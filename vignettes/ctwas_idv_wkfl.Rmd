@@ -1,0 +1,50 @@
+---
+title: "Run on individual-level data"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{Run on individual-level data}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>"
+)
+```
+
+# Prepare input
+
+```{r input}
+pgenfs <- paste0("/project2/mstephens/causalTWAS/ukbiobank/ukb_pgen_s40.22/ukb_chr", 1:22, "_s40.22.pgen")
+weight <- "/project2/mstephens/causalTWAS/fusion_weights/Adipose_Subcutaneous"
+load("/project2/mstephens/causalTWAS/simulations/simulation_ashtest_20201001/simu_20201001-1-1-pheno.Rd")
+Y <- phenores$Y
+s1 <- data.table::fread("/project2/mstephens/causalTWAS/ukbiobank/ukb_pgen_s40.22/ukb_chr10_s40.22.psam")
+s2 <- data.table::fread("/project2/mstephens/causalTWAS/ukbiobank/ukbiobank_samples_s40.22.txt")
+a <-match(s2$V1, s1$IID)
+```
+
+
+```{r setup}
+library(ctwas)
+```
+
+# Impute expression
+```{r impute}
+outputdir <- "/project2/mstephens/causalTWAS/simulations/test_package_temp"
+exprfs <- vector()
+for (i in 1:22){
+  pgenf <- pgenfs[i]
+  exprfs[i] <- impute_expr(pgenf = pgenf, weight = weight,
+                           method = "lasso", outputdir = outputdir,
+                           outname = "test")
+}
+```
+
+# Run ctwas 
+```{r ctwas}
+ctwas(pgenfs, exprfs, Y, ld_regions = "EUR",
+                  outputdir = outputdir, outname = "test")
+```
