@@ -23,7 +23,7 @@ load("/project2/mstephens/causalTWAS/simulations/simulation_ashtest_20201001/sim
 Y <- phenores$Y
 s1 <- data.table::fread("/project2/mstephens/causalTWAS/ukbiobank/ukb_pgen_s40.22/ukb_chr10_s40.22.psam")
 s2 <- data.table::fread("/project2/mstephens/causalTWAS/ukbiobank/ukbiobank_samples_s40.22.txt")
-a <-match(s2$V1, s1$IID)
+Y <- Y[match(s1$IID, s2$V1),]
 ```
 
 
@@ -45,6 +45,5 @@ for (i in 1:22){
 
 # Run ctwas 
 ```{r ctwas}
-ctwas(pgenfs, exprfs, Y, ld_regions = "EUR",
-                  outputdir = outputdir, outname = "test")
+ctwas(pgenfs, exprfs, Y, ld_regions = "EUR", outputdir = outputdir, outname = "test")
 ```

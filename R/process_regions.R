@@ -33,7 +33,7 @@ index_regions <- function(pvarfs,
 
     snpinfo$down_sample_tag <- 0
     nkept <- round(nrow(snpinfo) * down_sample_ratio)
-    seed(99)
+    set.seed(99)
     snpinfo$down_sample_tag[sample(1:nrow(snpinfo), nkept)] <- 1
 
 
@@ -63,8 +63,7 @@ index_regions <- function(pvarfs,
 
       if (length(gidx) == 0 & length(sidx) == 0) {next}
 
-      regionlist[[b]][[rn]][["gidx"]] <-  gidx
-      regionlist[[b]][[rn]][["sidx"]] <- sidx
+      regionlist[[b]][[rn]] <- list("gidx"= gidx, "sidx" = sidx)
 
     }
     loginfo("No. regions with at least one SNP/gene for chr%s: %s",

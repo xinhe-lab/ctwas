@@ -13,7 +13,8 @@ Encoding: UTF-8
 LazyData: true
 Imports:
     data.table,
-    pgenlibr
+    pgenlibr,
+    susieR
 Suggests: 
     knitr,
     rmarkdown

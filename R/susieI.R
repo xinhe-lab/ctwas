@@ -57,12 +57,12 @@ susieI <- function(pgenfs,
     gene.rpiplist <- list()
 
     outdf <- foreach (b = 1:22, .combine = "rbind",
-                      .packages = "susieR") %dopar% {
+                      .packages = c("susieR", "ctwas")) %dopar% {
 
       # prepare genotype data
       pgen <- prep_pgen(pgenf = pgenfs[b], pvarfs[b])
 
-      # run susie for each region (in parallel by batch)
+      # run susie for each region
       outdf.b.list <- list()
       for (rn in names(regionlist[[b]])) {
         print(c(iter, b, rn))
@@ -97,7 +97,6 @@ susieI <- function(pgenfs,
         X.g <- read_expr(exprfs[b], variantidx = gidx)
         X.s <- read_pgen(pgen, variantidx = sidx)
         X <- cbind(X.g, X.s)
-
 
         # in susie, prior_variance is under standardized scale (if performed)
         susieres <- susieR::susie(X, Y, L = L, prior_weights = prior,
