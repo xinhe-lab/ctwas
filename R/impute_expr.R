@@ -131,6 +131,7 @@ impute_expr <- function(pgenf,
                      sep = "\t", quote = F)
 
   if (isTRUE(compress)){
+    exprf <- paste0(exprf, '.gz')
     system(paste0("gzip -f ", exprf))
   }
 

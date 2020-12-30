@@ -133,7 +133,12 @@ read_exprvar <- function(exprvarf){
 #' @return A matrix, columns are imputed expression for each gene, rows are
 #'  for each sample.
 read_expr <- function(exprf, variantidx = NULL){
-  as.matrix(data.table::fread(exprf, header = F, select = variantidx))
+  if (!is.null(variantidx) & length(variantidx)==0){
+    return(NULL)
+  } else{
+    return(as.matrix(data.table::fread(exprf, header = F,
+                                       select = variantidx)))
+  }
 }
 
 

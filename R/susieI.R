@@ -40,8 +40,8 @@ susieI <- function(pgenfs,
   group_prior_rec <- matrix(, nrow = K , ncol =  niter)
   group_prior_var_rec <- matrix(, nrow = K , ncol =  niter)
 
-  prior.gene <- group_prior[1]
-  prior.SNP <-  group_prior[2]
+  prior.gene_init <- group_prior[1]
+  prior.SNP_init <-  group_prior[2]
 
   V.gene <- group_prior_var[1]
   V.SNP <- group_prior_var[2]
@@ -56,28 +56,34 @@ susieI <- function(pgenfs,
     snp.rpiplist <- list()
     gene.rpiplist <- list()
 
-    outdf <- foreach (b = 1:22, .combine = "rbind",
-                      .packages = c("susieR", "ctwas")) %dopar% {
+    # outdf <- foreach (b = 1:22, .combine = "rbind",
+    #                   .packages = c("susieR", "ctwas")) %dopar% {
 
+    for (b in 1:2) {
       # prepare genotype data
       pgen <- prep_pgen(pgenf = pgenfs[b], pvarfs[b])
 
       # run susie for each region
       outdf.b.list <- list()
-      for (rn in names(regionlist[[b]])) {
+      for (rn in 1:length(regionlist[[b]])[1:10]) {
         print(c(iter, b, rn))
 
         gidx <- regionlist[[b]][[rn]][["gidx"]]
         sidx <- regionlist[[b]][[rn]][["sidx"]]
         p <- length(gidx) + length(sidx)
 
-        if (is.null(prior.gene) | is.null(prior.SNP)){
-          prior.gene <- 1/p
-          prior.SNP <- 1/p
+        if (is.null(prior.gene_init) | is.null(prior.SNP_init)){
+          prior.gene_init <- 1/p
+          prior.SNP_init <- 1/p
         }
-        prior <- c(rep(prior.gene, length(gidx)),
-                   rep(prior.SNP, length(sidx)))
 
+        if (iter == 1) {
+          prior <- c(rep(prior.gene_init, length(gidx)),
+                     rep(prior.SNP_init, length(sidx)))
+        } else {
+          prior <- c(rep(prior.gene, length(gidx)),
+                     rep(prior.SNP, length(sidx)))
+        }
 
         if (is.null(V.gene) | is.null(V.SNP)){
           V.scaled <- matrix(rep(0.2, L * p), nrow = L)
@@ -104,7 +110,7 @@ susieI <- function(pgenfs,
                           standardize = standardize,
                           estimate_prior_variance = F, coverage = coverage)
 
-        geneinfo <- read_exprvar(exprvarsfs[b])
+        geneinfo <- read_exprvar(exprvarfs[b])
 
         anno.gene <- cbind(geneinfo[gidx,  c("chrom", "id", "p0")],
                            rep("gene", length(gidx)))
@@ -134,7 +140,7 @@ susieI <- function(pgenfs,
         }
 
         outdf.rn <- cbind(anno, susieres$pip)
-        colnames(outdf.rn)[9] <- "susie_pip"
+        colnames(outdf.rn)[8] <- "susie_pip"
         outdf.rn$mu2 <- colSums(susieres$mu2[ ,
                seq(1, ncol(X))[1:ncol(X)!=susieres$null_index], drop = F])
         #WARN: not sure for L>1
@@ -172,7 +178,7 @@ susieI <- function(pgenfs,
 
     save(group_prior_rec, group_prior_var_rec,
          file = paste0(outname, ".susieIres.Rd"))
-    data.table::fwite(outdf, file= paste0(outname, ".susieI.txt"),
+    data.table::fwrite(outdf, file= paste0(outname, ".susieI.txt"),
                       sep="\t", quote = F)
   }
 

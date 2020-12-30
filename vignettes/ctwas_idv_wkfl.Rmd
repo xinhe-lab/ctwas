@@ -45,5 +45,5 @@ for (i in 1:22){
 
 # Run ctwas 
 ```{r ctwas}
-ctwas(pgenfs, exprfs, Y, ld_regions = "EUR", outputdir = outputdir, outname = "test")
+ctwas(pgenfs, exprfs, Y, ld_regions = "EUR", down_sample_ratio = 0.1, outputdir = outputdir, outname = "test")
 ```
