@@ -124,7 +124,7 @@ ctwas <- function(pgenfs,
                                   prob_single= prob_single)
 
     loginfo("Blocks are filtered: %s blocks left",
-            sum(unlist(lapply(lapply(regionlist2, names), length))))
+             sum(unlist(lapply(regionlist2, length))))
 
     loginfo("Run susie iteratively, getting accurate estimate ...")
 

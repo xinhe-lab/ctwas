@@ -78,9 +78,10 @@ filter_regions <- function(regionlist, group_prior, prob_single = 0.8){
   prior.gene <- group_prior[1]
   prior.SNP <- group_prior[2]
 
-  for (b in 1:22){
+  regionlist2 <- regionlist
+  for (b in 1: length(regionlist)){
 
-    for (rn in names(regionlist[[b]])) {
+    for (rn in 1:length(regionlist[[b]])) {
 
       gidx <- regionlist[[b]][[rn]][["gidx"]]
       sidx <- regionlist[[b]][[rn]][["sidx"]]
@@ -91,9 +92,9 @@ filter_regions <- function(regionlist, group_prior, prob_single = 0.8){
         p.s * (1 - prior.gene) ** p.g * prior.SNP * (1- prior.SNP) ** (p.s - 1)
 
       if (P2 >= 1-prob_single){
-        regionlist[[b]][[rn]] <- NULL
+        regionlist2[[b]][[rn]] <- NULL
       }
     }
   }
-  regionlist
+  regionlist2
 }

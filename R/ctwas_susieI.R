@@ -56,7 +56,7 @@ susieI <- function(pgenfs,
     snp.rpiplist <- list()
     gene.rpiplist <- list()
 
-    outdf <- foreach (b = 1:2, .combine = "rbind",
+    outdf <- foreach (b = 1:length(regionlist), .combine = "rbind",
                       .packages = "ctwas") %dopar% {
     #for (b in 1:2) {
 
@@ -65,9 +65,7 @@ susieI <- function(pgenfs,
 
       # run susie for each region
       outdf.b.list <- list()
-      #for (rn in 1:length(regionlist[[b]])) {
-      for (rn in 1:5) {
-        print(c(iter, b, rn))
+      for (rn in 1:length(regionlist[[b]])) {
 
         gidx <- regionlist[[b]][[rn]][["gidx"]]
         sidx <- regionlist[[b]][[rn]][["sidx"]]
