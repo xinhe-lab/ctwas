@@ -5,11 +5,12 @@
 \title{Causal inference for TWAS}
 \usage{
 ctwas(pgenfs, exprfs, Y, ld_regions = c("EUR", "ASN", "AFR"),
-  ld_regions_custom = NULL, prob_single = 0.8, niter1 = 5,
-  niter2 = 20, L = 5, group_prior = NULL, group_prior_var = NULL,
-  estimate_group_prior = T, estimate_group_prior_var = T,
-  use_null_weight = T, coverage = 0.95, stardardize = T, ncore = 1,
-  outputdir = getwd(), outname = NULL, logfile = NULL)
+  ld_regions_custom = NULL, down_sample_ratio = 1, prob_single = 0.8,
+  niter1 = 5, niter2 = 20, L = 5, group_prior = NULL,
+  group_prior_var = NULL, estimate_group_prior = T,
+  estimate_group_prior_var = T, use_null_weight = T, coverage = 0.95,
+  stardardize = T, ncore = 1, outputdir = getwd(), outname = NULL,
+  logfile = NULL)
 }
 \arguments{
 \item{pgenfs}{A character vector of .pgen or .bed files. One file for one
@@ -34,7 +35,8 @@ assume corresponding `.exprvar` files are present in the same directory.
 Its rows should be in the same order as the columns for corresponding `.expr`
 files.}
 
-\item{Y}{a vector of length n, phenotype}
+\item{Y}{a vector of length n, phenotype, the same order as provided
+by `.pgenfs` (defined in .psam or .fam files).}
 
 \item{ld_regions}{A string representing the population to use for defining
 LD regions. These LD regions are defined by ldetect. The user can also

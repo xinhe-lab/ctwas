@@ -45,5 +45,6 @@ for (i in 1:22){
 
 # Run ctwas 
 ```{r ctwas}
+exprfs <- paste0("/project2/mstephens/causalTWAS/simulations/test_package_temp/test_chr", 1:22, ".expr.gz")
 ctwas(pgenfs, exprfs, Y, ld_regions = "EUR", down_sample_ratio = 0.1, outputdir = outputdir, outname = "test")
 ```
