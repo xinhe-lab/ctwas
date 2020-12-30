@@ -81,7 +81,7 @@ susie_rss <- function (z, R, maf = NULL, maf_thresh = 0, z_ld_weight = 0,
                 nrow(R), " by ", ncol(R), ") does not agree with expected (",
                 length(z), " by ", length(z), ")"))
   }
-  if (!susieR:::is_symmetric_matrix(R)) {
+  if (!is_symmetric_matrix(R)) {
     stop("R is not a symmetric matrix.")
   }
   if (!(is.double(R) & is.matrix(R)) & !inherits(R, "CsparseMatrix"))
@@ -106,7 +106,7 @@ susie_rss <- function (z, R, maf = NULL, maf_thresh = 0, z_ld_weight = 0,
     z[is.na(z)] = 0
   }
   if (z_ld_weight > 0) {
-    R = susieR:::muffled_cov2cor((1 - z_ld_weight) * R + z_ld_weight *
+    R = muffled_cov2cor((1 - z_ld_weight) * R + z_ld_weight *
                                    tcrossprod(z))
     R = (R + t(R))/2
     check_z = FALSE
@@ -141,7 +141,7 @@ susie_rss <- function (z, R, maf = NULL, maf_thresh = 0, z_ld_weight = 0,
                 min((attr(R, "eigen")$values), ". You can bypass this by \"check_R = FALSE\" which instead sets negative eigenvalues to 0 to allow for continued computations.")))
   }
   if (check_z) {
-    proj = susieR:::check_projection(R, z)
+    proj = check_projection(R, z)
     if (!proj$status) {
       warning("Input z does not lie in the space of non-zero eigenvectors of R. The result is thus not reliable.\n              Please refer to https://github.com/stephenslab/susieR/issues/91 for a possible solution.")
     }
@@ -150,7 +150,7 @@ susie_rss <- function (z, R, maf = NULL, maf_thresh = 0, z_ld_weight = 0,
             stderr())
     }
   }
-  R = susieR:::set_R_attributes(R, r_tol)
+  R = set_R_attributes(R, r_tol)
   X = t(attr(R, "eigen")$vectors[, attr(R, "eigen")$values !=
                                    0]) * attr(R, "eigen")$values[attr(R, "eigen")$values !=
                                                                    0]^(0.5)

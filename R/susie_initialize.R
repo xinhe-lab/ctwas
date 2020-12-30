@@ -104,7 +104,7 @@ init_finalize = function (s, X = NULL, Xr = NULL) {
   if (!missing(Xr))
     s$Xr = Xr
   if (!missing(X))
-    s$Xr = susieR:::compute_Xb(X,colSums(s$mu * s$alpha))
+    s$Xr = compute_Xb(X,colSums(s$mu * s$alpha))
 
   # Reset KL and lbf.
   s$KL = rep(as.numeric(NA),nrow(s$alpha))

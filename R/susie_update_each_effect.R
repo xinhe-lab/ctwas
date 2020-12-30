@@ -21,12 +21,12 @@ update_each_effect = function (X, Y, s, estimate_prior_variance = FALSE,
     for (l in 1:L) {
 
       # Remove lth effect from fitted values.
-      s$Xr = s$Xr - susieR:::compute_Xb(X,s$alpha[l,] * s$mu[l,])
+      s$Xr = s$Xr - compute_Xb(X,s$alpha[l,] * s$mu[l,])
 
       # Compute residuals.
       R = Y - s$Xr
 
-      res = susieR:::single_effect_regression(R,X,s$V[l,],s$sigma2,s$pi,
+      res = single_effect_regression(R,X,s$V[l,],s$sigma2,s$pi,
                                               estimate_prior_method,
                                               check_null_threshold)
 
@@ -37,10 +37,10 @@ update_each_effect = function (X, Y, s, estimate_prior_variance = FALSE,
       s$V[l,]      = res$V  #different from susieR
       s$lbf[l]    = res$lbf_model
       s$KL[l]     = -res$loglik +
-        susieR:::SER_posterior_e_loglik(X,R,s$sigma2,res$alpha * res$mu,
+          SER_posterior_e_loglik(X,R,s$sigma2,res$alpha * res$mu,
                                         res$alpha * res$mu2)
 
-      s$Xr = s$Xr + susieR:::compute_Xb(X,s$alpha[l,] * s$mu[l,])
+      s$Xr = s$Xr + compute_Xb(X,s$alpha[l,] * s$mu[l,])
     }
   return(s)
 }

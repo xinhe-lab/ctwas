@@ -145,7 +145,7 @@ susie_get_cs <- function (res, X = NULL, Xcorr = NULL, coverage = 0.95, min_abs_
     else include_idx = rep(TRUE, nrow(res$alpha))
   }
   else null_index = 0
-  status = susieR:::in_CS(res$alpha, coverage)
+  status = in_CS(res$alpha, coverage)
   cs = lapply(1:nrow(status), function(i) which(status[i, ] !=
                                                   0))
   include_idx = include_idx * (lapply(cs, length) > 0)
@@ -164,7 +164,7 @@ susie_get_cs <- function (res, X = NULL, Xcorr = NULL, coverage = 0.95, min_abs_
                                               function(i) {
                                                 if (null_index > 0 && null_index %in% cs[[i]])
                                                   c(-9, -9, -9)
-                                                else susieR:::get_purity(cs[[i]], X, Xcorr, squared)
+                                                else get_purity(cs[[i]], X, Xcorr, squared)
                                               })))
     if (squared)
       colnames(purity) = c("min.sq.corr", "mean.sq.corr",

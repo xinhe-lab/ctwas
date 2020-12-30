@@ -106,7 +106,7 @@ susieI <- function(pgenfs,
         X <- cbind(X.g, X.s)
 
         # in susie, prior_variance is under standardized scale (if performed)
-        susieres <- ctwas::susie(X, Y, L = L, prior_weights = prior,
+        susieres <- susie(X, Y, L = L, prior_weights = prior,
                           null_weight = nw, scaled_prior_variance = V.scaled,
                           standardize = standardize,
                           estimate_prior_variance = F, coverage = coverage)
@@ -183,7 +183,7 @@ susieI <- function(pgenfs,
                       sep="\t", quote = F)
   }
 
-  stopCluster(cl)
+  parallel::stopCluster(cl)
 
   list("group_prior"= c(prior.gene, prior.SNP),
        "group_prior_var" = c(V.gene, V.SNP))

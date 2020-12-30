@@ -17,6 +17,8 @@ Imports:
     methods,
     stats,
     Matrix,
+    parallel,
+    doParallel
 Suggests: 
     knitr,
     rmarkdown
