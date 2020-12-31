@@ -1,4 +1,4 @@
-#' Causal inference for TWAS
+#' Causal inference for TWAS using summary statistics
 #' @param pgenfs A character vector of .pgen or .bed files. One file for one
 #'  chromosome, in the order of 1 to 22. Therefore, the length of this vector
 #'  needs to be 22. If .pgen files are given, then .pvar and .psam are assumed
@@ -43,9 +43,8 @@
 #' @importFrom tools file_ext
 #'
 #' @export
-ctwas <- function(pgenfs,
-                  exprfs,
-                  Y,
+ctwas_rss <- function(    exprfs,
+                  ld_pgenfs,
                   ld_regions = c("EUR", "ASN", "AFR"),
                   ld_regions_custom = NULL,
                   down_sample_ratio = 1,
@@ -66,7 +65,7 @@ ctwas <- function(pgenfs,
                   logfile = NULL){
 
   if (!is.null(logfile)){
-      addHandler(writeToFile, file= logfile, level='DEBUG')
+    addHandler(writeToFile, file= logfile, level='DEBUG')
   }
 
   loginfo('ctwas started ... ')
@@ -102,7 +101,7 @@ ctwas <- function(pgenfs,
     pars <- susieI(pgenfs = pgenfs, exprfs = exprfs, Y = Y,
                    regionlist = regionlist,
                    niter = niter1,
-                   L = 1,
+                   L = L,
                    group_prior = group_prior,
                    group_prior_var = group_prior_var,
                    estimate_group_prior = estimate_group_prior,
@@ -124,7 +123,7 @@ ctwas <- function(pgenfs,
                                   prob_single= prob_single)
 
     loginfo("Blocks are filtered: %s blocks left",
-             sum(unlist(lapply(regionlist2, length))))
+            sum(unlist(lapply(regionlist2, length))))
 
     loginfo("Run susie iteratively, getting accurate estimate ...")
 
@@ -163,7 +162,7 @@ ctwas <- function(pgenfs,
                  outputdir = outputdir,
                  outname = outname)
 
-    pars
+  pars
 
 }
 

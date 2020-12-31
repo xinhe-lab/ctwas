@@ -11,11 +11,12 @@
 #'
 #' @importFrom logging loginfo
 #' @importFrom foreach %dopar% foreach
+#' @export
 susieI <- function(pgenfs,
                    exprfs,
                    Y,
                    regionlist,
-                   niter = 5,
+                   niter = 20,
                    L= 1,
                    group_prior = NULL,
                    group_prior_var = NULL,
@@ -155,7 +156,8 @@ susieI <- function(pgenfs,
       prior.gene <- mean(outdf[outdf[ , "type"] == "gene", "susie_pip"])
     }
 
-    print(c(prior.SNP, prior.gene))
+    loginfo("After iteration %s, gene prior %s:, SNP prior:%s",
+                 iter, prior.gene, prior.SNP)
 
     if (isTRUE(estimate_group_prior_var)){
       outdf.g <- outdf[outdf[ , "type"] == "gene", ]

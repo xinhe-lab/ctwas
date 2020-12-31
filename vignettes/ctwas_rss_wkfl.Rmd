@@ -1,8 +1,8 @@
 ---
-title: "Run on individual-level data"
+title: "Run on summary statistics data"
 output: rmarkdown::html_vignette
 vignette: >
-  %\VignetteIndexEntry{Run on individual-level data}
+  %\VignetteIndexEntry{Run on summary statistics data}
   %\VignetteEngine{knitr::rmarkdown}
   %\VignetteEncoding{UTF-8}
 ---
@@ -13,6 +13,7 @@ knitr::opts_chunk$set(
   comment = "#>"
 )
 ```
+
 
 # Prepare input
 

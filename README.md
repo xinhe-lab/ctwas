@@ -1,6 +1,11 @@
 # ctwas
 package for the causal TWAS project
 
+# install
+
+```
+devtools::install_github("simingz/ctwas", ref = "main")
+```
 
 # notes
 
