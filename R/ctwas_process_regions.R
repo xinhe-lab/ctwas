@@ -80,10 +80,10 @@ index_regions <- function(pvarfs,
 
       if (length(gidx) == 0 & length(sidx) == 0) {next}
 
-      regionlist[[b]][[rn]] <- list("gidx" = gidx,
-                                    "gid" = gid,
+      regionlist[[b]][[as.character(rn)]] <- list("gidx" = gidx,
+                                    "gid"  = gid,
                                     "sidx" = sidx,
-                                    "sid" = sid)
+                                    "sid"  = sid)
 
     }
     loginfo("No. regions with at least one SNP/gene for chr%s: %s",
@@ -103,7 +103,7 @@ filter_regions <- function(regionlist, group_prior, prob_single = 0.8){
   regionlist2 <- regionlist
   for (b in 1: length(regionlist)){
 
-    for (rn in 1:length(regionlist[[b]])) {
+    for (rn in names(regionlist[[b]])) {
 
       gidx <- regionlist[[b]][[rn]][["gidx"]]
       sidx <- regionlist[[b]][[rn]][["sidx"]]

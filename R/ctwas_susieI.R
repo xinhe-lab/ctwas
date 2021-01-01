@@ -59,14 +59,14 @@ susieI <- function(pgenfs,
 
     outdf <- foreach (b = 1:length(regionlist), .combine = "rbind",
                       .packages = "ctwas") %dopar% {
-    #for (b in 1:2) {
+    # for (b in 1:2) {
 
       # prepare genotype data
       pgen <- prep_pgen(pgenf = pgenfs[b], pvarfs[b])
 
       # run susie for each region
       outdf.b.list <- list()
-      for (rn in 1:length(regionlist[[b]])) {
+      for (rn in names(regionlist[[b]])) {
 
         gidx <- regionlist[[b]][[rn]][["gidx"]]
         sidx <- regionlist[[b]][[rn]][["sidx"]]

@@ -25,7 +25,7 @@ pgenfs <- paste0("/project2/mstephens/causalTWAS/ukbiobank/ukb_pgen_s40.22/ukb_c
 weight <- "/project2/mstephens/causalTWAS/fusion_weights/Adipose_Subcutaneous"
 load("/project2/mstephens/causalTWAS/simulations/simulation_ashtest_20201001/simu_20201001-1-1-pheno.Rd")
 Y <- phenores$Y
-s1 <- data.table::fread("/project2/mstephens/causalTWAS/ukbiobank/ukb_pgen_s40.22/ukb_chr10_s40.22.psam")
+s1 <- data.table::fread("/project2/mstephens/causalTWAS/ukbiobank/ukb_pgen_s40.22/ukb_chr10_s40.22_thinned.psam")
 s2 <- data.table::fread("/project2/mstephens/causalTWAS/ukbiobank/ukbiobank_samples_s40.22.txt")
 Y <- Y[match(s1$IID, s2$V1),]
 ```

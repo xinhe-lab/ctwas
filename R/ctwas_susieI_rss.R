@@ -12,9 +12,8 @@
 #' @importFrom logging loginfo
 #' @importFrom foreach %dopar% foreach
 #' @export
-susieI_rss <- function(pgenfs,
-                   exprfs,
-                   Y,
+susieI_rss <- function(zdf, ld_pgenfs,
+                   ld_exprfs,
                    regionlist,
                    niter = 20,
                    L= 1,
@@ -31,8 +30,8 @@ susieI_rss <- function(pgenfs,
 
   outname <- file.path(outputdir, outname)
 
-  pvarfs <- sapply(pgenfs, prep_pvar, outputdir = outputdir)
-  exprvarfs <- sapply(exprfs, prep_exprvar)
+  ld_pvarfs <- sapply(ld_pgenfs, prep_pvar, outputdir = outputdir)
+  ld_exprvarfs <- sapply(ld_exprfs, prep_exprvar)
 
   varY <- var(Y)
 
@@ -62,7 +61,7 @@ susieI_rss <- function(pgenfs,
                         #for (b in 1:2) {
 
                         # prepare genotype data
-                        pgen <- prep_pgen(pgenf = pgenfs[b], pvarfs[b])
+                        ld_pgen <- prep_pgen(pgenf = ld_pgenfs[b], ld_pvarfs[b])
 
                         # run susie for each region
                         outdf.b.list <- list()
@@ -70,6 +69,10 @@ susieI_rss <- function(pgenfs,
 
                           gidx <- regionlist[[b]][[rn]][["gidx"]]
                           sidx <- regionlist[[b]][[rn]][["sidx"]]
+                          gid <- regionlist[[b]][[rn]][["gid"]]
+                          sid <- regionlist[[b]][[rn]][["sid"]]
+                          id
+
                           p <- length(gidx) + length(sidx)
 
                           if (is.null(prior.gene_init) | is.null(prior.SNP_init)){
