@@ -1,11 +1,13 @@
 #' Causal inference for TWAS using summary statistics
+#' @param zdf A data frame with two columns: "id", "z. giving the z scores for
+#' genes and snps.
 #' @param ld_pgenfs A character vector of .pgen or .bed files. One file for one
 #'  chromosome, in the order of 1 to 22. Therefore, the length of this vector
 #'  needs to be 22. If .pgen files are given, then .pvar and .psam are assumed
 #'  to present in the same directory. If .bed files are given, then .bim and
 #'  .fam files are assumed to present in the same directory.
 #'
-#' @param exprfs A character vector of .`expr` or `.expr.gz` files. One file for
+#' @param ld_exprfs A character vector of .`expr` or `.expr.gz` files. One file for
 #'  one chromosome, in the order of 1 to 22. Therefore, the length of this vector
 #'  needs to be 22.  `.expr.gz` file is gzip compressed `.expr` files. `.expr` is
 #'  a matrix of imputed expression values, row is for each sample, column is for
@@ -36,8 +38,6 @@
 #'
 #' @param outname a string, the output name
 #'
-#' @param Y a vector of length n, phenotype, the same order as provided
-#' by `.pgenfs` (defined in .psam or .fam files).
 #'
 #' @importFrom logging addHandler loginfo
 #' @importFrom tools file_ext
@@ -100,20 +100,23 @@ ctwas_rss <- function(zdf,
 
     loginfo("Run susie iteratively, getting rough estimate ...")
 
-    pars <- susieI_rss(pgenfs = pgenfs, exprfs = exprfs, Y = Y,
-                   regionlist = regionlist,
-                   niter = niter1,
-                   L = 1,
-                   group_prior = group_prior,
-                   group_prior_var = group_prior_var,
-                   estimate_group_prior = estimate_group_prior,
-                   estimate_group_prior_var = estimate_group_prior_var,
-                   use_null_weight = use_null_weight,
-                   coverage = coverage,
-                   standardize = stardardize,
-                   ncore = ncore,
-                   outputdir = outputdir,
-                   outname = paste0(outname, ".s1"))
+    pars <- susieI_rss(zdf = zdf,
+                       ld_pgenfs = ld_pgenfs,
+                       ld_exprfs = ld_exprfs,
+                       regionlist = regionlist,
+                       niter = niter1,
+                       L = 1,
+                       z_ld_weight = 0,
+                       group_prior = group_prior,
+                       group_prior_var = group_prior_var,
+                       estimate_group_prior = estimate_group_prior,
+                       estimate_group_prior_var = estimate_group_prior_var,
+                       use_null_weight = use_null_weight,
+                       coverage = coverage,
+                       ncore = ncore,
+                       outputdir = outputdir,
+                       outname = paste0(outname, ".s1")
+                   )
 
 
     group_prior <- pars[["group_prior"]]
@@ -129,17 +132,19 @@ ctwas_rss <- function(zdf,
 
     loginfo("Run susie iteratively, getting accurate estimate ...")
 
-    pars <- susieI(pgenfs = pgenfs, exprfs = exprfs, Y = Y,
+    pars <- susieI_rss(zdf = zdf,
+                   ld_pgenfs = ld_pgenfs,
+                   ld_exprfs = ld_exprfs,
                    regionlist = regionlist2,
                    niter = niter2,
                    L = 1,
+                   z_ld_weight = 0,
                    group_prior = group_prior,
                    group_prior_var = group_prior_var,
                    estimate_group_prior = estimate_group_prior,
                    estimate_group_prior_var = estimate_group_prior_var,
                    use_null_weight = use_null_weight,
                    coverage = coverage,
-                   standardize = stardardize,
                    ncore = ncore,
                    outputdir = outputdir,
                    outname = paste0(outname, ".s2"))
@@ -149,17 +154,19 @@ ctwas_rss <- function(zdf,
   }
 
   loginfo("Run susie for all regions.")
-  pars <- susieI(pgenfs = pgenfs, exprfs = exprfs, Y = Y,
+  pars <- susieI_rss(zdf = zdf,
+                 ld_pgenfs = ld_pgenfs,
+                 ld_exprfs = ld_exprfs,
                  regionlist = regionlist2,
                  niter = 1,
                  L = L,
+                 z_ld_weight = 0,
                  group_prior = group_prior,
                  group_prior_var = group_prior_var,
                  estimate_group_prior = estimate_group_prior,
                  estimate_group_prior_var = estimate_group_prior_var,
                  use_null_weight = use_null_weight,
                  coverage = coverage,
-                 standardize = stardardize,
                  ncore = ncore,
                  outputdir = outputdir,
                  outname = outname)

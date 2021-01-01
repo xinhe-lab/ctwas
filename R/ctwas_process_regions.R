@@ -39,8 +39,9 @@ index_regions <- function(pvarfs,
     }
 
     # select variant
+    snpinfo$select <- 1
     if (!is.null(select)){
-      snpinfo <- snpinfo[snpinfo$id %in% select, ]
+      snpinfo[!(snpinfo$id %in% select), "select"] <- 0
     }
 
     # downsampling for SNPs
@@ -59,8 +60,9 @@ index_regions <- function(pvarfs,
     }
 
     # select variant
+    geneinfo$select <- 1
     if (!is.null(select)){
-      geneinfo <- geneinfo[geneinfo$id %in% select, ]
+      geneinfo[!(geneinfo$id %in% select), "select"] <- 0
     }
 
     regions <- reg[reg$chr == b | reg$chr == paste0("chr", b), ]
@@ -71,9 +73,10 @@ index_regions <- function(pvarfs,
       p0 <- regions[rn, "start"]
       p1 <- regions[rn, "stop"]
 
-      gidx <- which(geneinfo$chrom == b & geneinfo$p0 > p0 & geneinfo$p0 < p1)
+      gidx <- which(geneinfo$chrom == b & geneinfo$p0 > p0 & geneinfo$p0 < p1
+                    & geneinfo$select == 1)
       sidx <- which(snpinfo$chrom == b & snpinfo$pos > p0 & snpinfo$pos < p1
-                    & snpinfo$thin_tag == 1)
+                    & snpinfo$select == 1 & snpinfo$thin_tag == 1)
 
       gid <- geneinfo[gidx, "id"]
       sid <- snpinfo[sidx, "id"]

@@ -20,9 +20,10 @@ LD reference should contain all SNPs given in z score. SNP ID and LD reference S
 # Prepare input
 
 ```{r input}
-zdf.SNP <- fread("/home/simingz/causalTWAS/simulations/simulation_ashtest_20201001/20201001-1-1.snpgwas.txt.gz", header =T)
-setnames(zdf.SNP, old = c('MARKER_ID', 't.value',), new = c('id', 'z'))
-ld_pgenfs <- paste0("/project2/mstephens/causalTWAS/ukbiobank/ukb_pgen_s40.22/ukb_chr", 1:22, "_s40.22.pgen")
+zdf.SNP <- data.table::fread("/home/simingz/causalTWAS/simulations/simulation_ashtest_20201001/20201001-1-1.snpgwas.txt.gz", header =T)
+data.table::setnames(zdf.SNP, old = c('MARKER_ID', 't.value'), new = c('id', 'z'))
+zdf.SNP <- zdf.SNP[, c("id", "z")]
+ld_pgenfs <- paste0("/project2/mstephens/causalTWAS/ukbiobank/ukb_pgen_s40.22/ukb_chr", 1:22, "_s40.22_thinned.pgen")
 weight <- "/project2/mstephens/causalTWAS/fusion_weights/Adipose_Subcutaneous"
 ```
 
@@ -34,22 +35,24 @@ library(ctwas)
 # Impute expression z scores
 ```{r impute}
 outputdir <- "/project2/mstephens/causalTWAS/simulations/test_package_temp"
-exprfs <- vector()
+ld_exprfs <- vector()
 zdf.gene <- NULL
 for (i in 1:22){
   pgenf <- pgenfs[i]
-  res <- impute_expr_z(zdf.SNP, pgenf = pgenf, weight = weight,
+  res <- impute_expr_z(zdf.SNP, ld_pgenf = pgenf, weight = weight,
                            method = "lasso", outputdir = outputdir,
                            outname = "z")
-  exprfs[i] <- res$exprf
+  ld_exprfs[i] <- res$ld_exprf
   zdf.gene <- rbind(zdf.gene, res$zdf)
 }
 zdf <- rbind(zdf.SNP, zdf.gene)
+save(zdf, file = paste0(outputdir, "zdf.Rd"))
 ```
 
 # Run ctwas 
 ```{r ctwas}
+load(paste0(outputdir, "zdf.Rd"))
 outputdir <- "/project2/mstephens/causalTWAS/simulations/test_package_temp"
-exprfs <- paste0("/project2/mstephens/causalTWAS/simulations/test_package_temp/z_chr", 1:22, ".expr.gz")
-ctwas_rss(zdf, pgenfs, exprfs, ld_regions = "EUR", thin = 0.1, outputdir = outputdir, outname = "z", ncore = 10)
+ld_exprfs <- paste0("/project2/mstephens/causalTWAS/simulations/test_package_temp/z_chr", 1:22, ".expr.gz")
+ctwas_rss(zdf, ld_pgenfs, ld_exprfs, ld_regions = "EUR", thin = 1, outputdir = outputdir, outname = "z", ncore = 1)
 ```

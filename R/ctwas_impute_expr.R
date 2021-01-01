@@ -10,7 +10,7 @@
 #' @export
 impute_expr <- function(pgenf,
                         weight,
-                        method = "best",
+                        method = "lasso",
                         outputdir = getwd(),
                         outname = NULL,
                         logfile = NULL,
@@ -131,8 +131,8 @@ impute_expr <- function(pgenf,
                      sep = "\t", quote = F)
 
   if (isTRUE(compress)){
-    exprf <- paste0(exprf, '.gz')
     system(paste0("gzip -f ", exprf))
+    exprf <- paste0(exprf, '.gz')
   }
 
   geneinfo <- data.frame("chrom" = chrom,

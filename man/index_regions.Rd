@@ -4,13 +4,15 @@
 \alias{index_regions}
 \title{Get gene and SNP index for each region}
 \usage{
-index_regions(pvarfs, exprvarfs, regionfile, down_sample_ratio = 1)
+index_regions(pvarfs, exprvarfs, regionfile, select = NULL, thin = 1)
 }
 \arguments{
-\item{regionfile}{Has three columns, chr, start, end}
+\item{regionfile}{Has three columns: chr, start, end}
 
-\item{down_sample_ratio}{A scalar in (0,1]. The proportion of SNPs
-left after down sampling.}
+\item{select}{variant ids to include. If NULL, all variants will be selected}
+
+\item{thin}{A scalar in (0,1]. The proportion of SNPs
+left after down sampling. Only applied on SNPs after selecting variants.}
 }
 \value{
 A list. Items correspond to each pvarf/exprvarf. Each Item is
