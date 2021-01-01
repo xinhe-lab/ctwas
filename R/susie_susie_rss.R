@@ -181,3 +181,23 @@ susie_rss <- function (z, R, maf = NULL, maf_thresh = 0, z_ld_weight = 0,
 
   return(s)
 }
+
+# @title Check whether b is in space spanned by the non-zero eigenvectors
+#   of A
+# @param A a p by p matrix
+# @param b a length p vector
+# @return a list of result:
+# \item{status}{whether b in space spanned by the non-zero
+#  eigenvectors of A}
+# \item{msg}{msg gives the difference between the projected b and b if
+#   status is FALSE}
+check_projection = function (A, b) {
+  if (is.null(attr(A,"eigen")))
+    attr(A,"eigen") = eigen(A,symmetric = TRUE)
+  B = attr(A,"eigen")$vectors[,attr(A,"eigen")$values > .Machine$double.eps]
+  msg = all.equal(as.vector(B %*% crossprod(B,b)),as.vector(b),check.names = FALSE)
+  if (!is.character(msg))
+    return(list(status = TRUE,msg = NA))
+  else
+    return(list(status = FALSE,msg = msg))
+}
