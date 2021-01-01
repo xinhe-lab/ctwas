@@ -13,18 +13,17 @@ knitr::opts_chunk$set(
   comment = "#>"
 )
 ```
+# Requirements
 
+LD reference should contain all SNPs given in z score. SNP ID and LD reference SNP ID should have the same meaning. weights and LD refernce ID should have same meaning and ref/alt allele info needs to match.
 
 # Prepare input
 
 ```{r input}
-pgenfs <- paste0("/project2/mstephens/causalTWAS/ukbiobank/ukb_pgen_s40.22/ukb_chr", 1:22, "_s40.22.pgen")
+zdf.SNP <- fread("/home/simingz/causalTWAS/simulations/simulation_ashtest_20201001/20201001-1-1.snpgwas.txt.gz", header =T)
+setnames(zdf.SNP, old = c('MARKER_ID', 't.value',), new = c('id', 'z'))
+ld_pgenfs <- paste0("/project2/mstephens/causalTWAS/ukbiobank/ukb_pgen_s40.22/ukb_chr", 1:22, "_s40.22.pgen")
 weight <- "/project2/mstephens/causalTWAS/fusion_weights/Adipose_Subcutaneous"
-load("/project2/mstephens/causalTWAS/simulations/simulation_ashtest_20201001/simu_20201001-1-1-pheno.Rd")
-Y <- phenores$Y
-s1 <- data.table::fread("/project2/mstephens/causalTWAS/ukbiobank/ukb_pgen_s40.22/ukb_chr10_s40.22.psam")
-s2 <- data.table::fread("/project2/mstephens/causalTWAS/ukbiobank/ukbiobank_samples_s40.22.txt")
-Y <- Y[match(s1$IID, s2$V1),]
 ```
 
 
@@ -32,21 +31,25 @@ Y <- Y[match(s1$IID, s2$V1),]
 library(ctwas)
 ```
 
-# Impute expression
+# Impute expression z scores
 ```{r impute}
 outputdir <- "/project2/mstephens/causalTWAS/simulations/test_package_temp"
 exprfs <- vector()
+zdf.gene <- NULL
 for (i in 1:22){
   pgenf <- pgenfs[i]
-  exprfs[i] <- impute_expr(pgenf = pgenf, weight = weight,
+  res <- impute_expr_z(zdf.SNP, pgenf = pgenf, weight = weight,
                            method = "lasso", outputdir = outputdir,
-                           outname = "test")
+                           outname = "z")
+  exprfs[i] <- res$exprf
+  zdf.gene <- rbind(zdf.gene, res$zdf)
 }
+zdf <- rbind(zdf.SNP, zdf.gene)
 ```
 
 # Run ctwas 
 ```{r ctwas}
 outputdir <- "/project2/mstephens/causalTWAS/simulations/test_package_temp"
-exprfs <- paste0("/project2/mstephens/causalTWAS/simulations/test_package_temp/test_chr", 1:22, ".expr.gz")
-ctwas(pgenfs, exprfs, Y, ld_regions = "EUR", down_sample_ratio = 0.1, outputdir = outputdir, outname = "test", ncore = 10)
+exprfs <- paste0("/project2/mstephens/causalTWAS/simulations/test_package_temp/z_chr", 1:22, ".expr.gz")
+ctwas_rss(zdf, pgenfs, exprfs, ld_regions = "EUR", thin = 0.1, outputdir = outputdir, outname = "z", ncore = 10)
 ```

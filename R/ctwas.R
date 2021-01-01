@@ -48,7 +48,7 @@ ctwas <- function(pgenfs,
                   Y,
                   ld_regions = c("EUR", "ASN", "AFR"),
                   ld_regions_custom = NULL,
-                  down_sample_ratio = 1,
+                  thin = 1,
                   prob_single = 0.8,
                   niter1 = 3,
                   niter2 = 20,
@@ -93,7 +93,7 @@ ctwas <- function(pgenfs,
   exprvarfs <- sapply(exprfs, prep_exprvar)
 
   regionlist <- index_regions(pvarfs, exprvarfs, regionfile,
-                              down_sample_ratio = down_sample_ratio)
+                              thin = thin)
 
   if (isTRUE(estimate_group_prior) | isTRUE(estimate_group_prior_var)){
 

@@ -3,9 +3,11 @@
 #' is location/column number in .pgen file or .expr file) located within
 #' this region.
 #'
-#' @param regionfile Has three columns, chr, start, end
-#' @param down_sample_ratio  A scalar in (0,1]. The proportion of SNPs
-#'  left after down sampling.
+#' @param regionfile Has three columns: chr, start, end
+#'
+#' @param select variant ids to include. If NULL, all variants will be selected
+#' @param thin  A scalar in (0,1]. The proportion of SNPs
+#'  left after down sampling. Only applied on SNPs after selecting variants.
 #'
 #' @return A list. Items correspond to each pvarf/exprvarf. Each Item is
 #'  also a list, the items in this list are for each region.
@@ -15,31 +17,38 @@
 index_regions <- function(pvarfs,
                           exprvarfs,
                           regionfile,
-                          down_sample_ratio = 1) {
+                          select = NULL,
+                          thin = 1) {
 
   reg <- read.table(regionfile, header = T, stringsAsFactors = F)
 
   loginfo("No. LD regions: %s", nrow(reg))
 
-  if (down_sample_ratio > 1 | down_sample_ratio <= 0){
-    stop("down_sample_ratio needs to be in (0,1]")
+  if (thin > 1 | thin <= 0){
+    stop("thin needs to be in (0,1]")
   }
 
   regionlist <- list()
-  for (b in 1:22){
+  for (b in 1:length(pvarfs)){
     # get snp info (from pvarf file)
     pvarf <- pvarfs[b]
     snpinfo <- read_pvar(pvarf)
 
-    snpinfo$down_sample_tag <- 0
-    nkept <- round(nrow(snpinfo) * down_sample_ratio)
-    set.seed(99)
-    snpinfo$down_sample_tag[sample(1:nrow(snpinfo), nkept)] <- 1
-
-
     if (unique(snpinfo$chrom) != b){
       stop("Input genotype not by chromosome or not in correct order")
     }
+
+    # select variant
+    if (!is.null(select)){
+      snpinfo <- snpinfo[snpinfo$id %in% select, ]
+    }
+
+    # downsampling for SNPs
+    snpinfo$thin_tag <- 0
+    nkept <- round(nrow(snpinfo) * thin)
+    set.seed(99)
+    snpinfo$thin_tag[sample(1:nrow(snpinfo), nkept)] <- 1
+
 
     # get gene info (from exprf file)
     exprvarf <- exprvarfs[b]
@@ -47,6 +56,11 @@ index_regions <- function(pvarfs,
 
     if (unique(geneinfo$chrom) != b){
       stop("Imputed expression not by chromosome or not in correct order")
+    }
+
+    # select variant
+    if (!is.null(select)){
+      geneinfo <- geneinfo[geneinfo$id %in% select, ]
     }
 
     regions <- reg[reg$chr == b | reg$chr == paste0("chr", b), ]
@@ -59,11 +73,17 @@ index_regions <- function(pvarfs,
 
       gidx <- which(geneinfo$chrom == b & geneinfo$p0 > p0 & geneinfo$p0 < p1)
       sidx <- which(snpinfo$chrom == b & snpinfo$pos > p0 & snpinfo$pos < p1
-                    & snpinfo$down_sample_tag == 1)
+                    & snpinfo$thin_tag == 1)
+
+      gid <- geneinfo[gidx, "id"]
+      sid <- snpinfo[sidx, "id"]
 
       if (length(gidx) == 0 & length(sidx) == 0) {next}
 
-      regionlist[[b]][[rn]] <- list("gidx"= gidx, "sidx" = sidx)
+      regionlist[[b]][[rn]] <- list("gidx" = gidx,
+                                    "gid" = gid,
+                                    "sidx" = sidx,
+                                    "sid" = sid)
 
     }
     loginfo("No. regions with at least one SNP/gene for chr%s: %s",
@@ -72,6 +92,8 @@ index_regions <- function(pvarfs,
 
   regionlist
 }
+
+
 
 #' filter regions based on probality of at most 1 causal effect
 filter_regions <- function(regionlist, group_prior, prob_single = 0.8){

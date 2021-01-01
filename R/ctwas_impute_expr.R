@@ -85,7 +85,7 @@ impute_expr <- function(pgenf,
       # `snps` from FUSION follows .bim format
       snps$V3 <- NULL
       colnames(snps) <- c("chrom", "id", "pos", "alt", "ref")
-      gwassnps <- snpinfo[wgt.idx, ]
+      gwassnps <- snpinfo[gwas.idx, ]
 
       if (!identical(gwassnps, snps)){
         stop("GWAS SNP and eQTL info inconsistent. STOP.")

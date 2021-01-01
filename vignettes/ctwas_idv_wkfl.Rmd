@@ -14,10 +14,14 @@ knitr::opts_chunk$set(
 )
 ```
 
+# Requirements
+
+Weights and LD refernce ID should have same meaning and ref/alt allele info needs to match. Y sample order and pgen sample order should match.
+
 # Prepare input
 
 ```{r input}
-pgenfs <- paste0("/project2/mstephens/causalTWAS/ukbiobank/ukb_pgen_s40.22/ukb_chr", 1:22, "_s40.22.pgen")
+pgenfs <- paste0("/project2/mstephens/causalTWAS/ukbiobank/ukb_pgen_s40.22/ukb_chr", 1:22, "_s40.22_thinned.pgen")
 weight <- "/project2/mstephens/causalTWAS/fusion_weights/Adipose_Subcutaneous"
 load("/project2/mstephens/causalTWAS/simulations/simulation_ashtest_20201001/simu_20201001-1-1-pheno.Rd")
 Y <- phenores$Y
@@ -47,5 +51,5 @@ for (i in 1:22){
 ```{r ctwas}
 outputdir <- "/project2/mstephens/causalTWAS/simulations/test_package_temp"
 exprfs <- paste0("/project2/mstephens/causalTWAS/simulations/test_package_temp/test_chr", 1:22, ".expr.gz")
-ctwas(pgenfs, exprfs, Y, ld_regions = "EUR", down_sample_ratio = 0.1, outputdir = outputdir, outname = "test", ncore = 10)
+ctwas(pgenfs, exprfs, Y, ld_regions = "EUR", thin = 1, outputdir = outputdir, outname = "test", ncore = 14)
 ```

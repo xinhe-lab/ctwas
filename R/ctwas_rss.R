@@ -1,5 +1,5 @@
 #' Causal inference for TWAS using summary statistics
-#' @param pgenfs A character vector of .pgen or .bed files. One file for one
+#' @param ld_pgenfs A character vector of .pgen or .bed files. One file for one
 #'  chromosome, in the order of 1 to 22. Therefore, the length of this vector
 #'  needs to be 22. If .pgen files are given, then .pvar and .psam are assumed
 #'  to present in the same directory. If .bed files are given, then .bim and
@@ -43,11 +43,12 @@
 #' @importFrom tools file_ext
 #'
 #' @export
-ctwas_rss <- function(    exprfs,
+ctwas_rss <- function(zdf,
                   ld_pgenfs,
+                  ld_exprfs,
                   ld_regions = c("EUR", "ASN", "AFR"),
                   ld_regions_custom = NULL,
-                  down_sample_ratio = 1,
+                  thin = 1,
                   prob_single = 0.8,
                   niter1 = 3,
                   niter2 = 20,
@@ -70,11 +71,11 @@ ctwas_rss <- function(    exprfs,
 
   loginfo('ctwas started ... ')
 
-  if (length(pgenfs) != 22){
+  if (length(ld_pgenfs) != 22){
     stop("Not all pgen files for 22 chromosomes are provided.")
   }
 
-  if (length(exprfs) != 22){
+  if (length(ld_exprfs) != 22){
     stop("Not all imputed expression files for 22 chromosomes are provided.")
   }
 
@@ -88,20 +89,21 @@ ctwas_rss <- function(    exprfs,
 
   loginfo("LD region file: %s", regionfile)
 
-  pvarfs <- sapply(pgenfs, prep_pvar, outputdir = outputdir)
-  exprvarfs <- sapply(exprfs, prep_exprvar)
+  ld_pvarfs <- sapply(ld_pgenfs, prep_pvar, outputdir = outputdir)
+  ld_exprvarfs <- sapply(ld_exprfs, prep_exprvar)
 
-  regionlist <- index_regions(pvarfs, exprvarfs, regionfile,
-                              down_sample_ratio = down_sample_ratio)
+  regionlist <- index_regions(ld_pvarfs, ld_exprvarfs, regionfile,
+                              select = zdf$id,
+                              thin = thin)
 
   if (isTRUE(estimate_group_prior) | isTRUE(estimate_group_prior_var)){
 
     loginfo("Run susie iteratively, getting rough estimate ...")
 
-    pars <- susieI(pgenfs = pgenfs, exprfs = exprfs, Y = Y,
+    pars <- susieI_rss(pgenfs = pgenfs, exprfs = exprfs, Y = Y,
                    regionlist = regionlist,
                    niter = niter1,
-                   L = L,
+                   L = 1,
                    group_prior = group_prior,
                    group_prior_var = group_prior_var,
                    estimate_group_prior = estimate_group_prior,

@@ -1,4 +1,5 @@
 #' Impute expression
+#' @param zdf a data frame, with columns "id" and "z". Z scores for every SNP.
 #' @param weight a string, pointing to the fusion/twas format of weights.
 #'   Note the effect size are obtained with standardized genotype and phenotype.
 #' @param method a string,  blup/bslmm/lasso/top1/enet/best
@@ -8,7 +9,7 @@
 #' @importFrom logging addHandler loginfo
 #'
 #' @export
-impute_expr_z <- function(pgenf,
+impute_expr_z <- function(zdf, ld_pgenf,
                         weight,
                         method = "best",
                         outputdir = getwd(),
@@ -23,21 +24,21 @@ impute_expr_z <- function(pgenf,
 
   outname <- file.path(outputdir, outname)
 
-  pvarf <- prep_pvar(pgenf, outputdir = outputdir)
-  snpinfo <- read_pvar(pvarf)
+  ld_pvarf <- prep_pvar(ld_pgenf, outputdir = outputdir)
+  ld_snpinfo <- read_pvar(ld_pvarf)
 
-  pgen <- prep_pgen(pgenf, pvarf)
+  ld_pgen <- prep_pgen(ld_pgenf, ld_pvarf)
 
-  b <- unique(snpinfo$chrom)
+  b <- unique(ld_snpinfo$chrom)
   if (length(b) !=1){
-    stop("Input genotype not splited by chromosome")
+    stop("Input LD reference genotype not splited by chromosome")
   }
 
   exprf <- paste0(outname, "_chr", b, ".expr")
   exprvarf <- paste0(outname, "_chr", b, ".exprvar")
   exprqcf <-  paste0(outname, "_chr", b, ".exprqc.Rd")
 
-  loginfo('expression inmputation started for chr %s.', b)
+  loginfo('expression z score inmputation started for chr %s.', b)
 
   exprlist <- list()
   qclist <- list()
@@ -74,36 +75,43 @@ impute_expr_z <- function(pgenf,
 
     if (nrow(wgt.matrix) == 0) next
 
-    snpnames <- intersect(rownames(wgt.matrix), snpinfo$id)
+    snpnames <- Reduce(intersect,
+                       list(rownames(wgt.matrix), ld_snpinfo$id, zdf$id))
 
     if (length(snpnames) == 0) next
 
     wgt.idx <- match(snpnames, rownames(wgt.matrix))
-    gwas.idx <-  match(snpnames, snpinfo$id)
+    ld.idx <-  match(snpnames, ld_snpinfo$id)
+    zdf.idx <- match(snpnames, zdf$id)
 
     if (checksnps){
       # `snps` from FUSION follows .bim format
       snps$V3 <- NULL
       colnames(snps) <- c("chrom", "id", "pos", "alt", "ref")
-      gwassnps <- snpinfo[wgt.idx, ]
+      ldsnps <- ld_snpinfo[ld.idx, ]
 
-      if (!identical(gwassnps, snps)){
-        stop("GWAS SNP and eQTL info inconsistent. STOP.")
+      if (!identical(ldsnps, snps)){
+        stop("LD reference SNP and eQTL info inconsistent. STOP.")
       }
     }
 
     wgt <-  wgt.matrix[wgt.idx, g.method, drop = F]
+    X.g <- read_pgen(ld_pgen, variantidx = ld.idx)
 
-    g <- read_pgen(pgen, variantidx = gwas.idx)
+    # genotypes are standardized, as weights are standardized
+    X.g <- scale(X.g)
 
-    # genotypes are standardized
-    g <- scale(g)
-
-    gexpr <- g %*% wgt
-
+    gexpr <- X.g %*% wgt
     if (abs(max(gexpr) - min(gexpr)) < 1e-8) next
 
+    z.s <- as.matrix(zdf[zdf.idx, "z"])
+    var.s <- sqrt(apply(X.g, 2, var))
+    Gamma.g <- cov(X.g)
+
+    z.g <-  (t(wgt) * var.s) %*% z.s/ sqrt(t(wgt) %*% Gamma.g %*% wgt)
+
     exprlist[[gname]][["expr"]] <- gexpr
+    exprlist[[gname]][["z.g"]] <- z.g
     exprlist[[gname]][["chrom"]] <- wgtpos[wgtpos$ID == gname, "CHR"]
     exprlist[[gname]][["p0"]] <- wgtpos[wgtpos$ID == gname, "P0"]
     exprlist[[gname]][["p1"]] <- wgtpos[wgtpos$ID == gname, "P1"]
@@ -116,6 +124,7 @@ impute_expr_z <- function(pgenf,
 
   }
 
+  z.g <- unlist(lapply(exprlist,'[[', "z.g"))
   expr <- do.call(cbind, lapply(exprlist, '[[', "expr"))
   gnames <- names(exprlist)
   chrom <- unlist(lapply(exprlist,'[[', "chrom"))
@@ -145,6 +154,9 @@ impute_expr_z <- function(pgenf,
 
   loginfo('expression inmputation done for chr %s.', b)
 
-  return(exprf)
+  zdf.g <- data.frame("id" = gnames,
+                       "z" = z.g)
+
+  return(list("zdf" = zdf.g, "exprf"= exprf))
 }
 

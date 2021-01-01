@@ -12,7 +12,7 @@
 #' @importFrom logging loginfo
 #' @importFrom foreach %dopar% foreach
 #' @export
-susieI <- function(pgenfs,
+susieI_rss <- function(pgenfs,
                    exprfs,
                    Y,
                    regionlist,
