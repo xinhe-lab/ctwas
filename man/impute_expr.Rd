@@ -4,7 +4,7 @@
 \alias{impute_expr}
 \title{Impute expression}
 \usage{
-impute_expr(pgenf, weight, method = "best", outputdir = getwd(),
+impute_expr(pgenf, weight, method = "lasso", outputdir = getwd(),
   outname = NULL, logfile = NULL, compress = T, checksnps = F)
 }
 \arguments{

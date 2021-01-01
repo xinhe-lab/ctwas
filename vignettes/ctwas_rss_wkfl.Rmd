@@ -51,6 +51,7 @@ save(zdf, file = paste0(outputdir, "zdf.Rd"))
 
 # Run ctwas 
 ```{r ctwas}
+outputdir <- "/project2/mstephens/causalTWAS/simulations/test_package_temp"
 load(paste0(outputdir, "zdf.Rd"))
 outputdir <- "/project2/mstephens/causalTWAS/simulations/test_package_temp"
 ld_exprfs <- paste0("/project2/mstephens/causalTWAS/simulations/test_package_temp/z_chr", 1:22, ".expr.gz")

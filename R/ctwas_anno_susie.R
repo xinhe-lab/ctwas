@@ -38,8 +38,9 @@ anno_susie <- function(susieres,
   }
   outdf.rn <- cbind(anno, susieres$pip)
   colnames(outdf.rn)[8] <- "susie_pip"
+  p <- length(gidx) + length(sidx)
   outdf.rn$mu2 <- colSums(susieres$mu2[ ,
-                      seq(1, ncol(X))[1:ncol(X)!=susieres$null_index], drop = F])
+                      seq(1, p)[1:p!=susieres$null_index], drop = F])
   #WARN: not sure for L>1
   outdf.rn
 }
