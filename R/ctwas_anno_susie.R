@@ -10,9 +10,12 @@ anno_susie <- function(susieres,
 
   geneinfo <- read_exprvar(exprvarf)
 
-  anno.gene <- cbind(geneinfo[gidx,  c("chrom", "id", "p0")],
-                     rep("gene", length(gidx)))
-  colnames(anno.gene) <-  c("chrom", "id", "pos", "type")
+  anno.gene <- NULL
+  if (length(geneinfo) !=0){
+    anno.gene <- cbind(geneinfo[gidx,  c("chrom", "id", "p0")],
+                       rep("gene", length(gidx)))
+    colnames(anno.gene) <-  c("chrom", "id", "pos", "type")
+  }
 
   snpinfo <- read_pvar(pvarf)
 

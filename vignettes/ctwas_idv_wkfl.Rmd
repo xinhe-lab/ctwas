@@ -59,6 +59,7 @@ nsample <- nrow(X.g)
 beta.gene <- c(0.5, 0.1)
 beta.snp <- rep(0.2, 10)
 
+set.seed(100)
 Y <- X.g %*% beta.gene + X.s%*% beta.snp + rnorm(nsample, 0, 1)
 
 ctwas(pgenfs, exprfs, Y, ld_regions_custom = regionsfile, thin = 1, outputdir = outputdir, outname = "test", ncore = 1)

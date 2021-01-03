@@ -59,7 +59,7 @@ susieI <- function(pgenfs,
 
     outdf <- foreach (b = 1:length(regionlist), .combine = "rbind",
                       .packages = "ctwas") %dopar% {
-    # for (b in 1:2) {
+    # for (b in 21) {
 
       # prepare genotype data
       pgen <- prep_pgen(pgenf = pgenfs[b], pvarfs[b])
