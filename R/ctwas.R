@@ -72,11 +72,15 @@ ctwas <- function(pgenfs,
   loginfo('ctwas started ... ')
 
   if (length(pgenfs) != 22){
-    stop("Not all pgen files for 22 chromosomes are provided.")
+    warning("Not all pgen files for 22 chromosomes are provided.")
   }
 
   if (length(exprfs) != 22){
-    stop("Not all imputed expression files for 22 chromosomes are provided.")
+    warning("Not all imputed expression files for 22 chromosomes are provided.")
+  }
+
+  if (length(exprfs) != length(pgenfs)){
+    stop("Genotype pgen file and imputation files are not matching...")
   }
 
   if (is.null(ld_regions_custom)){

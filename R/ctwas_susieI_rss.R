@@ -109,7 +109,8 @@ susieI_rss <- function(zdf,
                                   null_weight = nw,
                                   prior_variance = V,
                                   estimate_prior_variance = F,
-                                  coverage = coverage)
+                                  coverage = coverage,
+                                  check_z = F)
 
             outdf.rn <- anno_susie(susieres,
                                    ld_exprvarfs[b],

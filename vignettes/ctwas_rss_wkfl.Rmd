@@ -15,21 +15,17 @@ knitr::opts_chunk$set(
 ```
 # Requirements
 
-LD reference should contain all SNPs given in z score. SNP ID and LD reference SNP ID should have the same meaning. weights and LD refernce ID should have same meaning and ref/alt allele info needs to match.
+LD reference should contain all SNPs given in z score. SNP ID and LD reference SNP ID should have the same meaning. weights and LD refernce ID should have same meaning and ref/alt allele info needs to match. All coordinates are in hg19.
 
 # Prepare input
 
 ```{r input}
+library(ctwas)
 zdf.SNP <- data.table::fread("/home/simingz/causalTWAS/simulations/simulation_ashtest_20201001/20201001-1-1.snpgwas.txt.gz", header =T)
 data.table::setnames(zdf.SNP, old = c('MARKER_ID', 't.value'), new = c('id', 'z'))
 zdf.SNP <- zdf.SNP[, c("id", "z")]
 ld_pgenfs <- paste0("/project2/mstephens/causalTWAS/ukbiobank/ukb_pgen_s40.22/ukb_chr", 1:22, "_s40.22_thinned.pgen")
 weight <- "/project2/mstephens/causalTWAS/fusion_weights/Adipose_Subcutaneous"
-```
-
-
-```{r setup}
-library(ctwas)
 ```
 
 # Impute expression z scores
@@ -55,5 +51,5 @@ outputdir <- "/project2/mstephens/causalTWAS/simulations/test_package_temp"
 load(paste0(outputdir, "zdf.Rd"))
 outputdir <- "/project2/mstephens/causalTWAS/simulations/test_package_temp"
 ld_exprfs <- paste0("/project2/mstephens/causalTWAS/simulations/test_package_temp/z_chr", 1:22, ".expr.gz")
-ctwas_rss(zdf, ld_pgenfs, ld_exprfs, ld_regions = "EUR", thin = 1, outputdir = outputdir, outname = "z", ncore = 1)
+ctwas_rss(zdf, ld_pgenfs, ld_exprfs, ld_regions = "EUR", thin = 1, outputdir = outputdir, outname = "z", ncore = 14)
 ```

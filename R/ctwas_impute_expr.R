@@ -44,17 +44,10 @@ impute_expr <- function(pgenf,
   wgtdir <- dirname(weight)
   wgtposfile <- file.path(wgtdir, paste0(basename(weight), ".pos"))
 
-  if (!file.exists(paste0(wgtposfile, ".IDfixed"))){
-    wgtpos <- read.table(wgtposfile, header = T, stringsAsFactors = F)
-    wgtpos <- transform(wgtpos,
+  wgtpos <- read.table(wgtposfile, header = T, stringsAsFactors = F)
+  wgtpos <- transform(wgtpos,
             "ID" = ifelse(duplicated(ID) | duplicated(ID, fromLast=TRUE),
             paste(ID, ave(ID, ID, FUN=seq_along), sep='_ID'), ID))
-
-    write.table(wgtpos, file = paste0(wgtposfile, ".IDfixed"),
-                row.names=F, col.names=T, sep="\t", quote = F)
-  }
-  wgtpos <- read.table(paste0(wgtposfile, ".IDfixed"),
-                       header = T, stringsAsFactors = F)
 
   loginfo("number of genes with weights provided: %s", nrow(wgtpos))
 
@@ -122,6 +115,11 @@ impute_expr <- function(pgenf,
   p0 <- unlist(lapply(exprlist,'[[', "p0"))
   p1 <- unlist(lapply(exprlist,'[[', "p1"))
   wgtlist <- lapply(exprlist, '[[', "wgt")
+
+  if (length(exprlist) == 0){
+    expr <- data.table::data.table(NULL)
+    geneinfo <- data.table::data.table(NULL)
+  }
 
   loginfo("Number of genes with imputed expression: %s for chr %s",
           ncol(expr), b)

@@ -35,7 +35,7 @@ index_regions <- function(pvarfs,
     snpinfo <- read_pvar(pvarf)
 
     if (unique(snpinfo$chrom) != b){
-      stop("Input genotype not by chromosome or not in correct order")
+      stop("Input genotype file not splitted by chromosome or not in correct order")
     }
 
     # select variant
@@ -55,15 +55,18 @@ index_regions <- function(pvarfs,
     exprvarf <- exprvarfs[b]
     geneinfo <- read_exprvar(exprvarf)
 
-    if (unique(geneinfo$chrom) != b){
-      stop("Imputed expression not by chromosome or not in correct order")
+    if (nrow(geneinfo)!=0){
+      if (unique(geneinfo$chrom) != b){
+        stop("Imputed expression not by chromosome or not in correct order")
+      }
+
+      # select variant
+      geneinfo$select <- 1
+      if (!is.null(select)){
+        geneinfo[!(geneinfo$id %in% select), "select"] <- 0
+      }
     }
 
-    # select variant
-    geneinfo$select <- 1
-    if (!is.null(select)){
-      geneinfo[!(geneinfo$id %in% select), "select"] <- 0
-    }
 
     regions <- reg[reg$chr == b | reg$chr == paste0("chr", b), ]
 
