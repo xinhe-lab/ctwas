@@ -7,7 +7,6 @@
 .ipy*
 .snake*
 .*swo
-data
 .ipynb_checkpoints
 code/.ipynb_checkpoints
 code/.R*

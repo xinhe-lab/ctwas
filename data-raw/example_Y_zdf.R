@@ -48,5 +48,5 @@ for (i in 1:22){
                data.frame("id" = id , "z" = zhat))
 }
 
-usethis::use_data(Y)
-usethis::use_data(zdf.snp)
+usethis::use_data(Y, zdf.snp)
+
