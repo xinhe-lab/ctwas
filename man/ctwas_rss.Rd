@@ -6,7 +6,7 @@
 \usage{
 ctwas_rss(zdf, ld_pgenfs, ld_exprfs, ld_regions = c("EUR", "ASN", "AFR"),
   ld_regions_custom = NULL, thin = 1, prob_single = 0.8,
-  niter1 = 3, niter2 = 20, L = 5, group_prior = NULL,
+  niter1 = 3, niter2 = 30, L = 5, group_prior = NULL,
   group_prior_var = NULL, estimate_group_prior = T,
   estimate_group_prior_var = T, use_null_weight = T, coverage = 0.95,
   stardardize = T, ncore = 1, outputdir = getwd(), outname = NULL,

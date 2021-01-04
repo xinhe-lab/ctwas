@@ -51,7 +51,7 @@ ctwas <- function(pgenfs,
                   thin = 1,
                   prob_single = 0.8,
                   niter1 = 3,
-                  niter2 = 20,
+                  niter2 = 30,
                   L= 5,
                   group_prior = NULL,
                   group_prior_var = NULL,
@@ -167,7 +167,8 @@ ctwas <- function(pgenfs,
                  outputdir = outputdir,
                  outname = outname)
 
-    pars
+    list("group_prior" = group_prior,
+         "group_prior_var" = group_prior_var)
 
 }
 

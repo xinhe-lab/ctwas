@@ -32,7 +32,7 @@ weight <- system.file("extdata/example_fusion_weights", "Tissue", package = "ctw
 
 
 # Impute expression
-```{r impute}
+```{r impute, warning=F, message=F}
 outputdir <- "."
 exprfs <- vector()
 for (i in 1:22){
@@ -47,16 +47,20 @@ for (i in 1:22){
 ```{r ctwas}
 regionsfile <- system.file("extdata", "example_regions.bed", package = "ctwas")
 
-X.g <- cbind(read_expr(exprfs[1]), read_expr(exprfs[2]))
+X.g <- read_expr(exprfs[1])
 X.g <- scale(X.g)
 
-pgen <- prep_pgen(pgenfs[1], prep_pvar(pgenfs[1]))
-X.s <- read_pgen(pgen, variantidx = 101:110)
+X.s.list <- list()
+for (i in 2:11){
+  pgen <- prep_pgen(pgenfs[i], prep_pvar(pgenfs[i]))
+  X.s.list[[i]] <- read_pgen(pgen, variantidx = c(100,300))
+}
+X.s <- do.call(cbind, X.s.list)
 
 X.s <- scale(X.s)
 nsample <- nrow(X.g)
 
-beta.gene <- c(0.5, 0.1)
+beta.gene <- 0.5
 beta.snp <- rep(0.2, 10)
 
 set.seed(100)
@@ -64,3 +68,5 @@ Y <- X.g %*% beta.gene + X.s%*% beta.snp + rnorm(nsample, 0, 1)
 
 ctwas(pgenfs, exprfs, Y, ld_regions_custom = regionsfile, thin = 1, outputdir = outputdir, outname = "test", ncore = 1)
 ```
+
+

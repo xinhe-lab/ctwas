@@ -4,7 +4,7 @@
 #' @return corresponding pvar file
 #'
 #' @importFrom tools file_ext file_path_sans_ext
-#'
+#' @export
 prep_pvar <- function(pgenf, outputdir = getwd()){
 
   if (file_ext(pgenf) == "pgen"){
@@ -58,6 +58,7 @@ prep_pvar <- function(pgenf, outputdir = getwd()){
 #'  .pvar file format: https://www.cog-genomics.org/plink/2.0/formats#pvar
 #'
 #' @return A data.table. variant info
+#' @export
 read_pvar <- function(pvarf){
 
   pvardt <- data.table::fread(pvarf, skip = "#CHROM")
@@ -75,7 +76,7 @@ read_pvar <- function(pvarf){
 #'  (rows). ALT allele in pvar file is counted (A1 allele in .bim file is the ALT
 #'   allele).
 #' @importFrom tools file_ext file_path_sans_ext
-#'
+#' @export
 prep_pgen <- function(pgenf, pvarf){
 
   pvar <- pgenlibr::NewPvar(pvarf)
@@ -100,6 +101,7 @@ prep_pgen <- function(pgenf, pvarf){
 #' @param variantidx variant index. If NULL, all variants will be extracted.
 #' @return A matrix, columns are allele count for each SNP, rows are
 #'  for each sample.
+#' @export
 read_pgen <- function(pgen, variantidx = NULL, meanimpute = F ){
   if (is.null(variantidx)){
     variantidx <- 1: pgenlibr::GetVariantCt(pgen)}
@@ -114,6 +116,7 @@ read_pgen <- function(pgen, variantidx = NULL, meanimpute = F ){
 #' @return corresponding exprvar file
 #'
 #' @importFrom tools file_ext file_path_sans_ext
+#' @export
 prep_exprvar <- function(exprf){
   if (file_ext(exprf) == "gz"){
     exprf <- file_path_sans_ext(exprf)
@@ -124,6 +127,7 @@ prep_exprvar <- function(exprf){
 
 #' Read .exprvar file into R
 #' @return A data.table. variant info
+#' @export
 read_exprvar <- function(exprvarf){
   data.table::fread(exprvarf, header = T)
 }
@@ -132,6 +136,7 @@ read_exprvar <- function(exprvarf){
 #' @param variantidx variant index. If NULL, all variants will be extracted.
 #' @return A matrix, columns are imputed expression for each gene, rows are
 #'  for each sample.
+#' @export
 read_expr <- function(exprf, variantidx = NULL){
   if (!is.null(variantidx) & length(variantidx)==0){
     return(NULL)
