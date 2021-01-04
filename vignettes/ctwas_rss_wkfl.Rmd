@@ -15,41 +15,41 @@ knitr::opts_chunk$set(
 ```
 # Requirements
 
-LD reference should contain all SNPs given in z score. SNP ID and LD reference SNP ID should have the same meaning. weights and LD refernce ID should have same meaning and ref/alt allele info needs to match. All coordinates are in hg19.
+LD reference should contain all SNPs given in z score data frame. The `id` column in z score data frame and LD reference SNP ID should have the same meaning (i.e., indicating the same SNP). Weights and LD refernce SNP ID should have same meaning and ref/alt allele info needs to match. All coordinates are in hg19.
 
 # Prepare input
 
 ```{r input}
 library(ctwas)
-zdf.SNP <- data.table::fread("/home/simingz/causalTWAS/simulations/simulation_ashtest_20201001/20201001-1-1.snpgwas.txt.gz", header =T)
-data.table::setnames(zdf.SNP, old = c('MARKER_ID', 't.value'), new = c('id', 'z'))
-zdf.SNP <- zdf.SNP[, c("id", "z")]
-ld_pgenfs <- paste0("/project2/mstephens/causalTWAS/ukbiobank/ukb_pgen_s40.22/ukb_chr", 1:22, "_s40.22_thinned.pgen")
-weight <- "/project2/mstephens/causalTWAS/fusion_weights/Adipose_Subcutaneous"
+
+# z scores
+data(zdf.snp)
+
+# genotype for LD reference
+ld_pgenfs <- system.file("extdata/example_genotype_files", paste0("example_chr", 1:22, ".pgen"), package = "ctwas")
+
+# weight
+weight <- system.file("extdata/example_fusion_weights", "Tissue", package = "ctwas")
 ```
 
 # Impute expression z scores
-```{r impute}
-outputdir <- "/project2/mstephens/causalTWAS/simulations/test_package_temp"
+```{r impute, warning=F, message=F}
+outputdir <- "~"
 ld_exprfs <- vector()
 zdf.gene <- NULL
 for (i in 1:22){
-  pgenf <- pgenfs[i]
-  res <- impute_expr_z(zdf.SNP, ld_pgenf = pgenf, weight = weight,
+  ld_pgenf <- ld_pgenfs[i]
+  res <- impute_expr_z(zdf.snp, ld_pgenf = ld_pgenf, weight = weight,
                            method = "lasso", outputdir = outputdir,
-                           outname = "z")
+                           outname = "test_ss")
   ld_exprfs[i] <- res$ld_exprf
   zdf.gene <- rbind(zdf.gene, res$zdf)
 }
-zdf <- rbind(zdf.SNP, zdf.gene)
-save(zdf, file = paste0(outputdir, "zdf.Rd"))
+zdf <- rbind(zdf.snp, zdf.gene)
 ```
 
 # Run ctwas 
-```{r ctwas}
-outputdir <- "/project2/mstephens/causalTWAS/simulations/test_package_temp"
-load(paste0(outputdir, "zdf.Rd"))
-outputdir <- "/project2/mstephens/causalTWAS/simulations/test_package_temp"
-ld_exprfs <- paste0("/project2/mstephens/causalTWAS/simulations/test_package_temp/z_chr", 1:22, ".expr.gz")
-ctwas_rss(zdf, ld_pgenfs, ld_exprfs, ld_regions = "EUR", thin = 1, outputdir = outputdir, outname = "z", ncore = 14)
+```{r ctwas, warning=F, message=F}
+regionsfile <- system.file("extdata", "example_regions.bed", package = "ctwas")
+ctwas_rss(zdf, ld_pgenfs, ld_exprfs, ld_regions_custom = regionsfile, thin = 1, outputdir = outputdir, outname = "test_ss", ncore = 1)
 ```
