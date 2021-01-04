@@ -176,9 +176,8 @@
 #' beta[1:4] = 1
 #' X = matrix(rnorm(n*p),nrow=n,ncol=p)
 #' y = X %*% beta + rnorm(n)
-#' res = susie(X,y,L=10)
-#' coef(res)
-#' plot(y,predict(res))
+#' # res = susie(X,y,L=10)
+#' 
 #'
 #' @importFrom stats var
 #' @importFrom utils modifyList

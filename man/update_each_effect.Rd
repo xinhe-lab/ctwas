@@ -22,5 +22,4 @@ compare likelihood between current estimate and zero the null}
 }
 \description{
 Revised from original susieR::update_each_effect.
-  Added susieR::: for all functions from susie
 }

@@ -1,10 +1,5 @@
 ---
 title: "Run on individual-level data"
-output: rmarkdown::html_vignette
-vignette: >
-  %\VignetteIndexEntry{Run on individual-level data}
-  %\VignetteEngine{knitr::rmarkdown}
-  %\VignetteEncoding{UTF-8}
 ---
 
 ```{r, include = FALSE}
@@ -38,7 +33,7 @@ weight <- system.file("extdata/example_fusion_weights", "Tissue", package = "ctw
 
 # Impute expression
 ```{r impute, warning=F, message=F}
-outputdir <- "~"
+outputdir <- "~/temp"
 exprfs <- vector()
 for (i in 1:22){
   pgenf <- pgenfs[i]
@@ -52,7 +47,7 @@ for (i in 1:22){
 ```{r ctwas, warning=F, message=F}
 regionsfile <- system.file("extdata", "example_regions.bed", package = "ctwas")
 
-ctwas(pgenfs, exprfs, Y, ld_regions_custom = regionsfile, thin = 1, outputdir = outputdir, outname = "test", ncore = 1, niter2 = 10)
+ctwas(pgenfs, exprfs, Y, ld_regions_custom = regionsfile, thin = 1, outputdir = outputdir, outname = "test", ncore = 1)
 ```
 
 

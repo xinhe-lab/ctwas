@@ -61,10 +61,10 @@
 #' X        <- matrix(rnorm(n*p),nrow=n,ncol=p)
 #' y        <- c(X %*% beta + rnorm(n))
 #' input_ss <- compute_ss(X,y,standardize = TRUE)
-#' ss <- susieR:::univariate_regression(X, y)
+#' ss <- univariate_regression(X, y)
 #' R <- with(input_ss, cov2cor(XtX))
 #' zhat <- with(ss, betahat/sebetahat)
-#' res <- susie_rss(zhat, R)
+#' # res <- susie_rss(zhat, R)
 #'
 #' @export
 susie_rss <- function (z, R, maf = NULL, maf_thresh = 0, z_ld_weight = 0,

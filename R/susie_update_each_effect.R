@@ -1,7 +1,6 @@
 #' @rdname update_each_effect
 #' @title update each effect
 #' @description Revised from original susieR::update_each_effect.
-#'   Added susieR::: for all functions from susie
 #' @param X an n by p matrix of regressor variables
 #' @param Y an n vector of response variable
 #' @param s a SuSiE fit

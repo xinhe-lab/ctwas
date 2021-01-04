@@ -71,7 +71,7 @@
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">ctwas</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="Released version">0.1.1</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="Released version">0.1.2</span>
       </span>
     </div>
 
@@ -290,15 +290,11 @@ equally likely to be non-zero. The prior on the non-zero element is N(0,var=prio
 <span class='va'>X</span>        <span class='op'>&lt;-</span> <span class='fu'><a href='https://rdrr.io/r/base/matrix.html'>matrix</a></span><span class='op'>(</span><span class='fu'><a href='https://rdrr.io/r/stats/Normal.html'>rnorm</a></span><span class='op'>(</span><span class='va'>n</span><span class='op'>*</span><span class='va'>p</span><span class='op'>)</span>,nrow<span class='op'>=</span><span class='va'>n</span>,ncol<span class='op'>=</span><span class='va'>p</span><span class='op'>)</span>
 <span class='va'>y</span>        <span class='op'>&lt;-</span> <span class='fu'><a href='https://rdrr.io/r/base/c.html'>c</a></span><span class='op'>(</span><span class='va'>X</span> <span class='op'>%*%</span> <span class='va'>beta</span> <span class='op'>+</span> <span class='fu'><a href='https://rdrr.io/r/stats/Normal.html'>rnorm</a></span><span class='op'>(</span><span class='va'>n</span><span class='op'>)</span><span class='op'>)</span>
 <span class='va'>input_ss</span> <span class='op'>&lt;-</span> <span class='fu'><a href='compute_ss.html'>compute_ss</a></span><span class='op'>(</span><span class='va'>X</span>,<span class='va'>y</span>,standardize <span class='op'>=</span> <span class='cn'>TRUE</span><span class='op'>)</span>
-<span class='va'>ss</span> <span class='op'>&lt;-</span> <span class='fu'>susieR</span><span class='fu'>:::</span><span class='fu'>univariate_regression</span><span class='op'>(</span><span class='va'>X</span>, <span class='va'>y</span><span class='op'>)</span>
-</div><div class='output co'>#&gt; <span class='message'>Registered S3 methods overwritten by 'susieR':</span>
-#&gt; <span class='message'>  method        from </span>
-#&gt; <span class='message'>  coef.susie    ctwas</span>
-#&gt; <span class='message'>  predict.susie ctwas</span></div><div class='input'><span class='va'>R</span> <span class='op'>&lt;-</span> <span class='fu'><a href='https://rdrr.io/r/base/with.html'>with</a></span><span class='op'>(</span><span class='va'>input_ss</span>, <span class='fu'><a href='https://rdrr.io/r/stats/cor.html'>cov2cor</a></span><span class='op'>(</span><span class='va'>XtX</span><span class='op'>)</span><span class='op'>)</span>
+<span class='va'>ss</span> <span class='op'>&lt;-</span> <span class='fu'>univariate_regression</span><span class='op'>(</span><span class='va'>X</span>, <span class='va'>y</span><span class='op'>)</span>
+<span class='va'>R</span> <span class='op'>&lt;-</span> <span class='fu'><a href='https://rdrr.io/r/base/with.html'>with</a></span><span class='op'>(</span><span class='va'>input_ss</span>, <span class='fu'><a href='https://rdrr.io/r/stats/cor.html'>cov2cor</a></span><span class='op'>(</span><span class='va'>XtX</span><span class='op'>)</span><span class='op'>)</span>
 <span class='va'>zhat</span> <span class='op'>&lt;-</span> <span class='fu'><a href='https://rdrr.io/r/base/with.html'>with</a></span><span class='op'>(</span><span class='va'>ss</span>, <span class='va'>betahat</span><span class='op'>/</span><span class='va'>sebetahat</span><span class='op'>)</span>
-<span class='va'>res</span> <span class='op'>&lt;-</span> <span class='fu'>susie_rss</span><span class='op'>(</span><span class='va'>zhat</span>, <span class='va'>R</span><span class='op'>)</span>
-</div><div class='output co'>#&gt; <span class='warning'>Warning: Input z does not lie in the space of non-zero eigenvectors of R. The result is thus not reliable.</span>
-#&gt; <span class='warning'>              Please refer to https://github.com/stephenslab/susieR/issues/91 for a possible solution.</span></div><div class='output co'>#&gt; <span class='error'>Error in s$V[l, ]: incorrect number of dimensions</span></div><div class='input'>
+<span class='co'># res &lt;- susie_rss(zhat, R)</span>
+
 </div></pre>
   </div>
   <div class="col-md-3 hidden-xs hidden-sm" id="pkgdown-sidebar">

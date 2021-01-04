@@ -1,10 +1,5 @@
 ---
 title: "Run on summary statistics data"
-output: rmarkdown::html_vignette
-vignette: >
-  %\VignetteIndexEntry{Run on summary statistics data}
-  %\VignetteEngine{knitr::rmarkdown}
-  %\VignetteEncoding{UTF-8}
 ---
 
 ```{r, include = FALSE}
@@ -34,7 +29,7 @@ weight <- system.file("extdata/example_fusion_weights", "Tissue", package = "ctw
 
 # Impute expression z scores
 ```{r impute, warning=F, message=F}
-outputdir <- "~"
+outputdir <- "~/temp"
 ld_exprfs <- vector()
 zdf.gene <- NULL
 for (i in 1:22){
@@ -51,5 +46,5 @@ zdf <- rbind(zdf.snp, zdf.gene)
 # Run ctwas 
 ```{r ctwas, warning=F, message=F}
 regionsfile <- system.file("extdata", "example_regions.bed", package = "ctwas")
-ctwas_rss(zdf, ld_pgenfs, ld_exprfs, ld_regions_custom = regionsfile, thin = 1, outputdir = outputdir, outname = "test_ss", ncore = 1, niter2 = 10)
+ctwas_rss(zdf, ld_pgenfs, ld_exprfs, ld_regions_custom = regionsfile, thin = 1, outputdir = outputdir, outname = "test_ss", ncore = 1)
 ```
