@@ -85,29 +85,68 @@
 
     
     
-<div id="requirements" class="section level1">
+<div id="purpose-of-the-analysis" class="section level1">
 <h1 class="hasAnchor">
-<a href="#requirements" class="anchor"></a>Requirements</h1>
-<p>LD reference should contain all SNPs given in z score data frame. The <code>id</code> column in z score data frame and LD reference SNP ID should have the same meaning (i.e., indicating the same SNP). Weights and LD refernce SNP ID should have same meaning and ref/alt allele info needs to match. All coordinates are in hg19.</p>
+<a href="#purpose-of-the-analysis" class="anchor"></a>Purpose of the analysis</h1>
+<p>This workflow aims to use GWAS summary statistics data as input and implements the causal TWAS algorithm. The “causal TWAS” method is developed to identify causal genes in GWAS studies. We improve the current TWAS analysis mainly by reducing false positives. We start from z scores for each SNP in a GWAS study and expression model trained by the <a href="http://gusevlab.org/projects/fusion/">Fusion/TWAS software</a>. In the end, we will provide a PIP (the posterior inclusion probality for being a causal gene) for each gene with an expression model.</p>
+<p>Below is the workflow for running <code>ctwas</code> for summary statistics data. I provided example input files with the package and you can use the following code as a toy pipeline. You can prepare your own input files following the examples.</p>
 </div>
-<div id="prepare-input" class="section level1">
+<div id="step-1-prepare-input" class="section level1">
 <h1 class="hasAnchor">
-<a href="#prepare-input" class="anchor"></a>Prepare input</h1>
+<a href="#step-1-prepare-input" class="anchor"></a>step 1: Prepare input</h1>
+<p>Our package is called <code>ctwas</code>.</p>
 <div class="sourceCode"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span class="kw"><a href="https://rdrr.io/r/base/library.html">library</a></span><span class="op">(</span><span class="va">ctwas</span><span class="op">)</span>
-
-<span class="co"># z scores</span>
+<code class="sourceCode R"><span class="kw"><a href="https://rdrr.io/r/base/library.html">library</a></span><span class="op">(</span><span class="va">ctwas</span><span class="op">)</span></code></pre></div>
+<p>The input are given below: z scores, a data frame:</p>
+<div class="sourceCode"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span class="co"># z scores</span>
 <span class="fu"><a href="https://rdrr.io/r/utils/data.html">data</a></span><span class="op">(</span><span class="va">zdf.snp</span><span class="op">)</span>
-
-<span class="co"># genotype for LD reference</span>
+<span class="fu"><a href="https://rdrr.io/r/utils/head.html">head</a></span><span class="op">(</span><span class="va">zdf.snp</span><span class="op">)</span>
+<span class="co">#&gt;       id          z</span>
+<span class="co">#&gt; 1 rs1001  -6.644254</span>
+<span class="co">#&gt; 2 rs1002  14.369485</span>
+<span class="co">#&gt; 3 rs1003 -14.180414</span>
+<span class="co">#&gt; 4 rs1004  -6.739014</span>
+<span class="co">#&gt; 5 rs1005 -14.049735</span>
+<span class="co">#&gt; 6 rs1006  -2.176475</span></code></pre></div>
+<p>The genotype files for LD reference data. This is a character vector of .pgen or .bed files. One file for one chromosome, in the order of 1 to 22. Therefore, the length of this vector needs to be 22. If .pgen files are given, then .pvar and .psam are assumed to present in the same directory. If .bed files are given, then .bim and .fam files are assumed to present in the same directory.</p>
+<div class="sourceCode"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span class="co"># genotype for LD reference</span>
 <span class="va">ld_pgenfs</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/system.file.html">system.file</a></span><span class="op">(</span><span class="st">"extdata/example_genotype_files"</span>, <span class="fu"><a href="https://rdrr.io/r/base/paste.html">paste0</a></span><span class="op">(</span><span class="st">"example_chr"</span>, <span class="fl">1</span><span class="op">:</span><span class="fl">22</span>, <span class="st">".pgen"</span><span class="op">)</span>, package <span class="op">=</span> <span class="st">"ctwas"</span><span class="op">)</span>
 
-<span class="co"># weight</span>
+<span class="va">ld_pgenfs</span>
+<span class="co">#&gt;  [1] "/home/simingz/R/x86_64-pc-linux-gnu-library/3.6/ctwas/extdata/example_genotype_files/example_chr1.pgen" </span>
+<span class="co">#&gt;  [2] "/home/simingz/R/x86_64-pc-linux-gnu-library/3.6/ctwas/extdata/example_genotype_files/example_chr2.pgen" </span>
+<span class="co">#&gt;  [3] "/home/simingz/R/x86_64-pc-linux-gnu-library/3.6/ctwas/extdata/example_genotype_files/example_chr3.pgen" </span>
+<span class="co">#&gt;  [4] "/home/simingz/R/x86_64-pc-linux-gnu-library/3.6/ctwas/extdata/example_genotype_files/example_chr4.pgen" </span>
+<span class="co">#&gt;  [5] "/home/simingz/R/x86_64-pc-linux-gnu-library/3.6/ctwas/extdata/example_genotype_files/example_chr5.pgen" </span>
+<span class="co">#&gt;  [6] "/home/simingz/R/x86_64-pc-linux-gnu-library/3.6/ctwas/extdata/example_genotype_files/example_chr6.pgen" </span>
+<span class="co">#&gt;  [7] "/home/simingz/R/x86_64-pc-linux-gnu-library/3.6/ctwas/extdata/example_genotype_files/example_chr7.pgen" </span>
+<span class="co">#&gt;  [8] "/home/simingz/R/x86_64-pc-linux-gnu-library/3.6/ctwas/extdata/example_genotype_files/example_chr8.pgen" </span>
+<span class="co">#&gt;  [9] "/home/simingz/R/x86_64-pc-linux-gnu-library/3.6/ctwas/extdata/example_genotype_files/example_chr9.pgen" </span>
+<span class="co">#&gt; [10] "/home/simingz/R/x86_64-pc-linux-gnu-library/3.6/ctwas/extdata/example_genotype_files/example_chr10.pgen"</span>
+<span class="co">#&gt; [11] "/home/simingz/R/x86_64-pc-linux-gnu-library/3.6/ctwas/extdata/example_genotype_files/example_chr11.pgen"</span>
+<span class="co">#&gt; [12] "/home/simingz/R/x86_64-pc-linux-gnu-library/3.6/ctwas/extdata/example_genotype_files/example_chr12.pgen"</span>
+<span class="co">#&gt; [13] "/home/simingz/R/x86_64-pc-linux-gnu-library/3.6/ctwas/extdata/example_genotype_files/example_chr13.pgen"</span>
+<span class="co">#&gt; [14] "/home/simingz/R/x86_64-pc-linux-gnu-library/3.6/ctwas/extdata/example_genotype_files/example_chr14.pgen"</span>
+<span class="co">#&gt; [15] "/home/simingz/R/x86_64-pc-linux-gnu-library/3.6/ctwas/extdata/example_genotype_files/example_chr15.pgen"</span>
+<span class="co">#&gt; [16] "/home/simingz/R/x86_64-pc-linux-gnu-library/3.6/ctwas/extdata/example_genotype_files/example_chr16.pgen"</span>
+<span class="co">#&gt; [17] "/home/simingz/R/x86_64-pc-linux-gnu-library/3.6/ctwas/extdata/example_genotype_files/example_chr17.pgen"</span>
+<span class="co">#&gt; [18] "/home/simingz/R/x86_64-pc-linux-gnu-library/3.6/ctwas/extdata/example_genotype_files/example_chr18.pgen"</span>
+<span class="co">#&gt; [19] "/home/simingz/R/x86_64-pc-linux-gnu-library/3.6/ctwas/extdata/example_genotype_files/example_chr19.pgen"</span>
+<span class="co">#&gt; [20] "/home/simingz/R/x86_64-pc-linux-gnu-library/3.6/ctwas/extdata/example_genotype_files/example_chr20.pgen"</span>
+<span class="co">#&gt; [21] "/home/simingz/R/x86_64-pc-linux-gnu-library/3.6/ctwas/extdata/example_genotype_files/example_chr21.pgen"</span>
+<span class="co">#&gt; [22] "/home/simingz/R/x86_64-pc-linux-gnu-library/3.6/ctwas/extdata/example_genotype_files/example_chr22.pgen"</span></code></pre></div>
+<p>Please check out <a href="http://gusevlab.org/projects/fusion/#computing-your-own-functional-weights">Fusion/TWAS</a> for the format of weights. Below is an example.</p>
+<div class="sourceCode"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span class="co"># weight</span>
 <span class="va">weight</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/system.file.html">system.file</a></span><span class="op">(</span><span class="st">"extdata/example_fusion_weights"</span>, <span class="st">"Tissue"</span>, package <span class="op">=</span> <span class="st">"ctwas"</span><span class="op">)</span></code></pre></div>
+<p>Note: LD reference should contain all SNPs given in z score data frame. The <code>id</code> column in z score data frame and LD reference SNP ID should have the same meaning (i.e., indicating the same SNP). Weights and LD refernce SNP ID should have same meaning and ref/alt allele info needs to match. All coordinates are in hg19.</p>
 </div>
-<div id="impute-expression-z-scores" class="section level1">
+<div id="step2-impute-expression-z-scores" class="section level1">
 <h1 class="hasAnchor">
-<a href="#impute-expression-z-scores" class="anchor"></a>Impute expression z scores</h1>
+<a href="#step2-impute-expression-z-scores" class="anchor"></a>step2: Impute expression z scores</h1>
+<p>In the following code, we compute expression z scores for each gene. We do this chromosome by chromosome. <code>impute_expr_z</code> will return z scores for each gene. It will also generate files containing the reference LD genotypes for eQTLs in the gene and the filename is returned. We will need these files in the <code>ctwas_rss</code> function in step 3.</p>
 <div class="sourceCode"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="va">outputdir</span> <span class="op">&lt;-</span> <span class="st">"~/temp"</span>
 <span class="va">ld_exprfs</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/vector.html">vector</a></span><span class="op">(</span><span class="op">)</span>
@@ -120,204 +159,240 @@
   <span class="va">ld_exprfs</span><span class="op">[</span><span class="va">i</span><span class="op">]</span> <span class="op">&lt;-</span> <span class="va">res</span><span class="op">$</span><span class="va">ld_exprf</span>
   <span class="va">zdf.gene</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/cbind.html">rbind</a></span><span class="op">(</span><span class="va">zdf.gene</span>, <span class="va">res</span><span class="op">$</span><span class="va">zdf</span><span class="op">)</span>
 <span class="op">}</span>
-<span class="co">#&gt; 2021-01-04 13:46:06 INFO::expression z score inmputation started for chr 1.</span>
-<span class="co">#&gt; 2021-01-04 13:46:06 INFO::number of genes with weights provided: 20</span>
-<span class="co">#&gt; 2021-01-04 13:46:06 INFO::Number of genes with imputed expression: 1 for chr 1</span>
-<span class="co">#&gt; 2021-01-04 13:46:06 INFO::expression inmputation done for chr 1.</span>
-<span class="co">#&gt; 2021-01-04 13:46:06 INFO::expression z score inmputation started for chr 2.</span>
-<span class="co">#&gt; 2021-01-04 13:46:06 INFO::number of genes with weights provided: 20</span>
-<span class="co">#&gt; 2021-01-04 13:46:06 INFO::Number of genes with imputed expression: 1 for chr 2</span>
-<span class="co">#&gt; 2021-01-04 13:46:06 INFO::expression inmputation done for chr 2.</span>
-<span class="co">#&gt; 2021-01-04 13:46:06 INFO::expression z score inmputation started for chr 3.</span>
-<span class="co">#&gt; 2021-01-04 13:46:06 INFO::number of genes with weights provided: 20</span>
-<span class="co">#&gt; 2021-01-04 13:46:06 INFO::Number of genes with imputed expression: 1 for chr 3</span>
-<span class="co">#&gt; 2021-01-04 13:46:07 INFO::expression inmputation done for chr 3.</span>
-<span class="co">#&gt; 2021-01-04 13:46:07 INFO::expression z score inmputation started for chr 4.</span>
-<span class="co">#&gt; 2021-01-04 13:46:07 INFO::number of genes with weights provided: 20</span>
-<span class="co">#&gt; 2021-01-04 13:46:07 INFO::Number of genes with imputed expression: 1 for chr 4</span>
-<span class="co">#&gt; 2021-01-04 13:46:07 INFO::expression inmputation done for chr 4.</span>
-<span class="co">#&gt; 2021-01-04 13:46:07 INFO::expression z score inmputation started for chr 5.</span>
-<span class="co">#&gt; 2021-01-04 13:46:07 INFO::number of genes with weights provided: 20</span>
-<span class="co">#&gt; 2021-01-04 13:46:07 INFO::Number of genes with imputed expression: 1 for chr 5</span>
-<span class="co">#&gt; 2021-01-04 13:46:07 INFO::expression inmputation done for chr 5.</span>
-<span class="co">#&gt; 2021-01-04 13:46:07 INFO::expression z score inmputation started for chr 6.</span>
-<span class="co">#&gt; 2021-01-04 13:46:07 INFO::number of genes with weights provided: 20</span>
-<span class="co">#&gt; 2021-01-04 13:46:07 INFO::Number of genes with imputed expression: 1 for chr 6</span>
-<span class="co">#&gt; 2021-01-04 13:46:07 INFO::expression inmputation done for chr 6.</span>
-<span class="co">#&gt; 2021-01-04 13:46:07 INFO::expression z score inmputation started for chr 7.</span>
-<span class="co">#&gt; 2021-01-04 13:46:07 INFO::number of genes with weights provided: 20</span>
-<span class="co">#&gt; 2021-01-04 13:46:07 INFO::Number of genes with imputed expression: 1 for chr 7</span>
-<span class="co">#&gt; 2021-01-04 13:46:07 INFO::expression inmputation done for chr 7.</span>
-<span class="co">#&gt; 2021-01-04 13:46:07 INFO::expression z score inmputation started for chr 8.</span>
-<span class="co">#&gt; 2021-01-04 13:46:07 INFO::number of genes with weights provided: 20</span>
-<span class="co">#&gt; 2021-01-04 13:46:07 INFO::Number of genes with imputed expression: 1 for chr 8</span>
-<span class="co">#&gt; 2021-01-04 13:46:07 INFO::expression inmputation done for chr 8.</span>
-<span class="co">#&gt; 2021-01-04 13:46:07 INFO::expression z score inmputation started for chr 9.</span>
-<span class="co">#&gt; 2021-01-04 13:46:07 INFO::number of genes with weights provided: 20</span>
-<span class="co">#&gt; 2021-01-04 13:46:07 INFO::Number of genes with imputed expression: 1 for chr 9</span>
-<span class="co">#&gt; 2021-01-04 13:46:07 INFO::expression inmputation done for chr 9.</span>
-<span class="co">#&gt; 2021-01-04 13:46:07 INFO::expression z score inmputation started for chr 10.</span>
-<span class="co">#&gt; 2021-01-04 13:46:07 INFO::number of genes with weights provided: 20</span>
-<span class="co">#&gt; 2021-01-04 13:46:07 INFO::Number of genes with imputed expression: 1 for chr 10</span>
-<span class="co">#&gt; 2021-01-04 13:46:07 INFO::expression inmputation done for chr 10.</span>
-<span class="co">#&gt; 2021-01-04 13:46:07 INFO::expression z score inmputation started for chr 11.</span>
-<span class="co">#&gt; 2021-01-04 13:46:07 INFO::number of genes with weights provided: 20</span>
-<span class="co">#&gt; 2021-01-04 13:46:07 INFO::Number of genes with imputed expression: 1 for chr 11</span>
-<span class="co">#&gt; 2021-01-04 13:46:07 INFO::expression inmputation done for chr 11.</span>
-<span class="co">#&gt; 2021-01-04 13:46:07 INFO::expression z score inmputation started for chr 12.</span>
-<span class="co">#&gt; 2021-01-04 13:46:07 INFO::number of genes with weights provided: 20</span>
-<span class="co">#&gt; 2021-01-04 13:46:07 INFO::Number of genes with imputed expression: 1 for chr 12</span>
-<span class="co">#&gt; 2021-01-04 13:46:07 INFO::expression inmputation done for chr 12.</span>
-<span class="co">#&gt; 2021-01-04 13:46:07 INFO::expression z score inmputation started for chr 13.</span>
-<span class="co">#&gt; 2021-01-04 13:46:07 INFO::number of genes with weights provided: 20</span>
-<span class="co">#&gt; 2021-01-04 13:46:07 INFO::Number of genes with imputed expression: 1 for chr 13</span>
-<span class="co">#&gt; 2021-01-04 13:46:07 INFO::expression inmputation done for chr 13.</span>
-<span class="co">#&gt; 2021-01-04 13:46:07 INFO::expression z score inmputation started for chr 14.</span>
-<span class="co">#&gt; 2021-01-04 13:46:07 INFO::number of genes with weights provided: 20</span>
-<span class="co">#&gt; 2021-01-04 13:46:07 INFO::Number of genes with imputed expression: 1 for chr 14</span>
-<span class="co">#&gt; 2021-01-04 13:46:07 INFO::expression inmputation done for chr 14.</span>
-<span class="co">#&gt; 2021-01-04 13:46:07 INFO::expression z score inmputation started for chr 15.</span>
-<span class="co">#&gt; 2021-01-04 13:46:07 INFO::number of genes with weights provided: 20</span>
-<span class="co">#&gt; 2021-01-04 13:46:07 INFO::Number of genes with imputed expression: 1 for chr 15</span>
-<span class="co">#&gt; 2021-01-04 13:46:07 INFO::expression inmputation done for chr 15.</span>
-<span class="co">#&gt; 2021-01-04 13:46:07 INFO::expression z score inmputation started for chr 16.</span>
-<span class="co">#&gt; 2021-01-04 13:46:07 INFO::number of genes with weights provided: 20</span>
-<span class="co">#&gt; 2021-01-04 13:46:07 INFO::Number of genes with imputed expression: 1 for chr 16</span>
-<span class="co">#&gt; 2021-01-04 13:46:07 INFO::expression inmputation done for chr 16.</span>
-<span class="co">#&gt; 2021-01-04 13:46:07 INFO::expression z score inmputation started for chr 17.</span>
-<span class="co">#&gt; 2021-01-04 13:46:07 INFO::number of genes with weights provided: 20</span>
-<span class="co">#&gt; 2021-01-04 13:46:07 INFO::Number of genes with imputed expression: 1 for chr 17</span>
-<span class="co">#&gt; 2021-01-04 13:46:07 INFO::expression inmputation done for chr 17.</span>
-<span class="co">#&gt; 2021-01-04 13:46:08 INFO::expression z score inmputation started for chr 18.</span>
-<span class="co">#&gt; 2021-01-04 13:46:08 INFO::number of genes with weights provided: 20</span>
-<span class="co">#&gt; 2021-01-04 13:46:08 INFO::Number of genes with imputed expression: 1 for chr 18</span>
-<span class="co">#&gt; 2021-01-04 13:46:08 INFO::expression inmputation done for chr 18.</span>
-<span class="co">#&gt; 2021-01-04 13:46:08 INFO::expression z score inmputation started for chr 19.</span>
-<span class="co">#&gt; 2021-01-04 13:46:08 INFO::number of genes with weights provided: 20</span>
-<span class="co">#&gt; 2021-01-04 13:46:08 INFO::Number of genes with imputed expression: 1 for chr 19</span>
-<span class="co">#&gt; 2021-01-04 13:46:08 INFO::expression inmputation done for chr 19.</span>
-<span class="co">#&gt; 2021-01-04 13:46:08 INFO::expression z score inmputation started for chr 20.</span>
-<span class="co">#&gt; 2021-01-04 13:46:08 INFO::number of genes with weights provided: 20</span>
-<span class="co">#&gt; 2021-01-04 13:46:08 INFO::Number of genes with imputed expression: 1 for chr 20</span>
-<span class="co">#&gt; 2021-01-04 13:46:08 INFO::expression inmputation done for chr 20.</span>
-<span class="co">#&gt; 2021-01-04 13:46:08 INFO::expression z score inmputation started for chr 21.</span>
-<span class="co">#&gt; 2021-01-04 13:46:08 INFO::number of genes with weights provided: 20</span>
-<span class="co">#&gt; 2021-01-04 13:46:08 INFO::Number of genes with imputed expression: 0 for chr 21</span>
-<span class="co">#&gt; 2021-01-04 13:46:08 INFO::expression inmputation done for chr 21.</span>
-<span class="co">#&gt; 2021-01-04 13:46:08 INFO::expression z score inmputation started for chr 22.</span>
-<span class="co">#&gt; 2021-01-04 13:46:08 INFO::number of genes with weights provided: 20</span>
-<span class="co">#&gt; 2021-01-04 13:46:08 INFO::Number of genes with imputed expression: 0 for chr 22</span>
-<span class="co">#&gt; 2021-01-04 13:46:08 INFO::expression inmputation done for chr 22.</span>
-<span class="va">zdf</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/cbind.html">rbind</a></span><span class="op">(</span><span class="va">zdf.snp</span>, <span class="va">zdf.gene</span><span class="op">)</span></code></pre></div>
+<span class="co">#&gt; 2021-01-08 13:26:08 INFO::expression z score inmputation started for chr 1.</span>
+<span class="co">#&gt; 2021-01-08 13:26:08 INFO::number of genes with weights provided: 20</span>
+<span class="co">#&gt; 2021-01-08 13:26:08 INFO::Number of genes with imputed expression: 1 for chr 1</span>
+<span class="co">#&gt; 2021-01-08 13:26:08 INFO::expression inmputation done for chr 1.</span>
+<span class="co">#&gt; 2021-01-08 13:26:08 INFO::expression z score inmputation started for chr 2.</span>
+<span class="co">#&gt; 2021-01-08 13:26:08 INFO::number of genes with weights provided: 20</span>
+<span class="co">#&gt; 2021-01-08 13:26:08 INFO::Number of genes with imputed expression: 1 for chr 2</span>
+<span class="co">#&gt; 2021-01-08 13:26:08 INFO::expression inmputation done for chr 2.</span>
+<span class="co">#&gt; 2021-01-08 13:26:08 INFO::expression z score inmputation started for chr 3.</span>
+<span class="co">#&gt; 2021-01-08 13:26:08 INFO::number of genes with weights provided: 20</span>
+<span class="co">#&gt; 2021-01-08 13:26:08 INFO::Number of genes with imputed expression: 1 for chr 3</span>
+<span class="co">#&gt; 2021-01-08 13:26:08 INFO::expression inmputation done for chr 3.</span>
+<span class="co">#&gt; 2021-01-08 13:26:08 INFO::expression z score inmputation started for chr 4.</span>
+<span class="co">#&gt; 2021-01-08 13:26:08 INFO::number of genes with weights provided: 20</span>
+<span class="co">#&gt; 2021-01-08 13:26:08 INFO::Number of genes with imputed expression: 1 for chr 4</span>
+<span class="co">#&gt; 2021-01-08 13:26:09 INFO::expression inmputation done for chr 4.</span>
+<span class="co">#&gt; 2021-01-08 13:26:09 INFO::expression z score inmputation started for chr 5.</span>
+<span class="co">#&gt; 2021-01-08 13:26:09 INFO::number of genes with weights provided: 20</span>
+<span class="co">#&gt; 2021-01-08 13:26:09 INFO::Number of genes with imputed expression: 1 for chr 5</span>
+<span class="co">#&gt; 2021-01-08 13:26:09 INFO::expression inmputation done for chr 5.</span>
+<span class="co">#&gt; 2021-01-08 13:26:09 INFO::expression z score inmputation started for chr 6.</span>
+<span class="co">#&gt; 2021-01-08 13:26:09 INFO::number of genes with weights provided: 20</span>
+<span class="co">#&gt; 2021-01-08 13:26:09 INFO::Number of genes with imputed expression: 1 for chr 6</span>
+<span class="co">#&gt; 2021-01-08 13:26:09 INFO::expression inmputation done for chr 6.</span>
+<span class="co">#&gt; 2021-01-08 13:26:09 INFO::expression z score inmputation started for chr 7.</span>
+<span class="co">#&gt; 2021-01-08 13:26:09 INFO::number of genes with weights provided: 20</span>
+<span class="co">#&gt; 2021-01-08 13:26:09 INFO::Number of genes with imputed expression: 1 for chr 7</span>
+<span class="co">#&gt; 2021-01-08 13:26:09 INFO::expression inmputation done for chr 7.</span>
+<span class="co">#&gt; 2021-01-08 13:26:09 INFO::expression z score inmputation started for chr 8.</span>
+<span class="co">#&gt; 2021-01-08 13:26:09 INFO::number of genes with weights provided: 20</span>
+<span class="co">#&gt; 2021-01-08 13:26:09 INFO::Number of genes with imputed expression: 1 for chr 8</span>
+<span class="co">#&gt; 2021-01-08 13:26:09 INFO::expression inmputation done for chr 8.</span>
+<span class="co">#&gt; 2021-01-08 13:26:09 INFO::expression z score inmputation started for chr 9.</span>
+<span class="co">#&gt; 2021-01-08 13:26:09 INFO::number of genes with weights provided: 20</span>
+<span class="co">#&gt; 2021-01-08 13:26:09 INFO::Number of genes with imputed expression: 1 for chr 9</span>
+<span class="co">#&gt; 2021-01-08 13:26:09 INFO::expression inmputation done for chr 9.</span>
+<span class="co">#&gt; 2021-01-08 13:26:09 INFO::expression z score inmputation started for chr 10.</span>
+<span class="co">#&gt; 2021-01-08 13:26:09 INFO::number of genes with weights provided: 20</span>
+<span class="co">#&gt; 2021-01-08 13:26:09 INFO::Number of genes with imputed expression: 1 for chr 10</span>
+<span class="co">#&gt; 2021-01-08 13:26:09 INFO::expression inmputation done for chr 10.</span>
+<span class="co">#&gt; 2021-01-08 13:26:09 INFO::expression z score inmputation started for chr 11.</span>
+<span class="co">#&gt; 2021-01-08 13:26:09 INFO::number of genes with weights provided: 20</span>
+<span class="co">#&gt; 2021-01-08 13:26:09 INFO::Number of genes with imputed expression: 1 for chr 11</span>
+<span class="co">#&gt; 2021-01-08 13:26:09 INFO::expression inmputation done for chr 11.</span>
+<span class="co">#&gt; 2021-01-08 13:26:09 INFO::expression z score inmputation started for chr 12.</span>
+<span class="co">#&gt; 2021-01-08 13:26:09 INFO::number of genes with weights provided: 20</span>
+<span class="co">#&gt; 2021-01-08 13:26:09 INFO::Number of genes with imputed expression: 1 for chr 12</span>
+<span class="co">#&gt; 2021-01-08 13:26:09 INFO::expression inmputation done for chr 12.</span>
+<span class="co">#&gt; 2021-01-08 13:26:09 INFO::expression z score inmputation started for chr 13.</span>
+<span class="co">#&gt; 2021-01-08 13:26:09 INFO::number of genes with weights provided: 20</span>
+<span class="co">#&gt; 2021-01-08 13:26:09 INFO::Number of genes with imputed expression: 1 for chr 13</span>
+<span class="co">#&gt; 2021-01-08 13:26:09 INFO::expression inmputation done for chr 13.</span>
+<span class="co">#&gt; 2021-01-08 13:26:09 INFO::expression z score inmputation started for chr 14.</span>
+<span class="co">#&gt; 2021-01-08 13:26:09 INFO::number of genes with weights provided: 20</span>
+<span class="co">#&gt; 2021-01-08 13:26:09 INFO::Number of genes with imputed expression: 1 for chr 14</span>
+<span class="co">#&gt; 2021-01-08 13:26:09 INFO::expression inmputation done for chr 14.</span>
+<span class="co">#&gt; 2021-01-08 13:26:09 INFO::expression z score inmputation started for chr 15.</span>
+<span class="co">#&gt; 2021-01-08 13:26:09 INFO::number of genes with weights provided: 20</span>
+<span class="co">#&gt; 2021-01-08 13:26:09 INFO::Number of genes with imputed expression: 1 for chr 15</span>
+<span class="co">#&gt; 2021-01-08 13:26:09 INFO::expression inmputation done for chr 15.</span>
+<span class="co">#&gt; 2021-01-08 13:26:09 INFO::expression z score inmputation started for chr 16.</span>
+<span class="co">#&gt; 2021-01-08 13:26:09 INFO::number of genes with weights provided: 20</span>
+<span class="co">#&gt; 2021-01-08 13:26:09 INFO::Number of genes with imputed expression: 1 for chr 16</span>
+<span class="co">#&gt; 2021-01-08 13:26:09 INFO::expression inmputation done for chr 16.</span>
+<span class="co">#&gt; 2021-01-08 13:26:09 INFO::expression z score inmputation started for chr 17.</span>
+<span class="co">#&gt; 2021-01-08 13:26:09 INFO::number of genes with weights provided: 20</span>
+<span class="co">#&gt; 2021-01-08 13:26:09 INFO::Number of genes with imputed expression: 1 for chr 17</span>
+<span class="co">#&gt; 2021-01-08 13:26:09 INFO::expression inmputation done for chr 17.</span>
+<span class="co">#&gt; 2021-01-08 13:26:09 INFO::expression z score inmputation started for chr 18.</span>
+<span class="co">#&gt; 2021-01-08 13:26:09 INFO::number of genes with weights provided: 20</span>
+<span class="co">#&gt; 2021-01-08 13:26:09 INFO::Number of genes with imputed expression: 1 for chr 18</span>
+<span class="co">#&gt; 2021-01-08 13:26:09 INFO::expression inmputation done for chr 18.</span>
+<span class="co">#&gt; 2021-01-08 13:26:09 INFO::expression z score inmputation started for chr 19.</span>
+<span class="co">#&gt; 2021-01-08 13:26:09 INFO::number of genes with weights provided: 20</span>
+<span class="co">#&gt; 2021-01-08 13:26:09 INFO::Number of genes with imputed expression: 1 for chr 19</span>
+<span class="co">#&gt; 2021-01-08 13:26:10 INFO::expression inmputation done for chr 19.</span>
+<span class="co">#&gt; 2021-01-08 13:26:10 INFO::expression z score inmputation started for chr 20.</span>
+<span class="co">#&gt; 2021-01-08 13:26:10 INFO::number of genes with weights provided: 20</span>
+<span class="co">#&gt; 2021-01-08 13:26:10 INFO::Number of genes with imputed expression: 1 for chr 20</span>
+<span class="co">#&gt; 2021-01-08 13:26:10 INFO::expression inmputation done for chr 20.</span>
+<span class="co">#&gt; 2021-01-08 13:26:10 INFO::expression z score inmputation started for chr 21.</span>
+<span class="co">#&gt; 2021-01-08 13:26:10 INFO::number of genes with weights provided: 20</span>
+<span class="co">#&gt; 2021-01-08 13:26:10 INFO::Number of genes with imputed expression: 0 for chr 21</span>
+<span class="co">#&gt; 2021-01-08 13:26:10 INFO::expression inmputation done for chr 21.</span>
+<span class="co">#&gt; 2021-01-08 13:26:10 INFO::expression z score inmputation started for chr 22.</span>
+<span class="co">#&gt; 2021-01-08 13:26:10 INFO::number of genes with weights provided: 20</span>
+<span class="co">#&gt; 2021-01-08 13:26:10 INFO::Number of genes with imputed expression: 0 for chr 22</span>
+<span class="co">#&gt; 2021-01-08 13:26:10 INFO::expression inmputation done for chr 22.</span>
+<span class="va">zdf</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/cbind.html">rbind</a></span><span class="op">(</span><span class="va">zdf.snp</span>, <span class="va">zdf.gene</span><span class="op">)</span>
+
+<span class="fu"><a href="https://rdrr.io/r/utils/head.html">head</a></span><span class="op">(</span><span class="va">zdf</span><span class="op">)</span>
+<span class="co">#&gt;       id          z</span>
+<span class="co">#&gt; 1 rs1001  -6.644254</span>
+<span class="co">#&gt; 2 rs1002  14.369485</span>
+<span class="co">#&gt; 3 rs1003 -14.180414</span>
+<span class="co">#&gt; 4 rs1004  -6.739014</span>
+<span class="co">#&gt; 5 rs1005 -14.049735</span>
+<span class="co">#&gt; 6 rs1006  -2.176475</span>
+<span class="va">ld_exprfs</span>
+<span class="co">#&gt;  [1] "~/temp/test_ss_chr1.expr.gz"  "~/temp/test_ss_chr2.expr.gz" </span>
+<span class="co">#&gt;  [3] "~/temp/test_ss_chr3.expr.gz"  "~/temp/test_ss_chr4.expr.gz" </span>
+<span class="co">#&gt;  [5] "~/temp/test_ss_chr5.expr.gz"  "~/temp/test_ss_chr6.expr.gz" </span>
+<span class="co">#&gt;  [7] "~/temp/test_ss_chr7.expr.gz"  "~/temp/test_ss_chr8.expr.gz" </span>
+<span class="co">#&gt;  [9] "~/temp/test_ss_chr9.expr.gz"  "~/temp/test_ss_chr10.expr.gz"</span>
+<span class="co">#&gt; [11] "~/temp/test_ss_chr11.expr.gz" "~/temp/test_ss_chr12.expr.gz"</span>
+<span class="co">#&gt; [13] "~/temp/test_ss_chr13.expr.gz" "~/temp/test_ss_chr14.expr.gz"</span>
+<span class="co">#&gt; [15] "~/temp/test_ss_chr15.expr.gz" "~/temp/test_ss_chr16.expr.gz"</span>
+<span class="co">#&gt; [17] "~/temp/test_ss_chr17.expr.gz" "~/temp/test_ss_chr18.expr.gz"</span>
+<span class="co">#&gt; [19] "~/temp/test_ss_chr19.expr.gz" "~/temp/test_ss_chr20.expr.gz"</span>
+<span class="co">#&gt; [21] "~/temp/test_ss_chr21.expr.gz" "~/temp/test_ss_chr22.expr.gz"</span></code></pre></div>
 </div>
-<div id="run-ctwas" class="section level1">
+<div id="step-3-run-ctwas_rss-" class="section level1">
 <h1 class="hasAnchor">
-<a href="#run-ctwas" class="anchor"></a>Run ctwas</h1>
+<a href="#step-3-run-ctwas_rss-" class="anchor"></a>step 3: Run <code>ctwas_rss</code>.</h1>
+<p>In this step we will perform the causal TWAS algorithm, the algorithm will run susie iteratively for parameter estimation and lastly provide PIPs for all genes and SNPs included in the analysis. If you don’t want to define your own LD regions, then you can use the one defined by ldetect by simply specifying the population name using the <code>ld_regions</code> argument. One feature of the ctwas function is that it allows parallel computing. you can specify number of cores to use by the <code>ncore</code> argument.</p>
 <div class="sourceCode"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="va">regionsfile</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/system.file.html">system.file</a></span><span class="op">(</span><span class="st">"extdata"</span>, <span class="st">"example_regions.bed"</span>, package <span class="op">=</span> <span class="st">"ctwas"</span><span class="op">)</span>
-<span class="fu"><a href="../reference/ctwas_rss.html">ctwas_rss</a></span><span class="op">(</span><span class="va">zdf</span>, <span class="va">ld_pgenfs</span>, <span class="va">ld_exprfs</span>, ld_regions_custom <span class="op">=</span> <span class="va">regionsfile</span>, thin <span class="op">=</span> <span class="fl">1</span>, outputdir <span class="op">=</span> <span class="va">outputdir</span>, outname <span class="op">=</span> <span class="st">"test_ss"</span>, ncore <span class="op">=</span> <span class="fl">1</span><span class="op">)</span>
-<span class="co">#&gt; 2021-01-04 13:46:08 INFO::ctwas started ...</span>
-<span class="co">#&gt; 2021-01-04 13:46:08 INFO::LD region file: /tmp/Rtmp5HBXud/temp_libpath1ce6f43f97e/ctwas/extdata/example_regions.bed</span>
-<span class="co">#&gt; 2021-01-04 13:46:08 INFO::No. LD regions: 374</span>
-<span class="co">#&gt; 2021-01-04 13:46:08 INFO::No. regions with at least one SNP/gene for chr1: 17</span>
-<span class="co">#&gt; 2021-01-04 13:46:08 INFO::No. regions with at least one SNP/gene for chr2: 17</span>
-<span class="co">#&gt; 2021-01-04 13:46:08 INFO::No. regions with at least one SNP/gene for chr3: 17</span>
-<span class="co">#&gt; 2021-01-04 13:46:08 INFO::No. regions with at least one SNP/gene for chr4: 17</span>
-<span class="co">#&gt; 2021-01-04 13:46:08 INFO::No. regions with at least one SNP/gene for chr5: 17</span>
-<span class="co">#&gt; 2021-01-04 13:46:08 INFO::No. regions with at least one SNP/gene for chr6: 17</span>
-<span class="co">#&gt; 2021-01-04 13:46:08 INFO::No. regions with at least one SNP/gene for chr7: 17</span>
-<span class="co">#&gt; 2021-01-04 13:46:08 INFO::No. regions with at least one SNP/gene for chr8: 17</span>
-<span class="co">#&gt; 2021-01-04 13:46:08 INFO::No. regions with at least one SNP/gene for chr9: 17</span>
-<span class="co">#&gt; 2021-01-04 13:46:08 INFO::No. regions with at least one SNP/gene for chr10: 17</span>
-<span class="co">#&gt; 2021-01-04 13:46:08 INFO::No. regions with at least one SNP/gene for chr11: 17</span>
-<span class="co">#&gt; 2021-01-04 13:46:08 INFO::No. regions with at least one SNP/gene for chr12: 17</span>
-<span class="co">#&gt; 2021-01-04 13:46:08 INFO::No. regions with at least one SNP/gene for chr13: 17</span>
-<span class="co">#&gt; 2021-01-04 13:46:08 INFO::No. regions with at least one SNP/gene for chr14: 17</span>
-<span class="co">#&gt; 2021-01-04 13:46:08 INFO::No. regions with at least one SNP/gene for chr15: 17</span>
-<span class="co">#&gt; 2021-01-04 13:46:08 INFO::No. regions with at least one SNP/gene for chr16: 17</span>
-<span class="co">#&gt; 2021-01-04 13:46:08 INFO::No. regions with at least one SNP/gene for chr17: 17</span>
-<span class="co">#&gt; 2021-01-04 13:46:08 INFO::No. regions with at least one SNP/gene for chr18: 17</span>
-<span class="co">#&gt; 2021-01-04 13:46:08 INFO::No. regions with at least one SNP/gene for chr19: 17</span>
-<span class="co">#&gt; 2021-01-04 13:46:08 INFO::No. regions with at least one SNP/gene for chr20: 17</span>
-<span class="co">#&gt; 2021-01-04 13:46:08 INFO::No. regions with at least one SNP/gene for chr21: 17</span>
-<span class="co">#&gt; 2021-01-04 13:46:08 INFO::No. regions with at least one SNP/gene for chr22: 17</span>
-<span class="co">#&gt; 2021-01-04 13:46:08 INFO::Run susie iteratively, getting rough estimate ...</span>
-<span class="co">#&gt; 2021-01-04 13:46:09 INFO::run iteration 1</span>
-<span class="co">#&gt; 2021-01-04 13:46:20 INFO::After iteration 1, gene prior 0.243146655875483:, SNP prior:0.0357649685951883</span>
-<span class="co">#&gt; 2021-01-04 13:46:20 INFO::run iteration 2</span>
-<span class="co">#&gt; 2021-01-04 13:46:30 INFO::After iteration 2, gene prior 0.120374063658439:, SNP prior:0.0344353241799761</span>
-<span class="co">#&gt; 2021-01-04 13:46:30 INFO::run iteration 3</span>
-<span class="co">#&gt; 2021-01-04 13:46:39 INFO::After iteration 3, gene prior 0.0737484285411093:, SNP prior:0.03436533472304</span>
-<span class="co">#&gt; 2021-01-04 13:46:39 INFO::Blocks are filtered: 22 blocks left</span>
-<span class="co">#&gt; 2021-01-04 13:46:39 INFO::Run susie iteratively, getting accurate estimate ...</span>
-<span class="co">#&gt; 2021-01-04 13:46:40 INFO::run iteration 1</span>
-<span class="co">#&gt; 2021-01-04 13:46:44 INFO::After iteration 1, gene prior 0.0611700519680101:, SNP prior:0.0267139083237737</span>
-<span class="co">#&gt; 2021-01-04 13:46:44 INFO::run iteration 2</span>
-<span class="co">#&gt; 2021-01-04 13:46:46 INFO::After iteration 2, gene prior 0.0582390854248041:, SNP prior:0.0235811157061746</span>
-<span class="co">#&gt; 2021-01-04 13:46:46 INFO::run iteration 3</span>
-<span class="co">#&gt; 2021-01-04 13:46:49 INFO::After iteration 3, gene prior 0.0576172459517432:, SNP prior:0.0217348397809996</span>
-<span class="co">#&gt; 2021-01-04 13:46:49 INFO::run iteration 4</span>
-<span class="co">#&gt; 2021-01-04 13:46:51 INFO::After iteration 4, gene prior 0.0574868652240599:, SNP prior:0.0204864737010255</span>
-<span class="co">#&gt; 2021-01-04 13:46:51 INFO::run iteration 5</span>
-<span class="co">#&gt; 2021-01-04 13:46:53 INFO::After iteration 5, gene prior 0.05745993371151:, SNP prior:0.0195768151495736</span>
-<span class="co">#&gt; 2021-01-04 13:46:53 INFO::run iteration 6</span>
-<span class="co">#&gt; 2021-01-04 13:46:56 INFO::After iteration 6, gene prior 0.057455347389839:, SNP prior:0.0188824660709167</span>
-<span class="co">#&gt; 2021-01-04 13:46:56 INFO::run iteration 7</span>
-<span class="co">#&gt; 2021-01-04 13:46:58 INFO::After iteration 7, gene prior 0.0574558100208693:, SNP prior:0.0183355567220778</span>
-<span class="co">#&gt; 2021-01-04 13:46:58 INFO::run iteration 8</span>
-<span class="co">#&gt; 2021-01-04 13:47:00 INFO::After iteration 8, gene prior 0.0574574549150203:, SNP prior:0.0178951465026107</span>
-<span class="co">#&gt; 2021-01-04 13:47:00 INFO::run iteration 9</span>
-<span class="co">#&gt; 2021-01-04 13:47:02 INFO::After iteration 9, gene prior 0.0574593375103003:, SNP prior:0.0175347610853563</span>
-<span class="co">#&gt; 2021-01-04 13:47:02 INFO::run iteration 10</span>
-<span class="co">#&gt; 2021-01-04 13:47:04 INFO::After iteration 10, gene prior 0.0574611966329314:, SNP prior:0.0172363521226043</span>
-<span class="co">#&gt; 2021-01-04 13:47:04 INFO::run iteration 11</span>
-<span class="co">#&gt; 2021-01-04 13:47:07 INFO::After iteration 11, gene prior 0.0574629519960593:, SNP prior:0.0169870984139625</span>
-<span class="co">#&gt; 2021-01-04 13:47:07 INFO::run iteration 12</span>
-<span class="co">#&gt; 2021-01-04 13:47:09 INFO::After iteration 12, gene prior 0.0574645799160119:, SNP prior:0.0167775885517669</span>
-<span class="co">#&gt; 2021-01-04 13:47:09 INFO::run iteration 13</span>
-<span class="co">#&gt; 2021-01-04 13:47:11 INFO::After iteration 13, gene prior 0.0574660775093162:, SNP prior:0.0166007278752564</span>
-<span class="co">#&gt; 2021-01-04 13:47:11 INFO::run iteration 14</span>
-<span class="co">#&gt; 2021-01-04 13:47:13 INFO::After iteration 14, gene prior 0.0574674502828191:, SNP prior:0.0164510494589264</span>
-<span class="co">#&gt; 2021-01-04 13:47:13 INFO::run iteration 15</span>
-<span class="co">#&gt; 2021-01-04 13:47:16 INFO::After iteration 15, gene prior 0.0574687070699038:, SNP prior:0.0163242624309391</span>
-<span class="co">#&gt; 2021-01-04 13:47:16 INFO::run iteration 16</span>
-<span class="co">#&gt; 2021-01-04 13:47:18 INFO::After iteration 16, gene prior 0.0574698577389729:, SNP prior:0.0162169459128607</span>
-<span class="co">#&gt; 2021-01-04 13:47:18 INFO::run iteration 17</span>
-<span class="co">#&gt; 2021-01-04 13:47:20 INFO::After iteration 17, gene prior 0.057470912113439:, SNP prior:0.0161263356963391</span>
-<span class="co">#&gt; 2021-01-04 13:47:20 INFO::run iteration 18</span>
-<span class="co">#&gt; 2021-01-04 13:47:22 INFO::After iteration 18, gene prior 0.0574718794722679:, SNP prior:0.0160501719010653</span>
-<span class="co">#&gt; 2021-01-04 13:47:22 INFO::run iteration 19</span>
-<span class="co">#&gt; 2021-01-04 13:47:25 INFO::After iteration 19, gene prior 0.0574727683422044:, SNP prior:0.0159865878641964</span>
-<span class="co">#&gt; 2021-01-04 13:47:25 INFO::run iteration 20</span>
-<span class="co">#&gt; 2021-01-04 13:47:27 INFO::After iteration 20, gene prior 0.057473586438738:, SNP prior:0.0159340275950331</span>
-<span class="co">#&gt; 2021-01-04 13:47:27 INFO::run iteration 21</span>
-<span class="co">#&gt; 2021-01-04 13:47:30 INFO::After iteration 21, gene prior 0.0574743406818356:, SNP prior:0.0158911834487666</span>
-<span class="co">#&gt; 2021-01-04 13:47:30 INFO::run iteration 22</span>
-<span class="co">#&gt; 2021-01-04 13:47:32 INFO::After iteration 22, gene prior 0.057475037247254:, SNP prior:0.0158569483860602</span>
-<span class="co">#&gt; 2021-01-04 13:47:32 INFO::run iteration 23</span>
-<span class="co">#&gt; 2021-01-04 13:47:34 INFO::After iteration 23, gene prior 0.0574756816325102:, SNP prior:0.015830378934062</span>
-<span class="co">#&gt; 2021-01-04 13:47:34 INFO::run iteration 24</span>
-<span class="co">#&gt; 2021-01-04 13:47:36 INFO::After iteration 24, gene prior 0.0574762787264314:, SNP prior:0.0158106661185008</span>
-<span class="co">#&gt; 2021-01-04 13:47:36 INFO::run iteration 25</span>
-<span class="co">#&gt; 2021-01-04 13:47:39 INFO::After iteration 25, gene prior 0.0574768328765942:, SNP prior:0.015797112414325</span>
-<span class="co">#&gt; 2021-01-04 13:47:39 INFO::run iteration 26</span>
-<span class="co">#&gt; 2021-01-04 13:47:41 INFO::After iteration 26, gene prior 0.0574773479519289:, SNP prior:0.0157891132966731</span>
-<span class="co">#&gt; 2021-01-04 13:47:41 INFO::run iteration 27</span>
-<span class="co">#&gt; 2021-01-04 13:47:43 INFO::After iteration 27, gene prior 0.0574778273993955:, SNP prior:0.0157861423474438</span>
-<span class="co">#&gt; 2021-01-04 13:47:43 INFO::run iteration 28</span>
-<span class="co">#&gt; 2021-01-04 13:47:45 INFO::After iteration 28, gene prior 0.057478274294514:, SNP prior:0.0157877391379307</span>
-<span class="co">#&gt; 2021-01-04 13:47:45 INFO::run iteration 29</span>
-<span class="co">#&gt; 2021-01-04 13:47:48 INFO::After iteration 29, gene prior 0.05747869138599:, SNP prior:0.0157934992990297</span>
-<span class="co">#&gt; 2021-01-04 13:47:48 INFO::run iteration 30</span>
-<span class="co">#&gt; 2021-01-04 13:47:50 INFO::After iteration 30, gene prior 0.057479081134895:, SNP prior:0.015803066329972</span>
-<span class="co">#&gt; 2021-01-04 13:47:50 INFO::Run susie for all regions.</span>
-<span class="co">#&gt; 2021-01-04 13:47:50 INFO::run iteration 1</span>
-<span class="co">#&gt; 2021-01-04 13:47:55 INFO::After iteration 1, gene prior 0.0794074183956216:, SNP prior:0.0782549675855982</span>
+<span class="va">pars</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/ctwas_rss.html">ctwas_rss</a></span><span class="op">(</span><span class="va">zdf</span>, <span class="va">ld_pgenfs</span>, <span class="va">ld_exprfs</span>, ld_regions_custom <span class="op">=</span> <span class="va">regionsfile</span>, thin <span class="op">=</span> <span class="fl">1</span>, outputdir <span class="op">=</span> <span class="va">outputdir</span>, outname <span class="op">=</span> <span class="st">"test_ss"</span>, ncore <span class="op">=</span> <span class="fl">1</span><span class="op">)</span>
+<span class="co">#&gt; 2021-01-08 13:26:10 INFO::ctwas started ...</span>
+<span class="co">#&gt; 2021-01-08 13:26:10 INFO::LD region file: /home/simingz/R/x86_64-pc-linux-gnu-library/3.6/ctwas/extdata/example_regions.bed</span>
+<span class="co">#&gt; 2021-01-08 13:26:10 INFO::No. LD regions: 374</span>
+<span class="co">#&gt; 2021-01-08 13:26:10 INFO::No. regions with at least one SNP/gene for chr1: 17</span>
+<span class="co">#&gt; 2021-01-08 13:26:10 INFO::No. regions with at least one SNP/gene for chr2: 17</span>
+<span class="co">#&gt; 2021-01-08 13:26:10 INFO::No. regions with at least one SNP/gene for chr3: 17</span>
+<span class="co">#&gt; 2021-01-08 13:26:10 INFO::No. regions with at least one SNP/gene for chr4: 17</span>
+<span class="co">#&gt; 2021-01-08 13:26:10 INFO::No. regions with at least one SNP/gene for chr5: 17</span>
+<span class="co">#&gt; 2021-01-08 13:26:10 INFO::No. regions with at least one SNP/gene for chr6: 17</span>
+<span class="co">#&gt; 2021-01-08 13:26:10 INFO::No. regions with at least one SNP/gene for chr7: 17</span>
+<span class="co">#&gt; 2021-01-08 13:26:10 INFO::No. regions with at least one SNP/gene for chr8: 17</span>
+<span class="co">#&gt; 2021-01-08 13:26:10 INFO::No. regions with at least one SNP/gene for chr9: 17</span>
+<span class="co">#&gt; 2021-01-08 13:26:10 INFO::No. regions with at least one SNP/gene for chr10: 17</span>
+<span class="co">#&gt; 2021-01-08 13:26:10 INFO::No. regions with at least one SNP/gene for chr11: 17</span>
+<span class="co">#&gt; 2021-01-08 13:26:10 INFO::No. regions with at least one SNP/gene for chr12: 17</span>
+<span class="co">#&gt; 2021-01-08 13:26:10 INFO::No. regions with at least one SNP/gene for chr13: 17</span>
+<span class="co">#&gt; 2021-01-08 13:26:10 INFO::No. regions with at least one SNP/gene for chr14: 17</span>
+<span class="co">#&gt; 2021-01-08 13:26:10 INFO::No. regions with at least one SNP/gene for chr15: 17</span>
+<span class="co">#&gt; 2021-01-08 13:26:10 INFO::No. regions with at least one SNP/gene for chr16: 17</span>
+<span class="co">#&gt; 2021-01-08 13:26:10 INFO::No. regions with at least one SNP/gene for chr17: 17</span>
+<span class="co">#&gt; 2021-01-08 13:26:10 INFO::No. regions with at least one SNP/gene for chr18: 17</span>
+<span class="co">#&gt; 2021-01-08 13:26:10 INFO::No. regions with at least one SNP/gene for chr19: 17</span>
+<span class="co">#&gt; 2021-01-08 13:26:10 INFO::No. regions with at least one SNP/gene for chr20: 17</span>
+<span class="co">#&gt; 2021-01-08 13:26:10 INFO::No. regions with at least one SNP/gene for chr21: 17</span>
+<span class="co">#&gt; 2021-01-08 13:26:10 INFO::No. regions with at least one SNP/gene for chr22: 17</span>
+<span class="co">#&gt; 2021-01-08 13:26:10 INFO::Run susie iteratively, getting rough estimate ...</span>
+<span class="co">#&gt; 2021-01-08 13:26:10 INFO::run iteration 1</span>
+<span class="co">#&gt; 2021-01-08 13:26:21 INFO::After iteration 1, gene prior 0.243146655875483:, SNP prior:0.0357649685951883</span>
+<span class="co">#&gt; 2021-01-08 13:26:21 INFO::run iteration 2</span>
+<span class="co">#&gt; 2021-01-08 13:26:30 INFO::After iteration 2, gene prior 0.120374063658439:, SNP prior:0.0344353241799761</span>
+<span class="co">#&gt; 2021-01-08 13:26:30 INFO::run iteration 3</span>
+<span class="co">#&gt; 2021-01-08 13:26:40 INFO::After iteration 3, gene prior 0.0737484285411093:, SNP prior:0.03436533472304</span>
+<span class="co">#&gt; 2021-01-08 13:26:40 INFO::Blocks are filtered: 22 blocks left</span>
+<span class="co">#&gt; 2021-01-08 13:26:40 INFO::Run susie iteratively, getting accurate estimate ...</span>
+<span class="co">#&gt; 2021-01-08 13:26:40 INFO::run iteration 1</span>
+<span class="co">#&gt; 2021-01-08 13:26:44 INFO::After iteration 1, gene prior 0.0611700519680101:, SNP prior:0.0267139083237737</span>
+<span class="co">#&gt; 2021-01-08 13:26:44 INFO::run iteration 2</span>
+<span class="co">#&gt; 2021-01-08 13:26:46 INFO::After iteration 2, gene prior 0.0582390854248041:, SNP prior:0.0235811157061746</span>
+<span class="co">#&gt; 2021-01-08 13:26:46 INFO::run iteration 3</span>
+<span class="co">#&gt; 2021-01-08 13:26:48 INFO::After iteration 3, gene prior 0.0576172459517432:, SNP prior:0.0217348397809996</span>
+<span class="co">#&gt; 2021-01-08 13:26:48 INFO::run iteration 4</span>
+<span class="co">#&gt; 2021-01-08 13:26:50 INFO::After iteration 4, gene prior 0.0574868652240599:, SNP prior:0.0204864737010255</span>
+<span class="co">#&gt; 2021-01-08 13:26:50 INFO::run iteration 5</span>
+<span class="co">#&gt; 2021-01-08 13:26:52 INFO::After iteration 5, gene prior 0.05745993371151:, SNP prior:0.0195768151495736</span>
+<span class="co">#&gt; 2021-01-08 13:26:52 INFO::run iteration 6</span>
+<span class="co">#&gt; 2021-01-08 13:26:55 INFO::After iteration 6, gene prior 0.057455347389839:, SNP prior:0.0188824660709167</span>
+<span class="co">#&gt; 2021-01-08 13:26:55 INFO::run iteration 7</span>
+<span class="co">#&gt; 2021-01-08 13:26:57 INFO::After iteration 7, gene prior 0.0574558100208693:, SNP prior:0.0183355567220778</span>
+<span class="co">#&gt; 2021-01-08 13:26:57 INFO::run iteration 8</span>
+<span class="co">#&gt; 2021-01-08 13:26:59 INFO::After iteration 8, gene prior 0.0574574549150203:, SNP prior:0.0178951465026107</span>
+<span class="co">#&gt; 2021-01-08 13:26:59 INFO::run iteration 9</span>
+<span class="co">#&gt; 2021-01-08 13:27:01 INFO::After iteration 9, gene prior 0.0574593375103003:, SNP prior:0.0175347610853563</span>
+<span class="co">#&gt; 2021-01-08 13:27:01 INFO::run iteration 10</span>
+<span class="co">#&gt; 2021-01-08 13:27:03 INFO::After iteration 10, gene prior 0.0574611966329314:, SNP prior:0.0172363521226043</span>
+<span class="co">#&gt; 2021-01-08 13:27:03 INFO::run iteration 11</span>
+<span class="co">#&gt; 2021-01-08 13:27:05 INFO::After iteration 11, gene prior 0.0574629519960593:, SNP prior:0.0169870984139625</span>
+<span class="co">#&gt; 2021-01-08 13:27:05 INFO::run iteration 12</span>
+<span class="co">#&gt; 2021-01-08 13:27:07 INFO::After iteration 12, gene prior 0.0574645799160119:, SNP prior:0.0167775885517669</span>
+<span class="co">#&gt; 2021-01-08 13:27:07 INFO::run iteration 13</span>
+<span class="co">#&gt; 2021-01-08 13:27:09 INFO::After iteration 13, gene prior 0.0574660775093162:, SNP prior:0.0166007278752564</span>
+<span class="co">#&gt; 2021-01-08 13:27:09 INFO::run iteration 14</span>
+<span class="co">#&gt; 2021-01-08 13:27:12 INFO::After iteration 14, gene prior 0.0574674502828191:, SNP prior:0.0164510494589264</span>
+<span class="co">#&gt; 2021-01-08 13:27:12 INFO::run iteration 15</span>
+<span class="co">#&gt; 2021-01-08 13:27:14 INFO::After iteration 15, gene prior 0.0574687070699038:, SNP prior:0.0163242624309391</span>
+<span class="co">#&gt; 2021-01-08 13:27:14 INFO::run iteration 16</span>
+<span class="co">#&gt; 2021-01-08 13:27:16 INFO::After iteration 16, gene prior 0.0574698577389729:, SNP prior:0.0162169459128607</span>
+<span class="co">#&gt; 2021-01-08 13:27:16 INFO::run iteration 17</span>
+<span class="co">#&gt; 2021-01-08 13:27:18 INFO::After iteration 17, gene prior 0.057470912113439:, SNP prior:0.0161263356963391</span>
+<span class="co">#&gt; 2021-01-08 13:27:18 INFO::run iteration 18</span>
+<span class="co">#&gt; 2021-01-08 13:27:20 INFO::After iteration 18, gene prior 0.0574718794722679:, SNP prior:0.0160501719010653</span>
+<span class="co">#&gt; 2021-01-08 13:27:20 INFO::run iteration 19</span>
+<span class="co">#&gt; 2021-01-08 13:27:22 INFO::After iteration 19, gene prior 0.0574727683422044:, SNP prior:0.0159865878641964</span>
+<span class="co">#&gt; 2021-01-08 13:27:22 INFO::run iteration 20</span>
+<span class="co">#&gt; 2021-01-08 13:27:24 INFO::After iteration 20, gene prior 0.057473586438738:, SNP prior:0.0159340275950331</span>
+<span class="co">#&gt; 2021-01-08 13:27:24 INFO::run iteration 21</span>
+<span class="co">#&gt; 2021-01-08 13:27:27 INFO::After iteration 21, gene prior 0.0574743406818356:, SNP prior:0.0158911834487666</span>
+<span class="co">#&gt; 2021-01-08 13:27:27 INFO::run iteration 22</span>
+<span class="co">#&gt; 2021-01-08 13:27:29 INFO::After iteration 22, gene prior 0.057475037247254:, SNP prior:0.0158569483860602</span>
+<span class="co">#&gt; 2021-01-08 13:27:29 INFO::run iteration 23</span>
+<span class="co">#&gt; 2021-01-08 13:27:31 INFO::After iteration 23, gene prior 0.0574756816325102:, SNP prior:0.015830378934062</span>
+<span class="co">#&gt; 2021-01-08 13:27:31 INFO::run iteration 24</span>
+<span class="co">#&gt; 2021-01-08 13:27:33 INFO::After iteration 24, gene prior 0.0574762787264314:, SNP prior:0.0158106661185008</span>
+<span class="co">#&gt; 2021-01-08 13:27:33 INFO::run iteration 25</span>
+<span class="co">#&gt; 2021-01-08 13:27:35 INFO::After iteration 25, gene prior 0.0574768328765942:, SNP prior:0.015797112414325</span>
+<span class="co">#&gt; 2021-01-08 13:27:35 INFO::run iteration 26</span>
+<span class="co">#&gt; 2021-01-08 13:27:37 INFO::After iteration 26, gene prior 0.0574773479519289:, SNP prior:0.0157891132966731</span>
+<span class="co">#&gt; 2021-01-08 13:27:37 INFO::run iteration 27</span>
+<span class="co">#&gt; 2021-01-08 13:27:39 INFO::After iteration 27, gene prior 0.0574778273993955:, SNP prior:0.0157861423474438</span>
+<span class="co">#&gt; 2021-01-08 13:27:39 INFO::run iteration 28</span>
+<span class="co">#&gt; 2021-01-08 13:27:42 INFO::After iteration 28, gene prior 0.057478274294514:, SNP prior:0.0157877391379307</span>
+<span class="co">#&gt; 2021-01-08 13:27:42 INFO::run iteration 29</span>
+<span class="co">#&gt; 2021-01-08 13:27:44 INFO::After iteration 29, gene prior 0.05747869138599:, SNP prior:0.0157934992990297</span>
+<span class="co">#&gt; 2021-01-08 13:27:44 INFO::run iteration 30</span>
+<span class="co">#&gt; 2021-01-08 13:27:46 INFO::After iteration 30, gene prior 0.057479081134895:, SNP prior:0.015803066329972</span>
+<span class="co">#&gt; 2021-01-08 13:27:46 INFO::Run susie for all regions.</span>
+<span class="co">#&gt; 2021-01-08 13:27:46 INFO::run iteration 1</span>
+<span class="co">#&gt; 2021-01-08 13:27:50 INFO::After iteration 1, gene prior 0.0794074183956216:, SNP prior:0.0782549675855982</span></code></pre></div>
+<p><code>ctwas_rss</code> returns the estimated parameters ( in the order of gene, SNP):</p>
+<div class="sourceCode"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span class="va">pars</span>
 <span class="co">#&gt; $group_prior</span>
 <span class="co">#&gt; [1] 0.05747908 0.01580307</span>
 <span class="co">#&gt; </span>
 <span class="co">#&gt; $group_prior_var</span>
 <span class="co">#&gt; [1] 295.8498442   0.2725021</span></code></pre></div>
+<p>PIP results are given in <code>outname.susieIres.txt</code>. This file contains PIP for each gene and SNP, please check <code>susie_pip</code> column.</p>
+<div class="sourceCode"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span class="fu"><a href="https://rdrr.io/r/utils/head.html">head</a></span><span class="op">(</span><span class="fu">data.table</span><span class="fu">::</span><span class="fu"><a href="https://Rdatatable.gitlab.io/data.table/reference/fread.html">fread</a></span><span class="op">(</span><span class="st">"~/temp/test_ss.susieIrss.txt"</span><span class="op">)</span><span class="op">)</span><span class="op">[</span>, <span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="st">"chrom"</span>, <span class="st">"id"</span>, <span class="st">"pos"</span>, <span class="st">"type"</span>, <span class="st">"susie_pip"</span><span class="op">)</span><span class="op">]</span>
+<span class="co">#&gt;    chrom     id pos type  susie_pip</span>
+<span class="co">#&gt; 1:     1  gene1   1 gene 1.00000000</span>
+<span class="co">#&gt; 2:     1 rs1001   1  SNP 0.07724269</span>
+<span class="co">#&gt; 3:     1 rs1002   2  SNP 0.06261407</span>
+<span class="co">#&gt; 4:     1 rs1003   3  SNP 0.06481980</span>
+<span class="co">#&gt; 5:     1 rs1004   4  SNP 0.07471944</span>
+<span class="co">#&gt; 6:     2  gene2   1 gene 0.05996194</span></code></pre></div>
+<p>You will also notice a few auxilary/intermediate files produced by <code>ctwas_rss</code>. These files can be useful for diagnoiss.<code>.Rd</code> files contains parameters estimation updates with each iteration.</p>
 </div>
   </div>
 

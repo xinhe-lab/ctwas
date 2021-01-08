@@ -8,26 +8,47 @@ knitr::opts_chunk$set(
   comment = "#>"
 )
 ```
-# Requirements
+# Purpose of the analysis
 
-LD reference should contain all SNPs given in z score data frame. The `id` column in z score data frame and LD reference SNP ID should have the same meaning (i.e., indicating the same SNP). Weights and LD refernce SNP ID should have same meaning and ref/alt allele info needs to match. All coordinates are in hg19.
+This workflow aims to use GWAS summary statistics data as input and implements the causal TWAS algorithm.  The "causal TWAS" method is developed to identify causal genes in GWAS studies. We improve the current TWAS analysis mainly by reducing false positives. We start from z scores for each SNP in a GWAS study and expression model trained by the [Fusion/TWAS software](http://gusevlab.org/projects/fusion/). In the end, we will provide a PIP (the posterior inclusion probality for being a causal gene) for each gene with an expression model. 
 
-# Prepare input
+Below is the workflow for running `ctwas` for summary statistics data. I provided example input files with the package and you can use the following code as a toy pipeline. You can prepare your own input files following the examples. 
+
+# step 1: Prepare input
+
+Our package is called `ctwas`.
 
 ```{r input}
 library(ctwas)
+```
 
+The input are given below: z scores, a data frame:
+
+```{r} 
 # z scores
 data(zdf.snp)
+head(zdf.snp)
+```
 
+The genotype files for LD reference data. This is a character vector of .pgen or .bed files. One file for one chromosome, in the order of 1 to 22. Therefore, the length of this vector needs to be 22. If .pgen files are given, then .pvar and .psam are assumed to present in the same directory. If .bed files are given, then .bim and .fam files are assumed to present in the same directory.
+```{r}
 # genotype for LD reference
 ld_pgenfs <- system.file("extdata/example_genotype_files", paste0("example_chr", 1:22, ".pgen"), package = "ctwas")
 
+ld_pgenfs
+```
+
+Please check out [Fusion/TWAS](http://gusevlab.org/projects/fusion/#computing-your-own-functional-weights) for the format of weights. Below is an example.
+```{r}
 # weight
 weight <- system.file("extdata/example_fusion_weights", "Tissue", package = "ctwas")
 ```
 
-# Impute expression z scores
+Note: LD reference should contain all SNPs given in z score data frame. The `id` column in z score data frame and LD reference SNP ID should have the same meaning (i.e., indicating the same SNP). Weights and LD refernce SNP ID should have same meaning and ref/alt allele info needs to match. All coordinates are in hg19.
+
+
+# step2: Impute expression z scores
+In the following code, we compute expression z scores for each gene. We do this chromosome by chromosome. `impute_expr_z` will return z scores for each gene. It will also generate files containing the reference LD genotypes for eQTLs in the gene and the filename is returned. We will need these files in the `ctwas_rss` function in step 3.
 ```{r impute, warning=F, message=F}
 outputdir <- "~/temp"
 ld_exprfs <- vector()
@@ -41,10 +62,29 @@ for (i in 1:22){
   zdf.gene <- rbind(zdf.gene, res$zdf)
 }
 zdf <- rbind(zdf.snp, zdf.gene)
+
+head(zdf)
+ld_exprfs
 ```
 
-# Run ctwas 
+# step 3: Run `ctwas_rss`. 
+In this step we will perform the causal TWAS algorithm, the algorithm will run susie iteratively for parameter estimation and lastly provide PIPs for all genes and SNPs included in the analysis. If you don't want to define your own LD regions, then you can use the one defined by ldetect by simply specifying the population name using the `ld_regions` argument. One feature of the ctwas function is that it allows parallel computing. you can specify number of cores to use by the `ncore` argument. 
+
 ```{r ctwas, warning=F, message=F}
 regionsfile <- system.file("extdata", "example_regions.bed", package = "ctwas")
-ctwas_rss(zdf, ld_pgenfs, ld_exprfs, ld_regions_custom = regionsfile, thin = 1, outputdir = outputdir, outname = "test_ss", ncore = 1)
+pars <- ctwas_rss(zdf, ld_pgenfs, ld_exprfs, ld_regions_custom = regionsfile, thin = 1, outputdir = outputdir, outname = "test_ss", ncore = 1)
 ```
+
+`ctwas_rss` returns the estimated parameters ( in the order of gene, SNP):
+
+```{r}
+pars
+```
+
+PIP results are given in `outname.susieIres.txt`. This file contains PIP for each gene and SNP, please check `susie_pip` column. 
+
+```{r}
+head(data.table::fread("~/temp/test_ss.susieIrss.txt"))[, c("chrom", "id", "pos", "type", "susie_pip")]
+```
+
+You will also notice a few auxilary/intermediate files produced by `ctwas_rss`. These files can be useful for diagnoiss.`.Rd` files contains parameters estimation updates with each iteration.
