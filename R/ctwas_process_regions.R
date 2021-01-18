@@ -18,7 +18,7 @@ index_regions <- function(pvarfs,
                           exprvarfs,
                           regionfile,
                           select = NULL,
-                          thin = 1) {
+                          thin = 1, minvar = 1) {
 
   reg <- read.table(regionfile, header = T, stringsAsFactors = F)
 
@@ -84,7 +84,7 @@ index_regions <- function(pvarfs,
       gid <- geneinfo[gidx, "id"]
       sid <- snpinfo[sidx, "id"]
 
-      if (length(gidx) == 0 & length(sidx) == 0) {next}
+      if (length(gidx) + length(sidx) < minvar) {next}
 
       regionlist[[b]][[as.character(rn)]] <- list("gidx" = gidx,
                                     "gid"  = gid,

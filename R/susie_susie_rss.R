@@ -157,13 +157,8 @@ susie_rss <- function (z, R, maf = NULL, maf_thresh = 0, z_ld_weight = 0,
   Y = (t(attr(R, "eigen")$vectors[, attr(R, "eigen")$values !=
                                     0]) * attr(R, "eigen")$values[attr(R, "eigen")$values !=
                                                                     0]^(-0.5)) %*% z
-  # different from susieR (as.numeric(var(Y)) and if{})
-  scaled_prior_variance <- prior_variance/as.numeric(var(Y))
-  if (is.na(scaled_prior_variance)) {
-    scaled_prior_variance <- 0.2
-  }
-
-  s = susie(X, Y, L = L, scaled_prior_variance = scaled_prior_variance ,
+  # different from susieR (as.numeric(var(Y)))
+  s = susie(X, Y, L = L, scaled_prior_variance =  prior_variance/as.numeric(var(Y)),
             residual_variance = residual_variance, prior_weights = prior_weights,
             null_weight = NULL, standardize = FALSE, intercept = FALSE,
             estimate_residual_variance = estimate_residual_variance,

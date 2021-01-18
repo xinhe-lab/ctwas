@@ -94,7 +94,7 @@ ctwas_rss <- function(zdf,
 
   regionlist <- index_regions(ld_pvarfs, ld_exprvarfs, regionfile,
                               select = zdf$id,
-                              thin = thin)
+                              thin = thin, minvar = 2) # susie_rss can't take 1 var.
 
   if (isTRUE(estimate_group_prior) | isTRUE(estimate_group_prior_var)){
 
