@@ -37,15 +37,15 @@ susieI_rss <- function(zdf,
   V.gene <- group_prior_var[1]
   V.SNP <- group_prior_var[2]
 
-  cl <- parallel::makeCluster(ncore, outfile = "")
-  doParallel::registerDoParallel(cl)
-
   for (iter in 1:niter){
 
     loginfo("run iteration %s", iter)
 
     snp.rpiplist <- list()
     gene.rpiplist <- list()
+
+    cl <- parallel::makeCluster(ncore, outfile = "")
+    doParallel::registerDoParallel(cl)
 
     outdf <- foreach (b = 1:length(regionlist), .combine = "rbind",
                       .packages = "ctwas") %dopar% {
@@ -156,9 +156,10 @@ susieI_rss <- function(zdf,
          file = paste0(outname, ".susieIrssres.Rd"))
     data.table::fwrite(outdf, file= paste0(outname, ".susieIrss.txt"),
                        sep="\t", quote = F)
+
+    parallel::stopCluster(cl)
   }
 
-  parallel::stopCluster(cl)
 
   list("group_prior"= c(prior.gene, prior.SNP),
        "group_prior_var" = c(V.gene, V.SNP))

@@ -129,7 +129,14 @@ prep_exprvar <- function(exprf){
 #' @return A data.table. variant info
 #' @export
 read_exprvar <- function(exprvarf){
-  data.table::fread(exprvarf, header = T)
+
+  exprvar <- try(data.table::fread(exprvarf, header = T))
+
+  if (inherits(exprvar, "try-error")){
+    exprvar <-  setNames(data.table(matrix(nrow = 0, ncol = 4)),
+                         c("chrom", "id", "p0", "p1"))
+  }
+  exprvar
 }
 
 #' Read .expr file into R
