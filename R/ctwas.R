@@ -153,7 +153,7 @@ ctwas <- function(pgenfs,
 
   loginfo("Run susie for all regions.")
   pars <- susieI(pgenfs = pgenfs, exprfs = exprfs, Y = Y,
-                 regionlist = regionlist2,
+                 regionlist = regionlist,
                  niter = 1,
                  L = L,
                  group_prior = group_prior,

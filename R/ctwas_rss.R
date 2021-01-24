@@ -38,7 +38,6 @@
 #'
 #' @param outname a string, the output name
 #'
-#'
 #' @importFrom logging addHandler loginfo
 #' @importFrom tools file_ext
 #'
@@ -157,7 +156,7 @@ ctwas_rss <- function(zdf,
   pars <- susieI_rss(zdf = zdf,
                  ld_pgenfs = ld_pgenfs,
                  ld_exprfs = ld_exprfs,
-                 regionlist = regionlist2,
+                 regionlist = regionlist,
                  niter = 1,
                  L = L,
                  z_ld_weight = 0,
