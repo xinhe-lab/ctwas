@@ -96,12 +96,17 @@ ctwas <- function(pgenfs,
   pvarfs <- sapply(pgenfs, prep_pvar, outputdir = outputdir)
   exprvarfs <- sapply(exprfs, prep_exprvar)
 
-  regionlist <- index_regions(pvarfs, exprvarfs, regionfile,
-                              thin = thin)
 
   if (isTRUE(estimate_group_prior) | isTRUE(estimate_group_prior_var)){
 
     loginfo("Run susie iteratively, getting rough estimate ...")
+
+    if (!is.null(group_prior)){
+      group_prior[2] <- group_prior[2]/thin
+    }
+
+    regionlist <- index_regions(pvarfs, exprvarfs, regionfile,
+                                thin = thin)
 
     pars <- susieI(pgenfs = pgenfs, exprfs = exprfs, Y = Y,
                    regionlist = regionlist,
@@ -148,10 +153,15 @@ ctwas <- function(pgenfs,
                    outname = paste0(outname, ".s2"))
 
     group_prior <- pars[["group_prior"]]
+    group_prior[2] <- group_prior[2] * thin # convert snp pi1
     group_prior_var <- pars[["group_prior_var"]]
   }
 
   loginfo("Run susie for all regions.")
+
+
+  regionlist <- index_regions(pvarfs, exprvarfs, regionfile,
+                              thin = 1)
   pars <- susieI(pgenfs = pgenfs, exprfs = exprfs, Y = Y,
                  regionlist = regionlist,
                  niter = 1,

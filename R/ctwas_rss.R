@@ -91,13 +91,18 @@ ctwas_rss <- function(zdf,
   ld_pvarfs <- sapply(ld_pgenfs, prep_pvar, outputdir = outputdir)
   ld_exprvarfs <- sapply(ld_exprfs, prep_exprvar)
 
-  regionlist <- index_regions(ld_pvarfs, ld_exprvarfs, regionfile,
-                              select = zdf$id,
-                              thin = thin, minvar = 2) # susie_rss can't take 1 var.
 
   if (isTRUE(estimate_group_prior) | isTRUE(estimate_group_prior_var)){
 
+    regionlist <- index_regions(ld_pvarfs, ld_exprvarfs, regionfile,
+                                select = zdf$id,
+                                thin = thin, minvar = 2) # susie_rss can't take 1 var.
+
     loginfo("Run susie iteratively, getting rough estimate ...")
+
+    if (!is.null(group_prior)){
+      group_prior[2] <- group_prior[2]/thin
+    }
 
     pars <- susieI_rss(zdf = zdf,
                        ld_pgenfs = ld_pgenfs,
@@ -149,10 +154,16 @@ ctwas_rss <- function(zdf,
                    outname = paste0(outname, ".s2"))
 
     group_prior <- pars[["group_prior"]]
+    group_prior[2] <- group_prior[2] * thin # convert snp pi1
     group_prior_var <- pars[["group_prior_var"]]
   }
 
   loginfo("Run susie for all regions.")
+
+  regionlist <- index_regions(ld_pvarfs, ld_exprvarfs, regionfile,
+                              select = zdf$id,
+                              thin = 1, minvar = 2) # susie_rss can't take 1 var.
+
   pars <- susieI_rss(zdf = zdf,
                  ld_pgenfs = ld_pgenfs,
                  ld_exprfs = ld_exprfs,
