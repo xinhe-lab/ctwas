@@ -100,7 +100,7 @@ susieI_rss <- function(zdf,
             X.g <- read_expr(ld_exprfs[b], variantidx = gidx)
             X.s <- read_pgen(ld_pgen, variantidx = sidx)
             X <- cbind(X.g, X.s)
-            R <- cor(X)
+            R <- Rfast::cova(X)
 
             # in susie, prior_variance is under standardized scale (if performed)
             susieres <- susie_rss(z, R,

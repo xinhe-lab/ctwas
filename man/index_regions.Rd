@@ -4,7 +4,8 @@
 \alias{index_regions}
 \title{Get gene and SNP index for each region}
 \usage{
-index_regions(pvarfs, exprvarfs, regionfile, select = NULL, thin = 1)
+index_regions(pvarfs, exprvarfs, regionfile, select = NULL, thin = 1,
+  minvar = 1)
 }
 \arguments{
 \item{regionfile}{Has three columns: chr, start, end}
