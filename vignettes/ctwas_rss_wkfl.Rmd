@@ -88,3 +88,7 @@ head(data.table::fread("~/temp/test_ss.susieIrss.txt"))[, c("chrom", "id", "pos"
 ```
 
 You will also notice a few auxilary/intermediate files produced by `ctwas_rss`. These files can be useful for diagnoiss.`.Rd` files contains parameters estimation updates with each iteration.
+
+```{r}
+sessionInfo()
+```

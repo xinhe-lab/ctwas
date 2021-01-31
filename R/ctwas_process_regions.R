@@ -126,3 +126,22 @@ filter_regions <- function(regionlist, group_prior, prob_single = 0.8){
   }
   regionlist2
 }
+
+#' parallel regions
+#' @param ncore integer, numeber of cores, at least 1
+#' regions allocated to given number of cores
+region2core <- function(regionlist, ncore = 1){
+  dflist <- list()
+  for (b in 1:length(regionlist)){
+    dflist[[b]] <- data.frame("b" = b, "rn"= names(regionlist[[b]]), stringsAsFactors = FALSE)
+  }
+
+  df <- do.call(rbind, dflist)
+  if (ncore > 1) {
+    d <- cut(seq_along(1:nrow(df)), ncore, labels = FALSE)
+    corelist <- split(df,d)
+  } else {
+    corelist <- list("1" = df)
+  }
+  return(corelist)
+}

@@ -47,16 +47,22 @@ susieI_rss <- function(zdf,
     cl <- parallel::makeCluster(ncore, outfile = "")
     doParallel::registerDoParallel(cl)
 
-    outdf <- foreach (b = 1:length(regionlist), .combine = "rbind",
-                      .packages = "ctwas") %dopar% {
-          # for (b in 1:2) {
+    corelist <- region2core(regionlist, ncore)
 
-          # prepare LD genotype data
-          ld_pgen <- prep_pgen(pgenf = ld_pgenfs[b], ld_pvarfs[b])
+    outdf <- foreach (core = 1:length(corelist), .combine = "rbind",
+                      .packages = "ctwas") %dopar% {
+          # for (core in 1:2) {
+
+          outdf.core.list <- list()
 
           # run susie for each region
-          outdf.b.list <- list()
-          for (rn in names(regionlist[[b]])) {
+          regs <- corelist[[core]]
+          for (reg in 1: nrow(regs)) {
+            b <- regs[reg, "b"]
+            rn <- regs[reg, "rn"]
+
+            # prepare LD genotype data
+            ld_pgen <- prep_pgen(pgenf = ld_pgenfs[b], ld_pvarfs[b])
 
             gidx <- regionlist[[b]][[rn]][["gidx"]]
             sidx <- regionlist[[b]][[rn]][["sidx"]]
@@ -112,23 +118,26 @@ susieI_rss <- function(zdf,
                                   coverage = coverage,
                                   check_z = F)
 
-            outdf.rn <- anno_susie(susieres,
+            outdf.reg <- anno_susie(susieres,
                                    ld_exprvarfs[b],
                                    ld_pvarfs[b],
                                    gidx,
                                    sidx,
                                    b, rn)
 
-            outdf.b.list[[rn]] <- outdf.rn
+            outdf.core.list[[reg]] <- outdf.reg
           }
 
-          outdf.b <- do.call(rbind, outdf.b.list)
-          outdf.b
+          outdf.core <- do.call(rbind, outdf.core.list)
+          outdf.core
     }
 
     if (isTRUE(estimate_group_prior)){
       prior.SNP <- mean(outdf[outdf[ , "type"] == "SNP", "susie_pip"])
       prior.gene <- mean(outdf[outdf[ , "type"] == "gene", "susie_pip"])
+    } else{
+      prior.SNP <- prior.SNP_init
+      prior.gene <- prior.gene_init
     }
 
     loginfo("After iteration %s, gene prior %s:, SNP prior:%s",
@@ -147,6 +156,9 @@ susieI_rss <- function(zdf,
       # res$mu2 is identifical to res2$mu2 but coefficients are on diff scale.
       V.gene <- sum(outdf.g$susie_pip * outdf.g$mu2)/sum(outdf.g$susie_pip)
       V.SNP <- sum(outdf.s$susie_pip * outdf.s$mu2)/sum(outdf.s$susie_pip)
+    } else {
+      V.gene <- 50
+      V.SNP <- 50
     }
 
     group_prior_rec[, iter] <- c(prior.gene, prior.SNP)

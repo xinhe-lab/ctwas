@@ -57,76 +57,82 @@ susieI <- function(pgenfs,
     snp.rpiplist <- list()
     gene.rpiplist <- list()
 
-    outdf <- foreach (b = 1:length(regionlist), .combine = "rbind",
+    corelist <- region2core(regionlist, ncore)
+
+    outdf <- foreach (core = 1:length(corelist), .combine = "rbind",
                       .packages = "ctwas") %dopar% {
-    # for (b in 21) {
+                        # for (core in 1:2) {
 
-      # prepare genotype data
-      pgen <- prep_pgen(pgenf = pgenfs[b], pvarfs[b])
+        outdf.core.list <- list()
 
-      # run susie for each region
-      outdf.b.list <- list()
-      for (rn in names(regionlist[[b]])) {
+                        # run susie for each region
+        regs <- corelist[[core]]
+        for (reg in 1: nrow(regs)) {
+            b <- regs[reg, "b"]
+            rn <- regs[reg, "rn"]
 
-        gidx <- regionlist[[b]][[rn]][["gidx"]]
-        sidx <- regionlist[[b]][[rn]][["sidx"]]
-        p <- length(gidx) + length(sidx)
+            gidx <- regionlist[[b]][[rn]][["gidx"]]
+            sidx <- regionlist[[b]][[rn]][["sidx"]]
+            p <- length(gidx) + length(sidx)
 
-        if (is.null(prior.gene_init) | is.null(prior.SNP_init)){
-          prior.gene_init <- 1/p
-          prior.SNP_init <- 1/p
+            if (is.null(prior.gene_init) | is.null(prior.SNP_init)){
+              prior.gene_init <- 1/p
+              prior.SNP_init <- 1/p
+            }
+
+            if (iter == 1) {
+              prior <- c(rep(prior.gene_init, length(gidx)),
+                         rep(prior.SNP_init, length(sidx)))
+            } else {
+              prior <- c(rep(prior.gene, length(gidx)),
+                         rep(prior.SNP, length(sidx)))
+            }
+
+            if (is.null(V.gene) | is.null(V.SNP)){
+              V.scaled <- matrix(rep(0.2, L * p), nrow = L)
+            } else{
+              V.scaled <- c(rep(V.gene/varY, length(gidx)),
+                            rep(V.SNP/varY, length(sidx)))
+              V.scaled <- matrix(rep(V.scaled, each = L), nrow=L)
+            }
+
+            if (isTRUE(use_null_weight)){
+              nw <- max(0, 1 - sum(prior))
+              prior <- prior/(1-nw)
+            } else {
+              nw <- NULL
+            }
+
+            X.g <- read_expr(exprfs[b], variantidx = gidx)
+            X.s <- read_pgen(pgen, variantidx = sidx)
+            X <- cbind(X.g, X.s)
+
+            # in susie, prior_variance is under standardized scale (if performed)
+            susieres <- susie(X, Y, L = L, prior_weights = prior,
+                              null_weight = nw, scaled_prior_variance = V.scaled,
+                              standardize = standardize,
+                              estimate_prior_variance = F, coverage = coverage)
+
+            outdf.reg <- anno_susie(susieres,
+                                   exprvarfs[b],
+                                   pvarfs[b],
+                                   gidx,
+                                   sidx,
+                                   b, rn)
+
+            outdf.core.list[[reg]] <- outdf.reg
         }
 
-        if (iter == 1) {
-          prior <- c(rep(prior.gene_init, length(gidx)),
-                     rep(prior.SNP_init, length(sidx)))
-        } else {
-          prior <- c(rep(prior.gene, length(gidx)),
-                     rep(prior.SNP, length(sidx)))
-        }
-
-        if (is.null(V.gene) | is.null(V.SNP)){
-          V.scaled <- matrix(rep(0.2, L * p), nrow = L)
-        } else{
-          V.scaled <- c(rep(V.gene/varY, length(gidx)),
-                        rep(V.SNP/varY, length(sidx)))
-          V.scaled <- matrix(rep(V.scaled, each = L), nrow=L)
-        }
-
-        if (isTRUE(use_null_weight)){
-          nw <- max(0, 1 - sum(prior))
-          prior <- prior/(1-nw)
-        } else {
-          nw <- NULL
-        }
-
-        X.g <- read_expr(exprfs[b], variantidx = gidx)
-        X.s <- read_pgen(pgen, variantidx = sidx)
-        X <- cbind(X.g, X.s)
-
-        # in susie, prior_variance is under standardized scale (if performed)
-        susieres <- susie(X, Y, L = L, prior_weights = prior,
-                          null_weight = nw, scaled_prior_variance = V.scaled,
-                          standardize = standardize,
-                          estimate_prior_variance = F, coverage = coverage)
-
-        outdf.rn <- anno_susie(susieres,
-                               exprvarfs[b],
-                               pvarfs[b],
-                               gidx,
-                               sidx,
-                               b, rn)
-
-        outdf.b.list[[rn]] <- outdf.rn
-      }
-
-      outdf.b <- do.call(rbind, outdf.b.list)
-      outdf.b
+        outdf.core <- do.call(rbind, outdf.core.list)
+        outdf.core
     }
 
     if (isTRUE(estimate_group_prior)){
       prior.SNP <- mean(outdf[outdf[ , "type"] == "SNP", "susie_pip"])
       prior.gene <- mean(outdf[outdf[ , "type"] == "gene", "susie_pip"])
+    } else{
+      prior.SNP <- prior.SNP_init
+      prior.gene <- prior.gene_init
     }
 
     loginfo("After iteration %s, gene prior %s:, SNP prior:%s",
@@ -145,6 +151,9 @@ susieI <- function(pgenfs,
       # res$mu2 is identifical to res2$mu2 but coefficients are on diff scale.
       V.gene <- sum(outdf.g$susie_pip * outdf.g$mu2)/sum(outdf.g$susie_pip)
       V.SNP <- sum(outdf.s$susie_pip * outdf.s$mu2)/sum(outdf.s$susie_pip)
+    } else {
+      V.gene <- 50
+      V.SNP <- 50
     }
 
     group_prior_rec[, iter] <- c(prior.gene, prior.SNP)
