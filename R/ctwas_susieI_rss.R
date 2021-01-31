@@ -31,8 +31,8 @@ susieI_rss <- function(zdf,
   group_prior_rec <- matrix(, nrow = K , ncol =  niter)
   group_prior_var_rec <- matrix(, nrow = K , ncol =  niter)
 
-  prior.gene_init <- group_prior[1]
-  prior.SNP_init <-  group_prior[2]
+  prior.gene <- group_prior[1]
+  prior.SNP <-  group_prior[2]
 
   V.gene <- group_prior_var[1]
   V.SNP <- group_prior_var[2]
@@ -71,14 +71,9 @@ susieI_rss <- function(zdf,
 
             p <- length(gidx) + length(sidx)
 
-            if (is.null(prior.gene_init) | is.null(prior.SNP_init)){
-              prior.gene_init <- 1/p
-              prior.SNP_init <- 1/p
-            }
-
-            if (iter == 1) {
-              prior <- c(rep(prior.gene_init, length(gidx)),
-                         rep(prior.SNP_init, length(sidx)))
+            if (is.null(prior.gene) | is.null(prior.SNP)){
+              prior <- c(rep(1/p, length(gidx)),
+                         rep(1/p, length(sidx)))
             } else {
               prior <- c(rep(prior.gene, length(gidx)),
                          rep(prior.SNP, length(sidx)))
@@ -106,7 +101,7 @@ susieI_rss <- function(zdf,
             X.g <- read_expr(ld_exprfs[b], variantidx = gidx)
             X.s <- read_pgen(ld_pgen, variantidx = sidx)
             X <- cbind(X.g, X.s)
-            R <- Rfast::cova(X)
+            R <- Rfast::cora(X)
 
             # in susie, prior_variance is under standardized scale (if performed)
             susieres <- susie_rss(z, R,
@@ -135,9 +130,7 @@ susieI_rss <- function(zdf,
     if (isTRUE(estimate_group_prior)){
       prior.SNP <- mean(outdf[outdf[ , "type"] == "SNP", "susie_pip"])
       prior.gene <- mean(outdf[outdf[ , "type"] == "gene", "susie_pip"])
-    } else{
-      prior.SNP <- prior.SNP_init
-      prior.gene <- prior.gene_init
+      group_prior_rec[, iter] <- c(prior.gene, prior.SNP)
     }
 
     loginfo("After iteration %s, gene prior %s:, SNP prior:%s",
@@ -156,13 +149,8 @@ susieI_rss <- function(zdf,
       # res$mu2 is identifical to res2$mu2 but coefficients are on diff scale.
       V.gene <- sum(outdf.g$susie_pip * outdf.g$mu2)/sum(outdf.g$susie_pip)
       V.SNP <- sum(outdf.s$susie_pip * outdf.s$mu2)/sum(outdf.s$susie_pip)
-    } else {
-      V.gene <- 50
-      V.SNP <- 50
+      group_prior_var_rec[, iter] <- c(V.gene, V.SNP)
     }
-
-    group_prior_rec[, iter] <- c(prior.gene, prior.SNP)
-    group_prior_var_rec[, iter] <- c(V.gene, V.SNP)
 
     save(group_prior_rec, group_prior_var_rec,
          file = paste0(outname, ".susieIrssres.Rd"))
