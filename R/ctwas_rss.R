@@ -36,6 +36,10 @@
 #' @param prob_single blocks with probility more than this value will be
 #'  used for parameter estimation
 #'
+#' @param rerun_gene_PIP if thin <1, will rerun blocks with the max gene PIP
+#' > \code{rerun_gene_PIP} using full SNPs. if \code{rerun_gene_PIP} is 0, then
+#' all blocks will rerun with full SNPs
+#'
 #' @param outname a string, the output name
 #'
 #' @importFrom logging addHandler loginfo
@@ -49,6 +53,7 @@ ctwas_rss <- function(zdf,
                   ld_regions_custom = NULL,
                   thin = 1,
                   prob_single = 0.8,
+                  rerun_gene_PIP = 0.8,
                   niter1 = 3,
                   niter2 = 30,
                   L= 5,
@@ -154,15 +159,10 @@ ctwas_rss <- function(zdf,
                    outname = paste0(outname, ".s2"))
 
     group_prior <- pars[["group_prior"]]
-    group_prior[2] <- group_prior[2] * thin # convert snp pi1
     group_prior_var <- pars[["group_prior_var"]]
   }
 
   loginfo("Run susie for all regions.")
-
-  regionlist <- index_regions(ld_pvarfs, ld_exprvarfs, regionfile,
-                              select = zdf$id,
-                              thin = 1, minvar = 2) # susie_rss can't take 1 var.
 
   pars <- susieI_rss(zdf = zdf,
                  ld_pgenfs = ld_pgenfs,
@@ -180,6 +180,65 @@ ctwas_rss <- function(zdf,
                  ncore = ncore,
                  outputdir = outputdir,
                  outname = outname)
+
+  group_prior[2] <- group_prior[2] * thin # convert snp pi1
+
+  if (thin < 1){
+
+    # get full SNPs
+    regionlist <- index_regions(ld_pvarfs, ld_exprvarfs, regionfile,
+                                select = zdf$id,
+                                thin = 1, minvar = 2) # susie_rss can't take 1 var.
+
+    res <- data.table::fread(paste0(file.path(outputdir, outname), ".susieIrss.txt"))
+    maxpip <- res[res$type == "gene", max(susie_pip), by = list(region_tag1, region_tag2)]
+
+    # filter out regions based on max gene PIP of the region
+    res.keep <- NULL
+    for (b in 1: length(regionlist)){
+      for (rn in names(regionlist[[b]])){
+       gene_PIP <- max(maxpip[region_tag1 == b & region_tag2 == rn, V1],0)
+       if (gene_PIP < rerun_gene_PIP) {
+         regionlist[[b]][[rn]] <- NULL
+         res.keep <- rbind(res.keep, res[region_tag1 ==b & region_tag2 == rn])
+       }
+      }
+    }
+
+    nreg <- sum(unlist(lapply(regionlist, length)))
+
+    loginfo("Number of regions that contains strong gene signals: %s", nreg)
+
+    if (nreg > 0){
+
+      loginfo("Rerun susie for regions with strong gene signals using full SNPs.")
+
+      pars <- susieI_rss(zdf = zdf,
+                         ld_pgenfs = ld_pgenfs,
+                         ld_exprfs = ld_exprfs,
+                         regionlist = regionlist,
+                         niter = 1,
+                         L = L,
+                         z_ld_weight = 0,
+                         group_prior = group_prior,
+                         group_prior_var = group_prior_var,
+                         estimate_group_prior = estimate_group_prior,
+                         estimate_group_prior_var = estimate_group_prior_var,
+                         use_null_weight = use_null_weight,
+                         coverage = coverage,
+                         ncore = ncore,
+                         outputdir = outputdir,
+                         outname = paste0(outname, ".s3"))
+
+      res.rerun <- data.table::fread(paste0(file.path(outputdir, outname), ".s3.susieIrss.txt"))
+
+      res <- rbind(res.keep, res.rerun)
+      res <- res[order(region_tag1, region_tag2)]
+
+      data.table::fwrite(res, file = paste0(file.path(outputdir, outname), ".susieIrss.txt"),
+                         sep = "\t", quote = F)
+    }
+  }
 
   list("group_prior" = group_prior,
        "group_prior_var" = group_prior_var)

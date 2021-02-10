@@ -39,9 +39,9 @@ index_regions <- function(pvarfs,
     }
 
     # select variant
-    snpinfo$select <- 1
+    snpinfo$keep <- 1
     if (!is.null(select)){
-      snpinfo[!(snpinfo$id %in% select), "select"] <- 0
+      snpinfo[!(snpinfo$id %in% select), "keep"] <- 0
     }
 
     # downsampling for SNPs
@@ -61,9 +61,9 @@ index_regions <- function(pvarfs,
       }
 
       # select variant
-      geneinfo$select <- 1
+      geneinfo$keep <- 1
       if (!is.null(select)){
-        geneinfo[!(geneinfo$id %in% select), "select"] <- 0
+        geneinfo[!(geneinfo$id %in% select), "keep"] <- 0
       }
     }
 
@@ -77,9 +77,9 @@ index_regions <- function(pvarfs,
       p1 <- regions[rn, "stop"]
 
       gidx <- which(geneinfo$chrom == b & geneinfo$p0 > p0 & geneinfo$p0 < p1
-                    & geneinfo$select == 1)
+                    & geneinfo$keep == 1)
       sidx <- which(snpinfo$chrom == b & snpinfo$pos > p0 & snpinfo$pos < p1
-                    & snpinfo$select == 1 & snpinfo$thin_tag == 1)
+                    & snpinfo$keep == 1 & snpinfo$thin_tag == 1)
 
       gid <- geneinfo[gidx, "id"]
       sid <- snpinfo[sidx, "id"]
@@ -130,15 +130,17 @@ filter_regions <- function(regionlist, group_prior, prob_single = 0.8){
 #' parallel regions
 #' @param ncore integer, numeber of cores, at least 1
 #' regions allocated to given number of cores
+#' regionlist need to contain at least 1 non-empty
 region2core <- function(regionlist, ncore = 1){
   dflist <- list()
   for (b in 1:length(regionlist)){
-    dflist[[b]] <- data.frame("b" = b, "rn"= names(regionlist[[b]]), stringsAsFactors = FALSE)
+    if (length(regionlist[[b]]) > 0){
+      dflist[[b]] <- data.frame("b" = b, "rn"= names(regionlist[[b]]), stringsAsFactors = FALSE)
+    }
   }
-
   df <- do.call(rbind, dflist)
   if (ncore > 1) {
-    d <- cut(seq_along(1:nrow(df)), ncore, labels = FALSE)
+    d <- cut(1:nrow(df), ncore, labels = FALSE)
     corelist <- split(df,d)
   } else {
     corelist <- list("1" = df)
