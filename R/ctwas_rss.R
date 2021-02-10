@@ -97,11 +97,11 @@ ctwas_rss <- function(zdf,
   ld_exprvarfs <- sapply(ld_exprfs, prep_exprvar)
 
 
-  if (isTRUE(estimate_group_prior) | isTRUE(estimate_group_prior_var)){
+  regionlist <- index_regions(ld_pvarfs, ld_exprvarfs, regionfile,
+                              select = zdf$id,
+                              thin = thin, minvar = 2) # susie_rss can't take 1 var.
 
-    regionlist <- index_regions(ld_pvarfs, ld_exprvarfs, regionfile,
-                                select = zdf$id,
-                                thin = thin, minvar = 2) # susie_rss can't take 1 var.
+  if (isTRUE(estimate_group_prior) | isTRUE(estimate_group_prior_var)){
 
     loginfo("Run susie iteratively, getting rough estimate ...")
 
