@@ -31,7 +31,7 @@
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">ctwas</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="Released version">0.1.8</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="Released version">0.1.9</span>
       </span>
     </div>
 
@@ -39,7 +39,7 @@
       <ul class="nav navbar-nav">
 <li>
   <a href="../index.html">
-    <span class="fas fa fas fa-home fa-lg"></span>
+    <span class="fas fa-home fa-lg"></span>
      
   </a>
 </li>
@@ -72,7 +72,7 @@
 
       
 
-      </header><div class="row">
+      </header><script src="ctwas_idv_wkfl_files/header-attrs-2.6/header-attrs.js"></script><div class="row">
   <div class="col-md-9 contents">
     <div class="page-header toc-ignore">
       <h1 data-toc-skip>Run on individual-level data</h1>
@@ -93,9 +93,9 @@
 <div id="prepare-input" class="section level1">
 <h1 class="hasAnchor">
 <a href="#prepare-input" class="anchor"></a>Prepare input</h1>
-<div class="sourceCode"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb1"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="kw"><a href="https://rdrr.io/r/base/library.html">library</a></span><span class="op">(</span><span class="va">ctwas</span><span class="op">)</span></code></pre></div>
-<div class="sourceCode"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb2"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="co"># phenotype</span>
 <span class="fu"><a href="https://rdrr.io/r/utils/data.html">data</a></span><span class="op">(</span><span class="va">Y</span><span class="op">)</span>
 
@@ -108,7 +108,7 @@
 <div id="impute-expression" class="section level1">
 <h1 class="hasAnchor">
 <a href="#impute-expression" class="anchor"></a>Impute expression</h1>
-<div class="sourceCode"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb3"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="va">outputdir</span> <span class="op">&lt;-</span> <span class="st">"~/temp"</span>
 <span class="va">exprfs</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/vector.html">vector</a></span><span class="op">(</span><span class="op">)</span>
 <span class="kw">for</span> <span class="op">(</span><span class="va">i</span> <span class="kw">in</span> <span class="fl">1</span><span class="op">:</span><span class="fl">22</span><span class="op">)</span><span class="op">{</span>
@@ -117,235 +117,236 @@
                            method <span class="op">=</span> <span class="st">"lasso"</span>, outputdir <span class="op">=</span> <span class="va">outputdir</span>,
                            outname <span class="op">=</span> <span class="st">"test"</span><span class="op">)</span>
 <span class="op">}</span>
-<span class="co">#&gt; 2021-01-31 13:15:18 INFO::expression inmputation started for chr 1.</span>
-<span class="co">#&gt; 2021-01-31 13:15:18 INFO::number of genes with weights provided: 20</span>
-<span class="co">#&gt; 2021-01-31 13:15:18 INFO::Number of genes with imputed expression: 1 for chr 1</span>
-<span class="co">#&gt; 2021-01-31 13:15:18 INFO::expression inmputation done for chr 1.</span>
-<span class="co">#&gt; 2021-01-31 13:15:19 INFO::expression inmputation started for chr 2.</span>
-<span class="co">#&gt; 2021-01-31 13:15:19 INFO::number of genes with weights provided: 20</span>
-<span class="co">#&gt; 2021-01-31 13:15:19 INFO::Number of genes with imputed expression: 1 for chr 2</span>
-<span class="co">#&gt; 2021-01-31 13:15:19 INFO::expression inmputation done for chr 2.</span>
-<span class="co">#&gt; 2021-01-31 13:15:19 INFO::expression inmputation started for chr 3.</span>
-<span class="co">#&gt; 2021-01-31 13:15:19 INFO::number of genes with weights provided: 20</span>
-<span class="co">#&gt; 2021-01-31 13:15:19 INFO::Number of genes with imputed expression: 1 for chr 3</span>
-<span class="co">#&gt; 2021-01-31 13:15:19 INFO::expression inmputation done for chr 3.</span>
-<span class="co">#&gt; 2021-01-31 13:15:19 INFO::expression inmputation started for chr 4.</span>
-<span class="co">#&gt; 2021-01-31 13:15:19 INFO::number of genes with weights provided: 20</span>
-<span class="co">#&gt; 2021-01-31 13:15:19 INFO::Number of genes with imputed expression: 1 for chr 4</span>
-<span class="co">#&gt; 2021-01-31 13:15:19 INFO::expression inmputation done for chr 4.</span>
-<span class="co">#&gt; 2021-01-31 13:15:19 INFO::expression inmputation started for chr 5.</span>
-<span class="co">#&gt; 2021-01-31 13:15:19 INFO::number of genes with weights provided: 20</span>
-<span class="co">#&gt; 2021-01-31 13:15:19 INFO::Number of genes with imputed expression: 1 for chr 5</span>
-<span class="co">#&gt; 2021-01-31 13:15:19 INFO::expression inmputation done for chr 5.</span>
-<span class="co">#&gt; 2021-01-31 13:15:19 INFO::expression inmputation started for chr 6.</span>
-<span class="co">#&gt; 2021-01-31 13:15:19 INFO::number of genes with weights provided: 20</span>
-<span class="co">#&gt; 2021-01-31 13:15:19 INFO::Number of genes with imputed expression: 1 for chr 6</span>
-<span class="co">#&gt; 2021-01-31 13:15:19 INFO::expression inmputation done for chr 6.</span>
-<span class="co">#&gt; 2021-01-31 13:15:19 INFO::expression inmputation started for chr 7.</span>
-<span class="co">#&gt; 2021-01-31 13:15:19 INFO::number of genes with weights provided: 20</span>
-<span class="co">#&gt; 2021-01-31 13:15:19 INFO::Number of genes with imputed expression: 1 for chr 7</span>
-<span class="co">#&gt; 2021-01-31 13:15:19 INFO::expression inmputation done for chr 7.</span>
-<span class="co">#&gt; 2021-01-31 13:15:19 INFO::expression inmputation started for chr 8.</span>
-<span class="co">#&gt; 2021-01-31 13:15:19 INFO::number of genes with weights provided: 20</span>
-<span class="co">#&gt; 2021-01-31 13:15:19 INFO::Number of genes with imputed expression: 1 for chr 8</span>
-<span class="co">#&gt; 2021-01-31 13:15:19 INFO::expression inmputation done for chr 8.</span>
-<span class="co">#&gt; 2021-01-31 13:15:19 INFO::expression inmputation started for chr 9.</span>
-<span class="co">#&gt; 2021-01-31 13:15:19 INFO::number of genes with weights provided: 20</span>
-<span class="co">#&gt; 2021-01-31 13:15:19 INFO::Number of genes with imputed expression: 1 for chr 9</span>
-<span class="co">#&gt; 2021-01-31 13:15:19 INFO::expression inmputation done for chr 9.</span>
-<span class="co">#&gt; 2021-01-31 13:15:19 INFO::expression inmputation started for chr 10.</span>
-<span class="co">#&gt; 2021-01-31 13:15:19 INFO::number of genes with weights provided: 20</span>
-<span class="co">#&gt; 2021-01-31 13:15:19 INFO::Number of genes with imputed expression: 1 for chr 10</span>
-<span class="co">#&gt; 2021-01-31 13:15:19 INFO::expression inmputation done for chr 10.</span>
-<span class="co">#&gt; 2021-01-31 13:15:19 INFO::expression inmputation started for chr 11.</span>
-<span class="co">#&gt; 2021-01-31 13:15:19 INFO::number of genes with weights provided: 20</span>
-<span class="co">#&gt; 2021-01-31 13:15:19 INFO::Number of genes with imputed expression: 1 for chr 11</span>
-<span class="co">#&gt; 2021-01-31 13:15:19 INFO::expression inmputation done for chr 11.</span>
-<span class="co">#&gt; 2021-01-31 13:15:19 INFO::expression inmputation started for chr 12.</span>
-<span class="co">#&gt; 2021-01-31 13:15:19 INFO::number of genes with weights provided: 20</span>
-<span class="co">#&gt; 2021-01-31 13:15:19 INFO::Number of genes with imputed expression: 1 for chr 12</span>
-<span class="co">#&gt; 2021-01-31 13:15:19 INFO::expression inmputation done for chr 12.</span>
-<span class="co">#&gt; 2021-01-31 13:15:19 INFO::expression inmputation started for chr 13.</span>
-<span class="co">#&gt; 2021-01-31 13:15:19 INFO::number of genes with weights provided: 20</span>
-<span class="co">#&gt; 2021-01-31 13:15:19 INFO::Number of genes with imputed expression: 1 for chr 13</span>
-<span class="co">#&gt; 2021-01-31 13:15:19 INFO::expression inmputation done for chr 13.</span>
-<span class="co">#&gt; 2021-01-31 13:15:19 INFO::expression inmputation started for chr 14.</span>
-<span class="co">#&gt; 2021-01-31 13:15:19 INFO::number of genes with weights provided: 20</span>
-<span class="co">#&gt; 2021-01-31 13:15:19 INFO::Number of genes with imputed expression: 1 for chr 14</span>
-<span class="co">#&gt; 2021-01-31 13:15:19 INFO::expression inmputation done for chr 14.</span>
-<span class="co">#&gt; 2021-01-31 13:15:19 INFO::expression inmputation started for chr 15.</span>
-<span class="co">#&gt; 2021-01-31 13:15:19 INFO::number of genes with weights provided: 20</span>
-<span class="co">#&gt; 2021-01-31 13:15:19 INFO::Number of genes with imputed expression: 1 for chr 15</span>
-<span class="co">#&gt; 2021-01-31 13:15:19 INFO::expression inmputation done for chr 15.</span>
-<span class="co">#&gt; 2021-01-31 13:15:19 INFO::expression inmputation started for chr 16.</span>
-<span class="co">#&gt; 2021-01-31 13:15:19 INFO::number of genes with weights provided: 20</span>
-<span class="co">#&gt; 2021-01-31 13:15:19 INFO::Number of genes with imputed expression: 1 for chr 16</span>
-<span class="co">#&gt; 2021-01-31 13:15:19 INFO::expression inmputation done for chr 16.</span>
-<span class="co">#&gt; 2021-01-31 13:15:19 INFO::expression inmputation started for chr 17.</span>
-<span class="co">#&gt; 2021-01-31 13:15:19 INFO::number of genes with weights provided: 20</span>
-<span class="co">#&gt; 2021-01-31 13:15:19 INFO::Number of genes with imputed expression: 1 for chr 17</span>
-<span class="co">#&gt; 2021-01-31 13:15:19 INFO::expression inmputation done for chr 17.</span>
-<span class="co">#&gt; 2021-01-31 13:15:19 INFO::expression inmputation started for chr 18.</span>
-<span class="co">#&gt; 2021-01-31 13:15:19 INFO::number of genes with weights provided: 20</span>
-<span class="co">#&gt; 2021-01-31 13:15:19 INFO::Number of genes with imputed expression: 1 for chr 18</span>
-<span class="co">#&gt; 2021-01-31 13:15:19 INFO::expression inmputation done for chr 18.</span>
-<span class="co">#&gt; 2021-01-31 13:15:20 INFO::expression inmputation started for chr 19.</span>
-<span class="co">#&gt; 2021-01-31 13:15:20 INFO::number of genes with weights provided: 20</span>
-<span class="co">#&gt; 2021-01-31 13:15:20 INFO::Number of genes with imputed expression: 1 for chr 19</span>
-<span class="co">#&gt; 2021-01-31 13:15:20 INFO::expression inmputation done for chr 19.</span>
-<span class="co">#&gt; 2021-01-31 13:15:20 INFO::expression inmputation started for chr 20.</span>
-<span class="co">#&gt; 2021-01-31 13:15:20 INFO::number of genes with weights provided: 20</span>
-<span class="co">#&gt; 2021-01-31 13:15:20 INFO::Number of genes with imputed expression: 1 for chr 20</span>
-<span class="co">#&gt; 2021-01-31 13:15:20 INFO::expression inmputation done for chr 20.</span>
-<span class="co">#&gt; 2021-01-31 13:15:20 INFO::expression inmputation started for chr 21.</span>
-<span class="co">#&gt; 2021-01-31 13:15:20 INFO::number of genes with weights provided: 20</span>
-<span class="co">#&gt; 2021-01-31 13:15:20 INFO::Number of genes with imputed expression: 0 for chr 21</span>
-<span class="co">#&gt; 2021-01-31 13:15:20 INFO::expression inmputation done for chr 21.</span>
-<span class="co">#&gt; 2021-01-31 13:15:20 INFO::expression inmputation started for chr 22.</span>
-<span class="co">#&gt; 2021-01-31 13:15:20 INFO::number of genes with weights provided: 20</span>
-<span class="co">#&gt; 2021-01-31 13:15:20 INFO::Number of genes with imputed expression: 0 for chr 22</span>
-<span class="co">#&gt; 2021-01-31 13:15:20 INFO::expression inmputation done for chr 22.</span></code></pre></div>
+<span class="co">#&gt; 2021-02-09 20:35:25 INFO::expression inmputation started for chr 1.</span>
+<span class="co">#&gt; 2021-02-09 20:35:25 INFO::number of genes with weights provided: 20</span>
+<span class="co">#&gt; 2021-02-09 20:35:25 INFO::Number of genes with imputed expression: 1 for chr 1</span>
+<span class="co">#&gt; 2021-02-09 20:35:25 INFO::expression inmputation done for chr 1.</span>
+<span class="co">#&gt; 2021-02-09 20:35:25 INFO::expression inmputation started for chr 2.</span>
+<span class="co">#&gt; 2021-02-09 20:35:25 INFO::number of genes with weights provided: 20</span>
+<span class="co">#&gt; 2021-02-09 20:35:25 INFO::Number of genes with imputed expression: 1 for chr 2</span>
+<span class="co">#&gt; 2021-02-09 20:35:25 INFO::expression inmputation done for chr 2.</span>
+<span class="co">#&gt; 2021-02-09 20:35:25 INFO::expression inmputation started for chr 3.</span>
+<span class="co">#&gt; 2021-02-09 20:35:25 INFO::number of genes with weights provided: 20</span>
+<span class="co">#&gt; 2021-02-09 20:35:25 INFO::Number of genes with imputed expression: 1 for chr 3</span>
+<span class="co">#&gt; 2021-02-09 20:35:25 INFO::expression inmputation done for chr 3.</span>
+<span class="co">#&gt; 2021-02-09 20:35:25 INFO::expression inmputation started for chr 4.</span>
+<span class="co">#&gt; 2021-02-09 20:35:25 INFO::number of genes with weights provided: 20</span>
+<span class="co">#&gt; 2021-02-09 20:35:25 INFO::Number of genes with imputed expression: 1 for chr 4</span>
+<span class="co">#&gt; 2021-02-09 20:35:25 INFO::expression inmputation done for chr 4.</span>
+<span class="co">#&gt; 2021-02-09 20:35:25 INFO::expression inmputation started for chr 5.</span>
+<span class="co">#&gt; 2021-02-09 20:35:25 INFO::number of genes with weights provided: 20</span>
+<span class="co">#&gt; 2021-02-09 20:35:25 INFO::Number of genes with imputed expression: 1 for chr 5</span>
+<span class="co">#&gt; 2021-02-09 20:35:25 INFO::expression inmputation done for chr 5.</span>
+<span class="co">#&gt; 2021-02-09 20:35:25 INFO::expression inmputation started for chr 6.</span>
+<span class="co">#&gt; 2021-02-09 20:35:25 INFO::number of genes with weights provided: 20</span>
+<span class="co">#&gt; 2021-02-09 20:35:25 INFO::Number of genes with imputed expression: 1 for chr 6</span>
+<span class="co">#&gt; 2021-02-09 20:35:25 INFO::expression inmputation done for chr 6.</span>
+<span class="co">#&gt; 2021-02-09 20:35:25 INFO::expression inmputation started for chr 7.</span>
+<span class="co">#&gt; 2021-02-09 20:35:25 INFO::number of genes with weights provided: 20</span>
+<span class="co">#&gt; 2021-02-09 20:35:25 INFO::Number of genes with imputed expression: 1 for chr 7</span>
+<span class="co">#&gt; 2021-02-09 20:35:26 INFO::expression inmputation done for chr 7.</span>
+<span class="co">#&gt; 2021-02-09 20:35:26 INFO::expression inmputation started for chr 8.</span>
+<span class="co">#&gt; 2021-02-09 20:35:26 INFO::number of genes with weights provided: 20</span>
+<span class="co">#&gt; 2021-02-09 20:35:26 INFO::Number of genes with imputed expression: 1 for chr 8</span>
+<span class="co">#&gt; 2021-02-09 20:35:26 INFO::expression inmputation done for chr 8.</span>
+<span class="co">#&gt; 2021-02-09 20:35:26 INFO::expression inmputation started for chr 9.</span>
+<span class="co">#&gt; 2021-02-09 20:35:26 INFO::number of genes with weights provided: 20</span>
+<span class="co">#&gt; 2021-02-09 20:35:26 INFO::Number of genes with imputed expression: 1 for chr 9</span>
+<span class="co">#&gt; 2021-02-09 20:35:26 INFO::expression inmputation done for chr 9.</span>
+<span class="co">#&gt; 2021-02-09 20:35:26 INFO::expression inmputation started for chr 10.</span>
+<span class="co">#&gt; 2021-02-09 20:35:26 INFO::number of genes with weights provided: 20</span>
+<span class="co">#&gt; 2021-02-09 20:35:26 INFO::Number of genes with imputed expression: 1 for chr 10</span>
+<span class="co">#&gt; 2021-02-09 20:35:26 INFO::expression inmputation done for chr 10.</span>
+<span class="co">#&gt; 2021-02-09 20:35:26 INFO::expression inmputation started for chr 11.</span>
+<span class="co">#&gt; 2021-02-09 20:35:26 INFO::number of genes with weights provided: 20</span>
+<span class="co">#&gt; 2021-02-09 20:35:26 INFO::Number of genes with imputed expression: 1 for chr 11</span>
+<span class="co">#&gt; 2021-02-09 20:35:26 INFO::expression inmputation done for chr 11.</span>
+<span class="co">#&gt; 2021-02-09 20:35:26 INFO::expression inmputation started for chr 12.</span>
+<span class="co">#&gt; 2021-02-09 20:35:26 INFO::number of genes with weights provided: 20</span>
+<span class="co">#&gt; 2021-02-09 20:35:26 INFO::Number of genes with imputed expression: 1 for chr 12</span>
+<span class="co">#&gt; 2021-02-09 20:35:26 INFO::expression inmputation done for chr 12.</span>
+<span class="co">#&gt; 2021-02-09 20:35:26 INFO::expression inmputation started for chr 13.</span>
+<span class="co">#&gt; 2021-02-09 20:35:26 INFO::number of genes with weights provided: 20</span>
+<span class="co">#&gt; 2021-02-09 20:35:26 INFO::Number of genes with imputed expression: 1 for chr 13</span>
+<span class="co">#&gt; 2021-02-09 20:35:26 INFO::expression inmputation done for chr 13.</span>
+<span class="co">#&gt; 2021-02-09 20:35:26 INFO::expression inmputation started for chr 14.</span>
+<span class="co">#&gt; 2021-02-09 20:35:26 INFO::number of genes with weights provided: 20</span>
+<span class="co">#&gt; 2021-02-09 20:35:26 INFO::Number of genes with imputed expression: 1 for chr 14</span>
+<span class="co">#&gt; 2021-02-09 20:35:26 INFO::expression inmputation done for chr 14.</span>
+<span class="co">#&gt; 2021-02-09 20:35:26 INFO::expression inmputation started for chr 15.</span>
+<span class="co">#&gt; 2021-02-09 20:35:26 INFO::number of genes with weights provided: 20</span>
+<span class="co">#&gt; 2021-02-09 20:35:26 INFO::Number of genes with imputed expression: 1 for chr 15</span>
+<span class="co">#&gt; 2021-02-09 20:35:26 INFO::expression inmputation done for chr 15.</span>
+<span class="co">#&gt; 2021-02-09 20:35:26 INFO::expression inmputation started for chr 16.</span>
+<span class="co">#&gt; 2021-02-09 20:35:26 INFO::number of genes with weights provided: 20</span>
+<span class="co">#&gt; 2021-02-09 20:35:26 INFO::Number of genes with imputed expression: 1 for chr 16</span>
+<span class="co">#&gt; 2021-02-09 20:35:26 INFO::expression inmputation done for chr 16.</span>
+<span class="co">#&gt; 2021-02-09 20:35:26 INFO::expression inmputation started for chr 17.</span>
+<span class="co">#&gt; 2021-02-09 20:35:26 INFO::number of genes with weights provided: 20</span>
+<span class="co">#&gt; 2021-02-09 20:35:26 INFO::Number of genes with imputed expression: 1 for chr 17</span>
+<span class="co">#&gt; 2021-02-09 20:35:27 INFO::expression inmputation done for chr 17.</span>
+<span class="co">#&gt; 2021-02-09 20:35:27 INFO::expression inmputation started for chr 18.</span>
+<span class="co">#&gt; 2021-02-09 20:35:27 INFO::number of genes with weights provided: 20</span>
+<span class="co">#&gt; 2021-02-09 20:35:27 INFO::Number of genes with imputed expression: 1 for chr 18</span>
+<span class="co">#&gt; 2021-02-09 20:35:27 INFO::expression inmputation done for chr 18.</span>
+<span class="co">#&gt; 2021-02-09 20:35:27 INFO::expression inmputation started for chr 19.</span>
+<span class="co">#&gt; 2021-02-09 20:35:27 INFO::number of genes with weights provided: 20</span>
+<span class="co">#&gt; 2021-02-09 20:35:27 INFO::Number of genes with imputed expression: 1 for chr 19</span>
+<span class="co">#&gt; 2021-02-09 20:35:27 INFO::expression inmputation done for chr 19.</span>
+<span class="co">#&gt; 2021-02-09 20:35:27 INFO::expression inmputation started for chr 20.</span>
+<span class="co">#&gt; 2021-02-09 20:35:27 INFO::number of genes with weights provided: 20</span>
+<span class="co">#&gt; 2021-02-09 20:35:27 INFO::Number of genes with imputed expression: 1 for chr 20</span>
+<span class="co">#&gt; 2021-02-09 20:35:27 INFO::expression inmputation done for chr 20.</span>
+<span class="co">#&gt; 2021-02-09 20:35:27 INFO::expression inmputation started for chr 21.</span>
+<span class="co">#&gt; 2021-02-09 20:35:27 INFO::number of genes with weights provided: 20</span>
+<span class="co">#&gt; 2021-02-09 20:35:27 INFO::Number of genes with imputed expression: 0 for chr 21</span>
+<span class="co">#&gt; 2021-02-09 20:35:27 INFO::expression inmputation done for chr 21.</span>
+<span class="co">#&gt; 2021-02-09 20:35:27 INFO::expression inmputation started for chr 22.</span>
+<span class="co">#&gt; 2021-02-09 20:35:27 INFO::number of genes with weights provided: 20</span>
+<span class="co">#&gt; 2021-02-09 20:35:27 INFO::Number of genes with imputed expression: 0 for chr 22</span>
+<span class="co">#&gt; 2021-02-09 20:35:27 INFO::expression inmputation done for chr 22.</span></code></pre></div>
 </div>
 <div id="run-ctwas" class="section level1">
 <h1 class="hasAnchor">
 <a href="#run-ctwas" class="anchor"></a>Run ctwas</h1>
-<div class="sourceCode"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="va">regionsfile</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/system.file.html">system.file</a></span><span class="op">(</span><span class="st">"extdata"</span>, <span class="st">"example_regions.bed"</span>, package <span class="op">=</span> <span class="st">"ctwas"</span><span class="op">)</span>
 
 <span class="fu"><a href="../reference/ctwas.html">ctwas</a></span><span class="op">(</span><span class="va">pgenfs</span>, <span class="va">exprfs</span>, <span class="va">Y</span>, ld_regions_custom <span class="op">=</span> <span class="va">regionsfile</span>, thin <span class="op">=</span> <span class="fl">1</span>, outputdir <span class="op">=</span> <span class="va">outputdir</span>, outname <span class="op">=</span> <span class="st">"test"</span>, ncore <span class="op">=</span> <span class="fl">1</span><span class="op">)</span>
-<span class="co">#&gt; 2021-01-31 13:15:20 INFO::ctwas started ...</span>
-<span class="co">#&gt; 2021-01-31 13:15:20 INFO::LD region file: /tmp/RtmpMImhSh/temp_libpath7ebf78aade23/ctwas/extdata/example_regions.bed</span>
-<span class="co">#&gt; 2021-01-31 13:15:20 INFO::Run susie iteratively, getting rough estimate ...</span>
-<span class="co">#&gt; 2021-01-31 13:15:20 INFO::No. LD regions: 374</span>
-<span class="co">#&gt; 2021-01-31 13:15:20 INFO::No. regions with at least one SNP/gene for chr1: 17</span>
-<span class="co">#&gt; 2021-01-31 13:15:20 INFO::No. regions with at least one SNP/gene for chr2: 17</span>
-<span class="co">#&gt; 2021-01-31 13:15:20 INFO::No. regions with at least one SNP/gene for chr3: 17</span>
-<span class="co">#&gt; 2021-01-31 13:15:20 INFO::No. regions with at least one SNP/gene for chr4: 17</span>
-<span class="co">#&gt; 2021-01-31 13:15:20 INFO::No. regions with at least one SNP/gene for chr5: 17</span>
-<span class="co">#&gt; 2021-01-31 13:15:20 INFO::No. regions with at least one SNP/gene for chr6: 17</span>
-<span class="co">#&gt; 2021-01-31 13:15:20 INFO::No. regions with at least one SNP/gene for chr7: 17</span>
-<span class="co">#&gt; 2021-01-31 13:15:20 INFO::No. regions with at least one SNP/gene for chr8: 17</span>
-<span class="co">#&gt; 2021-01-31 13:15:20 INFO::No. regions with at least one SNP/gene for chr9: 17</span>
-<span class="co">#&gt; 2021-01-31 13:15:20 INFO::No. regions with at least one SNP/gene for chr10: 17</span>
-<span class="co">#&gt; 2021-01-31 13:15:20 INFO::No. regions with at least one SNP/gene for chr11: 17</span>
-<span class="co">#&gt; 2021-01-31 13:15:20 INFO::No. regions with at least one SNP/gene for chr12: 17</span>
-<span class="co">#&gt; 2021-01-31 13:15:20 INFO::No. regions with at least one SNP/gene for chr13: 17</span>
-<span class="co">#&gt; 2021-01-31 13:15:20 INFO::No. regions with at least one SNP/gene for chr14: 17</span>
-<span class="co">#&gt; 2021-01-31 13:15:20 INFO::No. regions with at least one SNP/gene for chr15: 17</span>
-<span class="co">#&gt; 2021-01-31 13:15:20 INFO::No. regions with at least one SNP/gene for chr16: 17</span>
-<span class="co">#&gt; 2021-01-31 13:15:20 INFO::No. regions with at least one SNP/gene for chr17: 17</span>
-<span class="co">#&gt; 2021-01-31 13:15:20 INFO::No. regions with at least one SNP/gene for chr18: 17</span>
-<span class="co">#&gt; 2021-01-31 13:15:20 INFO::No. regions with at least one SNP/gene for chr19: 17</span>
-<span class="co">#&gt; 2021-01-31 13:15:20 INFO::No. regions with at least one SNP/gene for chr20: 17</span>
-<span class="co">#&gt; 2021-01-31 13:15:20 INFO::No. regions with at least one SNP/gene for chr21: 17</span>
-<span class="co">#&gt; 2021-01-31 13:15:20 INFO::No. regions with at least one SNP/gene for chr22: 17</span>
-<span class="co">#&gt; 2021-01-31 13:15:20 INFO::run iteration 1</span>
-<span class="co">#&gt; 2021-01-31 13:15:31 INFO::After iteration 1, gene prior 0.253154795140839:, SNP prior:0.0358330326434716</span>
-<span class="co">#&gt; 2021-01-31 13:15:31 INFO::run iteration 2</span>
-<span class="co">#&gt; 2021-01-31 13:15:40 INFO::After iteration 2, gene prior 0.132051318381414:, SNP prior:0.0344389231166242</span>
-<span class="co">#&gt; 2021-01-31 13:15:40 INFO::run iteration 3</span>
-<span class="co">#&gt; 2021-01-31 13:15:49 INFO::After iteration 3, gene prior 0.0804519667580253:, SNP prior:0.0343732967104774</span>
-<span class="co">#&gt; 2021-01-31 13:15:50 INFO::Blocks are filtered: 22 blocks left</span>
-<span class="co">#&gt; 2021-01-31 13:15:50 INFO::Run susie iteratively, getting accurate estimate ...</span>
-<span class="co">#&gt; 2021-01-31 13:15:50 INFO::run iteration 1</span>
-<span class="co">#&gt; 2021-01-31 13:15:53 INFO::After iteration 1, gene prior 0.0642345701692352:, SNP prior:0.0274211548626107</span>
-<span class="co">#&gt; 2021-01-31 13:15:53 INFO::run iteration 2</span>
-<span class="co">#&gt; 2021-01-31 13:15:55 INFO::After iteration 2, gene prior 0.0599204896969733:, SNP prior:0.0244099580229773</span>
-<span class="co">#&gt; 2021-01-31 13:15:55 INFO::run iteration 3</span>
-<span class="co">#&gt; 2021-01-31 13:15:57 INFO::After iteration 3, gene prior 0.0588888738156299:, SNP prior:0.0225452632402439</span>
-<span class="co">#&gt; 2021-01-31 13:15:57 INFO::run iteration 4</span>
-<span class="co">#&gt; 2021-01-31 13:15:59 INFO::After iteration 4, gene prior 0.0586465815699955:, SNP prior:0.0212202700261521</span>
-<span class="co">#&gt; 2021-01-31 13:15:59 INFO::run iteration 5</span>
-<span class="co">#&gt; 2021-01-31 13:16:01 INFO::After iteration 5, gene prior 0.0585893484787186:, SNP prior:0.0202031796666298</span>
-<span class="co">#&gt; 2021-01-31 13:16:01 INFO::run iteration 6</span>
-<span class="co">#&gt; 2021-01-31 13:16:04 INFO::After iteration 6, gene prior 0.0585760534778286:, SNP prior:0.0193822761085657</span>
-<span class="co">#&gt; 2021-01-31 13:16:04 INFO::run iteration 7</span>
-<span class="co">#&gt; 2021-01-31 13:16:06 INFO::After iteration 7, gene prior 0.0585736054718825:, SNP prior:0.0186961687319586</span>
-<span class="co">#&gt; 2021-01-31 13:16:06 INFO::run iteration 8</span>
-<span class="co">#&gt; 2021-01-31 13:16:08 INFO::After iteration 8, gene prior 0.0585740223982371:, SNP prior:0.0181079279857141</span>
-<span class="co">#&gt; 2021-01-31 13:16:08 INFO::run iteration 9</span>
-<span class="co">#&gt; 2021-01-31 13:16:10 INFO::After iteration 9, gene prior 0.0585752605251688:, SNP prior:0.0175937758624876</span>
-<span class="co">#&gt; 2021-01-31 13:16:10 INFO::run iteration 10</span>
-<span class="co">#&gt; 2021-01-31 13:16:12 INFO::After iteration 10, gene prior 0.0585767390161605:, SNP prior:0.017137569030242</span>
-<span class="co">#&gt; 2021-01-31 13:16:12 INFO::run iteration 11</span>
-<span class="co">#&gt; 2021-01-31 13:16:14 INFO::After iteration 11, gene prior 0.0585782666560106:, SNP prior:0.0167278749458581</span>
-<span class="co">#&gt; 2021-01-31 13:16:14 INFO::run iteration 12</span>
-<span class="co">#&gt; 2021-01-31 13:16:16 INFO::After iteration 12, gene prior 0.0585797702619266:, SNP prior:0.0163563152076408</span>
-<span class="co">#&gt; 2021-01-31 13:16:16 INFO::run iteration 13</span>
-<span class="co">#&gt; 2021-01-31 13:16:18 INFO::After iteration 13, gene prior 0.0585812190273481:, SNP prior:0.0160165737969517</span>
-<span class="co">#&gt; 2021-01-31 13:16:18 INFO::run iteration 14</span>
-<span class="co">#&gt; 2021-01-31 13:16:20 INFO::After iteration 14, gene prior 0.0585826001219523:, SNP prior:0.01570377546209</span>
-<span class="co">#&gt; 2021-01-31 13:16:20 INFO::run iteration 15</span>
-<span class="co">#&gt; 2021-01-31 13:16:22 INFO::After iteration 15, gene prior 0.0585839093124729:, SNP prior:0.015414080735491</span>
-<span class="co">#&gt; 2021-01-31 13:16:22 INFO::run iteration 16</span>
-<span class="co">#&gt; 2021-01-31 13:16:24 INFO::After iteration 16, gene prior 0.0585851467380859:, SNP prior:0.0151444132585396</span>
-<span class="co">#&gt; 2021-01-31 13:16:24 INFO::run iteration 17</span>
-<span class="co">#&gt; 2021-01-31 13:16:26 INFO::After iteration 17, gene prior 0.0585863147840351:, SNP prior:0.0148922709197058</span>
-<span class="co">#&gt; 2021-01-31 13:16:26 INFO::run iteration 18</span>
-<span class="co">#&gt; 2021-01-31 13:16:28 INFO::After iteration 18, gene prior 0.0585874169398054:, SNP prior:0.0146555917904577</span>
-<span class="co">#&gt; 2021-01-31 13:16:28 INFO::run iteration 19</span>
-<span class="co">#&gt; 2021-01-31 13:16:30 INFO::After iteration 19, gene prior 0.0585884571660951:, SNP prior:0.0144326568892288</span>
-<span class="co">#&gt; 2021-01-31 13:16:30 INFO::run iteration 20</span>
-<span class="co">#&gt; 2021-01-31 13:16:32 INFO::After iteration 20, gene prior 0.0585894395406753:, SNP prior:0.0142220183033906</span>
-<span class="co">#&gt; 2021-01-31 13:16:32 INFO::run iteration 21</span>
-<span class="co">#&gt; 2021-01-31 13:16:34 INFO::After iteration 21, gene prior 0.0585903680625106:, SNP prior:0.0140224451502488</span>
-<span class="co">#&gt; 2021-01-31 13:16:34 INFO::run iteration 22</span>
-<span class="co">#&gt; 2021-01-31 13:16:36 INFO::After iteration 22, gene prior 0.0585912465474825:, SNP prior:0.0138328823300905</span>
-<span class="co">#&gt; 2021-01-31 13:16:36 INFO::run iteration 23</span>
-<span class="co">#&gt; 2021-01-31 13:16:38 INFO::After iteration 23, gene prior 0.0585920785776198:, SNP prior:0.0136524186111371</span>
-<span class="co">#&gt; 2021-01-31 13:16:38 INFO::run iteration 24</span>
-<span class="co">#&gt; 2021-01-31 13:16:41 INFO::After iteration 24, gene prior 0.0585928674815719:, SNP prior:0.0134802616285783</span>
-<span class="co">#&gt; 2021-01-31 13:16:41 INFO::run iteration 25</span>
-<span class="co">#&gt; 2021-01-31 13:16:43 INFO::After iteration 25, gene prior 0.0585936163331067:, SNP prior:0.0133157180788571</span>
-<span class="co">#&gt; 2021-01-31 13:16:43 INFO::run iteration 26</span>
-<span class="co">#&gt; 2021-01-31 13:16:45 INFO::After iteration 26, gene prior 0.0585943279597108:, SNP prior:0.0131581778680279</span>
-<span class="co">#&gt; 2021-01-31 13:16:45 INFO::run iteration 27</span>
-<span class="co">#&gt; 2021-01-31 13:16:47 INFO::After iteration 27, gene prior 0.0585950049565232:, SNP prior:0.0130071013050308</span>
-<span class="co">#&gt; 2021-01-31 13:16:47 INFO::run iteration 28</span>
-<span class="co">#&gt; 2021-01-31 13:16:49 INFO::After iteration 28, gene prior 0.0585956497027374:, SNP prior:0.0128620086651556</span>
-<span class="co">#&gt; 2021-01-31 13:16:49 INFO::run iteration 29</span>
-<span class="co">#&gt; 2021-01-31 13:16:51 INFO::After iteration 29, gene prior 0.058596264378766:, SNP prior:0.0127224716168898</span>
-<span class="co">#&gt; 2021-01-31 13:16:51 INFO::run iteration 30</span>
-<span class="co">#&gt; 2021-01-31 13:16:53 INFO::After iteration 30, gene prior 0.0585968509831772:, SNP prior:0.0125881061272171</span>
-<span class="co">#&gt; 2021-01-31 13:16:53 INFO::Run susie for all regions.</span>
-<span class="co">#&gt; 2021-01-31 13:16:53 INFO::No. LD regions: 374</span>
-<span class="co">#&gt; 2021-01-31 13:16:53 INFO::No. regions with at least one SNP/gene for chr1: 17</span>
-<span class="co">#&gt; 2021-01-31 13:16:53 INFO::No. regions with at least one SNP/gene for chr2: 17</span>
-<span class="co">#&gt; 2021-01-31 13:16:53 INFO::No. regions with at least one SNP/gene for chr3: 17</span>
-<span class="co">#&gt; 2021-01-31 13:16:53 INFO::No. regions with at least one SNP/gene for chr4: 17</span>
-<span class="co">#&gt; 2021-01-31 13:16:53 INFO::No. regions with at least one SNP/gene for chr5: 17</span>
-<span class="co">#&gt; 2021-01-31 13:16:53 INFO::No. regions with at least one SNP/gene for chr6: 17</span>
-<span class="co">#&gt; 2021-01-31 13:16:53 INFO::No. regions with at least one SNP/gene for chr7: 17</span>
-<span class="co">#&gt; 2021-01-31 13:16:53 INFO::No. regions with at least one SNP/gene for chr8: 17</span>
-<span class="co">#&gt; 2021-01-31 13:16:53 INFO::No. regions with at least one SNP/gene for chr9: 17</span>
-<span class="co">#&gt; 2021-01-31 13:16:53 INFO::No. regions with at least one SNP/gene for chr10: 17</span>
-<span class="co">#&gt; 2021-01-31 13:16:53 INFO::No. regions with at least one SNP/gene for chr11: 17</span>
-<span class="co">#&gt; 2021-01-31 13:16:53 INFO::No. regions with at least one SNP/gene for chr12: 17</span>
-<span class="co">#&gt; 2021-01-31 13:16:53 INFO::No. regions with at least one SNP/gene for chr13: 17</span>
-<span class="co">#&gt; 2021-01-31 13:16:53 INFO::No. regions with at least one SNP/gene for chr14: 17</span>
-<span class="co">#&gt; 2021-01-31 13:16:53 INFO::No. regions with at least one SNP/gene for chr15: 17</span>
-<span class="co">#&gt; 2021-01-31 13:16:53 INFO::No. regions with at least one SNP/gene for chr16: 17</span>
-<span class="co">#&gt; 2021-01-31 13:16:53 INFO::No. regions with at least one SNP/gene for chr17: 17</span>
-<span class="co">#&gt; 2021-01-31 13:16:53 INFO::No. regions with at least one SNP/gene for chr18: 17</span>
-<span class="co">#&gt; 2021-01-31 13:16:53 INFO::No. regions with at least one SNP/gene for chr19: 17</span>
-<span class="co">#&gt; 2021-01-31 13:16:53 INFO::No. regions with at least one SNP/gene for chr20: 17</span>
-<span class="co">#&gt; 2021-01-31 13:16:53 INFO::No. regions with at least one SNP/gene for chr21: 17</span>
-<span class="co">#&gt; 2021-01-31 13:16:53 INFO::No. regions with at least one SNP/gene for chr22: 17</span>
-<span class="co">#&gt; 2021-01-31 13:16:53 INFO::run iteration 1</span>
-<span class="co">#&gt; 2021-01-31 13:17:09 INFO::After iteration 1, gene prior 0.084251176908959:, SNP prior:0.0631871447349</span>
+<span class="co">#&gt; 2021-02-09 20:35:27 INFO::ctwas started ...</span>
+<span class="co">#&gt; 2021-02-09 20:35:27 INFO::LD region file: /tmp/Rtmp87naUA/temp_libpath6f836d8e054d/ctwas/extdata/example_regions.bed</span>
+<span class="co">#&gt; 2021-02-09 20:35:27 INFO::Run susie iteratively, getting rough estimate ...</span>
+<span class="co">#&gt; 2021-02-09 20:35:27 INFO::No. LD regions: 374</span>
+<span class="co">#&gt; 2021-02-09 20:35:27 INFO::No. regions with at least one SNP/gene for chr1: 17</span>
+<span class="co">#&gt; 2021-02-09 20:35:27 INFO::No. regions with at least one SNP/gene for chr2: 17</span>
+<span class="co">#&gt; 2021-02-09 20:35:27 INFO::No. regions with at least one SNP/gene for chr3: 17</span>
+<span class="co">#&gt; 2021-02-09 20:35:27 INFO::No. regions with at least one SNP/gene for chr4: 17</span>
+<span class="co">#&gt; 2021-02-09 20:35:27 INFO::No. regions with at least one SNP/gene for chr5: 17</span>
+<span class="co">#&gt; 2021-02-09 20:35:27 INFO::No. regions with at least one SNP/gene for chr6: 17</span>
+<span class="co">#&gt; 2021-02-09 20:35:27 INFO::No. regions with at least one SNP/gene for chr7: 17</span>
+<span class="co">#&gt; 2021-02-09 20:35:27 INFO::No. regions with at least one SNP/gene for chr8: 17</span>
+<span class="co">#&gt; 2021-02-09 20:35:27 INFO::No. regions with at least one SNP/gene for chr9: 17</span>
+<span class="co">#&gt; 2021-02-09 20:35:27 INFO::No. regions with at least one SNP/gene for chr10: 17</span>
+<span class="co">#&gt; 2021-02-09 20:35:27 INFO::No. regions with at least one SNP/gene for chr11: 17</span>
+<span class="co">#&gt; 2021-02-09 20:35:27 INFO::No. regions with at least one SNP/gene for chr12: 17</span>
+<span class="co">#&gt; 2021-02-09 20:35:27 INFO::No. regions with at least one SNP/gene for chr13: 17</span>
+<span class="co">#&gt; 2021-02-09 20:35:27 INFO::No. regions with at least one SNP/gene for chr14: 17</span>
+<span class="co">#&gt; 2021-02-09 20:35:28 INFO::No. regions with at least one SNP/gene for chr15: 17</span>
+<span class="co">#&gt; 2021-02-09 20:35:28 INFO::No. regions with at least one SNP/gene for chr16: 17</span>
+<span class="co">#&gt; 2021-02-09 20:35:28 INFO::No. regions with at least one SNP/gene for chr17: 17</span>
+<span class="co">#&gt; 2021-02-09 20:35:28 INFO::No. regions with at least one SNP/gene for chr18: 17</span>
+<span class="co">#&gt; 2021-02-09 20:35:28 INFO::No. regions with at least one SNP/gene for chr19: 17</span>
+<span class="co">#&gt; 2021-02-09 20:35:28 INFO::No. regions with at least one SNP/gene for chr20: 17</span>
+<span class="co">#&gt; 2021-02-09 20:35:28 INFO::No. regions with at least one SNP/gene for chr21: 17</span>
+<span class="co">#&gt; 2021-02-09 20:35:28 INFO::No. regions with at least one SNP/gene for chr22: 17</span>
+<span class="co">#&gt; 2021-02-09 20:35:28 INFO::run iteration 1</span>
+<span class="co">#&gt; 2021-02-09 20:35:41 INFO::After iteration 1, gene prior 0.253154795140839:, SNP prior:0.0358330326434716</span>
+<span class="co">#&gt; 2021-02-09 20:35:42 INFO::run iteration 2</span>
+<span class="co">#&gt; 2021-02-09 20:35:53 INFO::After iteration 2, gene prior 0.132051318381413:, SNP prior:0.0344389231166242</span>
+<span class="co">#&gt; 2021-02-09 20:35:53 INFO::run iteration 3</span>
+<span class="co">#&gt; 2021-02-09 20:36:04 INFO::After iteration 3, gene prior 0.0804519667580252:, SNP prior:0.0343732967104774</span>
+<span class="co">#&gt; 2021-02-09 20:36:04 INFO::Blocks are filtered: 22 blocks left</span>
+<span class="co">#&gt; 2021-02-09 20:36:04 INFO::Run susie iteratively, getting accurate estimate ...</span>
+<span class="co">#&gt; 2021-02-09 20:36:04 INFO::run iteration 1</span>
+<span class="co">#&gt; 2021-02-09 20:36:08 INFO::After iteration 1, gene prior 0.0642345701692352:, SNP prior:0.0274211548626107</span>
+<span class="co">#&gt; 2021-02-09 20:36:08 INFO::run iteration 2</span>
+<span class="co">#&gt; 2021-02-09 20:36:10 INFO::After iteration 2, gene prior 0.0599204896969732:, SNP prior:0.0244099580229773</span>
+<span class="co">#&gt; 2021-02-09 20:36:10 INFO::run iteration 3</span>
+<span class="co">#&gt; 2021-02-09 20:36:12 INFO::After iteration 3, gene prior 0.0588888738156299:, SNP prior:0.022545263240244</span>
+<span class="co">#&gt; 2021-02-09 20:36:12 INFO::run iteration 4</span>
+<span class="co">#&gt; 2021-02-09 20:36:14 INFO::After iteration 4, gene prior 0.0586465815699955:, SNP prior:0.0212202700261522</span>
+<span class="co">#&gt; 2021-02-09 20:36:14 INFO::run iteration 5</span>
+<span class="co">#&gt; 2021-02-09 20:36:17 INFO::After iteration 5, gene prior 0.0585893484787186:, SNP prior:0.0202031796666299</span>
+<span class="co">#&gt; 2021-02-09 20:36:17 INFO::run iteration 6</span>
+<span class="co">#&gt; 2021-02-09 20:36:19 INFO::After iteration 6, gene prior 0.0585760534778286:, SNP prior:0.0193822761085657</span>
+<span class="co">#&gt; 2021-02-09 20:36:19 INFO::run iteration 7</span>
+<span class="co">#&gt; 2021-02-09 20:36:21 INFO::After iteration 7, gene prior 0.0585736054718825:, SNP prior:0.0186961687319586</span>
+<span class="co">#&gt; 2021-02-09 20:36:21 INFO::run iteration 8</span>
+<span class="co">#&gt; 2021-02-09 20:36:23 INFO::After iteration 8, gene prior 0.0585740223982371:, SNP prior:0.0181079279857142</span>
+<span class="co">#&gt; 2021-02-09 20:36:23 INFO::run iteration 9</span>
+<span class="co">#&gt; 2021-02-09 20:36:25 INFO::After iteration 9, gene prior 0.0585752605251688:, SNP prior:0.0175937758624876</span>
+<span class="co">#&gt; 2021-02-09 20:36:25 INFO::run iteration 10</span>
+<span class="co">#&gt; 2021-02-09 20:36:27 INFO::After iteration 10, gene prior 0.0585767390161605:, SNP prior:0.017137569030242</span>
+<span class="co">#&gt; 2021-02-09 20:36:27 INFO::run iteration 11</span>
+<span class="co">#&gt; 2021-02-09 20:36:29 INFO::After iteration 11, gene prior 0.0585782666560106:, SNP prior:0.0167278749458582</span>
+<span class="co">#&gt; 2021-02-09 20:36:29 INFO::run iteration 12</span>
+<span class="co">#&gt; 2021-02-09 20:36:31 INFO::After iteration 12, gene prior 0.0585797702619266:, SNP prior:0.0163563152076408</span>
+<span class="co">#&gt; 2021-02-09 20:36:31 INFO::run iteration 13</span>
+<span class="co">#&gt; 2021-02-09 20:36:34 INFO::After iteration 13, gene prior 0.058581219027348:, SNP prior:0.0160165737969517</span>
+<span class="co">#&gt; 2021-02-09 20:36:34 INFO::run iteration 14</span>
+<span class="co">#&gt; 2021-02-09 20:36:36 INFO::After iteration 14, gene prior 0.0585826001219523:, SNP prior:0.0157037754620901</span>
+<span class="co">#&gt; 2021-02-09 20:36:36 INFO::run iteration 15</span>
+<span class="co">#&gt; 2021-02-09 20:36:38 INFO::After iteration 15, gene prior 0.0585839093124729:, SNP prior:0.0154140807354911</span>
+<span class="co">#&gt; 2021-02-09 20:36:38 INFO::run iteration 16</span>
+<span class="co">#&gt; 2021-02-09 20:36:40 INFO::After iteration 16, gene prior 0.0585851467380858:, SNP prior:0.0151444132585396</span>
+<span class="co">#&gt; 2021-02-09 20:36:40 INFO::run iteration 17</span>
+<span class="co">#&gt; 2021-02-09 20:36:42 INFO::After iteration 17, gene prior 0.058586314784035:, SNP prior:0.0148922709197058</span>
+<span class="co">#&gt; 2021-02-09 20:36:42 INFO::run iteration 18</span>
+<span class="co">#&gt; 2021-02-09 20:36:44 INFO::After iteration 18, gene prior 0.0585874169398054:, SNP prior:0.0146555917904577</span>
+<span class="co">#&gt; 2021-02-09 20:36:44 INFO::run iteration 19</span>
+<span class="co">#&gt; 2021-02-09 20:36:47 INFO::After iteration 19, gene prior 0.0585884571660951:, SNP prior:0.0144326568892288</span>
+<span class="co">#&gt; 2021-02-09 20:36:47 INFO::run iteration 20</span>
+<span class="co">#&gt; 2021-02-09 20:36:49 INFO::After iteration 20, gene prior 0.0585894395406753:, SNP prior:0.0142220183033907</span>
+<span class="co">#&gt; 2021-02-09 20:36:49 INFO::run iteration 21</span>
+<span class="co">#&gt; 2021-02-09 20:36:51 INFO::After iteration 21, gene prior 0.0585903680625106:, SNP prior:0.0140224451502489</span>
+<span class="co">#&gt; 2021-02-09 20:36:51 INFO::run iteration 22</span>
+<span class="co">#&gt; 2021-02-09 20:36:53 INFO::After iteration 22, gene prior 0.0585912465474825:, SNP prior:0.0138328823300905</span>
+<span class="co">#&gt; 2021-02-09 20:36:53 INFO::run iteration 23</span>
+<span class="co">#&gt; 2021-02-09 20:36:55 INFO::After iteration 23, gene prior 0.0585920785776197:, SNP prior:0.0136524186111371</span>
+<span class="co">#&gt; 2021-02-09 20:36:55 INFO::run iteration 24</span>
+<span class="co">#&gt; 2021-02-09 20:36:57 INFO::After iteration 24, gene prior 0.0585928674815719:, SNP prior:0.0134802616285783</span>
+<span class="co">#&gt; 2021-02-09 20:36:57 INFO::run iteration 25</span>
+<span class="co">#&gt; 2021-02-09 20:36:59 INFO::After iteration 25, gene prior 0.0585936163331067:, SNP prior:0.0133157180788571</span>
+<span class="co">#&gt; 2021-02-09 20:36:59 INFO::run iteration 26</span>
+<span class="co">#&gt; 2021-02-09 20:37:01 INFO::After iteration 26, gene prior 0.0585943279597107:, SNP prior:0.013158177868028</span>
+<span class="co">#&gt; 2021-02-09 20:37:01 INFO::run iteration 27</span>
+<span class="co">#&gt; 2021-02-09 20:37:04 INFO::After iteration 27, gene prior 0.0585950049565232:, SNP prior:0.0130071013050309</span>
+<span class="co">#&gt; 2021-02-09 20:37:04 INFO::run iteration 28</span>
+<span class="co">#&gt; 2021-02-09 20:37:06 INFO::After iteration 28, gene prior 0.0585956497027374:, SNP prior:0.0128620086651556</span>
+<span class="co">#&gt; 2021-02-09 20:37:06 INFO::run iteration 29</span>
+<span class="co">#&gt; 2021-02-09 20:37:08 INFO::After iteration 29, gene prior 0.058596264378766:, SNP prior:0.0127224716168898</span>
+<span class="co">#&gt; 2021-02-09 20:37:08 INFO::run iteration 30</span>
+<span class="co">#&gt; 2021-02-09 20:37:10 INFO::After iteration 30, gene prior 0.0585968509831771:, SNP prior:0.0125881061272171</span>
+<span class="co">#&gt; 2021-02-09 20:37:10 INFO::Run susie for all regions.</span>
+<span class="co">#&gt; 2021-02-09 20:37:10 INFO::No. LD regions: 374</span>
+<span class="co">#&gt; 2021-02-09 20:37:10 INFO::No. regions with at least one SNP/gene for chr1: 17</span>
+<span class="co">#&gt; 2021-02-09 20:37:10 INFO::No. regions with at least one SNP/gene for chr2: 17</span>
+<span class="co">#&gt; 2021-02-09 20:37:10 INFO::No. regions with at least one SNP/gene for chr3: 17</span>
+<span class="co">#&gt; 2021-02-09 20:37:10 INFO::No. regions with at least one SNP/gene for chr4: 17</span>
+<span class="co">#&gt; 2021-02-09 20:37:10 INFO::No. regions with at least one SNP/gene for chr5: 17</span>
+<span class="co">#&gt; 2021-02-09 20:37:10 INFO::No. regions with at least one SNP/gene for chr6: 17</span>
+<span class="co">#&gt; 2021-02-09 20:37:10 INFO::No. regions with at least one SNP/gene for chr7: 17</span>
+<span class="co">#&gt; 2021-02-09 20:37:10 INFO::No. regions with at least one SNP/gene for chr8: 17</span>
+<span class="co">#&gt; 2021-02-09 20:37:10 INFO::No. regions with at least one SNP/gene for chr9: 17</span>
+<span class="co">#&gt; 2021-02-09 20:37:10 INFO::No. regions with at least one SNP/gene for chr10: 17</span>
+<span class="co">#&gt; 2021-02-09 20:37:10 INFO::No. regions with at least one SNP/gene for chr11: 17</span>
+<span class="co">#&gt; 2021-02-09 20:37:10 INFO::No. regions with at least one SNP/gene for chr12: 17</span>
+<span class="co">#&gt; 2021-02-09 20:37:10 INFO::No. regions with at least one SNP/gene for chr13: 17</span>
+<span class="co">#&gt; 2021-02-09 20:37:10 INFO::No. regions with at least one SNP/gene for chr14: 17</span>
+<span class="co">#&gt; 2021-02-09 20:37:10 INFO::No. regions with at least one SNP/gene for chr15: 17</span>
+<span class="co">#&gt; 2021-02-09 20:37:10 INFO::No. regions with at least one SNP/gene for chr16: 17</span>
+<span class="co">#&gt; 2021-02-09 20:37:10 INFO::No. regions with at least one SNP/gene for chr17: 17</span>
+<span class="co">#&gt; 2021-02-09 20:37:10 INFO::No. regions with at least one SNP/gene for chr18: 17</span>
+<span class="co">#&gt; 2021-02-09 20:37:10 INFO::No. regions with at least one SNP/gene for chr19: 17</span>
+<span class="co">#&gt; 2021-02-09 20:37:10 INFO::No. regions with at least one SNP/gene for chr20: 17</span>
+<span class="co">#&gt; 2021-02-09 20:37:10 INFO::No. regions with at least one SNP/gene for chr21: 17</span>
+<span class="co">#&gt; 2021-02-09 20:37:10 INFO::No. regions with at least one SNP/gene for chr22: 17</span>
+<span class="co">#&gt; 2021-02-09 20:37:11 INFO::run iteration 1</span>
+<span class="co">#&gt; 2021-02-09 20:37:33 INFO::After iteration 1, gene prior 0.084251176908959:, SNP prior:0.0631871447349001</span>
 <span class="co">#&gt; $group_prior</span>
 <span class="co">#&gt; [1] 0.05859685 0.01258811</span>
 <span class="co">#&gt; </span>
 <span class="co">#&gt; $group_prior_var</span>
 <span class="co">#&gt; [1] 0.2031186515 0.0002644459</span></code></pre></div>
-<div class="sourceCode"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="fu"><a href="https://rdrr.io/r/utils/sessionInfo.html">sessionInfo</a></span><span class="op">(</span><span class="op">)</span>
-<span class="co">#&gt; R version 3.6.1 (2019-07-05)</span>
-<span class="co">#&gt; Platform: x86_64-pc-linux-gnu (64-bit)</span>
+<span class="co">#&gt; R version 3.6.3 (2020-02-29)</span>
+<span class="co">#&gt; Platform: x86_64-conda_cos6-linux-gnu (64-bit)</span>
 <span class="co">#&gt; Running under: Scientific Linux 7.4 (Nitrogen)</span>
 <span class="co">#&gt; </span>
 <span class="co">#&gt; Matrix products: default</span>
-<span class="co">#&gt; BLAS/LAPACK: /software/openblas-0.2.19-el7-x86_64/lib/libopenblas_haswellp-r0.2.19.so</span>
+<span class="co">#&gt; BLAS:   /scratch/midway2/simingz/conda-envs/twas/lib/libblas.so.3.6.1</span>
+<span class="co">#&gt; LAPACK: /scratch/midway2/simingz/conda-envs/twas/lib/liblapack.so.3.6.1</span>
 <span class="co">#&gt; </span>
 <span class="co">#&gt; locale:</span>
 <span class="co">#&gt;  [1] LC_CTYPE=en_US.UTF-8       LC_NUMERIC=C              </span>
@@ -359,27 +360,26 @@
 <span class="co">#&gt; [1] stats     graphics  grDevices utils     datasets  methods   base     </span>
 <span class="co">#&gt; </span>
 <span class="co">#&gt; other attached packages:</span>
-<span class="co">#&gt; [1] ctwas_0.1.8</span>
+<span class="co">#&gt; [1] ctwas_0.1.9</span>
 <span class="co">#&gt; </span>
 <span class="co">#&gt; loaded via a namespace (and not attached):</span>
-<span class="co">#&gt;  [1] Rcpp_1.0.5        compiler_3.6.1    pillar_1.4.2     </span>
-<span class="co">#&gt;  [4] iterators_1.0.10  tools_3.6.1       digest_0.6.20    </span>
-<span class="co">#&gt;  [7] evaluate_0.14     memoise_1.1.0     tibble_2.1.3     </span>
-<span class="co">#&gt; [10] lattice_0.20-38   pkgconfig_2.0.2   rlang_0.4.6      </span>
-<span class="co">#&gt; [13] Matrix_1.2-18     foreach_1.4.4     yaml_2.2.0       </span>
-<span class="co">#&gt; [16] parallel_3.6.1    pkgdown_1.6.1     xfun_0.8         </span>
-<span class="co">#&gt; [19] stringr_1.4.0     dplyr_0.8.3       knitr_1.23       </span>
-<span class="co">#&gt; [22] pgenlibr_0.2      desc_1.2.0        fs_1.3.1         </span>
-<span class="co">#&gt; [25] vctrs_0.3.1       rprojroot_1.3-2   grid_3.6.1       </span>
-<span class="co">#&gt; [28] tidyselect_1.1.0  glue_1.3.1        data.table_1.13.2</span>
-<span class="co">#&gt; [31] R6_2.4.0          rmarkdown_1.13    purrr_0.3.4      </span>
-<span class="co">#&gt; [34] magrittr_1.5      backports_1.1.4   codetools_0.2-16 </span>
-<span class="co">#&gt; [37] htmltools_0.3.6   assertthat_0.2.1  logging_0.10-108 </span>
-<span class="co">#&gt; [40] stringi_1.4.3     doParallel_1.0.14 crayon_1.3.4</span></code></pre></div>
+<span class="co">#&gt;  [1] Rcpp_1.0.5        compiler_3.6.3    pillar_1.4.6      iterators_1.0.12 </span>
+<span class="co">#&gt;  [5] tools_3.6.3       digest_0.6.25     evaluate_0.14     memoise_1.1.0    </span>
+<span class="co">#&gt;  [9] lifecycle_0.2.0   tibble_3.0.3      lattice_0.20-41   pkgconfig_2.0.3  </span>
+<span class="co">#&gt; [13] rlang_0.4.7       Matrix_1.2-18     foreach_1.5.0     parallel_3.6.3   </span>
+<span class="co">#&gt; [17] yaml_2.2.1        pkgdown_1.6.1     xfun_0.19         stringr_1.4.0    </span>
+<span class="co">#&gt; [21] dplyr_1.0.0       knitr_1.29        pgenlibr_0.2      desc_1.2.0       </span>
+<span class="co">#&gt; [25] generics_0.0.2    fs_1.4.2          vctrs_0.3.2       systemfonts_0.3.2</span>
+<span class="co">#&gt; [29] rprojroot_2.0.2   grid_3.6.3        tidyselect_1.1.0  glue_1.4.1       </span>
+<span class="co">#&gt; [33] data.table_1.12.8 R6_2.4.1          rmarkdown_2.6     purrr_0.3.4      </span>
+<span class="co">#&gt; [37] magrittr_1.5      codetools_0.2-16  htmltools_0.5.0   ellipsis_0.3.1   </span>
+<span class="co">#&gt; [41] assertthat_0.2.1  logging_0.10-108  ragg_0.3.1        stringi_1.4.6    </span>
+<span class="co">#&gt; [45] doParallel_1.0.15 crayon_1.3.4</span></code></pre></div>
 </div>
   </div>
 
   <div class="col-md-3 hidden-xs hidden-sm" id="pkgdown-sidebar">
+
         <nav id="toc" data-toggle="toc"><h2 data-toc-skip>Contents</h2>
     </nav>
 </div>

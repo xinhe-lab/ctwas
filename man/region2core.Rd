@@ -8,7 +8,8 @@ region2core(regionlist, ncore = 1)
 }
 \arguments{
 \item{ncore}{integer, numeber of cores, at least 1
-regions allocated to given number of cores}
+regions allocated to given number of cores
+regionlist need to contain at least 1 non-empty}
 }
 \description{
 parallel regions

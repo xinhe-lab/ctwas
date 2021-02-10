@@ -8,11 +8,13 @@
 
 <title>Bayesian sum of single-effect (SuSiE) linear regression using z scores — susie_rss • ctwas</title>
 
+
 <!-- jquery -->
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.4.1/jquery.min.js" integrity="sha256-CSXorXvZcTkaix6Yvo6HppcZGetbYMGWSFlBw8HfCJo=" crossorigin="anonymous"></script>
 <!-- Bootstrap -->
 
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/3.4.1/css/bootstrap.min.css" integrity="sha256-bZLfwXAP04zRMK2BjiO8iu9pf4FbLqX6zitd+tIvLhE=" crossorigin="anonymous" />
+
 <script src="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/3.4.1/js/bootstrap.min.js" integrity="sha256-nuL8/2cJ5NDSSwnKD8VqreErSWHtnEP9E7AySL+1ev4=" crossorigin="anonymous"></script>
 
 <!-- bootstrap-toc -->
@@ -36,10 +38,9 @@
 
 
 
+
 <meta property="og:title" content="Bayesian sum of single-effect (SuSiE) linear regression using z scores — susie_rss" />
-
 <meta property="og:description" content="Bayesian sum of single-effect (SuSiE) linear regression using z scores" />
-
 
 
 
@@ -71,7 +72,7 @@
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">ctwas</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="Released version">0.1.8</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="Released version">0.1.9</span>
       </span>
     </div>
 
@@ -79,7 +80,7 @@
       <ul class="nav navbar-nav">
         <li>
   <a href="../index.html">
-    <span class="fas fa fas fa-home fa-lg"></span>
+    <span class="fas fa-home fa-lg"></span>
      
   </a>
 </li>
@@ -102,7 +103,6 @@
   </ul>
 </li>
       </ul>
-      
       <ul class="nav navbar-nav navbar-right">
         
       </ul>
@@ -124,9 +124,7 @@
     </div>
 
     <div class="ref-description">
-    
     <p>Bayesian sum of single-effect (SuSiE) linear regression using z scores</p>
-    
     </div>
 
     <pre class="usage"><span class='fu'>susie_rss</span><span class='op'>(</span><span class='va'>z</span>, <span class='va'>R</span>, maf <span class='op'>=</span> <span class='cn'>NULL</span>, maf_thresh <span class='op'>=</span> <span class='fl'>0</span>, z_ld_weight <span class='op'>=</span> <span class='fl'>0</span>,
@@ -138,7 +136,7 @@
   s_init <span class='op'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/list.html'>list</a></span><span class='op'>(</span><span class='op'>)</span>, intercept_value <span class='op'>=</span> <span class='fl'>0</span>, coverage <span class='op'>=</span> <span class='fl'>0.95</span>,
   min_abs_corr <span class='op'>=</span> <span class='fl'>0.5</span>, tol <span class='op'>=</span> <span class='fl'>0.001</span>, verbose <span class='op'>=</span> <span class='cn'>FALSE</span>,
   track_fit <span class='op'>=</span> <span class='cn'>FALSE</span>, check_R <span class='op'>=</span> <span class='cn'>TRUE</span>, check_z <span class='op'>=</span> <span class='cn'>TRUE</span><span class='op'>)</span></pre>
-    
+
     <h2 class="hasAnchor" id="arguments"><a class="anchor" href="#arguments"></a>Arguments</h2>
     <table class="ref-arguments">
     <colgroup><col class="name" /><col class="desc" /></colgroup>
@@ -259,7 +257,7 @@ Set to NULL if you want coef.susie() not to include an intercept term (and so on
       <td><p>check whether z in space spanned by the non-zero eigenvectors of R</p></td>
     </tr>
     </table>
-    
+
     <h2 class="hasAnchor" id="value"><a class="anchor" href="#value"></a>Value</h2>
 
     <p>a susie fit, which is a list with some or all of the following elements<br /></p>
@@ -270,7 +268,6 @@ Set to NULL if you want coef.susie() not to include an intercept term (and so on
 <dt>sigma2</dt><dd><p>residual variance</p></dd>
 <dt>V</dt><dd><p>prior variance</p></dd>
 
-    
     <h2 class="hasAnchor" id="details"><a class="anchor" href="#details"></a>Details</h2>
 
     <p>Revised from susieR::susie_rss. Performs sum of single-effect (SuSiE) linear regression with z scores.
@@ -279,7 +276,6 @@ This function fits the regression model z = sum_l Rb_l + e, where e is N(0,resid
 sum_l b_l is a p vector of effects to be estimated.
 The assumption is that each b_l has exactly one non-zero element, with all elements
 equally likely to be non-zero. The prior on the non-zero element is N(0,var=prior_variance).</p>
-    
 
     <h2 class="hasAnchor" id="examples"><a class="anchor" href="#examples"></a>Examples</h2>
     <pre class="examples"><div class='input'><span class='fu'><a href='https://rdrr.io/r/base/Random.html'>set.seed</a></span><span class='op'>(</span><span class='fl'>1</span><span class='op'>)</span>

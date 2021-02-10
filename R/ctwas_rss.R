@@ -191,16 +191,15 @@ ctwas_rss <- function(zdf,
                                 thin = 1, minvar = 2) # susie_rss can't take 1 var.
 
     res <- data.table::fread(paste0(file.path(outputdir, outname), ".susieIrss.txt"))
-    maxpip <- res[res$type == "gene", max(susie_pip), by = list(region_tag1, region_tag2)]
 
     # filter out regions based on max gene PIP of the region
     res.keep <- NULL
     for (b in 1: length(regionlist)){
       for (rn in names(regionlist[[b]])){
-       gene_PIP <- max(maxpip[region_tag1 == b & region_tag2 == rn, V1],0)
+       gene_PIP <- max(res[res$type == "gene" & res$region_tag1 == b & res$region_tag2 == rn, ]$susie_pip, 0)
        if (gene_PIP < rerun_gene_PIP) {
          regionlist[[b]][[rn]] <- NULL
-         res.keep <- rbind(res.keep, res[region_tag1 ==b & region_tag2 == rn])
+         res.keep <- rbind(res.keep, res[res$region_tag1 ==b & res$region_tag2 == rn, ])
        }
       }
     }
@@ -233,7 +232,6 @@ ctwas_rss <- function(zdf,
       res.rerun <- data.table::fread(paste0(file.path(outputdir, outname), ".s3.susieIrss.txt"))
 
       res <- rbind(res.keep, res.rerun)
-      res <- res[order(region_tag1, region_tag2)]
 
       data.table::fwrite(res, file = paste0(file.path(outputdir, outname), ".susieIrss.txt"),
                          sep = "\t", quote = F)
