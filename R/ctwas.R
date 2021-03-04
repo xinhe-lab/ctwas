@@ -98,9 +98,13 @@ ctwas <- function(pgenfs,
 
   regionlist <- index_regions(pvarfs, exprvarfs, regionfile,
                               thin = thin)
+
   regs <- do.call(rbind, lapply(1:22, function(x) cbind(x,
                           unlist(lapply(regionlist[[x]], "[[", "start")),
                           unlist(lapply(regionlist[[x]], "[[", "stop")))))
+
+  write.table(regs , file= paste0(outputdir,"/", outname, ".regions.txt")
+              , row.names=F, col.names=T, sep="\t", quote = F)
 
   if (isTRUE(estimate_group_prior) | isTRUE(estimate_group_prior_var)){
 
