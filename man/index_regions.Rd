@@ -5,15 +5,21 @@
 \title{Get gene and SNP index for each region}
 \usage{
 index_regions(pvarfs, exprvarfs, regionfile, select = NULL, thin = 1,
-  minvar = 1)
+  minvar = 1, merge = T)
 }
 \arguments{
-\item{regionfile}{Has three columns: chr, start, end}
+\item{regionfile}{regions file. Has three columns: chr, start, end. The regions file
+should provide non overlaping regions defining LD blocks. currently does not support
+chromsome X/Y etc.}
 
 \item{select}{variant ids to include. If NULL, all variants will be selected}
 
 \item{thin}{A scalar in (0,1]. The proportion of SNPs
 left after down sampling. Only applied on SNPs after selecting variants.}
+
+\item{minvar}{minimum number of variatns in a region}
+
+\item{merge}{True/False. If merge regions when a gene belong to multiple regions.}
 }
 \value{
 A list. Items correspond to each pvarf/exprvarf. Each Item is

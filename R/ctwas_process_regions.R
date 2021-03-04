@@ -3,11 +3,16 @@
 #' is location/column number in .pgen file or .expr file) located within
 #' this region.
 #'
-#' @param regionfile Has three columns: chr, start, end
+#' @param regionfile regions file. Has three columns: chr, start, end. The regions file
+#' should provide non overlaping regions defining LD blocks. currently does not support
+#' chromsome X/Y etc.
 #'
 #' @param select variant ids to include. If NULL, all variants will be selected
 #' @param thin  A scalar in (0,1]. The proportion of SNPs
 #'  left after down sampling. Only applied on SNPs after selecting variants.
+#' @param minvar minimum number of variatns in a region
+#'
+#' @param merge True/False. If merge regions when a gene belong to multiple regions.
 #'
 #' @return A list. Items correspond to each pvarf/exprvarf. Each Item is
 #'  also a list, the items in this list are for each region.
@@ -18,9 +23,16 @@ index_regions <- function(pvarfs,
                           exprvarfs,
                           regionfile,
                           select = NULL,
-                          thin = 1, minvar = 1) {
+                          thin = 1,
+                          minvar = 1,
+                          merge = T) {
 
   reg <- read.table(regionfile, header = T, stringsAsFactors = F)
+  if (is.character(reg$chr)){
+    reg$chr <- readr::parse_number(reg$chr)
+  }
+  # sort regions
+  reg <- reg[order(reg$chr, reg$start),]
 
   loginfo("No. LD regions: %s", nrow(reg))
 
@@ -50,7 +62,6 @@ index_regions <- function(pvarfs,
     set.seed(99)
     snpinfo$thin_tag[sample(1:nrow(snpinfo), nkept)] <- 1
 
-
     # get gene info (from exprf file)
     exprvarf <- exprvarfs[b]
     geneinfo <- read_exprvar(exprvarf)
@@ -76,8 +87,14 @@ index_regions <- function(pvarfs,
       p0 <- regions[rn, "start"]
       p1 <- regions[rn, "stop"]
 
-      gidx <- which(geneinfo$chrom == b & geneinfo$p0 > p0 & geneinfo$p0 < p1
-                    & geneinfo$keep == 1)
+      if (isTRUE(merge)){
+        gidx <- which(geneinfo$chrom == b & geneinfo$p1 > p0 & geneinfo$p0 < p1
+                    & geneinfo$keep == 1) # allow overlap
+      } else {
+        gidx <- which(geneinfo$chrom == b & geneinfo$p0 > p0 & geneinfo$p0 < p1
+                      & geneinfo$keep == 1) # unique assignment to regions
+      }
+
       sidx <- which(snpinfo$chrom == b & snpinfo$pos > p0 & snpinfo$pos < p1
                     & snpinfo$keep == 1 & snpinfo$thin_tag == 1)
 
@@ -89,10 +106,37 @@ index_regions <- function(pvarfs,
       regionlist[[b]][[as.character(rn)]] <- list("gidx" = gidx,
                                     "gid"  = gid,
                                     "sidx" = sidx,
-                                    "sid"  = sid)
+                                    "sid"  = sid,
+                                    "start" = p0,
+                                    "stop" = p1)
 
     }
     loginfo("No. regions with at least one SNP/gene for chr%s: %s",
+            b, length(regionlist[[b]]))
+
+    if (isTRUE(merge) & nrow(regions) >= 2){
+      loginfo("Merge regions for chr%s", b)
+      for (rn in 2:nrow(regions)){
+        current <- regionlist[[b]][[as.character(rn)]]
+        previous <- regionlist[[b]][[as.character(rn - 1)]]
+
+          if (length(intersect(current[["gid"]], previous[["gid"]]))> 0){
+
+            merged <- lapply(names(current), function(x) unique(c(previous[[x]],
+                                                                current[[x]])))
+
+            names(merged) <- names(current)
+            merged[["start"]] <- regions[rn - 1, "start"]
+            merged[["stop"]] <- regions[rn, "stop"]
+
+            regionlist[[b]][[as.character(rn)]] <- merged
+
+            regionlist[[b]][[as.character(rn -1)]] <- NULL
+          }
+      }
+    }
+
+    loginfo("No. regions with at least one SNP/gene for chr%s after merging: %s",
             b, length(regionlist[[b]]))
   }
 
@@ -147,3 +191,4 @@ region2core <- function(regionlist, ncore = 1){
   }
   return(corelist)
 }
+

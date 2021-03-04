@@ -153,15 +153,11 @@ ctwas <- function(pgenfs,
                    outname = paste0(outname, ".s2"))
 
     group_prior <- pars[["group_prior"]]
-    group_prior[2] <- group_prior[2] * thin # convert snp pi1
     group_prior_var <- pars[["group_prior_var"]]
   }
 
   loginfo("Run susie for all regions.")
 
-
-  regionlist <- index_regions(pvarfs, exprvarfs, regionfile,
-                              thin = 1)
   pars <- susieI(pgenfs = pgenfs, exprfs = exprfs, Y = Y,
                  regionlist = regionlist,
                  niter = 1,
@@ -177,8 +173,62 @@ ctwas <- function(pgenfs,
                  outputdir = outputdir,
                  outname = outname)
 
-    list("group_prior" = group_prior,
-         "group_prior_var" = group_prior_var)
+  group_prior[2] <- group_prior[2] * thin # convert snp pi1
+
+  if (thin < 1){
+
+    # get full SNPs
+    regionlist <- index_regions(pvarfs, exprvarfs, regionfile,
+                                thin = thin)
+
+    res <- data.table::fread(paste0(file.path(outputdir, outname), ".susieI.txt"))
+
+    # filter out regions based on max gene PIP of the region
+    res.keep <- NULL
+    for (b in 1: length(regionlist)){
+      for (rn in names(regionlist[[b]])){
+        gene_PIP <- max(res[res$type == "gene" & res$region_tag1 == b & res$region_tag2 == rn, ]$susie_pip, 0)
+        if (gene_PIP < rerun_gene_PIP) {
+          regionlist[[b]][[rn]] <- NULL
+          res.keep <- rbind(res.keep, res[res$region_tag1 ==b & res$region_tag2 == rn, ])
+        }
+      }
+    }
+
+    nreg <- sum(unlist(lapply(regionlist, length)))
+
+    loginfo("Number of regions that contains strong gene signals: %s", nreg)
+
+    if (nreg > 0){
+
+      loginfo("Rerun susie for regions with strong gene signals using full SNPs.")
+
+      pars <- susieI(pgenfs = pgenfs, exprfs = exprfs, Y = Y,
+                     regionlist = regionlist,
+                     niter = 1,
+                     L = L,
+                     group_prior = group_prior,
+                     group_prior_var = group_prior_var,
+                     estimate_group_prior = estimate_group_prior,
+                     estimate_group_prior_var = estimate_group_prior_var,
+                     use_null_weight = use_null_weight,
+                     coverage = coverage,
+                     standardize = stardardize,
+                     ncore = ncore,
+                     outputdir = outputdir,
+                     outname = paste0(outname, ".s3"))
+
+      res.rerun <- data.table::fread(paste0(file.path(outputdir, outname), ".s3.susieIres.txt"))
+
+      res <- rbind(res.keep, res.rerun)
+
+      data.table::fwrite(res, file = paste0(file.path(outputdir, outname), ".susieI.txt"),
+                         sep = "\t", quote = F)
+    }
+  }
+
+  list("group_prior" = group_prior,
+       "group_prior_var" = group_prior_var)
 
 }
 

@@ -74,13 +74,12 @@ impute_expr <- function(pgenf,
     wgt.idx <- match(snpnames, rownames(wgt.matrix))
     gwas.idx <-  match(snpnames, snpinfo$id)
 
-    if (checksnps){
-      # `snps` from FUSION follows .bim format
-      snps$V3 <- NULL
-      colnames(snps) <- c("chrom", "id", "pos", "alt", "ref")
-      gwassnps <- snpinfo[gwas.idx, ]
+    # `snps` from FUSION follows .bim format
+    colnames(snps) <- c("chrom", "id", "cm","pos", "alt", "ref")
 
-      if (!identical(gwassnps, snps)){
+    if (checksnps){
+      gwassnps <- snpinfo[gwas.idx, ]
+      if (!identical(gwassnps, snps[, c("chrom", "id", "pos", "alt", "ref")])){
         stop("GWAS SNP and eQTL info inconsistent. STOP.")
       }
     }
@@ -98,8 +97,8 @@ impute_expr <- function(pgenf,
 
     exprlist[[gname]][["expr"]] <- gexpr
     exprlist[[gname]][["chrom"]] <- wgtpos[wgtpos$ID == gname, "CHR"]
-    exprlist[[gname]][["p0"]] <- wgtpos[wgtpos$ID == gname, "P0"]
-    exprlist[[gname]][["p1"]] <- wgtpos[wgtpos$ID == gname, "P1"]
+    exprlist[[gname]][["p0"]] <-  min(snps[snps[, "id"] %in% snpnames, "pos"])  # eQTL positions
+    exprlist[[gname]][["p1"]] <-  max(snps[snps[, "id"] %in% snpnames, "pos"])  # eQTL positions
     exprlist[[gname]][["wgt"]] <- wgt
 
     qclist[[gname]][["n"]] <- nrow(wgt.matrix)

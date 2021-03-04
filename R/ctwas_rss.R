@@ -101,6 +101,13 @@ ctwas_rss <- function(zdf,
                               select = zdf$id,
                               thin = thin, minvar = 2) # susie_rss can't take 1 var.
 
+  regs <- do.call(rbind, lapply(1:22, function(x) cbind(x,
+                    unlist(lapply(regionlist[[x]], "[[", "start")),
+                    unlist(lapply(regionlist[[x]], "[[", "stop")))))
+
+  write.table(regs , file= paste0(outputdir, outname, ".regions.txt")
+               , row.names=F, col.names=T, sep="\t", quote = F)
+
   if (isTRUE(estimate_group_prior) | isTRUE(estimate_group_prior_var)){
 
     loginfo("Run susie iteratively, getting rough estimate ...")

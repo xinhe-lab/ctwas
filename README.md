@@ -24,9 +24,11 @@ Install `ctwas`.
 devtools::install_github("simingz/ctwas", ref = "main")
 ```
 
-# Notes
+# Acknowledgement
 
-SuSiE R code obtained from:
+We acknowledge the authors of `susieR` package for using their codes.
+
+Original `susieR` code obtained by:
 ```
 git clone git@github.com:stephenslab/susieR.git
 git checkout a06e35e

@@ -77,13 +77,12 @@ impute_expr_z <- function(zdf, ld_pgenf,
     ld.idx <-  match(snpnames, ld_snpinfo$id)
     zdf.idx <- match(snpnames, zdf$id)
 
-    if (checksnps){
-      # `snps` from FUSION follows .bim format
-      snps$V3 <- NULL
-      colnames(snps) <- c("chrom", "id", "pos", "alt", "ref")
-      ldsnps <- ld_snpinfo[ld.idx, ]
+    # `snps` from FUSION follows .bim format
+    colnames(snps) <- c("chrom", "id", "cm","pos", "alt", "ref")
 
-      if (!identical(ldsnps, snps)){
+    if (checksnps){
+      ldsnps <- ld_snpinfo[ld.idx, ]
+      if (!identical(ldsnps, snps[, c("chrom", "id", "pos", "alt", "ref")])){
         stop("LD reference SNP and eQTL info inconsistent. STOP.")
       }
     }
@@ -106,8 +105,8 @@ impute_expr_z <- function(zdf, ld_pgenf,
     exprlist[[gname]][["expr"]] <- gexpr
     exprlist[[gname]][["z.g"]] <- z.g
     exprlist[[gname]][["chrom"]] <- wgtpos[wgtpos$ID == gname, "CHR"]
-    exprlist[[gname]][["p0"]] <- wgtpos[wgtpos$ID == gname, "P0"]
-    exprlist[[gname]][["p1"]] <- wgtpos[wgtpos$ID == gname, "P1"]
+    exprlist[[gname]][["p0"]] <-  min(snps[snps[, "id"] %in% snpnames, "pos"])  # eQTL positions
+    exprlist[[gname]][["p1"]] <-  max(snps[snps[, "id"] %in% snpnames, "pos"])  # eQTL positions
     exprlist[[gname]][["wgt"]] <- wgt
 
     qclist[[gname]][["n"]] <- nrow(wgt.matrix)
