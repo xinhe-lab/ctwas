@@ -96,6 +96,11 @@ ctwas <- function(pgenfs,
   pvarfs <- sapply(pgenfs, prep_pvar, outputdir = outputdir)
   exprvarfs <- sapply(exprfs, prep_exprvar)
 
+  regionlist <- index_regions(pvarfs, exprvarfs, regionfile,
+                              thin = thin)
+  regs <- do.call(rbind, lapply(1:22, function(x) cbind(x,
+                          unlist(lapply(regionlist[[x]], "[[", "start")),
+                          unlist(lapply(regionlist[[x]], "[[", "stop")))))
 
   if (isTRUE(estimate_group_prior) | isTRUE(estimate_group_prior_var)){
 
@@ -104,9 +109,6 @@ ctwas <- function(pgenfs,
     if (!is.null(group_prior)){
       group_prior[2] <- group_prior[2]/thin
     }
-
-    regionlist <- index_regions(pvarfs, exprvarfs, regionfile,
-                                thin = thin)
 
     pars <- susieI(pgenfs = pgenfs, exprfs = exprfs, Y = Y,
                    regionlist = regionlist,

@@ -74,7 +74,7 @@ this region." />
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">ctwas</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="Released version">0.1.9</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="Released version">0.1.11</span>
       </span>
     </div>
 
@@ -106,7 +106,9 @@ this region." />
 </li>
       </ul>
       <ul class="nav navbar-nav navbar-right">
-        
+        <li>
+  <a href="https://github.com/simingz/ctwas">Source</a>
+</li>
       </ul>
       
     </div><!--/.nav-collapse -->
@@ -132,14 +134,16 @@ this region.</p>
     </div>
 
     <pre class="usage"><span class='fu'>index_regions</span><span class='op'>(</span><span class='va'>pvarfs</span>, <span class='va'>exprvarfs</span>, <span class='va'>regionfile</span>, select <span class='op'>=</span> <span class='cn'>NULL</span>, thin <span class='op'>=</span> <span class='fl'>1</span>,
-  minvar <span class='op'>=</span> <span class='fl'>1</span><span class='op'>)</span></pre>
+  minvar <span class='op'>=</span> <span class='fl'>1</span>, merge <span class='op'>=</span> <span class='cn'>T</span><span class='op'>)</span></pre>
 
     <h2 class="hasAnchor" id="arguments"><a class="anchor" href="#arguments"></a>Arguments</h2>
     <table class="ref-arguments">
     <colgroup><col class="name" /><col class="desc" /></colgroup>
     <tr>
       <th>regionfile</th>
-      <td><p>Has three columns: chr, start, end</p></td>
+      <td><p>regions file. Has three columns: chr, start, end. The regions file
+should provide non overlaping regions defining LD blocks. currently does not support
+chromsome X/Y etc.</p></td>
     </tr>
     <tr>
       <th>select</th>
@@ -149,6 +153,14 @@ this region.</p>
       <th>thin</th>
       <td><p>A scalar in (0,1]. The proportion of SNPs
 left after down sampling. Only applied on SNPs after selecting variants.</p></td>
+    </tr>
+    <tr>
+      <th>minvar</th>
+      <td><p>minimum number of variatns in a region</p></td>
+    </tr>
+    <tr>
+      <th>merge</th>
+      <td><p>True/False. If merge regions when a gene belong to multiple regions.</p></td>
     </tr>
     </table>
 
