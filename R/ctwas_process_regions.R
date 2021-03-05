@@ -79,7 +79,7 @@ index_regions <- function(pvarfs,
     }
 
 
-    regions <- reg[reg$chr == b | reg$chr == paste0("chr", b), ]
+    regions <- reg[reg$chr == b, ]
 
     regionlist[[b]] <- list()
 
@@ -109,7 +109,6 @@ index_regions <- function(pvarfs,
                                     "sid"  = sid,
                                     "start" = p0,
                                     "stop" = p1)
-
     }
     loginfo("No. regions with at least one SNP/gene for chr%s: %s",
             b, length(regionlist[[b]]))
@@ -122,14 +121,18 @@ index_regions <- function(pvarfs,
 
           if (length(intersect(current[["gid"]], previous[["gid"]]))> 0){
 
-            merged <- lapply(names(current), function(x) unique(c(previous[[x]],
-                                                                current[[x]])))
+            gidx <-  unique(c(previous[["gidx"]], current[["gidx"]]))
+            sidx <-  unique(c(previous[["sidx"]], current[["sidx"]]))
 
-            names(merged) <- names(current)
-            merged[["start"]] <- regions[rn - 1, "start"]
-            merged[["stop"]] <- regions[rn, "stop"]
+            gid <- geneinfo[gidx, "id"]
+            sid <- snpinfo[sidx, "id"]
 
-            regionlist[[b]][[as.character(rn)]] <- merged
+            regionlist[[b]][[as.character(rn)]] <- list("gidx" = gidx,
+                                                        "gid"  = gid,
+                                                        "sidx" = sidx,
+                                                        "sid"  = sid,
+                                                        "start" = regions[rn - 1, "start"],
+                                                        "stop" = regions[rn, "stop"])
 
             regionlist[[b]][[as.character(rn -1)]] <- NULL
           }
