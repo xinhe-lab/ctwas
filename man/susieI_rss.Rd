@@ -4,11 +4,24 @@
 \alias{susieI_rss}
 \title{SuSiE iteraitve rss version}
 \usage{
-susieI_rss(zdf, ld_pgenfs, ld_exprfs, regionlist, niter = 20, L = 1,
-  z_ld_weight = 0, group_prior = NULL, group_prior_var = NULL,
-  estimate_group_prior = T, estimate_group_prior_var = T,
-  use_null_weight = T, coverage = 0.95, ncore = 1,
-  outputdir = getwd(), outname = NULL)
+susieI_rss(
+  zdf,
+  ld_pgenfs,
+  ld_exprfs,
+  regionlist,
+  niter = 20,
+  L = 1,
+  z_ld_weight = 0,
+  group_prior = NULL,
+  group_prior_var = NULL,
+  estimate_group_prior = T,
+  estimate_group_prior_var = T,
+  use_null_weight = T,
+  coverage = 0.95,
+  ncore = 1,
+  outputdir = getwd(),
+  outname = NULL
+)
 }
 \description{
 SuSiE iteraitve rss version

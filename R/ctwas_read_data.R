@@ -75,8 +75,13 @@ read_pvar <- function(pvarf){
 #' @return  A matrix of allele count for each variant (columns) in each sample
 #'  (rows). ALT allele in pvar file is counted (A1 allele in .bim file is the ALT
 #'   allele).
+#'
+#' @importFrom pgenlibr NewPvar
+#' @importFrom pgenlibr NewPgen 
 #' @importFrom tools file_ext file_path_sans_ext
+#' 
 #' @export
+#' 
 prep_pgen <- function(pgenf, pvarf){
 
   pvar <- pgenlibr::NewPvar(pvarf)
@@ -86,7 +91,7 @@ prep_pgen <- function(pgenf, pvarf){
 
   } else if (file_ext(pgenf) == "bed"){
     famf <- paste0(file_path_sans_ext(pgenf), ".fam")
-    fam <- data.table:: fread(famf, header = F)
+    fam <- data.table::fread(famf, header = F)
     raw_s_ct <- nrow(fam)
     pgen <- pgenlibr::NewPgen(pgenf, pvar = pvar, raw_sample_ct = raw_s_ct)
 
@@ -101,6 +106,8 @@ prep_pgen <- function(pgenf, pvarf){
 #' @param variantidx variant index. If NULL, all variants will be extracted.
 #' @return A matrix, columns are allele count for each SNP, rows are
 #'  for each sample.
+#' @importFrom pgenlibr GetVariantCt
+#' @importFrom pgenlibr ReadList
 #' @export
 read_pgen <- function(pgen, variantidx = NULL, meanimpute = F ){
   if (is.null(variantidx)){

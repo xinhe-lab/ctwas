@@ -4,15 +4,34 @@
 \alias{susie_rss}
 \title{Bayesian sum of single-effect (SuSiE) linear regression using z scores}
 \usage{
-susie_rss(z, R, maf = NULL, maf_thresh = 0, z_ld_weight = 0,
-  L = 10, prior_variance = 50, residual_variance = NULL,
-  r_tol = 1e-08, prior_weights = NULL, null_weight = NULL,
-  estimate_residual_variance = TRUE, estimate_prior_variance = TRUE,
+susie_rss(
+  z,
+  R,
+  maf = NULL,
+  maf_thresh = 0,
+  z_ld_weight = 0,
+  L = 10,
+  prior_variance = 50,
+  residual_variance = NULL,
+  r_tol = 1e-08,
+  prior_weights = NULL,
+  null_weight = NULL,
+  estimate_residual_variance = TRUE,
+  estimate_prior_variance = TRUE,
   estimate_prior_method = c("optim", "EM", "simple"),
-  check_null_threshold = 0, prior_tol = 1e-09, max_iter = 100,
-  s_init = list(), intercept_value = 0, coverage = 0.95,
-  min_abs_corr = 0.5, tol = 0.001, verbose = FALSE,
-  track_fit = FALSE, check_R = TRUE, check_z = TRUE)
+  check_null_threshold = 0,
+  prior_tol = 1e-09,
+  max_iter = 100,
+  s_init = list(),
+  intercept_value = 0,
+  coverage = 0.95,
+  min_abs_corr = 0.5,
+  tol = 0.001,
+  verbose = FALSE,
+  track_fit = FALSE,
+  check_R = TRUE,
+  check_z = TRUE
+)
 }
 \arguments{
 \item{z}{a p vector of z scores.}
