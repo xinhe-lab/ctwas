@@ -4,15 +4,9 @@
 \alias{single_effect_regression}
 \title{Bayesian single-effect linear regression of y on X}
 \usage{
-single_effect_regression(
-  Y,
-  X,
-  V,
-  residual_variance = 1,
-  prior_weights = NULL,
-  optimize_V = c("none", "optim", "uniroot", "EM", "simple"),
-  check_null_threshold = 0
-)
+single_effect_regression(Y, X, V, residual_variance = 1,
+  prior_weights = NULL, optimize_V = c("none", "optim", "uniroot",
+  "EM", "simple"), check_null_threshold = 0)
 }
 \arguments{
 \item{Y}{An n vector.}

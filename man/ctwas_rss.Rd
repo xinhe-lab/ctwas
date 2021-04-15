@@ -4,34 +4,22 @@
 \alias{ctwas_rss}
 \title{Causal inference for TWAS using summary statistics}
 \usage{
-ctwas_rss(
-  zdf,
-  ld_pgenfs,
-  ld_exprfs,
-  ld_regions = c("EUR", "ASN", "AFR"),
-  ld_regions_custom = NULL,
-  thin = 1,
-  prob_single = 0.8,
-  rerun_gene_PIP = 0.8,
-  niter1 = 3,
-  niter2 = 30,
-  L = 5,
-  group_prior = NULL,
-  group_prior_var = NULL,
-  estimate_group_prior = T,
-  estimate_group_prior_var = T,
-  use_null_weight = T,
-  coverage = 0.95,
-  stardardize = T,
-  ncore = 1,
-  outputdir = getwd(),
-  outname = NULL,
-  logfile = NULL
-)
+ctwas_rss(z_snp, z_gene, ld_pgenfs, ld_exprfs, ld_regions = c("EUR",
+  "ASN", "AFR"), ld_regions_custom = NULL, thin = 1,
+  prob_single = 0.8, rerun_gene_PIP = 0.8, niter1 = 3, niter2 = 30,
+  L = 5, group_prior = NULL, group_prior_var = NULL,
+  estimate_group_prior = T, estimate_group_prior_var = T,
+  use_null_weight = T, coverage = 0.95, stardardize = T,
+  harmonize = T, ncore = 1, outputdir = getwd(), outname = NULL,
+  logfile = NULL)
 }
 \arguments{
-\item{zdf}{A data frame with two columns: "id", "z. giving the z scores for
-genes and snps.}
+\item{z_snp}{A data frame with four columns: "id", "A1", "A2", "z".
+giving the z scores for snps. "A1" is effect allele. "A2" is the other allele.
+If `harmonize= False`, A1 and A2 are not required.}
+
+\item{z_gene}{A data frame with two columns: "id", "z". giving the z scores for
+genes.}
 
 \item{ld_pgenfs}{A character vector of .pgen or .bed files. One file for one
 chromosome, in the order of 1 to 22. Therefore, the length of this vector

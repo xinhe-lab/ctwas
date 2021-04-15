@@ -44,7 +44,7 @@ Please check out [Fusion/TWAS](http://gusevlab.org/projects/fusion/#computing-yo
 weight <- system.file("extdata/example_fusion_weights", "Tissue", package = "ctwas")
 ```
 
-Note: LD reference should contain all SNPs given in z score data frame. The `id` column in z score data frame and LD reference SNP ID should have the same meaning (i.e., indicating the same SNP). Weights and LD refernce SNP ID should have same meaning and ref/alt allele info needs to match. All coordinates are in hg19.
+Note: LD reference should contain as many GWAS SNPs as possible as only the overlapping SNPs are included in the analysis. Also only the SNPs with z scores, in LD reference and are eQTLs (i.e. SNPs shared in GWAS, LD reference and weight files) are used in imputing gene expression z scores. Thus we suggest you to impute z scores for eQTLs if many are not available. The program will harmonize data internally. All coordinates are in hg19.
 
 
 # step2: Impute expression z scores

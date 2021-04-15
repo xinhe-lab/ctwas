@@ -4,20 +4,13 @@
 \alias{impute_expr_z}
 \title{Impute expression}
 \usage{
-impute_expr_z(
-  zdf,
-  ld_pgenf,
-  weight,
-  method = "lasso",
-  outputdir = getwd(),
-  outname = NULL,
-  logfile = NULL,
-  compress = T,
-  checksnps = F
-)
+impute_expr_z(z_snp, ld_pgenf, weight, method = "lasso",
+  outputdir = getwd(), outname = NULL, logfile = NULL,
+  compress = T, harmonize = T)
 }
 \arguments{
-\item{zdf}{a data frame, with columns "id" and "z". Z scores for every SNP.}
+\item{z_snp}{A data frame with two columns: "id", "A1", "A2", "z". giving the z scores for
+snps. "A1" is effect allele. "A2" is the other allele. If `harmonize= False`, A1 and A2 are not required.}
 
 \item{weight}{a string, pointing to the fusion/twas format of weights.
 Note the effect size are obtained with standardized genotype and phenotype.}
@@ -25,8 +18,7 @@ Note the effect size are obtained with standardized genotype and phenotype.}
 \item{method}{a string,  blup/bslmm/lasso/top1/enet/best
 "best" means the method giving the best cross validation R^2}
 
-\item{checksnps}{T/F, if need to check SNP consistency between weights
-file and genotype. fusion format of weights gives snp information from plink .bim file. checking include chr, pos, A1, A2.}
+\item{harmonize}{T/F, if need to harmonize SNP data, if T, will harmonize gwas, LD and eQTL genotype alleles.}
 }
 \description{
 Impute expression

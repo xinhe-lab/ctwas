@@ -11,7 +11,7 @@ knitr::opts_chunk$set(
 
 # Requirements
 
-Weights and LD refernce ID should have same meaning and ref/alt allele info needs to match. Y sample order and pgen sample order (as defined in .psam for plink2 files or .fam for plink1 files) should match. All coordinates are in hg19.
+Y sample order and pgen sample order (as defined in .psam for plink2 files or .fam for plink1 files) should match. All coordinates are in hg19. We will harmonize weights and GWAS genotype data internally.
 
 # Prepare input
 

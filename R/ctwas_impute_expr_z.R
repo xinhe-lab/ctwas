@@ -38,7 +38,7 @@ impute_expr_z <- function(z_snp,
   if (isTRUE(harmonize)){
     loginfo("flipping z scores to match LD reference")
     z_snp <- harmonize_z_ld(z_snp, ld_snpinfo)
-    loginfo("will also flip weights to match LD reference for each gene")
+    loginfo("will flip weights to match LD reference for each gene")
   }
 
   exprf <- paste0(outname, "_chr", b, ".expr")
@@ -82,7 +82,7 @@ impute_expr_z <- function(z_snp,
     }
 
     snpnames <- Reduce(intersect,
-                       list(rownames(wgt.matrix), ld_snpinfo$id, zdf$id))
+                       list(rownames(wgt.matrix), ld_snpinfo$id, z_snp$id))
 
     if (length(snpnames) == 0) next
 

@@ -4,14 +4,8 @@
 \alias{update_each_effect}
 \title{update each effect}
 \usage{
-update_each_effect(
-  X,
-  Y,
-  s,
-  estimate_prior_variance = FALSE,
-  estimate_prior_method = "optim",
-  check_null_threshold
-)
+update_each_effect(X, Y, s, estimate_prior_variance = FALSE,
+  estimate_prior_method = "optim", check_null_threshold)
 }
 \arguments{
 \item{X}{an n by p matrix of regressor variables}
