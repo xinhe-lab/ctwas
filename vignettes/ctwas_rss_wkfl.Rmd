@@ -26,8 +26,8 @@ The input are given below: z scores, a data frame:
 
 ```{r} 
 # z scores
-data(zdf.snp)
-head(zdf.snp)
+data(z_snp)
+head(z_snp)
 ```
 
 The genotype files for LD reference data. This is a character vector of .pgen or .bed files. One file for one chromosome, in the order of 1 to 22. Therefore, the length of this vector needs to be 22. If .pgen files are given, then .pvar and .psam are assumed to present in the same directory. If .bed files are given, then .bim and .fam files are assumed to present in the same directory.
@@ -52,18 +52,17 @@ In the following code, we compute expression z scores for each gene. We do this 
 ```{r impute, warning=F, message=F}
 outputdir <- "~/temp"
 ld_exprfs <- vector()
-zdf.gene <- NULL
+z_gene <- NULL
 for (i in 1:22){
   ld_pgenf <- ld_pgenfs[i]
-  res <- impute_expr_z(zdf.snp, ld_pgenf = ld_pgenf, weight = weight,
+  res <- impute_expr_z(z_snp = z_snp, ld_pgenf = ld_pgenf, weight = weight,
                            method = "lasso", outputdir = outputdir,
                            outname = "test_ss")
   ld_exprfs[i] <- res$ld_exprf
-  zdf.gene <- rbind(zdf.gene, res$zdf)
+  z_gene <- rbind(z_gene, res$z_gene)
 }
-zdf <- rbind(zdf.snp, zdf.gene)
 
-head(zdf)
+head(z_gene)
 ld_exprfs
 ```
 
@@ -72,10 +71,10 @@ In this step we will perform the causal TWAS algorithm, the algorithm will run s
 
 ```{r ctwas, warning=F, message=F}
 regionsfile <- system.file("extdata", "example_regions.bed", package = "ctwas")
-pars <- ctwas_rss(zdf, ld_pgenfs, ld_exprfs, ld_regions_custom = regionsfile, thin = 1, outputdir = outputdir, outname = "test_ss", ncore = 1)
+pars <- ctwas_rss(z_snp, z_gene, ld_pgenfs, ld_exprfs, ld_regions_custom = regionsfile, thin = 1, outputdir = outputdir, outname = "test_ss", ncore = 1)
 ```
 
-`ctwas_rss` returns the estimated parameters ( in the order of gene, SNP):
+`ctwas_rss` returns the estimated parameters (in the order of gene, SNP):
 
 ```{r}
 pars

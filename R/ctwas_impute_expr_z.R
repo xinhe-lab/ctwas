@@ -1,22 +1,23 @@
 #' Impute expression
-#' @param zdf a data frame, with columns "id" and "z". Z scores for every SNP.
+#' @param z_snp A data frame with two columns: "id", "A1", "A2", "z". giving the z scores for
+#' snps. "A1" is effect allele. "A2" is the other allele. If `harmonize= False`, A1 and A2 are not required.
 #' @param weight a string, pointing to the fusion/twas format of weights.
 #'   Note the effect size are obtained with standardized genotype and phenotype.
 #' @param method a string,  blup/bslmm/lasso/top1/enet/best
 #'   "best" means the method giving the best cross validation R^2
-#' @param checksnps T/F, if need to check SNP consistency between weights
-#'    file and genotype. fusion format of weights gives snp information from plink .bim file. checking include chr, pos, A1, A2.
+#' @param harmonize T/F, if need to harmonize SNP data, if T, will harmonize gwas, LD and eQTL genotype alleles.
 #' @importFrom logging addHandler loginfo
 #'
 #' @export
-impute_expr_z <- function(zdf, ld_pgenf,
+impute_expr_z <- function(z_snp,
+                        ld_pgenf,
                         weight,
                         method = "lasso",
                         outputdir = getwd(),
                         outname = NULL,
                         logfile = NULL,
                         compress = T,
-                        checksnps = F){
+                        harmonize = T){
 
   if (!is.null(logfile)){
     addHandler(writeToFile, file= logfile, level='DEBUG')
@@ -32,6 +33,12 @@ impute_expr_z <- function(zdf, ld_pgenf,
   b <- unique(ld_snpinfo$chrom)
   if (length(b) !=1){
     stop("Input LD reference genotype not splited by chromosome")
+  }
+
+  if (isTRUE(harmonize)){
+    loginfo("flipping z scores to match LD reference")
+    z_snp <- harmonize_z_ld(z_snp, ld_snpinfo)
+    loginfo("will also flip weights to match LD reference for each gene")
   }
 
   exprf <- paste0(outname, "_chr", b, ".expr")
@@ -68,6 +75,12 @@ impute_expr_z <- function(zdf, ld_pgenf,
 
     if (nrow(wgt.matrix) == 0) next
 
+    if (isTRUE(harmonize)){
+      w <- harmonize_wgt_ld(wgt.matrix, snps, ld_snpinfo)
+      wgt.matrix <- w[["wgt"]]
+      snps <- w[["snps"]]
+    }
+
     snpnames <- Reduce(intersect,
                        list(rownames(wgt.matrix), ld_snpinfo$id, zdf$id))
 
@@ -75,17 +88,7 @@ impute_expr_z <- function(zdf, ld_pgenf,
 
     wgt.idx <- match(snpnames, rownames(wgt.matrix))
     ld.idx <-  match(snpnames, ld_snpinfo$id)
-    zdf.idx <- match(snpnames, zdf$id)
-
-    # `snps` from FUSION follows .bim format
-    colnames(snps) <- c("chrom", "id", "cm","pos", "alt", "ref")
-
-    if (checksnps){
-      ldsnps <- ld_snpinfo[ld.idx, ]
-      if (!identical(ldsnps, snps[, c("chrom", "id", "pos", "alt", "ref")])){
-        stop("LD reference SNP and eQTL info inconsistent. STOP.")
-      }
-    }
+    z.idx <- match(snpnames, z_snp$id)
 
     wgt <-  wgt.matrix[wgt.idx, g.method, drop = F]
     X.g <- read_pgen(ld_pgen, variantidx = ld.idx)
@@ -96,7 +99,7 @@ impute_expr_z <- function(zdf, ld_pgenf,
     gexpr <- X.g %*% wgt
     if (abs(max(gexpr) - min(gexpr)) < 1e-8) next
 
-    z.s <- as.matrix(zdf[zdf.idx, "z"])
+    z.s <- as.matrix(z_snp[z.idx, "z"])
     var.s <- sqrt(apply(X.g, 2, var))
     Gamma.g <- cov(X.g)
 
@@ -151,9 +154,9 @@ impute_expr_z <- function(zdf, ld_pgenf,
 
   loginfo('expression inmputation done for chr %s.', b)
 
-  zdf.g <- data.frame("id" = gnames,
+  z_gene <- data.frame("id" = gnames,
                        "z" = z.g)
 
-  return(list("zdf" = zdf.g, "ld_exprf"= exprf))
+  return(list("z_gene" = z_gene, "ld_exprf"= exprf))
 }
 

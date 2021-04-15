@@ -1,8 +1,8 @@
 Package: ctwas
 Type: Package
 Title: Identify causal genes in TWAS analysis
-Date: 2021-3-26
-Version: 0.1.14
+Date: 2021-4-15
+Version: 0.1.15
 Author: Siming Zhao, Matthew Stephens, Xin He
 Maintainer: Siming Zhao <siming.zhao06@gmail.com>
 Description: These package implements a method we developed to identify

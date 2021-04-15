@@ -1,6 +1,11 @@
 #' Causal inference for TWAS using summary statistics
-#' @param zdf A data frame with two columns: "id", "z. giving the z scores for
-#' genes and snps.
+#' @param z_snp A data frame with four columns: "id", "A1", "A2", "z".
+#' giving the z scores for snps. "A1" is effect allele. "A2" is the other allele.
+#' If `harmonize= False`, A1 and A2 are not required.
+#'
+#' @param z_gene A data frame with two columns: "id", "z". giving the z scores for
+#' genes.
+#'
 #' @param ld_pgenfs A character vector of .pgen or .bed files. One file for one
 #'  chromosome, in the order of 1 to 22. Therefore, the length of this vector
 #'  needs to be 22. If .pgen files are given, then .pvar and .psam are assumed
@@ -46,7 +51,8 @@
 #' @importFrom tools file_ext
 #'
 #' @export
-ctwas_rss <- function(zdf,
+ctwas_rss <- function(z_snp,
+                  z_gene,
                   ld_pgenfs,
                   ld_exprfs,
                   ld_regions = c("EUR", "ASN", "AFR"),
@@ -64,6 +70,7 @@ ctwas_rss <- function(zdf,
                   use_null_weight = T,
                   coverage = 0.95,
                   stardardize = T,
+                  harmonize =T,
                   ncore = 1,
                   outputdir = getwd(),
                   outname = NULL,
@@ -96,6 +103,16 @@ ctwas_rss <- function(zdf,
   ld_pvarfs <- sapply(ld_pgenfs, prep_pvar, outputdir = outputdir)
   ld_exprvarfs <- sapply(ld_exprfs, prep_exprvar)
 
+  if (isTRUE(harmonize)){
+    loginfo("flipping z scores to match LD reference")
+    for (ld_pvarf in ld_pvarfs){
+      ld_snpinfo <- read_pvar(ld_pvarf)
+      z_snp <- harmonize_z_ld(z_snp, ld_snpinfo)
+    }
+  }
+
+  zdf <- rbind(z_snp[, c("id", "z")], z_gene[, c("id", "z")])
+  rm(z_snp)
 
   regionlist <- index_regions(ld_pvarfs, ld_exprvarfs, regionfile,
                               select = zdf$id,

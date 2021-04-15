@@ -37,16 +37,17 @@ set.seed(100)
 Y <- X.g %*% beta.gene + X.s%*% beta.snp + rnorm(nsample, 0, 1)
 
 # get summary statistics
-zdf.snp <- NULL
+z_snp <- NULL
 for (i in 1:22){
-  pgen <- prep_pgen(pgenfs[i], prep_pvar(pgenfs[i]))
+  pvar <- prep_pvar(pgenfs[i])
+  pgen <- prep_pgen(pgenfs[i], pvar)
+  snp <- read_pvar(pvar)
   X <- read_pgen(pgen)
   ss <- univariate_regression(X, Y)
   zhat <- with(ss, betahat/sebetahat)
-  id <- read_pvar(prep_pvar(pgenfs[i]))[, "id"]
-  zdf.snp <- rbind(zdf.snp,
-               data.frame("id" = id , "z" = zhat))
+  z_snp <- rbind(z_snp, cbind(snp[, c("id", "alt", "ref")], zhat))
 }
+colnames(z_snp) <- c("id", "A1", "A2", "z")
 
-usethis::use_data(Y, zdf.snp, overwrite = T)
+usethis::use_data(Y, z_snp, overwrite = T)
 

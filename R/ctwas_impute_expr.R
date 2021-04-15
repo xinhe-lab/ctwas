@@ -3,8 +3,7 @@
 #'   Note the effect size are obtained with standardized genotype and phenotype.
 #' @param method a string,  blup/bslmm/lasso/top1/enet/best
 #'   "best" means the method giving the best cross validation R^2
-#' @param checksnps T/F, if need to check SNP consistency between weights
-#'    file and genotype. fusion format of weights gives snp information from plink .bim file. checking include chr, pos, A1, A2.
+#' @param harmonize T/F, if need to harmonize SNP data, if T, will harmonize GWAS and eQTL genotype alleles.
 #' @importFrom logging addHandler loginfo
 #'
 #' @export
@@ -15,10 +14,14 @@ impute_expr <- function(pgenf,
                         outname = NULL,
                         logfile = NULL,
                         compress = T,
-                        checksnps = F){
+                        harmonize = T){
 
   if (!is.null(logfile)){
     addHandler(writeToFile, file= logfile, level='DEBUG')
+  }
+
+  if (isTRUE(harmonize)){
+    loginfo("Harmonize set to True: will flip weights to match LD reference")
   }
 
   outname <- file.path(outputdir, outname)
@@ -67,22 +70,18 @@ impute_expr <- function(pgenf,
 
     if (nrow(wgt.matrix) == 0) next
 
-    snpnames <- intersect(rownames(wgt.matrix), snpinfo$id)
 
+    if (isTRUE(harmonize)){
+      w <- harmonize_wgt_ld(wgt.matrix, snps, snpinfo)
+      wgt.matrix <- w[["wgt"]]
+      snps <- w[["snps"]]
+    }
+
+    snpnames <- intersect(rownames(wgt.matrix), snpinfo$id)
     if (length(snpnames) == 0) next
 
     wgt.idx <- match(snpnames, rownames(wgt.matrix))
     gwas.idx <-  match(snpnames, snpinfo$id)
-
-    # `snps` from FUSION follows .bim format
-    colnames(snps) <- c("chrom", "id", "cm","pos", "alt", "ref")
-
-    if (checksnps){
-      gwassnps <- snpinfo[gwas.idx, ]
-      if (!identical(gwassnps, snps[, c("chrom", "id", "pos", "alt", "ref")])){
-        stop("GWAS SNP and eQTL info inconsistent. STOP.")
-      }
-    }
 
     wgt <-  wgt.matrix[wgt.idx, g.method, drop = F]
 
