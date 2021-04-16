@@ -66,6 +66,7 @@ harmonize_z_ld <- function(z_snp, ld_snpinfo){
 harmonize_wgt_ld <- function(wgt.matrix, snps, ld_snpinfo){
   # `snps` from FUSION follows .bim format
   colnames(snps) <- c("chrom", "id", "cm", "pos", "alt", "ref")
+  snps <- snps[match(rownames(wgt.matrix), snps$id),]
   snpnames <- intersect(snps$id, ld_snpinfo$id)
   if (length(snpnames) != 0) {
     snps.idx <- match(snpnames, snps$id)

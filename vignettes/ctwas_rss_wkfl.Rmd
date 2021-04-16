@@ -14,7 +14,7 @@ This workflow aims to use GWAS summary statistics data as input and implements t
 
 Below is the workflow for running `ctwas` for summary statistics data. I provided example input files with the package and you can use the following code as a toy pipeline. You can prepare your own input files following the examples. 
 
-# step 1: Prepare input
+# Step 1: prepare input
 
 Our package is called `ctwas`.
 
@@ -22,7 +22,7 @@ Our package is called `ctwas`.
 library(ctwas)
 ```
 
-The input is given as below:
+The example inputs are given as below:
 
 * z scores, a data frame:
 
@@ -50,7 +50,7 @@ weight <- system.file("extdata/example_fusion_weights", "Tissue", package = "ctw
 Note: LD reference should contain as many GWAS SNPs as possible as only the overlapping SNPs are included in the analysis. Also only SNPs with z scores, in LD reference and are eQTLs (i.e. SNPs shared in GWAS, LD reference and weight files) are used in imputing gene expression z scores. Thus we suggest you to impute z scores for eQTLs if many are not available. The program will harmonize data internally. All coordinates are in hg19.
 
 
-# step2: Impute expression z scores
+# Step 2: impute expression z scores
 In the following code, we compute expression z scores for each gene. We do this chromosome by chromosome. `impute_expr_z` will return z scores for each gene. It will also generate files containing the reference LD genotypes for eQTLs in the gene and the filename is returned. We will need these files in the `ctwas_rss` function in step 3.
 ```{r impute, warning=F, message=F}
 outputdir <- "~/temp"
@@ -69,7 +69,7 @@ head(z_gene)
 ld_exprfs
 ```
 
-# step 3: Run `ctwas_rss`. 
+# Step 3: run `ctwas_rss`. 
 In this step we will perform the causal TWAS algorithm, the algorithm will run susie iteratively for parameter estimation and lastly provide PIPs for all genes and SNPs included in the analysis. If you don't want to define your own LD regions, then you can use the one defined by ldetect by simply specifying the population name using the `ld_regions` argument. One feature of the ctwas function is that it allows parallel computing. you can specify number of cores to use by the `ncore` argument. 
 
 ```{r ctwas, warning=F, message=F}

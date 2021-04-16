@@ -59,6 +59,12 @@ impute_expr <- function(pgenf,
     load(wf)
     gname <- wgtpos[i, "ID"]
 
+    if (isTRUE(harmonize)){
+      w <- harmonize_wgt_ld(wgt.matrix, snps, snpinfo)
+      wgt.matrix <- w[["wgt"]]
+      snps <- w[["snps"]]
+    }
+
     g.method = method
     if (g.method == "best"){
       g.method = names(which.max(cv.performance["rsq", ]))
@@ -69,13 +75,6 @@ impute_expr <- function(pgenf,
     wgt.matrix <- wgt.matrix[complete.cases(wgt.matrix), ,drop = F]
 
     if (nrow(wgt.matrix) == 0) next
-
-
-    if (isTRUE(harmonize)){
-      w <- harmonize_wgt_ld(wgt.matrix, snps, snpinfo)
-      wgt.matrix <- w[["wgt"]]
-      snps <- w[["snps"]]
-    }
 
     snpnames <- intersect(rownames(wgt.matrix), snpinfo$id)
     if (length(snpnames) == 0) next
