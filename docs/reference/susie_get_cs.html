@@ -8,13 +8,11 @@
 
 <title>Extract credible sets from SuSiE fit — susie_get_cs • ctwas</title>
 
-
 <!-- jquery -->
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.4.1/jquery.min.js" integrity="sha256-CSXorXvZcTkaix6Yvo6HppcZGetbYMGWSFlBw8HfCJo=" crossorigin="anonymous"></script>
 <!-- Bootstrap -->
 
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/3.4.1/css/bootstrap.min.css" integrity="sha256-bZLfwXAP04zRMK2BjiO8iu9pf4FbLqX6zitd+tIvLhE=" crossorigin="anonymous" />
-
 <script src="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/3.4.1/js/bootstrap.min.js" integrity="sha256-nuL8/2cJ5NDSSwnKD8VqreErSWHtnEP9E7AySL+1ev4=" crossorigin="anonymous"></script>
 
 <!-- bootstrap-toc -->
@@ -38,9 +36,10 @@
 
 
 
-
 <meta property="og:title" content="Extract credible sets from SuSiE fit — susie_get_cs" />
+
 <meta property="og:description" content="Extract credible sets from SuSiE fit" />
+
 
 
 
@@ -72,7 +71,7 @@
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">ctwas</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="Released version">0.1.11</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="Released version">0.1.16</span>
       </span>
     </div>
 
@@ -80,7 +79,7 @@
       <ul class="nav navbar-nav">
         <li>
   <a href="../index.html">
-    <span class="fas fa-home fa-lg"></span>
+    <span class="fas fa fas fa-home fa-lg"></span>
      
   </a>
 </li>
@@ -103,6 +102,7 @@
   </ul>
 </li>
       </ul>
+      
       <ul class="nav navbar-nav navbar-right">
         <li>
   <a href="https://github.com/simingz/ctwas">Source</a>
@@ -126,12 +126,14 @@
     </div>
 
     <div class="ref-description">
+    
     <p>Extract credible sets from SuSiE fit</p>
+    
     </div>
 
     <pre class="usage"><span class='fu'>susie_get_cs</span><span class='op'>(</span><span class='va'>res</span>, X <span class='op'>=</span> <span class='cn'>NULL</span>, Xcorr <span class='op'>=</span> <span class='cn'>NULL</span>, coverage <span class='op'>=</span> <span class='fl'>0.95</span>,
   min_abs_corr <span class='op'>=</span> <span class='fl'>0.5</span>, dedup <span class='op'>=</span> <span class='cn'>TRUE</span>, squared <span class='op'>=</span> <span class='cn'>FALSE</span><span class='op'>)</span></pre>
-
+    
     <h2 class="hasAnchor" id="arguments"><a class="anchor" href="#arguments"></a>Arguments</h2>
     <table class="ref-arguments">
     <colgroup><col class="name" /><col class="desc" /></colgroup>
@@ -170,7 +172,7 @@ a pair of variables with correlation less than this threshold will be filtered o
       <td><p>If TRUE, report min, mean and median of squared correlation instead of absolute correlation.</p></td>
     </tr>
     </table>
-
+    
     <h2 class="hasAnchor" id="value"><a class="anchor" href="#value"></a>Value</h2>
 
     <p>a list with elements:</p>
@@ -179,12 +181,14 @@ a pair of variables with correlation less than this threshold will be filtered o
 <dt>purity</dt><dd><p>(If `X` or `Xcorr` are provided), the purity of each CS.</p></dd>
 <dt>cs_index</dt><dd><p>(If `X` or `Xcorr` are provided) the index (in 1,...,L) of each reported CS in the supplied susie fit.</p></dd>
 
+    
     <h2 class="hasAnchor" id="details"><a class="anchor" href="#details"></a>Details</h2>
 
     <p>Reports indices of variables in each credible set (CS) identified,
 as well as summaries of correlation among the variables included in each CS.Revised from susieR::susie_get_cs.
 If desired, one can filter out CSs that do not meet a specified purity threshold (min_abs_corr);
 to do this either `X` or `Xcorr` must be supplied.</p>
+    
 
   </div>
   <div class="col-md-3 hidden-xs hidden-sm" id="pkgdown-sidebar">

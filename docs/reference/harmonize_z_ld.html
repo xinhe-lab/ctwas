@@ -6,7 +6,8 @@
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-<title>Read .expr file into R — read_expr • ctwas</title>
+<title>Harmonize z scores from GWAS to match ld reference genotypes.
+Flip signs when reverse complement matches. — harmonize_z_ld • ctwas</title>
 
 <!-- jquery -->
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.4.1/jquery.min.js" integrity="sha256-CSXorXvZcTkaix6Yvo6HppcZGetbYMGWSFlBw8HfCJo=" crossorigin="anonymous"></script>
@@ -36,9 +37,11 @@
 
 
 
-<meta property="og:title" content="Read .expr file into R — read_expr" />
+<meta property="og:title" content="Harmonize z scores from GWAS to match ld reference genotypes.
+Flip signs when reverse complement matches. — harmonize_z_ld" />
 
-<meta property="og:description" content="Read .expr file into R" />
+<meta property="og:description" content="Harmonize z scores from GWAS to match ld reference genotypes.
+Flip signs when reverse complement matches." />
 
 
 
@@ -120,32 +123,39 @@
 <div class="row">
   <div class="col-md-9 contents">
     <div class="page-header">
-    <h1>Read .expr file into R</h1>
+    <h1>Harmonize z scores from GWAS to match ld reference genotypes.
+Flip signs when reverse complement matches.</h1>
     
-    <div class="hidden name"><code>read_expr.Rd</code></div>
+    <div class="hidden name"><code>harmonize_z_ld.Rd</code></div>
     </div>
 
     <div class="ref-description">
     
-    <p>Read .expr file into R</p>
+    <p>Harmonize z scores from GWAS to match ld reference genotypes.
+Flip signs when reverse complement matches.</p>
     
     </div>
 
-    <pre class="usage"><span class='fu'>read_expr</span><span class='op'>(</span><span class='va'>exprf</span>, variantidx <span class='op'>=</span> <span class='cn'>NULL</span><span class='op'>)</span></pre>
+    <pre class="usage"><span class='fu'>harmonize_z_ld</span><span class='op'>(</span><span class='va'>z_snp</span>, <span class='va'>ld_snpinfo</span><span class='op'>)</span></pre>
     
     <h2 class="hasAnchor" id="arguments"><a class="anchor" href="#arguments"></a>Arguments</h2>
     <table class="ref-arguments">
     <colgroup><col class="name" /><col class="desc" /></colgroup>
     <tr>
-      <th>variantidx</th>
-      <td><p>variant index. If NULL, all variants will be extracted.</p></td>
+      <th>z_snp</th>
+      <td><p>a data frame, with columns "id", "A1", "A2" and "z".
+Z scores for every SNP. "A1" is the effect allele.</p></td>
+    </tr>
+    <tr>
+      <th>ld_snpinfo</th>
+      <td><p>A data frame, snp info for LD reference,
+with columns "chrom", "id", "pos", "alt", "ref".</p></td>
     </tr>
     </table>
     
     <h2 class="hasAnchor" id="value"><a class="anchor" href="#value"></a>Value</h2>
 
-    <p>A matrix, columns are imputed expression for each gene, rows are
- for each sample.</p>
+    <p>A data frame, z_snp with the "z" columns flipped to match LD ref.</p>
     
 
   </div>

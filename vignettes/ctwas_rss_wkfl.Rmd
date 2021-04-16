@@ -22,15 +22,18 @@ Our package is called `ctwas`.
 library(ctwas)
 ```
 
-The input are given below: z scores, a data frame:
+The input is given as below:
+
+* z scores, a data frame:
 
 ```{r} 
 # z scores
 data(z_snp)
 head(z_snp)
 ```
+Here, A1 is effect allele. A2 is the other allele. z indicates the z score from GWAS.
 
-The genotype files for LD reference data. This is a character vector of .pgen or .bed files. One file for one chromosome, in the order of 1 to 22. Therefore, the length of this vector needs to be 22. If .pgen files are given, then .pvar and .psam are assumed to present in the same directory. If .bed files are given, then .bim and .fam files are assumed to present in the same directory.
+* The genotype files for LD reference data. This is a character vector of .pgen or .bed files. One file for one chromosome, in the order of 1 to 22. Therefore, the length of this vector needs to be 22. If .pgen files are given, then .pvar and .psam are assumed to present in the same directory. If .bed files are given, then .bim and .fam files are assumed to present in the same directory.
 ```{r}
 # genotype for LD reference
 ld_pgenfs <- system.file("extdata/example_genotype_files", paste0("example_chr", 1:22, ".pgen"), package = "ctwas")
@@ -38,13 +41,13 @@ ld_pgenfs <- system.file("extdata/example_genotype_files", paste0("example_chr",
 ld_pgenfs
 ```
 
-Please check out [Fusion/TWAS](http://gusevlab.org/projects/fusion/#computing-your-own-functional-weights) for the format of weights. Below is an example.
+* Weight files. Please check out [Fusion/TWAS](http://gusevlab.org/projects/fusion/#computing-your-own-functional-weights) for the format of weights. Below is an example.
 ```{r}
 # weight
 weight <- system.file("extdata/example_fusion_weights", "Tissue", package = "ctwas")
 ```
 
-Note: LD reference should contain as many GWAS SNPs as possible as only the overlapping SNPs are included in the analysis. Also only the SNPs with z scores, in LD reference and are eQTLs (i.e. SNPs shared in GWAS, LD reference and weight files) are used in imputing gene expression z scores. Thus we suggest you to impute z scores for eQTLs if many are not available. The program will harmonize data internally. All coordinates are in hg19.
+Note: LD reference should contain as many GWAS SNPs as possible as only the overlapping SNPs are included in the analysis. Also only SNPs with z scores, in LD reference and are eQTLs (i.e. SNPs shared in GWAS, LD reference and weight files) are used in imputing gene expression z scores. Thus we suggest you to impute z scores for eQTLs if many are not available. The program will harmonize data internally. All coordinates are in hg19.
 
 
 # step2: Impute expression z scores
