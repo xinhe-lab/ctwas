@@ -73,8 +73,9 @@ harmonize_wgt_ld <- function(wgt.matrix, snps, ld_snpinfo){
     ld.idx <- match(snpnames, ld_snpinfo$id)
     ifflip <- flip_allele(snps[snps.idx, ]$alt, snps[snps.idx, ]$ref,
                           ld_snpinfo[ld.idx, ]$alt, ld_snpinfo[ld.idx, ]$ref)
-    snps[snps.idx, ][ifflip, c("alt", "ref")] <-  snps[snps.idx, ][ifflip, c("ref", "alt")]
-    wgt.matrix[snps.idx, ][ifflip, ] <- - wgt.matrix[snps.idx, ][ifflip, ]
+    flip.idx <- snps.idx[ifflip]
+    snps[flip.idx, c("alt", "ref")] <-  snps[flip.idx, c("ref", "alt")]
+    wgt.matrix[flip.idx, ] <- - wgt.matrix[flip.idx, ]
   }
   return(list("wgt" = wgt.matrix, "snps" = snps))
 }
