@@ -55,7 +55,7 @@ impute_expr <- function(pgenf,
   loginfo("number of genes with weights provided: %s", nrow(wgtpos))
 
   for (i in 1: nrow(wgtpos)){
-    print(i)
+
     wf <- file.path(wgtdir, wgtpos[i, "WGT"])
     load(wf)
     gname <- wgtpos[i, "ID"]
