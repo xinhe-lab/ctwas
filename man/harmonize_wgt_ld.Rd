@@ -3,7 +3,7 @@
 \name{harmonize_wgt_ld}
 \alias{harmonize_wgt_ld}
 \title{Harmonize z scores from GWAS to match ld reference genotypes.
-Flip signs when reverse complement matches.}
+Flip signs when reverse complement matches, remove strand ambiguous SNPs}
 \usage{
 harmonize_wgt_ld(wgt.matrix, snps, ld_snpinfo)
 }
@@ -19,5 +19,5 @@ wgt.matrix and snps with alleles flipped to match
 }
 \description{
 Harmonize z scores from GWAS to match ld reference genotypes.
-Flip signs when reverse complement matches.
+Flip signs when reverse complement matches, remove strand ambiguous SNPs
 }
