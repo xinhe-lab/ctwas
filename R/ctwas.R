@@ -34,6 +34,9 @@
 #' @param prob_single blocks with probility more than this value will be
 #'  used for parameter estimation
 #'
+#' @param harmonize TRUE/FALSE. If TRUE, will harmonize GWAS, LD reference
+#' and weight internally (flip alleles and remove strand ambiguous SNPs).
+#'
 #' @param outname a string, the output name
 #'
 #' @param Y a vector of length n, phenotype, the same order as provided
@@ -95,6 +98,10 @@ ctwas <- function(pgenfs,
 
   pvarfs <- sapply(pgenfs, prep_pvar, outputdir = outputdir)
   exprvarfs <- sapply(exprfs, prep_exprvar)
+
+  if (thin <=0 | thin > 1){
+    stop("thin value needs to be in (0,1]")
+  }
 
   regionlist <- index_regions(pvarfs, exprvarfs, regionfile,
                               thin = thin)
@@ -177,17 +184,19 @@ ctwas <- function(pgenfs,
                  standardize = stardardize,
                  ncore = ncore,
                  outputdir = outputdir,
-                 outname = outname)
+                 outname = paste0(outname, ".temp"))
 
   group_prior[2] <- group_prior[2] * thin # convert snp pi1
 
-  if (thin < 1){
-
+  if (thin == 1){
+    file.rename(paste0(file.path(outputdir, outname), ".temp.susieI.txt"),
+                paste0(file.path(outputdir, outname), ".susieI.txt"))
+  } else {
     # get full SNPs
     regionlist <- index_regions(pvarfs, exprvarfs, regionfile,
                                 thin = thin)
 
-    res <- data.table::fread(paste0(file.path(outputdir, outname), ".susieI.txt"))
+    res <- data.table::fread(paste0(file.path(outputdir, outname), ".temp.susieI.txt"))
 
     # filter out regions based on max gene PIP of the region
     res.keep <- NULL
@@ -205,7 +214,12 @@ ctwas <- function(pgenfs,
 
     loginfo("Number of regions that contains strong gene signals: %s", nreg)
 
-    if (nreg > 0){
+    if (nreg == 0){
+
+      file.rename(paste0(file.path(outputdir, outname), ".temp.susieI.txt"),
+                  paste0(file.path(outputdir, outname), ".susieI.txt"))
+
+    } else{
 
       loginfo("Rerun susie for regions with strong gene signals using full SNPs.")
 
@@ -224,12 +238,13 @@ ctwas <- function(pgenfs,
                      outputdir = outputdir,
                      outname = paste0(outname, ".s3"))
 
-      res.rerun <- data.table::fread(paste0(file.path(outputdir, outname), ".s3.susieIres.txt"))
+      res.rerun <- data.table::fread(paste0(file.path(outputdir, outname), ".s3.susieI.txt"))
 
       res <- rbind(res.keep, res.rerun)
 
       data.table::fwrite(res, file = paste0(file.path(outputdir, outname), ".susieI.txt"),
                          sep = "\t", quote = F)
+      file.remove((paste0(file.path(outputdir, outname), ".temp.susieI.txt")))
     }
   }
 

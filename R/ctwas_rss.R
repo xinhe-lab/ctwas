@@ -45,6 +45,9 @@
 #' > \code{rerun_gene_PIP} using full SNPs. if \code{rerun_gene_PIP} is 0, then
 #' all blocks will rerun with full SNPs
 #'
+#' @param harmonize TRUE/FALSE. If TRUE, will harmonize GWAS, LD reference
+#' and weight internally (flip alleles and remove strand ambiguous SNPs)
+#'
 #' @param outname a string, the output name
 #'
 #' @importFrom logging addHandler loginfo
@@ -113,6 +116,10 @@ ctwas_rss <- function(z_snp,
 
   zdf <- rbind(z_snp[, c("id", "z")], z_gene[, c("id", "z")])
   rm(z_snp)
+
+  if (thin <=0 | thin > 1){
+    stop("thin value needs to be in (0,1]")
+  }
 
   regionlist <- index_regions(ld_pvarfs, ld_exprvarfs, regionfile,
                               select = zdf$id,
@@ -203,18 +210,22 @@ ctwas_rss <- function(z_snp,
                  coverage = coverage,
                  ncore = ncore,
                  outputdir = outputdir,
-                 outname = outname)
+                 outname = paste0(outname, ".temp"))
 
   group_prior[2] <- group_prior[2] * thin # convert snp pi1
 
-  if (thin < 1){
+  if (thin == 1) {
+    file.rename(paste0(file.path(outputdir, outname), ".temp.susieIrss.txt"),
+                paste0(file.path(outputdir, outname), ".susieIrss.txt"))
+
+  } else {
 
     # get full SNPs
     regionlist <- index_regions(ld_pvarfs, ld_exprvarfs, regionfile,
                                 select = zdf$id,
                                 thin = 1, minvar = 2) # susie_rss can't take 1 var.
 
-    res <- data.table::fread(paste0(file.path(outputdir, outname), ".susieIrss.txt"))
+    res <- data.table::fread(paste0(file.path(outputdir, outname), ".temp.susieIrss.txt"))
 
     # filter out regions based on max gene PIP of the region
     res.keep <- NULL
@@ -231,8 +242,11 @@ ctwas_rss <- function(z_snp,
     nreg <- sum(unlist(lapply(regionlist, length)))
 
     loginfo("Number of regions that contains strong gene signals: %s", nreg)
+    if (nreg == 0){
+      file.rename(paste0(file.path(outputdir, outname), ".temp.susieIrss.txt"),
+                  paste0(file.path(outputdir, outname), ".susieIrss.txt"))
 
-    if (nreg > 0){
+    } else {
 
       loginfo("Rerun susie for regions with strong gene signals using full SNPs.")
 
@@ -259,6 +273,7 @@ ctwas_rss <- function(z_snp,
 
       data.table::fwrite(res, file = paste0(file.path(outputdir, outname), ".susieIrss.txt"),
                          sep = "\t", quote = F)
+      file.remove((paste0(file.path(outputdir, outname), ".temp.susieIrss.txt")))
     }
   }
 
