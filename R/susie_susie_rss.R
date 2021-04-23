@@ -276,6 +276,12 @@ susie_rss = function (z, R, maf = NULL, maf_thresh = 0, z_ld_weight = 0,
   s$fitted = s$Xtfitted
   s$Rr = s$XtXr
   s$Xtfitted = s$XtXr = NULL
+
+  # different from susieR, this is a bug of susie_rss, make it consistent to susie
+  if (!is.null(null_weight)) {
+    s$null_index <- length(z)
+    s$pip <- s$pip[1:(length(z)-1)]
+  }
   return(s)
 }
 
