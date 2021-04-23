@@ -52,6 +52,9 @@ used for parameter estimation}
 \item{outname}{a string, the output name}
 
 \item{logfile}{the log file, if NULL will print log info on screen}
+
+\item{harmonize}{TRUE/FALSE. If TRUE, will harmonize GWAS, LD reference
+and weight internally (flip alleles and remove strand ambiguous SNPs).}
 }
 \description{
 Causal inference for TWAS

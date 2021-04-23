@@ -2,115 +2,192 @@
 % Please edit documentation in R/susie_susie_rss.R
 \name{susie_rss}
 \alias{susie_rss}
-\title{Bayesian sum of single-effect (SuSiE) linear regression using z scores}
+\title{Sum of Single Effects (SuSiE) Regression using summary statistics}
 \usage{
 susie_rss(z, R, maf = NULL, maf_thresh = 0, z_ld_weight = 0,
   L = 10, prior_variance = 50, residual_variance = NULL,
-  r_tol = 1e-08, prior_weights = NULL, null_weight = NULL,
-  estimate_residual_variance = TRUE, estimate_prior_variance = TRUE,
+  prior_weights = NULL, null_weight = NULL,
+  estimate_residual_variance = FALSE, estimate_prior_variance = TRUE,
   estimate_prior_method = c("optim", "EM", "simple"),
   check_null_threshold = 0, prior_tol = 1e-09, max_iter = 100,
-  s_init = list(), intercept_value = 0, coverage = 0.95,
+  s_init = NULL, intercept_value = 0, coverage = 0.95,
   min_abs_corr = 0.5, tol = 0.001, verbose = FALSE,
-  track_fit = FALSE, check_R = TRUE, check_z = TRUE)
+  track_fit = FALSE, check_R = FALSE, r_tol = 1e-08,
+  refine = FALSE)
 }
 \arguments{
-\item{z}{a p vector of z scores.}
+\item{z}{A p-vector of z scores.}
 
-\item{R}{a p by p symmetric and positive semidefinite correlation matrix. If it is from a reference panel,
-we recommend a modification on correlation matrix with parameter `z_ld_weight`.}
+\item{R}{A p by p symmetric, positive semidefinite correlation
+matrix.}
 
-\item{maf}{minor allele frequency; to be used along with `maf_thresh` to filter input summary statistics}
+\item{maf}{Minor allele frequency; to be used along with
+\code{maf_thresh} to filter input summary statistics.}
 
-\item{maf_thresh}{variants having MAF smaller than this threshold will be filtered out}
+\item{maf_thresh}{Variants having a minor allele frequency smaller
+than this threshold are not used.}
 
-\item{z_ld_weight}{the weight assigned to the z in the ld matrix, the ld matrix used in model is cov2cor((1-w) R + w zz').
-We recomment setting `z_ld_weight` as 1/number of samples in reference panel.}
+\item{z_ld_weight}{This feature is not recommended. The weights
+assigned to the z scores in the LD matrix. If \code{z_ld_weight >
+0}, the LD matrix used in the model is \code{cov2cor((1-w)*R +
+w*tcrossprod(z))}, where \code{w = z_ld_weight}.}
 
-\item{L}{maximum number of non-zero effects}
+\item{L}{Number of components (nonzero coefficients) in the susie
+regression model. If L is larger than the number of covariates, p,
+L is set to p.}
 
-\item{prior_variance}{the prior variance (vector of length L, or scalar. In latter case gets repeated L times )}
+\item{prior_variance}{The prior variance. It is either a scalar or
+a vector of length L.}
 
-\item{residual_variance}{the residual variance, a scaler between 0 and 1}
+\item{residual_variance}{Variance of the residual.
+If it is not specified, we set it to 1.}
 
-\item{r_tol}{tolerance level for eigen value check of positive semidefinite matrix of R.}
+\item{prior_weights}{A vector of length p, in which each entry
+gives the prior probability that SNP j has non-zero effect.}
 
-\item{prior_weights}{a p vector of prior probability that each element is non-zero}
+\item{null_weight}{Prior probability of no effect (a number between
+0 and 1, and cannot be exactly 1).}
 
-\item{null_weight}{probability of no effect, for each single effect model}
+\item{estimate_residual_variance}{The residual variance is
+fixed to the value supplied by \code{residual_variance}. We don't
+estimate residual variance in susie_rss.}
 
-\item{estimate_residual_variance}{indicates whether to estimate residual variance}
-
-\item{estimate_prior_variance}{indicates whether to estimate prior}
+\item{estimate_prior_variance}{If \code{estimate_prior_variance =
+TRUE}, the prior variance is estimated (this is a separate
+parameter for each of the L effects). If provided,
+\code{prior_variance} is then used as an initial value for
+the optimization. When \code{estimate_prior_variance = FALSE}, the
+prior variance for each of the L effects is determined by the
+value supplied to \code{prior_variance}.}
 
 \item{estimate_prior_method}{The method used for estimating prior
-variance. "simple" method only compares the loglikelihood between
-using specified prior variance and using zero, and chose the one that
-gives larger loglikelihood.}
+variance. When \code{estimate_prior_method = "simple"} is used, the
+likelihood at the specified prior variance is compared to the
+likelihood at a variance of zero, and the setting with the larger
+likelihood is retained.}
 
-\item{check_null_threshold}{when prior variance is estimated, compare the
-estimate with the null and set prior variance to null (zero) unless the log-likelihood
-using the estimate is larger than that of null by this threshold. For example,
-you can set it to 0.1 to nudge the estimate towards zero. Default is 0. Notice that setting it to non-zero
-may lead to decreasing ELBO in some cases.}
+\item{check_null_threshold}{When the prior variance is estimated,
+compare the estimate with the null, and set the prior variance to
+zero unless the log-likelihood using the estimate is larger by this
+threshold amount. For example, if you set
+\code{check_null_threshold = 0.1}, this will "nudge" the estimate
+towards zero when the difference in log-likelihoods is small. A
+note of caution that setting this to a value greater than zero may
+lead the IBSS fitting procedure to occasionally decrease the ELBO.}
 
-\item{prior_tol}{when prior variance is estimated, compare the estimated value to this tol at the end of
-the analysis and exclude a single effect from PIP computation if the estimated prior variance is smaller than it.}
+\item{prior_tol}{When the prior variance is estimated, compare the
+estimated value to \code{prior_tol} at the end of the computation,
+and exclude a single effect from PIP computation if the estimated
+prior variance is smaller than this tolerance value.}
 
-\item{max_iter}{maximum number of iterations to perform}
+\item{max_iter}{Maximum number of IBSS iterations to perform.}
 
-\item{s_init}{a previous susie fit with which to initialize}
+\item{s_init}{A previous susie fit with which to initialize.}
 
-\item{intercept_value}{a value to assign to the intercept (since the intercept cannot be estimated from centered summary data). This
-value will be used by coef.susie() to assign an intercept value, for consistency with the non-summary-statistic version of this function \code{susie}.
-Set to NULL if you want coef.susie() not to include an intercept term (and so only return a p vector).}
+\item{intercept_value}{The intercept. (The intercept cannot be
+estimated from centered summary data.) This setting will be used by
+\code{coef} to assign an intercept value, mainly for consistency
+with \code{susie}. Set to \code{NULL} if you want \code{coef} not
+to include an intercept term (and so only a p-vector is returned).}
 
-\item{coverage}{coverage of confident sets. Default to 0.95 for 95\% credible interval.}
+\item{coverage}{A number between 0 and 1 specifying the
+\dQuote{coverage} of the estimated confidence sets.}
 
-\item{min_abs_corr}{minimum of absolute value of correlation allowed in a credible set.}
+\item{min_abs_corr}{Minimum absolute correlation allowed in a
+credible set. The default, 0.5, corresponds to a squared
+correlation of 0.25, which is a commonly used threshold for
+genotype data in genetic studies.}
 
-\item{tol}{convergence tolerance based on elbo}
+\item{tol}{A small, non-negative number specifying the convergence
+tolerance for the IBSS fitting procedure. The fitting procedure
+will halt when the difference in the variational lower bound, or
+\dQuote{ELBO} (the objective function to be maximized), is
+less than \code{tol}.}
 
-\item{verbose}{if true outputs some progress messages}
+\item{verbose}{If \code{verbose = TRUE}, the algorithm's progress,
+and a summary of the optimization settings, are printed to the
+console.}
 
-\item{track_fit}{add an attribute \code{trace} to output that saves current values of all iterations}
+\item{track_fit}{If \code{track_fit = TRUE}, \code{trace}
+is also returned containing detailed information about the
+estimates at each iteration of the IBSS fitting procedure.}
 
-\item{check_R}{check whether R is positive semidefinite}
+\item{check_R}{If \code{check_R = TRUE}, check that \code{R} is
+positive semidefinite.}
 
-\item{check_z}{check whether z in space spanned by the non-zero eigenvectors of R}
+\item{r_tol}{Tolerance level for eigenvalue check of positive
+semidefinite matrix of R.}
+
+\item{refine}{If \code{refine = TRUE}, we use a procedure to help
+SuSiE get out of local optimum.}
 }
 \value{
-a susie fit, which is a list with some or all of the following elements\cr
-\item{alpha}{an L by p matrix of posterior inclusion probabilites}
-\item{mu}{an L by p matrix of posterior means (conditional on inclusion)}
-\item{mu2}{an L by p matrix of posterior second moments (conditional on inclusion)}
-\item{Rr}{an p vector of t(X) times fitted values, the fitted values equal to X times colSums(alpha*mu))}
-\item{sigma2}{residual variance}
-\item{V}{prior variance}
+A \code{"susie"} object with some or all of the following
+  elements:
+
+\item{alpha}{An L by p matrix of posterior inclusion probabilites.}
+
+\item{mu}{An L by p matrix of posterior means, conditional on
+  inclusion.}
+
+\item{mu2}{An L by p matrix of posterior second moments,
+  conditional on inclusion.}
+
+\item{lbf}{log-Bayes Factor for each single effect.}
+
+\item{lbf_variable}{log-Bayes Factor for each variable and single effect.}
+
+\item{intercept}{Fixed Intercept.}
+
+\item{sigma2}{Fixed Residual variance.}
+
+\item{V}{Prior variance of the non-zero elements of b, equal to
+  \code{scaled_prior_variance * var(Y)}.}
+
+\item{elbo}{The value of the variational lower bound, or
+  \dQuote{ELBO} (objective function to be maximized), achieved at
+  each iteration of the IBSS fitting procedure.}
+
+\item{fitted}{Vector of length n containing the fitted values of
+  the outcome.}
+
+\item{sets}{Credible sets estimated from model fit; see
+  \code{\link{susie_get_cs}} for details.}
+
+\item{pip}{A vector of length p giving the (marginal) posterior
+  inclusion probabilities for all p covariates.}
+
+\item{niter}{Number of IBSS iterations that were performed.}
+
+\item{converged}{\code{TRUE} or \code{FALSE} indicating whether
+  the IBSS converged to a solution within the chosen tolerance
+  level.}
+
+\item{Rr}{An p-vector of \code{t(X)} times fitted values, \code{X
+  \%*\% colSums(alpha*mu)}.}
 }
 \description{
-Bayesian sum of single-effect (SuSiE) linear regression using z scores
-}
-\details{
-Revised from susieR::susie_rss. Performs sum of single-effect (SuSiE) linear regression with z scores.
-The summary data required are the p by p correlation matrix R, the p vector z. The summary stats should come from the same individuals.
-This function fits the regression model z = sum_l Rb_l + e, where e is N(0,residual_variance * R) and the
-sum_l b_l is a p vector of effects to be estimated.
-The assumption is that each b_l has exactly one non-zero element, with all elements
-equally likely to be non-zero. The prior on the non-zero element is N(0,var=prior_variance).
+\code{susie_rss} performs sum of single-effect linear
+  regression with z scores; all posterior calculations are for
+  z-scores. This function fits the regression model \eqn{z = \sum_l
+  R*b_l + e}, where e is \eqn{N(0,R)} and \eqn{\sum_l b_l} is a
+  p-vector of effects to be estimated. The required summary data are
+  the p by p correlation matrix, \code{R}, and the p-vector \code{z}.
 }
 \examples{
 set.seed(1)
-n    <- 1000
-p    <- 1000
-beta <- rep(0,p)
-beta[1:4] <- 1
-X        <- matrix(rnorm(n*p),nrow=n,ncol=p)
-y        <- c(X \%*\% beta + rnorm(n))
+n = 1000
+p = 1000
+beta = rep(0,p)
+beta[1:4] = 1
+X = matrix(rnorm(n*p),nrow = n,ncol = p)
+X = scale(X,center = TRUE,scale = TRUE)
+y = drop(X \%*\% beta + rnorm(n))
+
 input_ss <- compute_ss(X,y,standardize = TRUE)
-ss <- univariate_regression(X, y)
-R <- with(input_ss, cov2cor(XtX))
-zhat <- with(ss, betahat/sebetahat)
-# res <- susie_rss(zhat, R)
+ss   <- univariate_regression(X,y)
+R    <- with(input_ss,cov2cor(XtX))
+zhat <- with(ss,betahat/sebetahat)
+res  <- susie_rss(zhat,R,L = 10)
 
 }

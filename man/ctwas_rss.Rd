@@ -58,6 +58,9 @@ used for parameter estimation}
 > \code{rerun_gene_PIP} using full SNPs. if \code{rerun_gene_PIP} is 0, then
 all blocks will rerun with full SNPs}
 
+\item{harmonize}{TRUE/FALSE. If TRUE, will harmonize GWAS, LD reference
+and weight internally (flip alleles and remove strand ambiguous SNPs)}
+
 \item{outname}{a string, the output name}
 
 \item{logfile}{the log file, if NULL will print log info on screen}
