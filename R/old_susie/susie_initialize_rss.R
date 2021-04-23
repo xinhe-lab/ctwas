@@ -20,7 +20,6 @@ init_setup_rss = function(p, L, prior_variance, residual_variance,
            Rz     = rep(0,p),
            KL     = rep(as.numeric(NA),L),
            lbf    = rep(as.numeric(NA),L),
-           lbf_variable = matrix(as.numeric(NA),L,p),
            sigma2 = residual_variance,
            V      = prior_variance,
            pi     = prior_weights)
@@ -32,24 +31,19 @@ init_setup_rss = function(p, L, prior_variance, residual_variance,
   return(s)
 }
 
-# Update a susie fit object in order to initialize susie model.
-init_finalize_rss = function (s, R = NULL, Rz = NULL) {
+#' a susie fit object in order to initialize susie rss model. Revised from
+#' susieR::init_finalize_rss
+init_finalize_rss <- function (s, R = NULL, Rz = NULL){
   # different from susieR
-  # if(length(s$V) == 1)
-  #   s$V = rep(s$V,nrow(s$alpha))
-
-  # Check sigma2.
+  # if (length(s$V) == 1)
+  #   s$V = rep(s$V, nrow(s$alpha))
   if (!is.numeric(s$sigma2))
     stop("Input residual variance sigma2 must be numeric")
-
-  # Avoid problems with dimension if input is a 1 x 1 matrix.
   s$sigma2 = as.numeric(s$sigma2)
   if (length(s$sigma2) != 1)
     stop("Input residual variance sigma2 must be a scalar")
   if (s$sigma2 <= 0)
     stop("residual variance sigma2 must be positive (is your var(Y) zero?)")
-
-  # Check prior variance.
   if (!is.numeric(s$V))
     stop("Input prior variance must be numeric")
   if (!all(s$V >= 0))
@@ -58,20 +52,18 @@ init_finalize_rss = function (s, R = NULL, Rz = NULL) {
     stop("dimension of mu and mu2 in input object do not match")
   if (!all(dim(s$mu) == dim(s$alpha)))
     stop("dimension of mu and alpha in input object do not match")
+
   # different from susieR
   # if (nrow(s$alpha) != length(s$V))
   #   stop("Input prior variance V must have length of nrow of alpha in ",
   #        "input object")
 
-  # Update Rz.
   if (!missing(Rz))
     s$Rz = Rz
   if (!missing(R))
-    s$Rz = compute_Xb(R,colSums(s$mu * s$alpha))
-
-  # Reset KL and lbf.
-  s$KL = rep(as.numeric(NA),nrow(s$alpha))
-  s$lbf = rep(as.numeric(NA),nrow(s$alpha))
+    s$Rz = compute_Xb(R, colSums(s$mu * s$alpha))
+  s$KL = rep(as.numeric(NA), nrow(s$alpha))
+  s$lbf = rep(as.numeric(NA), nrow(s$alpha))
   class(s) = "susie"
   return(s)
 }

@@ -17,7 +17,7 @@ We acknowledge the authors of `susieR` package for using their codes.
 Original `susieR` code obtained by:
 ```
 git clone git@github.com:stephenslab/susieR.git
-git checkout a06e35e
+git checkout c7934c0
 ```
 
 Minor edits to make it accept different prior variances for each variable. 

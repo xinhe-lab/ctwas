@@ -1,29 +1,15 @@
 #' @title Initialize a susie object using regression coefficients
 #'
-#' @param coef_index An L-vector containing the the indices of the
-#'   nonzero coefficients.
+#' @param coef_index An L-vector for indices of nonzero effects.
 #'
-#' @param coef_value An L-vector containing initial coefficient
-#' estimates.
+#' @param coef_value An L-vector for initial estimated beta values.
 #'
-#' @param p A scalar giving the number of variables.
+#' @param p A scalar the number of variables in the data.
 #'
-#' @return A list with elements \code{alpha}, \code{mu} and \code{mu2}
-#'   to be used by \code{susie}.
+#' @return A list (alpha, mu, mu2) to be used by \code{susie}.
 #'
 #' @examples
-#' set.seed(1)
-#' n = 1000
-#' p = 1000
-#' beta = rep(0,p)
-#' beta[sample(1:1000,4)] = 1
-#' X = matrix(rnorm(n*p),nrow = n,ncol = p)
-#' X = scale(X,center = TRUE,scale = TRUE)
-#' y = drop(X %*% beta + rnorm(n))
-#'
-#' # Initialize susie to ground-truth coefficients.
-#' s = susie_init_coef(which(beta != 0),beta[beta != 0],length(beta))
-#' res = susie(X,y,L = 10,s_init=s)
+#' # Add example(s) here.
 #'
 #' @export
 #'
@@ -43,9 +29,7 @@ susie_init_coef = function (coef_index, coef_value, p) {
     alpha[i,coef_index[i]] = 1
     mu[i,coef_index[i]] = coef_value[i]
   }
-  out = list(alpha = alpha,mu = mu,mu2 = mu*mu)
-  class(out) <- c("susie","list")
-  return(out)
+  return(list(alpha = alpha,mu = mu,mu2 = mu*mu))
 }
 
 # Set default susie initialization.
@@ -72,7 +56,6 @@ init_setup = function (n, p, L, scaled_prior_variance, residual_variance,
            Xr     = rep(0,n),
            KL     = rep(as.numeric(NA),L),
            lbf    = rep(as.numeric(NA),L),
-           lbf_variable = matrix(as.numeric(NA),L,p),
            sigma2 = residual_variance,
            V      = scaled_prior_variance*varY,
            pi     = prior_weights)
@@ -84,11 +67,12 @@ init_setup = function (n, p, L, scaled_prior_variance, residual_variance,
   return(s)
 }
 
-# Update a susie fit object in order to initialize susie model.
+#' a susie fit object in order to initialize susie model. Revised from
+#' susieR::init_finalize
 init_finalize = function (s, X = NULL, Xr = NULL) {
   # different form susieR
   # if(length(s$V) == 1)
-  #   s$V = rep(s$V,nrow(s$alpha))
+  #   s$V = rep(s$V, nrow(s$alpha))
 
   # Check sigma2.
   if (!is.numeric(s$sigma2))
@@ -111,7 +95,7 @@ init_finalize = function (s, X = NULL, Xr = NULL) {
   if (!all(dim(s$mu) == dim(s$alpha)))
     stop("dimension of mu and alpha in input object do not match")
 
-  # different form susieR
+  # different from susieR
   # if (nrow(s$alpha) != length(s$V))
   #   stop("Input prior variance V must have length of nrow of alpha in ",
   #        "input object")
@@ -128,3 +112,4 @@ init_finalize = function (s, X = NULL, Xr = NULL) {
   class(s) = "susie"
   return(s)
 }
+

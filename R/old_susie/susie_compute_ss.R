@@ -10,10 +10,6 @@
 #' @return A list of sufficient statistics.
 #' 
 #' @importFrom methods as
-#'
-#' @examples
-#' data(N2finemapping)
-#' ss = compute_ss(N2finemapping$X, N2finemapping$Y[,1])
 #' 
 #' @export
 #' 
