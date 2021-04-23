@@ -81,7 +81,7 @@ susieI_rss <- function(zdf,
 
             if (is.null(V.gene) | is.null(V.SNP)){
               V <- matrix(rep(50, L * p), nrow = L)
-              # following the default in susieR_rss
+              # following the default in susieR::susie_rss
             } else{
               V <- c(rep(V.gene, length(gidx)), rep(V.SNP, length(sidx)))
               V <- matrix(rep(V, each = L), nrow=L)
@@ -110,8 +110,7 @@ susieI_rss <- function(zdf,
                                   null_weight = nw,
                                   prior_variance = V,
                                   estimate_prior_variance = F,
-                                  coverage = coverage,
-                                  check_z = F)
+                                  coverage = coverage)
 
             outdf.reg <- anno_susie(susieres,
                                    ld_exprvarfs[b],
