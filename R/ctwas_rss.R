@@ -48,6 +48,10 @@
 #' @param harmonize TRUE/FALSE. If TRUE, will harmonize GWAS, LD reference
 #' and weight internally (flip alleles and remove strand ambiguous SNPs)
 #'
+#' @param ncore integer, number of cores to run parameter estimation
+#' @param ncore.rerun integer, number of cores to rerun regions with strong signals
+#' using full SNPs.
+#'
 #' @param outname a string, the output name
 #'
 #' @importFrom logging addHandler loginfo
@@ -75,6 +79,7 @@ ctwas_rss <- function(z_snp,
                   stardardize = T,
                   harmonize =T,
                   ncore = 1,
+                  ncore.rerun = 1,
                   outputdir = getwd(),
                   outname = NULL,
                   logfile = NULL){
@@ -263,7 +268,7 @@ ctwas_rss <- function(z_snp,
                          estimate_group_prior_var = estimate_group_prior_var,
                          use_null_weight = use_null_weight,
                          coverage = coverage,
-                         ncore = ncore,
+                         ncore = ncore.rerun,
                          outputdir = outputdir,
                          outname = paste0(outname, ".s3"))
 

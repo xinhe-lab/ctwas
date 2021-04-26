@@ -131,7 +131,7 @@ index_regions <- function(pvarfs,
                                                         "gid"  = gid,
                                                         "sidx" = sidx,
                                                         "sid"  = sid,
-                                                        "start" = regions[rn - 1, "start"],
+                                                        "start" =  regionlist[[b]][[as.character(rn - 1)]]$start,
                                                         "stop" = regions[rn, "stop"])
 
             regionlist[[b]][[as.character(rn -1)]] <- NULL
