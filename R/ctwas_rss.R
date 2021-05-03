@@ -313,7 +313,7 @@ ctwas_rss <- function(z_snp,
       data.table::fwrite(res, file = paste0(file.path(outputdir, outname), ".susieIrss.txt"),
                          sep = "\t", quote = F)
       file.remove((paste0(file.path(outputdir, outname), ".temp.susieIrss.txt")))
-    }
+
   }
 
   list("group_prior" = group_prior,
