@@ -47,10 +47,6 @@ index_regions <- function(pvarfs,
 
   loginfo("No. LD regions: %s", nrow(reg))
 
-  if (thin > 1 | thin <= 0){
-    stop("thin needs to be in (0,1]")
-  }
-
   regionlist <- list()
   for (b in 1:length(pvarfs)){
     # get snp info (from pvarf file)
@@ -100,7 +96,7 @@ index_regions <- function(pvarfs,
       }
 
       sidx <- which(snpinfo$chrom == b & snpinfo$pos > p0 & snpinfo$pos < p1
-                    & snpinfo$keep == 1 & snpinfo$thin_tag == 1)
+                    & snpinfo$keep == 1)
 
       gid <- geneinfo[gidx, "id"]
       sid <- snpinfo[sidx, "id"]

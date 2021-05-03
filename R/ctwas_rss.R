@@ -138,9 +138,9 @@ ctwas_rss <- function(z_snp,
     stop("Invalid trim_z_value: need to be >=0. ")
   }
 
-  if (!is.numeric(trim_z_prop) | trim_z_prop <= 0 | trim_z_prop > 1)
+  if (!is.numeric(trim_z_prop) | trim_z_prop <= 0 | trim_z_prop > 1){
     stop("Invalid trim_z_prop: need to be in (0,1]. ")
-}
+  }
 
   if (trim_z_value == 0){
     if (trim_z_prop != 1){
@@ -314,11 +314,11 @@ ctwas_rss <- function(z_snp,
                          sep = "\t", quote = F)
       file.remove((paste0(file.path(outputdir, outname), ".temp.susieIrss.txt")))
 
+    }
   }
 
   list("group_prior" = group_prior,
        "group_prior_var" = group_prior_var)
-
 }
 
 
