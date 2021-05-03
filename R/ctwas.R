@@ -42,6 +42,8 @@
 #' @param Y a vector of length n, phenotype, the same order as provided
 #' by `.pgenfs` (defined in .psam or .fam files).
 #'
+#'
+#'
 #' @importFrom logging addHandler loginfo
 #' @importFrom tools file_ext
 #'

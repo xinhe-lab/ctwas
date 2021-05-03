@@ -7,12 +7,23 @@
 #' should provide non overlaping regions defining LD blocks. currently does not support
 #' chromsome X/Y etc.
 #'
-#' @param select variant ids to include. If NULL, all variants will be selected
-#' @param thin  A scalar in (0,1]. The proportion of SNPs
-#'  left after down sampling. Only applied on SNPs after selecting variants.
-#' @param minvar minimum number of variatns in a region
+#' @param select Default is NULL, all variants will be selected. Or a vector of variant IDs,
+#' or a data frame with columns id and z (id is for gene or SNP id, z is for z scores).
+#' z will be used for remove SNPs if the total number of SNPs exceeds limit. See
+#' parameter `maxSNP` for more information.
 #'
-#' @param merge True/False. If merge regions when a gene belong to multiple regions.
+#' @param maxSNP Default is Inf, no limit for the maximum number of SNPs in a region. Or an
+#' integer indicating the maximum number of SNPs allowed in a region. This
+#' parameter is useful when a region contains many SNPs and you don't have enough memory to
+#' run the program. In this case, you can put a limit on the number of SNPs in the region.
+#' If z scores are given in the parameter `select`, i.e. a data frame with columns id and z is
+#' provided, SNPs are ranked based on |z| from high to low and only the top `maxSNP` SNPs
+#' are kept. If only variant ids are provided, then `maxSNP` number of SNPs will be chosen
+#' randomly.
+#'
+#' @param minvar minimum number of variants in a region.
+#'
+#' @param merge True/False. If merge regions when a gene's eQTL locate in multiple regions.
 #'
 #' @return A list. Items correspond to each pvarf/exprvarf. Each Item is
 #'  also a list, the items in this list are for each region.
@@ -23,7 +34,7 @@ index_regions <- function(pvarfs,
                           exprvarfs,
                           regionfile,
                           select = NULL,
-                          thin = 1,
+                          maxSNP = Inf,
                           minvar = 1,
                           merge = T) {
 
@@ -56,12 +67,6 @@ index_regions <- function(pvarfs,
       snpinfo[!(snpinfo$id %in% select), "keep"] <- 0
     }
 
-    # downsampling for SNPs
-    snpinfo$thin_tag <- 0
-    nkept <- round(nrow(snpinfo) * thin)
-    set.seed(99)
-    snpinfo$thin_tag[sample(1:nrow(snpinfo), nkept)] <- 1
-
     # get gene info (from exprf file)
     exprvarf <- exprvarfs[b]
     geneinfo <- read_exprvar(exprvarf)
@@ -78,7 +83,6 @@ index_regions <- function(pvarfs,
       }
     }
 
-
     regions <- reg[reg$chr == b, ]
 
     regionlist[[b]] <- list()
@@ -89,7 +93,7 @@ index_regions <- function(pvarfs,
 
       if (isTRUE(merge)){
         gidx <- which(geneinfo$chrom == b & geneinfo$p1 > p0 & geneinfo$p0 < p1
-                    & geneinfo$keep == 1) # allow overlap
+                      & geneinfo$keep == 1) # allow overlap
       } else {
         gidx <- which(geneinfo$chrom == b & geneinfo$p0 > p0 & geneinfo$p0 < p1
                       & geneinfo$keep == 1) # unique assignment to regions
@@ -104,11 +108,11 @@ index_regions <- function(pvarfs,
       if (length(gidx) + length(sidx) < minvar) {next}
 
       regionlist[[b]][[as.character(rn)]] <- list("gidx" = gidx,
-                                    "gid"  = gid,
-                                    "sidx" = sidx,
-                                    "sid"  = sid,
-                                    "start" = p0,
-                                    "stop" = p1)
+                                                  "gid"  = gid,
+                                                  "sidx" = sidx,
+                                                  "sid"  = sid,
+                                                  "start" = p0,
+                                                  "stop" = p1)
     }
     loginfo("No. regions with at least one SNP/gene for chr%s: %s",
             b, length(regionlist[[b]]))
@@ -119,23 +123,23 @@ index_regions <- function(pvarfs,
         current <- regionlist[[b]][[as.character(rn)]]
         previous <- regionlist[[b]][[as.character(rn - 1)]]
 
-          if (length(intersect(current[["gid"]], previous[["gid"]]))> 0){
+        if (length(intersect(current[["gid"]], previous[["gid"]]))> 0){
 
-            gidx <-  unique(c(previous[["gidx"]], current[["gidx"]]))
-            sidx <-  unique(c(previous[["sidx"]], current[["sidx"]]))
+          gidx <-  unique(c(previous[["gidx"]], current[["gidx"]]))
+          sidx <-  unique(c(previous[["sidx"]], current[["sidx"]]))
 
-            gid <- geneinfo[gidx, "id"]
-            sid <- snpinfo[sidx, "id"]
+          gid <- geneinfo[gidx, "id"]
+          sid <- snpinfo[sidx, "id"]
 
-            regionlist[[b]][[as.character(rn)]] <- list("gidx" = gidx,
-                                                        "gid"  = gid,
-                                                        "sidx" = sidx,
-                                                        "sid"  = sid,
-                                                        "start" =  regionlist[[b]][[as.character(rn - 1)]]$start,
-                                                        "stop" = regions[rn, "stop"])
+          regionlist[[b]][[as.character(rn)]] <- list("gidx" = gidx,
+                                                      "gid"  = gid,
+                                                      "sidx" = sidx,
+                                                      "sid"  = sid,
+                                                      "start" =  regionlist[[b]][[as.character(rn - 1)]]$start,
+                                                      "stop" = regions[rn, "stop"])
 
-            regionlist[[b]][[as.character(rn -1)]] <- NULL
-          }
+          regionlist[[b]][[as.character(rn -1)]] <- NULL
+        }
       }
     }
 
@@ -143,7 +147,44 @@ index_regions <- function(pvarfs,
             b, length(regionlist[[b]]))
   }
 
-  regionlist
+
+  loginfo("Trim regions with SNPs more than %s", maxSNP)
+
+  if ("z" %in% colnames(select)) {
+    # z score is given, trim snps with lower |z|
+    for (b in 1: length(regionlist)){
+      for (rn in names(regionlist[[b]])) {
+        if (length(regionlist[[b]][[rn]][["sid"]]) > maxSNP){
+            z.abs <- abs(select[match(regionlist[[b]][[rn]][["sid"]], select[, "id"]), "z"])
+            ifkeep <- rank(-z.abs) <= maxSNP
+            regionlist[[b]][[rn]][["sidx"]] <-  regionlist[[b]][[rn]][["sidx"]][ifkeep]
+            regionlist[[b]][[rn]][["sid"]] <-  regionlist[[b]][[rn]][["sid"]][ifkeep]
+            regionlist[[b]][[rn]][["prop"]] <- maxSNP/length(ifkeep)
+        }
+      }
+    }
+  } else{
+    # if no z score information, randomly select snps
+    for (b in 1: length(regionlist)){
+      for (rn in names(regionlist[[b]])) {
+        if (length(regionlist[[b]][[rn]][["sid"]]) > maxSNP){
+          n.ori <- length(regionlist[[b]][[rn]][["sid"]])
+          ifkeep <- rep(F, n.ori)
+          set.seed <- 99
+          ifkeep[sample.int(n.ori, size = maxSNP)] <- T
+          regionlist[[b]][[rn]][["sidx"]] <-  regionlist[[b]][[rn]][["sidx"]][ifkeep]
+          regionlist[[b]][[rn]][["sid"]] <-  regionlist[[b]][[rn]][["sid"]][ifkeep]
+          regionlist[[b]][[rn]][["prop"]] <- maxSNP/length(ifkeep)
+        }
+      }
+    }
+  }
+
+
+  return(regionlist)
+
+
+
 }
 
 
@@ -194,4 +235,3 @@ region2core <- function(regionlist, ncore = 1){
   }
   return(corelist)
 }
-

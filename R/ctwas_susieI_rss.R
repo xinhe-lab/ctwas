@@ -68,6 +68,8 @@ susieI_rss <- function(zdf,
             sidx <- regionlist[[b]][[rn]][["sidx"]]
             gid <- regionlist[[b]][[rn]][["gid"]]
             sid <- regionlist[[b]][[rn]][["sid"]]
+            prop <-  regionlist[[b]][[rn]][["prop"]]
+            if (is.null(prop)) prop <- 1
 
             p <- length(gidx) + length(sidx)
 
@@ -78,6 +80,8 @@ susieI_rss <- function(zdf,
               prior <- c(rep(prior.gene, length(gidx)),
                          rep(prior.SNP, length(sidx)))
             }
+
+            prior[(length(gidx) + 1) : p] <- prior[(length(gidx) + 1) : p]/prop
 
             if (is.null(V.gene) | is.null(V.SNP)){
               V <- matrix(rep(50, L * p), nrow = L)
