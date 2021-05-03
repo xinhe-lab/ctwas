@@ -152,7 +152,7 @@ index_regions <- function(pvarfs,
       for (rn in names(regionlist[[b]])) {
         if (length(regionlist[[b]][[rn]][["sid"]]) > maxSNP){
             z.abs <- abs(select[match(regionlist[[b]][[rn]][["sid"]], select[, "id"]), "z"])
-            ifkeep <- rank(-z.abs) <= maxSNP
+            ifkeep <- rank(-z.abs, ties.method = "first") <= maxSNP
             regionlist[[b]][[rn]][["sidx"]] <-  regionlist[[b]][[rn]][["sidx"]][ifkeep]
             regionlist[[b]][[rn]][["sid"]] <-  regionlist[[b]][[rn]][["sid"]][ifkeep]
             regionlist[[b]][[rn]][["prop"]] <- maxSNP/length(ifkeep)

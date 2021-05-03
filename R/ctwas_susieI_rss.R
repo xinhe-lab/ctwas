@@ -81,7 +81,9 @@ susieI_rss <- function(zdf,
                          rep(prior.SNP, length(sidx)))
             }
 
-            prior[(length(gidx) + 1) : p] <- prior[(length(gidx) + 1) : p]/prop
+            if (length(sidx) >=1){
+              prior[(length(gidx) + 1) : p] <- prior[(length(gidx) + 1) : p]/prop
+            }
 
             if (is.null(V.gene) | is.null(V.SNP)){
               V <- matrix(rep(50, L * p), nrow = L)

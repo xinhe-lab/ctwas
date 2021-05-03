@@ -31,8 +31,25 @@
 #'
 #' @param logfile the log file, if NULL will print log info on screen
 #'
+#' @param rerun_gene_PIP if trim_z_prop < 1 or trim_z_value > 0, will rerun blocks with the max gene PIP
+#' > \code{rerun_gene_PIP} using full SNPs. if \code{rerun_gene_PIP} is 0, then
+#' all blocks will rerun with full SNPs
+#'
 #' @param prob_single blocks with probility more than this value will be
 #'  used for parameter estimation
+#'
+#' @param trim_z_prop  scalar in (0,1]. Proportion of SNPs left after trimming.
+#' This is for parameter estimation step. Currently, we are not trimming based on
+#' z scores but randomly. We will use z scores in future versions to be consistent
+#' with summary statistics version.
+#'
+#' @param trim_z_value scalar > = 0. Currently has to be 0.
+#'
+#' @param max_snp_region Inf or integer. Maximum number of SNPs in a region. Default is
+#' Inf, no limit. This can be useful if there are many SNPs in a region and you don't
+#' have enough memory to run the program. This applies to the last rerun step
+#'  (using full SNPs and rerun susie for regions with strong gene signals) only.
+#'
 #'
 #' @param harmonize TRUE/FALSE. If TRUE, will harmonize GWAS, LD reference
 #' and weight internally (flip alleles and remove strand ambiguous SNPs).
@@ -53,8 +70,11 @@ ctwas <- function(pgenfs,
                   Y,
                   ld_regions = c("EUR", "ASN", "AFR"),
                   ld_regions_custom = NULL,
-                  thin = 1,
+                  trim_z_prop = 1,
+                  trim_z_value = 0,
+                  max_snp_region = Inf,
                   prob_single = 0.8,
+                  rerun_gene_PIP = 0.8,
                   niter1 = 3,
                   niter2 = 30,
                   L= 5,
@@ -101,12 +121,40 @@ ctwas <- function(pgenfs,
   pvarfs <- sapply(pgenfs, prep_pvar, outputdir = outputdir)
   exprvarfs <- sapply(exprfs, prep_exprvar)
 
-  if (thin <=0 | thin > 1){
-    stop("thin value needs to be in (0,1]")
+  # trim SNPs for parameter estimation
+  if (!is.numeric(trim_z_value) | trim_z_value < 0){
+    stop("Invalid trim_z_value: need to be >=0. ")
   }
 
-  regionlist <- index_regions(pvarfs, exprvarfs, regionfile,
-                              thin = thin)
+  if (!is.numeric(trim_z_prop) | trim_z_prop <= 0 | trim_z_prop > 1){
+    stop("Invalid trim_z_prop: need to be in (0,1]. ")
+  }
+
+  #--- to do----- need to obtain z scores
+  z_snp <- do.call(rbind, lapply(pvarfs, read_pvar))
+  z_snp$z <- 0
+  z_gene <- do.call(rbind, lapply(exprvarfs, read_exprvar))
+  z_gene$z <- 0
+
+  if (trim_z_value == 0){
+    if (trim_z_prop != 1){
+      set.seed(99)
+      z_snp_trimmed <- z_snp[sample.int(n = nrow(z_snp), size = nrow(z_snp) * trim_z_prop), ,drop = F]
+    } else {
+      z_snp_trimmed <- z_snp
+    }
+  } else {
+    stop("trim_z_value >0 currently unsupported. use trim_z_prop instead.")
+    z_snp_trimmed <- z_snp[abs(z_snp$z) >= trim_z_value, ,drop = F]
+    trim_z_prop <- nrow(z_snp_trimmed)/nrow(z_snp)
+  }
+  #--- to do-----
+
+  zdf <- rbind(z_snp_trimmed[, c("id", "z")], z_gene[, c("id", "z")])
+  rm(z_snp_trimmed)
+
+  regionlist <- index_regions(pvarfs, exprvarfs, regionfile, select = zdf$id, maxSNP = Inf)
+  rm(zdf, z_snp, z_gene)
 
   regs <- do.call(rbind, lapply(1:22, function(x) cbind(x,
                           unlist(lapply(regionlist[[x]], "[[", "start")),
@@ -120,7 +168,7 @@ ctwas <- function(pgenfs,
     loginfo("Run susie iteratively, getting rough estimate ...")
 
     if (!is.null(group_prior)){
-      group_prior[2] <- group_prior[2]/thin
+      group_prior[2] <- group_prior[2]/trim_z_prop
     }
 
     pars <- susieI(pgenfs = pgenfs, exprfs = exprfs, Y = Y,
@@ -188,15 +236,15 @@ ctwas <- function(pgenfs,
                  outputdir = outputdir,
                  outname = paste0(outname, ".temp"))
 
-  group_prior[2] <- group_prior[2] * thin # convert snp pi1
+  group_prior[2] <- group_prior[2] * trim_z_prop # convert snp pi1
 
-  if (thin == 1){
+  if (trim_z_prop == 1){
     file.rename(paste0(file.path(outputdir, outname), ".temp.susieI.txt"),
                 paste0(file.path(outputdir, outname), ".susieI.txt"))
   } else {
     # get full SNPs
     regionlist <- index_regions(pvarfs, exprvarfs, regionfile,
-                                thin = thin)
+                                maxSNP = max_snp_region)
 
     res <- data.table::fread(paste0(file.path(outputdir, outname), ".temp.susieI.txt"))
 
