@@ -6,7 +6,7 @@
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-<title>Impute expression — impute_expr • ctwas</title>
+<title>Get correlations between CS, using variable with maximum PIP from each CS — get_cs_correlation • ctwas</title>
 
 
 <!-- jquery -->
@@ -39,8 +39,8 @@
 
 
 
-<meta property="og:title" content="Impute expression — impute_expr" />
-<meta property="og:description" content="Impute expression" />
+<meta property="og:title" content="Get correlations between CS, using variable with maximum PIP from each CS — get_cs_correlation" />
+<meta property="og:description" content="Get correlations between CS, using variable with maximum PIP from each CS" />
 
 
 
@@ -120,42 +120,33 @@
 <div class="row">
   <div class="col-md-9 contents">
     <div class="page-header">
-    <h1>Impute expression</h1>
+    <h1>Get correlations between CS, using variable with maximum PIP from each CS</h1>
     
-    <div class="hidden name"><code>impute_expr.Rd</code></div>
+    <div class="hidden name"><code>get_cs_correlation.Rd</code></div>
     </div>
 
     <div class="ref-description">
-    <p>Impute expression</p>
+    <p>Get correlations between CS, using variable with maximum PIP from each CS</p>
     </div>
 
-    <pre class="usage"><span class='fu'>impute_expr</span><span class='op'>(</span>
-  <span class='va'>pgenf</span>,
-  <span class='va'>weight</span>,
-  method <span class='op'>=</span> <span class='st'>"lasso"</span>,
-  outputdir <span class='op'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/getwd.html'>getwd</a></span><span class='op'>(</span><span class='op'>)</span>,
-  outname <span class='op'>=</span> <span class='cn'>NULL</span>,
-  logfile <span class='op'>=</span> <span class='cn'>NULL</span>,
-  compress <span class='op'>=</span> <span class='cn'>T</span>,
-  harmonize <span class='op'>=</span> <span class='cn'>T</span>
-<span class='op'>)</span></pre>
+    <pre class="usage"><span class='fu'>get_cs_correlation</span><span class='op'>(</span><span class='va'>res</span>, X <span class='op'>=</span> <span class='cn'>NULL</span>, Xcorr <span class='op'>=</span> <span class='cn'>NULL</span>, max <span class='op'>=</span> <span class='cn'>FALSE</span><span class='op'>)</span></pre>
 
     <h2 class="hasAnchor" id="arguments"><a class="anchor" href="#arguments"></a>Arguments</h2>
     <table class="ref-arguments">
     <colgroup><col class="name" /><col class="desc" /></colgroup>
     <tr>
-      <th>weight</th>
-      <td><p>a string, pointing to the fusion/twas format of weights.
-Note the effect size are obtained with standardized genotype and phenotype.</p></td>
+      <th>X</th>
+      <td><p>n by p matrix of values of the p variables (covariates) in
+n samples. When provided, correlation between variables will be
+computed and used to remove CSs whose minimum correlation among
+variables is smaller than <code>min_abs_corr</code>.</p></td>
     </tr>
     <tr>
-      <th>method</th>
-      <td><p>a string,  blup/bslmm/lasso/top1/enet/best
-"best" means the method giving the best cross validation R^2</p></td>
-    </tr>
-    <tr>
-      <th>harmonize</th>
-      <td><p>T/F, if need to harmonize SNP data, if T, will harmonize GWAS and eQTL genotype alleles.</p></td>
+      <th>Xcorr</th>
+      <td><p>p by p matrix of correlations between variables
+(covariates). When provided, it will be used to remove CSs whose
+minimum correlation among variables is smaller than
+<code>min_abs_corr</code>.</p></td>
     </tr>
     </table>
 

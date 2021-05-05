@@ -4,8 +4,14 @@
 \alias{univariate_regression}
 \title{Perform Univariate Linear Regression Separately for Columns of X}
 \usage{
-univariate_regression(X, y, Z = NULL, center = TRUE, scale = FALSE,
-  return_residuals = FALSE)
+univariate_regression(
+  X,
+  y,
+  Z = NULL,
+  center = TRUE,
+  scale = FALSE,
+  return_residuals = FALSE
+)
 }
 \arguments{
 \item{X}{n by p matrix of regressors.}

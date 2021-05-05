@@ -4,14 +4,34 @@
 \alias{ctwas_rss}
 \title{Causal inference for TWAS using summary statistics}
 \usage{
-ctwas_rss(z_snp, z_gene, ld_pgenfs, ld_exprfs, ld_regions = c("EUR",
-  "ASN", "AFR"), ld_regions_custom = NULL, thin = 1,
-  prob_single = 0.8, rerun_gene_PIP = 0.8, niter1 = 3, niter2 = 30,
-  L = 5, group_prior = NULL, group_prior_var = NULL,
-  estimate_group_prior = T, estimate_group_prior_var = T,
-  use_null_weight = T, coverage = 0.95, stardardize = T,
-  harmonize = T, ncore = 1, outputdir = getwd(), outname = NULL,
-  logfile = NULL)
+ctwas_rss(
+  z_snp,
+  z_gene,
+  ld_pgenfs,
+  ld_exprfs,
+  ld_regions = c("EUR", "ASN", "AFR"),
+  ld_regions_custom = NULL,
+  thin = 1,
+  prob_single = 0.8,
+  rerun_gene_PIP = 0.8,
+  niter1 = 3,
+  niter2 = 30,
+  L = 5,
+  group_prior = NULL,
+  group_prior_var = NULL,
+  estimate_group_prior = T,
+  estimate_group_prior_var = T,
+  use_null_weight = T,
+  coverage = 0.95,
+  stardardize = T,
+  harmonize = T,
+  max_snp_region = Inf,
+  ncore = 1,
+  ncore.rerun = 1,
+  outputdir = getwd(),
+  outname = NULL,
+  logfile = NULL
+)
 }
 \arguments{
 \item{z_snp}{A data frame with four columns: "id", "A1", "A2", "z".
@@ -60,6 +80,16 @@ all blocks will rerun with full SNPs}
 
 \item{harmonize}{TRUE/FALSE. If TRUE, will harmonize GWAS, LD reference
 and weight internally (flip alleles and remove strand ambiguous SNPs)}
+
+\item{max_snp_region}{Inf or integer. Maximum number of SNPs in a region. Default is
+Inf, no limit. This can be useful if there are many SNPs in a region and you don't
+have enough memory to run the program. This applies to the last rerun step
+ (using full SNPs and rerun susie for regions with strong gene signals) only.}
+
+\item{ncore}{integer, number of cores to run parameter estimation}
+
+\item{ncore.rerun}{integer, number of cores to rerun regions with strong signals
+using full SNPs.}
 
 \item{outname}{a string, the output name}
 

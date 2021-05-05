@@ -9,11 +9,13 @@
 <title>Harmonize z scores from GWAS to match ld reference genotypes.
 Flip signs when reverse complement matches, remove strand ambiguous SNPs — harmonize_wgt_ld • ctwas</title>
 
+
 <!-- jquery -->
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.4.1/jquery.min.js" integrity="sha256-CSXorXvZcTkaix6Yvo6HppcZGetbYMGWSFlBw8HfCJo=" crossorigin="anonymous"></script>
 <!-- Bootstrap -->
 
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/3.4.1/css/bootstrap.min.css" integrity="sha256-bZLfwXAP04zRMK2BjiO8iu9pf4FbLqX6zitd+tIvLhE=" crossorigin="anonymous" />
+
 <script src="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/3.4.1/js/bootstrap.min.js" integrity="sha256-nuL8/2cJ5NDSSwnKD8VqreErSWHtnEP9E7AySL+1ev4=" crossorigin="anonymous"></script>
 
 <!-- bootstrap-toc -->
@@ -37,12 +39,11 @@ Flip signs when reverse complement matches, remove strand ambiguous SNPs — har
 
 
 
+
 <meta property="og:title" content="Harmonize z scores from GWAS to match ld reference genotypes.
 Flip signs when reverse complement matches, remove strand ambiguous SNPs — harmonize_wgt_ld" />
-
 <meta property="og:description" content="Harmonize z scores from GWAS to match ld reference genotypes.
 Flip signs when reverse complement matches, remove strand ambiguous SNPs" />
-
 
 
 
@@ -74,7 +75,7 @@ Flip signs when reverse complement matches, remove strand ambiguous SNPs" />
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">ctwas</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="Released version">0.1.19</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="Released version">0.1.25</span>
       </span>
     </div>
 
@@ -82,7 +83,7 @@ Flip signs when reverse complement matches, remove strand ambiguous SNPs" />
       <ul class="nav navbar-nav">
         <li>
   <a href="../index.html">
-    <span class="fas fa fas fa-home fa-lg"></span>
+    <span class="fas fa-home fa-lg"></span>
      
   </a>
 </li>
@@ -105,7 +106,6 @@ Flip signs when reverse complement matches, remove strand ambiguous SNPs" />
   </ul>
 </li>
       </ul>
-      
       <ul class="nav navbar-nav navbar-right">
         <li>
   <a href="https://github.com/simingz/ctwas">Source</a>
@@ -130,14 +130,12 @@ Flip signs when reverse complement matches, remove strand ambiguous SNPs</h1>
     </div>
 
     <div class="ref-description">
-    
     <p>Harmonize z scores from GWAS to match ld reference genotypes.
 Flip signs when reverse complement matches, remove strand ambiguous SNPs</p>
-    
     </div>
 
     <pre class="usage"><span class='fu'>harmonize_wgt_ld</span><span class='op'>(</span><span class='va'>wgt.matrix</span>, <span class='va'>snps</span>, <span class='va'>ld_snpinfo</span><span class='op'>)</span></pre>
-    
+
     <h2 class="hasAnchor" id="arguments"><a class="anchor" href="#arguments"></a>Arguments</h2>
     <table class="ref-arguments">
     <colgroup><col class="name" /><col class="desc" /></colgroup>
@@ -152,11 +150,10 @@ with columns "chrom", "id", "pos", "alt", "ref". The effect allele
 for FUSION is alt.</p></td>
     </tr>
     </table>
-    
+
     <h2 class="hasAnchor" id="value"><a class="anchor" href="#value"></a>Value</h2>
 
     <p>wgt.matrix and snps with alleles flipped to match</p>
-    
 
   </div>
   <div class="col-md-3 hidden-xs hidden-sm" id="pkgdown-sidebar">

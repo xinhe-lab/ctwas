@@ -8,11 +8,13 @@
 
 <title>Function reference • ctwas</title>
 
+
 <!-- jquery -->
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.4.1/jquery.min.js" integrity="sha256-CSXorXvZcTkaix6Yvo6HppcZGetbYMGWSFlBw8HfCJo=" crossorigin="anonymous"></script>
 <!-- Bootstrap -->
 
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/3.4.1/css/bootstrap.min.css" integrity="sha256-bZLfwXAP04zRMK2BjiO8iu9pf4FbLqX6zitd+tIvLhE=" crossorigin="anonymous" />
+
 <script src="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/3.4.1/js/bootstrap.min.js" integrity="sha256-nuL8/2cJ5NDSSwnKD8VqreErSWHtnEP9E7AySL+1ev4=" crossorigin="anonymous"></script>
 
 <!-- bootstrap-toc -->
@@ -36,7 +38,9 @@
 
 
 
+
 <meta property="og:title" content="Function reference" />
+
 
 
 
@@ -67,7 +71,7 @@
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">ctwas</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="Released version">0.1.19</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="Released version">0.1.25</span>
       </span>
     </div>
 
@@ -75,7 +79,7 @@
       <ul class="nav navbar-nav">
         <li>
   <a href="../index.html">
-    <span class="fas fa fas fa-home fa-lg"></span>
+    <span class="fas fa-home fa-lg"></span>
      
   </a>
 </li>
@@ -98,7 +102,6 @@
   </ul>
 </li>
       </ul>
-      
       <ul class="nav navbar-nav navbar-right">
         <li>
   <a href="https://github.com/simingz/ctwas">Source</a>
@@ -210,20 +213,6 @@ Flip signs when reverse complement matches.</p></td>
       </tr><tr>
         
         <td>
-          <p><code><a href="init_finalize.html">init_finalize()</a></code> </p>
-        </td>
-        <td><p>a susie fit object in order to initialize susie model. Revised from
-susieR::init_finalize</p></td>
-      </tr><tr>
-        
-        <td>
-          <p><code><a href="init_finalize_rss.html">init_finalize_rss()</a></code> </p>
-        </td>
-        <td><p>a susie fit object in order to initialize susie rss model. Revised from
-susieR::init_finalize_rss</p></td>
-      </tr><tr>
-        
-        <td>
           <p><code><a href="predict.susie.html">predict(<i>&lt;susie&gt;</i>)</a></code> </p>
         </td>
         <td><p>Predict outcomes or extract coefficients from susie fit.</p></td>
@@ -278,9 +267,9 @@ susieR::init_finalize_rss</p></td>
       </tr><tr>
         
         <td>
-          <p><code><a href="susie.html">susie()</a></code> </p>
+          <p><code><a href="susie.html">susie()</a></code> <code><a href="susie.html">susie_suff_stat()</a></code> </p>
         </td>
-        <td><p>SUm of Single Effects (SuSiE) Regression</p></td>
+        <td><p>Sum of Single Effects (SuSiE) Regression</p></td>
       </tr><tr>
         
         <td>
@@ -296,58 +285,9 @@ susieR::init_finalize_rss</p></td>
       </tr><tr>
         
         <td>
-          <p><code><a href="susie_get_cs.html">susie_get_cs()</a></code> </p>
+          <p><code><a href="susie_get_methods.html">susie_get_objective()</a></code> <code><a href="susie_get_methods.html">susie_get_posterior_mean()</a></code> <code><a href="susie_get_methods.html">susie_get_posterior_sd()</a></code> <code><a href="susie_get_methods.html">susie_get_niter()</a></code> <code><a href="susie_get_methods.html">susie_get_prior_variance()</a></code> <code><a href="susie_get_methods.html">susie_get_residual_variance()</a></code> <code><a href="susie_get_methods.html">susie_get_lfsr()</a></code> <code><a href="susie_get_methods.html">susie_get_posterior_samples()</a></code> <code><a href="susie_get_methods.html">susie_get_cs()</a></code> <code><a href="susie_get_methods.html">susie_get_pip()</a></code> </p>
         </td>
-        <td><p>Extract credible sets from SuSiE fit</p></td>
-      </tr><tr>
-        
-        <td>
-          <p><code><a href="susie_get_lfsr.html">susie_get_lfsr()</a></code> </p>
-        </td>
-        <td><p>Local false sign rate (lfsr) for susie credible sets.</p></td>
-      </tr><tr>
-        
-        <td>
-          <p><code><a href="susie_get_niter.html">susie_get_niter()</a></code> </p>
-        </td>
-        <td><p>Get number of iterations from fitted susie model</p></td>
-      </tr><tr>
-        
-        <td>
-          <p><code><a href="susie_get_objective.html">susie_get_objective()</a></code> </p>
-        </td>
-        <td><p>Get evidence lower bound (ELBO) from fitted susie model</p></td>
-      </tr><tr>
-        
-        <td>
-          <p><code><a href="susie_get_pip.html">susie_get_pip()</a></code> </p>
-        </td>
-        <td><p>Compute posterior inclusion probability (PIP) for all variables</p></td>
-      </tr><tr>
-        
-        <td>
-          <p><code><a href="susie_get_posterior_mean.html">susie_get_posterior_mean()</a></code> </p>
-        </td>
-        <td><p>Get posterior mean for coefficients from fitted susie model</p></td>
-      </tr><tr>
-        
-        <td>
-          <p><code><a href="susie_get_posterior_sd.html">susie_get_posterior_sd()</a></code> </p>
-        </td>
-        <td><p>Get posterior standard deviation for coefficients from
-fitted susie model</p></td>
-      </tr><tr>
-        
-        <td>
-          <p><code><a href="susie_get_prior_variance.html">susie_get_prior_variance()</a></code> </p>
-        </td>
-        <td><p>Get updated prior variance</p></td>
-      </tr><tr>
-        
-        <td>
-          <p><code><a href="susie_get_residual_variance.html">susie_get_residual_variance()</a></code> </p>
-        </td>
-        <td><p>Get updated residual variance</p></td>
+        <td><p>Inferences From Fitted SuSiE Model</p></td>
       </tr><tr>
         
         <td>
@@ -359,13 +299,13 @@ fitted susie model</p></td>
         <td>
           <p><code><a href="susie_rss.html">susie_rss()</a></code> </p>
         </td>
-        <td><p>Bayesian sum of single-effect (SuSiE) linear regression using z scores</p></td>
+        <td><p>Sum of Single Effects (SuSiE) Regression using summary statistics</p></td>
       </tr><tr>
         
         <td>
-          <p><code><a href="update_each_effect.html">update_each_effect()</a></code> </p>
+          <p><code><a href="univariate_regression.html">univariate_regression()</a></code> </p>
         </td>
-        <td><p>update each effect</p></td>
+        <td><p>Perform Univariate Linear Regression Separately for Columns of X</p></td>
       </tr>
     </tbody>
     </table>

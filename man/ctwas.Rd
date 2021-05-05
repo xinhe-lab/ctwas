@@ -4,13 +4,31 @@
 \alias{ctwas}
 \title{Causal inference for TWAS}
 \usage{
-ctwas(pgenfs, exprfs, Y, ld_regions = c("EUR", "ASN", "AFR"),
-  ld_regions_custom = NULL, thin = 1, prob_single = 0.8,
-  niter1 = 3, niter2 = 30, L = 5, group_prior = NULL,
-  group_prior_var = NULL, estimate_group_prior = T,
-  estimate_group_prior_var = T, use_null_weight = T, coverage = 0.95,
-  stardardize = T, ncore = 1, outputdir = getwd(), outname = NULL,
-  logfile = NULL)
+ctwas(
+  pgenfs,
+  exprfs,
+  Y,
+  ld_regions = c("EUR", "ASN", "AFR"),
+  ld_regions_custom = NULL,
+  thin = 1,
+  prob_single = 0.8,
+  max_snp_region = Inf,
+  rerun_gene_PIP = 0.8,
+  niter1 = 3,
+  niter2 = 30,
+  L = 5,
+  group_prior = NULL,
+  group_prior_var = NULL,
+  estimate_group_prior = T,
+  estimate_group_prior_var = T,
+  use_null_weight = T,
+  coverage = 0.95,
+  stardardize = T,
+  ncore = 1,
+  outputdir = getwd(),
+  outname = NULL,
+  logfile = NULL
+)
 }
 \arguments{
 \item{pgenfs}{A character vector of .pgen or .bed files. One file for one
@@ -48,6 +66,15 @@ is \code{NULL}; when specified, \code{ld_regions} will be ignored.}
 
 \item{prob_single}{blocks with probility more than this value will be
 used for parameter estimation}
+
+\item{max_snp_region}{Inf or integer. Maximum number of SNPs in a region. Default is
+Inf, no limit. This can be useful if there are many SNPs in a region and you don't
+have enough memory to run the program. This applies to the last rerun step
+ (using full SNPs and rerun susie for regions with strong gene signals) only.}
+
+\item{rerun_gene_PIP}{if thin <1, will rerun blocks with the max gene PIP
+> \code{rerun_gene_PIP} using full SNPs. if \code{rerun_gene_PIP} is 0, then
+all blocks will rerun with full SNPs}
 
 \item{outname}{a string, the output name}
 

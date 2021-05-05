@@ -4,8 +4,16 @@
 \alias{impute_expr}
 \title{Impute expression}
 \usage{
-impute_expr(pgenf, weight, method = "lasso", outputdir = getwd(),
-  outname = NULL, logfile = NULL, compress = T, harmonize = T)
+impute_expr(
+  pgenf,
+  weight,
+  method = "lasso",
+  outputdir = getwd(),
+  outname = NULL,
+  logfile = NULL,
+  compress = T,
+  harmonize = T
+)
 }
 \arguments{
 \item{weight}{a string, pointing to the fusion/twas format of weights.

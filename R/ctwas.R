@@ -34,6 +34,10 @@
 #' @param prob_single blocks with probility more than this value will be
 #'  used for parameter estimation
 #'
+#' @param rerun_gene_PIP if thin <1, will rerun blocks with the max gene PIP
+#' > \code{rerun_gene_PIP} using full SNPs. if \code{rerun_gene_PIP} is 0, then
+#' all blocks will rerun with full SNPs
+#'
 #' @param max_snp_region Inf or integer. Maximum number of SNPs in a region. Default is
 #' Inf, no limit. This can be useful if there are many SNPs in a region and you don't
 #' have enough memory to run the program. This applies to the last rerun step
@@ -59,6 +63,7 @@ ctwas <- function(pgenfs,
                   thin = 1,
                   prob_single = 0.8,
                   max_snp_region = Inf,
+                  rerun_gene_PIP = 0.8,
                   niter1 = 3,
                   niter2 = 30,
                   L= 5,

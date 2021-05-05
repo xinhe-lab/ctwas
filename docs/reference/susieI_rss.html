@@ -8,11 +8,13 @@
 
 <title>SuSiE iteraitve rss version — susieI_rss • ctwas</title>
 
+
 <!-- jquery -->
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.4.1/jquery.min.js" integrity="sha256-CSXorXvZcTkaix6Yvo6HppcZGetbYMGWSFlBw8HfCJo=" crossorigin="anonymous"></script>
 <!-- Bootstrap -->
 
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/3.4.1/css/bootstrap.min.css" integrity="sha256-bZLfwXAP04zRMK2BjiO8iu9pf4FbLqX6zitd+tIvLhE=" crossorigin="anonymous" />
+
 <script src="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/3.4.1/js/bootstrap.min.js" integrity="sha256-nuL8/2cJ5NDSSwnKD8VqreErSWHtnEP9E7AySL+1ev4=" crossorigin="anonymous"></script>
 
 <!-- bootstrap-toc -->
@@ -36,10 +38,9 @@
 
 
 
+
 <meta property="og:title" content="SuSiE iteraitve rss version — susieI_rss" />
-
 <meta property="og:description" content="SuSiE iteraitve rss version" />
-
 
 
 
@@ -71,7 +72,7 @@
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">ctwas</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="Released version">0.1.19</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="Released version">0.1.25</span>
       </span>
     </div>
 
@@ -79,7 +80,7 @@
       <ul class="nav navbar-nav">
         <li>
   <a href="../index.html">
-    <span class="fas fa fas fa-home fa-lg"></span>
+    <span class="fas fa-home fa-lg"></span>
      
   </a>
 </li>
@@ -102,7 +103,6 @@
   </ul>
 </li>
       </ul>
-      
       <ul class="nav navbar-nav navbar-right">
         <li>
   <a href="https://github.com/simingz/ctwas">Source</a>
@@ -126,17 +126,29 @@
     </div>
 
     <div class="ref-description">
-    
     <p>SuSiE iteraitve rss version</p>
-    
     </div>
 
-    <pre class="usage"><span class='fu'>susieI_rss</span><span class='op'>(</span><span class='va'>zdf</span>, <span class='va'>ld_pgenfs</span>, <span class='va'>ld_exprfs</span>, <span class='va'>regionlist</span>, niter <span class='op'>=</span> <span class='fl'>20</span>, L <span class='op'>=</span> <span class='fl'>1</span>,
-  z_ld_weight <span class='op'>=</span> <span class='fl'>0</span>, group_prior <span class='op'>=</span> <span class='cn'>NULL</span>, group_prior_var <span class='op'>=</span> <span class='cn'>NULL</span>,
-  estimate_group_prior <span class='op'>=</span> <span class='cn'>T</span>, estimate_group_prior_var <span class='op'>=</span> <span class='cn'>T</span>,
-  use_null_weight <span class='op'>=</span> <span class='cn'>T</span>, coverage <span class='op'>=</span> <span class='fl'>0.95</span>, ncore <span class='op'>=</span> <span class='fl'>1</span>,
-  outputdir <span class='op'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/getwd.html'>getwd</a></span><span class='op'>(</span><span class='op'>)</span>, outname <span class='op'>=</span> <span class='cn'>NULL</span><span class='op'>)</span></pre>
-        
+    <pre class="usage"><span class='fu'>susieI_rss</span><span class='op'>(</span>
+  <span class='va'>zdf</span>,
+  <span class='va'>ld_pgenfs</span>,
+  <span class='va'>ld_exprfs</span>,
+  <span class='va'>regionlist</span>,
+  niter <span class='op'>=</span> <span class='fl'>20</span>,
+  L <span class='op'>=</span> <span class='fl'>1</span>,
+  z_ld_weight <span class='op'>=</span> <span class='fl'>0</span>,
+  group_prior <span class='op'>=</span> <span class='cn'>NULL</span>,
+  group_prior_var <span class='op'>=</span> <span class='cn'>NULL</span>,
+  estimate_group_prior <span class='op'>=</span> <span class='cn'>T</span>,
+  estimate_group_prior_var <span class='op'>=</span> <span class='cn'>T</span>,
+  use_null_weight <span class='op'>=</span> <span class='cn'>T</span>,
+  coverage <span class='op'>=</span> <span class='fl'>0.95</span>,
+  ncore <span class='op'>=</span> <span class='fl'>1</span>,
+  outputdir <span class='op'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/getwd.html'>getwd</a></span><span class='op'>(</span><span class='op'>)</span>,
+  outname <span class='op'>=</span> <span class='cn'>NULL</span>
+<span class='op'>)</span></pre>
+
+
 
   </div>
   <div class="col-md-3 hidden-xs hidden-sm" id="pkgdown-sidebar">

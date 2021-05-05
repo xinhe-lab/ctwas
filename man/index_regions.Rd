@@ -4,18 +4,38 @@
 \alias{index_regions}
 \title{Get gene and SNP index for each region}
 \usage{
-index_regions(pvarfs, exprvarfs, regionfile, select = NULL, thin = 1,
-  minvar = 1, merge = T)
+index_regions(
+  pvarfs,
+  exprvarfs,
+  regionfile,
+  select = NULL,
+  thin = 1,
+  maxSNP = Inf,
+  minvar = 1,
+  merge = T
+)
 }
 \arguments{
 \item{regionfile}{regions file. Has three columns: chr, start, end. The regions file
 should provide non overlaping regions defining LD blocks. currently does not support
 chromsome X/Y etc.}
 
-\item{select}{variant ids to include. If NULL, all variants will be selected}
+\item{select}{Default is NULL, all variants will be selected. Or a vector of variant IDs,
+or a data frame with columns id and z (id is for gene or SNP id, z is for z scores).
+z will be used for remove SNPs if the total number of SNPs exceeds limit. See
+parameter `maxSNP` for more information.}
 
 \item{thin}{A scalar in (0,1]. The proportion of SNPs
 left after down sampling. Only applied on SNPs after selecting variants.}
+
+\item{maxSNP}{Default is Inf, no limit for the maximum number of SNPs in a region. Or an
+integer indicating the maximum number of SNPs allowed in a region. This
+parameter is useful when a region contains many SNPs and you don't have enough memory to
+run the program. In this case, you can put a limit on the number of SNPs in the region.
+If z scores are given in the parameter `select`, i.e. a data frame with columns id and z is
+provided, SNPs are ranked based on |z| from high to low and only the top `maxSNP` SNPs
+are kept. If only variant ids are provided, then `maxSNP` number of SNPs will be chosen
+randomly.}
 
 \item{minvar}{minimum number of variatns in a region}
 
