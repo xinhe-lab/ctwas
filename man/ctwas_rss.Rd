@@ -10,8 +10,8 @@ ctwas_rss(z_snp, z_gene, ld_pgenfs, ld_exprfs, ld_regions = c("EUR",
   L = 5, group_prior = NULL, group_prior_var = NULL,
   estimate_group_prior = T, estimate_group_prior_var = T,
   use_null_weight = T, coverage = 0.95, stardardize = T,
-  harmonize = T, ncore = 1, ncore.rerun = 1, outputdir = getwd(),
-  outname = NULL, logfile = NULL)
+  harmonize = T, ncore = 1, outputdir = getwd(), outname = NULL,
+  logfile = NULL)
 }
 \arguments{
 \item{z_snp}{A data frame with four columns: "id", "A1", "A2", "z".
@@ -60,11 +60,6 @@ all blocks will rerun with full SNPs}
 
 \item{harmonize}{TRUE/FALSE. If TRUE, will harmonize GWAS, LD reference
 and weight internally (flip alleles and remove strand ambiguous SNPs)}
-
-\item{ncore}{integer, number of cores to run parameter estimation}
-
-\item{ncore.rerun}{integer, number of cores to rerun regions with strong signals
-using full SNPs.}
 
 \item{outname}{a string, the output name}
 

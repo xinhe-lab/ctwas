@@ -41,27 +41,16 @@
 #' @param prob_single blocks with probility more than this value will be
 #'  used for parameter estimation
 #'
-#' @param rerun_gene_PIP if trim_z_prop < 1 or trim_z_value > 0, will rerun blocks with the max gene PIP
+#' @param rerun_gene_PIP if thin <1, will rerun blocks with the max gene PIP
 #' > \code{rerun_gene_PIP} using full SNPs. if \code{rerun_gene_PIP} is 0, then
 #' all blocks will rerun with full SNPs
 #'
 #' @param harmonize TRUE/FALSE. If TRUE, will harmonize GWAS, LD reference
 #' and weight internally (flip alleles and remove strand ambiguous SNPs)
 #'
-#' @param trim_z_prop  scalar in (0,1]. Proportion of SNPs left after trimming z scores.
-#' The default is 1, all SNPs will be kept. This is for parameter estimation step.
-#'
-#' @param trim_z_value scalar > = 0. SNPs with |z| < this value will be removed. If a
-#' positive value is given, then `trim_z_prop` will be ignored. This is for parameter
-#' estimation step.
-#'
-#' @param max_snp_region Inf or integer. Maximum number of SNPs in a region. Default is
-#' Inf, no limit. This can be useful if there are many SNPs in a region and you don't
-#' have enough memory to run the program.
-#'
 #' @param ncore integer, number of cores to run parameter estimation
-#' @param ncore.rerun integer, number of cores to rerun susie for regions with
-#'  gene strong signals using full SNPs.
+#' @param ncore.rerun integer, number of cores to rerun regions with strong signals
+#' using full SNPs.
 #'
 #' @param outname a string, the output name
 #'
@@ -75,9 +64,7 @@ ctwas_rss <- function(z_snp,
                   ld_exprfs,
                   ld_regions = c("EUR", "ASN", "AFR"),
                   ld_regions_custom = NULL,
-                  trim_z_prop = 1,
-                  trim_z_value = 0,
-                  max_snp_region = Inf,
+                  thin = 1,
                   prob_single = 0.8,
                   rerun_gene_PIP = 0.8,
                   niter1 = 3,
@@ -135,20 +122,28 @@ ctwas_rss <- function(z_snp,
   zdf <- rbind(z_snp[, c("id", "z")], z_gene[, c("id", "z")])
   rm(z_snp)
 
+  if (thin <=0 | thin > 1){
+    stop("thin value needs to be in (0,1]")
+  }
+
   regionlist <- index_regions(ld_pvarfs, ld_exprvarfs, regionfile,
-                              z = zdf, trim_z_prop = trim_z_prop, trim_z_value = trim_z_value,
-                              maxSNP = max_snp_region, minvar = 2, merge = T) # susie_rss can't take 1 var.
+                              select = zdf$id,
+                              thin = thin, minvar = 2) # susie_rss can't take 1 var.
 
   regs <- do.call(rbind, lapply(1:22, function(x) cbind(x,
                     unlist(lapply(regionlist[[x]], "[[", "start")),
                     unlist(lapply(regionlist[[x]], "[[", "stop")))))
 
   write.table(regs , file= paste0(outputdir,"/", outname, ".regions.txt")
-               ,row.names=F, col.names=T, sep="\t", quote = F)
+               , row.names=F, col.names=T, sep="\t", quote = F)
 
   if (isTRUE(estimate_group_prior) | isTRUE(estimate_group_prior_var)){
 
     loginfo("Run susie iteratively, getting rough estimate ...")
+
+    if (!is.null(group_prior)){
+      group_prior[2] <- group_prior[2]/thin
+    }
 
     pars <- susieI_rss(zdf = zdf,
                        ld_pgenfs = ld_pgenfs,
@@ -167,6 +162,7 @@ ctwas_rss <- function(z_snp,
                        outputdir = outputdir,
                        outname = paste0(outname, ".s1")
                    )
+
 
     group_prior <- pars[["group_prior"]]
     group_prior_var <- pars[["group_prior_var"]]
@@ -221,19 +217,18 @@ ctwas_rss <- function(z_snp,
                  outputdir = outputdir,
                  outname = paste0(outname, ".temp"))
 
-  loginfo("Rerun susie for important regions.")
+  group_prior[2] <- group_prior[2] * thin # convert snp pi1
 
-  if (trim_z_prop == 1 & trim_z_value == 0) {
+  if (thin == 1) {
     file.rename(paste0(file.path(outputdir, outname), ".temp.susieIrss.txt"),
                 paste0(file.path(outputdir, outname), ".susieIrss.txt"))
 
   } else {
 
     # get full SNPs
-
     regionlist <- index_regions(ld_pvarfs, ld_exprvarfs, regionfile,
-                                z = zdf,
-                                maxSNP = max_snp_region, minvar = 2, merge = T) # susie_rss can't take 1 var.
+                                select = zdf$id,
+                                thin = 1, minvar = 2) # susie_rss can't take 1 var.
 
     res <- data.table::fread(paste0(file.path(outputdir, outname), ".temp.susieIrss.txt"))
 
@@ -249,15 +244,17 @@ ctwas_rss <- function(z_snp,
       }
     }
 
-    # rerun susie for regions contain strong signals, if present
     nreg <- sum(unlist(lapply(regionlist, length)))
 
     loginfo("Number of regions that contains strong gene signals: %s", nreg)
     if (nreg == 0){
       file.rename(paste0(file.path(outputdir, outname), ".temp.susieIrss.txt"),
                   paste0(file.path(outputdir, outname), ".susieIrss.txt"))
+
     } else {
+
       loginfo("Rerun susie for regions with strong gene signals using full SNPs.")
+
       pars <- susieI_rss(zdf = zdf,
                          ld_pgenfs = ld_pgenfs,
                          ld_exprfs = ld_exprfs,
@@ -282,12 +279,12 @@ ctwas_rss <- function(z_snp,
       data.table::fwrite(res, file = paste0(file.path(outputdir, outname), ".susieIrss.txt"),
                          sep = "\t", quote = F)
       file.remove((paste0(file.path(outputdir, outname), ".temp.susieIrss.txt")))
-
     }
   }
 
   list("group_prior" = group_prior,
        "group_prior_var" = group_prior_var)
+
 }
 
 

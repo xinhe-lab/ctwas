@@ -61,26 +61,21 @@ susieI <- function(pgenfs,
 
     outdf <- foreach (core = 1:length(corelist), .combine = "rbind",
                       .packages = "ctwas") %dopar% {
-        # for (core in 1:1) {
+                        # for (core in 1:2) {
 
         outdf.core.list <- list()
 
-        # run susie for each region
+                        # run susie for each region
         regs <- corelist[[core]]
         for (reg in 1: nrow(regs)) {
             b <- regs[reg, "b"]
             rn <- regs[reg, "rn"]
-
-            print(c(b,rn))
 
             # prepare genotype data
             pgen <- prep_pgen(pgenf = pgenfs[b], pvarfs[b])
 
             gidx <- regionlist[[b]][[rn]][["gidx"]]
             sidx <- regionlist[[b]][[rn]][["sidx"]]
-            prop <-  regionlist[[b]][[rn]][["prop"]]
-            if (is.null(prop)) prop <- 1
-
             p <- length(gidx) + length(sidx)
 
             if (is.null(prior.gene) | is.null(prior.SNP)){
@@ -89,10 +84,6 @@ susieI <- function(pgenfs,
             } else {
               prior <- c(rep(prior.gene, length(gidx)),
                          rep(prior.SNP, length(sidx)))
-            }
-
-            if (length(sidx) >=1){
-                prior[(length(gidx) + 1) : p] <- prior[(length(gidx) + 1) : p]/prop
             }
 
             if (is.null(V.gene) | is.null(V.SNP)){

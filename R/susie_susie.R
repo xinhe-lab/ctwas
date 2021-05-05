@@ -204,7 +204,7 @@
 #'   Society, Series B} \url{https://doi.org/10.1101/501114}.
 #'
 #' @seealso \code{\link{susie_rss}}
-#'
+#' 
 #' @examples
 #' # susie example.
 #' set.seed(1)
@@ -383,19 +383,16 @@ susie <- function (X,Y,L = min(10,ncol(X)),
     s$pip = susie_get_pip(s,prune_by_cs = FALSE,prior_tol = prior_tol)
   }
 
-  # different from susieR, with null weight, this seems doesn't work
-  # if (!is.null(colnames(X))) {
-  #   variable_names = colnames(X)
-  #   if (!is.null(null_weight))
-  #     variable_names = c("null", variable_names)
-  #   colnames(s$alpha) = variable_names
-  #   colnames(s$mu) = variable_names
-  #   colnames(s$mu2) = variable_names
-  #   colnames(s$lbf_variable) = variable_names
-  #   names(s$pip) = variable_names
-  # }
-
-
+  if (!is.null(colnames(X))) {
+    variable_names = colnames(X)
+    if (!is.null(null_weight))
+      variable_names = c("null", variable_names)
+    colnames(s$alpha) = variable_names
+    colnames(s$mu) = variable_names
+    colnames(s$mu2) = variable_names
+    colnames(s$lbf_variable) = variable_names
+    names(s$pip) = variable_names
+  }
   # report z-scores from univariate regression.
   if (compute_univariate_zscore) {
     if (!is.null(null_weight) && null_weight != 0)

@@ -51,7 +51,7 @@ susieI_rss <- function(zdf,
 
     outdf <- foreach (core = 1:length(corelist), .combine = "rbind",
                       .packages = "ctwas") %dopar% {
-          # for (core in 1:1) {
+          # for (core in 1:2) {
 
           outdf.core.list <- list()
 
@@ -68,9 +68,8 @@ susieI_rss <- function(zdf,
             sidx <- regionlist[[b]][[rn]][["sidx"]]
             gid <- regionlist[[b]][[rn]][["gid"]]
             sid <- regionlist[[b]][[rn]][["sid"]]
-            nsnp <-  regionlist[[b]][[rn]][["nsnp"]]
 
-            p <- length(gidx) + nsnp
+            p <- length(gidx) + length(sidx)
 
             if (is.null(prior.gene) | is.null(prior.SNP)){
               prior <- c(rep(1/p, length(gidx)),
@@ -81,7 +80,7 @@ susieI_rss <- function(zdf,
             }
 
             if (is.null(V.gene) | is.null(V.SNP)){
-              V <- matrix(rep(50, L * (length(gidx) + length(sidx))), nrow = L)
+              V <- matrix(rep(50, L * p), nrow = L)
               # following the default in susieR::susie_rss
             } else{
               V <- c(rep(V.gene, length(gidx)), rep(V.SNP, length(sidx)))
@@ -124,13 +123,11 @@ susieI_rss <- function(zdf,
           }
 
           outdf.core <- do.call(rbind, outdf.core.list)
-          # outdf <- outdf.core
           outdf.core
     }
 
     if (isTRUE(estimate_group_prior)){
-      nsnpall <- sum(unlist(lapply(1:22, function(x) lapply(regionlist[[x]], "[[", "nsnp"))))
-      prior.SNP <- sum(outdf[outdf[ , "type"] == "SNP", "susie_pip"])/nsnpall
+      prior.SNP <- mean(outdf[outdf[ , "type"] == "SNP", "susie_pip"])
       prior.gene <- mean(outdf[outdf[ , "type"] == "gene", "susie_pip"])
       group_prior_rec[, iter] <- c(prior.gene, prior.SNP)
     }

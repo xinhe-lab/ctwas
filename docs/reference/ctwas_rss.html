@@ -71,7 +71,7 @@
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">ctwas</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="Released version">0.1.23</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="Released version">0.1.19</span>
       </span>
     </div>
 
@@ -137,8 +137,8 @@
   L <span class='op'>=</span> <span class='fl'>5</span>, group_prior <span class='op'>=</span> <span class='cn'>NULL</span>, group_prior_var <span class='op'>=</span> <span class='cn'>NULL</span>,
   estimate_group_prior <span class='op'>=</span> <span class='cn'>T</span>, estimate_group_prior_var <span class='op'>=</span> <span class='cn'>T</span>,
   use_null_weight <span class='op'>=</span> <span class='cn'>T</span>, coverage <span class='op'>=</span> <span class='fl'>0.95</span>, stardardize <span class='op'>=</span> <span class='cn'>T</span>,
-  harmonize <span class='op'>=</span> <span class='cn'>T</span>, ncore <span class='op'>=</span> <span class='fl'>1</span>, ncore.rerun <span class='op'>=</span> <span class='fl'>1</span>, outputdir <span class='op'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/getwd.html'>getwd</a></span><span class='op'>(</span><span class='op'>)</span>,
-  outname <span class='op'>=</span> <span class='cn'>NULL</span>, logfile <span class='op'>=</span> <span class='cn'>NULL</span><span class='op'>)</span></pre>
+  harmonize <span class='op'>=</span> <span class='cn'>T</span>, ncore <span class='op'>=</span> <span class='fl'>1</span>, outputdir <span class='op'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/getwd.html'>getwd</a></span><span class='op'>(</span><span class='op'>)</span>, outname <span class='op'>=</span> <span class='cn'>NULL</span>,
+  logfile <span class='op'>=</span> <span class='cn'>NULL</span><span class='op'>)</span></pre>
     
     <h2 class="hasAnchor" id="arguments"><a class="anchor" href="#arguments"></a>Arguments</h2>
     <table class="ref-arguments">
@@ -201,20 +201,6 @@ used for parameter estimation</p></td>
       <td><p>if thin &lt;1, will rerun blocks with the max gene PIP
 &gt; <code>rerun_gene_PIP</code> using full SNPs. if <code>rerun_gene_PIP</code> is 0, then
 all blocks will rerun with full SNPs</p></td>
-    </tr>
-    <tr>
-      <th>harmonize</th>
-      <td><p>TRUE/FALSE. If TRUE, will harmonize GWAS, LD reference
-and weight internally (flip alleles and remove strand ambiguous SNPs)</p></td>
-    </tr>
-    <tr>
-      <th>ncore</th>
-      <td><p>integer, number of cores to run parameter estimation</p></td>
-    </tr>
-    <tr>
-      <th>ncore.rerun</th>
-      <td><p>integer, number of cores to rerun regions with strong signals
-using full SNPs.</p></td>
     </tr>
     <tr>
       <th>outname</th>

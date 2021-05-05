@@ -47,7 +47,7 @@ for (i in 1:22){
 ```{r ctwas, warning=F, message=F}
 regionsfile <- system.file("extdata", "example_regions.bed", package = "ctwas")
 
-ctwas(pgenfs, exprfs, Y, ld_regions_custom = regionsfile, trim_z_prop = 0.5, outputdir = outputdir, outname = "test", ncore = 1, max_snp_region = 100)
+ctwas(pgenfs, exprfs, Y, ld_regions_custom = regionsfile, thin = 1, outputdir = outputdir, outname = "test", ncore = 1)
 ```
 
 ```{r}
