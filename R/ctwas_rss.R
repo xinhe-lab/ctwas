@@ -57,8 +57,7 @@
 #'
 #' @param max_snp_region Inf or integer. Maximum number of SNPs in a region. Default is
 #' Inf, no limit. This can be useful if there are many SNPs in a region and you don't
-#' have enough memory to run the program. This applies to the last rerun step
-#'  (using full SNPs and rerun susie for regions with strong gene signals) only.
+#' have enough memory to run the program.
 #'
 #' @param ncore integer, number of cores to run parameter estimation
 #' @param ncore.rerun integer, number of cores to rerun susie for regions with
@@ -133,33 +132,12 @@ ctwas_rss <- function(z_snp,
     }
   }
 
-  # trim SNPs for parameter estimation
-  if (!is.numeric(trim_z_value) | trim_z_value < 0){
-    stop("Invalid trim_z_value: need to be >=0. ")
-  }
-
-  if (!is.numeric(trim_z_prop) | trim_z_prop <= 0 | trim_z_prop > 1){
-    stop("Invalid trim_z_prop: need to be in (0,1]. ")
-  }
-
-  if (trim_z_value == 0){
-    if (trim_z_prop != 1){
-      trim_z_value <- quantile(abs(z_snp$z), 1 - trim_z_prop)
-      z_snp_trimmed <- z_snp[abs(z_snp$z) >= trim_z_value, ,drop = F]
-    } else {
-      z_snp_trimmed <- z_snp
-    }
-  } else {
-    z_snp_trimmed <- z_snp[abs(z_snp$z) >= trim_z_value, ,drop = F]
-    trim_z_prop <- nrow(z_snp_trimmed)/nrow(z_snp)
-  }
-
-  zdf <- rbind(z_snp_trimmed[, c("id", "z")], z_gene[, c("id", "z")])
-  rm(z_snp_trimmed)
+  zdf <- rbind(z_snp[, c("id", "z")], z_gene[, c("id", "z")])
+  rm(z_snp)
 
   regionlist <- index_regions(ld_pvarfs, ld_exprvarfs, regionfile,
-                              select = zdf$id,
-                              maxSNP = Inf, minvar = 2, merge = T) # susie_rss can't take 1 var.
+                              z = zdf, trim_z_prop = trim_z_prop, trim_z_value = trim_z_value,
+                              maxSNP = max_snp_region, minvar = 2, merge = T) # susie_rss can't take 1 var.
 
   regs <- do.call(rbind, lapply(1:22, function(x) cbind(x,
                     unlist(lapply(regionlist[[x]], "[[", "start")),
@@ -171,10 +149,6 @@ ctwas_rss <- function(z_snp,
   if (isTRUE(estimate_group_prior) | isTRUE(estimate_group_prior_var)){
 
     loginfo("Run susie iteratively, getting rough estimate ...")
-
-    if (!is.null(group_prior)){
-      group_prior[2] <- group_prior[2]/trim_z_prop
-    }
 
     pars <- susieI_rss(zdf = zdf,
                        ld_pgenfs = ld_pgenfs,
@@ -193,7 +167,6 @@ ctwas_rss <- function(z_snp,
                        outputdir = outputdir,
                        outname = paste0(outname, ".s1")
                    )
-
 
     group_prior <- pars[["group_prior"]]
     group_prior_var <- pars[["group_prior_var"]]
@@ -248,22 +221,18 @@ ctwas_rss <- function(z_snp,
                  outputdir = outputdir,
                  outname = paste0(outname, ".temp"))
 
-  group_prior[2] <- group_prior[2] * trim_z_prop # convert snp pi1
-
   loginfo("Rerun susie for important regions.")
 
-  if (trim_z_prop == 1) {
+  if (trim_z_prop == 1 & trim_z_value == 0) {
     file.rename(paste0(file.path(outputdir, outname), ".temp.susieIrss.txt"),
                 paste0(file.path(outputdir, outname), ".susieIrss.txt"))
 
   } else {
 
     # get full SNPs
-    zdf <- rbind(z_snp[, c("id", "z")], z_gene[, c("id", "z")])
-    rm(z_snp)
 
     regionlist <- index_regions(ld_pvarfs, ld_exprvarfs, regionfile,
-                                select = zdf$id,
+                                z = zdf,
                                 maxSNP = max_snp_region, minvar = 2, merge = T) # susie_rss can't take 1 var.
 
     res <- data.table::fread(paste0(file.path(outputdir, outname), ".temp.susieIrss.txt"))

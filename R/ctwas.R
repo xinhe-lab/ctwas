@@ -153,7 +153,7 @@ ctwas <- function(pgenfs,
   zdf <- rbind(z_snp_trimmed[, c("id", "z")], z_gene[, c("id", "z")])
   rm(z_snp_trimmed)
 
-  regionlist <- index_regions(pvarfs, exprvarfs, regionfile, select = zdf$id, maxSNP = Inf)
+  regionlist <- index_regions(pvarfs, exprvarfs, regionfile, select = zdf, maxSNP = Inf)
   rm(zdf, z_snp, z_gene)
 
   regs <- do.call(rbind, lapply(1:22, function(x) cbind(x,

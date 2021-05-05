@@ -7,18 +7,24 @@
 #' should provide non overlaping regions defining LD blocks. currently does not support
 #' chromsome X/Y etc.
 #'
-#' @param select Default is NULL, all variants will be selected. Or a vector of variant IDs,
-#' or a data frame with columns id and z (id is for gene or SNP id, z is for z scores).
-#' z will be used for remove SNPs if the total number of SNPs exceeds limit. See
-#' parameter `maxSNP` for more information.
+#' @param z Default is NULL. Or a data frame with columns id and z
+#'  (id is for gene or SNP id, z is for z scores). If NULL, no trimming on z scores.
+#'  If a data frame with id and z i given, z will be used for remove SNPs, see `trim_z_prop`
+#'  and `trim_z_value` for trimming parameters.
+#'
+#' @param trim_z_prop scalar in (0,1]. Proportion of SNPs left after trimming z scores.
+#' The default is 1, all SNPs will be kept.
+#'
+#' @param trim_z_value scalar > = 0. SNPs with |z| < this value will be removed. If a
+#' positive value is given, then `trim_z_prop` will be ignored.
 #'
 #' @param maxSNP Default is Inf, no limit for the maximum number of SNPs in a region. Or an
 #' integer indicating the maximum number of SNPs allowed in a region. This
 #' parameter is useful when a region contains many SNPs and you don't have enough memory to
 #' run the program. In this case, you can put a limit on the number of SNPs in the region.
-#' If z scores are given in the parameter `select`, i.e. a data frame with columns id and z is
+#' If z scores are given in the parameter `z`, i.e. a data frame with columns id and z is
 #' provided, SNPs are ranked based on |z| from high to low and only the top `maxSNP` SNPs
-#' are kept. If only variant ids are provided, then `maxSNP` number of SNPs will be chosen
+#' are kept. If `z` is NULL, then `maxSNP` number of SNPs will be chosen
 #' randomly.
 #'
 #' @param minvar minimum number of variants in a region.
@@ -33,19 +39,39 @@
 index_regions <- function(pvarfs,
                           exprvarfs,
                           regionfile,
-                          select = NULL,
+                          z = NULL,
+                          trim_z_prop = 1,
+                          trim_z_value = 0,
                           maxSNP = Inf,
                           minvar = 1,
                           merge = T) {
 
+  # read regions file
   reg <- read.table(regionfile, header = T, stringsAsFactors = F)
   if (is.character(reg$chr)){
     reg$chr <- readr::parse_number(reg$chr)
   }
-  # sort regions
+
   reg <- reg[order(reg$chr, reg$start),]
 
   loginfo("No. LD regions: %s", nrow(reg))
+
+  # trim SNPs for parameter estimation
+  if (!is.numeric(trim_z_value) | trim_z_value < 0){
+    stop("Invalid trim_z_value: need to be >=0. ")
+  }
+
+  if (!is.numeric(trim_z_prop) | trim_z_prop <= 0 | trim_z_prop > 1){
+    stop("Invalid trim_z_prop: need to be in (0,1]. ")
+  }
+
+  if (trim_z_value == 0){
+    if (trim_z_prop != 1){
+      # get a rough trim_z_value based on trim_z_prop
+      trim_z_value <- quantile(abs(z$z), 1 - trim_z_prop)
+    }
+  }
+  loginfo("trim z scores using cut off: %s", trim_z_value)
 
   regionlist <- list()
   for (b in 1:length(pvarfs)){
@@ -57,10 +83,13 @@ index_regions <- function(pvarfs,
       stop("Input genotype file not splitted by chromosome or not in correct order")
     }
 
-    # select variant
-    snpinfo$keep <- 1
-    if (!is.null(select)){
-      snpinfo[!(snpinfo$id %in% select), "keep"] <- 0
+    # select snps
+    snpinfo$fullz <- 1
+    snpinfo$selectz <- 1
+    if (!is.null(z)){
+      z <- data.table::data.table(z)
+      snpinfo$fullz[!(snpinfo$id %in% z$id)] <- 0
+      snpinfo$selectz[abs(z[match(snpinfo$id, z$id),"z"]) < trim_z_value] <- 0
     }
 
     # get gene info (from exprf file)
@@ -72,10 +101,10 @@ index_regions <- function(pvarfs,
         stop("Imputed expression not by chromosome or not in correct order")
       }
 
-      # select variant
+      # select genes with z scores available
       geneinfo$keep <- 1
-      if (!is.null(select)){
-        geneinfo[!(geneinfo$id %in% select), "keep"] <- 0
+      if (!is.null(z)){
+        geneinfo[!(geneinfo$id %in% z$id), "keep"] <- 0
       }
     }
 
@@ -96,7 +125,10 @@ index_regions <- function(pvarfs,
       }
 
       sidx <- which(snpinfo$chrom == b & snpinfo$pos > p0 & snpinfo$pos < p1
-                    & snpinfo$keep == 1)
+                    & snpinfo$fullz == 1 & snpinfo$selectz == 1)
+
+      nsnp <- length(which(snpinfo$chrom == b & snpinfo$pos > p0 & snpinfo$pos < p1
+                           & snpinfo$fullz == 1))
 
       gid <- geneinfo[gidx, "id"]
       sid <- snpinfo[sidx, "id"]
@@ -108,7 +140,8 @@ index_regions <- function(pvarfs,
                                                   "sidx" = sidx,
                                                   "sid"  = sid,
                                                   "start" = p0,
-                                                  "stop" = p1)
+                                                  "stop" = p1,
+                                                  "nsnp" = nsnp)
     }
     loginfo("No. regions with at least one SNP/gene for chr%s: %s",
             b, length(regionlist[[b]]))
@@ -127,12 +160,15 @@ index_regions <- function(pvarfs,
           gid <- geneinfo[gidx, "id"]
           sid <- snpinfo[sidx, "id"]
 
+          nsnp <- previous[["nsnp"]] + current[["nsnp"]]
+
           regionlist[[b]][[as.character(rn)]] <- list("gidx" = gidx,
                                                       "gid"  = gid,
                                                       "sidx" = sidx,
                                                       "sid"  = sid,
-                                                      "start" =  regionlist[[b]][[as.character(rn - 1)]]$start,
-                                                      "stop" = regions[rn, "stop"])
+                                                      "start" = regionlist[[b]][[as.character(rn - 1)]]$start,
+                                                      "stop" = regions[rn, "stop"],
+                                                      "nsnp" = nsnp)
 
           regionlist[[b]][[as.character(rn -1)]] <- NULL
         }
@@ -146,16 +182,16 @@ index_regions <- function(pvarfs,
 
   loginfo("Trim regions with SNPs more than %s", maxSNP)
 
-  if ("z" %in% colnames(select)) {
+  if (!is.null(z)) {
     # z score is given, trim snps with lower |z|
     for (b in 1: length(regionlist)){
       for (rn in names(regionlist[[b]])) {
-        if (length(regionlist[[b]][[rn]][["sid"]]) > maxSNP){
-            z.abs <- abs(select[match(regionlist[[b]][[rn]][["sid"]], select[, "id"]), "z"])
+        n.ori <- length(regionlist[[b]][[rn]][["sid"]])
+        if (n.ori > maxSNP){
+            z.abs <- abs(z[match(regionlist[[b]][[rn]][["sid"]], id), "z"])
             ifkeep <- rank(-z.abs, ties.method = "first") <= maxSNP
             regionlist[[b]][[rn]][["sidx"]] <-  regionlist[[b]][[rn]][["sidx"]][ifkeep]
             regionlist[[b]][[rn]][["sid"]] <-  regionlist[[b]][[rn]][["sid"]][ifkeep]
-            regionlist[[b]][[rn]][["prop"]] <- maxSNP/length(ifkeep)
         }
       }
     }
@@ -163,14 +199,13 @@ index_regions <- function(pvarfs,
     # if no z score information, randomly select snps
     for (b in 1: length(regionlist)){
       for (rn in names(regionlist[[b]])) {
-        if (length(regionlist[[b]][[rn]][["sid"]]) > maxSNP){
-          n.ori <- length(regionlist[[b]][[rn]][["sid"]])
+        n.ori <- length(regionlist[[b]][[rn]][["sid"]])
+        if (n.ori > maxSNP){
           ifkeep <- rep(F, n.ori)
           set.seed <- 99
           ifkeep[sample.int(n.ori, size = maxSNP)] <- T
           regionlist[[b]][[rn]][["sidx"]] <-  regionlist[[b]][[rn]][["sidx"]][ifkeep]
           regionlist[[b]][[rn]][["sid"]] <-  regionlist[[b]][[rn]][["sid"]][ifkeep]
-          regionlist[[b]][[rn]][["prop"]] <- maxSNP/length(ifkeep)
         }
       }
     }
