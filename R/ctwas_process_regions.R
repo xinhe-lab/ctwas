@@ -7,7 +7,20 @@
 #' should provide non overlaping regions defining LD blocks. currently does not support
 #' chromsome X/Y etc.
 #'
-#' @param select variant ids to include. If NULL, all variants will be selected
+#' @param select Default is NULL, all variants will be selected. Or a vector of variant IDs,
+#' or a data frame with columns id and z (id is for gene or SNP id, z is for z scores).
+#' z will be used for remove SNPs if the total number of SNPs exceeds limit. See
+#' parameter `maxSNP` for more information.
+#'
+#' @param maxSNP Default is Inf, no limit for the maximum number of SNPs in a region. Or an
+#' integer indicating the maximum number of SNPs allowed in a region. This
+#' parameter is useful when a region contains many SNPs and you don't have enough memory to
+#' run the program. In this case, you can put a limit on the number of SNPs in the region.
+#' If z scores are given in the parameter `select`, i.e. a data frame with columns id and z is
+#' provided, SNPs are ranked based on |z| from high to low and only the top `maxSNP` SNPs
+#' are kept. If only variant ids are provided, then `maxSNP` number of SNPs will be chosen
+#' randomly.
+#'
 #' @param thin  A scalar in (0,1]. The proportion of SNPs
 #'  left after down sampling. Only applied on SNPs after selecting variants.
 #' @param minvar minimum number of variatns in a region
@@ -24,6 +37,7 @@ index_regions <- function(pvarfs,
                           regionfile,
                           select = NULL,
                           thin = 1,
+                          maxSNP = Inf,
                           minvar = 1,
                           merge = T) {
 
@@ -40,6 +54,12 @@ index_regions <- function(pvarfs,
     stop("thin needs to be in (0,1]")
   }
 
+  if (is.null(dim(select))) {
+    selectid <- select
+  } else {
+    selectid <- select$id
+  }
+
   regionlist <- list()
   for (b in 1:length(pvarfs)){
     # get snp info (from pvarf file)
@@ -52,8 +72,8 @@ index_regions <- function(pvarfs,
 
     # select variant
     snpinfo$keep <- 1
-    if (!is.null(select)){
-      snpinfo[!(snpinfo$id %in% select), "keep"] <- 0
+    if (!is.null(selectid)){
+      snpinfo[!(snpinfo$id %in% selectid), "keep"] <- 0
     }
 
     # downsampling for SNPs
@@ -73,11 +93,10 @@ index_regions <- function(pvarfs,
 
       # select variant
       geneinfo$keep <- 1
-      if (!is.null(select)){
-        geneinfo[!(geneinfo$id %in% select), "keep"] <- 0
+      if (!is.null(selectid)){
+        geneinfo[!(geneinfo$id %in% selectid), "keep"] <- 0
       }
     }
-
 
     regions <- reg[reg$chr == b, ]
 
@@ -141,6 +160,38 @@ index_regions <- function(pvarfs,
 
     loginfo("No. regions with at least one SNP/gene for chr%s after merging: %s",
             b, length(regionlist[[b]]))
+  }
+
+
+  loginfo("Trim regions with SNPs more than %s", maxSNP)
+
+  if ("z" %in% colnames(select)) {
+    # z score is given, trim snps with lower |z|
+    for (b in 1: length(regionlist)){
+      for (rn in names(regionlist[[b]])) {
+        if (length(regionlist[[b]][[rn]][["sid"]]) > maxSNP){
+          idx <- match(regionlist[[b]][[rn]][["sid"]], select[, "id"])
+          z.abs <- abs(select[idx, "z"])
+          ifkeep <- rank(-z.abs) <= maxSNP
+          regionlist[[b]][[rn]][["sidx"]] <-  regionlist[[b]][[rn]][["sidx"]][ifkeep]
+          regionlist[[b]][[rn]][["sid"]] <-  regionlist[[b]][[rn]][["sid"]][ifkeep]
+        }
+      }
+    }
+  } else{
+    # if no z score information, randomly select snps
+    for (b in 1: length(regionlist)){
+      for (rn in names(regionlist[[b]])) {
+        if (length(regionlist[[b]][[rn]][["sid"]]) > maxSNP){
+          n.ori <- length(regionlist[[b]][[rn]][["sid"]])
+          ifkeep <- rep(F, n.ori)
+          set.seed <- 99
+          ifkeep[sample.int(n.ori, size = maxSNP)] <- T
+          regionlist[[b]][[rn]][["sidx"]] <-  regionlist[[b]][[rn]][["sidx"]][ifkeep]
+          regionlist[[b]][[rn]][["sid"]] <-  regionlist[[b]][[rn]][["sid"]][ifkeep]
+        }
+      }
+    }
   }
 
   regionlist

@@ -48,6 +48,11 @@
 #' @param harmonize TRUE/FALSE. If TRUE, will harmonize GWAS, LD reference
 #' and weight internally (flip alleles and remove strand ambiguous SNPs)
 #'
+#' @param max_snp_region Inf or integer. Maximum number of SNPs in a region. Default is
+#' Inf, no limit. This can be useful if there are many SNPs in a region and you don't
+#' have enough memory to run the program. This applies to the last rerun step
+#'  (using full SNPs and rerun susie for regions with strong gene signals) only.
+#'
 #' @param ncore integer, number of cores to run parameter estimation
 #' @param ncore.rerun integer, number of cores to rerun regions with strong signals
 #' using full SNPs.
@@ -78,6 +83,7 @@ ctwas_rss <- function(z_snp,
                   coverage = 0.95,
                   stardardize = T,
                   harmonize =T,
+                  max_snp_region = Inf,
                   ncore = 1,
                   ncore.rerun = 1,
                   outputdir = getwd(),
@@ -227,8 +233,8 @@ ctwas_rss <- function(z_snp,
 
     # get full SNPs
     regionlist <- index_regions(ld_pvarfs, ld_exprvarfs, regionfile,
-                                select = zdf$id,
-                                thin = 1, minvar = 2) # susie_rss can't take 1 var.
+                                select = zdf,
+                                thin = 1, maxSNP = max_snp_region, minvar = 2) # susie_rss can't take 1 var.
 
     res <- data.table::fread(paste0(file.path(outputdir, outname), ".temp.susieIrss.txt"))
 

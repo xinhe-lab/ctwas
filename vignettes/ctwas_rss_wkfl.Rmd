@@ -74,7 +74,7 @@ In this step we will perform the causal TWAS algorithm, the algorithm will run s
 
 ```{r ctwas, warning=F, message=F}
 regionsfile <- system.file("extdata", "example_regions.bed", package = "ctwas")
-pars <- ctwas_rss(z_snp, z_gene, ld_pgenfs, ld_exprfs, ld_regions_custom = regionsfile, thin = 1, outputdir = outputdir, outname = "test_ss", ncore = 1)
+pars <- ctwas_rss(z_snp, z_gene, ld_pgenfs, ld_exprfs, ld_regions_custom = regionsfile, thin = 0.9, max_snp_region = 20, outputdir = outputdir, outname = "test_ss", ncore = 1)
 ```
 
 `ctwas_rss` returns the estimated parameters (in the order of gene, SNP):

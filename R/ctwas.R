@@ -34,6 +34,11 @@
 #' @param prob_single blocks with probility more than this value will be
 #'  used for parameter estimation
 #'
+#' @param max_snp_region Inf or integer. Maximum number of SNPs in a region. Default is
+#' Inf, no limit. This can be useful if there are many SNPs in a region and you don't
+#' have enough memory to run the program. This applies to the last rerun step
+#'  (using full SNPs and rerun susie for regions with strong gene signals) only.
+#'
 #' @param harmonize TRUE/FALSE. If TRUE, will harmonize GWAS, LD reference
 #' and weight internally (flip alleles and remove strand ambiguous SNPs).
 #'
@@ -53,6 +58,7 @@ ctwas <- function(pgenfs,
                   ld_regions_custom = NULL,
                   thin = 1,
                   prob_single = 0.8,
+                  max_snp_region = Inf,
                   niter1 = 3,
                   niter2 = 30,
                   L= 5,
@@ -193,8 +199,10 @@ ctwas <- function(pgenfs,
                 paste0(file.path(outputdir, outname), ".susieI.txt"))
   } else {
     # get full SNPs
+    # TODO: should use z score to trim down to maxSNP in the future.
+
     regionlist <- index_regions(pvarfs, exprvarfs, regionfile,
-                                thin = thin)
+                                thin = 1, maxSNP = max_snp_region)
 
     res <- data.table::fread(paste0(file.path(outputdir, outname), ".temp.susieI.txt"))
 
