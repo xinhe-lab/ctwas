@@ -211,11 +211,7 @@ index_regions <- function(pvarfs,
     }
   }
 
-
   return(regionlist)
-
-
-
 }
 
 
@@ -231,9 +227,8 @@ filter_regions <- function(regionlist, group_prior, prob_single = 0.8){
     for (rn in names(regionlist[[b]])) {
 
       gidx <- regionlist[[b]][[rn]][["gidx"]]
-      sidx <- regionlist[[b]][[rn]][["sidx"]]
       p.g <- length(gidx)
-      p.s <- length(sidx)
+      p.s <-regionlist[[b]][[rn]][["nsnp"]]
       P2 <- 1 - (1- prior.gene)**p.g * (1- prior.SNP)**p.s -
         p.g * prior.gene * (1 - prior.gene) ** (p.g - 1) * (1- prior.SNP) ** p.s -
         p.s * (1 - prior.gene) ** p.g * prior.SNP * (1- prior.SNP) ** (p.s - 1)

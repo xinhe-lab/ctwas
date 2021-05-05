@@ -144,7 +144,7 @@ ctwas_rss <- function(z_snp,
                     unlist(lapply(regionlist[[x]], "[[", "stop")))))
 
   write.table(regs , file= paste0(outputdir,"/", outname, ".regions.txt")
-               , row.names=F, col.names=T, sep="\t", quote = F)
+               ,row.names=F, col.names=T, sep="\t", quote = F)
 
   if (isTRUE(estimate_group_prior) | isTRUE(estimate_group_prior_var)){
 
