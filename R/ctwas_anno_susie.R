@@ -1,14 +1,12 @@
 #' annotate susie results. this will generate out put txt files
 #'
 anno_susie <- function(susieres,
-                       exprvarf,
-                       pvarf,
+                       geneinfo,
+                       snpinfo,
                        gidx,
                        sidx,
                        region_tag1,
                        region_tag2) {
-
-  geneinfo <- read_exprvar(exprvarf)
 
   anno.gene <- NULL
   if (length(geneinfo) !=0){
@@ -16,8 +14,6 @@ anno_susie <- function(susieres,
                        rep("gene", length(gidx)))
     colnames(anno.gene) <-  c("chrom", "id", "pos", "type")
   }
-
-  snpinfo <- read_pvar(pvarf)
 
   anno.SNP <- cbind(snpinfo[sidx, c("chrom", "id", "pos")],
                     rep("SNP", length(sidx)))

@@ -4,24 +4,11 @@
 \alias{susieI}
 \title{SuSiE iteraitve}
 \usage{
-susieI(
-  pgenfs,
-  exprfs,
-  Y,
-  regionlist,
-  niter = 20,
-  L = 1,
-  group_prior = NULL,
-  group_prior_var = NULL,
-  estimate_group_prior = T,
-  estimate_group_prior_var = T,
-  use_null_weight = T,
-  coverage = 0.95,
-  standardize = T,
-  ncore = 1,
-  outputdir = getwd(),
-  outname = NULL
-)
+susieI(pgenfs, exprfs, Y, regionlist, niter = 20, L = 1,
+  group_prior = NULL, group_prior_var = NULL,
+  estimate_group_prior = T, estimate_group_prior_var = T,
+  use_null_weight = T, coverage = 0.95, standardize = T, ncore = 1,
+  outputdir = getwd(), outname = NULL)
 }
 \arguments{
 \item{standardize}{True/False. Follows susie convention: If

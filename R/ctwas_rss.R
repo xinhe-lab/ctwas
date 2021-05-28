@@ -63,32 +63,34 @@
 #' @importFrom tools file_ext
 #'
 #' @export
-ctwas_rss <- function(z_snp,
-                  z_gene,
-                  ld_pgenfs,
-                  ld_exprfs,
-                  ld_regions = c("EUR", "ASN", "AFR"),
-                  ld_regions_custom = NULL,
-                  thin = 1,
-                  prob_single = 0.8,
-                  rerun_gene_PIP = 0.8,
-                  niter1 = 3,
-                  niter2 = 30,
-                  L= 5,
-                  group_prior = NULL,
-                  group_prior_var = NULL,
-                  estimate_group_prior = T,
-                  estimate_group_prior_var = T,
-                  use_null_weight = T,
-                  coverage = 0.95,
-                  stardardize = T,
-                  harmonize =T,
-                  max_snp_region = Inf,
-                  ncore = 1,
-                  ncore.rerun = 1,
-                  outputdir = getwd(),
-                  outname = NULL,
-                  logfile = NULL){
+ctwas_rss <- function(
+  z_gene,
+  z_snp,
+  ld_exprfs,
+  ld_pgenfs = NULL,
+  ld_Rfs = NULL,
+  ld_regions = c("EUR", "ASN", "AFR"),
+  ld_regions_custom = NULL,
+  thin = 1,
+  prob_single = 0.8,
+  rerun_gene_PIP = 0.8,
+  niter1 = 3,
+  niter2 = 30,
+  L= 5,
+  group_prior = NULL,
+  group_prior_var = NULL,
+  estimate_group_prior = T,
+  estimate_group_prior_var = T,
+  use_null_weight = T,
+  coverage = 0.95,
+  stardardize = T,
+  harmonize =T,
+  max_snp_region = Inf,
+  ncore = 1,
+  ncore.rerun = 1,
+  outputdir = getwd(),
+  outname = NULL,
+  logfile = NULL){
 
   if (!is.null(logfile)){
     addHandler(writeToFile, file= logfile, level='DEBUG')
@@ -96,12 +98,26 @@ ctwas_rss <- function(z_snp,
 
   loginfo('ctwas started ... ')
 
-  if (length(ld_pgenfs) != 22){
-    stop("Not all pgen files for 22 chromosomes are provided.")
-  }
-
   if (length(ld_exprfs) != 22){
     stop("Not all imputed expression files for 22 chromosomes are provided.")
+  }
+  ld_exprvarfs <- sapply(ld_exprfs, prep_exprvar)
+
+  if (is.null(ld_pgenfs) & is.null(ld_Rfs)){
+    stop("Error: need to provide either .pgen file or ld_R file")
+  } else if (!is.null(ld_pgenfs)){
+    if (length(ld_pgenfs) != 22){
+      stop("Not all pgen files for 22 chromosomes are provided.")
+    }
+    ld_pvarfs <- sapply(ld_pgenfs, prep_pvar, outputdir = outputdir)
+    ld_snpinfo <- lapply(ld_pvarfs, read_pvar)
+    ld_Rfs <- NULL # do not use R matrix info if genotype is given
+  } else {
+    if (length(ld_Rfs) != 22){
+      stop("Not all LD R matrix files for 22 chromosomes are provided.")
+    }
+    ld_snpinfo <- lapply(ld_Rfs, read_ld_Rvar)
+    ld_pvarfs <- NULL
   }
 
   if (is.null(ld_regions_custom)){
@@ -114,25 +130,24 @@ ctwas_rss <- function(z_snp,
 
   loginfo("LD region file: %s", regionfile)
 
-  ld_pvarfs <- sapply(ld_pgenfs, prep_pvar, outputdir = outputdir)
-  ld_exprvarfs <- sapply(ld_exprfs, prep_exprvar)
-
   if (isTRUE(harmonize)){
     loginfo("flipping z scores to match LD reference")
-    for (ld_pvarf in ld_pvarfs){
-      ld_snpinfo <- read_pvar(ld_pvarf)
-      z_snp <- harmonize_z_ld(z_snp, ld_snpinfo)
-    }
+      for (b in 1:22) {
+        z_snp <- harmonize_z_ld(z_snp, ld_snpinfo[[b]])
+      }
   }
 
   zdf <- rbind(z_snp[, c("id", "z")], z_gene[, c("id", "z")])
-  rm(z_snp)
+  rm(z_snp, ld_snpinfo)
 
   if (thin <=0 | thin > 1){
     stop("thin value needs to be in (0,1]")
   }
 
-  regionlist <- index_regions(ld_pvarfs, ld_exprvarfs, regionfile,
+  regionlist <- index_regions(regionfile = regionfile,
+                              exprvarfs = ld_exprvarfs,
+                              pvarfs = ld_pvarfs,
+                              ld_Rfs = ld_Rfs,
                               select = zdf$id,
                               thin = thin, minvar = 2) # susie_rss can't take 1 var.
 
@@ -152,9 +167,10 @@ ctwas_rss <- function(z_snp,
     }
 
     pars <- susieI_rss(zdf = zdf,
-                       ld_pgenfs = ld_pgenfs,
-                       ld_exprfs = ld_exprfs,
                        regionlist = regionlist,
+                       ld_exprfs = ld_exprfs,
+                       ld_pgenfs = ld_pgenfs,
+                       ld_Rfs = ld_Rfs,
                        niter = niter1,
                        L = 1,
                        z_ld_weight = 0,
@@ -184,21 +200,23 @@ ctwas_rss <- function(z_snp,
     loginfo("Run susie iteratively, getting accurate estimate ...")
 
     pars <- susieI_rss(zdf = zdf,
-                   ld_pgenfs = ld_pgenfs,
-                   ld_exprfs = ld_exprfs,
-                   regionlist = regionlist2,
-                   niter = niter2,
-                   L = 1,
-                   z_ld_weight = 0,
-                   group_prior = group_prior,
-                   group_prior_var = group_prior_var,
-                   estimate_group_prior = estimate_group_prior,
-                   estimate_group_prior_var = estimate_group_prior_var,
-                   use_null_weight = use_null_weight,
-                   coverage = coverage,
-                   ncore = ncore,
-                   outputdir = outputdir,
-                   outname = paste0(outname, ".s2"))
+                       regionlist = regionlist2,
+                       ld_exprfs = ld_exprfs,
+                       ld_pgenfs = ld_pgenfs,
+                       ld_Rfs = ld_Rfs,
+                       niter = niter2,
+                       L = 1,
+                       z_ld_weight = 0,
+                       group_prior = group_prior,
+                       group_prior_var = group_prior_var,
+                       estimate_group_prior = estimate_group_prior,
+                       estimate_group_prior_var = estimate_group_prior_var,
+                       use_null_weight = use_null_weight,
+                       coverage = coverage,
+                       ncore = ncore,
+                       outputdir = outputdir,
+                       outname = paste0(outname, ".s2"))
+
 
     group_prior <- pars[["group_prior"]]
     group_prior_var <- pars[["group_prior_var"]]
@@ -207,21 +225,23 @@ ctwas_rss <- function(z_snp,
   loginfo("Run susie for all regions.")
 
   pars <- susieI_rss(zdf = zdf,
-                 ld_pgenfs = ld_pgenfs,
-                 ld_exprfs = ld_exprfs,
-                 regionlist = regionlist,
-                 niter = 1,
-                 L = L,
-                 z_ld_weight = 0,
-                 group_prior = group_prior,
-                 group_prior_var = group_prior_var,
-                 estimate_group_prior = estimate_group_prior,
-                 estimate_group_prior_var = estimate_group_prior_var,
-                 use_null_weight = use_null_weight,
-                 coverage = coverage,
-                 ncore = ncore,
-                 outputdir = outputdir,
-                 outname = paste0(outname, ".temp"))
+                     regionlist = regionlist,
+                     ld_exprfs = ld_exprfs,
+                     ld_pgenfs = ld_pgenfs,
+                     ld_Rfs = ld_Rfs,
+                     niter = 1,
+                     L = L,
+                     z_ld_weight = 0,
+                     group_prior = group_prior,
+                     group_prior_var = group_prior_var,
+                     estimate_group_prior = estimate_group_prior,
+                     estimate_group_prior_var = estimate_group_prior_var,
+                     use_null_weight = use_null_weight,
+                     coverage = coverage,
+                     ncore = ncore,
+                     outputdir = outputdir,
+                     outname = paste0(outname, ".temp"))
+
 
   group_prior[2] <- group_prior[2] * thin # convert snp pi1
 
@@ -232,7 +252,10 @@ ctwas_rss <- function(z_snp,
   } else {
 
     # get full SNPs
-    regionlist <- index_regions(ld_pvarfs, ld_exprvarfs, regionfile,
+    regionlist <- index_regions(regionfile = regionfile,
+                                exprvarfs = ld_exprvarfs,
+                                pvarfs = ld_pvarfs,
+                                ld_Rfs = ld_Rfs,
                                 select = zdf,
                                 thin = 1, maxSNP = max_snp_region, minvar = 2) # susie_rss can't take 1 var.
 
@@ -262,9 +285,10 @@ ctwas_rss <- function(z_snp,
       loginfo("Rerun susie for regions with strong gene signals using full SNPs.")
 
       pars <- susieI_rss(zdf = zdf,
-                         ld_pgenfs = ld_pgenfs,
-                         ld_exprfs = ld_exprfs,
                          regionlist = regionlist,
+                         ld_exprfs = ld_exprfs,
+                         ld_pgenfs = ld_pgenfs,
+                         ld_Rfs = ld_Rfs,
                          niter = 1,
                          L = L,
                          z_ld_weight = 0,

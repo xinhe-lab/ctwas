@@ -77,11 +77,11 @@ read_pvar <- function(pvarf){
 #'   allele).
 #'
 #' @importFrom pgenlibr NewPvar
-#' @importFrom pgenlibr NewPgen 
+#' @importFrom pgenlibr NewPgen
 #' @importFrom tools file_ext file_path_sans_ext
-#' 
+#'
 #' @export
-#' 
+#'
 prep_pgen <- function(pgenf, pvarf){
 
   pvar <- pgenlibr::NewPvar(pvarf)
@@ -159,5 +159,49 @@ read_expr <- function(exprf, variantidx = NULL){
                                        select = variantidx)))
   }
 }
+
+#' @return a data frame with columns: chr region_name start stop RDS_file
+read_ld_Rinfo <- function(ld_Rf){
+   Rinfo <- data.table::fread(ld_Rf, header = T)
+   target_header <- c("chrom", "region_name", "start", "stop", "RDS_file")
+   if (all(target_header %in% colnames(Rinfo))){
+     if (length(unique(Rinfo$chrom)) == 1){
+       return(Rinfo)
+     } else{
+       stop("Each ld_Rf needs to contain regions from only one chromosome")
+     }
+   } else {
+     stop("The ld_Rf file needs to contain the following columns: ",
+          paste(target_header, collapse = " "))
+   }
+}
+
+#' read variant information associated with a LD R matrix .RDS file.
+#'
+#' @return a data frame with columns: "chrom", "id", "pos", "alt", "ref". "alt" is
+#' the coded allele
+#'
+#' @importFrom tools file_ext file_path_sans_ext
+read_ld_Rvar_RDS <- function(ld_RDSf){
+  ld_Rvarf <- paste0(file_path_sans_ext(ld_RDSf), ".Rvar")
+  ld_Rvar <- data.table::fread(ld_Rvarf, header = T)
+  target_header <- c("chrom", "id", "pos", "alt", "ref")
+  if (all(target_header %in% colnames(ld_Rvar))){
+      return(ld_Rvar)
+  } else {
+    stop("The .Rvar file needs to contain the following columns: ",
+         paste(target_header, collapse = " "))
+  }
+}
+
+#' read variant information for all regions in ld_Rf.
+#' @return a data frame with columns: "chrom", "id", "pos", "alt", "ref"
+read_ld_Rvar <- function(ld_Rf){
+  Rinfo <- read_ld_Rinfo(ld_Rf)
+  ld_Rvar <- do.call(rbind, lapply(Rinfo$RDS_file, read_ld_Rvar_RDS))
+  ld_Rvar <- unique(ld_Rvar)
+  ld_Rvar
+}
+
 
 

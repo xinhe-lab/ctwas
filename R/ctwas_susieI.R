@@ -111,9 +111,12 @@ susieI <- function(pgenfs,
                               standardize = standardize,
                               estimate_prior_variance = F, coverage = coverage)
 
+            geneinfo <- read_exprvar(exprvarfs[b])
+            snpinfo <- read_pvar(pvarfs[b])
+
             outdf.reg <- anno_susie(susieres,
-                                   exprvarfs[b],
-                                   pvarfs[b],
+                                   geneinfo,
+                                   snpinfo,
                                    gidx,
                                    sidx,
                                    b, rn)

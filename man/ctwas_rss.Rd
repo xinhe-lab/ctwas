@@ -4,34 +4,14 @@
 \alias{ctwas_rss}
 \title{Causal inference for TWAS using summary statistics}
 \usage{
-ctwas_rss(
-  z_snp,
-  z_gene,
-  ld_pgenfs,
-  ld_exprfs,
-  ld_regions = c("EUR", "ASN", "AFR"),
-  ld_regions_custom = NULL,
-  thin = 1,
-  prob_single = 0.8,
-  rerun_gene_PIP = 0.8,
-  niter1 = 3,
-  niter2 = 30,
-  L = 5,
-  group_prior = NULL,
-  group_prior_var = NULL,
-  estimate_group_prior = T,
-  estimate_group_prior_var = T,
-  use_null_weight = T,
-  coverage = 0.95,
-  stardardize = T,
-  harmonize = T,
-  max_snp_region = Inf,
-  ncore = 1,
-  ncore.rerun = 1,
-  outputdir = getwd(),
-  outname = NULL,
-  logfile = NULL
-)
+ctwas_rss(z_snp, z_gene, ld_exprfs, ld_pgenfs = NULL, ld_Rfs = NULL,
+  ld_regions = c("EUR", "ASN", "AFR"), ld_regions_custom = NULL,
+  thin = 1, prob_single = 0.8, rerun_gene_PIP = 0.8, niter1 = 3,
+  niter2 = 30, L = 5, group_prior = NULL, group_prior_var = NULL,
+  estimate_group_prior = T, estimate_group_prior_var = T,
+  use_null_weight = T, coverage = 0.95, stardardize = T,
+  harmonize = T, max_snp_region = Inf, ncore = 1, ncore.rerun = 1,
+  outputdir = getwd(), outname = NULL, logfile = NULL)
 }
 \arguments{
 \item{z_snp}{A data frame with four columns: "id", "A1", "A2", "z".
@@ -40,12 +20,6 @@ If `harmonize= False`, A1 and A2 are not required.}
 
 \item{z_gene}{A data frame with two columns: "id", "z". giving the z scores for
 genes.}
-
-\item{ld_pgenfs}{A character vector of .pgen or .bed files. One file for one
-chromosome, in the order of 1 to 22. Therefore, the length of this vector
-needs to be 22. If .pgen files are given, then .pvar and .psam are assumed
-to present in the same directory. If .bed files are given, then .bim and
-.fam files are assumed to present in the same directory.}
 
 \item{ld_exprfs}{A character vector of .`expr` or `.expr.gz` files. One file for
 one chromosome, in the order of 1 to 22. Therefore, the length of this vector
@@ -62,6 +36,12 @@ assume corresponding `.exprvar` files are present in the same directory.
 }
 Its rows should be in the same order as the columns for corresponding `.expr`
 files.}
+
+\item{ld_pgenfs}{A character vector of .pgen or .bed files. One file for one
+chromosome, in the order of 1 to 22. Therefore, the length of this vector
+needs to be 22. If .pgen files are given, then .pvar and .psam are assumed
+to present in the same directory. If .bed files are given, then .bim and
+.fam files are assumed to present in the same directory.}
 
 \item{ld_regions}{A string representing the population to use for defining
 LD regions. These LD regions are defined by ldetect. The user can also

@@ -4,17 +4,9 @@
 \alias{impute_expr_z}
 \title{Impute expression}
 \usage{
-impute_expr_z(
-  z_snp,
-  ld_pgenf,
-  weight,
-  method = "lasso",
-  outputdir = getwd(),
-  outname = NULL,
-  logfile = NULL,
-  compress = T,
-  harmonize = T
-)
+impute_expr_z(z_snp, ld_pgenf = NULL, ld_Rf = NULL, weight,
+  method = "lasso", outputdir = getwd(), outname = NULL,
+  logfile = NULL, compress = T, harmonize = T)
 }
 \arguments{
 \item{z_snp}{A data frame with two columns: "id", "A1", "A2", "z". giving the z scores for
