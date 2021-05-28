@@ -67,6 +67,7 @@ susieI_rss <- function(zdf,
           # run susie for each region
           regs <- corelist[[core]]
           for (reg in 1: nrow(regs)) {
+          # for (reg in 1:2){
             b <- regs[reg, "b"]
             rn <- regs[reg, "rn"]
 

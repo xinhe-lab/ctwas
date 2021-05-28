@@ -122,14 +122,14 @@ index_regions <- function(regionfile,
       p1 <- regions[rn, "stop"]
 
       if (isTRUE(merge)){
-        gidx <- which(geneinfo$chrom == b & geneinfo$p1 >= p0 & geneinfo$p0 < p1
+        gidx <- which(geneinfo$chrom == b & geneinfo$p1 > p0 & geneinfo$p0 < p1
                     & geneinfo$keep == 1) # allow overlap
       } else {
-        gidx <- which(geneinfo$chrom == b & geneinfo$p0 >= p0 & geneinfo$p0 < p1
+        gidx <- which(geneinfo$chrom == b & geneinfo$p0 > p0 & geneinfo$p0 < p1
                       & geneinfo$keep == 1) # unique assignment to regions
       }
 
-      sidx <- which(snpinfo$chrom == b & snpinfo$pos >= p0 & snpinfo$pos < p1
+      sidx <- which(snpinfo$chrom == b & snpinfo$pos > p0 & snpinfo$pos < p1
                     & snpinfo$keep == 1 & snpinfo$thin_tag == 1)
 
       gid <- geneinfo[gidx, "id"]
