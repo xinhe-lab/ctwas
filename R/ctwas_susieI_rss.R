@@ -120,10 +120,14 @@ susieI_rss <- function(zdf,
                 stop("R matrix info not available for region", b, ",", rn)
               }
               regRDS <-  regionlist[[b]][[rn]][["R_s_file"]]
-
+              R_snp <- lapply(regRDS, readRDS)
+              R_snp <- as.matrix(Matrix::bdiag(R_snp))
+              R_snp <- R_snp[sidx, sidx, drop = F]
               R_snp_gene <- readRDS(regionlist[[b]][[rn]][["R_sg_file"]])
+              R_snp_gene <- R_snp_gene[sidx, ]
               R_gene <- readRDS(regionlist[[b]][[rn]][["R_g_file"]])
-              R_snp <- readRDS(regRDS)
+
+              # gene first then SNPs
               R <- rbind(cbind(R_gene, t(R_snp_gene)),
                          cbind(R_snp_gene, R_snp))
             }

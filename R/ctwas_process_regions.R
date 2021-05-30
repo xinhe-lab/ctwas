@@ -122,27 +122,32 @@ index_regions <- function(regionfile,
       p1 <- regions[rn, "stop"]
 
       if (isTRUE(merge)){
-        gidx <- which(geneinfo$chrom == b & geneinfo$p1 > p0 & geneinfo$p0 < p1
+        gidx <- which(geneinfo$chrom == b & geneinfo$p1 >= p0 & geneinfo$p0 < p1
                     & geneinfo$keep == 1) # allow overlap
       } else {
-        gidx <- which(geneinfo$chrom == b & geneinfo$p0 > p0 & geneinfo$p0 < p1
+        gidx <- which(geneinfo$chrom == b & geneinfo$p0 >= p0 & geneinfo$p0 < p1
                       & geneinfo$keep == 1) # unique assignment to regions
       }
 
-      sidx <- which(snpinfo$chrom == b & snpinfo$pos > p0 & snpinfo$pos < p1
+      sidx <- which(snpinfo$chrom == b & snpinfo$pos >= p0 & snpinfo$pos < p1
                     & snpinfo$keep == 1 & snpinfo$thin_tag == 1)
+
+      if (length(gidx) + length(sidx) < minvar) {next}
 
       gid <- geneinfo[gidx, "id"]
       sid <- snpinfo[sidx, "id"]
 
-      if (length(gidx) + length(sidx) < minvar) {next}
+      minpos <- min(c(geneinfo[gidx, "p0"], snpinfo[sidx, "pos"]))
+      maxpos <- max(c(geneinfo[gidx, "p1"], snpinfo[sidx, "pos"]))
 
       regionlist[[b]][[as.character(rn)]] <- list("gidx" = gidx,
                                     "gid"  = gid,
                                     "sidx" = sidx,
                                     "sid"  = sid,
                                     "start" = p0,
-                                    "stop" = p1)
+                                    "stop" = p1,
+                                    "minpos" = minpos,
+                                    "maxpos" = maxpos)
     }
     loginfo("No. regions with at least one SNP/gene for chr%s: %s",
             b, length(regionlist[[b]]))
@@ -165,8 +170,10 @@ index_regions <- function(regionfile,
                                                         "gid"  = gid,
                                                         "sidx" = sidx,
                                                         "sid"  = sid,
-                                                        "start" =  regionlist[[b]][[as.character(rn - 1)]]$start,
-                                                        "stop" = regions[rn, "stop"])
+                                                        "start" = previous$start,
+                                                        "stop" = current$stop,
+                                                        "minpos" = previous$minpos,
+                                                        "maxpos" = current$maxpos)
 
             regionlist[[b]][[as.character(rn -1)]] <- NULL
           }
@@ -212,26 +219,32 @@ index_regions <- function(regionfile,
   if (is.null(pvarfs)){
 
     loginfo("Adding R matrix info, as genotype is not given")
-    wgtlistall <- do.call(c, lapply(exprvarfs, function(x){
-      load(paste0(strsplit(x, ".exprvar")[[1]], ".exprqc.Rd")); wgtlist}))
+
+    dir.create(file.path(outputdir, paste0(outname, "_LDR")), showWarnings = F)
+
+    wgtall <- lapply(exprvarfs, function(x){
+      load(paste0(strsplit(x, ".exprvar")[[1]], ".exprqc.Rd")); wgtlist})
+    wgtlistall <- do.call(c, wgtall)
+    names(wgtlistall) <- do.call(c, lapply(wgtall, names))
 
     for (b in 1: length(ld_Rfs)){
+      loginfo("Adding R matrix info for chrom %s", b)
       ld_Rf <- ld_Rfs[b]
       ld_Rinfo <- read_ld_Rinfo(ld_Rf)
       ld_snpinfo <- read_ld_Rvar(ld_Rf)
       for (rn in names(regionlist[[b]])){
-        ifreg <- ifelse(regionlist[[b]][[rn]][["start"]] < ld_Rinfo[, "stop"]
-                        & regionlist[[b]][[rn]][["stop"]] > ld_Rinfo[, "start"], T, F)
-        regRDS <- ld_Rinfo[ifreg, "RDSfile"]
-
-        if (length(regRDS) > 0) {
-          R_snp <- lapply(regRDS, readRDS)
-          R_snp <- as.matrix(Matrix::bdiag(R_snp))
-        } else {
-          R_snp <- matrix(, 0, 0)
-        }
-
+        ifreg <- ifelse(regionlist[[b]][[rn]][["minpos"]] < ld_Rinfo[, "stop"]
+                        & regionlist[[b]][[rn]][["maxpos"]] >= ld_Rinfo[, "start"], T, F)
+        regRDS <- ld_Rinfo[ifreg, "RDS_file"]
+        R_snp <- lapply(regRDS, readRDS)
+        R_snp <- as.matrix(Matrix::bdiag(R_snp))
         R_snp_anno <- do.call(rbind, lapply(regRDS, read_ld_Rvar_RDS))
+
+        #update sidx and gidx to match R matrix info
+        if (length(regionlist[[b]][[rn]][["gidx"]])!=0) {
+          regionlist[[b]][[rn]][["gidx"]] <- 1: length(regionlist[[b]][[rn]][["gidx"]])
+        }
+        regionlist[[b]][[rn]][["sidx"]] <- match(regionlist[[b]][[rn]][["sid"]], R_snp_anno$id)
 
         gnames <- regionlist[[b]][[rn]][["gid"]]
         R_snp_gene <- matrix( , nrow(R_snp), length(gnames))
