@@ -40,7 +40,9 @@ index_regions <- function(regionfile,
                           thin = 1,
                           maxSNP = Inf,
                           minvar = 1,
-                          merge = T) {
+                          merge = T,
+                          outname = NULL,
+                          outputdir = getwd()) {
 
   if (is.null(pvarfs) & is.null(ld_Rfs)){
     stop("Stopped: missing LD/genotype information.

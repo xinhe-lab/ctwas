@@ -147,7 +147,9 @@ ctwas_rss <- function(
                               pvarfs = ld_pvarfs,
                               ld_Rfs = ld_Rfs,
                               select = zdf$id,
-                              thin = thin, minvar = 2) # susie_rss can't take 1 var.
+                              thin = thin, minvar = 2,
+                              outname = outname,
+                              outputdir = outputdir) # susie_rss can't take 1 var.
 
   regs <- do.call(rbind, lapply(1:22, function(x) cbind(x,
                     unlist(lapply(regionlist[[x]], "[[", "start")),
@@ -255,7 +257,8 @@ ctwas_rss <- function(
                                 pvarfs = ld_pvarfs,
                                 ld_Rfs = ld_Rfs,
                                 select = zdf,
-                                thin = 1, maxSNP = max_snp_region, minvar = 2) # susie_rss can't take 1 var.
+                                thin = 1, maxSNP = max_snp_region, minvar = 2,
+                                outname = outname, outputdir = outputdir) # susie_rss can't take 1 var.
 
     res <- data.table::fread(paste0(file.path(outputdir, outname), ".temp.susieIrss.txt"))
 
