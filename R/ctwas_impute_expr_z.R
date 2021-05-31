@@ -226,7 +226,6 @@ impute_expr_z <- function (z_snp,
 
     z_gene_chr <- data.frame("id" = gnames,
                          "z" = z.g)
-    print(class(z_gene_chr$id))
 
     z_genelist[[b]] <- z_gene_chr
     ld_exprfs[b] <- exprf

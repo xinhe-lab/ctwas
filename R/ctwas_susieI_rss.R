@@ -57,10 +57,10 @@ susieI_rss <- function(zdf,
 
     corelist <- region2core(regionlist, ncore)
 
-    # outdf <- foreach (core = 1:length(corelist), .combine = "rbind",
-    #                   .packages = "ctwas") %dopar% {
-      outdf <- NULL
-      for (core in 1) {
+    outdf <- foreach (core = 1:length(corelist), .combine = "rbind",
+                      .packages = "ctwas") %dopar% {
+      # outdf <- NULL
+      # for (core in 1) {
 
           outdf.core.list <- list()
 
@@ -161,7 +161,7 @@ susieI_rss <- function(zdf,
 
           outdf.core <- do.call(rbind, outdf.core.list)
           outdf.core
-          outdf <- rbind(outdf, outdf.core)
+          # outdf <- rbind(outdf, outdf.core)
     }
 
     if (isTRUE(estimate_group_prior)){
