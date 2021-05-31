@@ -2,7 +2,7 @@
 % Please edit documentation in R/ctwas_read_data.R
 \name{read_ld_Rvar}
 \alias{read_ld_Rvar}
-\title{read variant information for all regions in ld_Rf.}
+\title{read variant information for all ld mattrices in `ld_Rf`.}
 \usage{
 read_ld_Rvar(ld_Rf)
 }
@@ -10,5 +10,5 @@ read_ld_Rvar(ld_Rf)
 a data frame with columns: "chrom", "id", "pos", "alt", "ref"
 }
 \description{
-read variant information for all regions in ld_Rf.
+read variant information for all ld mattrices in `ld_Rf`.
 }

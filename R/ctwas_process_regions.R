@@ -42,7 +42,7 @@ index_regions <- function(regionfile,
                           minvar = 1,
                           merge = T) {
 
-  if (is.null(pvarfs) & is.null(ld_Rf)){
+  if (is.null(pvarfs) & is.null(ld_Rfs)){
     stop("Stopped: missing LD/genotype information.
          LD/genotype information needs to be provided either in genotype form
          (see parameter description for pvarfs) or R matrix form
@@ -118,18 +118,18 @@ index_regions <- function(regionfile,
     regionlist[[b]] <- list()
 
     for (rn in 1:nrow(regions)){
-      p0 <- regions[rn, "start"]
-      p1 <- regions[rn, "stop"]
+      rn.start <- regions[rn, "start"]
+      rn.stop <- regions[rn, "stop"]
 
       if (isTRUE(merge)){
-        gidx <- which(geneinfo$chrom == b & geneinfo$p1 >= p0 & geneinfo$p0 < p1
+        gidx <- which(geneinfo$chrom == b & geneinfo$p1 >= rn.start & geneinfo$p0 < rn.stop
                     & geneinfo$keep == 1) # allow overlap
       } else {
-        gidx <- which(geneinfo$chrom == b & geneinfo$p0 >= p0 & geneinfo$p0 < p1
+        gidx <- which(geneinfo$chrom == b & geneinfo$p0 >= rn.start & geneinfo$p0 < rn.stop
                       & geneinfo$keep == 1) # unique assignment to regions
       }
 
-      sidx <- which(snpinfo$chrom == b & snpinfo$pos >= p0 & snpinfo$pos < p1
+      sidx <- which(snpinfo$chrom == b & snpinfo$pos >= rn.start & snpinfo$pos < rn.stop
                     & snpinfo$keep == 1 & snpinfo$thin_tag == 1)
 
       if (length(gidx) + length(sidx) < minvar) {next}
@@ -144,8 +144,8 @@ index_regions <- function(regionfile,
                                     "gid"  = gid,
                                     "sidx" = sidx,
                                     "sid"  = sid,
-                                    "start" = p0,
-                                    "stop" = p1,
+                                    "start" = rn.start,
+                                    "stop" = rn.stop,
                                     "minpos" = minpos,
                                     "maxpos" = maxpos)
     }
@@ -230,7 +230,7 @@ index_regions <- function(regionfile,
     for (b in 1: length(ld_Rfs)){
       loginfo("Adding R matrix info for chrom %s", b)
       ld_Rf <- ld_Rfs[b]
-      ld_Rinfo <- read_ld_Rinfo(ld_Rf)
+      ld_Rinfo <- data.table::fread(ld_Rf, header = T)
       ld_snpinfo <- read_ld_Rvar(ld_Rf)
       for (rn in names(regionlist[[b]])){
         ifreg <- ifelse(regionlist[[b]][[rn]][["minpos"]] < ld_Rinfo[, "stop"]
@@ -240,10 +240,7 @@ index_regions <- function(regionfile,
         R_snp <- as.matrix(Matrix::bdiag(R_snp))
         R_snp_anno <- do.call(rbind, lapply(regRDS, read_ld_Rvar_RDS))
 
-        #update sidx and gidx to match R matrix info
-        if (length(regionlist[[b]][[rn]][["gidx"]])!=0) {
-          regionlist[[b]][[rn]][["gidx"]] <- 1: length(regionlist[[b]][[rn]][["gidx"]])
-        }
+        #update sidx to match R matrix info
         regionlist[[b]][[rn]][["sidx"]] <- match(regionlist[[b]][[rn]][["sid"]], R_snp_anno$id)
 
         gnames <- regionlist[[b]][[rn]][["gid"]]

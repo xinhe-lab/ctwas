@@ -4,7 +4,7 @@
 \alias{impute_expr_z}
 \title{Impute expression}
 \usage{
-impute_expr_z(z_snp, ld_pgenf = NULL, ld_Rf = NULL, weight,
+impute_expr_z(z_snp, weight, ld_pgenfs = NULL, ld_R_dir = NULL,
   method = "lasso", outputdir = getwd(), outname = NULL,
   logfile = NULL, compress = T, harmonize = T)
 }

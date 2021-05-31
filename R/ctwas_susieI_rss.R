@@ -146,7 +146,7 @@ susieI_rss <- function(zdf,
             if (!is.null(ld_pgenfs)){
               snpinfo <-  read_pvar(ld_pvarfs[b])
             } else {
-              snpinfo <- read_ld_Rvar(ld_Rfs[b])
+              snpinfo <- do.call(rbind, lapply(regRDS, read_ld_Rvar_RDS))
             }
 
             outdf.reg <- anno_susie(susieres,

@@ -68,7 +68,7 @@ ctwas_rss <- function(
   z_snp,
   ld_exprfs,
   ld_pgenfs = NULL,
-  ld_Rfs = NULL,
+  ld_R_dir = NULL,
   ld_regions = c("EUR", "ASN", "AFR"),
   ld_regions_custom = NULL,
   thin = 1,
@@ -103,7 +103,7 @@ ctwas_rss <- function(
   }
   ld_exprvarfs <- sapply(ld_exprfs, prep_exprvar)
 
-  if (is.null(ld_pgenfs) & is.null(ld_Rfs)){
+  if (is.null(ld_pgenfs) & is.null(ld_R_dir)){
     stop("Error: need to provide either .pgen file or ld_R file")
   } else if (!is.null(ld_pgenfs)){
     if (length(ld_pgenfs) != 22){
@@ -113,9 +113,7 @@ ctwas_rss <- function(
     ld_snpinfo <- lapply(ld_pvarfs, read_pvar)
     ld_Rfs <- NULL # do not use R matrix info if genotype is given
   } else {
-    if (length(ld_Rfs) != 22){
-      stop("Not all LD R matrix files for 22 chromosomes are provided.")
-    }
+    ld_Rfs <- write_ld_Rf(ld_R_dir, outname = outname, outputdir = outputdir)
     ld_snpinfo <- lapply(ld_Rfs, read_ld_Rvar)
     ld_pvarfs <- NULL
   }

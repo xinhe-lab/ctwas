@@ -44,22 +44,19 @@ ld_pgenfs <- system.file("extdata/example_genotype_files", paste0("example_chr",
 ld_pgenfs
 ```
 
-  ** If you want to provide R matrices for LD independent regions. You need to provide a character vector of LD R information files, one for each chromosome, in the order of 1 to 22. For example:
+  ** If you want to provide R matrices. You need to provide a directory with all `.RDS` and matching `.Rvar` files. For example:
+  
+```{r}
+ld_R_dir <- system.file("extdata/example_ld_R", package = "ctwas")
+list.files(ld_R_dir)[1:10]
+```
+  
+The .RDS file, is a [R .RDS format](https://www.rdocumentation.org/packages/base/versions/3.3.2/topics/readRDS?tap_a=5644-dce66f&tap_s=10907-287229) file. It stores the LD correlation matrix for a region (a $p \times p$ matrix, $p$ is the number of SNPs in the region). We also require that for each `.RDS` file, a file with the same stem name but ended with the suffix `.Rvar` to present in the same directory. This .Rvar files gives SNPs information in the region and its order should match columns/rows in the `.RDS` file. An example, if the .RDS file is `example_chr1.R_snp.0_5.RDS`. the matching `.Rvar` file should be `example_chr1.R_snp.0_5.Rvar` in the same directory, and it looks like this:
 
 ```{r}
-ld_Rfs <- system.file("extdata/example_ld_R", paste0("example_chr", 1:22, "_ld_R_info.txt"), package = "ctwas")
-ld_Rfs
+head(read.table(system.file("extdata/example_ld_R","example_chr1.R_snp.0_5.Rvar",  package = "ctwas"), header = T))
 ```
-Each row in the LD R information file provides information for a LD independent region.  The file has these columns: "chrom" (chromosome), "region_name" (a name for the LD independent region, can be anything), "start" (start position of the LD independent region), "stop" (stop or end position of the LD independent region), "RDS_file" (the file path for the .RDS file containing the LD R matrix, more description below).
-
-```{r}
-head(read.table(ld_Rfs[1], header = T))
-```
-The "RDS_file", is a [R .RDS format](https://www.rdocumentation.org/packages/base/versions/3.3.2/topics/readRDS?tap_a=5644-dce66f&tap_s=10907-287229) file. It stores the LD correlation matrix for this region (a $p \times p$ matrix, $p$ is the number of SNPs in the region). We also require that for each "RDS_file"" we require that a file with the same stem name but ended with the suffix ".Rvar" to present in the same directory. This files gives SNPs information in the region and its order should match columns/rows in the .RDS file. An example, for region "1", the .RDS file is `/home/simingz/ctwas/inst/extdata/example_ld_R/example_chr1.R_snp.0_5.RDS`. the matching .Rvar file should be `/home/simingz/ctwas/inst/extdata/example_ld_R/example_chr1.R_snp.0_5.Rvar` and it looks like this:
-
-```{r}
-head(read.table("/home/simingz/ctwas/inst/extdata/example_ld_R/example_chr1.R_snp.0_5.Rvar", header = T))
-```
+The program will automatically search for all `.RDS` and `.Rvar` file in the directory, so no other `.RDS` files should be seen in this directory unless you want to use it as a LD R matrix in the program. Each SNP should uniquely belong to one of these R matrices.
 
 Note: LD reference should contain as many GWAS SNPs as possible as only the overlapping SNPs are included in the analysis. Also only SNPs with z scores, in LD reference and are eQTLs (i.e. SNPs shared in GWAS, LD reference and weight files) are used in imputing gene expression z scores. Thus we suggest you to impute z scores for eQTLs if many are not available. The program will harmonize data internally. All coordinates are in hg19.
 
@@ -88,16 +85,11 @@ In the following code, we compute expression z scores for each gene. We do this 
 When providing LD genotype data:
 ```{r impute, warning=F, message=F}
 outputdir <- "~/temp"
-ld_exprfs <- vector()
-z_gene <- NULL
-for (i in 1:22){
-  ld_pgenf <- ld_pgenfs[i]
-  res <- impute_expr_z(z_snp = z_snp, ld_pgenf = ld_pgenf, weight = weight,
+res <- impute_expr_z(z_snp = z_snp,  weight = weight, ld_pgenfs = ld_pgenfs,
                            method = "lasso", outputdir = outputdir,
                            outname = "test_ss")
-  ld_exprfs[i] <- res$ld_exprf
-  z_gene <- rbind(z_gene, res$z_gene)
-}
+z_gene <- res$z_gene
+ld_exprfs <- res$ld_exprfs
 
 head(z_gene)
 ld_exprfs
@@ -112,7 +104,7 @@ Run `ctwas_rss` using genotype data for LD:
 pars <- ctwas_rss(z_gene = z_gene, z_snp = z_snp, ld_exprfs = ld_exprfs, ld_pgenfs = ld_pgenfs, ld_regions_custom = regionsfile, thin = 0.9, max_snp_region = 20, outputdir = outputdir, outname = "test_ss", ncore = 1)
 ```
 
-# Steps when using LD correlation matrices
+# Steps when using LD R (correlation) matrices
 
 ## Step 1: impute expression z scores
 In the following code, we compute expression z scores for each gene. We do this chromosome by chromosome. `impute_expr_z` will return z scores for each gene. It will also generate files containing the reference LD genotypes for eQTLs in the gene and the filename is returned. We will need these files in the `ctwas_rss` function in step 3.
@@ -120,16 +112,12 @@ In the following code, we compute expression z scores for each gene. We do this 
 When providing LD R matrices:
 ```{r impute_R, warning=F, message=F}
 outputdir <- "~/temp"
-ld_exprfs <- vector()
-z_gene <- NULL
-for (i in 1:22){
-  ld_Rf <- ld_Rfs[i]
-  res <- impute_expr_z(z_snp = z_snp, ld_Rf = ld_Rf, weight = weight,
+
+res <- impute_expr_z(z_snp = z_snp,  weight = weight, ld_R_dir = ld_R_dir,
                            method = "lasso", outputdir = outputdir,
                            outname = "test_ss")
-  ld_exprfs[i] <- res$ld_exprf
-  z_gene <- rbind(z_gene, res$z_gene)
-}
+z_gene <- res$z_gene
+ld_exprfs <- res$ld_exprfs
 
 head(z_gene)
 ld_exprfs
@@ -140,7 +128,7 @@ In this step we will perform the causal TWAS algorithm, the algorithm will run s
 
 When providing LD R matrices, use the following command:
 ```{r ctwas_R, warning=F, message=F}
-pars <- ctwas_rss(z_gene = z_gene, z_snp = z_snp, ld_exprfs = ld_exprfs, ld_Rfs = ld_Rfs, ld_regions_custom = regionsfile, thin = 0.9, max_snp_region = 20, outputdir = outputdir, outname = "test_ss", ncore = 1)
+pars <- ctwas_rss(z_gene = z_gene, z_snp = z_snp, ld_exprfs = ld_exprfs, ld_R_dir = ld_R_dir, ld_regions_custom = regionsfile, thin = 0.9, max_snp_region = 20, outputdir = outputdir, outname = "test_ss", ncore = 1)
 ```
 
 # Output from ctwas
