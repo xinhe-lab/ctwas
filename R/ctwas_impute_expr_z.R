@@ -81,6 +81,7 @@ impute_expr_z <- function (z_snp,
     loginfo("collecting gene weight information ...")
     if (nrow(wgtpos) > 0){
       for (i in 1:nrow(wgtpos)) {
+      # for (i in 1:2) {
         wf <- file.path(wgtdir, wgtpos[i, "WGT"])
         load(wf)
         gname <- wgtpos[i, "ID"]
@@ -155,7 +156,8 @@ impute_expr_z <- function (z_snp,
       } else {
         loginfo("Using given LD matrices to impute gene z score.")
         regs <- data.frame("gid" = names(exprlist),
-                           "reg" = unlist(lapply(exprlist, "[[", "reg")))
+                           "reg" = unlist(lapply(exprlist, "[[", "reg")),
+                           stringsAsFactors = F)
         batches <- unique(regs$reg)
         for (batch in batches){
           gnames <- regs[regs$reg == batch, "gid"]
@@ -165,6 +167,7 @@ impute_expr_z <- function (z_snp,
           R_snp <- as.matrix(Matrix::bdiag(R_snp))
           R_snp_anno <- do.call(rbind, lapply(regRDS, read_ld_Rvar_RDS))
           for (i in 1:length(gnames)){
+            gname <- gnames[i]
             wgt <- exprlist[[gname]][["wgt"]]
             snpnames <- rownames(wgt)
             ld.idx <- match(snpnames, R_snp_anno$id)
@@ -198,8 +201,11 @@ impute_expr_z <- function (z_snp,
     }
     data.table::fwrite(geneinfo, file = exprvarf, sep = "\t", quote = F)
 
+    z_gene_chr <- data.frame("id" = gnames,
+                             "z" = z.g)
+
     exprqcf <- paste0(outname, "_chr", b, ".exprqc.Rd")
-    save(wgtlist, qclist, file = exprqcf)
+    save(wgtlist, qclist, z_gene_chr, file = exprqcf)
 
     exprf <- paste0(outname, "_chr", b, ".expr")
     if (!is.null(ld_pgenfs)){
@@ -224,8 +230,6 @@ impute_expr_z <- function (z_snp,
     loginfo("Imputation done: number of genes with imputed expression: %s for chr %s",
             length(gnames), b)
 
-    z_gene_chr <- data.frame("id" = gnames,
-                         "z" = z.g)
 
     z_genelist[[b]] <- z_gene_chr
     ld_exprfs[b] <- exprf
