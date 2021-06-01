@@ -264,7 +264,7 @@ index_regions <- function(regionfile,
 
           if (length(gnames) > 1){
             gene_pairs <- combn(length(gnames), 2)
-            wgtr <- lapply(wgtlistall[gnames], "[[", "wgt")
+            wgtr <- wgtlistall[gnames]
             gene_corrs <- apply(gene_pairs, 2, function(x){t(wgtr[[x[1]]])%*%R_snp[ldr[[x[1]]], ldr[[x[2]]]]%*%wgtr[[x[2]]]/(
               sqrt(t(wgtr[[x[1]]])%*%R_snp[ldr[[x[1]]], ldr[[x[1]]]]%*%wgtr[[x[1]]]) *
                 sqrt(t(wgtr[[x[2]]])%*%R_snp[ldr[[x[2]]], ldr[[x[2]]]]%*%wgtr[[x[2]]]))})
