@@ -222,61 +222,60 @@ index_regions <- function(regionfile,
 
     loginfo("Adding R matrix info, as genotype is not given")
 
-    dir.create(file.path(outputdir, paste0(outname, "_LDR")), showWarnings = F)
-
-    wgtall <- lapply(exprvarfs, function(x){
-      load(paste0(strsplit(x, ".exprvar")[[1]], ".exprqc.Rd")); wgtlist})
-    wgtlistall <- do.call(c, wgtall)
-    names(wgtlistall) <- do.call(c, lapply(wgtall, names))
-
+    # dir.create(file.path(outputdir, paste0(outname, "_LDR")), showWarnings = F)
+    #
+    # wgtall <- lapply(exprvarfs, function(x){
+    #   load(paste0(strsplit(x, ".exprvar")[[1]], ".exprqc.Rd")); wgtlist})
+    # wgtlistall <- do.call(c, wgtall)
+    # names(wgtlistall) <- do.call(c, lapply(wgtall, names))
+    #
     for (b in 1: length(ld_Rfs)){
       loginfo("Adding R matrix info for chrom %s", b)
       ld_Rf <- ld_Rfs[b]
       ld_Rinfo <- data.table::fread(ld_Rf, header = T)
-      ld_snpinfo <- read_ld_Rvar(ld_Rf)
       for (rn in names(regionlist[[b]])){
         ifreg <- ifelse(regionlist[[b]][[rn]][["minpos"]] < ld_Rinfo[, "stop"]
                         & regionlist[[b]][[rn]][["maxpos"]] >= ld_Rinfo[, "start"], T, F)
         regRDS <- ld_Rinfo[ifreg, "RDS_file"]
-        R_snp <- lapply(regRDS, readRDS)
-        R_snp <- as.matrix(Matrix::bdiag(R_snp))
+        # R_snp <- lapply(regRDS, readRDS)
+        # R_snp <- as.matrix(Matrix::bdiag(R_snp))
         R_snp_anno <- do.call(rbind, lapply(regRDS, read_ld_Rvar_RDS))
 
         #update sidx to match R matrix info
         regionlist[[b]][[rn]][["sidx"]] <- match(regionlist[[b]][[rn]][["sid"]], R_snp_anno$id)
 
-        gnames <- regionlist[[b]][[rn]][["gid"]]
-        R_snp_gene <- matrix( , nrow(R_snp), length(gnames))
-        R_gene <- diag(length(gnames))
-        if (length(gnames) > 0) {
-
-          ldr <- list()
-          for (i in 1:length(gnames)){
-            gname <- gnames[i]
-            wgt <- wgtlistall[[gname]]
-            snpnames <- rownames(wgt)
-            ld.idx <- match(snpnames, R_snp_anno$id)
-            ldr[[gname]] <- ld.idx
-            R.s <- R_snp[ld.idx, ld.idx]
-            R_snp_gene[,i] <- sapply(1:nrow(R_snp),
-                                     function(x){crossprod(wgt,R_snp[ld.idx,x])/sqrt(crossprod(wgt,R.s)%*%wgt*R_snp[x,x])})
-          }
-
-          if (length(gnames) > 1){
-            gene_pairs <- combn(length(gnames), 2)
-            wgtr <- wgtlistall[gnames]
-            gene_corrs <- apply(gene_pairs, 2, function(x){t(wgtr[[x[1]]])%*%R_snp[ldr[[x[1]]], ldr[[x[2]]]]%*%wgtr[[x[2]]]/(
-              sqrt(t(wgtr[[x[1]]])%*%R_snp[ldr[[x[1]]], ldr[[x[1]]]]%*%wgtr[[x[1]]]) *
-                sqrt(t(wgtr[[x[2]]])%*%R_snp[ldr[[x[2]]], ldr[[x[2]]]]%*%wgtr[[x[2]]]))})
-            R_gene[t(gene_pairs)] <- gene_corrs
-            R_gene[t(gene_pairs[c(2,1),])] <- gene_corrs
-          }
-        }
+    #     gnames <- regionlist[[b]][[rn]][["gid"]]
+    #     R_snp_gene <- matrix( , nrow(R_snp), length(gnames))
+    #     R_gene <- diag(length(gnames))
+    #     if (length(gnames) > 0) {
+    #
+    #       ldr <- list()
+    #       for (i in 1:length(gnames)){
+    #         gname <- gnames[i]
+    #         wgt <- wgtlistall[[gname]]
+    #         snpnames <- rownames(wgt)
+    #         ld.idx <- match(snpnames, R_snp_anno$id)
+    #         ldr[[gname]] <- ld.idx
+    #         R.s <- R_snp[ld.idx, ld.idx]
+    #         R_snp_gene[,i] <- sapply(1:nrow(R_snp),
+    #                                  function(x){crossprod(wgt,R_snp[ld.idx,x])/sqrt(crossprod(wgt,R.s)%*%wgt*R_snp[x,x])})
+    #       }
+    #
+    #       if (length(gnames) > 1){
+    #         gene_pairs <- combn(length(gnames), 2)
+    #         wgtr <- wgtlistall[gnames]
+    #         gene_corrs <- apply(gene_pairs, 2, function(x){t(wgtr[[x[1]]])%*%R_snp[ldr[[x[1]]], ldr[[x[2]]]]%*%wgtr[[x[2]]]/(
+    #           sqrt(t(wgtr[[x[1]]])%*%R_snp[ldr[[x[1]]], ldr[[x[1]]]]%*%wgtr[[x[1]]]) *
+    #             sqrt(t(wgtr[[x[2]]])%*%R_snp[ldr[[x[2]]], ldr[[x[2]]]]%*%wgtr[[x[2]]]))})
+    #         R_gene[t(gene_pairs)] <- gene_corrs
+    #         R_gene[t(gene_pairs[c(2,1),])] <- gene_corrs
+    #       }
+    #     }
 
         R_sg_file <- file.path(outputdir, paste0(outname, "_LDR"), paste0("chr", b, "_reg", rn, ".R_snp_gene.RDS"))
         R_g_file <- file.path(outputdir, paste0(outname, "_LDR"), paste0("chr", b, "_reg", rn, ".R_gene.RDS"))
-        saveRDS(R_snp_gene, file=R_sg_file)
-        saveRDS(R_gene, file=R_g_file)
+        # saveRDS(R_snp_gene, file=R_sg_file)
+        # saveRDS(R_gene, file=R_g_file)
 
         regionlist[[b]][[rn]][["R_s_file"]] <- regRDS
         regionlist[[b]][[rn]][["R_sg_file"]] <- R_sg_file

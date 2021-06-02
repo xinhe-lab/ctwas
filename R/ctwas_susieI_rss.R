@@ -60,7 +60,7 @@ susieI_rss <- function(zdf,
     outdf <- foreach (core = 1:length(corelist), .combine = "rbind",
                       .packages = "ctwas") %dopar% {
       # outdf <- NULL
-      # for (core in 1) {
+      # for (core in 2:10) {
 
           outdf.core.list <- list()
 
@@ -124,7 +124,7 @@ susieI_rss <- function(zdf,
               R_snp <- as.matrix(Matrix::bdiag(R_snp))
               R_snp <- R_snp[sidx, sidx, drop = F]
               R_snp_gene <- readRDS(regionlist[[b]][[rn]][["R_sg_file"]])
-              R_snp_gene <- R_snp_gene[sidx, ]
+              R_snp_gene <- R_snp_gene[sidx, , drop = F]
               R_gene <- readRDS(regionlist[[b]][[rn]][["R_g_file"]])
 
               # gene first then SNPs
