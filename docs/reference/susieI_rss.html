@@ -72,7 +72,7 @@
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">ctwas</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="Released version">0.1.25</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="Released version">0.1.26</span>
       </span>
     </div>
 
@@ -129,24 +129,11 @@
     <p>SuSiE iteraitve rss version</p>
     </div>
 
-    <pre class="usage"><span class='fu'>susieI_rss</span><span class='op'>(</span>
-  <span class='va'>zdf</span>,
-  <span class='va'>ld_pgenfs</span>,
-  <span class='va'>ld_exprfs</span>,
-  <span class='va'>regionlist</span>,
-  niter <span class='op'>=</span> <span class='fl'>20</span>,
-  L <span class='op'>=</span> <span class='fl'>1</span>,
-  z_ld_weight <span class='op'>=</span> <span class='fl'>0</span>,
-  group_prior <span class='op'>=</span> <span class='cn'>NULL</span>,
-  group_prior_var <span class='op'>=</span> <span class='cn'>NULL</span>,
-  estimate_group_prior <span class='op'>=</span> <span class='cn'>T</span>,
-  estimate_group_prior_var <span class='op'>=</span> <span class='cn'>T</span>,
-  use_null_weight <span class='op'>=</span> <span class='cn'>T</span>,
-  coverage <span class='op'>=</span> <span class='fl'>0.95</span>,
-  ncore <span class='op'>=</span> <span class='fl'>1</span>,
-  outputdir <span class='op'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/getwd.html'>getwd</a></span><span class='op'>(</span><span class='op'>)</span>,
-  outname <span class='op'>=</span> <span class='cn'>NULL</span>
-<span class='op'>)</span></pre>
+    <pre class="usage"><span class='fu'>susieI_rss</span><span class='op'>(</span><span class='va'>zdf</span>, <span class='va'>regionlist</span>, <span class='va'>ld_exprfs</span>, ld_pgenfs <span class='op'>=</span> <span class='cn'>NULL</span>, ld_Rfs <span class='op'>=</span> <span class='cn'>NULL</span>,
+  niter <span class='op'>=</span> <span class='fl'>20</span>, L <span class='op'>=</span> <span class='fl'>1</span>, z_ld_weight <span class='op'>=</span> <span class='fl'>0</span>, group_prior <span class='op'>=</span> <span class='cn'>NULL</span>,
+  group_prior_var <span class='op'>=</span> <span class='cn'>NULL</span>, estimate_group_prior <span class='op'>=</span> <span class='cn'>T</span>,
+  estimate_group_prior_var <span class='op'>=</span> <span class='cn'>T</span>, use_null_weight <span class='op'>=</span> <span class='cn'>T</span>, coverage <span class='op'>=</span> <span class='fl'>0.95</span>,
+  ncore <span class='op'>=</span> <span class='fl'>1</span>, outputdir <span class='op'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/getwd.html'>getwd</a></span><span class='op'>(</span><span class='op'>)</span>, outname <span class='op'>=</span> <span class='cn'>NULL</span><span class='op'>)</span></pre>
 
 
 

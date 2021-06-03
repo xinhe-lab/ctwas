@@ -31,7 +31,7 @@
 #'
 #' @param logfile the log file, if NULL will print log info on screen
 #'
-#' @param prob_single blocks with probility more than this value will be
+#' @param prob_single blocks with probability more than this value will be
 #'  used for parameter estimation
 #'
 #' @param rerun_gene_PIP if thin <1, will rerun blocks with the max gene PIP

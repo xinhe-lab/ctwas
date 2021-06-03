@@ -283,7 +283,6 @@ susie_rss = function (z, R, maf = NULL, maf_thresh = 0, z_ld_weight = 0,
   if (!is.null(null_weight)) {
     s$null_index <- length(z)
     s$pip <- s$pip[1:(length(z)-1)]
-    s$mu2 <- s$mu2[, 1:(length(z)-1), drop = F]
   }
   return(s)
 }

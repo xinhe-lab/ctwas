@@ -51,6 +51,7 @@ susieI <- function(pgenfs,
   doParallel::registerDoParallel(cl)
 
   for (iter in 1:niter){
+    browser(expr = {iter == 2})
 
     loginfo("run iteration %s", iter)
 
@@ -59,9 +60,10 @@ susieI <- function(pgenfs,
 
     corelist <- region2core(regionlist, ncore)
 
-    outdf <- foreach (core = 1:length(corelist), .combine = "rbind",
-                      .packages = "ctwas") %dopar% {
-                        # for (core in 1:2) {
+    # outdf <- foreach (core = 1:length(corelist), .combine = "rbind",
+    #                   .packages = "ctwas") %dopar% {
+    outdf <- NULL
+    for (core in 1) {
 
         outdf.core.list <- list()
 
@@ -70,6 +72,7 @@ susieI <- function(pgenfs,
         for (reg in 1: nrow(regs)) {
             b <- regs[reg, "b"]
             rn <- regs[reg, "rn"]
+            print(c(b,rn))
 
             # prepare genotype data
             pgen <- prep_pgen(pgenf = pgenfs[b], pvarfs[b])
@@ -126,6 +129,7 @@ susieI <- function(pgenfs,
 
         outdf.core <- do.call(rbind, outdf.core.list)
         outdf.core
+        outdf <- rbind(outdf, outdf.core)
     }
 
     if (isTRUE(estimate_group_prior)){
