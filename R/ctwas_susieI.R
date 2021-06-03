@@ -51,7 +51,6 @@ susieI <- function(pgenfs,
   doParallel::registerDoParallel(cl)
 
   for (iter in 1:niter){
-    browser(expr = {iter == 2})
 
     loginfo("run iteration %s", iter)
 
@@ -72,7 +71,6 @@ susieI <- function(pgenfs,
         for (reg in 1: nrow(regs)) {
             b <- regs[reg, "b"]
             rn <- regs[reg, "rn"]
-            print(c(b,rn))
 
             # prepare genotype data
             pgen <- prep_pgen(pgenf = pgenfs[b], pvarfs[b])
