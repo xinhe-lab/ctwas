@@ -22,7 +22,8 @@ Imports:
     foreach,
     logging,
     Rfast,
-    readr
+    readr,
+    RSQLite
 Suggests: 
     knitr,
     rmarkdown

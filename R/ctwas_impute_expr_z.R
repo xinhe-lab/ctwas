@@ -2,10 +2,11 @@
 #' @param z_snp A data frame with two columns: "id", "A1", "A2", "z". giving the z scores for
 #' snps. "A1" is effect allele. "A2" is the other allele. If `harmonize= False`, A1 and A2 are not required.
 # @param ld_Rf a file listing all LD matrix R files in one chromosome. It gives the file path for the .RDS file which contains LD matrix for a region/block, one file per line. All .RDS file from the target chromosome should be included here. For each RDS file, a file with same base name but ended with .Rvar needs to be present in the same folder. the .Rvar file has 5 columns: "chrom", "id", "pos", "alt", "ref". The order of rows needs to match the order of rows in .RDS file.
-#' @param weight a string, pointing to the fusion/twas format of weights.
+#' @param weight a string, pointing to the fusion/twas format of weights, or predictdb format.
 #'   Note the effect size are obtained with standardized genotype and phenotype.
+#'
 #' @param method a string,  blup/bslmm/lasso/top1/enet/best
-#'   "best" means the method giving the best cross validation R^2
+#'   "best" means the method giving the best cross validation R^2, this is only used for fusion weights.
 #' @param harmonize T/F, if need to harmonize SNP data, if T, will harmonize gwas, LD and eQTL genotype alleles.
 #' @importFrom logging addHandler loginfo
 #'
@@ -64,73 +65,23 @@ impute_expr_z <- function (z_snp,
       logging::loginfo("will also flip weights to match LD reference for each gene")
     }
 
-    exprlist <- list()
-    qclist <- list()
-    wgtdir <- dirname(weight)
-    wgtposfile <- file.path(wgtdir, paste0(basename(weight), ".pos"))
+    if (dir.exists(weight)){
+      weightall <- read_weight_fusion(weight, chrom, ld_snpinfo, z_snp,  harmonize = T)
+    } else if (file_ext(weight)=='.db'){
+      weightall <- read_weight_predictdb(weight, chrom, ld_snpinfo, z_snp,  harmonize = T)
+    } else{
+      stop("Unrecognized weight format, need to use either FUSION format or predict.db format")
+    }
 
-    wgtpos <- read.table(wgtposfile, header = T, stringsAsFactors = F)
-    wgtpos <- transform(wgtpos,
-                        ID = ifelse(duplicated(ID) | duplicated(ID, fromLast = TRUE),
-                                    paste(ID, ave(ID, ID, FUN = seq_along), sep = "_ID"), ID))
-    loginfo("number of genes with weights provided: %s", nrow(wgtpos))
+    exprlist <- weightall[["exprlist"]]
+    qclist <- weightall[["qclist"]]
 
-    wgtpos <- wgtpos[wgtpos$CHR==b,]
-    loginfo("number of genes on chromosome %s: %s", b, nrow(wgtpos))
-
-    loginfo("collecting gene weight information ...")
-    if (nrow(wgtpos) > 0){
-      for (i in 1:nrow(wgtpos)) {
-      # for (i in 1:2) {
-        wf <- file.path(wgtdir, wgtpos[i, "WGT"])
-        load(wf)
-        gname <- wgtpos[i, "ID"]
-        if (isTRUE(harmonize)) {
-          w <- harmonize_wgt_ld(wgt.matrix, snps, ld_snpinfo)
-          wgt.matrix <- w[["wgt"]]
-          snps <- w[["snps"]]
-        }
-        g.method = method
-        if (g.method == "best") {
-          g.method = names(which.max(cv.performance["rsq",]))
-        }
-        if (!(g.method %in% names(cv.performance[1, ])))
-          next
-        wgt.matrix <- wgt.matrix[abs(wgt.matrix[, g.method]) > 0, , drop = F]
-        wgt.matrix <- wgt.matrix[complete.cases(wgt.matrix), , drop = F]
-        if (nrow(wgt.matrix) == 0)
-          next
-        snpnames <- Reduce(intersect, list(rownames(wgt.matrix), ld_snpinfo$id, z_snp$id))
-        if (length(snpnames) == 0)
-          next
-        wgt.idx <- match(snpnames, rownames(wgt.matrix))
-        wgt <- wgt.matrix[wgt.idx, g.method, drop = F]
-
-        p0 <-  min(snps[snps[, "id"] %in% snpnames, "pos"])
-        p1 <- max(snps[snps[, "id"] %in% snpnames, "pos"])
-
-        exprlist[[gname]] <- list("chrom" = b,
-                                  "p0" = p0,
-                                  "p1" = p1,
-                                  "wgt" = wgt)
-
-        if (is.null(ld_pgenfs)){
-          ifreg <- ifelse(p1 >= ld_Rinfo[, "start"] & p0 < ld_Rinfo[, "stop"], T, F)
-          exprlist[[gname]][["reg"]] <- paste(sort(ld_Rinfo[ifreg, "region_name"]),
-                                              collapse = ";")
-        }
-
-        nwgt <- nrow(wgt.matrix)
-        nmiss <- nrow(wgt.matrix) - length(snpnames)
-        qclist[[gname]] <- list("n" = nwgt,
-                                "nmiss" = nmiss,
-                                "missrate" = nwgt/nmiss)
-
-      }
-
+    if (length(exprlist) > 0) {
       loginfo("Start gene z score imputation ...")
+
       if (!is.null(ld_pgenfs)){
         loginfo("ld genotype is given, using genotypes to impute gene z score.")
+
         ld_pgen <- prep_pgen(ld_pgenf, ld_pvarf)
         gnames <- names(exprlist)
         for (i in 1:length(gnames)){
@@ -155,6 +106,16 @@ impute_expr_z <- function (z_snp,
         }
       } else {
         loginfo("Using given LD matrices to impute gene z score.")
+
+        # Add region info for each gene
+        for (gname in names(exprlist)){
+          p0 <- exprlist[[gname]][["p0"]]
+          p1 <- exprlist[[gname]][["p1"]]
+          ifreg <- ifelse(p1 >= ld_Rinfo[, "start"] & p0 < ld_Rinfo[, "stop"], T, F)
+          exprlist[[gname]][["reg"]] <- paste(sort(ld_Rinfo[ifreg, "region_name"]),
+                                              collapse = ";")
+        }
+        # impute in batch (a batch uses same LD R files)
         regs <- data.frame("gid" = names(exprlist),
                            "reg" = unlist(lapply(exprlist, "[[", "reg")),
                            stringsAsFactors = F)
@@ -238,5 +199,122 @@ impute_expr_z <- function (z_snp,
   z_gene <- do.call(rbind, z_genelist)
 
   return(list("z_gene" = z_gene, "ld_exprfs"= ld_exprfs))
+}
+
+
+read_weight_fusion <- function(weight, chrom, ld_snpinfo, z_snp, harmonize = T){
+  exprlist <- list()
+  qclist <- list()
+  wgtdir <- dirname(weight)
+  wgtposfile <- file.path(wgtdir, paste0(basename(weight), ".pos"))
+
+  wgtpos <- read.table(wgtposfile, header = T, stringsAsFactors = F)
+  wgtpos <- transform(wgtpos,
+                      ID = ifelse(duplicated(ID) | duplicated(ID, fromLast = TRUE),
+                                  paste(ID, ave(ID, ID, FUN = seq_along), sep = "_ID"), ID))
+  loginfo("number of genes with weights provided: %s", nrow(wgtpos))
+
+  wgtpos <- wgtpos[wgtpos$CHR==chrom,]
+  loginfo("number of genes on chromosome %s: %s", b, nrow(wgtpos))
+
+  loginfo("collecting gene weight information ...")
+  if (nrow(wgtpos) > 0){
+    for (i in 1:nrow(wgtpos)) {
+      # for (i in 1:2) {
+      wf <- file.path(wgtdir, wgtpos[i, "WGT"])
+      load(wf)
+      gname <- wgtpos[i, "ID"]
+      if (isTRUE(harmonize)) {
+        w <- harmonize_wgt_ld(wgt.matrix, snps, ld_snpinfo)
+        wgt.matrix <- w[["wgt"]]
+        snps <- w[["snps"]]
+      }
+      g.method = method
+      if (g.method == "best") {
+        g.method = names(which.max(cv.performance["rsq",]))
+      }
+      if (!(g.method %in% names(cv.performance[1, ])))
+        next
+      wgt.matrix <- wgt.matrix[abs(wgt.matrix[, g.method]) > 0, , drop = F]
+      wgt.matrix <- wgt.matrix[complete.cases(wgt.matrix), , drop = F]
+      if (nrow(wgt.matrix) == 0)
+        next
+      snpnames <- Reduce(intersect, list(rownames(wgt.matrix), ld_snpinfo$id, z_snp$id))
+      if (length(snpnames) == 0)
+        next
+      wgt.idx <- match(snpnames, rownames(wgt.matrix))
+      wgt <- wgt.matrix[wgt.idx, g.method, drop = F]
+
+      p0 <-  min(snps[snps[, "id"] %in% snpnames, "pos"])
+      p1 <- max(snps[snps[, "id"] %in% snpnames, "pos"])
+
+      exprlist[[gname]] <- list("chrom" = b,
+                                "p0" = p0,
+                                "p1" = p1,
+                                "wgt" = wgt)
+
+      nwgt <- nrow(wgt.matrix)
+      nmiss <- nrow(wgt.matrix) - length(snpnames)
+      qclist[[gname]] <- list("n" = nwgt,
+                              "nmiss" = nmiss,
+                              "missrate" = nwgt/nmiss)
+
+    }
+  }
+  return(list("exprlist" = exprlist, "qclist" = qclist))
+}
+
+read_weight_predictdb <- function(weight, chrom, ld_snpinfo, z_snp, harmonize = T){
+  exprlist <- list()
+  qclist <- list()
+
+  sqlite <- RSQLite::dbDriver("SQLite")
+  db = dbConnect(sqlite,weight)
+
+  ## convenience query function
+  query <- function(...) RSQLite::dbGetQuery(db, ...)
+
+  gnames <- unique(query('select gene from weights')[,1])
+  loginfo("number of genes with weights provided: %s",
+          length(gnames))
+
+  loginfo("collecting gene weight information ...")
+  for (gname in gnames){
+    wgt <- query('select * from weights where gene = ?', params = list(gname))
+    wgt.matrix <- as.matrix(wgt[, "weight", drop = F])
+    rownames(wgt.matrix) <- wgt$rsid
+    chrpos <- do.call(rbind, strsplit(wgt$varID, "_"))
+    snps <- data.frame(chrpos[,1], wgt$rsid, "0", chrpos[,2], wgt$eff_allele, wgt$ref_allele, stringsAsFactors = F)
+    colnames(snps) <- c("chrom", "id", "cm", "pos", "alt", "ref")
+
+    if (isTRUE(harmonize)) {
+      w <- harmonize_wgt_ld(wgt.matrix, snps, ld_snpinfo)
+      wgt.matrix <- w[["wgt"]]
+      snps <- w[["snps"]]
+    }
+    g.method = "weight"
+    wgt.matrix <- wgt.matrix[abs(wgt.matrix[, g.method]) > 0, , drop = F]
+    wgt.matrix <- wgt.matrix[complete.cases(wgt.matrix), , drop = F]
+    if (nrow(wgt.matrix) == 0)
+      next
+    snpnames <- Reduce(intersect, list(rownames(wgt.matrix), ld_snpinfo$id, z_snp$id))
+    if (length(snpnames) == 0)
+      next
+
+    p0 <-  min(snps[snps[, "id"] %in% snpnames, "pos"])
+    p1 <- max(snps[snps[, "id"] %in% snpnames, "pos"])
+
+    exprlist[[gname]] <- list("chrom" = b,
+                              "p0" = p0,
+                              "p1" = p1,
+                              "wgt" = wgt)
+
+    nwgt <- nrow(wgt.matrix)
+    nmiss <- nrow(wgt.matrix) - length(snpnames)
+    qclist[[gname]] <- list("n" = nwgt,
+                            "nmiss" = nmiss,
+                            "missrate" = nwgt/nmiss)
+  }
+  return(list("exprlist" = exprlist, "qclist" = qclist))
 }
 
