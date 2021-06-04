@@ -31,7 +31,7 @@
 #'
 #' @param logfile the log file, if NULL will print log info on screen
 #'
-#' @param prob_single blocks with probility more than this value will be
+#' @param prob_single blocks with probability more than this value will be
 #'  used for parameter estimation
 #'
 #' @param rerun_gene_PIP if thin <1, will rerun blocks with the max gene PIP
@@ -114,7 +114,8 @@ ctwas <- function(pgenfs,
     stop("thin value needs to be in (0,1]")
   }
 
-  regionlist <- index_regions(pvarfs, exprvarfs, regionfile,
+  regionlist <- index_regions(regionfile = regionfile, exprvarfs = exprvarfs,
+                              pvarfs = pvarfs,
                               thin = thin)
 
   regs <- do.call(rbind, lapply(1:22, function(x) cbind(x,
@@ -206,7 +207,8 @@ ctwas <- function(pgenfs,
     # get full SNPs
     # TODO: should use z score to trim down to maxSNP in the future.
 
-    regionlist <- index_regions(pvarfs, exprvarfs, regionfile,
+    regionlist <- index_regions(regionfile = regionfile, exprvarfs = exprvarfs,
+                                pvarfs = pvarfs,
                                 thin = 1, maxSNP = max_snp_region)
 
     res <- data.table::fread(paste0(file.path(outputdir, outname), ".temp.susieI.txt"))

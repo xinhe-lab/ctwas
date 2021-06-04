@@ -74,7 +74,7 @@ this region." />
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">ctwas</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="Released version">0.1.25</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="Released version">0.1.26</span>
       </span>
     </div>
 
@@ -133,16 +133,8 @@ is location/column number in .pgen file or .expr file) located within
 this region.</p>
     </div>
 
-    <pre class="usage"><span class='fu'>index_regions</span><span class='op'>(</span>
-  <span class='va'>pvarfs</span>,
-  <span class='va'>exprvarfs</span>,
-  <span class='va'>regionfile</span>,
-  select <span class='op'>=</span> <span class='cn'>NULL</span>,
-  thin <span class='op'>=</span> <span class='fl'>1</span>,
-  maxSNP <span class='op'>=</span> <span class='cn'>Inf</span>,
-  minvar <span class='op'>=</span> <span class='fl'>1</span>,
-  merge <span class='op'>=</span> <span class='cn'>T</span>
-<span class='op'>)</span></pre>
+    <pre class="usage"><span class='fu'>index_regions</span><span class='op'>(</span><span class='va'>regionfile</span>, <span class='va'>exprvarfs</span>, pvarfs <span class='op'>=</span> <span class='cn'>NULL</span>, ld_Rfs <span class='op'>=</span> <span class='cn'>NULL</span>,
+  select <span class='op'>=</span> <span class='cn'>NULL</span>, thin <span class='op'>=</span> <span class='fl'>1</span>, maxSNP <span class='op'>=</span> <span class='cn'>Inf</span>, minvar <span class='op'>=</span> <span class='fl'>1</span>, merge <span class='op'>=</span> <span class='cn'>T</span><span class='op'>)</span></pre>
 
     <h2 class="hasAnchor" id="arguments"><a class="anchor" href="#arguments"></a>Arguments</h2>
     <table class="ref-arguments">

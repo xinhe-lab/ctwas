@@ -61,7 +61,8 @@ susieI <- function(pgenfs,
 
     outdf <- foreach (core = 1:length(corelist), .combine = "rbind",
                       .packages = "ctwas") %dopar% {
-                        # for (core in 1:2) {
+    # outdf <- NULL
+    # for (core in 1) {
 
         outdf.core.list <- list()
 
@@ -111,9 +112,12 @@ susieI <- function(pgenfs,
                               standardize = standardize,
                               estimate_prior_variance = F, coverage = coverage)
 
+            geneinfo <- read_exprvar(exprvarfs[b])
+            snpinfo <- read_pvar(pvarfs[b])
+
             outdf.reg <- anno_susie(susieres,
-                                   exprvarfs[b],
-                                   pvarfs[b],
+                                   geneinfo,
+                                   snpinfo,
                                    gidx,
                                    sidx,
                                    b, rn)
@@ -123,6 +127,7 @@ susieI <- function(pgenfs,
 
         outdf.core <- do.call(rbind, outdf.core.list)
         outdf.core
+        # outdf <- rbind(outdf, outdf.core)
     }
 
     if (isTRUE(estimate_group_prior)){

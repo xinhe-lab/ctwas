@@ -73,7 +73,7 @@
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">ctwas</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="Released version">0.1.25</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="Released version">0.1.26</span>
       </span>
     </div>
 
@@ -147,15 +147,8 @@
 
 <span class='fu'>susie_get_posterior_samples</span><span class='op'>(</span><span class='va'>susie_fit</span>, <span class='va'>num_samples</span><span class='op'>)</span>
 
-<span class='fu'>susie_get_cs</span><span class='op'>(</span>
-  <span class='va'>res</span>,
-  X <span class='op'>=</span> <span class='cn'>NULL</span>,
-  Xcorr <span class='op'>=</span> <span class='cn'>NULL</span>,
-  coverage <span class='op'>=</span> <span class='fl'>0.95</span>,
-  min_abs_corr <span class='op'>=</span> <span class='fl'>0.5</span>,
-  dedup <span class='op'>=</span> <span class='cn'>TRUE</span>,
-  squared <span class='op'>=</span> <span class='cn'>FALSE</span>
-<span class='op'>)</span>
+<span class='fu'>susie_get_cs</span><span class='op'>(</span><span class='va'>res</span>, X <span class='op'>=</span> <span class='cn'>NULL</span>, Xcorr <span class='op'>=</span> <span class='cn'>NULL</span>, coverage <span class='op'>=</span> <span class='fl'>0.95</span>,
+  min_abs_corr <span class='op'>=</span> <span class='fl'>0.5</span>, dedup <span class='op'>=</span> <span class='cn'>TRUE</span>, squared <span class='op'>=</span> <span class='cn'>FALSE</span><span class='op'>)</span>
 
 <span class='fu'>susie_get_pip</span><span class='op'>(</span><span class='va'>res</span>, prune_by_cs <span class='op'>=</span> <span class='cn'>FALSE</span>, prior_tol <span class='op'>=</span> <span class='fl'>1e-09</span><span class='op'>)</span></pre>
 

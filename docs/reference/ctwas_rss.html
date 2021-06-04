@@ -72,7 +72,7 @@
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">ctwas</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="Released version">0.1.25</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="Released version">0.1.26</span>
       </span>
     </div>
 
@@ -129,56 +129,28 @@
     <p>Causal inference for TWAS using summary statistics</p>
     </div>
 
-    <pre class="usage"><span class='fu'>ctwas_rss</span><span class='op'>(</span>
-  <span class='va'>z_snp</span>,
-  <span class='va'>z_gene</span>,
-  <span class='va'>ld_pgenfs</span>,
-  <span class='va'>ld_exprfs</span>,
-  ld_regions <span class='op'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/c.html'>c</a></span><span class='op'>(</span><span class='st'>"EUR"</span>, <span class='st'>"ASN"</span>, <span class='st'>"AFR"</span><span class='op'>)</span>,
-  ld_regions_custom <span class='op'>=</span> <span class='cn'>NULL</span>,
-  thin <span class='op'>=</span> <span class='fl'>1</span>,
-  prob_single <span class='op'>=</span> <span class='fl'>0.8</span>,
-  rerun_gene_PIP <span class='op'>=</span> <span class='fl'>0.8</span>,
-  niter1 <span class='op'>=</span> <span class='fl'>3</span>,
-  niter2 <span class='op'>=</span> <span class='fl'>30</span>,
-  L <span class='op'>=</span> <span class='fl'>5</span>,
-  group_prior <span class='op'>=</span> <span class='cn'>NULL</span>,
-  group_prior_var <span class='op'>=</span> <span class='cn'>NULL</span>,
-  estimate_group_prior <span class='op'>=</span> <span class='cn'>T</span>,
-  estimate_group_prior_var <span class='op'>=</span> <span class='cn'>T</span>,
-  use_null_weight <span class='op'>=</span> <span class='cn'>T</span>,
-  coverage <span class='op'>=</span> <span class='fl'>0.95</span>,
-  stardardize <span class='op'>=</span> <span class='cn'>T</span>,
-  harmonize <span class='op'>=</span> <span class='cn'>T</span>,
-  max_snp_region <span class='op'>=</span> <span class='cn'>Inf</span>,
-  ncore <span class='op'>=</span> <span class='fl'>1</span>,
-  ncore.rerun <span class='op'>=</span> <span class='fl'>1</span>,
-  outputdir <span class='op'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/getwd.html'>getwd</a></span><span class='op'>(</span><span class='op'>)</span>,
-  outname <span class='op'>=</span> <span class='cn'>NULL</span>,
-  logfile <span class='op'>=</span> <span class='cn'>NULL</span>
-<span class='op'>)</span></pre>
+    <pre class="usage"><span class='fu'>ctwas_rss</span><span class='op'>(</span><span class='va'>z_gene</span>, <span class='va'>z_snp</span>, <span class='va'>ld_exprfs</span>, ld_pgenfs <span class='op'>=</span> <span class='cn'>NULL</span>, ld_R_dir <span class='op'>=</span> <span class='cn'>NULL</span>,
+  ld_regions <span class='op'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/c.html'>c</a></span><span class='op'>(</span><span class='st'>"EUR"</span>, <span class='st'>"ASN"</span>, <span class='st'>"AFR"</span><span class='op'>)</span>, ld_regions_custom <span class='op'>=</span> <span class='cn'>NULL</span>,
+  thin <span class='op'>=</span> <span class='fl'>1</span>, prob_single <span class='op'>=</span> <span class='fl'>0.8</span>, rerun_gene_PIP <span class='op'>=</span> <span class='fl'>0.8</span>, niter1 <span class='op'>=</span> <span class='fl'>3</span>,
+  niter2 <span class='op'>=</span> <span class='fl'>30</span>, L <span class='op'>=</span> <span class='fl'>5</span>, group_prior <span class='op'>=</span> <span class='cn'>NULL</span>, group_prior_var <span class='op'>=</span> <span class='cn'>NULL</span>,
+  estimate_group_prior <span class='op'>=</span> <span class='cn'>T</span>, estimate_group_prior_var <span class='op'>=</span> <span class='cn'>T</span>,
+  use_null_weight <span class='op'>=</span> <span class='cn'>T</span>, coverage <span class='op'>=</span> <span class='fl'>0.95</span>, stardardize <span class='op'>=</span> <span class='cn'>T</span>,
+  harmonize <span class='op'>=</span> <span class='cn'>T</span>, max_snp_region <span class='op'>=</span> <span class='cn'>Inf</span>, ncore <span class='op'>=</span> <span class='fl'>1</span>, ncore.rerun <span class='op'>=</span> <span class='fl'>1</span>,
+  outputdir <span class='op'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/getwd.html'>getwd</a></span><span class='op'>(</span><span class='op'>)</span>, outname <span class='op'>=</span> <span class='cn'>NULL</span>, logfile <span class='op'>=</span> <span class='cn'>NULL</span><span class='op'>)</span></pre>
 
     <h2 class="hasAnchor" id="arguments"><a class="anchor" href="#arguments"></a>Arguments</h2>
     <table class="ref-arguments">
     <colgroup><col class="name" /><col class="desc" /></colgroup>
-    <tr>
-      <th>z_snp</th>
-      <td><p>A data frame with four columns: "id", "A1", "A2", "z".
-giving the z scores for snps. "A1" is effect allele. "A2" is the other allele.
-If `harmonize= False`, A1 and A2 are not required.</p></td>
-    </tr>
     <tr>
       <th>z_gene</th>
       <td><p>A data frame with two columns: "id", "z". giving the z scores for
 genes.</p></td>
     </tr>
     <tr>
-      <th>ld_pgenfs</th>
-      <td><p>A character vector of .pgen or .bed files. One file for one
-chromosome, in the order of 1 to 22. Therefore, the length of this vector
-needs to be 22. If .pgen files are given, then .pvar and .psam are assumed
-to present in the same directory. If .bed files are given, then .bim and
-.fam files are assumed to present in the same directory.</p></td>
+      <th>z_snp</th>
+      <td><p>A data frame with four columns: "id", "A1", "A2", "z".
+giving the z scores for snps. "A1" is effect allele. "A2" is the other allele.
+If `harmonize= False`, A1 and A2 are not required.</p></td>
     </tr>
     <tr>
       <th>ld_exprfs</th>
@@ -196,6 +168,14 @@ assume corresponding `.exprvar` files are present in the same directory.
 
 </dl><p>Its rows should be in the same order as the columns for corresponding `.expr`
 files.</p></td>
+    </tr>
+    <tr>
+      <th>ld_pgenfs</th>
+      <td><p>A character vector of .pgen or .bed files. One file for one
+chromosome, in the order of 1 to 22. Therefore, the length of this vector
+needs to be 22. If .pgen files are given, then .pvar and .psam are assumed
+to present in the same directory. If .bed files are given, then .bim and
+.fam files are assumed to present in the same directory.</p></td>
     </tr>
     <tr>
       <th>ld_regions</th>

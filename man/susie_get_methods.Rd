@@ -29,15 +29,8 @@ susie_get_lfsr(res)
 
 susie_get_posterior_samples(susie_fit, num_samples)
 
-susie_get_cs(
-  res,
-  X = NULL,
-  Xcorr = NULL,
-  coverage = 0.95,
-  min_abs_corr = 0.5,
-  dedup = TRUE,
-  squared = FALSE
-)
+susie_get_cs(res, X = NULL, Xcorr = NULL, coverage = 0.95,
+  min_abs_corr = 0.5, dedup = TRUE, squared = FALSE)
 
 susie_get_pip(res, prune_by_cs = FALSE, prior_tol = 1e-09)
 }

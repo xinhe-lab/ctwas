@@ -4,9 +4,10 @@
 #' @importFrom foreach %dopar% foreach
 #' @export
 susieI_rss <- function(zdf,
-                       ld_pgenfs,
-                       ld_exprfs,
                        regionlist,
+                       ld_exprfs,
+                       ld_pgenfs = NULL,
+                       ld_Rfs = NULL,
                        niter = 20,
                        L= 1,
                        z_ld_weight = 0,
@@ -23,8 +24,15 @@ susieI_rss <- function(zdf,
 
   outname <- file.path(outputdir, outname)
 
-  ld_pvarfs <- sapply(ld_pgenfs, prep_pvar, outputdir = outputdir)
   ld_exprvarfs <- sapply(ld_exprfs, prep_exprvar)
+
+  if (is.null(ld_pgenfs) & is.null(ld_Rfs)){
+    stop("Error: need to provide either .pgen file or ld_R file")
+  }
+
+  if (!is.null(ld_pgenfs)){
+    ld_pvarfs <- sapply(ld_pgenfs, prep_pvar, outputdir = outputdir)
+  }
 
   K <- 2
 
@@ -51,18 +59,17 @@ susieI_rss <- function(zdf,
 
     outdf <- foreach (core = 1:length(corelist), .combine = "rbind",
                       .packages = "ctwas") %dopar% {
-          # for (core in 1:2) {
+      # outdf <- NULL
+      # for (core in 2:10) {
 
           outdf.core.list <- list()
 
           # run susie for each region
           regs <- corelist[[core]]
           for (reg in 1: nrow(regs)) {
+          # for (reg in 1:2){
             b <- regs[reg, "b"]
             rn <- regs[reg, "rn"]
-
-            # prepare LD genotype data
-            ld_pgen <- prep_pgen(pgenf = ld_pgenfs[b], ld_pvarfs[b])
 
             gidx <- regionlist[[b]][[rn]][["gidx"]]
             sidx <- regionlist[[b]][[rn]][["sidx"]]
@@ -98,10 +105,32 @@ susieI_rss <- function(zdf,
             z.s <- zdf[match(sid, zdf$id), ][["z"]]
             z <- c(z.g, z.s)
 
-            X.g <- read_expr(ld_exprfs[b], variantidx = gidx)
-            X.s <- read_pgen(ld_pgen, variantidx = sidx)
-            X <- cbind(X.g, X.s)
-            R <- Rfast::cora(X)
+
+            if (!(is.null(ld_pgenfs))){
+              # prepare LD genotype data
+              ld_pgen <- prep_pgen(pgenf = ld_pgenfs[b], ld_pvarfs[b])
+
+              X.g <- read_expr(ld_exprfs[b], variantidx = gidx)
+              X.s <- read_pgen(ld_pgen, variantidx = sidx)
+              X <- cbind(X.g, X.s)
+              R <- Rfast::cora(X)
+            } else {
+              # prepare R matrix
+              if (!("R_s_file" %in% names(regionlist[[b]][[rn]]))){
+                stop("R matrix info not available for region", b, ",", rn)
+              }
+              regRDS <-  regionlist[[b]][[rn]][["R_s_file"]]
+              R_snp <- lapply(regRDS, readRDS)
+              R_snp <- as.matrix(Matrix::bdiag(R_snp))
+              R_snp <- R_snp[sidx, sidx, drop = F]
+              R_snp_gene <- readRDS(regionlist[[b]][[rn]][["R_sg_file"]])
+              R_snp_gene <- R_snp_gene[sidx, , drop = F]
+              R_gene <- readRDS(regionlist[[b]][[rn]][["R_g_file"]])
+
+              # gene first then SNPs
+              R <- rbind(cbind(R_gene, t(R_snp_gene)),
+                         cbind(R_snp_gene, R_snp))
+            }
 
             # in susie, prior_variance is under standardized scale (if performed)
             susieres <- susie_rss(z, R,
@@ -112,18 +141,27 @@ susieI_rss <- function(zdf,
                                   estimate_prior_variance = F,
                                   coverage = coverage)
 
+            geneinfo <- read_exprvar(ld_exprvarfs[b])
+
+            if (!is.null(ld_pgenfs)){
+              snpinfo <-  read_pvar(ld_pvarfs[b])
+            } else {
+              snpinfo <- do.call(rbind, lapply(regRDS, read_ld_Rvar_RDS))
+            }
+
             outdf.reg <- anno_susie(susieres,
-                                   ld_exprvarfs[b],
-                                   ld_pvarfs[b],
-                                   gidx,
-                                   sidx,
-                                   b, rn)
+                                    geneinfo,
+                                    snpinfo,
+                                    gidx,
+                                    sidx,
+                                    b, rn)
 
             outdf.core.list[[reg]] <- outdf.reg
           }
 
           outdf.core <- do.call(rbind, outdf.core.list)
           outdf.core
+          # outdf <- rbind(outdf, outdf.core)
     }
 
     if (isTRUE(estimate_group_prior)){

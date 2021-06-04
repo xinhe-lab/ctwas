@@ -247,6 +247,8 @@ susie_rss = function (z, R, maf = NULL, maf_thresh = 0, z_ld_weight = 0,
       prior_weights = c(prior_weights * (1 - null_weight),null_weight)
     R = cbind(rbind(R,0),0)
     z = c(z,0)
+    # different from susieR
+    prior_variance = cbind(prior_variance, 0)
   }
 
   if(estimate_residual_variance){

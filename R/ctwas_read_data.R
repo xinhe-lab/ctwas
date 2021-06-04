@@ -77,11 +77,11 @@ read_pvar <- function(pvarf){
 #'   allele).
 #'
 #' @importFrom pgenlibr NewPvar
-#' @importFrom pgenlibr NewPgen 
+#' @importFrom pgenlibr NewPgen
 #' @importFrom tools file_ext file_path_sans_ext
-#' 
+#'
 #' @export
-#' 
+#'
 prep_pgen <- function(pgenf, pvarf){
 
   pvar <- pgenlibr::NewPvar(pvarf)
@@ -159,5 +159,78 @@ read_expr <- function(exprf, variantidx = NULL){
                                        select = variantidx)))
   }
 }
+
+
+#' read variant information associated with a LD R matrix .RDS file.
+#'
+#' @return a data frame with columns: "chrom", "id", "pos", "alt", "ref". "alt" is
+#' the coded allele
+#'
+#' @importFrom tools file_ext file_path_sans_ext
+read_ld_Rvar_RDS <- function(ld_RDSf){
+  ld_Rvarf <- paste0(file_path_sans_ext(ld_RDSf), ".Rvar")
+  ld_Rvar <- data.table::fread(ld_Rvarf, header = T)
+  target_header <- c("chrom", "id", "pos", "alt", "ref")
+  if (all(target_header %in% colnames(ld_Rvar))){
+      return(ld_Rvar)
+  } else {
+    stop("The .Rvar file needs to contain the following columns: ",
+         paste(target_header, collapse = " "))
+  }
+}
+
+
+#' @param ld_R_dir The directory that contains all ld R mattrices.
+#' the ld R matrices should not have overlapping positions.
+#'
+#' @return A vector of the `ld_Rf` file names. The function will write one `ld_Rf` file
+#' for each chromosome, so the vector has length 22. The `ld_Rf` file has the following
+#' columns: chr region_name start stop RDS_file.
+write_ld_Rf <- function(ld_R_dir, outname = outname , outputdir = getwd()){
+  ld_RDSfs <- list.files(path = ld_R_dir, pattern = "\\.RDS$", full.names = T)
+  ldinfolist <- list()
+  for (ld_RDSf in ld_RDSfs){
+    Rvar <- read_ld_Rvar_RDS(ld_RDSf)
+    chrom <- unique(Rvar$chrom)
+    if (length(chrom) != 1){
+      stop("R matrix on multiple chromosomes,
+           can't handle this. Need to be on one chromosome:", ld_RDSf)
+    }
+    start <- min(Rvar$pos)
+    stop <- max(Rvar$pos) + 1
+    ldinfolist[[ld_RDSf]] <- c(chrom, start, stop, ld_RDSf)
+  }
+  ldinfo <- do.call(rbind, ldinfolist)
+  colnames(ldinfo) <- c("chrom", "start", "stop", "RDS_file")
+  rownames(ldinfo) <- NULL
+  ldinfo <- data.frame(ldinfo, stringsAsFactors = F)
+  ldinfo <- transform(ldinfo, chrom = as.numeric(chrom),
+                      start = as.numeric(start),
+                      stop = as.numeric(stop))
+
+  ld_Rfs <- vector()
+  for (b in 1:22){
+    ldinfo.b <- ldinfo[ldinfo$chrom == b, , drop = F]
+    if (nrow(ldinfo.b) == 0){
+      stop("no region on chromosome ", b, "at least one is required.")
+    }
+    ldinfo.b <- ldinfo.b[order(ldinfo.b$start),]
+    ldinfo.b$region_name <- 1:nrow(ldinfo.b)
+    ld_Rf <- file.path(outputdir, paste0(outname, "_ld_R_chr", b, ".txt"))
+    write.table(ldinfo.b, file= ld_Rf,
+                row.names=F, col.names=T, sep="\t", quote = F)
+    ld_Rfs[b] <- ld_Rf
+  }
+  ld_Rfs
+}
+
+#' read variant information for all ld mattrices in `ld_Rf`.
+#' @return a data frame with columns: "chrom", "id", "pos", "alt", "ref"
+read_ld_Rvar <- function(ld_Rf){
+  Rinfo <- data.table::fread(ld_Rf, header = T)
+  ld_Rvar <- do.call(rbind, lapply(Rinfo$RDS_file, read_ld_Rvar_RDS))
+  ld_Rvar
+}
+
 
 
