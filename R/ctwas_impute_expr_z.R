@@ -66,7 +66,7 @@ impute_expr_z <- function (z_snp,
       loginfo("will also flip weights to match LD reference for each gene")
     }
 
-    loginfo("Reading weights for chromosome ", b)
+    loginfo("Reading weights for chromosome %s", b)
     if (dir.exists(weight)){
       weightall <- read_weight_fusion(weight, b, ld_snpinfo, z_snp, method = method, harmonize = T)
     } else if (file_ext(weight)=='db'){

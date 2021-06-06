@@ -323,6 +323,8 @@ read_weight_predictdb <- function(weight, chrom, ld_snpinfo, z_snp = NULL, harmo
     snps <- data.frame(gsub("chr", "", chrpos[,1]), wgt$rsid, "0", chrpos[,2],
                        wgt$eff_allele, wgt$ref_allele, stringsAsFactors = F)
     colnames(snps) <- c("chrom", "id", "cm", "pos", "alt", "ref")
+    snps$chrom <- as.integer(snps$chrom)
+    snps$pos <- as.integer(snps$pos)
 
     if (isTRUE(harmonize)) {
       w <- harmonize_wgt_ld(wgt.matrix, snps, ld_snpinfo)
