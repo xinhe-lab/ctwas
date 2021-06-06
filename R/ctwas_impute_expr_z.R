@@ -9,6 +9,7 @@
 #'   "best" means the method giving the best cross validation R^2, this is only used for fusion weights.
 #' @param harmonize T/F, if need to harmonize SNP data, if T, will harmonize gwas, LD and eQTL genotype alleles.
 #' @importFrom logging addHandler loginfo
+#' @importFrom tools file_ext
 #'
 #' @export
 impute_expr_z <- function (z_snp,
@@ -66,9 +67,9 @@ impute_expr_z <- function (z_snp,
     }
 
     if (dir.exists(weight)){
-      weightall <- read_weight_fusion(weight, chrom, ld_snpinfo, z_snp,  harmonize = T)
-    } else if (file_ext(weight)=='.db'){
-      weightall <- read_weight_predictdb(weight, chrom, ld_snpinfo, z_snp,  harmonize = T)
+      weightall <- read_weight_fusion(weight, b, ld_snpinfo, z_snp, method = method, harmonize = T)
+    } else if (file_ext(weight)=='db'){
+      weightall <- read_weight_predictdb(weight, b, ld_snpinfo, z_snp,  harmonize = T)
     } else{
       stop("Unrecognized weight format, need to use either FUSION format or predict.db format")
     }
@@ -202,7 +203,7 @@ impute_expr_z <- function (z_snp,
 }
 
 
-read_weight_fusion <- function(weight, chrom, ld_snpinfo, z_snp, harmonize = T){
+read_weight_fusion <- function(weight, chrom, ld_snpinfo, z_snp, method, harmonize = T){
   exprlist <- list()
   qclist <- list()
   wgtdir <- dirname(weight)
@@ -215,7 +216,7 @@ read_weight_fusion <- function(weight, chrom, ld_snpinfo, z_snp, harmonize = T){
   loginfo("number of genes with weights provided: %s", nrow(wgtpos))
 
   wgtpos <- wgtpos[wgtpos$CHR==chrom,]
-  loginfo("number of genes on chromosome %s: %s", b, nrow(wgtpos))
+  loginfo("number of genes on chromosome %s: %s", chrom, nrow(wgtpos))
 
   loginfo("collecting gene weight information ...")
   if (nrow(wgtpos) > 0){
@@ -248,7 +249,7 @@ read_weight_fusion <- function(weight, chrom, ld_snpinfo, z_snp, harmonize = T){
       p0 <-  min(snps[snps[, "id"] %in% snpnames, "pos"])
       p1 <- max(snps[snps[, "id"] %in% snpnames, "pos"])
 
-      exprlist[[gname]] <- list("chrom" = b,
+      exprlist[[gname]] <- list("chrom" = chrom,
                                 "p0" = p0,
                                 "p1" = p1,
                                 "wgt" = wgt)
@@ -284,7 +285,8 @@ read_weight_predictdb <- function(weight, chrom, ld_snpinfo, z_snp, harmonize = 
     wgt.matrix <- as.matrix(wgt[, "weight", drop = F])
     rownames(wgt.matrix) <- wgt$rsid
     chrpos <- do.call(rbind, strsplit(wgt$varID, "_"))
-    snps <- data.frame(chrpos[,1], wgt$rsid, "0", chrpos[,2], wgt$eff_allele, wgt$ref_allele, stringsAsFactors = F)
+    snps <- data.frame(gsub("chr", "", chrpos[,1]), wgt$rsid, "0", chrpos[,2],
+                       wgt$eff_allele, wgt$ref_allele, stringsAsFactors = F)
     colnames(snps) <- c("chrom", "id", "cm", "pos", "alt", "ref")
 
     if (isTRUE(harmonize)) {
@@ -304,10 +306,10 @@ read_weight_predictdb <- function(weight, chrom, ld_snpinfo, z_snp, harmonize = 
     p0 <-  min(snps[snps[, "id"] %in% snpnames, "pos"])
     p1 <- max(snps[snps[, "id"] %in% snpnames, "pos"])
 
-    exprlist[[gname]] <- list("chrom" = b,
+    exprlist[[gname]] <- list("chrom" = chrom,
                               "p0" = p0,
                               "p1" = p1,
-                              "wgt" = wgt)
+                              "wgt" = wgt.matrix)
 
     nwgt <- nrow(wgt.matrix)
     nmiss <- nrow(wgt.matrix) - length(snpnames)
@@ -315,6 +317,8 @@ read_weight_predictdb <- function(weight, chrom, ld_snpinfo, z_snp, harmonize = 
                             "nmiss" = nmiss,
                             "missrate" = nwgt/nmiss)
   }
+
+  dbDisconnect(db)
   return(list("exprlist" = exprlist, "qclist" = qclist))
 }
 
