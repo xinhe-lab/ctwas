@@ -270,7 +270,7 @@ read_weight_predictdb <- function(weight, chrom, ld_snpinfo, z_snp, harmonize = 
   qclist <- list()
 
   sqlite <- RSQLite::dbDriver("SQLite")
-  db = dbConnect(sqlite,weight)
+  db = RSQLite::dbConnect(sqlite,weight)
 
   ## convenience query function
   query <- function(...) RSQLite::dbGetQuery(db, ...)
@@ -318,7 +318,7 @@ read_weight_predictdb <- function(weight, chrom, ld_snpinfo, z_snp, harmonize = 
                             "missrate" = nwgt/nmiss)
   }
 
-  dbDisconnect(db)
+  RSQLite::dbDisconnect(db)
   return(list("exprlist" = exprlist, "qclist" = qclist))
 }
 
