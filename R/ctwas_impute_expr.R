@@ -7,7 +7,7 @@
 #' @importFrom logging addHandler loginfo
 #'
 #' @export
-impute_expr <- function(pgenf,
+impute_expr <- function(pgenfs,
                         weight,
                         method = "lasso",
                         outputdir = getwd(),
@@ -26,121 +26,87 @@ impute_expr <- function(pgenf,
 
   outname <- file.path(outputdir, outname)
 
-  pvarf <- prep_pvar(pgenf, outputdir = outputdir)
-  snpinfo <- read_pvar(pvarf)
+  exprfs <- vector()
 
-  pgen <- prep_pgen(pgenf, pvarf)
+  for (b in 1:22){
+    pgenf <- pgenfs[b]
+    pvarf <- prep_pvar(pgenf, outputdir = outputdir)
+    snpinfo <- read_pvar(pvarf)
 
-  b <- unique(snpinfo$chrom)
-  if (length(b) !=1){
-    stop("Input genotype not splited by chromosome")
-  }
+    pgen <- prep_pgen(pgenf, pvarf)
 
-  exprf <- paste0(outname, "_chr", b, ".expr")
-  exprvarf <- paste0(outname, "_chr", b, ".exprvar")
-  exprqcf <-  paste0(outname, "_chr", b, ".exprqc.Rd")
-
-  loginfo('expression inmputation started for chr %s.', b)
-
-  exprlist <- list()
-  qclist <- list()
-  wgtdir <- dirname(weight)
-  wgtposfile <- file.path(wgtdir, paste0(basename(weight), ".pos"))
-
-  wgtpos <- read.table(wgtposfile, header = T, stringsAsFactors = F)
-  wgtpos <- transform(wgtpos,
-            "ID" = ifelse(duplicated(ID) | duplicated(ID, fromLast=TRUE),
-            paste(ID, ave(ID, ID, FUN=seq_along), sep='_ID'), ID))
-
-  loginfo("number of genes with weights provided: %s", nrow(wgtpos))
-
-  for (i in 1: nrow(wgtpos)){
-
-    wf <- file.path(wgtdir, wgtpos[i, "WGT"])
-    load(wf)
-    gname <- wgtpos[i, "ID"]
-
-    if (isTRUE(harmonize)){
-      w <- harmonize_wgt_ld(wgt.matrix, snps, snpinfo)
-      wgt.matrix <- w[["wgt"]]
-      snps <- w[["snps"]]
+    b <- unique(snpinfo$chrom)
+    if (length(b) !=1){
+      stop("Input genotype not splited by chromosome")
     }
 
-    g.method = method
-    if (g.method == "best"){
-      g.method = names(which.max(cv.performance["rsq", ]))
+    exprf <- paste0(outname, "_chr", b, ".expr")
+    exprvarf <- paste0(outname, "_chr", b, ".exprvar")
+    exprqcf <-  paste0(outname, "_chr", b, ".exprqc.Rd")
+
+    loginfo("Reading weights for chromosome ", b)
+    if (dir.exists(weight)){
+      weightall <- read_weight_fusion(weight, b, snpinfo, z_snp = NULL, method = method, harmonize = T)
+    } else if (file_ext(weight)=='db'){
+      weightall <- read_weight_predictdb(weight, b, snpinfo, z_snp = NULL, harmonize = T)
+    } else{
+      stop("Unrecognized weight format, need to use either FUSION format or predict.db format")
     }
-    if (!(g.method %in% names(cv.performance[1,]))) next
 
-    wgt.matrix <- wgt.matrix[abs(wgt.matrix[, g.method]) > 0, , drop = F]
-    wgt.matrix <- wgt.matrix[complete.cases(wgt.matrix), ,drop = F]
+    exprlist <- weightall[["exprlist"]]
+    qclist <- weightall[["qclist"]]
 
-    if (nrow(wgt.matrix) == 0) next
+    if (length(exprlist) > 0) {
+      loginfo("Start gene z score imputation ...")
+      for (gname in names(exprlist)){
+        wgt <- exprlist[[gname]][["wgt"]]
+        snpnames <- rownames(wgt)
+        gwas.idx <-  match(snpnames, snpinfo$id)
+        g <- read_pgen(pgen, variantidx = gwas.idx)
+        g <- scale(g)  # genotypes are standardized
+        gexpr <- g %*% wgt
+        exprlist[[gname]][["expr"]] <- gexpr
+      }
+    }
 
-    snpnames <- intersect(rownames(wgt.matrix), snpinfo$id)
-    if (length(snpnames) == 0) next
+    loginfo ("Imputation done, writing results to output...")
+    expr <- do.call(cbind, lapply(exprlist, '[[', "expr"))
+    gnames <- names(exprlist)
+    chrom <- unlist(lapply(exprlist,'[[', "chrom"))
+    p0 <- unlist(lapply(exprlist,'[[', "p0"))
+    p1 <- unlist(lapply(exprlist,'[[', "p1"))
+    wgtlist <- lapply(exprlist, '[[', "wgt")
 
-    wgt.idx <- match(snpnames, rownames(wgt.matrix))
-    gwas.idx <-  match(snpnames, snpinfo$id)
+    if (length(exprlist) == 0){
+      expr <- data.table::data.table(NULL)
+      geneinfo <- data.table::data.table(NULL)
+    }
 
-    wgt <-  wgt.matrix[wgt.idx, g.method, drop = F]
+    loginfo("Number of genes with imputed expression: %s for chr %s",
+            ncol(expr), b)
 
-    g <- read_pgen(pgen, variantidx = gwas.idx)
+    data.table::fwrite(expr, file = exprf,
+                       row.names = F, col.names = F,
+                       sep = "\t", quote = F)
 
-    # genotypes are standardized
-    g <- scale(g)
+    if (isTRUE(compress)){
+      system(paste0("gzip -f ", exprf))
+      exprf <- paste0(exprf, '.gz')
+    }
 
-    gexpr <- g %*% wgt
+    geneinfo <- data.frame("chrom" = chrom,
+                           "id" = gnames,
+                           "p0" = p0,
+                           "p1" = p1)
+    data.table::fwrite(geneinfo, file = exprvarf, sep = "\t", quote = F)
 
-    if (abs(max(gexpr) - min(gexpr)) < 1e-8) next
+    save(wgtlist, qclist, file = exprqcf)
 
-    exprlist[[gname]][["expr"]] <- gexpr
-    exprlist[[gname]][["chrom"]] <- wgtpos[wgtpos$ID == gname, "CHR"]
-    exprlist[[gname]][["p0"]] <-  min(snps[snps[, "id"] %in% snpnames, "pos"])  # eQTL positions
-    exprlist[[gname]][["p1"]] <-  max(snps[snps[, "id"] %in% snpnames, "pos"])  # eQTL positions
-    exprlist[[gname]][["wgt"]] <- wgt
+    loginfo('expression inmputation done for chr %s.', b)
 
-    qclist[[gname]][["n"]] <- nrow(wgt.matrix)
-    qclist[[gname]][["nmiss"]] <-  nrow(wgt.matrix) - length(snpnames)
-    qclist[[gname]][["missrate"]] <-
-        qclist[[gname]][["nmiss"]]/qclist[[gname]][["n"]]
-
+    exprfs[b] <- exprf
   }
 
-  expr <- do.call(cbind, lapply(exprlist, '[[', "expr"))
-  gnames <- names(exprlist)
-  chrom <- unlist(lapply(exprlist,'[[', "chrom"))
-  p0 <- unlist(lapply(exprlist,'[[', "p0"))
-  p1 <- unlist(lapply(exprlist,'[[', "p1"))
-  wgtlist <- lapply(exprlist, '[[', "wgt")
-
-  if (length(exprlist) == 0){
-    expr <- data.table::data.table(NULL)
-    geneinfo <- data.table::data.table(NULL)
-  }
-
-  loginfo("Number of genes with imputed expression: %s for chr %s",
-          ncol(expr), b)
-
-  data.table::fwrite(expr, file = exprf,
-                     row.names = F, col.names = F,
-                     sep = "\t", quote = F)
-
-  if (isTRUE(compress)){
-    system(paste0("gzip -f ", exprf))
-    exprf <- paste0(exprf, '.gz')
-  }
-
-  geneinfo <- data.frame("chrom" = chrom,
-                         "id" = gnames,
-                         "p0" = p0,
-                         "p1" = p1)
-  data.table::fwrite(geneinfo, file = exprvarf, sep = "\t", quote = F)
-
-  save(wgtlist, qclist, file = exprqcf)
-
-  loginfo('expression inmputation done for chr %s.', b)
-
-  return(exprf)
+  return(exprfs)
 }
 

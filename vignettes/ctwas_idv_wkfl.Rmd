@@ -27,20 +27,22 @@ data(Y)
 pgenfs <- system.file("extdata/example_genotype_files", paste0("example_chr", 1:22, ".pgen"), package = "ctwas")
 
 # weight
-weight <- system.file("extdata/example_fusion_weights", "Tissue", package = "ctwas")
+weight.fusion <- system.file("extdata/example_fusion_weights", "Tissue", package = "ctwas")
 ```
 
+or predict weight
+
+```{r}
+weight.predictdb <- system.file("extdata", "example_tissue.db", package = "ctwas") 
+```
 
 # Impute expression
 ```{r impute, warning=F, message=F}
 outputdir <- "~/temp"
-exprfs <- vector()
-for (i in 1:22){
-  pgenf <- pgenfs[i]
-  exprfs[i] <- impute_expr(pgenf = pgenf, weight = weight,
+
+exprfs <- impute_expr(pgenfs = pgenfs, weight = weight,
                            method = "lasso", outputdir = outputdir,
                            outname = "test")
-}
 ```
 
 # Run ctwas 
