@@ -1,8 +1,8 @@
-pandoc: 2.11.3.1
+pandoc: 1.15.0.6
 pkgdown: 1.6.1
 pkgdown_sha: ~
 articles:
   ctwas_idv_wkfl: ctwas_idv_wkfl.html
   ctwas_rss_wkfl: ctwas_rss_wkfl.html
-last_built: 2021-06-03T14:10Z
+last_built: 2021-06-07T00:08Z
 

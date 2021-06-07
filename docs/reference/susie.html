@@ -8,13 +8,11 @@
 
 <title>Sum of Single Effects (SuSiE) Regression — susie • ctwas</title>
 
-
 <!-- jquery -->
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.4.1/jquery.min.js" integrity="sha256-CSXorXvZcTkaix6Yvo6HppcZGetbYMGWSFlBw8HfCJo=" crossorigin="anonymous"></script>
 <!-- Bootstrap -->
 
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/3.4.1/css/bootstrap.min.css" integrity="sha256-bZLfwXAP04zRMK2BjiO8iu9pf4FbLqX6zitd+tIvLhE=" crossorigin="anonymous" />
-
 <script src="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/3.4.1/js/bootstrap.min.js" integrity="sha256-nuL8/2cJ5NDSSwnKD8VqreErSWHtnEP9E7AySL+1ev4=" crossorigin="anonymous"></script>
 
 <!-- bootstrap-toc -->
@@ -38,8 +36,8 @@
 
 
 
-
 <meta property="og:title" content="Sum of Single Effects (SuSiE) Regression — susie" />
+
 <meta property="og:description" content="Performs Bayesian multiple linear regression of Y on
   X; that is, this function fits the regression model \(Y = \sum_l
   X b_{l=1}^L + e\), where elements of e are i.i.d. normal with
@@ -52,6 +50,7 @@
   &amp;#8220;Iterative Bayesian Stepwise Selection&amp;#8221; (IBSS) algorithm.
   See also susie_trendfilter for applying susie to
   non-parametric regression, particularly changepoint problems." />
+
 
 
 
@@ -83,7 +82,7 @@
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">ctwas</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="Released version">0.1.26</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="Released version">0.1.27</span>
       </span>
     </div>
 
@@ -91,7 +90,7 @@
       <ul class="nav navbar-nav">
         <li>
   <a href="../index.html">
-    <span class="fas fa-home fa-lg"></span>
+    <span class="fas fa fas fa-home fa-lg"></span>
      
   </a>
 </li>
@@ -114,6 +113,7 @@
   </ul>
 </li>
       </ul>
+      
       <ul class="nav navbar-nav navbar-right">
         <li>
   <a href="https://github.com/simingz/ctwas">Source</a>
@@ -137,6 +137,7 @@
     </div>
 
     <div class="ref-description">
+    
     <p>Performs Bayesian multiple linear regression of Y on
   X; that is, this function fits the regression model \(Y = \sum_l
   X b_{l=1}^L + e\), where elements of e are <em>i.i.d.</em> normal with
@@ -149,6 +150,7 @@
   &#8220;Iterative Bayesian Stepwise Selection&#8221; (IBSS) algorithm.
   See also <code>susie_trendfilter</code> for applying susie to
   non-parametric regression, particularly changepoint problems.</p>
+    
     </div>
 
     <pre class="usage"><span class='fu'>susie</span><span class='op'>(</span><span class='va'>X</span>, <span class='va'>Y</span>, L <span class='op'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/Extremes.html'>min</a></span><span class='op'>(</span><span class='fl'>10</span>, <span class='fu'><a href='https://rdrr.io/r/base/nrow.html'>ncol</a></span><span class='op'>(</span><span class='va'>X</span><span class='op'>)</span><span class='op'>)</span>, scaled_prior_variance <span class='op'>=</span> <span class='fl'>0.2</span>,
@@ -173,7 +175,7 @@
   intercept_value <span class='op'>=</span> <span class='fl'>0</span>, coverage <span class='op'>=</span> <span class='fl'>0.95</span>, min_abs_corr <span class='op'>=</span> <span class='fl'>0.5</span>,
   tol <span class='op'>=</span> <span class='fl'>0.001</span>, verbose <span class='op'>=</span> <span class='cn'>FALSE</span>, track_fit <span class='op'>=</span> <span class='cn'>FALSE</span>,
   check_input <span class='op'>=</span> <span class='cn'>FALSE</span>, refine <span class='op'>=</span> <span class='cn'>FALSE</span><span class='op'>)</span></pre>
-
+    
     <h2 class="hasAnchor" id="arguments"><a class="anchor" href="#arguments"></a>Arguments</h2>
     <table class="ref-arguments">
     <colgroup><col class="name" /><col class="desc" /></colgroup>
@@ -421,7 +423,7 @@ semidefinite; (2) check that <code>Xty</code> is in the space spanned by
 the non-zero eigenvectors of <code>XtX</code>.</p></td>
     </tr>
     </table>
-
+    
     <h2 class="hasAnchor" id="value"><a class="anchor" href="#value"></a>Value</h2>
 
     <p>A <code>"susie"</code> object with some or all of the following
@@ -474,6 +476,7 @@ susie_suff_stat returns also outputs:
 <dt>XtXr</dt><dd><p>A p-vector of <code><a href='https://rdrr.io/r/base/t.html'>t(X)</a></code> times the fitted values,
   <code>X %*% colSums(alpha*mu)</code>.</p></dd>
 
+    
     <h2 class="hasAnchor" id="details"><a class="anchor" href="#details"></a>Details</h2>
 
     <p><code>susie_suff_stat</code> performs sum of single-effect
@@ -487,15 +490,18 @@ should come from the same individuals. Both the columns of X and
 the vector y should be centered to have mean zero before computing
 these summary statistics; you may also want to scale each column of
 X and y to have variance 1 (see examples).</p>
+    
     <h2 class="hasAnchor" id="references"><a class="anchor" href="#references"></a>References</h2>
 
     <p>G. Wang, A. Sarkar, P. Carbonetto and M. Stephens (2020). A simple
   new approach to variable selection in regression, with application
   to genetic fine-mapping. <em>Journal of the Royal Statistical
   Society, Series B</em> <a href='https://doi.org/10.1101/501114'>https://doi.org/10.1101/501114</a>.</p>
+    
     <h2 class="hasAnchor" id="see-also"><a class="anchor" href="#see-also"></a>See also</h2>
 
     <div class='dont-index'><p><code><a href='susie_rss.html'>susie_rss</a></code></p></div>
+    
 
     <h2 class="hasAnchor" id="examples"><a class="anchor" href="#examples"></a>Examples</h2>
     <pre class="examples"><div class='input'><span class='co'># susie example.</span>

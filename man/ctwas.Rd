@@ -46,7 +46,7 @@ provide custom LD regions matching genotype data, see
 \item{ld_regions_custom}{A bed format file defining LD regions. The default
 is \code{NULL}; when specified, \code{ld_regions} will be ignored.}
 
-\item{prob_single}{blocks with probility more than this value will be
+\item{prob_single}{blocks with probability more than this value will be
 used for parameter estimation}
 
 \item{max_snp_region}{Inf or integer. Maximum number of SNPs in a region. Default is

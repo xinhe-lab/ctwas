@@ -232,5 +232,141 @@ read_ld_Rvar <- function(ld_Rf){
   ld_Rvar
 }
 
+read_weight_fusion <- function(weight, chrom, ld_snpinfo, z_snp = NULL, method = "lasso", harmonize = T){
+  exprlist <- list()
+  qclist <- list()
+  wgtdir <- dirname(weight)
+  wgtposfile <- file.path(wgtdir, paste0(basename(weight), ".pos"))
+
+  wgtpos <- read.table(wgtposfile, header = T, stringsAsFactors = F)
+  wgtpos <- transform(wgtpos,
+                      ID = ifelse(duplicated(ID) | duplicated(ID, fromLast = TRUE),
+                                  paste(ID, ave(ID, ID, FUN = seq_along), sep = "_ID"), ID))
+  loginfo("number of genes with weights provided: %s", nrow(wgtpos))
+
+  wgtpos <- wgtpos[wgtpos$CHR==chrom,]
+  loginfo("number of genes on chromosome %s: %s", chrom, nrow(wgtpos))
+
+  loginfo("collecting gene weight information ...")
+  if (nrow(wgtpos) > 0){
+    for (i in 1:nrow(wgtpos)) {
+      # for (i in 1:2) {
+      wf <- file.path(wgtdir, wgtpos[i, "WGT"])
+      load(wf)
+      gname <- wgtpos[i, "ID"]
+      if (isTRUE(harmonize)) {
+        w <- harmonize_wgt_ld(wgt.matrix, snps, ld_snpinfo)
+        wgt.matrix <- w[["wgt"]]
+        snps <- w[["snps"]]
+      }
+      g.method = method
+      if (g.method == "best") {
+        g.method = names(which.max(cv.performance["rsq",]))
+      }
+      if (!(g.method %in% names(cv.performance[1, ])))
+        next
+      wgt.matrix <- wgt.matrix[abs(wgt.matrix[, g.method]) > 0, , drop = F]
+      wgt.matrix <- wgt.matrix[complete.cases(wgt.matrix), , drop = F]
+      if (nrow(wgt.matrix) == 0)
+        next
+
+      if (is.null(z_snp)){
+        snpnames <- intersect(rownames(wgt.matrix), ld_snpinfo$id)
+      } else{
+        snpnames <- Reduce(intersect, list(rownames(wgt.matrix), ld_snpinfo$id, z_snp$id))
+      }
+
+      if (length(snpnames) == 0)
+        next
+      wgt.idx <- match(snpnames, rownames(wgt.matrix))
+      wgt <- wgt.matrix[wgt.idx, g.method, drop = F]
+
+      p0 <-  min(snps[snps[, "id"] %in% snpnames, "pos"])
+      p1 <- max(snps[snps[, "id"] %in% snpnames, "pos"])
+
+      exprlist[[gname]] <- list("chrom" = chrom,
+                                "p0" = p0,
+                                "p1" = p1,
+                                "wgt" = wgt)
+
+      nwgt <- nrow(wgt.matrix)
+      nmiss <- nrow(wgt.matrix) - length(snpnames)
+      qclist[[gname]] <- list("n" = nwgt,
+                              "nmiss" = nmiss,
+                              "missrate" = nwgt/nmiss)
+
+    }
+  }
+  return(list("exprlist" = exprlist, "qclist" = qclist))
+}
+
+read_weight_predictdb <- function(weight, chrom, ld_snpinfo, z_snp = NULL, harmonize = T){
+  exprlist <- list()
+  qclist <- list()
+
+  sqlite <- RSQLite::dbDriver("SQLite")
+  db = RSQLite::dbConnect(sqlite,weight)
+
+  ## convenience query function
+  query <- function(...) RSQLite::dbGetQuery(db, ...)
+
+  gnames <- unique(query('select gene from weights')[,1])
+  loginfo("number of genes with weights provided: %s",
+          length(gnames))
+
+  loginfo("collecting gene weight information ...")
+  for (gname in gnames){
+    wgt <- query('select * from weights where gene = ?', params = list(gname))
+    wgt.matrix <- as.matrix(wgt[, "weight", drop = F])
+    rownames(wgt.matrix) <- wgt$rsid
+    chrpos <- do.call(rbind, strsplit(wgt$varID, "_"))
+    snps <- data.frame(gsub("chr", "", chrpos[,1]), wgt$rsid, "0", chrpos[,2],
+                       wgt$eff_allele, wgt$ref_allele, stringsAsFactors = F)
+    colnames(snps) <- c("chrom", "id", "cm", "pos", "alt", "ref")
+    snps$chrom <- as.integer(snps$chrom)
+    snps$pos <- as.integer(snps$pos)
+
+    if (isTRUE(harmonize)) {
+      w <- harmonize_wgt_ld(wgt.matrix, snps, ld_snpinfo)
+      wgt.matrix <- w[["wgt"]]
+      snps <- w[["snps"]]
+    }
+    g.method = "weight"
+    wgt.matrix <- wgt.matrix[abs(wgt.matrix[, g.method]) > 0, , drop = F]
+    wgt.matrix <- wgt.matrix[complete.cases(wgt.matrix), , drop = F]
+    if (nrow(wgt.matrix) == 0)
+      next
+
+    if (is.null(z_snp)){
+      snpnames <- intersect(rownames(wgt.matrix), ld_snpinfo$id)
+    } else{
+      snpnames <- Reduce(intersect, list(rownames(wgt.matrix), ld_snpinfo$id, z_snp$id))
+    }
+
+    if (length(snpnames) == 0)
+      next
+
+    wgt.idx <- match(snpnames, rownames(wgt.matrix))
+    wgt <- wgt.matrix[wgt.idx, g.method, drop = F]
+
+    p0 <-  min(snps[snps[, "id"] %in% snpnames, "pos"])
+    p1 <- max(snps[snps[, "id"] %in% snpnames, "pos"])
+
+    exprlist[[gname]] <- list("chrom" = chrom,
+                              "p0" = p0,
+                              "p1" = p1,
+                              "wgt" = wgt)
+
+    nwgt <- nrow(wgt.matrix)
+    nmiss <- nrow(wgt.matrix) - length(snpnames)
+    qclist[[gname]] <- list("n" = nwgt,
+                            "nmiss" = nmiss,
+                            "missrate" = nwgt/nmiss)
+  }
+
+  RSQLite::dbDisconnect(db)
+  return(list("exprlist" = exprlist, "qclist" = qclist))
+}
+
 
 

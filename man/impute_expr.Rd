@@ -4,15 +4,15 @@
 \alias{impute_expr}
 \title{Impute expression}
 \usage{
-impute_expr(pgenf, weight, method = "lasso", outputdir = getwd(),
+impute_expr(pgenfs, weight, method = "lasso", outputdir = getwd(),
   outname = NULL, logfile = NULL, compress = T, harmonize = T)
 }
 \arguments{
-\item{weight}{a string, pointing to the fusion/twas format of weights.
+\item{weight}{a string, pointing to the fusion/twas format of weights.or predictdb format.
 Note the effect size are obtained with standardized genotype and phenotype.}
 
 \item{method}{a string,  blup/bslmm/lasso/top1/enet/best
-"best" means the method giving the best cross validation R^2}
+"best" means the method giving the best cross validation R^2, only used for fusion weight format.}
 
 \item{harmonize}{T/F, if need to harmonize SNP data, if T, will harmonize GWAS and eQTL genotype alleles.}
 }

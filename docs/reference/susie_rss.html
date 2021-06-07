@@ -8,13 +8,11 @@
 
 <title>Sum of Single Effects (SuSiE) Regression using summary statistics — susie_rss • ctwas</title>
 
-
 <!-- jquery -->
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.4.1/jquery.min.js" integrity="sha256-CSXorXvZcTkaix6Yvo6HppcZGetbYMGWSFlBw8HfCJo=" crossorigin="anonymous"></script>
 <!-- Bootstrap -->
 
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/3.4.1/css/bootstrap.min.css" integrity="sha256-bZLfwXAP04zRMK2BjiO8iu9pf4FbLqX6zitd+tIvLhE=" crossorigin="anonymous" />
-
 <script src="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/3.4.1/js/bootstrap.min.js" integrity="sha256-nuL8/2cJ5NDSSwnKD8VqreErSWHtnEP9E7AySL+1ev4=" crossorigin="anonymous"></script>
 
 <!-- bootstrap-toc -->
@@ -38,14 +36,15 @@
 
 
 
-
 <meta property="og:title" content="Sum of Single Effects (SuSiE) Regression using summary statistics — susie_rss" />
+
 <meta property="og:description" content="susie_rss performs sum of single-effect linear
   regression with z scores; all posterior calculations are for
   z-scores. This function fits the regression model \(z = \sum_l
   R*b_l + e\), where e is \(N(0,R)\) and \(\sum_l b_l\) is a
   p-vector of effects to be estimated. The required summary data are
   the p by p correlation matrix, R, and the p-vector z." />
+
 
 
 
@@ -77,7 +76,7 @@
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">ctwas</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="Released version">0.1.26</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="Released version">0.1.27</span>
       </span>
     </div>
 
@@ -85,7 +84,7 @@
       <ul class="nav navbar-nav">
         <li>
   <a href="../index.html">
-    <span class="fas fa-home fa-lg"></span>
+    <span class="fas fa fas fa-home fa-lg"></span>
      
   </a>
 </li>
@@ -108,6 +107,7 @@
   </ul>
 </li>
       </ul>
+      
       <ul class="nav navbar-nav navbar-right">
         <li>
   <a href="https://github.com/simingz/ctwas">Source</a>
@@ -131,12 +131,14 @@
     </div>
 
     <div class="ref-description">
+    
     <p><code>susie_rss</code> performs sum of single-effect linear
   regression with z scores; all posterior calculations are for
   z-scores. This function fits the regression model \(z = \sum_l
   R*b_l + e\), where e is \(N(0,R)\) and \(\sum_l b_l\) is a
   p-vector of effects to be estimated. The required summary data are
   the p by p correlation matrix, <code>R</code>, and the p-vector <code>z</code>.</p>
+    
     </div>
 
     <pre class="usage"><span class='fu'>susie_rss</span><span class='op'>(</span><span class='va'>z</span>, <span class='va'>R</span>, maf <span class='op'>=</span> <span class='cn'>NULL</span>, maf_thresh <span class='op'>=</span> <span class='fl'>0</span>, z_ld_weight <span class='op'>=</span> <span class='fl'>0</span>,
@@ -149,7 +151,7 @@
   min_abs_corr <span class='op'>=</span> <span class='fl'>0.5</span>, tol <span class='op'>=</span> <span class='fl'>0.001</span>, verbose <span class='op'>=</span> <span class='cn'>FALSE</span>,
   track_fit <span class='op'>=</span> <span class='cn'>FALSE</span>, check_R <span class='op'>=</span> <span class='cn'>FALSE</span>, r_tol <span class='op'>=</span> <span class='fl'>1e-08</span>,
   refine <span class='op'>=</span> <span class='cn'>FALSE</span><span class='op'>)</span></pre>
-
+    
     <h2 class="hasAnchor" id="arguments"><a class="anchor" href="#arguments"></a>Arguments</h2>
     <table class="ref-arguments">
     <colgroup><col class="name" /><col class="desc" /></colgroup>
@@ -311,7 +313,7 @@ semidefinite matrix of R.</p></td>
 SuSiE get out of local optimum.</p></td>
     </tr>
     </table>
-
+    
     <h2 class="hasAnchor" id="value"><a class="anchor" href="#value"></a>Value</h2>
 
     <p>A <code>"susie"</code> object with some or all of the following
@@ -357,6 +359,7 @@ SuSiE get out of local optimum.</p></td>
 <dt>Rr</dt><dd><p>An p-vector of <code><a href='https://rdrr.io/r/base/t.html'>t(X)</a></code> times fitted values, <code>X
   %*% colSums(alpha*mu)</code>.</p></dd>
 
+    
 
     <h2 class="hasAnchor" id="examples"><a class="anchor" href="#examples"></a>Examples</h2>
     <pre class="examples"><div class='input'><span class='fu'><a href='https://rdrr.io/r/base/Random.html'>set.seed</a></span><span class='op'>(</span><span class='fl'>1</span><span class='op'>)</span>
