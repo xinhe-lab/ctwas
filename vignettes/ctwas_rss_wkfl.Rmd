@@ -123,7 +123,7 @@ When providing LD R matrices:
 ```{r impute_R, warning=F, message=F}
 outputdir <- "~/temp"
 
-res <- impute_expr_z(z_snp = z_snp,  weight = weight, ld_R_dir = ld_R_dir,
+res <- impute_expr_z(z_snp = z_snp,  weight = weight.predictdb, ld_R_dir = ld_R_dir,
                            method = "lasso", outputdir = outputdir,
                            outname = "test_ss")
 z_gene <- res$z_gene

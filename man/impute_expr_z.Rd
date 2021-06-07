@@ -12,11 +12,11 @@ impute_expr_z(z_snp, weight, ld_pgenfs = NULL, ld_R_dir = NULL,
 \item{z_snp}{A data frame with two columns: "id", "A1", "A2", "z". giving the z scores for
 snps. "A1" is effect allele. "A2" is the other allele. If `harmonize= False`, A1 and A2 are not required.}
 
-\item{weight}{a string, pointing to the fusion/twas format of weights.
+\item{weight}{a string, pointing to the fusion/twas format of weights, or predictdb format.
 Note the effect size are obtained with standardized genotype and phenotype.}
 
 \item{method}{a string,  blup/bslmm/lasso/top1/enet/best
-"best" means the method giving the best cross validation R^2}
+"best" means the method giving the best cross validation R^2, this is only used for fusion weights.}
 
 \item{harmonize}{T/F, if need to harmonize SNP data, if T, will harmonize gwas, LD and eQTL genotype alleles.}
 }

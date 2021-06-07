@@ -40,7 +40,7 @@ weight.predictdb <- system.file("extdata", "example_tissue.db", package = "ctwas
 ```{r impute, warning=F, message=F}
 outputdir <- "~/temp"
 
-exprfs <- impute_expr(pgenfs = pgenfs, weight = weight,
+exprfs <- impute_expr(pgenfs = pgenfs, weight = weight.fusion,
                            method = "lasso", outputdir = outputdir,
                            outname = "test")
 ```
