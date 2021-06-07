@@ -70,6 +70,7 @@ ctwas_rss <- function(
   ld_pgenfs = NULL,
   ld_R_dir = NULL,
   ld_regions = c("EUR", "ASN", "AFR"),
+  ld_regions_version = c("b37", "b38"),
   ld_regions_custom = NULL,
   thin = 1,
   prob_single = 0.8,
@@ -120,8 +121,9 @@ ctwas_rss <- function(
 
   if (is.null(ld_regions_custom)){
     ld_regions <- match.arg(ld_regions)
+    ld_regions_version <- match.arg(ld_regions_version)
     regionfile <- system.file("extdata", "ldetect",
-                              paste0(ld_regions, ".bed"), package="ctwas")
+                              paste0(ld_regions, "." , ld_regions_version, ".bed"), package="ctwas")
   } else {
     regionfile <- ld_regions_custom
   }

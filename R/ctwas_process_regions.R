@@ -242,7 +242,8 @@ index_regions <- function(regionfile,
         R_snp_anno <- do.call(rbind, lapply(regRDS, read_ld_Rvar_RDS))
 
         #update sidx to match R matrix info
-        regionlist[[b]][[rn]][["sidx"]] <- match(regionlist[[b]][[rn]][["sid"]], R_snp_anno$id)
+        sidx <-  match(regionlist[[b]][[rn]][["sid"]], R_snp_anno$id)
+        regionlist[[b]][[rn]][["sidx"]] <- sidx
 
         gnames <- regionlist[[b]][[rn]][["gid"]]
         R_snp_gene <- matrix( , nrow(R_snp), length(gnames))
@@ -272,14 +273,21 @@ index_regions <- function(regionfile,
           }
         }
 
+        regionlist[[b]][[rn]][["regRDS"]] <- regRDS
+
         R_sg_file <- file.path(outputdir, paste0(outname, "_LDR"), paste0("chr", b, "_reg", rn, ".R_snp_gene.RDS"))
         R_g_file <- file.path(outputdir, paste0(outname, "_LDR"), paste0("chr", b, "_reg", rn, ".R_gene.RDS"))
         saveRDS(R_snp_gene, file=R_sg_file)
         saveRDS(R_gene, file=R_g_file)
-
-        regionlist[[b]][[rn]][["R_s_file"]] <- regRDS
         regionlist[[b]][[rn]][["R_sg_file"]] <- R_sg_file
         regionlist[[b]][[rn]][["R_g_file"]] <- R_g_file
+
+        if (thin < 1){
+          R_s_file <- file.path(outputdir, paste0(outname, "_LDR"), paste0("chr", b, "_reg", rn, ".R_snp.RDS"))
+          R_snp <- R_snp[sidx, sidx, drop = F]
+          saveRDS(R_snp, file=R_s_file)
+          regionlist[[b]][[rn]][["R_s_file"]] <- R_s_file
+        }
       }
     }
   }

@@ -116,13 +116,19 @@ susieI_rss <- function(zdf,
               R <- Rfast::cora(X)
             } else {
               # prepare R matrix
-              if (!("R_s_file" %in% names(regionlist[[b]][[rn]]))){
+              if (!("regRDS" %in% names(regionlist[[b]][[rn]]))){
                 stop("R matrix info not available for region", b, ",", rn)
               }
-              regRDS <-  regionlist[[b]][[rn]][["R_s_file"]]
-              R_snp <- lapply(regRDS, readRDS)
-              R_snp <- as.matrix(Matrix::bdiag(R_snp))
-              R_snp <- R_snp[sidx, sidx, drop = F]
+
+              regRDS <- regionlist[[b]][[rn]][["regRDS"]]
+
+              if (is.null(regionlist[[b]][[rn]][["R_s_file"]])){
+                R_snp <- lapply(regRDS, readRDS)
+                R_snp <- as.matrix(Matrix::bdiag(R_snp))
+                R_snp <- R_snp[sidx, sidx, drop = F]
+              } else {
+                R_snp <- readRDS(regionlist[[b]][[rn]][["R_s_file"]])
+              }
               R_snp_gene <- readRDS(regionlist[[b]][[rn]][["R_sg_file"]])
               R_snp_gene <- R_snp_gene[sidx, , drop = F]
               R_gene <- readRDS(regionlist[[b]][[rn]][["R_g_file"]])
