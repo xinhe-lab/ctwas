@@ -12,40 +12,23 @@
 #' @importFrom tools file_ext
 #'
 #' @export
-impute_expr_z <- function (z_snp,
-                           weight,
-                           ld_pgenfs = NULL,
-                           ld_R_dir = NULL,
-                           method = "lasso",
-                           outputdir = getwd(),
-                           outname = NULL,
-                           logfile = NULL,
-                           compress = T,
-                           harmonize = T){
-
-
-  dir.create(outputdir, showWarnings=F)
-
+impute_expr_z <- function (z_snp, weight, ld_pgenfs = NULL, ld_R_dir = NULL, method = "lasso", 
+                           outputdir = getwd(), outname = NULL, logfile = NULL, compress = T, 
+                           harmonize_z = F, harmonize_wgt = T, recover_strand_ambig = T){
+  dir.create(outputdir, showWarnings = F)
   if (!is.null(logfile)) {
     addHandler(writeToFile, file = logfile, level = "DEBUG")
   }
-
-  if (is.null(ld_pgenfs) & is.null(ld_R_dir)){
-    stop("Stopped: missing LD information.
-         LD information needs to be provided either in genotype form
-         (see parameter description for ld_pgenfs) or R matrix form
-         (see parameter description for ld_R_dir) ")
-  } else if (is.null(ld_pgenfs)){
+  if (is.null(ld_pgenfs) & is.null(ld_R_dir)) {
+    stop("Stopped: missing LD information.\n         LD information needs to be provided either in genotype form\n         (see parameter description for ld_pgenfs) or R matrix form\n         (see parameter description for ld_R_dir) ")
+  } else if (is.null(ld_pgenfs)) {
     ld_Rfs <- write_ld_Rf(ld_R_dir, outname = outname, outputdir = outputdir)
   }
-
   outname <- file.path(outputdir, outname)
   ld_exprfs <- vector()
   z_genelist <- list()
-
-  for (b in 1:22){
-
-    if (!is.null(ld_pgenfs)){
+  for (b in 1:22) {
+    if (!is.null(ld_pgenfs)) {
       ld_pgenf <- ld_pgenfs[b]
       ld_pvarf <- prep_pvar(ld_pgenf, outputdir = outputdir)
       ld_snpinfo <- read_pvar(ld_pvarf)
@@ -54,39 +37,35 @@ impute_expr_z <- function (z_snp,
       ld_Rinfo <- data.table::fread(ld_Rf, header = T)
       ld_snpinfo <- read_ld_Rvar(ld_Rf)
     }
-
     chrom <- unique(ld_snpinfo$chrom)
     if (length(chrom) != 1) {
       stop("Input LD reference not split by chromosome")
     }
-
-    if (isTRUE(harmonize)) {
+    if (isTRUE(harmonize_z)) {
       loginfo("flipping z scores to match LD reference")
-      z_snp <- harmonize_z_ld(z_snp, ld_snpinfo)
+      z_snp <- harmonize_z_ld(z_snp, ld_snpinfo,
+                              recover_strand_ambig = recover_strand_ambig, 
+                              ld_pgenfs = ld_pgenfs, 
+                              ld_Rinfo = ld_Rinfo)
       loginfo("will also flip weights to match LD reference for each gene")
     }
-
     loginfo("Reading weights for chromosome %s", b)
-    if (dir.exists(weight)){
-      weightall <- read_weight_fusion(weight, b, ld_snpinfo, z_snp, method = method, harmonize = T)
-    } else if (file_ext(weight)=='db'){
-      weightall <- read_weight_predictdb(weight, b, ld_snpinfo, z_snp, harmonize = T)
-    } else{
+    if (dir.exists(weight)) {
+      weightall <- read_weight_fusion(weight, b, ld_snpinfo, z_snp, method = method, harmonize_wgt=harmonize_wgt)
+    } else if (file_ext(weight) == "db") {
+      weightall <- read_weight_predictdb(weight, b, ld_snpinfo, z_snp, harmonize_wgt=harmonize_wgt, ld_Rinfo=ld_Rinfo)
+    } else {
       stop("Unrecognized weight format, need to use either FUSION format or predict.db format")
     }
-
     exprlist <- weightall[["exprlist"]]
     qclist <- weightall[["qclist"]]
-
     if (length(exprlist) > 0) {
       loginfo("Start gene z score imputation ...")
-
-      if (!is.null(ld_pgenfs)){
+      if (!is.null(ld_pgenfs)) {
         loginfo("ld genotype is given, using genotypes to impute gene z score.")
-
         ld_pgen <- prep_pgen(ld_pgenf, ld_pvarf)
         gnames <- names(exprlist)
-        for (i in 1:length(gnames)){
+        for (i in 1:length(gnames)) {
           gname <- gnames[i]
           wgt <- exprlist[[gname]][["wgt"]]
           snpnames <- rownames(wgt)
@@ -101,105 +80,92 @@ impute_expr_z <- function (z_snp,
             z.s <- as.matrix(z_snp[z.idx, "z"])
             var.s <- sqrt(apply(X.g, 2, var))
             Gamma.g <- cov(X.g)
-            z.g <- (t(wgt) * var.s) %*% z.s/sqrt(t(wgt) %*% Gamma.g %*% wgt)
+            z.g <- (t(wgt) * var.s) %*% z.s/sqrt(t(wgt) %*% 
+                                                   Gamma.g %*% wgt)
             exprlist[[gname]][["expr"]] <- gexpr
             exprlist[[gname]][["z.g"]] <- z.g
           }
         }
       } else {
         loginfo("Using given LD matrices to impute gene z score.")
-
-        # Add region info for each gene
-        for (gname in names(exprlist)){
+        for (gname in names(exprlist)) {
           p0 <- exprlist[[gname]][["p0"]]
           p1 <- exprlist[[gname]][["p1"]]
-          ifreg <- ifelse(p1 >= ld_Rinfo[, "start"] & p0 < ld_Rinfo[, "stop"], T, F)
-          exprlist[[gname]][["reg"]] <- paste(sort(ld_Rinfo[ifreg, "region_name"]),
-                                              collapse = ";")
+          ifreg <- ifelse(p1 >= ld_Rinfo[, "start"] & 
+                            p0 < ld_Rinfo[, "stop"], T, F)
+          exprlist[[gname]][["reg"]] <- paste(sort(ld_Rinfo[ifreg, 
+                                                            "region_name"]), collapse = ";")
         }
-        # impute in batch (a batch uses same LD R files)
-        regs <- data.frame("gid" = names(exprlist),
-                           "reg" = unlist(lapply(exprlist, "[[", "reg")),
-                           stringsAsFactors = F)
+        regs <- data.frame(gid = names(exprlist), reg = unlist(lapply(exprlist, 
+                                                                      "[[", "reg")), stringsAsFactors = F)
         batches <- unique(regs$reg)
-        for (batch in batches){
+        for (batch in batches) {
           gnames <- regs[regs$reg == batch, "gid"]
           regnames <- strsplit(batch, ";")[[1]]
-          regRDS <- ld_Rinfo[match(regnames, ld_Rinfo$region_name), "RDS_file"]
+          regRDS <- ld_Rinfo[match(regnames, ld_Rinfo$region_name), 
+                             "RDS_file"]
           R_snp <- lapply(regRDS, readRDS)
           R_snp <- as.matrix(Matrix::bdiag(R_snp))
-          R_snp_anno <- do.call(rbind, lapply(regRDS, read_ld_Rvar_RDS))
-          for (i in 1:length(gnames)){
+          R_snp_anno <- do.call(rbind, lapply(regRDS, 
+                                              read_ld_Rvar_RDS))
+          for (i in 1:length(gnames)) {
             gname <- gnames[i]
             wgt <- exprlist[[gname]][["wgt"]]
             snpnames <- rownames(wgt)
             ld.idx <- match(snpnames, R_snp_anno$id)
             zdf.idx <- match(snpnames, z_snp$id)
-            R.s <- R_snp[ld.idx,ld.idx]
-            z.s <-  as.matrix(z_snp[zdf.idx, "z"])
-            z.g <- crossprod(wgt,z.s)/sqrt(crossprod(wgt,R.s)%*%wgt)
+            R.s <- R_snp[ld.idx, ld.idx]
+            z.s <- as.matrix(z_snp[zdf.idx, "z"])
+            z.g <- crossprod(wgt, z.s)/sqrt(crossprod(wgt, 
+                                                      R.s) %*% wgt)
             exprlist[[gname]][["z.g"]] <- z.g
           }
         }
       }
     }
-
-    loginfo ("Imputation done, writing results to output...")
-    z.g <- unlist(lapply(exprlist,'[[', "z.g"))
+    loginfo("Imputation done, writing results to output...")
+    z.g <- unlist(lapply(exprlist, "[[", "z.g"))
     gnames <- names(exprlist)
-    chrom <- unlist(lapply(exprlist,'[[', "chrom"))
-    p0 <- unlist(lapply(exprlist,'[[', "p0"))
-    p1 <- unlist(lapply(exprlist,'[[', "p1"))
-    wgtlist <- lapply(exprlist, '[[', "wgt")
-
+    chrom <- unlist(lapply(exprlist, "[[", "chrom"))
+    p0 <- unlist(lapply(exprlist, "[[", "p0"))
+    p1 <- unlist(lapply(exprlist, "[[", "p1"))
+    wgtlist <- lapply(exprlist, "[[", "wgt")
     exprvarf <- paste0(outname, "_chr", b, ".exprvar")
-    if (length(exprlist) == 0){
+    if (length(exprlist) == 0) {
       geneinfo <- data.table::data.table(NULL)
     } else {
-      geneinfo <- data.frame("chrom" = chrom,
-                             "id" = gnames,
-                             "p0" = p0,
-                             "p1" = p1)
+      geneinfo <- data.frame(chrom = chrom, id = gnames, 
+                             p0 = p0, p1 = p1)
     }
-    data.table::fwrite(geneinfo, file = exprvarf, sep = "\t", quote = F)
-
-    z_gene_chr <- data.frame("id" = gnames,
-                             "z" = z.g)
-
+    data.table::fwrite(geneinfo, file = exprvarf, sep = "\t", 
+                       quote = F)
+    z_gene_chr <- data.frame(id = gnames, z = z.g)
     exprqcf <- paste0(outname, "_chr", b, ".exprqc.Rd")
     save(wgtlist, qclist, z_gene_chr, file = exprqcf)
-
     exprf <- paste0(outname, "_chr", b, ".expr")
-    if (!is.null(ld_pgenfs)){
-      if (length(exprlist) == 0){
+    if (!is.null(ld_pgenfs)) {
+      if (length(exprlist) == 0) {
         expr <- data.table::data.table(NULL)
       } else {
-        expr <- do.call(cbind, lapply(exprlist, '[[', "expr"))
+        expr <- do.call(cbind, lapply(exprlist, "[[", 
+                                      "expr"))
       }
     } else {
-      # an empty .expr file when using LD R matrices
       expr <- data.table::data.table(NA)
     }
-
-    data.table::fwrite(expr, file = exprf,
-                       row.names = F, col.names = F,
-                       sep = "\t", quote = F)
-    if (isTRUE(compress)){
+    data.table::fwrite(expr, file = exprf, row.names = F, 
+                       col.names = F, sep = "\t", quote = F)
+    if (isTRUE(compress)) {
       system(paste0("gzip -f ", exprf))
-      exprf <- paste0(exprf, '.gz')
+      exprf <- paste0(exprf, ".gz")
     }
-
-    loginfo("Imputation done: number of genes with imputed expression: %s for chr %s",
+    loginfo("Imputation done: number of genes with imputed expression: %s for chr %s", 
             length(gnames), b)
-
-
     z_genelist[[b]] <- z_gene_chr
     ld_exprfs[b] <- exprf
   }
-
   z_gene <- do.call(rbind, z_genelist)
-
-  return(list("z_gene" = z_gene, "ld_exprfs"= ld_exprfs))
+  return(list(z_gene = z_gene, ld_exprfs = ld_exprfs))
 }
 
 
