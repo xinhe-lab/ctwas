@@ -298,11 +298,15 @@ read_weight_predictdb <- function (weight, chrom, ld_snpinfo, z_snp = NULL, harm
   db = RSQLite::dbConnect(sqlite, weight)
   query <- function(...) RSQLite::dbGetQuery(db, ...)
   gnames <- unique(query("select gene from weights")[, 1])
-  loginfo("number of genes with weights provided: %s", length(gnames))
-  loginfo("collecting gene weight information ...")
+  loginfo("Number of genes with weights provided: %s", length(gnames))
+  loginfo("Collecting gene weight information ...")
+  if (harmonize_wgt){
+    loginfo("Flipping weights to match LD reference")
+  }
   
   #load correlations for variants in each gene (accompanies .db file)
   if (recover_strand_ambig){
+    loginfo("Harmonizing strand ambiguous weights using correlations with unambiguous variants")
     R_wgt_all = read.table(gzfile(paste0(file_path_sans_ext(weight), ".txt.gz")), header=T)
   }
   
@@ -320,7 +324,16 @@ read_weight_predictdb <- function (weight, chrom, ld_snpinfo, z_snp = NULL, harm
     snps$chrom <- as.integer(snps$chrom)
     snps$pos <- as.integer(snps$pos)
     if (isTRUE(harmonize_wgt)) {
-      w <- harmonize_wgt_ld(wgt.matrix, snps, ld_snpinfo, ld_Rinfo=ld_Rinfo, R_wgt_all=R_wgt_all, gname=gname, wgt=wgt)
+      if (recover_strand_ambig){
+        #subset R_wgt_all to current weight
+        R_wgt <- R_wgt_all[R_wgt_all$GENE == gname,]
+        R_wgt <- R_wgt[R_wgt$RSID1!=R_wgt$RSID2,] #discard variant correlations with itself (NOTE: not equal to one, not scaled?)
+      } else {
+        R_wgt <- NULL
+      }
+      w <- harmonize_wgt_ld(wgt.matrix, snps, ld_snpinfo, 
+                            recover_strand_ambig=recover_strand_ambig, 
+                            ld_Rinfo=ld_Rinfo, R_wgt=R_wgt, wgt=wgt, )
       wgt.matrix <- w[["wgt"]]
       snps <- w[["snps"]]
     }

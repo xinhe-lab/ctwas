@@ -55,7 +55,7 @@ harmonize_z_ld <- function(z_snp, ld_snpinfo, recover_strand_ambig = T, ld_pgenf
       #compare sign of imputed z score with observed z score for strand ambiguous variants 
       #following imputation strategy in https://dx.doi.org/10.1093%2Fbioinformatics%2Fbtu416
       if (is.null(ld_pgenfs)){
-        loginfo("harmonizing strand-ambiguous z scores using imputation by region")
+        loginfo("Harmonizing strand-ambiguous z scores using imputation by region")
         for (i in 1:nrow(ld_Rinfo)){
           R_snp <- readRDS(ld_Rinfo$RDS_file[i])
           R_snp_anno <- read_ld_Rvar_RDS(ld_Rinfo$RDS_file[i])
@@ -104,7 +104,7 @@ harmonize_z_ld <- function(z_snp, ld_snpinfo, recover_strand_ambig = T, ld_pgenf
 #'
 #' @export
 harmonize_wgt_ld <- function (wgt.matrix, snps, ld_snpinfo, recover_strand_ambig=T, 
-                              ld_pgenfs=NULL, ld_Rinfo=NULL, R_wgt_all=NULL, gname=NULL, wgt=NULL){
+                              ld_pgenfs=NULL, ld_Rinfo=NULL, R_wgt=NULL, wgt=NULL){
   colnames(snps) <- c("chrom", "id", "cm", "pos", "alt", "ref")
   snps <- snps[match(rownames(wgt.matrix), snps$id), ]
   snpnames <- intersect(snps$id, ld_snpinfo$id)
@@ -134,10 +134,6 @@ harmonize_wgt_ld <- function (wgt.matrix, snps, ld_snpinfo, recover_strand_ambig
         #index the variant positions in LD reference
         R_snp.idx <- match(snpnames, R_snp_anno$id)
         R_snp.idx.unambig <- R_snp.idx[!ifremove]
-        
-        #subset R_wgt_all to current weight
-        R_wgt <- R_wgt_all[R_wgt_all$GENE == gname,]
-        R_wgt <- R_wgt[R_wgt$RSID1!=R_wgt$RSID2,] #discard variant correlations with itself (NOTE: not equal to one? not scaled?)
         
         #drop R_wgt correlations between ambiguous variants
         R_wgt <- R_wgt[R_wgt$RSID1 %in% wgt$varID[!ifremove] | R_wgt$RSID2 %in% wgt$varID[!ifremove],]

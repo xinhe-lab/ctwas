@@ -14,7 +14,8 @@
 #' @export
 impute_expr_z <- function (z_snp, weight, ld_pgenfs = NULL, ld_R_dir = NULL, method = "lasso", 
                            outputdir = getwd(), outname = NULL, logfile = NULL, compress = T, 
-                           harmonize_z = F, harmonize_wgt = T, recover_strand_ambig = T){
+                           harmonize_z = T, harmonize_wgt = T, 
+                           recover_strand_ambig_z = T, recover_strand_ambig_wgt = T){
   dir.create(outputdir, showWarnings = F)
   if (!is.null(logfile)) {
     addHandler(writeToFile, file = logfile, level = "DEBUG")
@@ -42,21 +43,32 @@ impute_expr_z <- function (z_snp, weight, ld_pgenfs = NULL, ld_R_dir = NULL, met
       stop("Input LD reference not split by chromosome")
     }
     if (isTRUE(harmonize_z)) {
-      loginfo("flipping z scores to match LD reference")
+      loginfo("Flipping z scores to match LD reference")
       z_snp <- harmonize_z_ld(z_snp, ld_snpinfo,
-                              recover_strand_ambig = recover_strand_ambig, 
+                              recover_strand_ambig = recover_strand_ambig_z, 
                               ld_pgenfs = ld_pgenfs, 
                               ld_Rinfo = ld_Rinfo)
-      loginfo("will also flip weights to match LD reference for each gene")
     }
     loginfo("Reading weights for chromosome %s", b)
+    
+    
+    
+    
     if (dir.exists(weight)) {
-      weightall <- read_weight_fusion(weight, b, ld_snpinfo, z_snp, method = method, harmonize_wgt=harmonize_wgt)
+      weightall <- read_weight_fusion(weight, b, ld_snpinfo, z_snp, method = method, 
+                                      harmonize_wgt=harmonize_wgt)
     } else if (file_ext(weight) == "db") {
-      weightall <- read_weight_predictdb(weight, b, ld_snpinfo, z_snp, harmonize_wgt=harmonize_wgt, ld_Rinfo=ld_Rinfo)
+      weightall <- read_weight_predictdb(weight, b, ld_snpinfo, z_snp, 
+                                         harmonize_wgt=harmonize_wgt, ld_Rinfo=ld_Rinfo,
+                                         recover_strand_ambig=recover_strand_ambig_wgt)
     } else {
       stop("Unrecognized weight format, need to use either FUSION format or predict.db format")
     }
+    
+    
+    
+    
+    
     exprlist <- weightall[["exprlist"]]
     qclist <- weightall[["qclist"]]
     if (length(exprlist) > 0) {
