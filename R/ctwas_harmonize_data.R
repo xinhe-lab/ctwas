@@ -125,8 +125,8 @@ harmonize_wgt_ld <- function (wgt.matrix, snps, ld_snpinfo, recover_strand_ambig
       if (is.null(ld_pgenfs)){
         #load correlation matrix(es) for LD reference(s) containing current weight
         wgt_pos <- ld_snpinfo$pos[ld_snpinfo$id %in% snpnames]
-        regnames <- unique(sapply(wgt_pos, function(x){which(x > ld_Rinfo$start & x < ld_Rinfo$stop)}))
-        regRDS <- ld_Rinfo[match(regnames, ld_Rinfo$region_name), "RDS_file"]
+        regnames <- unique(sapply(wgt_pos, function(x){which(x >= ld_Rinfo$start & x <= ld_Rinfo$stop)}))
+        regRDS <- ld_Rinfo$RDS_file[match(regnames, ld_Rinfo$region_name)]
         R_snp <- lapply(regRDS, readRDS)
         R_snp <- as.matrix(Matrix::bdiag(R_snp))
         R_snp_anno <- do.call(rbind, lapply(regRDS, read_ld_Rvar_RDS))
@@ -144,6 +144,8 @@ harmonize_wgt_ld <- function (wgt.matrix, snps, ld_snpinfo, recover_strand_ambig
           R_wgt$VALUE[ifflip_rwgt] <- -R_wgt$VALUE[ifflip_rwgt]
         }
         
+        unrecoverable.idx <- c()
+        
         #iterate over ambiguous snps
         for (i in snpnames[ifremove]){
           #index current ambiguous snp
@@ -155,10 +157,22 @@ harmonize_wgt_ld <- function (wgt.matrix, snps, ld_snpinfo, recover_strand_ambig
           #sum of correlations in weights between current ambiguous variant and unambiguous variants
           sumcor_R_wgt <- sum(R_wgt$VALUE[R_wgt$RSID1==wgt$varID[snpnames.idx] | R_wgt$RSID2==wgt$varID[snpnames.idx]])
           
-          #flip weight if sign of correlations is not the same
-          if (sign(sumcor_R_snp)!=sign(sumcor_R_wgt)){
-            wgt.matrix[snpnames.idx,] <- -wgt.matrix[snpnames.idx,]
+          if (sumcor_R_snp==0 | sumcor_R_wgt==0){
+            #collect ambiguous variants that do not have an unambiguous variant in the same LD region: all off-diagonal correlations = 0
+            #also collect amiguous variants independent of unambiguous variants in weights (trivial, correlations must = exactly zero)
+            unrecoverable.idx <- c(unrecoverable.idx, snpnames.idx)
+          } else {
+            #flip weight if sign of correlations is not the same
+            if (sign(sumcor_R_snp)!=sign(sumcor_R_wgt)){
+              wgt.matrix[snpnames.idx,] <- -wgt.matrix[snpnames.idx,]
+            }
           }
+        }
+        
+        #drop ambiguous variants that cannot be recovered
+        if (length(unrecoverable.idx)>0){
+          snps <- snps[-unrecoverable.idx, , drop = F]
+          wgt.matrix <- wgt.matrix[-unrecoverable.idx, , drop = F]
         }
       } else {
         #TO-DO: mirror following section but compute R_snp each region using Xs
