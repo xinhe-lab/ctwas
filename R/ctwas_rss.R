@@ -85,7 +85,8 @@ ctwas_rss <- function(
   use_null_weight = T,
   coverage = 0.95,
   stardardize = T,
-  harmonize =T,
+  harmonize_z =T,
+  recover_strand_ambig_z=T,
   max_snp_region = Inf,
   ncore = 1,
   ncore.rerun = 1,
@@ -130,11 +131,20 @@ ctwas_rss <- function(
 
   loginfo("LD region file: %s", regionfile)
 
-  if (isTRUE(harmonize)){
-    loginfo("flipping z scores to match LD reference")
-      for (b in 1:22) {
-        z_snp <- harmonize_z_ld(z_snp, ld_snpinfo[[b]])
+  if (isTRUE(harmonize_z)) {
+    logging::loginfo("Flipping z scores to match LD reference")
+    for (b in 1:22) {
+      if (recover_strand_ambig_z){
+        if (!is.null(ld_pgenfs)){
+          #TO-DO: add support for genotypes as necessary
+        } else {
+          ld_Rf <- ld_Rfs[b]
+          ld_Rinfo <- data.table::fread(ld_Rf, header = T)
+        }
       }
+      z_snp <- harmonize_z_ld(z_snp, ld_snpinfo[[b]], recover_strand_ambig = recover_strand_ambig_z, 
+                              ld_pgenfs = ld_pgenfs, ld_Rinfo = ld_Rinfo)
+    }
   }
 
   zdf <- rbind(z_snp[, c("id", "z")], z_gene[, c("id", "z")])
