@@ -40,7 +40,7 @@ allele.qc = function(a1,a2,ref1,ref2) {
 #' @return A data frame, z_snp with the "z" columns flipped to match LD ref.
 #'
 #' @export
-harmonize_z_ld <- function(z_snp, ld_snpinfo, recover_strand_ambig = T, ld_pgenfs = NULL, ld_Rinfo = NULL){
+harmonize_z_ld <- function(z_snp, ld_snpinfo, strand_ambig_action = c("drop", "none", "recover"), ld_pgenfs = NULL, ld_Rinfo = NULL){
   snpnames <- intersect(z_snp$id, ld_snpinfo$id)
   if (length(snpnames) != 0) {
     z.idx <- match(snpnames, z_snp$id)
@@ -51,7 +51,7 @@ harmonize_z_ld <- function(z_snp, ld_snpinfo, recover_strand_ambig = T, ld_pgenf
     flip.idx <- z.idx[ifflip]
     z_snp[flip.idx, c("A1", "A2")] <- z_snp[flip.idx, c("A2", "A1")]
     z_snp[flip.idx, "z"] <- -z_snp[flip.idx, "z"]
-    if (recover_strand_ambig & any(ifremove)){
+    if (strand_ambig_action=="recover" & any(ifremove)){
       #compare sign of imputed z score with observed z score for strand ambiguous variants 
       #following imputation strategy in https://dx.doi.org/10.1093%2Fbioinformatics%2Fbtu416
       if (is.null(ld_pgenfs)){
@@ -80,13 +80,14 @@ harmonize_z_ld <- function(z_snp, ld_snpinfo, recover_strand_ambig = T, ld_pgenf
           z_i <- sigma_it%*%sigma_tt_inv%*%z_t
           
           #flip z scores that do not match the sign of the imputation
+          #NOTE: consider replacing this with a test of significance - see "Fine-mapping from summary data with the Sum of Single Effects model" - Yuxin
           if_sign_neq <- sign(z_i_obs) != sign(z_i)
           z_snp[z.idx.ambig[if_sign_neq], "z"] <- -z_snp[z.idx.ambig[if_sign_neq], "z"]
         }
       } else {
         #TO-DO: mirror previous section but compute R for each region using X
       }
-    } else if (any(ifremove)) {
+    } else if (strand_ambig_action=="drop" & any(ifremove)) {
       remove.idx <- z.idx[ifremove]
       z_snp <- z_snp[-remove.idx, , drop = F]
     }
