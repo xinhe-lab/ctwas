@@ -28,6 +28,7 @@ impute_expr_z <- function (z_snp, weight, ld_pgenfs = NULL, ld_R_dir = NULL, met
   outname <- file.path(outputdir, outname)
   ld_exprfs <- vector()
   z_genelist <- list()
+  ld_snplist <- c() #list to store names of snps in ld reference
   for (b in 1:22) {
     if (!is.null(ld_pgenfs)) {
       ld_pgenf <- ld_pgenfs[b]
@@ -42,6 +43,7 @@ impute_expr_z <- function (z_snp, weight, ld_pgenfs = NULL, ld_R_dir = NULL, met
     if (length(chrom) != 1) {
       stop("Input LD reference not split by chromosome")
     }
+    ld_snplist <- c(ld_snplist, ld_snpinfo$id) #store names of snps in ld reference
     if (isTRUE(harmonize_z)) {
       loginfo("Flipping z scores to match LD reference")
       z_snp <- harmonize_z_ld(z_snp, ld_snpinfo,
@@ -168,9 +170,6 @@ impute_expr_z <- function (z_snp, weight, ld_pgenfs = NULL, ld_R_dir = NULL, met
     ld_exprfs[b] <- exprf
   }
   z_gene <- do.call(rbind, z_genelist)
+  z_snp <- z_snp[z_snp$id %in% ld_snplist,] #subset z_snp to snps in ld reference
   return(list(z_gene = z_gene, ld_exprfs = ld_exprfs, z_snp = z_snp))
 }
-
-
-
-

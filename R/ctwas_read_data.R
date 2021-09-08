@@ -302,14 +302,11 @@ read_weight_predictdb <- function (weight, chrom, ld_snpinfo, z_snp = NULL, harm
   loginfo("Collecting gene weight information ...")
   if (harmonize_wgt){
     loginfo("Flipping weights to match LD reference")
+    if (recover_strand_ambig){
+      loginfo("Harmonizing strand ambiguous weights using correlations with unambiguous variants")
+      R_wgt_all = read.table(gzfile(paste0(file_path_sans_ext(weight), ".txt.gz")), header=T) #load correlations for variants in each gene (accompanies .db file)
+    }
   }
-  
-  #load correlations for variants in each gene (accompanies .db file)
-  if (recover_strand_ambig){
-    loginfo("Harmonizing strand ambiguous weights using correlations with unambiguous variants")
-    R_wgt_all = read.table(gzfile(paste0(file_path_sans_ext(weight), ".txt.gz")), header=T)
-  }
-  
   for (gname in gnames) {
     wgt <- query("select * from weights where gene = ?", 
                  params = list(gname))
