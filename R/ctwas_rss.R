@@ -145,6 +145,8 @@ ctwas_rss <- function(
                               outname = outname,
                               outputdir = outputdir) # susie_rss can't take 1 var.
   
+  saveRDS(regionlist, file=paste0(outputdir, "/", outname, ".regionlist.RDS"))
+  
   temp_regs <- lapply(1:22, function(x) cbind(x,
                    unlist(lapply(regionlist[[x]], "[[", "start")),
                      unlist(lapply(regionlist[[x]], "[[", "stop"))))
