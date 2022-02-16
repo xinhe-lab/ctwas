@@ -67,22 +67,25 @@ harmonize_z_ld <- function(z_snp, ld_snpinfo, strand_ambig_action = c("drop", "n
           z.idx.unambig <- z.idx[z.idx.ifreg & qc$keep]
           z.idx.ambig <- z.idx[z.idx.ifreg & !qc$keep]
           
-          #z scores for unambiguous and ambiguous variants in current region
-          z_t <- z_snp$z[z.idx.unambig]
-          z_i_obs <- z_snp$z[z.idx.ambig]
-          
-          #impute z scores for ambiguous variants using unambiguous variants in current region
-          R_t.idx <- match(z_snp$id[z.idx.unambig], R_snp_anno$id)
-          R_i.idx <- match(z_snp$id[z.idx.ambig], R_snp_anno$id)
-          lambda <- 0.001
-          sigma_tt_inv <- solve(R_snp[R_t.idx, R_t.idx, drop=F] + lambda*diag(length(R_t.idx)))
-          sigma_it <- R_snp[R_i.idx, R_t.idx, drop=F]
-          z_i <- sigma_it%*%sigma_tt_inv%*%z_t
-          
-          #flip z scores that do not match the sign of the imputation
-          #NOTE: consider replacing this with a test of significance - see "Fine-mapping from summary data with the Sum of Single Effects model" - Yuxin
-          if_sign_neq <- sign(z_i_obs) != sign(z_i)
-          z_snp[z.idx.ambig[if_sign_neq], "z"] <- -z_snp[z.idx.ambig[if_sign_neq], "z"]
+          #skip region if there are no ambiguous variants
+          if (length(z.idx.ambig)>0){
+            #z scores for unambiguous and ambiguous variants in current region
+            z_t <- z_snp$z[z.idx.unambig]
+            z_i_obs <- z_snp$z[z.idx.ambig]
+            
+            #impute z scores for ambiguous variants using unambiguous variants in current region
+            R_t.idx <- match(z_snp$id[z.idx.unambig], R_snp_anno$id)
+            R_i.idx <- match(z_snp$id[z.idx.ambig], R_snp_anno$id)
+            lambda <- 0.001
+            sigma_tt_inv <- solve(R_snp[R_t.idx, R_t.idx, drop=F] + lambda*diag(length(R_t.idx)))
+            sigma_it <- R_snp[R_i.idx, R_t.idx, drop=F]
+            z_i <- sigma_it%*%sigma_tt_inv%*%z_t
+            
+            #flip z scores that do not match the sign of the imputation
+            #NOTE: consider replacing this with a test of significance - see "Fine-mapping from summary data with the Sum of Single Effects model" - Yuxin
+            if_sign_neq <- sign(z_i_obs) != sign(z_i)
+            z_snp[z.idx.ambig[if_sign_neq], "z"] <- -z_snp[z.idx.ambig[if_sign_neq], "z"]
+          }
         }
       } else {
         #TO-DO: mirror previous section but compute R for each region using X
