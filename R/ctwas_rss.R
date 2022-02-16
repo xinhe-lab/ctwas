@@ -90,7 +90,8 @@ ctwas_rss <- function(
   ncore.rerun = 1,
   outputdir = getwd(),
   outname = NULL,
-  logfile = NULL){
+  logfile = NULL,
+  merge = TRUE){
 
   if (!is.null(logfile)){
     addHandler(writeToFile, file= logfile, level='DEBUG')
@@ -143,7 +144,8 @@ ctwas_rss <- function(
                               select = zdf$id,
                               thin = thin, minvar = 2,
                               outname = outname,
-                              outputdir = outputdir) # susie_rss can't take 1 var.
+                              outputdir = outputdir,
+                              merge = merge) # susie_rss can't take 1 var.
   
   saveRDS(regionlist, file=paste0(outputdir, "/", outname, ".regionlist.RDS"))
   
@@ -256,7 +258,8 @@ ctwas_rss <- function(
                                 ld_Rfs = ld_Rfs,
                                 select = zdf,
                                 thin = 1, maxSNP = max_snp_region, minvar = 2,
-                                outname = outname, outputdir = outputdir) # susie_rss can't take 1 var.
+                                outname = outname, outputdir = outputdir,
+                                merge = merge) # susie_rss can't take 1 var.
 
     res <- data.table::fread(paste0(file.path(outputdir, outname), ".temp.susieIrss.txt"))
 

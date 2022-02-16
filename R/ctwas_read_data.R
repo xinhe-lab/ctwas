@@ -320,6 +320,11 @@ read_weight_predictdb <- function (weight, chrom, ld_snpinfo, z_snp = NULL, harm
                         "ref")
     snps$chrom <- as.integer(snps$chrom)
     snps$pos <- as.integer(snps$pos)
+    
+    if (!any(snps$chrom==chrom)){
+      next
+    }
+    
     if (isTRUE(harmonize_wgt)) {
       if (recover_strand_ambig){
         #subset R_wgt_all to current weight
