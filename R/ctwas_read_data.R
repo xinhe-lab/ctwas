@@ -209,16 +209,21 @@ write_ld_Rf <- function(ld_R_dir, outname = outname , outputdir = getwd()){
                       stop = as.numeric(stop))
 
   ld_Rfs <- vector()
-  for (b in 1:22){
+  for (b in 1:22) {
     ldinfo.b <- ldinfo[ldinfo$chrom == b, , drop = F]
-    if (nrow(ldinfo.b) == 0){
-      stop("no region on chromosome ", b, "at least one is required.")
+    ldinfo.b <- ldinfo.b[order(ldinfo.b$start), ]
+    
+    if (nrow(ldinfo.b) == 0) {
+      loginfo(paste0("no region on chromosome ", b))
+      ldinfo.b <- cbind(ldinfo.b, data.frame(region_name=as.character()))
+    } else {
+      ldinfo.b$region_name <- 1:nrow(ldinfo.b)
     }
-    ldinfo.b <- ldinfo.b[order(ldinfo.b$start),]
-    ldinfo.b$region_name <- 1:nrow(ldinfo.b)
-    ld_Rf <- file.path(outputdir, paste0(outname, "_ld_R_chr", b, ".txt"))
-    write.table(ldinfo.b, file= ld_Rf,
-                row.names=F, col.names=T, sep="\t", quote = F)
+    
+    ld_Rf <- file.path(outputdir, paste0(outname, "_ld_R_chr", 
+                                         b, ".txt"))
+    write.table(ldinfo.b, file = ld_Rf, row.names = F, col.names = T, 
+                sep = "\t", quote = F)
     ld_Rfs[b] <- ld_Rf
   }
   ld_Rfs
@@ -228,7 +233,11 @@ write_ld_Rf <- function(ld_R_dir, outname = outname , outputdir = getwd()){
 #' @return a data frame with columns: "chrom", "id", "pos", "alt", "ref"
 read_ld_Rvar <- function(ld_Rf){
   Rinfo <- data.table::fread(ld_Rf, header = T)
-  ld_Rvar <- do.call(rbind, lapply(Rinfo$RDS_file, read_ld_Rvar_RDS))
+  if (nrow(Rinfo)>0){
+    ld_Rvar <- do.call(rbind, lapply(Rinfo$RDS_file, read_ld_Rvar_RDS))
+  } else {
+    ld_Rvar <- data.table::data.table(chrom=as.integer(), id=as.character(), pos=as.integer(), alt=as.character(), ref=as.character())
+  }
   ld_Rvar
 }
 

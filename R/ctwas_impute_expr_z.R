@@ -40,7 +40,7 @@ impute_expr_z <- function (z_snp, weight, ld_pgenfs = NULL, ld_R_dir = NULL, met
       ld_snpinfo <- read_ld_Rvar(ld_Rf)
     }
     chrom <- unique(ld_snpinfo$chrom)
-    if (length(chrom) != 1) {
+    if (length(chrom) > 1) {
       stop("Input LD reference not split by chromosome")
     }
     ld_snplist <- c(ld_snplist, ld_snpinfo$id) #store names of snps in ld reference

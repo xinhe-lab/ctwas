@@ -277,7 +277,7 @@ ctwas_rss <- function(
 
     nreg <- sum(unlist(lapply(regionlist, length)))
 
-    loginfo("Number of regions that contains strong gene signals: %s", nreg)
+    loginfo("Number of regions that contain strong gene signals: %s", nreg)
     if (nreg == 0){
       file.rename(paste0(file.path(outputdir, outname), ".temp.susieIrss.txt"),
                   paste0(file.path(outputdir, outname), ".susieIrss.txt"))
