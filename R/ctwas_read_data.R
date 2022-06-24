@@ -236,7 +236,7 @@ read_ld_Rvar <- function(ld_Rf){
   if (nrow(Rinfo)>0){
     ld_Rvar <- do.call(rbind, lapply(Rinfo$RDS_file, read_ld_Rvar_RDS))
   } else {
-    ld_Rvar <- data.table::data.table(chrom=as.integer(), id=as.character(), pos=as.integer(), alt=as.character(), ref=as.character())
+    ld_Rvar <- data.table::data.table(chrom=as.integer(), id=as.character(), pos=as.integer(), alt=as.character(), ref=as.character(), variance=as.numeric())
   }
   ld_Rvar
 }
@@ -338,6 +338,12 @@ read_weight_predictdb <- function (weight, chrom, ld_snpinfo, z_snp = NULL, harm
       if (recover_strand_ambig){
         #subset R_wgt_all to current weight
         R_wgt <- R_wgt_all[R_wgt_all$GENE == gname,]
+        
+        #convert covariance to correlation
+        R_wgt_stdev <- R_wgt[R_wgt$RSID1==R_wgt$RSID2,]
+        R_wgt_stdev <- setNames(sqrt(R_wgt_stdev$VALUE), R_wgt_stdev$RSID1)
+        R_wgt$VALUE <- R_wgt$VALUE/(R_wgt_stdev[R_wgt$RSID1]*R_wgt_stdev[R_wgt$RSID2])
+        
         R_wgt <- R_wgt[R_wgt$RSID1!=R_wgt$RSID2,] #discard variant correlations with itself (NOTE: not equal to one, not scaled?)
       } else {
         R_wgt <- NULL
@@ -362,6 +368,11 @@ read_weight_predictdb <- function (weight, chrom, ld_snpinfo, z_snp = NULL, harm
       next
     wgt.idx <- match(snpnames, rownames(wgt.matrix))
     wgt <- wgt.matrix[wgt.idx, g.method, drop = F]
+    
+    #scale weights by standard deviation of variant in LD reference
+    ld_snpinfo.idx <- match(snpnames, ld_snpinfo$id)
+    wgt <- wgt*sqrt(ld_snpinfo$variance[ld_snpinfo.idx])
+    
     p0 <- min(snps[snps[, "id"] %in% snpnames, "pos"])
     p1 <- max(snps[snps[, "id"] %in% snpnames, "pos"])
     exprlist[[gname]] <- list(chrom = chrom, p0 = p0, p1 = p1, wgt = wgt)
