@@ -344,7 +344,11 @@ read_weight_predictdb <- function (weight, chrom, ld_snpinfo, z_snp = NULL, harm
         R_wgt_stdev <- setNames(sqrt(R_wgt_stdev$VALUE), R_wgt_stdev$RSID1)
         R_wgt$VALUE <- R_wgt$VALUE/(R_wgt_stdev[R_wgt$RSID1]*R_wgt_stdev[R_wgt$RSID2])
         
-        R_wgt <- R_wgt[R_wgt$RSID1!=R_wgt$RSID2,] #discard variant correlations with itself (NOTE: not equal to one, not scaled?)
+        #discard variances
+        R_wgt <- R_wgt[R_wgt$RSID1!=R_wgt$RSID2,]
+        
+        #fix edge case where variance=0; treat correlations with these variants as uninformative (=0) for harmonization
+        R_wgt$VALUE[is.nan(R_wgt$VALUE)] <- 0
       } else {
         R_wgt <- NULL
       }

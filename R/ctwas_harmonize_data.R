@@ -163,7 +163,7 @@ harmonize_wgt_ld <- function (wgt.matrix, snps, ld_snpinfo, recover_strand_ambig
           
           if (sumcor_R_snp==0 | sumcor_R_wgt==0){
             #collect ambiguous variants that do not have an unambiguous variant in the same LD region: all off-diagonal correlations = 0
-            #also collect amiguous variants independent of unambiguous variants in weights (trivial, correlations must = exactly zero)
+            #also collect ambiguous variants independent of unambiguous variants in weights (trivial, correlations must = exactly zero)
             unrecoverable.idx <- c(unrecoverable.idx, snpnames.idx)
           } else {
             #flip weight if sign of correlations is not the same
