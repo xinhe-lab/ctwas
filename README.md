@@ -7,7 +7,7 @@ Package for the causal TWAS project.
 Install `ctwas`:
 
 ```
-remotes::install_github("simingz/ctwas",ref = "main")
+remotes::install_github("xinhe-lab/ctwas",ref = "main")
 ```
 
 # Acknowledgement
