@@ -2,6 +2,8 @@
 
 Package for the causal TWAS project.
 
+Read the [manuscript](https://doi.org/10.1101/2022.09.27.509700) on bioRxiv.
+
 # Install
 
 Install `ctwas`:
