@@ -130,7 +130,14 @@ ctwas_rss <- function(
 
   loginfo("LD region file: %s", regionfile)
 
-  zdf <- rbind(z_snp[, c("id", "z")], z_gene[, c("id", "z")])
+  z_snp$type <- "SNP"
+  
+  if (is.null(z_gene$type)){
+    z_gene$type <- "gene"
+  }
+  
+  zdf <- rbind(z_snp[, c("id", "z", "type")], z_gene[, c("id", "z", "type")])
+  
   rm(z_snp, ld_snpinfo)
 
   if (thin <=0 | thin > 1){
@@ -150,8 +157,8 @@ ctwas_rss <- function(
   saveRDS(regionlist, file=paste0(outputdir, "/", outname, ".regionlist.RDS"))
   
   temp_regs <- lapply(1:22, function(x) cbind(x,
-                   unlist(lapply(regionlist[[x]], "[[", "start")),
-                     unlist(lapply(regionlist[[x]], "[[", "stop"))))
+                                              unlist(lapply(regionlist[[x]], "[[", "start")),
+                                              unlist(lapply(regionlist[[x]], "[[", "stop"))))
                  
   regs <- do.call(rbind, lapply(temp_regs, function(x) if (ncol(x) == 3){x}))
 
@@ -163,7 +170,7 @@ ctwas_rss <- function(
     loginfo("Run susie iteratively, getting rough estimate ...")
 
     if (!is.null(group_prior)){
-      group_prior[2] <- group_prior[2]/thin
+      group_prior["SNP"] <- group_prior["SNP"]/thin
     }
 
     pars <- susieI_rss(zdf = zdf,
@@ -192,7 +199,8 @@ ctwas_rss <- function(
     # filter blocks
     regionlist2 <- filter_regions(regionlist,
                                   group_prior,
-                                  prob_single= prob_single)
+                                  prob_single,
+                                  zdf)
 
     loginfo("Blocks are filtered: %s blocks left",
             sum(unlist(lapply(regionlist2, length))))
@@ -243,7 +251,7 @@ ctwas_rss <- function(
                      outname = paste0(outname, ".temp"))
 
 
-  group_prior[2] <- group_prior[2] * thin # convert snp pi1
+  group_prior["SNP"] <- group_prior["SNP"] * thin # convert snp pi1
 
   if (thin == 1) {
     file.rename(paste0(file.path(outputdir, outname), ".temp.susieIrss.txt"),
@@ -267,7 +275,7 @@ ctwas_rss <- function(
     res.keep <- NULL
     for (b in 1: length(regionlist)){
       for (rn in names(regionlist[[b]])){
-       gene_PIP <- max(res[res$type == "gene" & res$region_tag1 == b & res$region_tag2 == rn, ]$susie_pip, 0)
+       gene_PIP <- max(res$susie_pip[res$type != "SNP" & res$region_tag1 == b & res$region_tag2 == rn], 0)
        if (gene_PIP < rerun_gene_PIP) {
          regionlist[[b]][[rn]] <- NULL
          res.keep <- rbind(res.keep, res[res$region_tag1 ==b & res$region_tag2 == rn, ])

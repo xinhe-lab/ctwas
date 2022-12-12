@@ -6,17 +6,18 @@ anno_susie <- function(susieres,
                        gidx,
                        sidx,
                        region_tag1,
-                       region_tag2) {
+                       region_tag2,
+                       type) {
 
   anno.gene <- NULL
   if (length(geneinfo) !=0){
     anno.gene <- cbind(geneinfo[gidx,  c("chrom", "id", "p0")],
-                       rep("gene", length(gidx)))
+                       type)
     colnames(anno.gene) <-  c("chrom", "id", "pos", "type")
   }
 
   anno.SNP <- cbind(snpinfo[sidx, c("chrom", "id", "pos")],
-                    rep("SNP", length(sidx)))
+                    "SNP")
   colnames(anno.SNP) <-  c("chrom", "id", "pos", "type")
 
   anno <- rbind(anno.gene, anno.SNP)
@@ -32,7 +33,7 @@ anno_susie <- function(susieres,
       X.idx <- susieres$sets$cs[[paste0("L", cs_i)]]
       X.idx <- X.idx[X.idx != susieres$null_index] # susie_rss' bug
       anno$cs_index[X.idx] <- cs_i
-      #TODO: note this ignore the fact that some variant can belong to multiple CS
+      #TODO: note this ignores the fact that some variants can belong to multiple CS
     }
   }
   outdf.rn <- cbind(anno, susieres$pip)

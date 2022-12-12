@@ -52,10 +52,10 @@ impute_expr_z <- function (z_snp, weight, ld_pgenfs = NULL, ld_R_dir = NULL, met
                               ld_Rinfo = ld_Rinfo)
     }
     loginfo("Reading weights for chromosome %s", b)
-    if (dir.exists(weight)) {
+    if (isTRUE(dir.exists(weight))) {
       weightall <- read_weight_fusion(weight, b, ld_snpinfo, z_snp, method = method, 
                                       harmonize_wgt=harmonize_wgt)
-    } else if (file_ext(weight) == "db") {
+    } else if (all(file_ext(weight) == "db")) {
       weightall <- read_weight_predictdb(weight, b, ld_snpinfo, z_snp, 
                                          harmonize_wgt=harmonize_wgt, ld_Rinfo=ld_Rinfo,
                                          recover_strand_ambig=recover_strand_ambig_wgt)
@@ -136,11 +136,17 @@ impute_expr_z <- function (z_snp, weight, ld_pgenfs = NULL, ld_R_dir = NULL, met
     p1 <- unlist(lapply(exprlist, "[[", "p1"))
     wgtlist <- lapply(exprlist, "[[", "wgt")
     exprvarf <- paste0(outname, "_chr", b, ".exprvar")
+    
+    gene_name <- lapply(exprlist, "[[", "gname")
+    weight_name <- lapply(exprlist, "[[", "weight_name")
+    
     if (length(exprlist) == 0) {
       geneinfo <- data.table::data.table(NULL)
     } else {
       geneinfo <- data.frame(chrom = chrom, id = gnames, 
                              p0 = p0, p1 = p1)
+      geneinfo$gene_name <- gene_name
+      geneinfo$weight_name <- weight_name
     }
     data.table::fwrite(geneinfo, file = exprvarf, sep = "\t", 
                        quote = F)

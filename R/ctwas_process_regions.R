@@ -235,7 +235,7 @@ index_regions <- function(regionfile,
     for (b in 1: length(ld_Rfs)){
       loginfo("Adding R matrix info for chrom %s", b)
       ld_Rf <- ld_Rfs[b]
-      ld_Rinfo <- data.table::fread(ld_Rf, header = T)
+      ld_Rinfo <- as.data.frame(data.table::fread(ld_Rf, header = T))
       for (rn in names(regionlist[[b]])){
         ifreg <- ifelse(regionlist[[b]][[rn]][["minpos"]] < ld_Rinfo[, "stop"]
                         & regionlist[[b]][[rn]][["maxpos"]] >= ld_Rinfo[, "start"], T, F)
@@ -299,8 +299,29 @@ index_regions <- function(regionfile,
 }
 
 
-#' filter regions based on probality of at most 1 causal effect
-filter_regions <- function(regionlist, group_prior, prob_single = 0.8){
+#' filter regions based on probability of at most 1 causal effect
+filter_regions <- function(regionlist, group_prior, prob_single = 0.8, zdf){
+  regionlist2 <- regionlist
+  for (b in 1: length(regionlist)){
+    
+    for (rn in names(regionlist[[b]])) {
+      
+      gid <- regionlist[[b]][[rn]][["gid"]]
+      sid <- regionlist[[b]][[rn]][["sid"]]
+      gs_type <- zdf$type[match(c(gid,sid), zdf$id)]
+      
+      pi_prior <- unname(group_prior[gs_type])
+      P1 <- prod((1-pi_prior)) * (1 + sum(pi_prior/(1-pi_prior)))
+      
+      if (P1 < prob_single){
+        regionlist2[[b]][[rn]] <- NULL
+      }
+    }
+  }
+  regionlist2
+}
+
+filter_regions_stable <- function(regionlist, group_prior, prob_single = 0.8){
   prior.gene <- group_prior[1]
   prior.SNP <- group_prior[2]
 
