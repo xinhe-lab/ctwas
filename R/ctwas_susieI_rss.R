@@ -13,6 +13,7 @@ susieI_rss <- function(zdf,
                        z_ld_weight = 0,
                        group_prior = NULL,
                        group_prior_var = NULL,
+                       group_prior_var_structure = c("independent","shared"),
                        estimate_group_prior = T,
                        estimate_group_prior_var = T,
                        use_null_weight = T,
@@ -198,7 +199,19 @@ susieI_rss <- function(zdf,
       # X2 = 5*X
       # res2 = susie(X2,y,L=10)
       # res$mu2 is identical to res2$mu2 but coefficients are on diff scale.
-      V_prior <- sapply(names(V_prior), function(x){outdf_temp <- outdf[outdf$type==x,]; sum(outdf_temp$susie_pip*outdf_temp$mu2)/sum(outdf_temp$susie_pip)})
+      
+      if (group_prior_var_structure=="independent"){
+        V_prior <- sapply(names(V_prior), function(x){outdf_temp <- outdf[outdf$type==x,]; sum(outdf_temp$susie_pip*outdf_temp$mu2)/sum(outdf_temp$susie_pip)})
+      } else if (group_prior_var_structure=="shared"){
+        outdf_temp <- outdf[outdf$type=="SNP",]
+        V_prior["SNP"] <- sum(outdf_temp$susie_pip*outdf_temp$mu2)/sum(outdf_temp$susie_pip)
+        
+        outdf_temp <- outdf[outdf$type!="SNP",]
+        V_prior[names(V_prior)!="SNP"] <- sum(outdf_temp$susie_pip*outdf_temp$mu2)/sum(outdf_temp$susie_pip)
+        
+        rm(outdf_temp)
+      }
+      
       group_prior_var_rec[names(V_prior), iter] <- V_prior
     }
     

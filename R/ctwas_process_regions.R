@@ -303,15 +303,18 @@ index_regions <- function(regionfile,
 filter_regions <- function(regionlist, group_prior, prob_single = 0.8, zdf){
   regionlist2 <- regionlist
   for (b in 1: length(regionlist)){
-    
     for (rn in names(regionlist[[b]])) {
-      
       gid <- regionlist[[b]][[rn]][["gid"]]
       sid <- regionlist[[b]][[rn]][["sid"]]
       gs_type <- zdf$type[match(c(gid,sid), zdf$id)]
       
-      pi_prior <- unname(group_prior[gs_type])
-      P1 <- prod((1-pi_prior)) * (1 + sum(pi_prior/(1-pi_prior)))
+      #pi_prior <- unname(group_prior[gs_type])
+      #P1 <- prod(1-pi_prior) * (1 + sum(pi_prior/(1-pi_prior)))
+      
+      group_size <- table(gs_type)[names(group_prior)]
+      group_size[is.na(group_size)] <- 0
+      
+      P1 <- prod((1-group_prior)^group_size) * (1 + sum(group_size*(group_prior/(1-group_prior))))
       
       if (P1 < prob_single){
         regionlist2[[b]][[rn]] <- NULL

@@ -300,7 +300,8 @@ read_weight_fusion <- function (weight, chrom, ld_snpinfo, z_snp = NULL, method 
 }
 
 read_weight_predictdb <- function (weight, chrom, ld_snpinfo, z_snp = NULL, harmonize_wgt = T, 
-                                   recover_strand_ambig=T, ld_pgenfs=NULL, ld_Rinfo=NULL){
+                                   recover_strand_ambig=T, ld_pgenfs=NULL, ld_Rinfo=NULL,
+                                   scale_by_ld_variance=T){
   exprlist <- list()
   qclist <- list()
   weights <- weight
@@ -369,7 +370,7 @@ read_weight_predictdb <- function (weight, chrom, ld_snpinfo, z_snp = NULL, harm
         }
         w <- harmonize_wgt_ld(wgt.matrix, snps, ld_snpinfo, 
                               recover_strand_ambig=recover_strand_ambig, 
-                              ld_Rinfo=ld_Rinfo, R_wgt=R_wgt, wgt=wgt, )
+                              ld_Rinfo=ld_Rinfo, R_wgt=R_wgt, wgt=wgt)
         wgt.matrix <- w[["wgt"]]
         snps <- w[["snps"]]
       }
@@ -389,8 +390,10 @@ read_weight_predictdb <- function (weight, chrom, ld_snpinfo, z_snp = NULL, harm
       wgt <- wgt.matrix[wgt.idx, g.method, drop = F]
       
       #scale weights by standard deviation of variant in LD reference
-      ld_snpinfo.idx <- match(snpnames, ld_snpinfo$id)
-      wgt <- wgt*sqrt(ld_snpinfo$variance[ld_snpinfo.idx])
+      if (scale_by_ld_variance){
+        ld_snpinfo.idx <- match(snpnames, ld_snpinfo$id)
+        wgt <- wgt*sqrt(ld_snpinfo$variance[ld_snpinfo.idx])
+      }
       
       p0 <- min(snps[snps[, "id"] %in% snpnames, "pos"])
       p1 <- max(snps[snps[, "id"] %in% snpnames, "pos"])

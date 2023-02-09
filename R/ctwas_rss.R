@@ -80,6 +80,7 @@ ctwas_rss <- function(
   L= 5,
   group_prior = NULL,
   group_prior_var = NULL,
+  group_prior_var_structure = c("independent","shared"),
   estimate_group_prior = T,
   estimate_group_prior_var = T,
   use_null_weight = T,
@@ -183,6 +184,7 @@ ctwas_rss <- function(
                        z_ld_weight = 0,
                        group_prior = group_prior,
                        group_prior_var = group_prior_var,
+                       group_prior_var_structure = group_prior_var_structure,
                        estimate_group_prior = estimate_group_prior,
                        estimate_group_prior_var = estimate_group_prior_var,
                        use_null_weight = use_null_weight,
@@ -191,7 +193,6 @@ ctwas_rss <- function(
                        outputdir = outputdir,
                        outname = paste0(outname, ".s1")
                    )
-
 
     group_prior <- pars[["group_prior"]]
     group_prior_var <- pars[["group_prior_var"]]
@@ -217,6 +218,7 @@ ctwas_rss <- function(
                        z_ld_weight = 0,
                        group_prior = group_prior,
                        group_prior_var = group_prior_var,
+                       group_prior_var_structure = group_prior_var_structure,
                        estimate_group_prior = estimate_group_prior,
                        estimate_group_prior_var = estimate_group_prior_var,
                        use_null_weight = use_null_weight,
@@ -224,7 +226,6 @@ ctwas_rss <- function(
                        ncore = ncore,
                        outputdir = outputdir,
                        outname = paste0(outname, ".s2"))
-
 
     group_prior <- pars[["group_prior"]]
     group_prior_var <- pars[["group_prior_var"]]
@@ -244,6 +245,7 @@ ctwas_rss <- function(
                      group_prior_var = group_prior_var,
                      estimate_group_prior = estimate_group_prior,
                      estimate_group_prior_var = estimate_group_prior_var,
+                     group_prior_var_structure = group_prior_var_structure,
                      use_null_weight = use_null_weight,
                      coverage = coverage,
                      ncore = ncore,
@@ -304,6 +306,7 @@ ctwas_rss <- function(
                          z_ld_weight = 0,
                          group_prior = group_prior,
                          group_prior_var = group_prior_var,
+                         group_prior_var_structure = group_prior_var_structure,
                          estimate_group_prior = estimate_group_prior,
                          estimate_group_prior_var = estimate_group_prior_var,
                          use_null_weight = use_null_weight,
