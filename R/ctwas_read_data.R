@@ -263,6 +263,8 @@ read_weight_fusion <- function (weight, chrom, ld_snpinfo, z_snp = NULL, method 
         w <- harmonize_wgt_ld(wgt.matrix, snps, ld_snpinfo, recover_strand_ambig=F)
         wgt.matrix <- w[["wgt"]]
         snps <- w[["snps"]]
+      } else {
+        colnames(snps) <- c("chrom", "id", "cm", "pos", "alt", "ref")
       }
       g.method = method
       if (g.method == "best") {

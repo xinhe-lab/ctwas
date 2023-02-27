@@ -53,6 +53,9 @@ impute_expr_z <- function (z_snp, weight, ld_pgenfs = NULL, ld_R_dir = NULL, met
     }
     loginfo("Reading weights for chromosome %s", b)
     if (isTRUE(dir.exists(weight))) {
+      if (recover_strand_ambig_wgt){
+        loginfo("Ignoring recover_strand_ambig_wgt=T; not implemented for FUSION format")
+      }
       weightall <- read_weight_fusion(weight, b, ld_snpinfo, z_snp, method = method, 
                                       harmonize_wgt=harmonize_wgt)
     } else if (all(file_ext(weight) == "db")) {
