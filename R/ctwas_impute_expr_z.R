@@ -99,10 +99,8 @@ impute_expr_z <- function (z_snp, weight, ld_pgenfs = NULL, ld_R_dir = NULL, met
         for (gname in names(exprlist)) {
           p0 <- exprlist[[gname]][["p0"]]
           p1 <- exprlist[[gname]][["p1"]]
-          ifreg <- ifelse(p1 >= ld_Rinfo[, "start"] & 
-                            p0 < ld_Rinfo[, "stop"], T, F)
-          exprlist[[gname]][["reg"]] <- paste(sort(ld_Rinfo[ifreg, 
-                                                            "region_name"]), collapse = ";")
+          ifreg <- ifelse(p1 >= ld_Rinfo[, "start"] & p0 < ld_Rinfo[, "stop"], T, F)
+          exprlist[[gname]][["reg"]] <- paste(sort(ld_Rinfo$region_name[ifreg]), collapse = ";")
         }
         regs <- data.frame(gid = names(exprlist), reg = unlist(lapply(exprlist, 
                                                                       "[[", "reg")), stringsAsFactors = F)
@@ -110,10 +108,9 @@ impute_expr_z <- function (z_snp, weight, ld_pgenfs = NULL, ld_R_dir = NULL, met
         for (batch in batches) {
           gnames <- regs[regs$reg == batch, "gid"]
           regnames <- strsplit(batch, ";")[[1]]
-          regRDS <- ld_Rinfo[match(regnames, ld_Rinfo$region_name), 
-                             "RDS_file"]
+          regRDS <- ld_Rinfo$RDS_file[match(regnames, ld_Rinfo$region_name)]
           R_snp <- lapply(regRDS, readRDS)
-          R_snp <- as.matrix(Matrix::bdiag(R_snp))
+          R_snp <- Matrix::bdiag(R_snp)
           R_snp_anno <- do.call(rbind, lapply(regRDS, 
                                               read_ld_Rvar_RDS))
           for (i in 1:length(gnames)) {
@@ -123,9 +120,8 @@ impute_expr_z <- function (z_snp, weight, ld_pgenfs = NULL, ld_R_dir = NULL, met
             ld.idx <- match(snpnames, R_snp_anno$id)
             zdf.idx <- match(snpnames, z_snp$id)
             R.s <- R_snp[ld.idx, ld.idx]
-            z.s <- as.matrix(z_snp[zdf.idx, "z"])
-            z.g <- crossprod(wgt, z.s)/sqrt(crossprod(wgt, 
-                                                      R.s) %*% wgt)
+            z.s <- as.matrix(z_snp$z[zdf.idx])
+            z.g <- as.matrix(crossprod(wgt, z.s)/sqrt(t(wgt)%*%R.s%*% wgt))
             exprlist[[gname]][["z.g"]] <- z.g
           }
         }

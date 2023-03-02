@@ -242,6 +242,8 @@ read_ld_Rvar <- function(ld_Rf){
 }
 
 read_weight_fusion <- function (weight, chrom, ld_snpinfo, z_snp = NULL, method = "lasso", harmonize_wgt = T){
+  weight_name <- tools::file_path_sans_ext(basename(weight))
+  
   exprlist <- list()
   qclist <- list()
   wgtdir <- dirname(weight)
@@ -268,7 +270,7 @@ read_weight_fusion <- function (weight, chrom, ld_snpinfo, z_snp = NULL, method 
       }
       g.method = method
       if (g.method == "best") {
-        g.method = names(which.max(cv.performance["rsq", ]))
+        g.method = names(which.max(cv.performance["rsq",]))
       }
       if (!(g.method %in% names(cv.performance[1, ]))) 
         next
@@ -288,14 +290,12 @@ read_weight_fusion <- function (weight, chrom, ld_snpinfo, z_snp = NULL, method 
         next
       wgt.idx <- match(snpnames, rownames(wgt.matrix))
       wgt <- wgt.matrix[wgt.idx, g.method, drop = F]
-      p0 <- min(snps[snps[, "id"] %in% snpnames, "pos"])
-      p1 <- max(snps[snps[, "id"] %in% snpnames, "pos"])
-      exprlist[[gname]] <- list(chrom = chrom, p0 = p0, 
-                                p1 = p1, wgt = wgt)
+      p0 <- min(snps$pos[snps$id %in% snpnames])
+      p1 <- max(snps$pos[snps$id %in% snpnames])
+      exprlist[[gname]] <- list(chrom = chrom, p0 = p0, p1 = p1, wgt = wgt, gname=gname, weight_name=weight_name)
       nwgt <- nrow(wgt.matrix)
       nmiss <- nrow(wgt.matrix) - length(snpnames)
-      qclist[[gname]] <- list(n = nwgt, nmiss = nmiss, 
-                              missrate = nwgt/nmiss)
+      qclist[[gname]] <- list(n = nwgt, nmiss = nmiss, missrate = nwgt/nmiss)
     }
   }
   return(list(exprlist = exprlist, qclist = qclist))
