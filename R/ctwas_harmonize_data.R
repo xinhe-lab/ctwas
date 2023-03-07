@@ -195,3 +195,46 @@ harmonize_wgt_ld <- function (wgt.matrix, snps, ld_snpinfo, recover_strand_ambig
   return(list(wgt = wgt.matrix, snps = snps))
 }
 
+preharmonize_z_ld <- function (z_snp, ld_R_dir, outputdir = getwd(), outname = NULL, logfile = NULL,
+                           harmonize_z = T, strand_ambig_action_z = c("drop", "none", "recover"),
+                           drop_multiallelic=T){
+  dir.create(outputdir, showWarnings = F, recursive=T)
+  
+  if (!is.null(logfile)) {
+    addHandler(writeToFile, file = logfile, level = "DEBUG")
+  }
+  
+  ld_Rfs <- write_ld_Rf(ld_R_dir, outname = outname, outputdir = outputdir)
+  
+  ld_snplist <- c()
+  
+  if (drop_multiallelic){
+    z_snp <- z_snp[!(z_snp$id %in% z_snp$id[duplicated(z_snp$id)]),] #drop multiallelic variants (id not unique)
+  }
+  
+  for (b in 1:22){
+    loginfo("Harmonizing summary statistics for chromosome %s", b)
+    
+    ld_Rf <- ld_Rfs[b]
+    ld_Rinfo <- data.table::fread(ld_Rf, header = T)
+    ld_snpinfo <- read_ld_Rvar(ld_Rf)
+    
+    chrom <- unique(ld_snpinfo$chrom)
+    if (length(chrom) > 1) {
+      stop("Input LD reference not split by chromosome")
+    }
+    ld_snplist <- c(ld_snplist, ld_snpinfo$id) #store names of snps in ld reference
+    
+    if (isTRUE(harmonize_z)) {
+      loginfo("Flipping z scores to match LD reference")
+      z_snp <- harmonize_z_ld(z_snp, ld_snpinfo,
+                              strand_ambig_action = strand_ambig_action_z, 
+                              ld_pgenfs = NULL, 
+                              ld_Rinfo = ld_Rinfo)
+    }
+  }
+  
+  z_snp <- z_snp[z_snp$id %in% ld_snplist,]
+
+  return(list(z_snp = z_snp))
+}

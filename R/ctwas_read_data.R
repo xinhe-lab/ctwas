@@ -303,12 +303,15 @@ read_weight_fusion <- function (weight, chrom, ld_snpinfo, z_snp = NULL, method 
 
 read_weight_predictdb <- function (weight, chrom, ld_snpinfo, z_snp = NULL, harmonize_wgt = T, 
                                    recover_strand_ambig=T, ld_pgenfs=NULL, ld_Rinfo=NULL,
-                                   scale_by_ld_variance=T){
+                                   scale_by_ld_variance=T, ncore=1){
   exprlist <- list()
   qclist <- list()
   weights <- weight
   
   sqlite <- RSQLite::dbDriver("SQLite")
+  
+  cl <- parallel::makeCluster(ncore, outfile = "")
+  doParallel::registerDoParallel(cl)
   
   for (weight in weights){
     weight_name <- tools::file_path_sans_ext(basename(weight))
@@ -316,6 +319,8 @@ read_weight_predictdb <- function (weight, chrom, ld_snpinfo, z_snp = NULL, harm
     db = RSQLite::dbConnect(sqlite, weight)
     query <- function(...) RSQLite::dbGetQuery(db, ...)
     gnames <- unique(query("select gene from weights")[, 1])
+    RSQLite::dbDisconnect(db)
+    
     loginfo("Current weight: %s", weight)
     loginfo("Number of genes with weights provided: %s", length(gnames))
     loginfo("Collecting gene weight information ...")
@@ -326,86 +331,115 @@ read_weight_predictdb <- function (weight, chrom, ld_snpinfo, z_snp = NULL, harm
         R_wgt_all = read.table(gzfile(paste0(file_path_sans_ext(weight), ".txt.gz")), header=T) #load covariances for variants in each gene (accompanies .db file)
       }
     }
+
+    corelist <- lapply(1:ncore, function(core){gnames_core <- gnames[0:ceiling(length(gnames)/ncore-1)*ncore+core]; gnames_core[!is.na(gnames_core)]})
+    names(corelist) <- 1:ncore
     
-    for (gname in gnames) {
+    outlist <- foreach(core = 1:ncore, .combine = "c", .packages = "ctwas") %dopar% {
+      db = RSQLite::dbConnect(sqlite, weight)
       
-      if (length(weights)>1){
-        gname_weight <- paste0(gname, "|", weight_name)
-      } else {
-        gname_weight <- gname
-      }
+      outlist_core <- list()
       
-      wgt <- query("select * from weights where gene = ?", 
-                   params = list(gname))
-      wgt.matrix <- as.matrix(wgt[, "weight", drop = F])
-      rownames(wgt.matrix) <- wgt$rsid
-      chrpos <- do.call(rbind, strsplit(wgt$varID, "_"))
-      snps <- data.frame(gsub("chr", "", chrpos[, 1]), wgt$rsid, 
-                         "0", chrpos[, 2], wgt$eff_allele, wgt$ref_allele, 
-                         stringsAsFactors = F)
-      colnames(snps) <- c("chrom", "id", "cm", "pos", "alt", 
-                          "ref")
-      snps$chrom <- as.integer(snps$chrom)
-      snps$pos <- as.integer(snps$pos)
+      gnames_core <- corelist[[core]]
       
-      if (!any(snps$chrom==chrom)){
-        next
-      }
-      
-      if (isTRUE(harmonize_wgt)) {
-        if (recover_strand_ambig){
-          #subset R_wgt_all to current weight
-          R_wgt <- R_wgt_all[R_wgt_all$GENE == gname,]
-          
-          #convert covariance to correlation
-          R_wgt_stdev <- R_wgt[R_wgt$RSID1==R_wgt$RSID2,]
-          R_wgt_stdev <- setNames(sqrt(R_wgt_stdev$VALUE), R_wgt_stdev$RSID1)
-          R_wgt$VALUE <- R_wgt$VALUE/(R_wgt_stdev[R_wgt$RSID1]*R_wgt_stdev[R_wgt$RSID2])
-          
-          #discard variances
-          R_wgt <- R_wgt[R_wgt$RSID1!=R_wgt$RSID2,]
-          
-          #fix edge case where variance=0; treat correlations with these variants as uninformative (=0) for harmonization
-          R_wgt$VALUE[is.nan(R_wgt$VALUE)] <- 0
+      for (gname in gnames_core) {
+        
+        if (length(weights)>1){
+          gname_weight <- paste0(gname, "|", weight_name)
         } else {
-          R_wgt <- NULL
+          gname_weight <- gname
         }
-        w <- harmonize_wgt_ld(wgt.matrix, snps, ld_snpinfo, 
-                              recover_strand_ambig=recover_strand_ambig, 
-                              ld_Rinfo=ld_Rinfo, R_wgt=R_wgt, wgt=wgt)
-        wgt.matrix <- w[["wgt"]]
-        snps <- w[["snps"]]
+        
+        wgt <- query("select * from weights where gene = ?", params = list(gname))
+        wgt.matrix <- as.matrix(wgt[, "weight", drop = F])
+        
+        rownames(wgt.matrix) <- wgt$rsid
+        chrpos <- do.call(rbind, strsplit(wgt$varID, "_"))
+        
+        
+        snps <- data.frame(gsub("chr", "", chrpos[, 1]), wgt$rsid,
+                           "0", chrpos[, 2], wgt$eff_allele, wgt$ref_allele,
+                           stringsAsFactors = F)
+        colnames(snps) <- c("chrom", "id", "cm", "pos", "alt", "ref")
+        snps$chrom <- as.integer(snps$chrom)
+        snps$pos <- as.integer(snps$pos)
+        
+        if (!any(snps$chrom==chrom)){
+          next
+        }
+        
+        if (isTRUE(harmonize_wgt)) {
+          if (recover_strand_ambig){
+            #subset R_wgt_all to current weight
+            R_wgt <- R_wgt_all[R_wgt_all$GENE == gname,]
+            
+            #convert covariance to correlation
+            R_wgt_stdev <- R_wgt[R_wgt$RSID1==R_wgt$RSID2,]
+            R_wgt_stdev <- setNames(sqrt(R_wgt_stdev$VALUE), R_wgt_stdev$RSID1)
+            R_wgt$VALUE <- R_wgt$VALUE/(R_wgt_stdev[R_wgt$RSID1]*R_wgt_stdev[R_wgt$RSID2])
+            
+            #discard variances
+            R_wgt <- R_wgt[R_wgt$RSID1!=R_wgt$RSID2,]
+            
+            #fix edge case where variance=0; treat correlations with these variants as uninformative (=0) for harmonization
+            R_wgt$VALUE[is.nan(R_wgt$VALUE)] <- 0
+          } else {
+            R_wgt <- NULL
+          }
+          w <- harmonize_wgt_ld(wgt.matrix, snps, ld_snpinfo,
+                                recover_strand_ambig=recover_strand_ambig,
+                                ld_Rinfo=ld_Rinfo, R_wgt=R_wgt, wgt=wgt)
+          wgt.matrix <- w[["wgt"]]
+          snps <- w[["snps"]]
+        }
+        g.method = "weight"
+        wgt.matrix <- wgt.matrix[abs(wgt.matrix[, g.method]) > 0, , drop = F]
+        wgt.matrix <- wgt.matrix[complete.cases(wgt.matrix),, drop = F]
+        if (nrow(wgt.matrix) == 0)
+          next
+        if (is.null(z_snp)) {
+          snpnames <- intersect(rownames(wgt.matrix), ld_snpinfo$id)
+        } else {
+          snpnames <- Reduce(intersect, list(rownames(wgt.matrix), ld_snpinfo$id, z_snp$id))
+        }
+        if (length(snpnames) == 0)
+          next
+        wgt.idx <- match(snpnames, rownames(wgt.matrix))
+        wgt <- wgt.matrix[wgt.idx, g.method, drop = F]
+        
+        #scale weights by standard deviation of variant in LD reference
+        if (scale_by_ld_variance){
+          ld_snpinfo.idx <- match(snpnames, ld_snpinfo$id)
+          wgt <- wgt*sqrt(ld_snpinfo$variance[ld_snpinfo.idx])
+        }
+        
+        p0 <- min(snps[snps[, "id"] %in% snpnames, "pos"])
+        p1 <- max(snps[snps[, "id"] %in% snpnames, "pos"])
+        nwgt <- nrow(wgt.matrix)
+        nmiss <- nrow(wgt.matrix) - length(snpnames)
+        outlist_core[[gname_weight]] <- list(chrom = chrom, p0 = p0, p1 = p1, wgt = wgt, gname=gname, weight_name=weight_name,
+                                             n = nwgt, nmiss = nmiss, missrate = nwgt/nmiss)
       }
-      g.method = "weight"
-      wgt.matrix <- wgt.matrix[abs(wgt.matrix[, g.method]) > 0, , drop = F]
-      wgt.matrix <- wgt.matrix[complete.cases(wgt.matrix),, drop = F]
-      if (nrow(wgt.matrix) == 0) 
-        next
-      if (is.null(z_snp)) {
-        snpnames <- intersect(rownames(wgt.matrix), ld_snpinfo$id)
-      } else {
-        snpnames <- Reduce(intersect, list(rownames(wgt.matrix), ld_snpinfo$id, z_snp$id))
-      }
-      if (length(snpnames) == 0) 
-        next
-      wgt.idx <- match(snpnames, rownames(wgt.matrix))
-      wgt <- wgt.matrix[wgt.idx, g.method, drop = F]
       
-      #scale weights by standard deviation of variant in LD reference
-      if (scale_by_ld_variance){
-        ld_snpinfo.idx <- match(snpnames, ld_snpinfo$id)
-        wgt <- wgt*sqrt(ld_snpinfo$variance[ld_snpinfo.idx])
-      }
+      RSQLite::dbDisconnect(db)
       
-      p0 <- min(snps[snps[, "id"] %in% snpnames, "pos"])
-      p1 <- max(snps[snps[, "id"] %in% snpnames, "pos"])
-      exprlist[[gname_weight]] <- list(chrom = chrom, p0 = p0, p1 = p1, wgt = wgt, gname=gname, weight_name=weight_name)
-      nwgt <- nrow(wgt.matrix)
-      nmiss <- nrow(wgt.matrix) - length(snpnames)
-      qclist[[gname_weight]] <- list(n = nwgt, nmiss = nmiss, missrate = nwgt/nmiss)
+      outlist_core
     }
-    RSQLite::dbDisconnect(db)
+    
+    exprlist_weight <- lapply(names(outlist), function(x){outlist[[x]][c("chrom","p0","p1","wgt","gname","weight_name")]})
+    names(exprlist_weight) <- names(outlist)
+    
+    qclist_weight <- lapply(names(outlist), function(x){outlist[[x]][c("n","nmiss","missrate")]})
+    names(qclist_weight) <- names(outlist)
+    
+    exprlist <- c(exprlist, exprlist_weight)
+    qclist <- c(qclist, qclist_weight)
+    
+    rm(outlist, exprlist_weight, qclist_weight)
   }
+  
+  parallel::stopCluster(cl)
+  
   return(list(exprlist = exprlist, qclist = qclist))
 }
 
