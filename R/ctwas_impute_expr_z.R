@@ -16,7 +16,7 @@ impute_expr_z <- function (z_snp, weight, ld_pgenfs = NULL, ld_R_dir = NULL, met
                            outputdir = getwd(), outname = NULL, logfile = NULL, compress = T, 
                            harmonize_z = T, harmonize_wgt = T, 
                            strand_ambig_action_z = c("drop", "none", "recover"), recover_strand_ambig_wgt = T,
-                           ncore=1){
+                           ncore=1, chrom=1:22){
   dir.create(outputdir, showWarnings = F)
   if (!is.null(logfile)) {
     addHandler(writeToFile, file = logfile, level = "DEBUG")
@@ -30,7 +30,7 @@ impute_expr_z <- function (z_snp, weight, ld_pgenfs = NULL, ld_R_dir = NULL, met
   ld_exprfs <- vector()
   z_genelist <- list()
   ld_snplist <- c() #list to store names of snps in ld reference
-  for (b in 1:22) {
+  for (b in chrom) {
     if (!is.null(ld_pgenfs)) {
       ld_pgenf <- ld_pgenfs[b]
       ld_pvarf <- prep_pvar(ld_pgenf, outputdir = outputdir)

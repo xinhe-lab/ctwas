@@ -310,39 +310,59 @@ read_weight_predictdb <- function (weight, chrom, ld_snpinfo, z_snp = NULL, harm
   
   sqlite <- RSQLite::dbDriver("SQLite")
   
-  cl <- parallel::makeCluster(ncore, outfile = "")
-  doParallel::registerDoParallel(cl)
+  gnames_all <- list()
   
-  for (weight in weights){
-    weight_name <- tools::file_path_sans_ext(basename(weight))
+  for (i in 1:length(weights)){
+    weight <- weights[i]
     
     db = RSQLite::dbConnect(sqlite, weight)
     query <- function(...) RSQLite::dbGetQuery(db, ...)
     gnames <- unique(query("select gene from weights")[, 1])
-    RSQLite::dbDisconnect(db)
     
-    loginfo("Current weight: %s", weight)
-    loginfo("Number of genes with weights provided: %s", length(gnames))
-    loginfo("Collecting gene weight information ...")
-    if (harmonize_wgt){
-      loginfo("Flipping weights to match LD reference")
-      if (recover_strand_ambig){
-        loginfo("Harmonizing strand ambiguous weights using correlations with unambiguous variants")
+    gnames_all[[i]] <- cbind(gnames,weight)
+    
+    RSQLite::dbDisconnect(db)
+  }
+  
+  gnames_all <- as.data.frame(do.call(rbind, gnames_all))
+  colnames(gnames_all) <- c("gname", "weight")
+  
+  loginfo("Number of genes with weights provided: %s", nrow(gnames))
+  loginfo("Collecting gene weight information ...")
+  
+  if (harmonize_wgt){
+    loginfo("Flipping weights to match LD reference")
+    if (recover_strand_ambig){
+      loginfo("Harmonizing strand ambiguous weights using correlations with unambiguous variants")
+    }
+  }
+  
+  corelist <- lapply(1:ncore, function(core){njobs <- ceiling(nrow(gnames_all)/ncore); jobs <- ((core-1)*njobs+1):(core*njobs); jobs[jobs<=nrow(gnames_all)]})
+  names(corelist) <- 1:ncore
+  
+  cl <- parallel::makeCluster(ncore, outfile = "")
+  doParallel::registerDoParallel(cl)
+  
+  outlist <- foreach(core = 1:ncore, .combine = "c", .packages = "ctwas") %dopar% {
+    gnames_core <- gnames_all[corelist[[core]],,drop=F]
+    weights_core <- unique(gnames_core$weight)
+    
+    outlist_core <- list()
+    
+    for (weight in weights_core){
+      loginfo("Current weight: %s (core %s)", weight, core)
+      
+      weight_name <- tools::file_path_sans_ext(basename(weight))
+      gnames_core_weight <- gnames_core$gname[gnames_core$weight==weight]
+      
+      if (harmonize_wgt & recover_strand_ambig){
         R_wgt_all = read.table(gzfile(paste0(file_path_sans_ext(weight), ".txt.gz")), header=T) #load covariances for variants in each gene (accompanies .db file)
       }
-    }
-
-    corelist <- lapply(1:ncore, function(core){gnames_core <- gnames[0:ceiling(length(gnames)/ncore-1)*ncore+core]; gnames_core[!is.na(gnames_core)]})
-    names(corelist) <- 1:ncore
-    
-    outlist <- foreach(core = 1:ncore, .combine = "c", .packages = "ctwas") %dopar% {
+      
       db = RSQLite::dbConnect(sqlite, weight)
+      query <- function(...) RSQLite::dbGetQuery(db, ...)
       
-      outlist_core <- list()
-      
-      gnames_core <- corelist[[core]]
-      
-      for (gname in gnames_core) {
+      for (gname in gnames_core_weight) {
         
         if (length(weights)>1){
           gname_weight <- paste0(gname, "|", weight_name)
@@ -422,23 +442,23 @@ read_weight_predictdb <- function (weight, chrom, ld_snpinfo, z_snp = NULL, harm
       }
       
       RSQLite::dbDisconnect(db)
-      
-      outlist_core
     }
     
-    exprlist_weight <- lapply(names(outlist), function(x){outlist[[x]][c("chrom","p0","p1","wgt","gname","weight_name")]})
-    names(exprlist_weight) <- names(outlist)
-    
-    qclist_weight <- lapply(names(outlist), function(x){outlist[[x]][c("n","nmiss","missrate")]})
-    names(qclist_weight) <- names(outlist)
-    
-    exprlist <- c(exprlist, exprlist_weight)
-    qclist <- c(qclist, qclist_weight)
-    
-    rm(outlist, exprlist_weight, qclist_weight)
+    outlist_core
   }
   
   parallel::stopCluster(cl)
+  
+  exprlist_weight <- lapply(names(outlist), function(x){outlist[[x]][c("chrom","p0","p1","wgt","gname","weight_name")]})
+  names(exprlist_weight) <- names(outlist)
+  
+  qclist_weight <- lapply(names(outlist), function(x){outlist[[x]][c("n","nmiss","missrate")]})
+  names(qclist_weight) <- names(outlist)
+  
+  exprlist <- c(exprlist, exprlist_weight)
+  qclist <- c(qclist, qclist_weight)
+  
+  rm(outlist, exprlist_weight, qclist_weight)
   
   return(list(exprlist = exprlist, qclist = qclist))
 }

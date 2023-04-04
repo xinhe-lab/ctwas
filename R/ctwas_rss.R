@@ -89,10 +89,12 @@ ctwas_rss <- function(
   max_snp_region = Inf,
   ncore = 1,
   ncore.rerun = 1,
+  ncore_LDR = 1,
   outputdir = getwd(),
   outname = NULL,
   logfile = NULL,
-  merge = TRUE){
+  merge = TRUE,
+  fine_map = T){
 
   if (!is.null(logfile)){
     addHandler(writeToFile, file= logfile, level='DEBUG')
@@ -153,7 +155,8 @@ ctwas_rss <- function(
                               thin = thin, minvar = 2,
                               outname = outname,
                               outputdir = outputdir,
-                              merge = merge) # susie_rss can't take 1 var.
+                              merge = merge,
+                              ncore = ncore_LDR) # susie_rss can't take 1 var.
   
   saveRDS(regionlist, file=paste0(outputdir, "/", outname, ".regionlist.RDS"))
   
@@ -230,104 +233,104 @@ ctwas_rss <- function(
     group_prior <- pars[["group_prior"]]
     group_prior_var <- pars[["group_prior_var"]]
   }
-
-  loginfo("Run susie for all regions.")
-
-  pars <- susieI_rss(zdf = zdf,
-                     regionlist = regionlist,
-                     ld_exprfs = ld_exprfs,
-                     ld_pgenfs = ld_pgenfs,
-                     ld_Rfs = ld_Rfs,
-                     niter = 1,
-                     L = L,
-                     z_ld_weight = 0,
-                     group_prior = group_prior,
-                     group_prior_var = group_prior_var,
-                     estimate_group_prior = estimate_group_prior,
-                     estimate_group_prior_var = estimate_group_prior_var,
-                     group_prior_var_structure = group_prior_var_structure,
-                     use_null_weight = use_null_weight,
-                     coverage = coverage,
-                     ncore = ncore,
-                     outputdir = outputdir,
-                     outname = paste0(outname, ".temp"))
-
-
-  group_prior["SNP"] <- group_prior["SNP"] * thin # convert snp pi1
-
-  if (thin == 1) {
-    file.rename(paste0(file.path(outputdir, outname), ".temp.susieIrss.txt"),
-                paste0(file.path(outputdir, outname), ".susieIrss.txt"))
-
-  } else {
-
-    # get full SNPs
-    regionlist <- index_regions(regionfile = regionfile,
-                                exprvarfs = ld_exprvarfs,
-                                pvarfs = ld_pvarfs,
-                                ld_Rfs = ld_Rfs,
-                                select = zdf,
-                                thin = 1, maxSNP = max_snp_region, minvar = 2,
-                                outname = outname, outputdir = outputdir,
-                                merge = merge) # susie_rss can't take 1 var.
-
-    res <- data.table::fread(paste0(file.path(outputdir, outname), ".temp.susieIrss.txt"))
-
-    # filter out regions based on max gene PIP of the region
-    res.keep <- NULL
-    for (b in 1: length(regionlist)){
-      for (rn in names(regionlist[[b]])){
-       gene_PIP <- max(res$susie_pip[res$type != "SNP" & res$region_tag1 == b & res$region_tag2 == rn], 0)
-       if (gene_PIP < rerun_gene_PIP) {
-         regionlist[[b]][[rn]] <- NULL
-         res.keep <- rbind(res.keep, res[res$region_tag1 ==b & res$region_tag2 == rn, ])
-       }
-      }
-    }
-
-    nreg <- sum(unlist(lapply(regionlist, length)))
-
-    loginfo("Number of regions that contain strong gene signals: %s", nreg)
-    if (nreg == 0){
+  
+  if (fine_map){
+    loginfo("Run susie for all regions.")
+    
+    pars <- susieI_rss(zdf = zdf,
+                       regionlist = regionlist,
+                       ld_exprfs = ld_exprfs,
+                       ld_pgenfs = ld_pgenfs,
+                       ld_Rfs = ld_Rfs,
+                       niter = 1,
+                       L = L,
+                       z_ld_weight = 0,
+                       group_prior = group_prior,
+                       group_prior_var = group_prior_var,
+                       estimate_group_prior = estimate_group_prior,
+                       estimate_group_prior_var = estimate_group_prior_var,
+                       group_prior_var_structure = group_prior_var_structure,
+                       use_null_weight = use_null_weight,
+                       coverage = coverage,
+                       ncore = ncore,
+                       outputdir = outputdir,
+                       outname = paste0(outname, ".temp"))
+    
+    group_prior["SNP"] <- group_prior["SNP"] * thin # convert snp pi1
+    
+    if (thin == 1) {
       file.rename(paste0(file.path(outputdir, outname), ".temp.susieIrss.txt"),
                   paste0(file.path(outputdir, outname), ".susieIrss.txt"))
-
     } else {
-
-      loginfo("Rerun susie for regions with strong gene signals using full SNPs.")
-
-      pars <- susieI_rss(zdf = zdf,
-                         regionlist = regionlist,
-                         ld_exprfs = ld_exprfs,
-                         ld_pgenfs = ld_pgenfs,
-                         ld_Rfs = ld_Rfs,
-                         niter = 1,
-                         L = L,
-                         z_ld_weight = 0,
-                         group_prior = group_prior,
-                         group_prior_var = group_prior_var,
-                         group_prior_var_structure = group_prior_var_structure,
-                         estimate_group_prior = estimate_group_prior,
-                         estimate_group_prior_var = estimate_group_prior_var,
-                         use_null_weight = use_null_weight,
-                         coverage = coverage,
-                         ncore = ncore.rerun,
-                         outputdir = outputdir,
-                         outname = paste0(outname, ".s3"))
-
-      res.rerun <- data.table::fread(paste0(file.path(outputdir, outname), ".s3.susieIrss.txt"))
-
-      res <- rbind(res.keep, res.rerun)
-
-      data.table::fwrite(res, file = paste0(file.path(outputdir, outname), ".susieIrss.txt"),
-                         sep = "\t", quote = F)
-      file.remove((paste0(file.path(outputdir, outname), ".temp.susieIrss.txt")))
+      # get full SNPs
+      regionlist <- index_regions(regionfile = regionfile,
+                                  exprvarfs = ld_exprvarfs,
+                                  pvarfs = ld_pvarfs,
+                                  ld_Rfs = ld_Rfs,
+                                  select = zdf,
+                                  thin = 1, maxSNP = max_snp_region, minvar = 2,
+                                  outname = outname, outputdir = outputdir,
+                                  merge = merge,
+                                  ncore = ncore_LDR,
+                                  reuse_R_gene = T) # susie_rss can't take 1 var.
+      
+      res <- data.table::fread(paste0(file.path(outputdir, outname), ".temp.susieIrss.txt"))
+      
+      # filter out regions based on max gene PIP of the region
+      res.keep <- NULL
+      for (b in 1: length(regionlist)){
+        for (rn in names(regionlist[[b]])){
+          gene_PIP <- max(res$susie_pip[res$type != "SNP" & res$region_tag1 == b & res$region_tag2 == rn], 0)
+          if (gene_PIP < rerun_gene_PIP) {
+            regionlist[[b]][[rn]] <- NULL
+            res.keep <- rbind(res.keep, res[res$region_tag1 ==b & res$region_tag2 == rn, ])
+          }
+        }
+      }
+      
+      nreg <- sum(unlist(lapply(regionlist, length)))
+      
+      loginfo("Number of regions that contain strong gene signals: %s", nreg)
+      if (nreg == 0){
+        file.rename(paste0(file.path(outputdir, outname), ".temp.susieIrss.txt"),
+                    paste0(file.path(outputdir, outname), ".susieIrss.txt"))
+        
+      } else {
+        
+        loginfo("Rerun susie for regions with strong gene signals using full SNPs.")
+        
+        pars <- susieI_rss(zdf = zdf,
+                           regionlist = regionlist,
+                           ld_exprfs = ld_exprfs,
+                           ld_pgenfs = ld_pgenfs,
+                           ld_Rfs = ld_Rfs,
+                           niter = 1,
+                           L = L,
+                           z_ld_weight = 0,
+                           group_prior = group_prior,
+                           group_prior_var = group_prior_var,
+                           group_prior_var_structure = group_prior_var_structure,
+                           estimate_group_prior = estimate_group_prior,
+                           estimate_group_prior_var = estimate_group_prior_var,
+                           use_null_weight = use_null_weight,
+                           coverage = coverage,
+                           ncore = ncore.rerun,
+                           outputdir = outputdir,
+                           outname = paste0(outname, ".s3"))
+        
+        res.rerun <- data.table::fread(paste0(file.path(outputdir, outname), ".s3.susieIrss.txt"))
+        
+        res <- rbind(res.keep, res.rerun)
+        
+        data.table::fwrite(res, file = paste0(file.path(outputdir, outname), ".susieIrss.txt"),
+                           sep = "\t", quote = F)
+        file.remove((paste0(file.path(outputdir, outname), ".temp.susieIrss.txt")))
+      }
     }
   }
 
   list("group_prior" = group_prior,
        "group_prior_var" = group_prior_var)
-
 }
 
 

@@ -42,7 +42,9 @@ index_regions <- function(regionfile,
                           minvar = 1,
                           merge = T,
                           outname = NULL,
-                          outputdir = getwd()) {
+                          outputdir = getwd(),
+                          ncore = 1,
+                          reuse_R_gene = F) {
 
   if (is.null(pvarfs) & is.null(ld_Rfs)){
     stop("Stopped: missing LD/genotype information.
@@ -222,76 +224,138 @@ index_regions <- function(regionfile,
   }
 
   if (is.null(pvarfs)){
-
     loginfo("Adding R matrix info, as genotype is not given")
-
+    
     dir.create(file.path(outputdir, paste0(outname, "_LDR")), showWarnings = F)
-
-    wgtall <- lapply(exprvarfs, function(x){
-      load(paste0(strsplit(x, ".exprvar")[[1]], ".exprqc.Rd")); wgtlist})
+    
+    wgtall <- lapply(exprvarfs, function(x){load(paste0(strsplit(x, ".exprvar")[[1]], ".exprqc.Rd")); wgtlist})
     wgtlistall <- do.call(c, wgtall)
     names(wgtlistall) <- do.call(c, lapply(wgtall, names))
-
-    for (b in 1: length(ld_Rfs)){
-      loginfo("Adding R matrix info for chrom %s", b)
-      ld_Rf <- ld_Rfs[b]
-      ld_Rinfo <- as.data.frame(data.table::fread(ld_Rf, header = T))
-      for (rn in names(regionlist[[b]])){
-        ifreg <- ifelse(regionlist[[b]][[rn]][["minpos"]] < ld_Rinfo[, "stop"]
-                        & regionlist[[b]][[rn]][["maxpos"]] >= ld_Rinfo[, "start"], T, F)
-        regRDS <- ld_Rinfo[ifreg, "RDS_file"]
-        R_snp <- lapply(regRDS, readRDS)
-        R_snp <- as.matrix(Matrix::bdiag(R_snp))
-        R_snp_anno <- do.call(rbind, lapply(regRDS, read_ld_Rvar_RDS))
-
-        #update sidx to match R matrix info
-        sidx <-  match(regionlist[[b]][[rn]][["sid"]], R_snp_anno$id)
-        regionlist[[b]][[rn]][["sidx"]] <- sidx
-
-        gnames <- regionlist[[b]][[rn]][["gid"]]
-        R_snp_gene <- matrix( , nrow(R_snp), length(gnames))
-        R_gene <- diag(length(gnames))
-        if (length(gnames) > 0) {
-
-          ldr <- list()
-          for (i in 1:length(gnames)){
-            gname <- gnames[i]
-            wgt <- wgtlistall[[gname]]
-            snpnames <- rownames(wgt)
-            ld.idx <- match(snpnames, R_snp_anno$id)
-            ldr[[gname]] <- ld.idx
-            R.s <- R_snp[ld.idx, ld.idx]
-            R_snp_gene[,i] <- sapply(1:nrow(R_snp),
-                                     function(x){crossprod(wgt,R_snp[ld.idx,x])/sqrt(crossprod(wgt,R.s)%*%wgt*R_snp[x,x])})
+    rm(wgtall)
+    
+    regionlist_all <- list()
+    
+    for (b in 1:22){
+      regionlist_all[[b]] <- cbind(b, names(regionlist[[b]]))
+    }
+    
+    regionlist_all <- as.data.frame(do.call(rbind, regionlist_all))
+    colnames(regionlist_all) <- c("b", "rn")
+    regionlist_all$b <- as.integer(regionlist_all$b)
+    
+    corelist <- lapply(1:ncore, function(core){njobs <- ceiling(nrow(regionlist_all)/ncore); jobs <- ((core-1)*njobs+1):(core*njobs); jobs[jobs<=nrow(regionlist_all)]})
+    names(corelist) <- 1:ncore
+    
+    
+    cl <- parallel::makeCluster(ncore, outfile = "")
+    doParallel::registerDoParallel(cl)
+    
+    outlist <- foreach(core = 1:ncore, .combine = "c", .packages = c("ctwas", "tools")) %dopar% {
+      
+      regionlist_core <- regionlist_all[corelist[[core]],]
+      outlist_core <- list()
+      
+      b_core <- unique(regionlist_core$b)
+      
+      for (b in b_core){
+        logging::loginfo("Adding R matrix info for chrom %s (core %s)", b, core)
+        
+        ld_Rf <- ld_Rfs[b]
+        ld_Rinfo <- as.data.frame(data.table::fread(ld_Rf, header = T))
+        
+        regionlist_core_b <- regionlist_core$rn[regionlist_core$b==b]
+        
+        for (rn in regionlist_core_b){
+          outlist_core_region <- list(b=b, rn=rn)
+          
+          ifreg <- ifelse(regionlist[[b]][[rn]][["start"]] < ld_Rinfo[, "stop"] & regionlist[[b]][[rn]][["stop"]] >= ld_Rinfo[, "start"], T, F)
+          
+          regRDS <- ld_Rinfo[ifreg, "RDS_file"]
+          R_snp <- lapply(regRDS, readRDS)
+          
+          if (length(R_snp)==1){
+            R_snp <- unname(R_snp[[1]])
+          } else {
+            R_snp <- suppressWarnings(as.matrix(Matrix::bdiag(R_snp)))
           }
-
-          if (length(gnames) > 1){
-            gene_pairs <- combn(length(gnames), 2)
-            wgtr <- wgtlistall[gnames]
-            gene_corrs <- apply(gene_pairs, 2, function(x){t(wgtr[[x[1]]])%*%R_snp[ldr[[x[1]]], ldr[[x[2]]]]%*%wgtr[[x[2]]]/(
-              sqrt(t(wgtr[[x[1]]])%*%R_snp[ldr[[x[1]]], ldr[[x[1]]]]%*%wgtr[[x[1]]]) *
-                sqrt(t(wgtr[[x[2]]])%*%R_snp[ldr[[x[2]]], ldr[[x[2]]]]%*%wgtr[[x[2]]]))})
-            R_gene[t(gene_pairs)] <- gene_corrs
-            R_gene[t(gene_pairs[c(2,1),])] <- gene_corrs
+          
+          R_snp_anno <- as.data.frame(do.call(rbind, lapply(regRDS, read_ld_Rvar_RDS)))
+          sidx <-  match(regionlist[[b]][[rn]][["sid"]], R_snp_anno$id)
+          outlist_core_region[["sidx"]] <- sidx
+          
+          gnames <- regionlist[[b]][[rn]][["gid"]]
+          R_snp_gene <- matrix(NA, nrow(R_snp), length(gnames))
+          R_gene <- diag(length(gnames))
+          
+          if (length(gnames) > 0) {
+            ldr <- list()
+            for (i in 1:length(gnames)){
+              gname <- gnames[i]
+              wgt <- wgtlistall[[gname]]
+              snpnames <- rownames(wgt)
+              ld.idx <- match(snpnames, R_snp_anno$id)
+              ldr[[gname]] <- ld.idx
+              R.s <- R_snp[ld.idx, ld.idx]
+              R_snp_gene[,i] <- sapply(1:nrow(R_snp), function(x){t(wgt)%*%R_snp[ld.idx,x]/sqrt(t(wgt)%*%R.s%*%wgt*R_snp[x,x])})
+            }
+            
+            if (length(gnames) > 1 & !reuse_R_gene){
+              gene_pairs <- combn(length(gnames), 2)
+              wgtr <- wgtlistall[gnames]
+              
+              gene_corrs <- apply(gene_pairs, 2, function(x){t(wgtr[[x[1]]])%*%R_snp[ldr[[x[1]]], ldr[[x[2]]]]%*%wgtr[[x[2]]]/(
+                sqrt(t(wgtr[[x[1]]])%*%R_snp[ldr[[x[1]]], ldr[[x[1]]]]%*%wgtr[[x[1]]]) *
+                  sqrt(t(wgtr[[x[2]]])%*%R_snp[ldr[[x[2]]], ldr[[x[2]]]]%*%wgtr[[x[2]]]))})
+              R_gene[t(gene_pairs)] <- gene_corrs
+              R_gene[t(gene_pairs[c(2,1),])] <- gene_corrs
+            }
           }
-        }
-
-        regionlist[[b]][[rn]][["regRDS"]] <- regRDS
-
-        R_sg_file <- file.path(outputdir, paste0(outname, "_LDR"), paste0("chr", b, "_reg", rn, ".R_snp_gene.RDS"))
-        R_g_file <- file.path(outputdir, paste0(outname, "_LDR"), paste0("chr", b, "_reg", rn, ".R_gene.RDS"))
-        saveRDS(R_snp_gene, file=R_sg_file)
-        saveRDS(R_gene, file=R_g_file)
-        regionlist[[b]][[rn]][["R_sg_file"]] <- R_sg_file
-        regionlist[[b]][[rn]][["R_g_file"]] <- R_g_file
-
-        if (thin < 1){
-          R_s_file <- file.path(outputdir, paste0(outname, "_LDR"), paste0("chr", b, "_reg", rn, ".R_snp.RDS"))
-          R_snp <- R_snp[sidx, sidx, drop = F]
-          saveRDS(R_snp, file=R_s_file)
-          regionlist[[b]][[rn]][["R_s_file"]] <- R_s_file
+          
+          #remove genes with NA in R_snp_gene (e.g. boundary spanning with merge=F) from analysis
+          gene_not_NA <- which(apply(R_snp_gene, 2, function(x){!any(is.na(x))}))
+          outlist_core_region[["gidx"]] <- regionlist[[b]][[rn]][["gidx"]][gene_not_NA]
+          outlist_core_region[["gid"]] <- regionlist[[b]][[rn]][["gid"]][gene_not_NA]
+          R_snp_gene <- R_snp_gene[,gene_not_NA,drop=F]
+          R_gene <- R_gene[gene_not_NA,gene_not_NA,drop=F]
+          
+          #save R_snp_gene and R_gene
+          outlist_core_region[["regRDS"]] <- regRDS
+          R_sg_file <- file.path(outputdir, paste0(outname, "_LDR"), paste0("chr", b, "_reg", rn, ".R_snp_gene.RDS"))
+          R_g_file <- file.path(outputdir, paste0(outname, "_LDR"), paste0("chr", b, "_reg", rn, ".R_gene.RDS"))
+          saveRDS(R_snp_gene, file=R_sg_file)
+          
+          if (!reuse_R_gene){
+            saveRDS(R_gene, file=R_g_file)
+          }
+          
+          outlist_core_region[["R_sg_file"]] <- R_sg_file
+          outlist_core_region[["R_g_file"]] <- R_g_file
+          
+          if (thin < 1){
+            R_s_file <- file.path(outputdir, paste0(outname, "_LDR"), paste0("chr", b, "_reg", rn, ".R_snp.RDS"))
+            R_snp <- R_snp[sidx, sidx, drop = F]
+            saveRDS(R_snp, file=R_s_file)
+            outlist_core_region[["R_s_file"]] <- R_s_file
+          }
+          
+          outlist_core[[length(outlist_core)+1]] <- outlist_core_region
         }
       }
+      outlist_core
+    }
+
+    parallel::stopCluster(cl)
+    
+    for (i in 1:length(outlist)){
+      b <- outlist[[i]][["b"]]
+      rn <- outlist[[i]][["rn"]]
+      regionlist[[b]][[rn]][["sidx"]] <- outlist[[i]][["sidx"]]
+      regionlist[[b]][[rn]][["gidx"]] <- outlist[[i]][["gidx"]]
+      regionlist[[b]][[rn]][["gid"]] <- outlist[[i]][["gid"]]
+      regionlist[[b]][[rn]][["regRDS"]] <- outlist[[i]][["regRDS"]]
+      regionlist[[b]][[rn]][["R_sg_file"]] <- outlist[[i]][["R_sg_file"]]
+      regionlist[[b]][[rn]][["R_g_file"]] <- outlist[[i]][["R_g_file"]]
+      regionlist[[b]][[rn]][["R_s_file"]] <- outlist[[i]][["R_s_file"]]
     }
   }
 
