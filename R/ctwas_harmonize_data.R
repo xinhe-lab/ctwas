@@ -41,6 +41,7 @@ allele.qc = function(a1,a2,ref1,ref2) {
 #'
 #' @export
 harmonize_z_ld <- function(z_snp, ld_snpinfo, strand_ambig_action = c("drop", "none", "recover"), ld_pgenfs = NULL, ld_Rinfo = NULL){
+  strand_ambig_action <- match.arg(strand_ambig_action)
   snpnames <- intersect(z_snp$id, ld_snpinfo$id)
   if (length(snpnames) != 0) {
     z.idx <- match(snpnames, z_snp$id)
