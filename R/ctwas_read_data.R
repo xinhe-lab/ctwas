@@ -268,8 +268,11 @@ read_weight_fusion <- function (weight, chrom, ld_snpinfo, z_snp = NULL, method 
       if (g.method == "best") {
         g.method = names(which.max(cv.performance["rsq", ]))
       }
-      if (!(g.method %in% names(cv.performance[1, ]))) 
+      if (!exists("cv.performance")){
         next
+      } else if (!(g.method %in% names(cv.performance[1,]))){
+        next
+      }
       wgt.matrix <- wgt.matrix[abs(wgt.matrix[, g.method]) > 
                                  0, , drop = F]
       wgt.matrix <- wgt.matrix[complete.cases(wgt.matrix), 
