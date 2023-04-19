@@ -330,7 +330,7 @@ read_weight_predictdb <- function (weight, chrom, ld_snpinfo, z_snp = NULL, harm
   gnames_all <- as.data.frame(do.call(rbind, gnames_all))
   colnames(gnames_all) <- c("gname", "weight")
   
-  loginfo("Number of genes with weights provided: %s", nrow(gnames))
+  loginfo("Number of genes with weights provided: %s", nrow(gnames_all))
   loginfo("Collecting gene weight information ...")
   
   if (harmonize_wgt){
