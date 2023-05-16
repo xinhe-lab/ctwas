@@ -83,22 +83,22 @@ index_regions <- function(regionfile,
       snpinfo <- read_ld_Rvar(ld_Rf)
     }
 
-    if (unique(snpinfo$chrom) != b){
-      stop("Input genotype file not splitted by chromosome or not in correct order")
+    if (isTRUE(unique(snpinfo$chrom) != b)){
+      stop("Input genotype file not split by chromosome or not in correct order")
     }
 
     # select variant
-    snpinfo$keep <- 1
+    snpinfo$keep <- rep(1, nrow(snpinfo))
     if (!is.null(selectid)){
-      snpinfo[!(snpinfo$id %in% selectid), "keep"] <- 0
+      snpinfo$keep[!(snpinfo$id %in% selectid)] <- 0
     }
 
     # downsampling for SNPs
-    snpinfo$thin_tag <- 0
+    snpinfo$thin_tag <- rep(0, nrow(snpinfo))
     nkept <- round(nrow(snpinfo) * thin)
     set.seed(99)
     snpinfo$thin_tag[sample(1:nrow(snpinfo), nkept)] <- 1
-
+    
     # get gene info (from exprf file)
     exprvarf <- exprvarfs[b]
     geneinfo <- read_exprvar(exprvarf)
@@ -120,8 +120,11 @@ index_regions <- function(regionfile,
     regionlist[[b]] <- list()
 
     for (rn in 1:nrow(regions)){
-      rn.start <- regions[rn, "start"]
-      rn.stop <- regions[rn, "stop"]
+      
+      #loginfo(rn)
+      
+      rn.start <- regions$start[rn]
+      rn.stop <- regions$stop[rn]
 
       if (isTRUE(merge)){
         gidx <- which(geneinfo$chrom == b & geneinfo$p1 >= rn.start & geneinfo$p0 < rn.stop
@@ -136,11 +139,11 @@ index_regions <- function(regionfile,
 
       if (length(gidx) + length(sidx) < minvar) {next}
 
-      gid <- geneinfo[gidx, "id"]
-      sid <- snpinfo[sidx, "id"]
+      gid <- geneinfo$id[gidx]
+      sid <- snpinfo$id[sidx]
 
-      minpos <- min(c(geneinfo[gidx, "p0"], snpinfo[sidx, "pos"]))
-      maxpos <- max(c(geneinfo[gidx, "p1"], snpinfo[sidx, "pos"]))
+      minpos <- min(c(geneinfo$p0[gidx], snpinfo$pos[sidx]))
+      maxpos <- max(c(geneinfo$p1[gidx], snpinfo$pos[sidx]))
 
       regionlist[[b]][[as.character(rn)]] <- list("gidx" = gidx,
                                     "gid"  = gid,
@@ -165,8 +168,8 @@ index_regions <- function(regionfile,
             gidx <-  unique(c(previous[["gidx"]], current[["gidx"]]))
             sidx <-  unique(c(previous[["sidx"]], current[["sidx"]]))
 
-            gid <- geneinfo[gidx, "id"]
-            sid <- snpinfo[sidx, "id"]
+            gid <- geneinfo$id[gidx]
+            sid <- snpinfo$id[sidx]
 
             regionlist[[b]][[as.character(rn)]] <- list("gidx" = gidx,
                                                         "gid"  = gid,

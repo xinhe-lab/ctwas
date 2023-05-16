@@ -85,13 +85,13 @@ ctwas_rss <- function(
   use_null_weight = T,
   coverage = 0.95,
   stardardize = T,
-  harmonize =T,
   max_snp_region = Inf,
   ncore = 1,
   ncore.rerun = 1,
   outputdir = getwd(),
   outname = NULL,
-  logfile = NULL){
+  logfile = NULL,
+  merge = TRUE){
 
   if (!is.null(logfile)){
     addHandler(writeToFile, file= logfile, level='DEBUG')
@@ -130,13 +130,6 @@ ctwas_rss <- function(
 
   loginfo("LD region file: %s", regionfile)
 
-  if (isTRUE(harmonize)){
-    loginfo("flipping z scores to match LD reference")
-      for (b in 1:22) {
-        z_snp <- harmonize_z_ld(z_snp, ld_snpinfo[[b]])
-      }
-  }
-
   zdf <- rbind(z_snp[, c("id", "z")], z_gene[, c("id", "z")])
   rm(z_snp, ld_snpinfo)
 
@@ -151,11 +144,16 @@ ctwas_rss <- function(
                               select = zdf$id,
                               thin = thin, minvar = 2,
                               outname = outname,
-                              outputdir = outputdir) # susie_rss can't take 1 var.
-
-  regs <- do.call(rbind, lapply(1:22, function(x) cbind(x,
-                    unlist(lapply(regionlist[[x]], "[[", "start")),
-                    unlist(lapply(regionlist[[x]], "[[", "stop")))))
+                              outputdir = outputdir,
+                              merge = merge) # susie_rss can't take 1 var.
+  
+  saveRDS(regionlist, file=paste0(outputdir, "/", outname, ".regionlist.RDS"))
+  
+  temp_regs <- lapply(1:22, function(x) cbind(x,
+                   unlist(lapply(regionlist[[x]], "[[", "start")),
+                     unlist(lapply(regionlist[[x]], "[[", "stop"))))
+                 
+  regs <- do.call(rbind, lapply(temp_regs, function(x) if (ncol(x) == 3){x}))
 
   write.table(regs , file= paste0(outputdir,"/", outname, ".regions.txt")
                , row.names=F, col.names=T, sep="\t", quote = F)
@@ -260,7 +258,8 @@ ctwas_rss <- function(
                                 ld_Rfs = ld_Rfs,
                                 select = zdf,
                                 thin = 1, maxSNP = max_snp_region, minvar = 2,
-                                outname = outname, outputdir = outputdir) # susie_rss can't take 1 var.
+                                outname = outname, outputdir = outputdir,
+                                merge = merge) # susie_rss can't take 1 var.
 
     res <- data.table::fread(paste0(file.path(outputdir, outname), ".temp.susieIrss.txt"))
 
@@ -278,7 +277,7 @@ ctwas_rss <- function(
 
     nreg <- sum(unlist(lapply(regionlist, length)))
 
-    loginfo("Number of regions that contains strong gene signals: %s", nreg)
+    loginfo("Number of regions that contain strong gene signals: %s", nreg)
     if (nreg == 0){
       file.rename(paste0(file.path(outputdir, outname), ".temp.susieIrss.txt"),
                   paste0(file.path(outputdir, outname), ".susieIrss.txt"))
