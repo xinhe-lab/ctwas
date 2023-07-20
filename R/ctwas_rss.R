@@ -141,6 +141,8 @@ ctwas_rss <- function(
   
   zdf <- rbind(z_snp[, c("id", "z", "type")], z_gene[, c("id", "z", "type")])
   
+  group_prior_var_structure <- match.arg(group_prior_var_structure)
+  
   rm(z_snp, ld_snpinfo)
 
   if (thin <=0 | thin > 1){
