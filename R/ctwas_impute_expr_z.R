@@ -16,7 +16,8 @@ impute_expr_z <- function (z_snp, weight, ld_pgenfs = NULL, ld_R_dir = NULL, met
                            outputdir = getwd(), outname = NULL, logfile = NULL, compress = T, 
                            harmonize_z = T, harmonize_wgt = T, 
                            strand_ambig_action_z = c("drop", "none", "recover"), recover_strand_ambig_wgt = T,
-                           ncore=1, chrom=1:22){
+                           ncore=1, chrom=1:22,
+                           scale_by_ld_variance=T){
   dir.create(outputdir, showWarnings = F)
   if (!is.null(logfile)) {
     addHandler(writeToFile, file = logfile, level = "DEBUG")
@@ -63,7 +64,8 @@ impute_expr_z <- function (z_snp, weight, ld_pgenfs = NULL, ld_R_dir = NULL, met
       weightall <- read_weight_predictdb(weight, b, ld_snpinfo, z_snp, 
                                          harmonize_wgt=harmonize_wgt, ld_Rinfo=ld_Rinfo,
                                          recover_strand_ambig=recover_strand_ambig_wgt,
-                                         ncore=ncore)
+                                         ncore=ncore,
+                                         scale_by_ld_variance=scale_by_ld_variance)
     } else {
       stop("Unrecognized weight format, need to use either FUSION format or predict.db format")
     }
