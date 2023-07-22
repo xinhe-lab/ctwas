@@ -13,7 +13,7 @@ susieI_rss <- function(zdf,
                        z_ld_weight = 0,
                        group_prior = NULL,
                        group_prior_var = NULL,
-                       group_prior_var_structure = c("independent","shared"),
+                       group_prior_var_structure = c("independent","shared","shared+snps"),
                        estimate_group_prior = T,
                        estimate_group_prior_var = T,
                        use_null_weight = T,
@@ -23,6 +23,8 @@ susieI_rss <- function(zdf,
                        outname = NULL){
 
   outname <- file.path(outputdir, outname)
+  
+  group_prior_var_structure <- match.arg(group_prior_var_structure)
 
   ld_exprvarfs <- sapply(ld_exprfs, prep_exprvar)
 
@@ -210,6 +212,8 @@ susieI_rss <- function(zdf,
         V_prior[names(V_prior)!="SNP"] <- sum(outdf_temp$susie_pip*outdf_temp$mu2)/sum(outdf_temp$susie_pip)
         
         rm(outdf_temp)
+      } else if (group_prior_var_structure=="shared+snps"){
+        V_prior[names(V_prior)] <- sum(outdf$susie_pip*outdf$mu2)/sum(outdf$susie_pip)
       }
       
       group_prior_var_rec[names(V_prior), iter] <- V_prior

@@ -80,7 +80,7 @@ ctwas_rss <- function(
   L= 5,
   group_prior = NULL,
   group_prior_var = NULL,
-  group_prior_var_structure = c("independent","shared"),
+  group_prior_var_structure = c("independent","shared","shared+snps"),
   estimate_group_prior = T,
   estimate_group_prior_var = T,
   use_null_weight = T,

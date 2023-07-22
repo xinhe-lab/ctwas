@@ -78,11 +78,11 @@ index_regions <- function(regionfile,
     if (!is.null(pvarfs)){
       # get snp info (from pvarf file)
       pvarf <- pvarfs[b]
-      snpinfo <- read_pvar(pvarf)
+      snpinfo <- ctwas:::read_pvar(pvarf)
     } else {
       # get snp info (from LD R matrix file)
       ld_Rf <- ld_Rfs[b]
-      snpinfo <- read_ld_Rvar(ld_Rf)
+      snpinfo <- ctwas:::read_ld_Rvar(ld_Rf)
     }
 
     if (isTRUE(unique(snpinfo$chrom) != b)){
