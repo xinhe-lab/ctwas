@@ -11,7 +11,10 @@
 #' or a data frame with columns id and z (id is for gene or SNP id, z is for z scores).
 #' z will be used for remove SNPs if the total number of SNPs exceeds limit. See
 #' parameter `maxSNP` for more information.
-#'
+#' 
+#' @param thin  A scalar in (0,1]. The proportion of SNPs
+#' left after down sampling. Only applied on SNPs after selecting variants.
+#'  
 #' @param maxSNP Default is Inf, no limit for the maximum number of SNPs in a region. Or an
 #' integer indicating the maximum number of SNPs allowed in a region. This
 #' parameter is useful when a region contains many SNPs and you don't have enough memory to
@@ -20,12 +23,18 @@
 #' provided, SNPs are ranked based on |z| from high to low and only the top `maxSNP` SNPs
 #' are kept. If only variant ids are provided, then `maxSNP` number of SNPs will be chosen
 #' randomly.
-#'
-#' @param thin  A scalar in (0,1]. The proportion of SNPs
-#'  left after down sampling. Only applied on SNPs after selecting variants.
+#'  
 #' @param minvar minimum number of variatns in a region
 #'
-#' @param merge True/False. If merge regions when a gene belong to multiple regions.
+#' @param merge TRUE/FALSE. If TRUE, merge regions when a gene spans a region boundary (i.e. belongs to multiple regions.)
+#' 
+#' @param outputdir a string, the directory to store output
+#' 
+#' @param outname a string, the output name
+#' 
+#' @param ncore the number of cores used to parallelize region indexing
+#' 
+#' @param reuse_R_gene an option to reuse the R_gene matrix when indexing for the final rerun step
 #'
 #' @return A list. Items correspond to each pvarf/exprvarf. Each Item is
 #'  also a list, the items in this list are for each region.
@@ -372,9 +381,6 @@ filter_regions <- function(regionlist, group_prior, prob_single = 0.8, zdf){
       sid <- regionlist[[b]][[rn]][["sid"]]
       gs_type <- zdf$type[match(c(gid,sid), zdf$id)]
       
-      #pi_prior <- unname(group_prior[gs_type])
-      #P1 <- prod(1-pi_prior) * (1 + sum(pi_prior/(1-pi_prior)))
-      
       group_size <- table(gs_type)[names(group_prior)]
       group_size[is.na(group_size)] <- 0
       
@@ -388,35 +394,12 @@ filter_regions <- function(regionlist, group_prior, prob_single = 0.8, zdf){
   regionlist2
 }
 
-filter_regions_stable <- function(regionlist, group_prior, prob_single = 0.8){
-  prior.gene <- group_prior[1]
-  prior.SNP <- group_prior[2]
-
-  regionlist2 <- regionlist
-  for (b in 1: length(regionlist)){
-
-    for (rn in names(regionlist[[b]])) {
-
-      gidx <- regionlist[[b]][[rn]][["gidx"]]
-      sidx <- regionlist[[b]][[rn]][["sidx"]]
-      p.g <- length(gidx)
-      p.s <- length(sidx)
-      P2 <- 1 - (1- prior.gene)**p.g * (1- prior.SNP)**p.s -
-        p.g * prior.gene * (1 - prior.gene) ** (p.g - 1) * (1- prior.SNP) ** p.s -
-        p.s * (1 - prior.gene) ** p.g * prior.SNP * (1- prior.SNP) ** (p.s - 1)
-
-      if (P2 >= 1-prob_single){
-        regionlist2[[b]][[rn]] <- NULL
-      }
-    }
-  }
-  regionlist2
-}
-
-#' parallel regions
+#' assign regions to cores
+#' 
 #' @param ncore integer, numeber of cores, at least 1
 #' regions allocated to given number of cores
 #' regionlist need to contain at least 1 non-empty
+#' 
 region2core <- function(regionlist, ncore = 1){
   dflist <- list()
   for (b in 1:length(regionlist)){

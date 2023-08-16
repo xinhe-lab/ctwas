@@ -5,21 +5,23 @@
 \title{Causal inference for TWAS using summary statistics}
 \usage{
 ctwas_rss(z_gene, z_snp, ld_exprfs, ld_pgenfs = NULL, ld_R_dir = NULL,
-  ld_regions = c("EUR", "ASN", "AFR"), ld_regions_custom = NULL,
-  thin = 1, prob_single = 0.8, rerun_gene_PIP = 0.8, niter1 = 3,
+  ld_regions = c("EUR", "ASN", "AFR"), ld_regions_version = c("b37",
+  "b38"), ld_regions_custom = NULL, thin = 1, prob_single = 0.8,
+  max_snp_region = Inf, rerun_gene_PIP = 0.8, niter1 = 3,
   niter2 = 30, L = 5, group_prior = NULL, group_prior_var = NULL,
+  group_prior_var_structure = c("independent", "shared", "shared+snps",
+  "inv_gamma"), inv_gamma_shape = 1, inv_gamma_rate = 0,
   estimate_group_prior = T, estimate_group_prior_var = T,
-  use_null_weight = T, coverage = 0.95, stardardize = T,
-  harmonize = T, max_snp_region = Inf, ncore = 1, ncore.rerun = 1,
-  outputdir = getwd(), outname = NULL, logfile = NULL)
+  use_null_weight = T, coverage = 0.95, stardardize = T, ncore = 1,
+  ncore.rerun = 1, ncore_LDR = 1, outputdir = getwd(),
+  outname = NULL, logfile = NULL, merge = TRUE, fine_map = T)
 }
 \arguments{
-\item{z_gene}{A data frame with two columns: "id", "z". giving the z scores for
-genes.}
+\item{z_gene}{A data frame with two columns: "id", "z". giving the z scores for genes. 
+Optionally, a "type" column can also be supplied; this is for using multiple sets of weights}
 
 \item{z_snp}{A data frame with four columns: "id", "A1", "A2", "z".
-giving the z scores for snps. "A1" is effect allele. "A2" is the other allele.
-If `harmonize= False`, A1 and A2 are not required.}
+giving the z scores for snps. "A1" is effect allele. "A2" is the other allele.}
 
 \item{ld_exprfs}{A character vector of .`expr` or `.expr.gz` files. One file for
 one chromosome, in the order of 1 to 22. Therefore, the length of this vector
@@ -44,36 +46,88 @@ to present in the same directory. If .bed files are given, then .bim and
 .fam files are assumed to present in the same directory.}
 
 \item{ld_regions}{A string representing the population to use for defining
-LD regions. These LD regions are defined by ldetect. The user can also
+LD regions. These LD regions were previously defined by ldetect. The user can also
 provide custom LD regions matching genotype data, see
 \code{ld_regions_custom}.}
 
-\item{ld_regions_custom}{A bed format file defining LD regions. The default
-is \code{NULL}; when specified, \code{ld_regions} will be ignored.}
+\item{ld_regions_version}{A string representing the genome reference build ("b37", "b38") to use for defining
+LD regions. See \code{ld_regions}.}
 
-\item{prob_single}{blocks with probility more than this value will be
+\item{ld_regions_custom}{A bed format file defining LD regions. The default
+is \code{NULL}; when specified, \code{ld_regions} and \code{ld_regions_version} will be ignored.}
+
+\item{thin}{The proportion of SNPs to be used for the parameter estimation and initial fine 
+mapping steps. Smaller \code{thin} parameters reduce runtime at the expense of accuracy. The fine mapping step is rerun using full SNPs 
+for regions with strong gene signals; see \code{rerun_gene_PIP}.}
+
+\item{prob_single}{Blocks with probability greater than \code{prob_single} of having 1 or fewer effects will be
 used for parameter estimation}
+
+\item{max_snp_region}{Inf or integer. Maximum number of SNPs in a region. Default is
+Inf, no limit. This can be useful if there are many SNPs in a region and you don't
+have enough memory to run the program. This applies to the last rerun step
+(using full SNPs and rerun susie for regions with strong gene signals) only.}
 
 \item{rerun_gene_PIP}{if thin <1, will rerun blocks with the max gene PIP
 > \code{rerun_gene_PIP} using full SNPs. if \code{rerun_gene_PIP} is 0, then
 all blocks will rerun with full SNPs}
 
-\item{harmonize}{TRUE/FALSE. If TRUE, will harmonize GWAS, LD reference
-and weight internally (flip alleles and remove strand ambiguous SNPs)}
+\item{niter1}{the number of iterations of the E-M algorithm to perform during the initial parameter estimation step}
 
-\item{max_snp_region}{Inf or integer. Maximum number of SNPs in a region. Default is
-Inf, no limit. This can be useful if there are many SNPs in a region and you don't
-have enough memory to run the program. This applies to the last rerun step
- (using full SNPs and rerun susie for regions with strong gene signals) only.}
+\item{niter2}{the number of iterations of the E-M algorithm to perform during the complete parameter estimation step}
 
-\item{ncore}{integer, number of cores to run parameter estimation}
+\item{L}{the number of effects for susie during the fine mapping steps}
+
+\item{group_prior}{a vector of two prior inclusion probabilities for SNPs and genes. This is ignored 
+if \code{estimate_group_prior = T}}
+
+\item{group_prior_var}{a vector of two prior variances for SNPs and gene effects. This is ignored 
+if \code{estimate_group_prior_var = T}}
+
+\item{group_prior_var_structure}{a string indicating the structure to put on the prior variance parameters.
+"independent" is the default and allows all groups to have their own separate variance parameters.
+"shared" allows all groups to share the same variance parameter.
+"shared+snps" allows all groups to share the same variance parameter, and this variance parameter is also shared with SNPs.
+"inv_gamma" places an inverse-gamma prior on the variance parameters for each group, with shape and rate hypeparameters.}
+
+\item{inv_gamma_shape}{the shape hyperparameter if using "inv_gamma" for \code{group_prior_var_structure}}
+
+\item{inv_gamma_rate}{the rate hyperparameter if using "inv_gamma" for \code{group_prior_var_structure}}
+
+\item{estimate_group_prior}{TRUE/FALSE. If TRUE, the prior inclusion probabilities for SNPs and genes are estimated
+using the data. If FALSE, \code{group_prior} must be specified}
+
+\item{estimate_group_prior_var}{TRUE/FALSE. If TRUE, the prior variances for SNPs and genes are estimated
+using the data. If FALSE, \code{group_prior_var} must be specified}
+
+\item{use_null_weight}{TRUE/FALSE. If TRUE, allow for a probability of no effect in susie}
+
+\item{coverage}{A number between 0 and 1 specifying the \dQuote{coverage} of the estimated confidence sets}
+
+\item{ncore}{The number of cores used to parallelize susie over regions}
 
 \item{ncore.rerun}{integer, number of cores to rerun regions with strong signals
 using full SNPs.}
 
+\item{ncore_LDR}{integer, number of cores to use to parallelize construction of the SNP x gene and gene x gene LD matrices}
+
+\item{outputdir}{a string, the directory to store output}
+
 \item{outname}{a string, the output name}
 
 \item{logfile}{the log file, if NULL will print log info on screen}
+
+\item{merge}{TRUE/FALSE. If TRUE, merge regions when a gene spans a region boundary (i.e. belongs to multiple regions.)}
+
+\item{fine_map}{TRUE/FALSE. If FALSE, only the parameter estimation sets will be run. This is useful for dividing up large jobs
+into parameter estimation and fine mapping steps}
+
+\item{LD_R_dir}{a string, pointing to a directory containing all LD matrix files and variant information. Expects .RDS files which contain LD correlation matrices for a region/block.
+For each RDS file, a file with same base name but ended with .Rvar needs to be present in the same folder. the .Rvar file has 5 required columns: "chrom", "id", "pos", "alt", "ref". 
+If using PredictDB format weights and \code{scale_by_ld_variance=T}, a 6th column is also required: "variance", which is the variance of the each SNP.
+The order of rows needs to match the order of rows in .RDS file.}
+
+\item{standardize}{TRUE/FALSE. If TRUE, all variables are standardized to unit variance}
 }
 \description{
 Causal inference for TWAS using summary statistics

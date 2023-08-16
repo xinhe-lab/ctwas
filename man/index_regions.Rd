@@ -6,7 +6,7 @@
 \usage{
 index_regions(regionfile, exprvarfs, pvarfs = NULL, ld_Rfs = NULL,
   select = NULL, thin = 1, maxSNP = Inf, minvar = 1, merge = T,
-  outname = NULL, outputdir = getwd())
+  outname = NULL, outputdir = getwd(), ncore = 1, reuse_R_gene = F)
 }
 \arguments{
 \item{regionfile}{regions file. Has three columns: chr, start, end. The regions file
@@ -32,7 +32,15 @@ randomly.}
 
 \item{minvar}{minimum number of variatns in a region}
 
-\item{merge}{True/False. If merge regions when a gene belong to multiple regions.}
+\item{merge}{TRUE/FALSE. If TRUE, merge regions when a gene spans a region boundary (i.e. belongs to multiple regions.)}
+
+\item{outname}{a string, the output name}
+
+\item{outputdir}{a string, the directory to store output}
+
+\item{ncore}{the number of cores used to parallelize region indexing}
+
+\item{reuse_R_gene}{an option to reuse the R_gene matrix when indexing for the final rerun step}
 }
 \value{
 A list. Items correspond to each pvarf/exprvarf. Each Item is

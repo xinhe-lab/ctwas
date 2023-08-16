@@ -5,14 +5,37 @@
 \title{Impute expression}
 \usage{
 impute_expr(pgenfs, weight, method = "lasso", outputdir = getwd(),
-  outname = NULL, logfile = NULL, compress = T, harmonize = T)
+  outname = NULL, logfile = NULL, compress = T, harmonize_wgt = T,
+  recover_strand_ambig_wgt = F)
 }
 \arguments{
-\item{weight}{a string, pointing to the fusion/twas format of weights.or predictdb format.
-Note the effect size are obtained with standardized genotype and phenotype.}
+\item{pgenfs}{A character vector of .pgen or .bed files. One file for one
+chromosome, in the order of 1 to 22. Therefore, the length of this vector
+needs to be 22. If .pgen files are given, then .pvar and .psam are assumed
+to present in the same directory. If .bed files are given, then .bim and
+.fam files are assumed to present in the same directory.}
 
-\item{method}{a string,  blup/bslmm/lasso/top1/enet/best
-"best" means the method giving the best cross validation R^2, only used for fusion weight format.}
+\item{weight}{a string, pointing to a directory with the fusion/twas format of weights, 
+or a vector of one or more .db files in PredictDB format.}
+
+\item{method}{a string, blup/bslmm/lasso/top1/enet/best. This option is only used for fusion weights. 
+"best" means the method giving the best cross #' validation R^2. Note that top1 uses only the weight 
+with largest effect.}
+
+\item{outputdir}{a string, the directory to store output}
+
+\item{outname}{a string, the output name}
+
+\item{logfile}{the log file, if NULL will print log info on screen}
+
+\item{compress}{TRUE/FALSE. If TRUE, the imputed expression files are compressed}
+
+\item{harmonize_wgt}{TRUE/FALSE. If TRUE, GWAS and eQTL genotype alleles are harmonized}
+
+\item{recover_strand_ambig_wgt}{TRUE/FALSE. If TRUE, a procedure is used to recover strand ambiguous variants. If FALSE, 
+these variants are dropped from the prediction model. This procedure compares correlations between variants in the the 
+LD reference and prediction models, and it can only be used with PredictDB format prediction models, which include this
+information.}
 
 \item{harmonize}{T/F, if need to harmonize SNP data, if T, will harmonize GWAS and eQTL genotype alleles.}
 }

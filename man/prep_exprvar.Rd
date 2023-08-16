@@ -6,6 +6,9 @@
 \usage{
 prep_exprvar(exprf)
 }
+\arguments{
+\item{exprf}{expression variable info files, the output of \code{impute_expr}}
+}
 \value{
 corresponding exprvar file
 }

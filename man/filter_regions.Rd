@@ -2,10 +2,10 @@
 % Please edit documentation in R/ctwas_process_regions.R
 \name{filter_regions}
 \alias{filter_regions}
-\title{filter regions based on probality of at most 1 causal effect}
+\title{filter regions based on probability of at most 1 causal effect}
 \usage{
-filter_regions(regionlist, group_prior, prob_single = 0.8)
+filter_regions(regionlist, group_prior, prob_single = 0.8, zdf)
 }
 \description{
-filter regions based on probality of at most 1 causal effect
+filter regions based on probability of at most 1 causal effect
 }

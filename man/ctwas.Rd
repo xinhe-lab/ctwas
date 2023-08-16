@@ -5,9 +5,10 @@
 \title{Causal inference for TWAS}
 \usage{
 ctwas(pgenfs, exprfs, Y, ld_regions = c("EUR", "ASN", "AFR"),
-  ld_regions_custom = NULL, thin = 1, prob_single = 0.8,
-  max_snp_region = Inf, rerun_gene_PIP = 0.8, niter1 = 3,
-  niter2 = 30, L = 5, group_prior = NULL, group_prior_var = NULL,
+  ld_regions_version = c("b37", "b38"), ld_regions_custom = NULL,
+  thin = 1, prob_single = 0.8, max_snp_region = Inf,
+  rerun_gene_PIP = 0.8, niter1 = 3, niter2 = 30, L = 5,
+  group_prior = NULL, group_prior_var = NULL,
   estimate_group_prior = T, estimate_group_prior_var = T,
   use_null_weight = T, coverage = 0.95, stardardize = T, ncore = 1,
   outputdir = getwd(), outname = NULL, logfile = NULL)
@@ -39,31 +40,63 @@ files.}
 by `.pgenfs` (defined in .psam or .fam files).}
 
 \item{ld_regions}{A string representing the population to use for defining
-LD regions. These LD regions are defined by ldetect. The user can also
+LD regions. These LD regions were previously defined by ldetect. The user can also
 provide custom LD regions matching genotype data, see
 \code{ld_regions_custom}.}
 
-\item{ld_regions_custom}{A bed format file defining LD regions. The default
-is \code{NULL}; when specified, \code{ld_regions} will be ignored.}
+\item{ld_regions_version}{A string representing the genome reference build ("b37", "b38") to use for defining
+LD regions. See \code{ld_regions}.}
 
-\item{prob_single}{blocks with probability more than this value will be
+\item{ld_regions_custom}{A bed format file defining LD regions. The default
+is \code{NULL}; when specified, \code{ld_regions} and \code{ld_regions_version} will be ignored.}
+
+\item{thin}{The proportion of SNPs to be used for the parameter estimation and initial fine 
+mapping steps. Smaller \code{thin} parameters reduce runtime at the expense of accuracy. The fine mapping step is rerun using full SNPs 
+for regions with strong gene signals; see \code{rerun_gene_PIP}.}
+
+\item{prob_single}{Blocks with probability greater than \code{prob_single} of having 1 or fewer effects will be
 used for parameter estimation}
 
 \item{max_snp_region}{Inf or integer. Maximum number of SNPs in a region. Default is
 Inf, no limit. This can be useful if there are many SNPs in a region and you don't
 have enough memory to run the program. This applies to the last rerun step
- (using full SNPs and rerun susie for regions with strong gene signals) only.}
+(using full SNPs and rerun susie for regions with strong gene signals) only.}
 
 \item{rerun_gene_PIP}{if thin <1, will rerun blocks with the max gene PIP
 > \code{rerun_gene_PIP} using full SNPs. if \code{rerun_gene_PIP} is 0, then
 all blocks will rerun with full SNPs}
 
+\item{niter1}{the number of iterations of the E-M algorithm to perform during the initial parameter estimation step}
+
+\item{niter2}{the number of iterations of the E-M algorithm to perform during the complete parameter estimation step}
+
+\item{L}{the number of effects for susie during the fine mapping steps}
+
+\item{group_prior}{a vector of two prior inclusion probabilities for SNPs and genes. This is ignored 
+if \code{estimate_group_prior = T}}
+
+\item{group_prior_var}{a vector of two prior variances for SNPs and gene effects. This is ignored 
+if \code{estimate_group_prior_var = T}}
+
+\item{estimate_group_prior}{TRUE/FALSE. If TRUE, the prior inclusion probabilities for SNPs and genes are estimated
+using the data. If FALSE, \code{group_prior} must be specified}
+
+\item{estimate_group_prior_var}{TRUE/FALSE. If TRUE, the prior variances for SNPs and genes are estimated
+using the data. If FALSE, \code{group_prior_var} must be specified}
+
+\item{use_null_weight}{TRUE/FALSE. If TRUE, allow for a probability of no effect in susie}
+
+\item{coverage}{A number between 0 and 1 specifying the \dQuote{coverage} of the estimated confidence sets}
+
+\item{ncore}{The number of cores used to parallelize susie over regions}
+
+\item{outputdir}{a string, the directory to store output}
+
 \item{outname}{a string, the output name}
 
 \item{logfile}{the log file, if NULL will print log info on screen}
 
-\item{harmonize}{TRUE/FALSE. If TRUE, will harmonize GWAS, LD reference
-and weight internally (flip alleles and remove strand ambiguous SNPs).}
+\item{standardize}{TRUE/FALSE. If TRUE, all variables are standardized to unit variance}
 }
 \description{
 Causal inference for TWAS

@@ -5,7 +5,7 @@
 \title{annotate susie results. this will generate out put txt files}
 \usage{
 anno_susie(susieres, geneinfo, snpinfo, gidx, sidx, region_tag1,
-  region_tag2)
+  region_tag2, type)
 }
 \description{
 annotate susie results. this will generate out put txt files

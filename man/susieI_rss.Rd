@@ -2,14 +2,88 @@
 % Please edit documentation in R/ctwas_susieI_rss.R
 \name{susieI_rss}
 \alias{susieI_rss}
-\title{SuSiE iteraitve rss version}
+\title{Iteratively run susie and estimate parameters - RSS version}
 \usage{
 susieI_rss(zdf, regionlist, ld_exprfs, ld_pgenfs = NULL, ld_Rfs = NULL,
   niter = 20, L = 1, z_ld_weight = 0, group_prior = NULL,
-  group_prior_var = NULL, estimate_group_prior = T,
+  group_prior_var = NULL, group_prior_var_structure = c("independent",
+  "shared", "shared+snps", "inv_gamma"), estimate_group_prior = T,
   estimate_group_prior_var = T, use_null_weight = T, coverage = 0.95,
-  ncore = 1, outputdir = getwd(), outname = NULL)
+  ncore = 1, outputdir = getwd(), outname = NULL,
+  inv_gamma_shape = 1, inv_gamma_rate = 0, report_parameters = T)
+}
+\arguments{
+\item{zdf}{A data frame with three columns: "id", "z", "type". 
+This data frame gives the the z scores for SNPs and genes, denoted in "type".
+The "type" column can also be use to specify multiple sets of weights}
+
+\item{regionlist}{a list object indexing regions, variants and genes. The output of 
+\code{index_regions}}
+
+\item{ld_exprfs}{A character vector of .`expr` or `.expr.gz` files. One file for
+one chromosome, in the order of 1 to 22. Therefore, the length of this vector
+needs to be 22.  `.expr.gz` file is gzip compressed `.expr` files. `.expr` is
+a matrix of imputed expression values, row is for each sample, column is for
+each gene. Its sample order is same as in files provided by `.pgenfs`. We also
+assume corresponding `.exprvar` files are present in the same directory.
+`.exprvar` files are just tab delimited text files, with columns:
+\describe{
+  \item{chrom}{chromosome number, numeric}
+  \item{p0}{gene boundary position, the smaller value}
+  \item{p1}{gene boundary position, the larger value}
+  \item{id}{gene id}
+}
+Its rows should be in the same order as the columns for corresponding `.expr`
+files.}
+
+\item{ld_pgenfs}{A character vector of .pgen or .bed files. One file for one
+chromosome, in the order of 1 to 22. Therefore, the length of this vector
+needs to be 22. If .pgen files are given, then .pvar and .psam are assumed
+to present in the same directory. If .bed files are given, then .bim and
+.fam files are assumed to present in the same directory.}
+
+\item{ld_Rfs}{a vector of paths to the LD matrices}
+
+\item{niter}{the number of iterations of the E-M algorithm to perform}
+
+\item{L}{the number of effects for susie}
+
+\item{z_ld_weight}{the z_ld_weight parameter for susie_rss}
+
+\item{group_prior}{a vector of two prior inclusion probabilities for SNPs and genes. This is ignored 
+if \code{estimate_group_prior = T}}
+
+\item{group_prior_var}{a vector of two prior variances for SNPs and gene effects. This is ignored 
+if \code{estimate_group_prior_var = T}}
+
+\item{group_prior_var_structure}{a string indicating the structure to put on the prior variance parameters.
+"independent" is the default and allows all groups to have their own separate variance parameters.
+"shared" allows all groups to share the same variance parameter.
+"shared+snps" allows all groups to share the same variance parameter, and this variance parameter is also shared with SNPs.
+"inv_gamma" places an inverse-gamma prior on the variance parameters for each group, with shape and rate hypeparameters.}
+
+\item{estimate_group_prior}{TRUE/FALSE. If TRUE, the prior inclusion probabilities for SNPs and genes are estimated
+using the data. If FALSE, \code{group_prior} must be specified}
+
+\item{estimate_group_prior_var}{TRUE/FALSE. If TRUE, the prior variances for SNPs and genes are estimated
+using the data. If FALSE, \code{group_prior_var} must be specified}
+
+\item{use_null_weight}{TRUE/FALSE. If TRUE, allow for a probability of no effect in susie}
+
+\item{coverage}{A number between 0 and 1 specifying the \dQuote{coverage} of the estimated confidence sets}
+
+\item{ncore}{The number of cores used to parallelize susie over regions}
+
+\item{outputdir}{a string, the directory to store output}
+
+\item{outname}{a string, the output name}
+
+\item{inv_gamma_shape}{the shape hyperparameter if using "inv_gamma" for \code{group_prior_var_structure}}
+
+\item{inv_gamma_rate}{the rate hyperparameter if using "inv_gamma" for \code{group_prior_var_structure}}
+
+\item{report_parameters}{TRUE/FALSE. If TRUE, estimated parameters are reported at the end of iteration}
 }
 \description{
-SuSiE iteraitve rss version
+Iteratively run susie and estimate parameters - RSS version
 }

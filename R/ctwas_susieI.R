@@ -1,17 +1,66 @@
-#' SuSiE iteraitve
-#' @param standardize True/False. Follows susie convention: If
-#' standardize = TRUE, standardize the columns of X to unit variance
-#'  prior to fitting. Note that scaled_prior_variance' specifies the prior
-#'  on the coefficients of X after standardization (if it is performed).
-#'  If you do not standardize, you may need to think more carefully about
-#'  specifying scaled_prior_variance. Whatever your choice, the coefficients
-#'  returned by coef are given for X on the original input scale. Any
-#'  column of X that has zero variance is not standardized, but left
-#'  as is.
+#' Iteratively run susie and estimate parameters
+#' 
+#' @param pgenfs A character vector of .pgen or .bed files. One file for one
+#' chromosome, in the order of 1 to 22. Therefore, the length of this vector
+#' needs to be 22. If .pgen files are given, then .pvar and .psam are assumed
+#' to present in the same directory. If .bed files are given, then .bim and
+#' .fam files are assumed to present in the same directory.
+#' 
+#' @param A character vector of .`expr` or `.expr.gz` files. One file for
+#' one chromosome, in the order of 1 to 22. Therefore, the length of this vector
+#' needs to be 22.  `.expr.gz` file is gzip compressed `.expr` files. `.expr` is
+#' a matrix of imputed expression values, row is for each sample, column is for
+#' each gene. Its sample order is same as in files provided by `.pgenfs`. We also
+#' assume corresponding `.exprvar` files are present in the same directory.
+#' `.exprvar` files are just tab delimited text files, with columns:
+#' \describe{
+#'   \item{chrom}{chromosome number, numeric}
+#'   \item{p0}{gene boundary position, the smaller value}
+#'   \item{p1}{gene boundary position, the larger value}
+#'   \item{id}{gene id}
+#' }
+#' Its rows should be in the same order as the columns for corresponding `.expr`
+#' files.
+#' 
+#' @param Y a vector of length n, phenotype, the same order as provided
+#' by `.pgenfs` (defined in .psam or .fam files).
+#' 
+#' @param regionlist a list object indexing regions, variants and genes. The output of 
+#' \code{index_regions}
+#' 
+#' @param niter the number of iterations of the E-M algorithm to perform 
+#' 
+#' @param L the number of effects for susie
+#' 
+#' @param group_prior a vector of two prior inclusion probabilities for SNPs and genes. This is ignored 
+#' if \code{estimate_group_prior = T}
+#' 
+#' @param group_prior_var a vector of two prior variances for SNPs and gene effects. This is ignored 
+#' if \code{estimate_group_prior_var = T}
+#' 
+#' @param estimate_group_prior TRUE/FALSE. If TRUE, the prior inclusion probabilities for SNPs and genes are estimated
+#' using the data. If FALSE, \code{group_prior} must be specified
+#' 
+#' @param estimate_group_prior_var TRUE/FALSE. If TRUE, the prior variances for SNPs and genes are estimated
+#' using the data. If FALSE, \code{group_prior_var} must be specified
+#' 
+#' @param use_null_weight TRUE/FALSE. If TRUE, allow for a probability of no effect in susie
+#' 
+#' @param coverage A number between 0 and 1 specifying the \dQuote{coverage} of the estimated confidence sets
+#' 
+#' @param standardize TRUE/FALSE. If TRUE, all variables are standardized to unit variance
+#' 
+#' @param ncore The number of cores used to parallelize susie over regions
+#' 
+#' @param outputdir a string, the directory to store output
+#' 
+#' @param outname a string, the output name
+#' 
+#' @param report_parameters TRUE/FALSE. If TRUE, estimated parameters are reported at the end of iteration
 #'
 #' @importFrom logging loginfo
 #' @importFrom foreach %dopar% foreach
-#' @export
+#' 
 susieI <- function(pgenfs,
                    exprfs,
                    Y,
@@ -27,7 +76,8 @@ susieI <- function(pgenfs,
                    standardize = T,
                    ncore = 1,
                    outputdir = getwd(),
-                   outname = NULL) {
+                   outname = NULL,
+                   report_parameters=T) {
 
   outname <- file.path(outputdir, outname)
 
@@ -61,8 +111,6 @@ susieI <- function(pgenfs,
 
     outdf <- foreach (core = 1:length(corelist), .combine = "rbind",
                       .packages = "ctwas") %dopar% {
-    # outdf <- NULL
-    # for (core in 1) {
 
         outdf.core.list <- list()
 
@@ -127,7 +175,6 @@ susieI <- function(pgenfs,
 
         outdf.core <- do.call(rbind, outdf.core.list)
         outdf.core
-        # outdf <- rbind(outdf, outdf.core)
     }
 
     if (isTRUE(estimate_group_prior)){
@@ -136,8 +183,10 @@ susieI <- function(pgenfs,
       group_prior_rec[, iter] <- c(prior.gene, prior.SNP)
     }
 
-    loginfo("After iteration %s, gene prior %s:, SNP prior:%s",
-                 iter, prior.gene, prior.SNP)
+    if (report_parameters){
+      loginfo("After iteration %s, gene prior %s:, SNP prior:%s",
+              iter, prior.gene, prior.SNP)
+    }
 
     if (isTRUE(estimate_group_prior_var)){
       outdf.g <- outdf[outdf[ , "type"] == "gene", ]

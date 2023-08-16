@@ -33,13 +33,29 @@ allele.qc = function(a1,a2,ref1,ref2) {
 
 #' Harmonize z scores from GWAS to match ld reference genotypes.
 #' Flip signs when reverse complement matches.
+#' 
 #' @param z_snp a data frame, with columns "id", "A1", "A2" and "z".
 #'     Z scores for every SNP. "A1" is the effect allele.
-#' @param ld_snpinfo A data frame, snp info for LD reference,
+#'     
+#' @param ld_snpinfo a data frame, snp info for LD reference,
 #'  with columns "chrom", "id", "pos", "alt", "ref".
-#' @return A data frame, z_snp with the "z" columns flipped to match LD ref.
-#'
-#' @export
+#'  
+#' @param strand_ambig_action the action to take to harmonize strand ambiguous variants (A/T, G/C) between 
+#' the z scores and LD reference. "drop" removes the ambiguous variant from the z scores. "none" treats the variant 
+#' as unambiguous, flipping the z score to match the LD reference and then taking no additional action. "recover" 
+#' imputes the sign of ambiguous z scores using unambiguous z scores and the LD reference and flips the z scores 
+#' if there is a mismatch between the imputed sign and the observed sign of the z score. This option is computationally intensive
+#' 
+#' @param ld_pgenfs a character vector of .pgen or .bed files. One file for one
+#'  chromosome, in the order of 1 to 22. Therefore, the length of this vector
+#'  needs to be 22. If .pgen files are given, then .pvar and .psam are assumed
+#'  to present in the same directory. If .bed files are given, then .bim and
+#'  .fam files are assumed to present in the same directory.
+#'  
+#' @param ld_Rinfo a vector of paths to the variant information for all LD matrices 
+#' 
+#' @return a data frame, z_snp with the "z" columns flipped to match LD ref.
+#' 
 harmonize_z_ld <- function(z_snp, ld_snpinfo, strand_ambig_action = c("drop", "none", "recover"), ld_pgenfs = NULL, ld_Rinfo = NULL){
   strand_ambig_action <- match.arg(strand_ambig_action)
   snpnames <- intersect(z_snp$id, ld_snpinfo$id)
@@ -101,15 +117,35 @@ harmonize_z_ld <- function(z_snp, ld_snpinfo, strand_ambig_action = c("drop", "n
 
 #' Harmonize z scores from GWAS to match ld reference genotypes.
 #' Flip signs when reverse complement matches, remove strand ambiguous SNPs
+#' 
 #' @param wgt.matrix from FUSION weight .Rdat file
+#' 
 #' @param snps from FUSION weight .Rdat file
 #'  with columns "chrom", "id", "pos", "alt", "ref". The effect allele
 #'  for FUSION is alt.
+#'  
+#' @param ld_snpinfo a data frame, snp info for LD reference,
+#'  with columns "chrom", "id", "pos", "alt", "ref".
+#'  
+#' @param recover_strand_ambig TRUE/FALSE. If TRUE, a procedure is used to recover strand ambiguous variants. If FALSE, 
+#' these variants are dropped from the prediction model. This procedure compares correlations between variants in the the 
+#' LD reference and prediction models, and it can only be used with PredictDB format prediction models, which include this
+#' information.
+#'  
+#' @param ld_pgenfs a character vector of .pgen or .bed files. One file for one
+#'  chromosome, in the order of 1 to 22. Therefore, the length of this vector
+#'  needs to be 22. If .pgen files are given, then .pvar and .psam are assumed
+#'  to present in the same directory. If .bed files are given, then .bim and
+#'  .fam files are assumed to present in the same directory.
+#'  
+#' @param ld_Rinfo a vector of paths to the variant information for all LD matrices 
+#'  
+#' @param R_wgt the LD matrix for the variants in \code{wgt.matrix} 
+#'  
 #' @return wgt.matrix and snps with alleles flipped to match
-#'
-#' @export
+#' 
 harmonize_wgt_ld <- function (wgt.matrix, snps, ld_snpinfo, recover_strand_ambig=T, 
-                              ld_pgenfs=NULL, ld_Rinfo=NULL, R_wgt=NULL, wgt=NULL){
+                              ld_pgenfs=NULL, ld_Rinfo=NULL, R_wgt=NULL){
   colnames(snps) <- c("chrom", "id", "cm", "pos", "alt", "ref")
   snps <- snps[match(rownames(wgt.matrix), snps$id), ]
   snpnames <- intersect(snps$id, ld_snpinfo$id)
@@ -196,6 +232,37 @@ harmonize_wgt_ld <- function (wgt.matrix, snps, ld_snpinfo, recover_strand_ambig
   return(list(wgt = wgt.matrix, snps = snps))
 }
 
+#' Harmonize GWAS summary statistics and LD reference
+#' 
+#' @param z_snp A data frame with two columns: "id", "A1", "A2", "z". giving the z scores for
+#' snps. "A1" is effect allele. "A2" is the other allele. If `harmonize= False`, A1 and A2 are not required.
+#' 
+#' @param LD_R_dir a string, pointing to a directory containing all LD matrix files and variant information. Expects .RDS files which contain LD correlation matrices for a region/block.
+#' For each RDS file, a file with same base name but ended with .Rvar needs to be present in the same folder. the .Rvar file has 5 required columns: "chrom", "id", "pos", "alt", "ref". 
+#' If using PredictDB format weights and \code{scale_by_ld_variance=T}, a 6th column is also required: "variance", which is the variance of the each SNP.
+#' The order of rows needs to match the order of rows in .RDS file.
+#'   
+#' @param outputdir a string, the directory to store output
+#' 
+#' @param outname a string, the output name
+#' 
+#' @param logfile the log file, if NULL will print log info on screen
+#' 
+#' @param harmonize_z TRUE/FALSE. If TRUE, GWAS and eQTL genotype alleles are harmonized
+#' 
+#' @param strand_ambig_action_z the action to take to harmonize strand ambiguous variants (A/T, G/C) between 
+#' the z scores and LD reference. "drop" removes the ambiguous variant from the z scores. "none" treats the variant 
+#' as unambiguous, flipping the z score to match the LD reference and then taking no additional action. "recover" 
+#' imputes the sign of ambiguous z scores using unambiguous z scores and the LD reference and flips the z scores 
+#' if there is a mismatch between the imputed sign and the observed sign of the z score. This option is computationally intensive
+#' 
+#' @param drop_multiallelic TRUE/FALSE. If TRUE, multiallelic variants will be dropped from the summary statistics
+#' 
+#' @importFrom logging addHandler loginfo
+#' @importFrom tools file_ext
+#'
+#' @export
+#' 
 preharmonize_z_ld <- function (z_snp, ld_R_dir, outputdir = getwd(), outname = NULL, logfile = NULL,
                            harmonize_z = T, strand_ambig_action_z = c("drop", "none", "recover"),
                            drop_multiallelic=T){

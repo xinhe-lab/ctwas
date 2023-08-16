@@ -1,10 +1,14 @@
 #' Prepare .pvar file
+#' 
 #' @param pgenf pgen file
-#'  .pvar file format: https://www.cog-genomics.org/plink/2.0/formats#pvar
+#' .pvar file format: https://www.cog-genomics.org/plink/2.0/formats#pvar
+#'  
+#' @param outputdir a string, the directory to store output
+#'  
 #' @return corresponding pvar file
 #'
 #' @importFrom tools file_ext file_path_sans_ext
-#' @export
+#' 
 prep_pvar <- function(pgenf, outputdir = getwd()){
 
   if (file_ext(pgenf) == "pgen"){
@@ -58,7 +62,7 @@ prep_pvar <- function(pgenf, outputdir = getwd()){
 #'  .pvar file format: https://www.cog-genomics.org/plink/2.0/formats#pvar
 #'
 #' @return A data.table. variant info
-#' @export
+#' 
 read_pvar <- function(pvarf){
 
   pvardt <- data.table::fread(pvarf, skip = "#CHROM")
@@ -69,9 +73,12 @@ read_pvar <- function(pvarf){
 }
 
 #' Read .pgen file into R
+#' 
 #' @param pgenf .pgen file or .bed file
+#' 
 #' @param pvarf .pvar file or .bim file with have proper
 #'  header.  Matching `pgenf`.
+#'  
 #' @return  A matrix of allele count for each variant (columns) in each sample
 #'  (rows). ALT allele in pvar file is counted (A1 allele in .bim file is the ALT
 #'   allele).
@@ -79,8 +86,6 @@ read_pvar <- function(pvarf){
 #' @importFrom pgenlibr NewPvar
 #' @importFrom pgenlibr NewPgen
 #' @importFrom tools file_ext file_path_sans_ext
-#'
-#' @export
 #'
 prep_pgen <- function(pgenf, pvarf){
 
@@ -103,12 +108,17 @@ prep_pgen <- function(pgenf, pvarf){
 }
 
 #' Read pgen file into R
+#' 
+#' @param pgen .pgen file or .bed file
+#' 
 #' @param variantidx variant index. If NULL, all variants will be extracted.
+#' 
 #' @return A matrix, columns are allele count for each SNP, rows are
 #'  for each sample.
+#'  
 #' @importFrom pgenlibr GetVariantCt
 #' @importFrom pgenlibr ReadList
-#' @export
+#' 
 read_pgen <- function(pgen, variantidx = NULL, meanimpute = F ){
   if (is.null(variantidx)){
     variantidx <- 1: pgenlibr::GetVariantCt(pgen)}
@@ -118,12 +128,14 @@ read_pgen <- function(pgen, variantidx = NULL, meanimpute = F ){
                      meanimpute = meanimpute)
 }
 
-
 #' Prepare .exprvar file
+#' 
+#' @param exprf expression variable info files, the output of \code{impute_expr}
+#' 
 #' @return corresponding exprvar file
 #'
 #' @importFrom tools file_ext file_path_sans_ext
-#' @export
+#' 
 prep_exprvar <- function(exprf){
   if (file_ext(exprf) == "gz"){
     exprf <- file_path_sans_ext(exprf)
@@ -133,8 +145,11 @@ prep_exprvar <- function(exprf){
 }
 
 #' Read .exprvar file into R
+#' 
+#' @param exprvarf expression variable info files, prepared by the \code{prep_exprvar} function
+#' 
 #' @return A data.table. variant info
-#' @export
+#' 
 read_exprvar <- function(exprvarf){
 
   exprvar <- try(data.table::fread(exprvarf, header = T))
@@ -147,10 +162,14 @@ read_exprvar <- function(exprvarf){
 }
 
 #' Read .expr file into R
+#' 
+#' @param exprf expression variable info files, the output of \code{impute_expr}
+#' 
 #' @param variantidx variant index. If NULL, all variants will be extracted.
+#' 
 #' @return A matrix, columns are imputed expression for each gene, rows are
 #'  for each sample.
-#' @export
+#'  
 read_expr <- function(exprf, variantidx = NULL){
   if (!is.null(variantidx) & length(variantidx)==0){
     return(NULL)
@@ -160,13 +179,15 @@ read_expr <- function(exprf, variantidx = NULL){
   }
 }
 
-
 #' read variant information associated with a LD R matrix .RDS file.
+#' 
+#' @param ld_RDSf files containing the variant information for the LD matrices
 #'
 #' @return a data frame with columns: "chrom", "id", "pos", "alt", "ref". "alt" is
 #' the coded allele
 #'
 #' @importFrom tools file_ext file_path_sans_ext
+#' 
 read_ld_Rvar_RDS <- function(ld_RDSf){
   ld_Rvarf <- paste0(file_path_sans_ext(ld_RDSf), ".Rvar")
   ld_Rvar <- data.table::fread(ld_Rvarf, header = T)
@@ -179,13 +200,19 @@ read_ld_Rvar_RDS <- function(ld_RDSf){
   }
 }
 
-
-#' @param ld_R_dir The directory that contains all ld R mattrices.
+#' combined variant information associated with a LD R matrix .RDS file.
+#' 
+#' @param ld_R_dir The directory that contains all ld R matrices.
 #' the ld R matrices should not have overlapping positions.
+#' 
+#' @param outputdir a string, the directory to store output
+#' 
+#' @param outname a string, the output name
 #'
 #' @return A vector of the `ld_Rf` file names. The function will write one `ld_Rf` file
 #' for each chromosome, so the vector has length 22. The `ld_Rf` file has the following
 #' columns: chr region_name start stop RDS_file.
+#' 
 write_ld_Rf <- function(ld_R_dir, outname = outname , outputdir = getwd()){
   ld_RDSfs <- list.files(path = ld_R_dir, pattern = "\\.RDS$", full.names = T)
   ldinfolist <- list()
@@ -229,8 +256,12 @@ write_ld_Rf <- function(ld_R_dir, outname = outname , outputdir = getwd()){
   ld_Rfs
 }
 
-#' read variant information for all ld mattrices in `ld_Rf`.
+#' read variant information for all ld matrices in `ld_Rf`.
+#' 
+#' @param ld_Rf a vector of paths to the LD matrices
+#' 
 #' @return a data frame with columns: "chrom", "id", "pos", "alt", "ref"
+#' 
 read_ld_Rvar <- function(ld_Rf){
   Rinfo <- data.table::fread(ld_Rf, header = T)
   if (nrow(Rinfo)>0){
@@ -470,6 +501,3 @@ read_weight_predictdb <- function (weight, chrom, ld_snpinfo, z_snp = NULL, harm
   
   return(list(exprlist = exprlist, qclist = qclist))
 }
-
-
-

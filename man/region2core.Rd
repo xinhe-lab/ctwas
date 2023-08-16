@@ -2,7 +2,7 @@
 % Please edit documentation in R/ctwas_process_regions.R
 \name{region2core}
 \alias{region2core}
-\title{parallel regions}
+\title{assign regions to cores}
 \usage{
 region2core(regionlist, ncore = 1)
 }
@@ -12,5 +12,5 @@ regions allocated to given number of cores
 regionlist need to contain at least 1 non-empty}
 }
 \description{
-parallel regions
+assign regions to cores
 }
