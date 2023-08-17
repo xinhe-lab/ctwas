@@ -147,7 +147,7 @@ harmonize_z_ld <- function(z_snp, ld_snpinfo, strand_ambig_action = c("drop", "n
 #' @return wgt.matrix and snps with alleles flipped to match
 #' 
 harmonize_wgt_ld <- function (wgt.matrix, snps, ld_snpinfo, recover_strand_ambig=T, 
-                              ld_pgenfs=NULL, ld_Rinfo=NULL, R_wgt=NULL){
+                              ld_pgenfs=NULL, ld_Rinfo=NULL, R_wgt=NULL, wgt=NULL){
   colnames(snps) <- c("chrom", "id", "cm", "pos", "alt", "ref")
   snps <- snps[match(rownames(wgt.matrix), snps$id), ]
   snpnames <- intersect(snps$id, ld_snpinfo$id)
