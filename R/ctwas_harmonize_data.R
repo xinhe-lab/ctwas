@@ -141,6 +141,8 @@ harmonize_z_ld <- function(z_snp, ld_snpinfo, strand_ambig_action = c("drop", "n
 #' @param ld_Rinfo a vector of paths to the variant information for all LD matrices 
 #'  
 #' @param R_wgt the LD matrix for the variants in \code{wgt.matrix} 
+#' 
+#' @param wgt allele information from the weights
 #'  
 #' @return wgt.matrix and snps with alleles flipped to match
 #' 
