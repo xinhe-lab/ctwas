@@ -28,8 +28,6 @@
 #' LD reference and prediction models, and it can only be used with PredictDB format prediction models, which include this
 #' information.
 #' 
-#' @param harmonize T/F, if need to harmonize SNP data, if T, will harmonize GWAS and eQTL genotype alleles.
-#' 
 #' @importFrom logging addHandler loginfo
 #'
 #' @export
