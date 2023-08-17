@@ -36,8 +36,6 @@ with largest effect.}
 these variants are dropped from the prediction model. This procedure compares correlations between variants in the the 
 LD reference and prediction models, and it can only be used with PredictDB format prediction models, which include this
 information.}
-
-\item{harmonize}{T/F, if need to harmonize SNP data, if T, will harmonize GWAS and eQTL genotype alleles.}
 }
 \description{
 Impute expression

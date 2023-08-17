@@ -2,11 +2,11 @@
 % Please edit documentation in R/ctwas_anno_susie.R
 \name{anno_susie}
 \alias{anno_susie}
-\title{annotate susie results. this will generate out put txt files}
+\title{annotate susie results. this will generate output text files}
 \usage{
 anno_susie(susieres, geneinfo, snpinfo, gidx, sidx, region_tag1,
   region_tag2, type)
 }
 \description{
-annotate susie results. this will generate out put txt files
+annotate susie results. this will generate output text files
 }

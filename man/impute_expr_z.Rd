@@ -2,7 +2,7 @@
 % Please edit documentation in R/ctwas_impute_expr_z.R
 \name{impute_expr_z}
 \alias{impute_expr_z}
-\title{Impute expression}
+\title{Impute expression z scores}
 \usage{
 impute_expr_z(z_snp, weight, ld_pgenfs = NULL, ld_R_dir = NULL,
   method = "lasso", outputdir = getwd(), outname = NULL,
@@ -65,5 +65,5 @@ If using PredictDB format weights and \code{scale_by_ld_variance=T}, a 6th colum
 The order of rows needs to match the order of rows in .RDS file.}
 }
 \description{
-Impute expression
+Impute expression z scores
 }

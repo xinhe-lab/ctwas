@@ -3,10 +3,10 @@
 \name{harmonize_wgt_ld}
 \alias{harmonize_wgt_ld}
 \title{Harmonize z scores from GWAS to match ld reference genotypes.
-Flip signs when reverse complement matches, remove strand ambiguous SNPs}
+Flip signs when reverse complement matches, remove/recover strand ambiguous SNPs}
 \usage{
 harmonize_wgt_ld(wgt.matrix, snps, ld_snpinfo, recover_strand_ambig = T,
-  ld_pgenfs = NULL, ld_Rinfo = NULL, R_wgt = NULL)
+  ld_pgenfs = NULL, ld_Rinfo = NULL, R_wgt = NULL, wgt = NULL)
 }
 \arguments{
 \item{wgt.matrix}{from FUSION weight .Rdat file}
@@ -32,11 +32,13 @@ to present in the same directory. If .bed files are given, then .bim and
 \item{ld_Rinfo}{a vector of paths to the variant information for all LD matrices}
 
 \item{R_wgt}{the LD matrix for the variants in \code{wgt.matrix}}
+
+\item{wgt}{allele information from the weights}
 }
 \value{
 wgt.matrix and snps with alleles flipped to match
 }
 \description{
 Harmonize z scores from GWAS to match ld reference genotypes.
-Flip signs when reverse complement matches, remove strand ambiguous SNPs
+Flip signs when reverse complement matches, remove/recover strand ambiguous SNPs
 }

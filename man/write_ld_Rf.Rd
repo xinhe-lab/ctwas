@@ -2,7 +2,7 @@
 % Please edit documentation in R/ctwas_read_data.R
 \name{write_ld_Rf}
 \alias{write_ld_Rf}
-\title{combined variant information associated with a LD R matrix .RDS file.}
+\title{combine variant information associated with a LD R matrix .RDS file.}
 \usage{
 write_ld_Rf(ld_R_dir, outname = outname, outputdir = getwd())
 }
@@ -20,5 +20,5 @@ for each chromosome, so the vector has length 22. The `ld_Rf` file has the follo
 columns: chr region_name start stop RDS_file.
 }
 \description{
-combined variant information associated with a LD R matrix .RDS file.
+combine variant information associated with a LD R matrix .RDS file.
 }
