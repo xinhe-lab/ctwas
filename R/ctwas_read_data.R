@@ -200,7 +200,7 @@ read_ld_Rvar_RDS <- function(ld_RDSf){
   }
 }
 
-#' combined variant information associated with a LD R matrix .RDS file.
+#' combine variant information associated with a LD R matrix .RDS file.
 #' 
 #' @param ld_R_dir The directory that contains all ld R matrices.
 #' the ld R matrices should not have overlapping positions.
