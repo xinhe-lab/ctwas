@@ -32,7 +32,11 @@ randomly.}
 
 \item{minvar}{minimum number of variatns in a region}
 
-\item{merge}{True/False. If merge regions when a gene belong to multiple regions.}
+\item{merge}{TRUE/FALSE. If TRUE, merge regions when a gene spans a region boundary (i.e. belongs to multiple regions.)}
+
+\item{outname}{a string, the output name}
+
+\item{outputdir}{a string, the directory to store output}
 }
 \value{
 A list. Items correspond to each pvarf/exprvarf. Each Item is

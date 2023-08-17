@@ -1,4 +1,4 @@
-#' annotate susie results. this will generate out put txt files
+#' annotate susie results. this will generate output text files
 #'
 anno_susie <- function(susieres,
                        geneinfo,
@@ -43,4 +43,3 @@ anno_susie <- function(susieres,
 
   outdf.rn
 }
-

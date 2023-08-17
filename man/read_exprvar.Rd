@@ -6,6 +6,9 @@
 \usage{
 read_exprvar(exprvarf)
 }
+\arguments{
+\item{exprvarf}{expression variable info files, prepared by the \code{prep_exprvar} function}
+}
 \value{
 A data.table. variant info
 }

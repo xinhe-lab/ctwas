@@ -9,6 +9,8 @@ prep_pvar(pgenf, outputdir = getwd())
 \arguments{
 \item{pgenf}{pgen file
 .pvar file format: https://www.cog-genomics.org/plink/2.0/formats#pvar}
+
+\item{outputdir}{a string, the directory to store output}
 }
 \value{
 corresponding pvar file

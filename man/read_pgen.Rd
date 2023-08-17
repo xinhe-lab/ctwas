@@ -7,6 +7,8 @@
 read_pgen(pgen, variantidx = NULL, meanimpute = F)
 }
 \arguments{
+\item{pgen}{.pgen file or .bed file}
+
 \item{variantidx}{variant index. If NULL, all variants will be extracted.}
 }
 \value{

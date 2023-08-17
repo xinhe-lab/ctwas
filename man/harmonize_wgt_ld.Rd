@@ -3,9 +3,10 @@
 \name{harmonize_wgt_ld}
 \alias{harmonize_wgt_ld}
 \title{Harmonize z scores from GWAS to match ld reference genotypes.
-Flip signs when reverse complement matches, remove strand ambiguous SNPs}
+Flip signs when reverse complement matches, remove/recover strand ambiguous SNPs}
 \usage{
-harmonize_wgt_ld(wgt.matrix, snps, ld_snpinfo)
+harmonize_wgt_ld(wgt.matrix, snps, ld_snpinfo, recover_strand_ambig = T,
+  ld_pgenfs = NULL, ld_Rinfo = NULL, R_wgt = NULL, wgt = NULL)
 }
 \arguments{
 \item{wgt.matrix}{from FUSION weight .Rdat file}
@@ -13,11 +14,31 @@ harmonize_wgt_ld(wgt.matrix, snps, ld_snpinfo)
 \item{snps}{from FUSION weight .Rdat file
 with columns "chrom", "id", "pos", "alt", "ref". The effect allele
 for FUSION is alt.}
+
+\item{ld_snpinfo}{a data frame, snp info for LD reference,
+with columns "chrom", "id", "pos", "alt", "ref".}
+
+\item{recover_strand_ambig}{TRUE/FALSE. If TRUE, a procedure is used to recover strand ambiguous variants. If FALSE, 
+these variants are dropped from the prediction model. This procedure compares correlations between variants in the the 
+LD reference and prediction models, and it can only be used with PredictDB format prediction models, which include this
+information.}
+
+\item{ld_pgenfs}{a character vector of .pgen or .bed files. One file for one
+chromosome, in the order of 1 to 22. Therefore, the length of this vector
+needs to be 22. If .pgen files are given, then .pvar and .psam are assumed
+to present in the same directory. If .bed files are given, then .bim and
+.fam files are assumed to present in the same directory.}
+
+\item{ld_Rinfo}{a vector of paths to the variant information for all LD matrices}
+
+\item{R_wgt}{the LD matrix for the variants in \code{wgt.matrix}}
+
+\item{wgt}{allele information from the weights}
 }
 \value{
 wgt.matrix and snps with alleles flipped to match
 }
 \description{
 Harmonize z scores from GWAS to match ld reference genotypes.
-Flip signs when reverse complement matches, remove strand ambiguous SNPs
+Flip signs when reverse complement matches, remove/recover strand ambiguous SNPs
 }

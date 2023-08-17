@@ -1,8 +1,67 @@
-#' SuSiE iteraitve rss version
-#'
+#' Iteratively run susie and estimate parameters - RSS version
+#' 
+#' @param zdf A data frame with three columns: "id", "z", "type". 
+#' This data frame gives the the z scores for SNPs and genes, denoted in "type".
+#' The "type" column can also be use to specify multiple sets of weights
+#' 
+#' @param regionlist a list object indexing regions, variants and genes. The output of 
+#' \code{index_regions}
+#' 
+#' @param ld_exprfs A character vector of .`expr` or `.expr.gz` files. One file for
+#' one chromosome, in the order of 1 to 22. Therefore, the length of this vector
+#' needs to be 22.  `.expr.gz` file is gzip compressed `.expr` files. `.expr` is
+#' a matrix of imputed expression values, row is for each sample, column is for
+#' each gene. Its sample order is same as in files provided by `.pgenfs`. We also
+#' assume corresponding `.exprvar` files are present in the same directory.
+#' `.exprvar` files are just tab delimited text files, with columns:
+#' \describe{
+#'   \item{chrom}{chromosome number, numeric}
+#'   \item{p0}{gene boundary position, the smaller value}
+#'   \item{p1}{gene boundary position, the larger value}
+#'   \item{id}{gene id}
+#' }
+#' Its rows should be in the same order as the columns for corresponding `.expr`
+#' files.
+#' 
+#' @param ld_pgenfs A character vector of .pgen or .bed files. One file for one
+#' chromosome, in the order of 1 to 22. Therefore, the length of this vector
+#' needs to be 22. If .pgen files are given, then .pvar and .psam are assumed
+#' to present in the same directory. If .bed files are given, then .bim and
+#' .fam files are assumed to present in the same directory.
+#' 
+#' @param ld_Rfs a vector of paths to the LD matrices
+#' 
+#' @param niter the number of iterations of the E-M algorithm to perform 
+#' 
+#' @param L the number of effects for susie
+#' 
+#' @param z_ld_weight the z_ld_weight parameter for susie_rss
+#' 
+#' @param group_prior a vector of two prior inclusion probabilities for SNPs and genes. This is ignored 
+#' if \code{estimate_group_prior = T}
+#' 
+#' @param group_prior_var a vector of two prior variances for SNPs and gene effects. This is ignored 
+#' if \code{estimate_group_prior_var = T}
+#' 
+#' @param estimate_group_prior TRUE/FALSE. If TRUE, the prior inclusion probabilities for SNPs and genes are estimated
+#' using the data. If FALSE, \code{group_prior} must be specified
+#' 
+#' @param estimate_group_prior_var TRUE/FALSE. If TRUE, the prior variances for SNPs and genes are estimated
+#' using the data. If FALSE, \code{group_prior_var} must be specified
+#' 
+#' @param use_null_weight TRUE/FALSE. If TRUE, allow for a probability of no effect in susie
+#' 
+#' @param coverage A number between 0 and 1 specifying the \dQuote{coverage} of the estimated confidence sets
+#' 
+#' @param ncore The number of cores used to parallelize susie over regions
+#' 
+#' @param outputdir a string, the directory to store output
+#' 
+#' @param outname a string, the output name
+#' 
 #' @importFrom logging loginfo
 #' @importFrom foreach %dopar% foreach
-#' @export
+#' 
 susieI_rss <- function(zdf,
                        regionlist,
                        ld_exprfs,

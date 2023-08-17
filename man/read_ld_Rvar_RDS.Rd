@@ -6,6 +6,9 @@
 \usage{
 read_ld_Rvar_RDS(ld_RDSf)
 }
+\arguments{
+\item{ld_RDSf}{files containing the variant information for the LD matrices}
+}
 \value{
 a data frame with columns: "chrom", "id", "pos", "alt", "ref". "alt" is
 the coded allele

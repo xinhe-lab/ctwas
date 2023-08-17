@@ -7,6 +7,8 @@
 read_expr(exprf, variantidx = NULL)
 }
 \arguments{
+\item{exprf}{expression variable info files, the output of \code{impute_expr}}
+
 \item{variantidx}{variant index. If NULL, all variants will be extracted.}
 }
 \value{
