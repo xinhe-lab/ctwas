@@ -1,4 +1,4 @@
-#' Impute expression
+#' Impute expression z scores
 #' 
 #' @param z_snp A data frame with two columns: "id", "A1", "A2", "z". giving the z scores for
 #' snps. "A1" is effect allele. "A2" is the other allele. If `harmonize= False`, A1 and A2 are not required.
