@@ -116,7 +116,7 @@ harmonize_z_ld <- function(z_snp, ld_snpinfo, strand_ambig_action = c("drop", "n
 }
 
 #' Harmonize z scores from GWAS to match ld reference genotypes.
-#' Flip signs when reverse complement matches, remove strand ambiguous SNPs
+#' Flip signs when reverse complement matches, remove/recover strand ambiguous SNPs
 #' 
 #' @param wgt.matrix from FUSION weight .Rdat file
 #' 
