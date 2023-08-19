@@ -11,6 +11,7 @@ Install `ctwas`:
 ```
 remotes::install_github("xinhe-lab/ctwas",ref = "main")
 ```
+Currently, ctwas can only be installed on linux systems. We suggset to run ctwas using a high throughput computing system.
 
 # Acknowledgement
 
