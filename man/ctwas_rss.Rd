@@ -4,16 +4,36 @@
 \alias{ctwas_rss}
 \title{Causal inference for TWAS using summary statistics}
 \usage{
-ctwas_rss(z_gene, z_snp, ld_exprfs, ld_pgenfs = NULL, ld_R_dir = NULL,
-  ld_regions = c("EUR", "ASN", "AFR"), ld_regions_version = c("b37",
-  "b38"), ld_regions_custom = NULL, thin = 1, prob_single = 0.8,
-  rerun_gene_PIP = 0.8, niter1 = 3, niter2 = 30, L = 5,
-  group_prior = NULL, group_prior_var = NULL,
-  estimate_group_prior = T, estimate_group_prior_var = T,
-  use_null_weight = T, coverage = 0.95, stardardize = T,
-  max_snp_region = Inf, ncore = 1, ncore.rerun = 1,
-  outputdir = getwd(), outname = NULL, logfile = NULL,
-  merge = TRUE)
+ctwas_rss(
+  z_gene,
+  z_snp,
+  ld_exprfs,
+  ld_pgenfs = NULL,
+  ld_R_dir = NULL,
+  ld_regions = c("EUR", "ASN", "AFR"),
+  ld_regions_version = c("b37", "b38"),
+  ld_regions_custom = NULL,
+  thin = 1,
+  prob_single = 0.8,
+  rerun_gene_PIP = 0.8,
+  niter1 = 3,
+  niter2 = 30,
+  L = 5,
+  group_prior = NULL,
+  group_prior_var = NULL,
+  estimate_group_prior = T,
+  estimate_group_prior_var = T,
+  use_null_weight = T,
+  coverage = 0.95,
+  stardardize = T,
+  max_snp_region = Inf,
+  ncore = 1,
+  ncore.rerun = 1,
+  outputdir = getwd(),
+  outname = NULL,
+  logfile = NULL,
+  merge = TRUE
+)
 }
 \arguments{
 \item{z_gene}{A data frame with two columns: "id", "z". giving the z scores for genes.}

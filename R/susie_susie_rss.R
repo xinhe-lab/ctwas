@@ -172,8 +172,6 @@
 #' zhat <- with(ss,betahat/sebetahat)
 #' res  <- susie_rss(zhat,R,L = 10)
 #'
-#' @export
-#'
 susie_rss = function (z, R, maf = NULL, maf_thresh = 0, z_ld_weight = 0,
                       L = 10, prior_variance = 50, residual_variance = NULL,
                       prior_weights = NULL, null_weight = NULL,

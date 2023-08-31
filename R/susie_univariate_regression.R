@@ -43,8 +43,6 @@
 #' @importFrom stats coef
 #' @importFrom stats summary.lm
 #'
-#' @export
-#' 
 univariate_regression = function (X, y, Z = NULL, center = TRUE,
                                   scale = FALSE, return_residuals = FALSE) {
   y_na = which(is.na(y))

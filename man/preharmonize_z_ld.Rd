@@ -4,9 +4,16 @@
 \alias{preharmonize_z_ld}
 \title{Harmonize GWAS summary statistics and LD reference}
 \usage{
-preharmonize_z_ld(z_snp, ld_R_dir, outputdir = getwd(), outname = NULL,
-  logfile = NULL, harmonize_z = T, strand_ambig_action_z = c("drop",
-  "none", "recover"), drop_multiallelic = T)
+preharmonize_z_ld(
+  z_snp,
+  ld_R_dir,
+  outputdir = getwd(),
+  outname = NULL,
+  logfile = NULL,
+  harmonize_z = T,
+  strand_ambig_action_z = c("drop", "none", "recover"),
+  drop_multiallelic = T
+)
 }
 \arguments{
 \item{z_snp}{A data frame with two columns: "id", "A1", "A2", "z". giving the z scores for

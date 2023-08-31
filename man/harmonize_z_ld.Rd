@@ -5,8 +5,13 @@
 \title{Harmonize z scores from GWAS to match ld reference genotypes.
 Flip signs when reverse complement matches.}
 \usage{
-harmonize_z_ld(z_snp, ld_snpinfo, strand_ambig_action = c("drop", "none",
-  "recover"), ld_pgenfs = NULL, ld_Rinfo = NULL)
+harmonize_z_ld(
+  z_snp,
+  ld_snpinfo,
+  strand_ambig_action = c("drop", "none", "recover"),
+  ld_pgenfs = NULL,
+  ld_Rinfo = NULL
+)
 }
 \arguments{
 \item{z_snp}{a data frame, with columns "id", "A1", "A2" and "z".

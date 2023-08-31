@@ -11,8 +11,6 @@
 #' @importFrom stats coef
 #'
 #' @method coef susie
-#' @export coef.susie
-#' @export
 #' 
 coef.susie = function (object, ...) {
   s = object
@@ -39,8 +37,6 @@ coef.susie = function (object, ...) {
 #' @importFrom stats coef
 #'
 #' @method predict susie
-#' @export predict.susie
-#' @export
 #' 
 predict.susie = function (object, newx = NULL,
                           type = c("response","coefficients"), ...) {

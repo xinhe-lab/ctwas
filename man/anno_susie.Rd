@@ -4,8 +4,7 @@
 \alias{anno_susie}
 \title{annotate susie results. this will generate output text files}
 \usage{
-anno_susie(susieres, geneinfo, snpinfo, gidx, sidx, region_tag1,
-  region_tag2)
+anno_susie(susieres, geneinfo, snpinfo, gidx, sidx, region_tag1, region_tag2)
 }
 \description{
 annotate susie results. this will generate output text files

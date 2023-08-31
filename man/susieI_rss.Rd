@@ -4,11 +4,26 @@
 \alias{susieI_rss}
 \title{Iteratively run susie and estimate parameters - RSS version}
 \usage{
-susieI_rss(zdf, regionlist, ld_exprfs, ld_pgenfs = NULL, ld_Rfs = NULL,
-  niter = 20, L = 1, z_ld_weight = 0, group_prior = NULL,
-  group_prior_var = NULL, estimate_group_prior = T,
-  estimate_group_prior_var = T, use_null_weight = T, coverage = 0.95,
-  ncore = 1, outputdir = getwd(), outname = NULL)
+susieI_rss(
+  zdf,
+  regionlist,
+  ld_exprfs,
+  ld_pgenfs = NULL,
+  ld_Rfs = NULL,
+  niter = 20,
+  L = 1,
+  z_ld_weight = 0,
+  group_prior = NULL,
+  group_prior_var = NULL,
+  estimate_group_prior = T,
+  estimate_group_prior_var = T,
+  use_null_weight = T,
+  coverage = 0.95,
+  ncore = 1,
+  outputdir = getwd(),
+  outname = NULL,
+  report_parameters = T
+)
 }
 \arguments{
 \item{zdf}{A data frame with three columns: "id", "z", "type". 
@@ -69,6 +84,8 @@ using the data. If FALSE, \code{group_prior_var} must be specified}
 \item{outputdir}{a string, the directory to store output}
 
 \item{outname}{a string, the output name}
+
+\item{report_parameters}{TRUE/FALSE. If TRUE, estimated parameters are reported at the end of iteration}
 }
 \description{
 Iteratively run susie and estimate parameters - RSS version

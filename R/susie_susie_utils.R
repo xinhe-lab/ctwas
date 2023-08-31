@@ -88,8 +88,6 @@
 #' susie_get_pip(s)
 #' susie_get_lfsr(s)
 #'
-#' @export
-#'
 susie_get_objective = function (res, last_only = TRUE, warning_tol = 1e-6) {
   if (!all(diff(res$elbo) >= (-1*warning_tol)))
     warning("Objective is decreasing")
@@ -100,8 +98,6 @@ susie_get_objective = function (res, last_only = TRUE, warning_tol = 1e-6) {
 }
 
 #' @rdname susie_get_methods
-#'
-#' @export
 #'
 susie_get_posterior_mean = function (res, prior_tol = 1e-9) {
 
@@ -120,8 +116,6 @@ susie_get_posterior_mean = function (res, prior_tol = 1e-9) {
 }
 
 #' @rdname susie_get_methods
-#'
-#' @export
 #'
 susie_get_posterior_sd = function (res, prior_tol = 1e-9) {
 
@@ -142,21 +136,15 @@ susie_get_posterior_sd = function (res, prior_tol = 1e-9) {
 
 #' @rdname susie_get_methods
 #'
-#' @export
-#'
 susie_get_niter = function (res)
   res$niter
 
 #' @rdname susie_get_methods
 #'
-#' @export
-#'
 susie_get_prior_variance = function (res)
   res$V
 
 #' @rdname susie_get_methods
-#'
-#' @export
 #'
 susie_get_residual_variance = function (res)
   res$sigma2
@@ -164,8 +152,6 @@ susie_get_residual_variance = function (res)
 #' @rdname susie_get_methods
 #'
 #' @importFrom stats pnorm
-#'
-#' @export
 #'
 susie_get_lfsr = function (res) {
   pos_prob = pnorm(0,mean = t(res$mu),sd = sqrt(res$mu2 - res$mu^2))
@@ -182,8 +168,6 @@ susie_get_lfsr = function (res) {
 #'
 #' @importFrom stats rmultinom
 #' @importFrom stats rnorm
-#'
-#' @export
 #'
 susie_get_posterior_samples <- function (susie_fit, num_samples) {
 
@@ -242,8 +226,6 @@ susie_get_posterior_samples <- function (susie_fit, num_samples) {
 #'
 #' @param squared If \code{squared = TRUE}, report min, mean and
 #' median of squared correlation instead of the absolute correlation.
-#'
-#' @export
 #'
 susie_get_cs = function (res, X = NULL, Xcorr = NULL, coverage = 0.95,
                          min_abs_corr = 0.5, dedup = TRUE, squared = FALSE) {
@@ -359,8 +341,6 @@ get_cs_correlation = function (res, X = NULL, Xcorr = NULL, max = FALSE) {
 #'
 #' @param prior_tol Filter out effects having estimated prior variance
 #'   smaller than this threshold.
-#'
-#' @export
 #'
 susie_get_pip = function (res, prune_by_cs = FALSE, prior_tol = 1e-9) {
 

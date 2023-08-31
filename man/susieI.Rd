@@ -4,11 +4,25 @@
 \alias{susieI}
 \title{Iteratively run susie and estimate parameters}
 \usage{
-susieI(pgenfs, exprfs, Y, regionlist, niter = 20, L = 1,
-  group_prior = NULL, group_prior_var = NULL,
-  estimate_group_prior = T, estimate_group_prior_var = T,
-  use_null_weight = T, coverage = 0.95, standardize = T, ncore = 1,
-  outputdir = getwd(), outname = NULL)
+susieI(
+  pgenfs,
+  exprfs,
+  Y,
+  regionlist,
+  niter = 20,
+  L = 1,
+  group_prior = NULL,
+  group_prior_var = NULL,
+  estimate_group_prior = T,
+  estimate_group_prior_var = T,
+  use_null_weight = T,
+  coverage = 0.95,
+  standardize = T,
+  ncore = 1,
+  outputdir = getwd(),
+  outname = NULL,
+  report_parameters = T
+)
 }
 \arguments{
 \item{pgenfs}{A character vector of .pgen or .bed files. One file for one
@@ -50,6 +64,8 @@ using the data. If FALSE, \code{group_prior_var} must be specified}
 \item{outputdir}{a string, the directory to store output}
 
 \item{outname}{a string, the output name}
+
+\item{report_parameters}{TRUE/FALSE. If TRUE, estimated parameters are reported at the end of iteration}
 
 \item{A}{character vector of .`expr` or `.expr.gz` files. One file for
 one chromosome, in the order of 1 to 22. Therefore, the length of this vector

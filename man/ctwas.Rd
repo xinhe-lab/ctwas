@@ -4,14 +4,32 @@
 \alias{ctwas}
 \title{Causal inference for TWAS}
 \usage{
-ctwas(pgenfs, exprfs, Y, ld_regions = c("EUR", "ASN", "AFR"),
-  ld_regions_version = c("b37", "b38"), ld_regions_custom = NULL,
-  thin = 1, prob_single = 0.8, max_snp_region = Inf,
-  rerun_gene_PIP = 0.8, niter1 = 3, niter2 = 30, L = 5,
-  group_prior = NULL, group_prior_var = NULL,
-  estimate_group_prior = T, estimate_group_prior_var = T,
-  use_null_weight = T, coverage = 0.95, stardardize = T, ncore = 1,
-  outputdir = getwd(), outname = NULL, logfile = NULL)
+ctwas(
+  pgenfs,
+  exprfs,
+  Y,
+  ld_regions = c("EUR", "ASN", "AFR"),
+  ld_regions_version = c("b37", "b38"),
+  ld_regions_custom = NULL,
+  thin = 1,
+  prob_single = 0.8,
+  max_snp_region = Inf,
+  rerun_gene_PIP = 0.8,
+  niter1 = 3,
+  niter2 = 30,
+  L = 5,
+  group_prior = NULL,
+  group_prior_var = NULL,
+  estimate_group_prior = T,
+  estimate_group_prior_var = T,
+  use_null_weight = T,
+  coverage = 0.95,
+  stardardize = T,
+  ncore = 1,
+  outputdir = getwd(),
+  outname = NULL,
+  logfile = NULL
+)
 }
 \arguments{
 \item{pgenfs}{A character vector of .pgen or .bed files. One file for one

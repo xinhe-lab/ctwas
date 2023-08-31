@@ -55,6 +55,8 @@
 #' @param outputdir a string, the directory to store output
 #' 
 #' @param outname a string, the output name
+#' 
+#' @param report_parameters TRUE/FALSE. If TRUE, estimated parameters are reported at the end of iteration
 #'
 #' @importFrom logging loginfo
 #' @importFrom foreach %dopar% foreach
@@ -74,7 +76,8 @@ susieI <- function(pgenfs,
                    standardize = T,
                    ncore = 1,
                    outputdir = getwd(),
-                   outname = NULL) {
+                   outname = NULL,
+                   report_parameters=T) {
 
   outname <- file.path(outputdir, outname)
 
@@ -183,8 +186,10 @@ susieI <- function(pgenfs,
       group_prior_rec[, iter] <- c(prior.gene, prior.SNP)
     }
 
-    loginfo("After iteration %s, gene prior %s:, SNP prior:%s",
-                 iter, prior.gene, prior.SNP)
+    if (report_parameters){
+      loginfo("After iteration %s, gene prior %s:, SNP prior:%s",
+              iter, prior.gene, prior.SNP)
+    }
 
     if (isTRUE(estimate_group_prior_var)){
       outdf.g <- outdf[outdf[ , "type"] == "gene", ]

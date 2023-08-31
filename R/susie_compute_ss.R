@@ -15,8 +15,6 @@
 #' data(N2finemapping)
 #' ss = compute_ss(N2finemapping$X, N2finemapping$Y[,1])
 #' 
-#' @export
-#' 
 compute_ss = function(X, y, standardize = TRUE) {
   y = y - mean(y)
   is.sparse = !is.matrix(X)

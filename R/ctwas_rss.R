@@ -278,8 +278,8 @@ ctwas_rss <- function(
                      coverage = coverage,
                      ncore = ncore,
                      outputdir = outputdir,
-                     outname = paste0(outname, ".temp"))
-
+                     outname = paste0(outname, ".temp"),
+                     report_parameters=F)
 
   group_prior[2] <- group_prior[2] * thin # convert snp pi1
 
@@ -340,7 +340,8 @@ ctwas_rss <- function(
                          coverage = coverage,
                          ncore = ncore.rerun,
                          outputdir = outputdir,
-                         outname = paste0(outname, ".s3"))
+                         outname = paste0(outname, ".s3"),
+                         report_parameters=F)
 
       res.rerun <- data.table::fread(paste0(file.path(outputdir, outname), ".s3.susieIrss.txt"))
 

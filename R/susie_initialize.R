@@ -25,8 +25,6 @@
 #' s = susie_init_coef(which(beta != 0),beta[beta != 0],length(beta))
 #' res = susie(X,y,L = 10,s_init=s)
 #'
-#' @export
-#'
 susie_init_coef = function (coef_index, coef_value, p) {
   L = length(coef_index)
   if (L <= 0)
