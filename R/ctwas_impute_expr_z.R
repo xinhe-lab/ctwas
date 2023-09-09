@@ -145,7 +145,7 @@ impute_expr_z <- function (z_snp, weight, ld_pgenfs = NULL, ld_R_dir = NULL, met
           regRDS <- ld_Rinfo[match(regnames, ld_Rinfo$region_name), 
                              "RDS_file"]
           R_snp <- lapply(regRDS, readRDS)
-          R_snp <- as.matrix(Matrix::bdiag(R_snp))
+          R_snp <- suppressWarnings({as.matrix(Matrix::bdiag(R_snp))})
           R_snp_anno <- do.call(rbind, lapply(regRDS, 
                                               read_ld_Rvar_RDS))
           for (i in 1:length(gnames)) {
