@@ -170,7 +170,7 @@ harmonize_wgt_ld <- function (wgt.matrix, snps, ld_snpinfo, recover_strand_ambig
         regnames <- unique(sapply(wgt_pos, function(x){which(x >= ld_Rinfo$start & x <= ld_Rinfo$stop)}))
         regRDS <- ld_Rinfo$RDS_file[match(regnames, ld_Rinfo$region_name)]
         R_snp <- lapply(regRDS, readRDS)
-        R_snp <- as.matrix(Matrix::bdiag(R_snp))
+        R_snp <- suppressWarnings({as.matrix(Matrix::bdiag(R_snp))})
         R_snp_anno <- do.call(rbind, lapply(regRDS, read_ld_Rvar_RDS))
         
         #index the variant positions in LD reference
