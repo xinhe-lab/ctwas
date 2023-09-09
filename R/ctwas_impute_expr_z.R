@@ -172,7 +172,7 @@ impute_expr_z <- function (z_snp, weight, ld_pgenfs = NULL, ld_R_dir = NULL, met
             regnames <- strsplit(batch, ";")[[1]]
             regRDS <- ld_Rinfo$RDS_file[match(regnames, ld_Rinfo$region_name)]
             R_snp <- lapply(regRDS, readRDS)
-            R_snp <- Matrix::bdiag(R_snp)
+            R_snp <- suppressWarnings({Matrix::bdiag(R_snp)})
             R_snp_anno <- do.call(rbind, lapply(regRDS, read_ld_Rvar_RDS))
             for (i in 1:length(gnames)) {
               gname <- gnames[i]
