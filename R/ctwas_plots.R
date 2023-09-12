@@ -407,7 +407,7 @@ ctwas_summarize_parameters <- function(outputdir,
     
     #inclusion plot
     df <- data.frame(niter = rep(1:ncol(estimated_group_prior_all), 2),
-                     value = c(estimated_group_prior_all["gene",], estimated_group_prior_all["snp",]),
+                     value = c(estimated_group_prior_all["gene",], estimated_group_prior_all["SNP",]),
                      group = rep(c("Gene", "SNP"), each = ncol(estimated_group_prior_all)))
     df$group <- as.factor(df$group)
     
@@ -424,7 +424,7 @@ ctwas_summarize_parameters <- function(outputdir,
     
     #effect size plot
     df <- data.frame(niter = rep(1:ncol(estimated_group_prior_var_all ), 2),
-                     value = c(estimated_group_prior_var_all["gene",], estimated_group_prior_var_all["snp",]),
+                     value = c(estimated_group_prior_var_all["gene",], estimated_group_prior_var_all["SNP",]),
                      group = rep(c("Gene", "SNP"), each = ncol(estimated_group_prior_var_all)))
     df$group <- as.factor(df$group)
     p_sigma2 <- ggplot(df, aes(x=niter, y=value, group=group)) +
@@ -440,7 +440,7 @@ ctwas_summarize_parameters <- function(outputdir,
     
     #PVE plot
     df <- data.frame(niter = rep(1:ncol(estimated_group_pve_all ), 2),
-                     value = c(estimated_group_pve_all["gene",], estimated_group_pve_all["snp",]),
+                     value = c(estimated_group_pve_all["gene",], estimated_group_pve_all["SNP",]),
                      group = rep(c("Gene", "SNP"), each = ncol(estimated_group_pve_all)))
     df$group <- as.factor(df$group)
     p_pve <- ggplot(df, aes(x=niter, y=value, group=group)) +
