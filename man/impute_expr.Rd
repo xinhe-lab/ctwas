@@ -4,9 +4,17 @@
 \alias{impute_expr}
 \title{Impute expression}
 \usage{
-impute_expr(pgenfs, weight, method = "lasso", outputdir = getwd(),
-  outname = NULL, logfile = NULL, compress = T, harmonize_wgt = T,
-  recover_strand_ambig_wgt = F)
+impute_expr(
+  pgenfs,
+  weight,
+  method = "lasso",
+  outputdir = getwd(),
+  outname = NULL,
+  logfile = NULL,
+  compress = T,
+  harmonize_wgt = T,
+  recover_strand_ambig_wgt = F
+)
 }
 \arguments{
 \item{pgenfs}{A character vector of .pgen or .bed files. One file for one

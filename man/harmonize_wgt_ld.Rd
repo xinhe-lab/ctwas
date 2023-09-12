@@ -5,8 +5,16 @@
 \title{Harmonize z scores from GWAS to match ld reference genotypes.
 Flip signs when reverse complement matches, remove/recover strand ambiguous SNPs}
 \usage{
-harmonize_wgt_ld(wgt.matrix, snps, ld_snpinfo, recover_strand_ambig = T,
-  ld_pgenfs = NULL, ld_Rinfo = NULL, R_wgt = NULL, wgt = NULL)
+harmonize_wgt_ld(
+  wgt.matrix,
+  snps,
+  ld_snpinfo,
+  recover_strand_ambig = T,
+  ld_pgenfs = NULL,
+  ld_Rinfo = NULL,
+  R_wgt = NULL,
+  wgt = NULL
+)
 }
 \arguments{
 \item{wgt.matrix}{from FUSION weight .Rdat file}

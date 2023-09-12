@@ -4,12 +4,24 @@
 \alias{impute_expr_z}
 \title{Impute expression z scores}
 \usage{
-impute_expr_z(z_snp, weight, ld_pgenfs = NULL, ld_R_dir = NULL,
-  method = "lasso", outputdir = getwd(), outname = NULL,
-  logfile = NULL, compress = T, harmonize_z = T, harmonize_wgt = T,
+impute_expr_z(
+  z_snp,
+  weight,
+  ld_pgenfs = NULL,
+  ld_R_dir = NULL,
+  method = "lasso",
+  outputdir = getwd(),
+  outname = NULL,
+  logfile = NULL,
+  compress = T,
+  harmonize_z = T,
+  harmonize_wgt = T,
   strand_ambig_action_z = c("drop", "none", "recover"),
-  recover_strand_ambig_wgt = T, ncore = 1, chrom = 1:22,
-  scale_by_ld_variance = T)
+  recover_strand_ambig_wgt = T,
+  ncore = 1,
+  chrom = 1:22,
+  scale_by_ld_variance = T
+)
 }
 \arguments{
 \item{z_snp}{A data frame with two columns: "id", "A1", "A2", "z". giving the z scores for

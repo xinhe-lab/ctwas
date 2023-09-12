@@ -4,17 +4,41 @@
 \alias{ctwas_rss}
 \title{Causal inference for TWAS using summary statistics}
 \usage{
-ctwas_rss(z_gene, z_snp, ld_exprfs, ld_pgenfs = NULL, ld_R_dir = NULL,
-  ld_regions = c("EUR", "ASN", "AFR"), ld_regions_version = c("b37",
-  "b38"), ld_regions_custom = NULL, thin = 1, prob_single = 0.8,
-  max_snp_region = Inf, rerun_gene_PIP = 0.8, niter1 = 3,
-  niter2 = 30, L = 5, group_prior = NULL, group_prior_var = NULL,
-  group_prior_var_structure = c("independent", "shared", "shared+snps",
-  "inv_gamma"), inv_gamma_shape = 1, inv_gamma_rate = 0,
-  estimate_group_prior = T, estimate_group_prior_var = T,
-  use_null_weight = T, coverage = 0.95, stardardize = T, ncore = 1,
-  ncore.rerun = 1, ncore_LDR = 1, outputdir = getwd(),
-  outname = NULL, logfile = NULL, merge = TRUE, fine_map = T)
+ctwas_rss(
+  z_gene,
+  z_snp,
+  ld_exprfs,
+  ld_pgenfs = NULL,
+  ld_R_dir = NULL,
+  ld_regions = c("EUR", "ASN", "AFR"),
+  ld_regions_version = c("b37", "b38"),
+  ld_regions_custom = NULL,
+  thin = 1,
+  prob_single = 0.8,
+  max_snp_region = Inf,
+  rerun_gene_PIP = 0.8,
+  niter1 = 3,
+  niter2 = 30,
+  L = 5,
+  group_prior = NULL,
+  group_prior_var = NULL,
+  group_prior_var_structure = c("independent", "shared", "shared+snps", "inv_gamma"),
+  inv_gamma_shape = 1,
+  inv_gamma_rate = 0,
+  estimate_group_prior = T,
+  estimate_group_prior_var = T,
+  use_null_weight = T,
+  coverage = 0.95,
+  stardardize = T,
+  ncore = 1,
+  ncore.rerun = 1,
+  ncore_LDR = 1,
+  outputdir = getwd(),
+  outname = NULL,
+  logfile = NULL,
+  merge = TRUE,
+  fine_map = T
+)
 }
 \arguments{
 \item{z_gene}{A data frame with two columns: "id", "z". giving the z scores for genes. 

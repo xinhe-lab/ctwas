@@ -4,13 +4,29 @@
 \alias{susieI_rss}
 \title{Iteratively run susie and estimate parameters - RSS version}
 \usage{
-susieI_rss(zdf, regionlist, ld_exprfs, ld_pgenfs = NULL, ld_Rfs = NULL,
-  niter = 20, L = 1, z_ld_weight = 0, group_prior = NULL,
-  group_prior_var = NULL, group_prior_var_structure = c("independent",
-  "shared", "shared+snps", "inv_gamma"), estimate_group_prior = T,
-  estimate_group_prior_var = T, use_null_weight = T, coverage = 0.95,
-  ncore = 1, outputdir = getwd(), outname = NULL,
-  inv_gamma_shape = 1, inv_gamma_rate = 0, report_parameters = T)
+susieI_rss(
+  zdf,
+  regionlist,
+  ld_exprfs,
+  ld_pgenfs = NULL,
+  ld_Rfs = NULL,
+  niter = 20,
+  L = 1,
+  z_ld_weight = 0,
+  group_prior = NULL,
+  group_prior_var = NULL,
+  group_prior_var_structure = c("independent", "shared", "shared+snps", "inv_gamma"),
+  estimate_group_prior = T,
+  estimate_group_prior_var = T,
+  use_null_weight = T,
+  coverage = 0.95,
+  ncore = 1,
+  outputdir = getwd(),
+  outname = NULL,
+  inv_gamma_shape = 1,
+  inv_gamma_rate = 0,
+  report_parameters = T
+)
 }
 \arguments{
 \item{zdf}{A data frame with three columns: "id", "z", "type". 

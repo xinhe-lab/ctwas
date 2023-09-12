@@ -255,7 +255,6 @@ index_regions <- function(regionfile,
     corelist <- lapply(1:ncore, function(core){njobs <- ceiling(nrow(regionlist_all)/ncore); jobs <- ((core-1)*njobs+1):(core*njobs); jobs[jobs<=nrow(regionlist_all)]})
     names(corelist) <- 1:ncore
     
-    
     cl <- parallel::makeCluster(ncore, outfile = "")
     doParallel::registerDoParallel(cl)
     
