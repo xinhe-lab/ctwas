@@ -374,22 +374,22 @@ ctwas_summarize_parameters <- function(outputdir,
   
   #estimated group prior (all iterations)
   estimated_group_prior_all <- group_prior_rec
-  rownames(estimated_group_prior_all) <- c("gene", "snp")
-  estimated_group_prior_all["snp",] <- estimated_group_prior_all["snp",]*thin #adjust parameter to account for thin argument
+  rownames(estimated_group_prior_all) <- c("gene", "SNP")
+  estimated_group_prior_all["SNP",] <- estimated_group_prior_all["SNP",]*thin #adjust parameter to account for thin argument
   group_prior <- estimated_group_prior_all[,ncol(estimated_group_prior_all)]
   
   #estimated group prior variance (all iterations)
   estimated_group_prior_var_all <- group_prior_var_rec
-  rownames(estimated_group_prior_var_all) <- c("gene", "snp")
+  rownames(estimated_group_prior_var_all) <- c("gene", "SNP")
   group_prior_var <- estimated_group_prior_var_all[,ncol(estimated_group_prior_var_all)]
   
   #estimated group PVE (all iterations)
   estimated_group_pve_all <- estimated_group_prior_var_all*estimated_group_prior_all*group_size/gwas_n
-  rownames(estimated_group_pve_all) <- c("gene", "snp")
+  rownames(estimated_group_pve_all) <- c("gene", "SNP")
   group_pve <- estimated_group_pve_all[,ncol(estimated_group_pve_all)]
   
   #estimated enrichment of genes (all iterations)
-  estimated_enrichment_all <- estimated_group_prior_all["gene",]/estimated_group_prior_all["snp",]
+  estimated_enrichment_all <- estimated_group_prior_all["gene",]/estimated_group_prior_all["SNP",]
   enrichment <- estimated_enrichment_all[length(estimated_enrichment_all)]
   
   outlist <- list(n_snps = n_snps,
