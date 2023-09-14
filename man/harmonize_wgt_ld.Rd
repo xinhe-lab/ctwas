@@ -9,7 +9,7 @@ harmonize_wgt_ld(
   wgt.matrix,
   snps,
   ld_snpinfo,
-  recover_strand_ambig = T,
+  strand_ambig_action = c("drop", "none", "recover"),
   ld_pgenfs = NULL,
   ld_Rinfo = NULL,
   R_wgt = NULL,
@@ -26,8 +26,10 @@ for FUSION is alt.}
 \item{ld_snpinfo}{a data frame, snp info for LD reference,
 with columns "chrom", "id", "pos", "alt", "ref".}
 
-\item{recover_strand_ambig}{TRUE/FALSE. If TRUE, a procedure is used to recover strand ambiguous variants. If FALSE, 
-these variants are dropped from the prediction model. This procedure compares correlations between variants in the the 
+\item{strand_ambig_action}{the action to take to harmonize strand ambiguous variants (A/T, G/C) between 
+the weights and LD reference. "drop" removes the ambiguous variant from the prediction models. "none" treats the variant 
+as unambiguous, flipping the weights to match the LD reference and then taking no additional action. "recover" uses a procedure
+to recover strand ambiguous variants. This procedure compares correlations between variants in the 
 LD reference and prediction models, and it can only be used with PredictDB format prediction models, which include this
 information.}
 

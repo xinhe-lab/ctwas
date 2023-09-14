@@ -40,8 +40,10 @@
 #' imputes the sign of ambiguous z scores using unambiguous z scores and the LD reference and flips the z scores 
 #' if there is a mismatch between the imputed sign and the observed sign of the z score. This option is computationally intensive
 #' 
-#' @param recover_strand_ambig_wgt TRUE/FALSE. If TRUE, a procedure is used to recover strand ambiguous variants. If FALSE, 
-#' these variants are dropped from the prediction model. This procedure compares correlations between variants in the the 
+#' @param strand_ambig_action_wgt the action to take to harmonize strand ambiguous variants (A/T, G/C) between 
+#' the weights and LD reference. "drop" removes the ambiguous variant from the prediction models. "none" treats the variant 
+#' as unambiguous, flipping the weights to match the LD reference and then taking no additional action. "recover" uses a procedure
+#' to recover strand ambiguous variants. This procedure compares correlations between variants in the 
 #' LD reference and prediction models, and it can only be used with PredictDB format prediction models, which include this
 #' information.
 #' 
@@ -59,10 +61,15 @@
 impute_expr_z <- function (z_snp, weight, ld_pgenfs = NULL, ld_R_dir = NULL, method = "lasso", 
                            outputdir = getwd(), outname = NULL, logfile = NULL, compress = T, 
                            harmonize_z = T, harmonize_wgt = T, 
-                           strand_ambig_action_z = c("drop", "none", "recover"), recover_strand_ambig_wgt = T,
+                           strand_ambig_action_z = c("drop", "none", "recover"), 
+                           strand_ambig_action_wgt = c("drop", "none", "recover"),
                            ncore=1, chrom=1:22,
                            scale_by_ld_variance=T){
   dir.create(outputdir, showWarnings = F)
+  
+  strand_ambig_action_z <- match.arg(strand_ambig_action_z)
+  strand_ambig_action_wgt <- match.arg(strand_ambig_action_wgt)
+  
   if (!is.null(logfile)) {
     addHandler(writeToFile, file = logfile, level = "DEBUG")
   }
@@ -99,15 +106,24 @@ impute_expr_z <- function (z_snp, weight, ld_pgenfs = NULL, ld_R_dir = NULL, met
     }
     loginfo("Reading weights for chromosome %s", b)
     if (isTRUE(dir.exists(weight))) {
-      if (recover_strand_ambig_wgt){
-        loginfo("Ignoring recover_strand_ambig_wgt=T; not implemented for FUSION format")
+      if (strand_ambig_action_wgt=="recover"){
+        stop('strand_ambig_action=="recover" is not supported for FUSION format')
       }
-      weightall <- read_weight_fusion(weight, b, ld_snpinfo, z_snp, method = method, 
-                                      harmonize_wgt=harmonize_wgt)
+      weightall <- read_weight_fusion(weight, 
+                                      b, 
+                                      ld_snpinfo, 
+                                      z_snp, 
+                                      method = method, 
+                                      harmonize_wgt=harmonize_wgt,
+                                      strand_ambig_action=strand_ambig_action_wgt)
     } else if (all(file_ext(weight) == "db")) {
-      weightall <- read_weight_predictdb(weight, b, ld_snpinfo, z_snp, 
-                                         harmonize_wgt=harmonize_wgt, ld_Rinfo=ld_Rinfo,
-                                         recover_strand_ambig=recover_strand_ambig_wgt,
+      weightall <- read_weight_predictdb(weight, 
+                                         b, 
+                                         ld_snpinfo, 
+                                         z_snp, 
+                                         harmonize_wgt=harmonize_wgt, 
+                                         ld_Rinfo=ld_Rinfo,
+                                         strand_ambig_action=strand_ambig_action_wgt,
                                          ncore=ncore,
                                          scale_by_ld_variance=scale_by_ld_variance)
     } else {

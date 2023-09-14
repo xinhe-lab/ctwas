@@ -126,9 +126,11 @@ harmonize_z_ld <- function(z_snp, ld_snpinfo, strand_ambig_action = c("drop", "n
 #'  
 #' @param ld_snpinfo a data frame, snp info for LD reference,
 #'  with columns "chrom", "id", "pos", "alt", "ref".
-#'  
-#' @param recover_strand_ambig TRUE/FALSE. If TRUE, a procedure is used to recover strand ambiguous variants. If FALSE, 
-#' these variants are dropped from the prediction model. This procedure compares correlations between variants in the the 
+#' 
+#' @param strand_ambig_action the action to take to harmonize strand ambiguous variants (A/T, G/C) between 
+#' the weights and LD reference. "drop" removes the ambiguous variant from the prediction models. "none" treats the variant 
+#' as unambiguous, flipping the weights to match the LD reference and then taking no additional action. "recover" uses a procedure
+#' to recover strand ambiguous variants. This procedure compares correlations between variants in the 
 #' LD reference and prediction models, and it can only be used with PredictDB format prediction models, which include this
 #' information.
 #'  
@@ -146,8 +148,11 @@ harmonize_z_ld <- function(z_snp, ld_snpinfo, strand_ambig_action = c("drop", "n
 #'  
 #' @return wgt.matrix and snps with alleles flipped to match
 #' 
-harmonize_wgt_ld <- function (wgt.matrix, snps, ld_snpinfo, recover_strand_ambig=T, 
+harmonize_wgt_ld <- function (wgt.matrix, snps, ld_snpinfo, strand_ambig_action = c("drop", "none", "recover"), 
                               ld_pgenfs=NULL, ld_Rinfo=NULL, R_wgt=NULL, wgt=NULL){
+  
+  strand_ambig_action <- match.arg(strand_ambig_action)
+  
   colnames(snps) <- c("chrom", "id", "cm", "pos", "alt", "ref")
   snps <- snps[match(rownames(wgt.matrix), snps$id), ]
   snpnames <- intersect(snps$id, ld_snpinfo$id)
@@ -162,7 +167,7 @@ harmonize_wgt_ld <- function (wgt.matrix, snps, ld_snpinfo, recover_strand_ambig
     snps[flip.idx, c("alt", "ref")] <- snps[flip.idx, c("ref", "alt")]
     wgt.matrix[flip.idx, ] <- -wgt.matrix[flip.idx, ]
     
-    if (recover_strand_ambig & 
+    if (strand_ambig_action == "recover" & 
         any(ifremove) & 
         sum(!ifremove)>0){
       if (is.null(ld_pgenfs)){
@@ -218,14 +223,16 @@ harmonize_wgt_ld <- function (wgt.matrix, snps, ld_snpinfo, recover_strand_ambig
           wgt.matrix <- wgt.matrix[-unrecoverable.idx, , drop = F]
         }
       } else {
-        #TO-DO: mirror following section but compute R_snp each region using Xs
+        stop("Recovering strand ambiguous variants is not currently suppported when using .pgen files")
+        #TO-DO: mirror following section but compute R_snp for each region using individual level data
       }
-    } else if (recover_strand_ambig & 
+    } else if (strand_ambig_action == "recover" & 
                any(ifremove) & 
                sum(ifremove)==1){
       #take no action if single variant. wrote this as separate if-statement for clarity, but it could be rolled into the following if-statement
-    } else if (any(ifremove)){
-      #if recover_strand_ambig=F, or >2 ambiguous variants and 0 unambiguous variants, discard the ambiguous variants
+    } else if (strand_ambig_action != "none" & 
+               any(ifremove)){
+      #if dropping ambiguous variants, or >2 ambiguous variants and 0 unambiguous variants, discard the ambiguous variants
       remove.idx <- snps.idx[ifremove]
       snps <- snps[-remove.idx, , drop = F]
       wgt.matrix <- wgt.matrix[-remove.idx, , drop = F]

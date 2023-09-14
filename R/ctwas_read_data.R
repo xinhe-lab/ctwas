@@ -272,7 +272,15 @@ read_ld_Rvar <- function(ld_Rf){
   ld_Rvar
 }
 
-read_weight_fusion <- function (weight, chrom, ld_snpinfo, z_snp = NULL, method = "lasso", harmonize_wgt = T){
+read_weight_fusion <- function (weight, chrom, 
+                                ld_snpinfo, 
+                                z_snp = NULL, 
+                                method = "lasso", 
+                                harmonize_wgt = T, 
+                                strand_ambig_action=c("drop", "none")){
+  
+  strand_ambig_action <- match.arg(strand_ambig_action)
+  
   weight_name <- tools::file_path_sans_ext(basename(weight))
   
   exprlist <- list()
@@ -293,7 +301,7 @@ read_weight_fusion <- function (weight, chrom, ld_snpinfo, z_snp = NULL, method 
       load(wf)
       gname <- wgtpos[i, "ID"]
       if (isTRUE(harmonize_wgt)) {
-        w <- harmonize_wgt_ld(wgt.matrix, snps, ld_snpinfo, recover_strand_ambig=F)
+        w <- harmonize_wgt_ld(wgt.matrix, snps, ld_snpinfo, strand_ambig_action=strand_ambig_action)
         wgt.matrix <- w[["wgt"]]
         snps <- w[["snps"]]
       } else {
@@ -340,9 +348,19 @@ read_weight_fusion <- function (weight, chrom, ld_snpinfo, z_snp = NULL, method 
   return(list(exprlist = exprlist, qclist = qclist))
 }
 
-read_weight_predictdb <- function (weight, chrom, ld_snpinfo, z_snp = NULL, harmonize_wgt = T, 
-                                   recover_strand_ambig=T, ld_pgenfs=NULL, ld_Rinfo=NULL,
-                                   scale_by_ld_variance=T, ncore=1){
+read_weight_predictdb <- function (weight, 
+                                   chrom, 
+                                   ld_snpinfo, 
+                                   z_snp = NULL, 
+                                   harmonize_wgt = T, 
+                                   strand_ambig_action = c("drop", "none", "recover"), 
+                                   ld_pgenfs=NULL, 
+                                   ld_Rinfo=NULL,
+                                   scale_by_ld_variance=T, 
+                                   ncore=1){
+  
+  strand_ambig_action <- match.arg(strand_ambig_action)
+  
   exprlist <- list()
   qclist <- list()
   weights <- weight
@@ -371,7 +389,7 @@ read_weight_predictdb <- function (weight, chrom, ld_snpinfo, z_snp = NULL, harm
   
   if (harmonize_wgt){
     loginfo("Flipping weights to match LD reference")
-    if (recover_strand_ambig){
+    if (strand_ambig_action=="recover"){
       loginfo("Harmonizing strand ambiguous weights using correlations with unambiguous variants")
     }
   }
@@ -394,8 +412,9 @@ read_weight_predictdb <- function (weight, chrom, ld_snpinfo, z_snp = NULL, harm
       weight_name <- tools::file_path_sans_ext(basename(weight))
       gnames_core_weight <- gnames_core$gname[gnames_core$weight==weight]
       
-      if (harmonize_wgt & recover_strand_ambig){
-        R_wgt_all = read.table(gzfile(paste0(file_path_sans_ext(weight), ".txt.gz")), header=T) #load covariances for variants in each gene (accompanies .db file)
+      if (harmonize_wgt & strand_ambig_action=="recover"){
+        R_wgt_all <- read.table(gzfile(paste0(file_path_sans_ext(weight), ".txt.gz")), header=T) #load covariances for variants in each gene (accompanies .db file)
+        R_wgt_all <- R_wgt_all[R_wgt_all$GENE %in% gnames_core_weight,]
       }
       
       db = RSQLite::dbConnect(sqlite, weight)
@@ -428,7 +447,7 @@ read_weight_predictdb <- function (weight, chrom, ld_snpinfo, z_snp = NULL, harm
         }
         
         if (isTRUE(harmonize_wgt)) {
-          if (recover_strand_ambig){
+          if (strand_ambig_action=="recover"){
             #subset R_wgt_all to current weight
             R_wgt <- R_wgt_all[R_wgt_all$GENE == gname,]
             
@@ -445,9 +464,13 @@ read_weight_predictdb <- function (weight, chrom, ld_snpinfo, z_snp = NULL, harm
           } else {
             R_wgt <- NULL
           }
-          w <- harmonize_wgt_ld(wgt.matrix, snps, ld_snpinfo,
-                                recover_strand_ambig=recover_strand_ambig,
-                                ld_Rinfo=ld_Rinfo, R_wgt=R_wgt, wgt=wgt)
+          w <- harmonize_wgt_ld(wgt.matrix, 
+                                snps, 
+                                ld_snpinfo,
+                                strand_ambig_action=strand_ambig_action,
+                                ld_Rinfo=ld_Rinfo, 
+                                R_wgt=R_wgt, 
+                                wgt=wgt)
           wgt.matrix <- w[["wgt"]]
           snps <- w[["snps"]]
         }

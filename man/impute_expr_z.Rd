@@ -17,7 +17,7 @@ impute_expr_z(
   harmonize_z = T,
   harmonize_wgt = T,
   strand_ambig_action_z = c("drop", "none", "recover"),
-  recover_strand_ambig_wgt = T,
+  strand_ambig_action_wgt = c("drop", "none", "recover"),
   ncore = 1,
   chrom = 1:22,
   scale_by_ld_variance = T
@@ -59,8 +59,10 @@ as unambiguous, flipping the z score to match the LD reference and then taking n
 imputes the sign of ambiguous z scores using unambiguous z scores and the LD reference and flips the z scores 
 if there is a mismatch between the imputed sign and the observed sign of the z score. This option is computationally intensive}
 
-\item{recover_strand_ambig_wgt}{TRUE/FALSE. If TRUE, a procedure is used to recover strand ambiguous variants. If FALSE, 
-these variants are dropped from the prediction model. This procedure compares correlations between variants in the the 
+\item{strand_ambig_action_wgt}{the action to take to harmonize strand ambiguous variants (A/T, G/C) between 
+the weights and LD reference. "drop" removes the ambiguous variant from the prediction models. "none" treats the variant 
+as unambiguous, flipping the weights to match the LD reference and then taking no additional action. "recover" uses a procedure
+to recover strand ambiguous variants. This procedure compares correlations between variants in the 
 LD reference and prediction models, and it can only be used with PredictDB format prediction models, which include this
 information.}
 
