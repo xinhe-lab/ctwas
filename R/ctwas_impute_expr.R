@@ -23,10 +23,17 @@
 #' 
 #' @param harmonize_wgt TRUE/FALSE. If TRUE, GWAS and eQTL genotype alleles are harmonized
 #' 
-#' @param recover_strand_ambig_wgt TRUE/FALSE. If TRUE, a procedure is used to recover strand ambiguous variants. If FALSE, 
-#' these variants are dropped from the prediction model. This procedure compares correlations between variants in the the 
+#' @param strand_ambig_action_wgt the action to take to harmonize strand ambiguous variants (A/T, G/C) between 
+#' the weights and LD reference. "drop" removes the ambiguous variant from the prediction models. "none" treats the variant 
+#' as unambiguous, flipping the weights to match the LD reference and then taking no additional action. "recover" uses a procedure
+#' to recover strand ambiguous variants. This procedure compares correlations between variants in the 
 #' LD reference and prediction models, and it can only be used with PredictDB format prediction models, which include this
 #' information.
+#' 
+#' @param ncore The number of cores used to parallelize imputation over weights
+#' 
+#' @param scale_by_ld_variance TRUE/FALSE. If TRUE, PredictDB weights are scaled by genotype variance, which is the default 
+#' behavior for PredictDB
 #' 
 #' @importFrom logging addHandler loginfo
 #'
@@ -39,7 +46,8 @@ impute_expr <- function(pgenfs,
                         logfile = NULL,
                         compress = T,
                         harmonize_wgt = T,
-                        recover_strand_ambig_wgt = F){
+                        ncore=1,
+                        strand_ambig_action_wgt = c("drop", "none", "recover")){
 
   if (!is.null(logfile)){
     addHandler(writeToFile, file= logfile, level='DEBUG')
@@ -86,9 +94,9 @@ impute_expr <- function(pgenfs,
                                          snpinfo, 
                                          z_snp=NULL, 
                                          harmonize_wgt=harmonize_wgt, 
-                                         ld_Rinfo=ld_Rinfo,
-                                         recover_strand_ambig=recover_strand_ambig_wgt,
-                                         scale_by_ld_variance=F)
+                                         strand_ambig_action=strand_ambig_action_wgt,
+                                         ncore=ncore,
+                                         scale_by_ld_variance=scale_by_ld_variance)
     } else {
       stop("Unrecognized weight format, need to use either FUSION format or predict.db format")
     }
