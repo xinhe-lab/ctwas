@@ -47,6 +47,7 @@ impute_expr <- function(pgenfs,
                         compress = T,
                         harmonize_wgt = T,
                         ncore=1,
+                        scale_by_ld_variance=T,
                         strand_ambig_action_wgt = c("drop", "none", "recover")){
 
   if (!is.null(logfile)){
