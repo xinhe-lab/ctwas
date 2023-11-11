@@ -405,7 +405,7 @@ read_weight_predictdb <- function (weight,
     weights_core <- unique(gnames_core$weight)
     
     outlist_core <- list()
-    print(1)
+    
     for (weight in weights_core){
       loginfo("Current weight: %s (core %s)", weight, core)
       
@@ -419,9 +419,9 @@ read_weight_predictdb <- function (weight,
       
       db = RSQLite::dbConnect(sqlite, weight)
       query <- function(...) RSQLite::dbGetQuery(db, ...)
-      print(2)
+      
       for (gname in gnames_core_weight) {
-        print(gname)
+        
         if (length(weights)>1){
           gname_weight <- paste0(gname, "|", weight_name)
         } else {
@@ -430,7 +430,7 @@ read_weight_predictdb <- function (weight,
         
         wgt <- query("select * from weights where gene = ?", params = list(gname))
         wgt.matrix <- as.matrix(wgt[, "weight", drop = F])
-        print(3)
+        
         rownames(wgt.matrix) <- wgt$rsid
         chrpos <- do.call(rbind, strsplit(wgt$varID, "_"))
         
