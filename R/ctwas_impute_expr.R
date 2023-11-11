@@ -47,7 +47,7 @@ impute_expr <- function(pgenfs,
                         compress = T,
                         harmonize_wgt = T,
                         ncore=1,
-                        scale_by_ld_variance=T,
+                        scale_by_ld_variance=F,
                         strand_ambig_action_wgt = c("drop", "none", "recover")){
 
   if (!is.null(logfile)){
@@ -97,7 +97,7 @@ impute_expr <- function(pgenfs,
                                          harmonize_wgt=harmonize_wgt, 
                                          strand_ambig_action=strand_ambig_action_wgt,
                                          ncore=ncore,
-                                         scale_by_ld_variance=scale_by_ld_variance)
+                                         scale_by_ld_variance=F)
     } else {
       stop("Unrecognized weight format, need to use either FUSION format or predict.db format")
     }
@@ -113,7 +113,7 @@ impute_expr <- function(pgenfs,
         gwas.idx <-  match(snpnames, snpinfo$id)
         g <- read_pgen(pgen, variantidx = gwas.idx)
         
-        if (weight_type=="fusion"){
+        if (weight_type=="fusion" | scale_by_ld_variance=F){
           g <- scale(g)  # genotypes are standardized for FUSION
         }
         
