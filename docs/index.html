@@ -21,6 +21,8 @@
 <![endif]-->
 </head>
 <body data-spy="scroll" data-target="#toc">
+    
+
     <div class="container template-home">
       <header><div class="navbar navbar-default navbar-fixed-top" role="navigation">
   <div class="container">
@@ -33,40 +35,37 @@
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="index.html">ctwas</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="Released version">0.1.28</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">0.1.35</span>
       </span>
     </div>
 
     <div id="navbar" class="navbar-collapse collapse">
       <ul class="nav navbar-nav">
 <li>
-  <a href="index.html">
-    <span class="fas fa fas fa-home fa-lg"></span>
-     
-  </a>
-</li>
-<li>
   <a href="reference/index.html">Reference</a>
 </li>
 <li class="dropdown">
-  <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false">
+  <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
     Articles
      
     <span class="caret"></span>
   </a>
   <ul class="dropdown-menu" role="menu">
 <li>
-      <a href="articles/ctwas_idv_wkfl.html">Run on individual-level data</a>
+      <a href="articles/harmonization.html">Harmonization</a>
     </li>
     <li>
-      <a href="articles/ctwas_rss_wkfl.html">Run on summary statistics data</a>
+      <a href="articles/regionmerging.html">Region Merging</a>
+    </li>
+    <li>
+      <a href="articles/transition.html">Using cTWAS</a>
     </li>
   </ul>
 </li>
       </ul>
 <ul class="nav navbar-nav navbar-right">
 <li>
-  <a href="https://github.com/xinhe-lab/ctwas">Source</a>
+  <a href="https://github.com/simingz/ctwas" class="external-link">Source</a>
 </li>
       </ul>
 </div>
@@ -81,20 +80,22 @@
       </header><div class="row">
   <div class="contents col-md-9">
 
-<div id="ctwas" class="section level1">
-<div class="page-header"><h1 class="hasAnchor">
-<a href="#ctwas" class="anchor"></a>ctwas</h1></div>
+<div class="section level1">
+<div class="page-header"><h1 id="ctwas">ctwas<a class="anchor" aria-label="anchor" href="#ctwas"></a>
+</h1></div>
 <p>Package for the causal TWAS project.</p>
+<p>Read the <a href="https://doi.org/10.1101/2022.09.27.509700" class="external-link">manuscript</a> on bioRxiv.</p>
 </div>
-<div id="install" class="section level1">
-<h1 class="hasAnchor">
-<a href="#install" class="anchor"></a>Install</h1>
+<div class="section level1">
+<h1 id="install">Install<a class="anchor" aria-label="anchor" href="#install"></a>
+</h1>
 <p>Install <code>ctwas</code>:</p>
-<pre><code><a href="https://rdrr.io/pkg/remotes/man/install_github.html">remotes::install_github("xinhe-lab/ctwas",ref = "main")</a></code></pre>
+<pre><code><span><span class="fu">remotes</span><span class="fu">::</span><span class="fu"><a href="https://remotes.r-lib.org/reference/install_github.html" class="external-link">install_github</a></span><span class="op">(</span><span class="st">"xinhe-lab/ctwas"</span>,ref <span class="op">=</span> <span class="st">"main"</span><span class="op">)</span></span></code></pre>
+<p>Currently, ctwas can only be installed on linux systems. We suggset to run ctwas using a high throughput computing system.</p>
 </div>
-<div id="acknowledgement" class="section level1">
-<h1 class="hasAnchor">
-<a href="#acknowledgement" class="anchor"></a>Acknowledgement</h1>
+<div class="section level1">
+<h1 id="acknowledgement">Acknowledgement<a class="anchor" aria-label="anchor" href="#acknowledgement"></a>
+</h1>
 <p>We acknowledge the authors of <code>susieR</code> package for using their codes.</p>
 <p>Original <code>susieR</code> code obtained by:</p>
 <pre><code>git clone git@github.com:stephenslab/susieR.git
@@ -106,30 +107,43 @@ git checkout c7934c0</code></pre>
 
   <div class="col-md-3 hidden-xs hidden-sm" id="pkgdown-sidebar">
     <div class="license">
-<h2>License</h2>
+<h2 data-toc-skip>License</h2>
 <ul class="list-unstyled">
 <li>
-<a href="https://opensource.org/licenses/mit-license.php">MIT</a> + file <a href="LICENSE-text.html">LICENCE</a>
+<a href="https://opensource.org/licenses/mit-license.php" class="external-link">MIT</a> + file <a href="LICENSE-text.html">LICENCE</a>
 </li>
 </ul>
 </div>
+
+
+<div class="citation">
+<h2 data-toc-skip>Citation</h2>
+<ul class="list-unstyled">
+<li><a href="authors.html#citation">Citing ctwas</a></li>
+</ul>
+</div>
+
 <div class="developers">
-<h2>Developers</h2>
+<h2 data-toc-skip>Developers</h2>
 <ul class="list-unstyled">
 <li>Siming Zhao <br><small class="roles"> Maintainer </small>  </li>
 </ul>
 </div>
+
+
 
   </div>
 </div>
 
 
       <footer><div class="copyright">
-  <p>Developed by Siming Zhao.</p>
+  <p></p>
+<p>Developed by Siming Zhao.</p>
 </div>
 
 <div class="pkgdown">
-  <p>Site built with <a href="https://pkgdown.r-lib.org/">pkgdown</a> 1.6.1.</p>
+  <p></p>
+<p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.0.7.</p>
 </div>
 
       </footer>
@@ -137,6 +151,8 @@ git checkout c7934c0</code></pre>
 
   
 
+
+  
 
   </body>
 </html>

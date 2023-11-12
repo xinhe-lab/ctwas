@@ -1,0 +1,22 @@
+---
+title: "Region Merging"
+author: "wesleycrouse"
+date: "2023-08-31"
+output: workflowr::wflow_html
+editor_options:
+  chunk_output_type: console
+---
+
+### Region Merging
+
+cTWAS performs its analysis region-by-region in order to make the analysis tractable. By default, regions are merged (`merge=T`) and analyzed jointly when a gene spans a region boundary; this ensures that these genes are analyzed in their appropriate context, which includes information from both regions. Gene start and end positions are determined by the first and last variant positions for each gene prediction model, for variants that are also in the LD reference and GWAS summary statistics. Thus, the actual regions analyzed by cTWAS depend not only on the specified region locations, but also the LD and summary statistics supplied. Region definitions are data-dependent in this way. 
+
+cTWAS is region-based for computational reasons, so it follows that excessive region merging (i.e. combining many adjacent regions) can make the analysis slow or intractable. This is especially true if there are already many variants in the LD reference. The cTWAS log reports the number of regions on each chromosome before and after merging. If more than a handful of regions are merged, there many be computational issues in subsequent steps, or something many misspecified. There are at least two scenarios that can lead to excessive region merging. 
+
+First, it is possible that the specified prediction models are dense (they contain many variants per gene), or that they span a large genomic region. This can result in many boundary-spanning genes and many merged regions. For this reason, cTWAS performs best when prediction models are sparse. If using dense prediction models, we recommend removing variants with weight below a threshold from the prediction models prior to analysis. We also recommend prediction models that only use variants nearby the gene for the same reason.
+
+Second, mismatching the genome build (e.g. hg38) of the LD reference and the genome build used to train the prediction models can lead to excessive region merging. If the genome builds are mismatched, it is possible that variants included in a prediction model for a gene are not near the gene in the LD reference. Such a gene could potentially span many region boundaries. It is critical that the genome build of the LD reference match the genome build used to train the prediction models. The genome build of the GWAS summary statistics does not matter because variant positions are determined by the LD reference.
+
+Turning region merging off (`merge=F`) discards all genes that span region boundaries. This will resolve computational issues around excessive region merging but will also prevent the analysis of boundary-spanning genes.
+
+

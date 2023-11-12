@@ -1,8 +1,9 @@
-pandoc: 1.15.0.6
-pkgdown: 1.6.1
+pandoc: 2.14.0.3
+pkgdown: 2.0.7
 pkgdown_sha: ~
 articles:
-  ctwas_idv_wkfl: ctwas_idv_wkfl.html
-  ctwas_rss_wkfl: ctwas_rss_wkfl.html
-last_built: 2021-06-07T01:18Z
+  harmonization: harmonization.html
+  regionmerging: regionmerging.html
+  transition: transition.html
+last_built: 2023-11-12T19:06Z
 
