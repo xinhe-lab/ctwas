@@ -129,7 +129,7 @@ ctwas_rss <- function(
   thin = 1,
   prob_single = 0.8,
   max_snp_region = Inf,
-  rerun_gene_PIP = 0.8,
+  rerun_gene_PIP = 0.5,
   niter1 = 3,
   niter2 = 30,
   L= 5,
@@ -345,7 +345,8 @@ ctwas_rss <- function(
       res.keep <- NULL
       for (b in 1: length(regionlist)){
         for (rn in names(regionlist[[b]])){
-          gene_PIP <- max(res$susie_pip[res$type != "SNP" & res$region_tag1 == b & res$region_tag2 == rn], 0)
+          #gene_PIP <- max(res$susie_pip[res$type != "SNP" & res$region_tag1 == b & res$region_tag2 == rn], 0)
+          gene_PIP <- sum(res$susie_pip[res$type != "SNP" & res$region_tag1 == b & res$region_tag2 == rn])
           if (gene_PIP < rerun_gene_PIP) {
             regionlist[[b]][[rn]] <- NULL
             res.keep <- rbind(res.keep, res[res$region_tag1 ==b & res$region_tag2 == rn, ])
