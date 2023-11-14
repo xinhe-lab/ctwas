@@ -44,19 +44,19 @@
 </li>
 <li class="dropdown">
   <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
-    Articles
+    Tutorial
      
     <span class="caret"></span>
   </a>
   <ul class="dropdown-menu" role="menu">
 <li>
-      <a href="../articles/harmonization.html">Harmonization</a>
+      <a href="../articles/transition.html">How to use cTWAS software</a>
     </li>
     <li>
-      <a href="../articles/regionmerging.html">Region Merging</a>
+      <a href="../articles/harmonization.html">Topics on Harmonization</a>
     </li>
     <li>
-      <a href="../articles/transition.html">Using cTWAS</a>
+      <a href="../articles/regionmerging.html">Topics on Region Merging</a>
     </li>
   </ul>
 </li>
@@ -298,12 +298,12 @@
 <div class="sourceCode" id="cb21"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">ld_pgenfs</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/system.file.html" class="external-link">system.file</a></span><span class="op">(</span><span class="st">"extdata/example_genotype_files"</span>, <span class="fu"><a href="https://rdrr.io/r/base/paste.html" class="external-link">paste0</a></span><span class="op">(</span><span class="st">"example_chr"</span>, <span class="fl">1</span><span class="op">:</span><span class="fl">22</span>, <span class="st">".pgen"</span><span class="op">)</span>, package <span class="op">=</span> <span class="st">"ctwas"</span><span class="op">)</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">head</a></span><span class="op">(</span><span class="va">ld_pgenfs</span><span class="op">)</span></span></code></pre></div>
-<pre><code><span><span class="co">## [1] "/tmp/RtmpAq4OYV/temp_libpath8f1c1449b285/ctwas/extdata/example_genotype_files/example_chr1.pgen"</span></span>
-<span><span class="co">## [2] "/tmp/RtmpAq4OYV/temp_libpath8f1c1449b285/ctwas/extdata/example_genotype_files/example_chr2.pgen"</span></span>
-<span><span class="co">## [3] "/tmp/RtmpAq4OYV/temp_libpath8f1c1449b285/ctwas/extdata/example_genotype_files/example_chr3.pgen"</span></span>
-<span><span class="co">## [4] "/tmp/RtmpAq4OYV/temp_libpath8f1c1449b285/ctwas/extdata/example_genotype_files/example_chr4.pgen"</span></span>
-<span><span class="co">## [5] "/tmp/RtmpAq4OYV/temp_libpath8f1c1449b285/ctwas/extdata/example_genotype_files/example_chr5.pgen"</span></span>
-<span><span class="co">## [6] "/tmp/RtmpAq4OYV/temp_libpath8f1c1449b285/ctwas/extdata/example_genotype_files/example_chr6.pgen"</span></span></code></pre>
+<pre><code><span><span class="co">## [1] "/tmp/RtmpvrzZG2/temp_libpathcbd35fea4ed2/ctwas/extdata/example_genotype_files/example_chr1.pgen"</span></span>
+<span><span class="co">## [2] "/tmp/RtmpvrzZG2/temp_libpathcbd35fea4ed2/ctwas/extdata/example_genotype_files/example_chr2.pgen"</span></span>
+<span><span class="co">## [3] "/tmp/RtmpvrzZG2/temp_libpathcbd35fea4ed2/ctwas/extdata/example_genotype_files/example_chr3.pgen"</span></span>
+<span><span class="co">## [4] "/tmp/RtmpvrzZG2/temp_libpathcbd35fea4ed2/ctwas/extdata/example_genotype_files/example_chr4.pgen"</span></span>
+<span><span class="co">## [5] "/tmp/RtmpvrzZG2/temp_libpathcbd35fea4ed2/ctwas/extdata/example_genotype_files/example_chr5.pgen"</span></span>
+<span><span class="co">## [6] "/tmp/RtmpvrzZG2/temp_libpathcbd35fea4ed2/ctwas/extdata/example_genotype_files/example_chr6.pgen"</span></span></code></pre>
 <div class="sourceCode" id="cb23"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/rm.html" class="external-link">rm</a></span><span class="op">(</span><span class="va">ld_pgenfs</span><span class="op">)</span></span></code></pre></div>
 </div>
@@ -367,11 +367,11 @@
 <div class="sourceCode" id="cb34"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co">#path to b38 script</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/system.file.html" class="external-link">system.file</a></span><span class="op">(</span><span class="st">"extdata/scripts"</span>, <span class="st">"convert_geno_to_LDR_chr.R"</span>, package <span class="op">=</span> <span class="st">"ctwas"</span><span class="op">)</span></span></code></pre></div>
-<pre><code><span><span class="co">## [1] "/tmp/RtmpAq4OYV/temp_libpath8f1c1449b285/ctwas/extdata/scripts/convert_geno_to_LDR_chr.R"</span></span></code></pre>
+<pre><code><span><span class="co">## [1] "/tmp/RtmpvrzZG2/temp_libpathcbd35fea4ed2/ctwas/extdata/scripts/convert_geno_to_LDR_chr.R"</span></span></code></pre>
 <div class="sourceCode" id="cb36"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co">#path to b37 script</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/system.file.html" class="external-link">system.file</a></span><span class="op">(</span><span class="st">"extdata/scripts"</span>, <span class="st">"convert_geno_to_LDR_chr_b37.R"</span>, package <span class="op">=</span> <span class="st">"ctwas"</span><span class="op">)</span></span></code></pre></div>
-<pre><code><span><span class="co">## [1] "/tmp/RtmpAq4OYV/temp_libpath8f1c1449b285/ctwas/extdata/scripts/convert_geno_to_LDR_chr_b37.R"</span></span></code></pre>
+<pre><code><span><span class="co">## [1] "/tmp/RtmpvrzZG2/temp_libpathcbd35fea4ed2/ctwas/extdata/scripts/convert_geno_to_LDR_chr_b37.R"</span></span></code></pre>
 <p>On the University of Chicago RCC cluster, the b38 reference is available at <code>/project2/mstephens/wcrouse/UKB_LDR_0.1/</code> and the b37 reference is available at <code>/project2/mstephens/wcrouse/UKB_LDR_0.1_b37/</code>.</p>
 </div>
 </div>

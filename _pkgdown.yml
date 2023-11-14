@@ -4,6 +4,19 @@ repo:
     branch: main
 
 navbar:
-  right:
-    - text: "Source"
+  structure:
+    left:  [reference, tutorial]
+    right: [source]    
+  components:
+    tutorial:
+      text: Tutorial
+      menu:
+      - text: How to use cTWAS software
+        href: articles/transition.html
+      - text: Topics on Harmonization
+        href: articles/harmonization.html
+      - text: Topics on Region Merging
+        href: articles/regionmerging.html
+    source:
+      text: Source
       href: https://github.com/simingz/ctwas

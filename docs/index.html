@@ -46,19 +46,19 @@
 </li>
 <li class="dropdown">
   <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
-    Articles
+    Tutorial
      
     <span class="caret"></span>
   </a>
   <ul class="dropdown-menu" role="menu">
 <li>
-      <a href="articles/harmonization.html">Harmonization</a>
+      <a href="articles/transition.html">How to use cTWAS software</a>
     </li>
     <li>
-      <a href="articles/regionmerging.html">Region Merging</a>
+      <a href="articles/harmonization.html">Topics on Harmonization</a>
     </li>
     <li>
-      <a href="articles/transition.html">Using cTWAS</a>
+      <a href="articles/regionmerging.html">Topics on Region Merging</a>
     </li>
   </ul>
 </li>
@@ -79,30 +79,35 @@
 
       </header><div class="row">
   <div class="contents col-md-9">
-
 <div class="section level1">
-<div class="page-header"><h1 id="ctwas">ctwas<a class="anchor" aria-label="anchor" href="#ctwas"></a>
+<div class="page-header"><h1 id="ctwas">cTWAS<a class="anchor" aria-label="anchor" href="#ctwas"></a>
 </h1></div>
-<p>Package for the causal TWAS project.</p>
-<p>Read the <a href="https://doi.org/10.1101/2022.09.27.509700" class="external-link">manuscript</a> on bioRxiv.</p>
-</div>
-<div class="section level1">
-<h1 id="install">Install<a class="anchor" aria-label="anchor" href="#install"></a>
-</h1>
+<p>The ctwas package implements a novel statistical framework for integrating eQTL and GWAS data, enabling reliable gene discoveries. Our approach can be viewed as a generalization of TWAS, which we term “causal-TWAS” (cTWAS).</p>
+<p>Running cTWAS involves four main steps: preparing input data, imputing gene z-scores, estimating parameters, and fine-mapping the genes and variants. The output of cTWAS is a posterior inclusion probability (PIP) for each variant and each gene with an expression model. We have included a <a href="https://xinhe-lab.github.io/ctwas/articles/transition.html" class="external-link">tutorial</a> of how to use the ctwas software.</p>
+<p>For more details, Please read the <a href="https://doi.org/10.1101/2022.09.27.509700" class="external-link">manuscript</a> on bioRxiv.</p>
+<div class="section level2">
+<h2 id="install">Install<a class="anchor" aria-label="anchor" href="#install"></a>
+</h2>
 <p>Install <code>ctwas</code>:</p>
 <pre><code><span><span class="fu">remotes</span><span class="fu">::</span><span class="fu"><a href="https://remotes.r-lib.org/reference/install_github.html" class="external-link">install_github</a></span><span class="op">(</span><span class="st">"xinhe-lab/ctwas"</span>,ref <span class="op">=</span> <span class="st">"main"</span><span class="op">)</span></span></code></pre>
 <p>Currently, ctwas can only be installed on linux systems. We suggset to run ctwas using a high throughput computing system.</p>
 </div>
-<div class="section level1">
-<h1 id="acknowledgement">Acknowledgement<a class="anchor" aria-label="anchor" href="#acknowledgement"></a>
-</h1>
+<div class="section level2">
+<h2 id="citing-this-work">Citing this work<a class="anchor" aria-label="anchor" href="#citing-this-work"></a>
+</h2>
+<p>If you find the <code>ctwas</code> package or any of the source code in this repository useful for your work, please cite:</p>
+<blockquote><p>Siming, Z., Wesley, C., Sheng, Q., Kaixuan, L., Stephens, M. &amp; Xin, H. (2022). Adjusting for genetic confounders in transcriptome-wide association studies leads to reliable detection of causal genes application to genetic fine mapping. *bioRxiv <a href="https://doi.org/10.1101/2022.09.27.509700" class="external-link uri">https://doi.org/10.1101/2022.09.27.509700</a></p></blockquote>
+</div>
+<div class="section level2">
+<h2 id="acknowledgement">Acknowledgement<a class="anchor" aria-label="anchor" href="#acknowledgement"></a>
+</h2>
 <p>We acknowledge the authors of <code>susieR</code> package for using their codes.</p>
 <p>Original <code>susieR</code> code obtained by:</p>
 <pre><code>git clone git@github.com:stephenslab/susieR.git
 git checkout c7934c0</code></pre>
 <p>Minor edits to make it accept different prior variances for each variable.</p>
 </div>
-
+</div>
   </div>
 
   <div class="col-md-3 hidden-xs hidden-sm" id="pkgdown-sidebar">
