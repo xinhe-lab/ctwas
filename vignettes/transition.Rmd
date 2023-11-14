@@ -378,7 +378,7 @@ z_snp_subset <- readRDS(system.file("extdata/summary_stats", "ukb-d-30780_irnt_s
 
 ```
 
-To impute gene z-scores at this locus, we use the following code. Here, we use the option `harmonize_z = T` and `harmonize_wgt = T` to harmonize both the z-scores and the weights to the LD reference. Because the z-scores and the LD reference are from the same source (UK Biobank), we expect that the strand is consistent between the GWAS and LD reference, so we use the option `strand_ambig_action_z = "none"` to treat strand ambiguous variants as unambiguous. The prediction models are from a different population (GTEx),, so we use the option `recover_strand_ambig_wgt` to recover strand ambiguous variants in the prediction models. The detailed procedure is described in the paper.
+To impute gene z-scores at this locus, we use the following code. Here, we use the option `harmonize_z = T` and `harmonize_wgt = T` to harmonize both the z-scores and the weights to the LD reference. Because the z-scores and the LD reference are from the same source (UK Biobank), we expect that the strand is consistent between the GWAS and LD reference, so we use the option `strand_ambig_action_z = "none"` to treat strand ambiguous variants as unambiguous. The prediction models are from a different population (GTEx), so we use the option `recover_strand_ambig_wgt` to recover strand ambiguous variants in the prediction models. The detailed procedure is described in the paper.
 
 ```{r}
 outputdir <- "/project2/xinhe/shared_data/ctwas_tutorial/results/single_locus/"
