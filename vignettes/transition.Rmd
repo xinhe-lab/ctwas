@@ -321,8 +321,6 @@ On the University of Chicago RCC cluster, the b38 reference is available at `/pr
 
 To speed computation in our single locus example, we will also subset the prediction models to only the genes at the HPR locus that we analyzed in the paper. Subsetting the prediction models is not strictly necessary (simply specifying a single region for the fine-mapping step will yield the same output), but subsetting the weights lets us avoid imputing all the genes during the imputation step. 
 
-<span style="color: red;">NOTE: Consider adding an option to impute only specific genes in the imputation function, or to impute only genes in specific regions. This will make the code more accessible for user who want to run cTWAS as a single locus with fixed parameters. </span>
-
 ```{r}
 
 #specify the genes to subset to:
