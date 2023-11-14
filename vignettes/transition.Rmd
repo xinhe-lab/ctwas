@@ -402,7 +402,7 @@ res <- impute_expr_z(z_snp = z_snp_subset,
 
 ```
 
-The log tells us that there is only chromosome information for chromosome 16, as expected. For each chromosome, it also tells us that we've harmonized (flipped) the GWAS z-scores and weights, and that we've harmonized strand ambiguous variants for the weights. Chromsome 16 has 11 prediction models and all of them are successfully imputed. The warnings tell us that 21 of the chromosomes did not have any imputed genes.
+The log is supressed in this tutorial. When running it, it tells us that there is only chromosome information for chromosome 16, as expected. For each chromosome, it also tells us that we've harmonized (flipped) the GWAS z-scores and weights, and that we've harmonized strand ambiguous variants for the weights. Chromsome 16 has 11 prediction models and all of them are successfully imputed. The warnings tell us that 21 of the chromosomes did not have any imputed genes.
 
 We've now successfully harmonized the data and imputed the gene z-scores. The function has returned a list containing three objects: the imputed gene z-scores, the harmonized GWAS z-scores, and paths to `.expr.gz` files for each chromosome. We will store all three of these for use in the next step. Make sure to store the harmonized GWAS z-scores or this will introduce inconsistencies during the fine-mapping step.
 
