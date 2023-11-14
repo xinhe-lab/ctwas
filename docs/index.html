@@ -82,7 +82,9 @@
 <div class="section level1">
 <div class="page-header"><h1 id="ctwas">cTWAS<a class="anchor" aria-label="anchor" href="#ctwas"></a>
 </h1></div>
-<p>The ctwas package implements a novel statistical framework for integrating eQTL and GWAS data, enabling reliable gene discoveries. Our approach can be viewed as a generalization of TWAS, which we term “causal-TWAS” (cTWAS).</p>
+<p>Expression Quantitative Trait Loci (eQTLs), provide valuable information on the effects of genetic variants. Many methods have been developed to leverage eQTLs to nominate candidate genes of complex traits, including colocalization analysis, transcriptome-wide association studies (TWAS), and Mendelian Randomization (MR)-based methods.</p>
+<p>All these methods, however, suffer from a key problem: when using the eQTLs of a gene to assess its role in a trait, nearby variants and nearby genetic components of expression of other genes can be correlated with the eQTLs of the test gene, while affecting the trait directly. These “genetic confounders” often lead to false discoveries.</p>
+<p>The ctwas package implements a novel statistical framework for integrating eQTL and GWAS data. It borrows ideas from statistical fine-mapping, which enables us to adjust all genetic confounders. Our approach can be viewed as a generalization of TWAS, which we term “causal-TWAS” (cTWAS).</p>
 <p>Running cTWAS involves four main steps: preparing input data, imputing gene z-scores, estimating parameters, and fine-mapping the genes and variants. The output of cTWAS is a posterior inclusion probability (PIP) for each variant and each gene with an expression model. We have included a <a href="https://xinhe-lab.github.io/ctwas/articles/transition.html" class="external-link">tutorial</a> of how to use the ctwas software.</p>
 <p>For more details, Please read the <a href="https://doi.org/10.1101/2022.09.27.509700" class="external-link">manuscript</a> on bioRxiv.</p>
 <div class="section level2">
