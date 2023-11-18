@@ -4,10 +4,10 @@ Title: Adjusting for genetic confounders in transcriptome-wide association studi
 Date: 2023-05-15
 Version: 0.1.35
 Authors@R: c(
-    person("Siming", "Zhao"),
-    person("Wesley", "Crouse"),
-    person("Sheng", "Qian"),
-    person("Kaixuan", "Luo")
+    person("Siming", "Zhao", role = c("aut", "cre")),
+    person("Wesley", "Crouse", role = c("aut", "cre")),
+    person("Sheng", "Qian", role = c("aut", "cre")),
+    person("Kaixuan", "Luo", role = c("aut", "cre"))
   )
 Author: Siming Zhao, Wesley Crouse, Sheng Qian, Kaixuan Luo, Matthew Stephens, Xin He
 Description: These package implements a method we developed to identify
