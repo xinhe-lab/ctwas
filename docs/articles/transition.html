@@ -128,7 +128,7 @@
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/files2.html" class="external-link">dir.create</a></span><span class="op">(</span><span class="st">"/project2/xinhe/shared_data/ctwas_tutorial/gwas_summary_stats"</span><span class="op">)</span></span>
 <span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/system.html" class="external-link">system</a></span><span class="op">(</span><span class="st">"wget https://gwas.mrcieu.ac.uk/files/ukb-d-30780_irnt/ukb-d-30780_irnt.vcf.gz -P gwas_summary_stats"</span><span class="op">)</span></span>
-<span><span class="fu">R.utils</span><span class="fu">::</span><span class="fu"><a href="https://henrikbengtsson.github.io/R.utils/reference/compressFile.html" class="external-link">gunzip</a></span><span class="op">(</span><span class="st">"/project2/xinhe/shared_data/ctwas_tutorial/gwas_summary_stats/ukb-d-30780_irnt.vcf.gz"</span><span class="op">)</span></span></code></pre></div>
+<span><span class="fu">R.utils</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/R.utils/man/compressFile.html" class="external-link">gunzip</a></span><span class="op">(</span><span class="st">"/project2/xinhe/shared_data/ctwas_tutorial/gwas_summary_stats/ukb-d-30780_irnt.vcf.gz"</span><span class="op">)</span></span></code></pre></div>
 <p>Next, we will use the VariantAnnotation package to read the summary statistics. Then, we will compute the z-scores and format the input data. We will also collect the sample size, which will be useful later. We will save this output for convenience.</p>
 <div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co">#read the data</span></span>
@@ -298,12 +298,12 @@
 <div class="sourceCode" id="cb21"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">ld_pgenfs</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/system.file.html" class="external-link">system.file</a></span><span class="op">(</span><span class="st">"extdata/example_genotype_files"</span>, <span class="fu"><a href="https://rdrr.io/r/base/paste.html" class="external-link">paste0</a></span><span class="op">(</span><span class="st">"example_chr"</span>, <span class="fl">1</span><span class="op">:</span><span class="fl">22</span>, <span class="st">".pgen"</span><span class="op">)</span>, package <span class="op">=</span> <span class="st">"ctwas"</span><span class="op">)</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">head</a></span><span class="op">(</span><span class="va">ld_pgenfs</span><span class="op">)</span></span></code></pre></div>
-<pre><code><span><span class="co">## [1] "/tmp/RtmpjvlAfU/temp_libpath8e414e1d43fe/ctwas/extdata/example_genotype_files/example_chr1.pgen"</span></span>
-<span><span class="co">## [2] "/tmp/RtmpjvlAfU/temp_libpath8e414e1d43fe/ctwas/extdata/example_genotype_files/example_chr2.pgen"</span></span>
-<span><span class="co">## [3] "/tmp/RtmpjvlAfU/temp_libpath8e414e1d43fe/ctwas/extdata/example_genotype_files/example_chr3.pgen"</span></span>
-<span><span class="co">## [4] "/tmp/RtmpjvlAfU/temp_libpath8e414e1d43fe/ctwas/extdata/example_genotype_files/example_chr4.pgen"</span></span>
-<span><span class="co">## [5] "/tmp/RtmpjvlAfU/temp_libpath8e414e1d43fe/ctwas/extdata/example_genotype_files/example_chr5.pgen"</span></span>
-<span><span class="co">## [6] "/tmp/RtmpjvlAfU/temp_libpath8e414e1d43fe/ctwas/extdata/example_genotype_files/example_chr6.pgen"</span></span></code></pre>
+<pre><code><span><span class="co">## [1] "/home/shengqian/R/x86_64-pc-linux-gnu-library/4.2/ctwas/extdata/example_genotype_files/example_chr1.pgen"</span></span>
+<span><span class="co">## [2] "/home/shengqian/R/x86_64-pc-linux-gnu-library/4.2/ctwas/extdata/example_genotype_files/example_chr2.pgen"</span></span>
+<span><span class="co">## [3] "/home/shengqian/R/x86_64-pc-linux-gnu-library/4.2/ctwas/extdata/example_genotype_files/example_chr3.pgen"</span></span>
+<span><span class="co">## [4] "/home/shengqian/R/x86_64-pc-linux-gnu-library/4.2/ctwas/extdata/example_genotype_files/example_chr4.pgen"</span></span>
+<span><span class="co">## [5] "/home/shengqian/R/x86_64-pc-linux-gnu-library/4.2/ctwas/extdata/example_genotype_files/example_chr5.pgen"</span></span>
+<span><span class="co">## [6] "/home/shengqian/R/x86_64-pc-linux-gnu-library/4.2/ctwas/extdata/example_genotype_files/example_chr6.pgen"</span></span></code></pre>
 <div class="sourceCode" id="cb23"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/rm.html" class="external-link">rm</a></span><span class="op">(</span><span class="va">ld_pgenfs</span><span class="op">)</span></span></code></pre></div>
 </div>
@@ -367,11 +367,11 @@
 <div class="sourceCode" id="cb34"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co">#path to b38 script</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/system.file.html" class="external-link">system.file</a></span><span class="op">(</span><span class="st">"extdata/scripts"</span>, <span class="st">"convert_geno_to_LDR_chr.R"</span>, package <span class="op">=</span> <span class="st">"ctwas"</span><span class="op">)</span></span></code></pre></div>
-<pre><code><span><span class="co">## [1] "/tmp/RtmpjvlAfU/temp_libpath8e414e1d43fe/ctwas/extdata/scripts/convert_geno_to_LDR_chr.R"</span></span></code></pre>
+<pre><code><span><span class="co">## [1] "/home/shengqian/R/x86_64-pc-linux-gnu-library/4.2/ctwas/extdata/scripts/convert_geno_to_LDR_chr.R"</span></span></code></pre>
 <div class="sourceCode" id="cb36"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co">#path to b37 script</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/system.file.html" class="external-link">system.file</a></span><span class="op">(</span><span class="st">"extdata/scripts"</span>, <span class="st">"convert_geno_to_LDR_chr_b37.R"</span>, package <span class="op">=</span> <span class="st">"ctwas"</span><span class="op">)</span></span></code></pre></div>
-<pre><code><span><span class="co">## [1] "/tmp/RtmpjvlAfU/temp_libpath8e414e1d43fe/ctwas/extdata/scripts/convert_geno_to_LDR_chr_b37.R"</span></span></code></pre>
+<pre><code><span><span class="co">## [1] "/home/shengqian/R/x86_64-pc-linux-gnu-library/4.2/ctwas/extdata/scripts/convert_geno_to_LDR_chr_b37.R"</span></span></code></pre>
 <p>On the University of Chicago RCC cluster, the b38 reference is available at <code>/project2/mstephens/wcrouse/UKB_LDR_0.1/</code> and the b37 reference is available at <code>/project2/mstephens/wcrouse/UKB_LDR_0.1_b37/</code>.</p>
 </div>
 </div>
