@@ -116,7 +116,7 @@ ctwas_summarize_parameters <- function(outputdir,
                      value = unlist(lapply(1:nrow(estimated_enrichment_all), function(x){estimated_enrichment_all[x,]})),
                      group = rep(rownames(estimated_enrichment_all), each=ncol(estimated_enrichment_all)))
     df$group <- as.factor(df$group)
-    levels(df$group) <- factor_levels
+    #levels(df$group) <- factor_levels
     
     p_enrich <- ggplot(df, aes(x=niter, y=value, group=group)) +
       geom_line(aes(color=group)) +
