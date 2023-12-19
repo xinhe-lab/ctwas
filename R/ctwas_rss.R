@@ -104,7 +104,7 @@
 ctwas_rss <- function(
   z_gene,
   z_snp,
-  ld_exprfs,
+  ld_exprvarfs,
   ld_pgenfs = NULL,
   ld_R_dir = NULL,
   ld_regions = c("EUR", "ASN", "AFR"),
@@ -137,10 +137,10 @@ ctwas_rss <- function(
 
   loginfo('ctwas started ... ')
 
-  if (length(ld_exprfs) != 22){
+  if (length(ld_exprvarfs) != 22){
     stop("Not all imputed expression files for 22 chromosomes are provided.")
   }
-  ld_exprvarfs <- sapply(ld_exprfs, prep_exprvar)
+  #ld_exprvarfs <- sapply(ld_exprfs, prep_exprvar)
 
   if (is.null(ld_pgenfs) & is.null(ld_R_dir)){
     stop("Error: need to provide either .pgen file or ld_R file")
@@ -206,7 +206,7 @@ ctwas_rss <- function(
 
     pars <- susieI_rss(zdf = zdf,
                        regionlist = regionlist,
-                       ld_exprfs = ld_exprfs,
+                       ld_exprvarfs = ld_exprvarfs,
                        ld_pgenfs = ld_pgenfs,
                        ld_Rfs = ld_Rfs,
                        niter = niter1,
@@ -239,7 +239,7 @@ ctwas_rss <- function(
 
     pars <- susieI_rss(zdf = zdf,
                        regionlist = regionlist2,
-                       ld_exprfs = ld_exprfs,
+                       ld_exprvarfs = ld_exprvarfs,
                        ld_pgenfs = ld_pgenfs,
                        ld_Rfs = ld_Rfs,
                        niter = niter2,
@@ -264,7 +264,7 @@ ctwas_rss <- function(
 
   pars <- susieI_rss(zdf = zdf,
                      regionlist = regionlist,
-                     ld_exprfs = ld_exprfs,
+                     ld_exprvarfs = ld_exprvarfs,
                      ld_pgenfs = ld_pgenfs,
                      ld_Rfs = ld_Rfs,
                      niter = 1,
@@ -326,7 +326,7 @@ ctwas_rss <- function(
 
       pars <- susieI_rss(zdf = zdf,
                          regionlist = regionlist,
-                         ld_exprfs = ld_exprfs,
+                         ld_exprvarfs = ld_exprvarfs,
                          ld_pgenfs = ld_pgenfs,
                          ld_Rfs = ld_Rfs,
                          niter = 1,

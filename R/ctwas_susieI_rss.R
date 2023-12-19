@@ -66,7 +66,7 @@
 #' 
 susieI_rss <- function(zdf,
                        regionlist,
-                       ld_exprfs,
+                       ld_exprvarfs,
                        ld_pgenfs = NULL,
                        ld_Rfs = NULL,
                        niter = 20,
@@ -86,7 +86,7 @@ susieI_rss <- function(zdf,
 
   outname <- file.path(outputdir, outname)
 
-  ld_exprvarfs <- sapply(ld_exprfs, prep_exprvar)
+  #ld_exprvarfs <- sapply(ld_exprfs, prep_exprvar)
 
   if (is.null(ld_pgenfs) & is.null(ld_Rfs)){
     stop("Error: need to provide either .pgen file or ld_R file")
