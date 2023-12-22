@@ -1,7 +1,7 @@
 ---
-title: "Using cTWAS"
-author: "wesleycrouse"
-date: "2023-08-31"
+title: "Using cTWAS with summary statistics"
+author: "Wesley Crouse, Sheng Qian, Xin He"
+date: "2023-12-22"
 output: workflowr::wflow_html
 editor_options:
   chunk_output_type: console
@@ -9,25 +9,13 @@ editor_options:
 
 ## Overview
 
-This document is a user guide for the cTWAS R package. It details how to use to use the summary statistics version of cTWAS, which is an integrative method for identifying causal genes at GWAS loci using eQTL data. Briefly, cTWAS conditions on genetic confounders, jointly modeling sparse effects of all nearby genes and variants in an extended fine-mapping framework. Additional details are available in the [paper](https://doi.org/10.1101/2022.09.27.509700). 
+This document demonstrates how to use the summary statistics version of cTWAS. Running cTWAS involves four main steps: preparing input data, imputing gene z-scores, estimating parameters, and fine-mapping the genes and variants. The output of cTWAS are posterior inclusion probabilities (PIPs) for all variants and genes with expression models. This document will cover each of these topics in detail. We also describe some of the options available at each step and the analysis considerations behind these options. 
 
-Running cTWAS involves four main steps: preparing input data, imputing gene z-scores, estimating parameters, and fine-mapping the genes and variants. The output of cTWAS is a posterior inclusion probability (PIP) for each variant and each gene with an expression model. This document will cover each of these topics in detail. We also describe some of the options available at each step and the analysis considerations behind these options. 
-
-We will start by examining the input data and running the cTWAS fine-mapping step at a single locus using parameters previously estimated in the cTWAS paper. Running cTWAS with fixed parameters at a single locus is relatively fast, and is the simplest way to use cTWAS, but it requires specifying parameters, rather than learning them from the data. 
-
-We will then provide a workflow for the same analysis, but using the full data and estimating parameters. This can be computationally intensive. We performed these analyses for the paper with 10 cores and 56GB of RAM, although the exact resource requirements will vary with the numbers of genes and variants provided.
+We will start by examining the input data and running the cTWAS analysis at a single locus using parameters previously estimated in the cTWAS paper. Running cTWAS with fixed parameters at a single locus is relatively fast, and is the simplest way to use cTWAS. We will then provide a workflow for the same analysis, but using the full data and estimating parameters. 
 
 ## Getting started
 
-Start by installing cTWAS in R via GitHub. For the first section of this document, we will use the main branch of cTWAS.
-
-```{r, eval=F}
-
-remotes::install_github("xinhe-lab/ctwas", ref = "main")
-
-```
-
-Then load the package and set the working directory where you want to perform perform the analysis.
+Suppose the cTWAS package has been installed, we first load the package and set the working directory where you want to perform the analysis.
 
 ```{r}
 
@@ -41,14 +29,13 @@ library(ctwas)
 
 ```
 
-## Preparing input data
+## Preparing the input data
 
-The inputs for the summary statistics version of cTWAS include GWAS summary statistics for variants, prediction models for genes, and an LD reference. These inputs should be harmonized prior to analysis because the reference and alternative alleles for each variant may not  match across GWAS summary statistics, prediction model for genes and LD reference.
+The inputs for the summary statistics version of cTWAS include GWAS summary statistics for variants, prediction models for genes, and LD reference. There are a few potential problems when preparing the input data. First, the variants in the three sets of input data may not match. Only variants in all three input data will be used in cTWAS. So it is important to maximize the overlap of the variants in the three sets. This can be done for example, by imputing GWAS summary statistics of the variants missing in GWAS but in the LD reference. Another useful pre-processing step is to perform Minor allele frequency (MAF) filtering on the GWAS data so that only those with MAF above a certain cutoff would be used in the analysis, ideally the same cutoff used in the LD references. Additionally, when building the prediction models of gene expression, it is better to impute the genotype data using the LD reference, if possible.  All these steps should be done before running cTWAS.  
 
-We provide some options for harmonization if the data are not already harmonized. For example, if variants that are not strand ambiguous, harmonization simply flips reference and alternative alleles to match the LD reference. Please see the topics on harmonization for more details.
-
-The LD reference should contain as many of the GWAS and eQTL variants as possible. Only variants in both the GWAS and LD reference are included in the analysis. Further, if a variant is in the prediction models but not the LD reference or the GWAS, it cannot be used for imputation. We recommend imputing z-scores for variants missing from the GWAS but in the LD reference, and taking care to ensure overlap between the variants in the LD reference and the prediction models.
-
+The second potential problem is that the effect alleles in the prediction model, GWAS and LD reference may not agree with each other, thus we need to ``harmonize'' the data to ensure that the effect alleles match. While cTWAS tries to harmonize the data internally, it is better to perform harmonization before running cTWAS. To harmonize between GWAS and LD reference, one can use [SuSiE-RSS](https://stephenslab.github.io/susieR/articles/susierss_diagnostic.html) to check if the alleles match, and perform allele flipping if necessary . If the data are not already harmonized, we provide some options for harmonization. For example, if variants that are not strand ambiguous, harmonization simply flips reference and alternative alleles to match the LD reference. Please see the topics on harmonization for more details.
+    
+The third potential problem is the LD of the GWAS data (in-sample LD) do not match the reference LD. This can lead to false positives in fine-mapping tools. Diagonistic tools including [SuSiE-RSS](https://stephenslab.github.io/susieR/articles/susierss_diagnostic.html), and DENTIST (https://github.com/Yves-CHEN/DENTIST/), have been developed to check possible LD mismatch. Any problematic variants should be filtered before running cTWAS. 
 
 ### GWAS z-scores
 
@@ -89,7 +76,7 @@ saveRDS(gwas_n, file="/project2/xinhe/shared_data/ctwas_tutorial/gwas_summary_st
 
 ```
 
-After the previous step has run, we can load the data and look at the format. Z_snp is a data frame, and each row is a variant. A1 is the alternate allele, and A2 is the reference allele. The sample size for this GWAS is N=343,621.
+After the previous step, we can load the data and look at the format. Z_snp is a data frame, and each row is a variant. A1 is the alternate allele, and A2 is the reference allele. The sample size for this GWAS is N=343,621.
 
 ```{r}
 
@@ -101,13 +88,15 @@ gwas_n
 
 ```
 
-If your GWAS summary statistics is of other formats, extracting relevant columns (rsid, alternative allele, reference allele, zscore) and converting it to the format shown above.
+If your GWAS summary statistics is of other formats, extracting relevant columns (rsid, alternative allele, reference allele, zscore) and converting it to the format shown above. For large datasets, one can use special R packages such as `data.table` for this task. 
 
 ### Prediction models
 
-Prediction models can be specified in either PredictDB or FUSION format. Given a choice, PredictDB is the recommended format as some optional features are not implemented for FUSION. PredictDB has covariance information among SNPs included in the model, which can be used to recover strand ambiguous variants. In this user guide, we focus on the PredictDB format, but will provide information on using FUSION format.
+Prediction models can be specified in either PredictDB or FUSION format. Given a choice, PredictDB is the recommended format. PredictDB has information about correlations among SNPs included in the model. This is useful for recovering strand ambiguous variants. In this user guide, we focus on the PredictDB format, but will provide information on using FUSION format.
 
-Note: cTWAS performs best when prediction models are sparse (i.e. they do not include many variants per gene). As the density of variants increases, it becomes more intensive to compute gene-by-gene correlations using summary statistics. Dense variants can also lead to excessive region merging. See the topics on region merging for more details. Given an option, it is preferable to choose sparse prediction models for these reasons. If using dense prediction models, we recommend removing variants with weight below a threshold from the prediction models.
+In terms of the choice of prediction models, cTWAS performs best when prediction models are sparse, i.e. they have relatively few variants per gene. As the density of variants increases, it becomes computationally more expensive. Dense variants may also lead to a problem with region merging. Basically, if the variants in the prediction model of a gene spans two LD-independent regions, it would be unclear to cTWAS what region the gene should be assigned to. So cTWAS will attempt to merge the two regions. But if many genes have dense variants in their prediction models, region merging could be excessive, leading to very large regions and hurting the performance of cTWAS. Given this consideration, we recommend to choose sparse prediction models such as Lasso. If using dense prediction models, we recommend to remove variants with weights below a threshold from the prediction models.
+
+Often, a research may perform eQTL mapping and have a list of significant eQTLs without explicitly building prediction models. In such cases, it is possible to run cTWAS. This can be done simply by using top eQTL per gene as the prediction model. One can create PredictDB format data from the eQTL list - the details will be added later. 
 
 #### PredictDB format
 
@@ -181,7 +170,7 @@ weight_fusion <- system.file("extdata/example_fusion_weights", "Tissue", package
 
 ```
 
-To specify weights in FUSION format, provide the directory that contains all the `.rdata` files as above. We assume a file with the same name as the directory with the suffix `.pos` is present in the same level as the directory. The program will search for this file automatically. For example, we have both the directory `Tissue/` and `Tissue.pos` present under the `extdata/example_fusion_weights` folder. Note that FUSION weights don’t come with covariance information among variants. So you need to turn off the option “recover_strand_ambig_wgt”
+To specify weights in FUSION format, provide the directory that contains all the `.rdata` files as above. We assume a file with the same name as the directory with the suffix `.pos` is present in the same level as the directory. The program will search for this file automatically. For example, we have both the directory `Tissue/` and `Tissue.pos` present under the `extdata/example_fusion_weights` folder. Note that FUSION weights don’t come with covariance information among variants. So you need to turn off the option "recover_strand_ambig_wgt" in the "impute_expr_z" function.
 
 ```{r}
 
@@ -203,11 +192,11 @@ cTWAS performs its analysis region-by-region. If individual-level genotype data 
 
 It is critical that the genome build (e.g. hg38) of the LD reference matches the genome build used to train the prediction models. The genome build of the GWAS summary statistics does not matter because variant positions are determined by the LD reference.
 
-The choice of LD reference population is important for fine-mapping. Best practice for fine-mapping is to use an in-sample LD reference (LD computed using the subjects in the GWAS sample). If an in-sample LD reference is not an option, the LD reference should be as representative of the population in the GWAS sample as possible. Given that cTWAS is an extended fine-mapping algorithm, and that gene z-scores are computed using the observed GWAS z-scores, which reflect patterns of LD in the GWAS population, our recommendation is to match the LD reference to the GWAS population, not the population used to build the prediction models. 
+The choice of LD reference population is important for fine-mapping. Best practice for fine-mapping is to use in-sample LD reference (LD computed using the subjects in the GWAS sample). If in-sample LD reference is not an option, the LD reference should be as representative of the population in the GWAS sample as possible. Given that cTWAS is an extended fine-mapping algorithm, and that gene z-scores are computed using the observed GWAS z-scores, which reflect patterns of LD in the GWAS population, our recommendation is to match the LD reference to the GWAS population, not the population used to build the prediction models. 
 
-#### Regions
+#### Defining regions
 
-cTWAS includes pre-defined regions based on European (EUR), Asian (ASN), or African (AFR) populations, using either genome build b38 or b37. These regions were previously generated using LDetect. These regions are specified in `ctwas_rss` function using the `ld_regions` and `ld_regions_version` arguments, respectively. The regions are left closed and right open, i.e. [start, stop). We will open the b38 European region file, which is included in the package, to view the format, centered on the region that we will analyze later.
+cTWAS includes pre-defined regions based on European (EUR), Asian (ASN), or African (AFR) populations, using either genome build b38 or b37. These regions were previously generated using [LDetect](https://github.com/endrebak/ldetect). These regions are specified in `ctwas_rss` function using the `ld_regions` and `ld_regions_version` arguments, respectively (see function [reference](https://xinhe-lab.github.io/ctwas/reference/index.html)). We will open the b38 European region file, which is included in the package, to view the format, centered on the region that we will analyze later.
 
 ```{r}
 
@@ -254,7 +243,9 @@ rm(ld_pgenfs)
 
 #### LD matrices
 
-To use LD matrices for the LD reference, provide a directory containing all of the `.RDS` matrix files and matching `.Rvar` variant information files. We have included an LD matrix for the HPR locus that we analyzed in the paper as part of the package. The complete LD matrix for this region was too large to include in the package, so we include only half of the variants at this locus, including the ones needed for the prediction models at this locus. We obtained the example LD matrix using the following code:
+To use LD matrices for the LD reference, provide a directory containing all of the `.RDS` matrix files and matching `.Rvar` variant information files. We have included an LD matrix for the HPR locus that we analyzed in the paper as part of the package. The complete LD matrix for this region was too large to include in the package, so we include only half of the variants at this locus, including the ones needed for the prediction models at this locus. The complete LD matrices of European individuals from UK Biobank can be downloaded [here](https://uchicago.box.com/s/jqocacd2fulskmhoqnasrknbt59x3xkn). On the University of Chicago RCC cluster, the b38 reference is available at `/project2/mstephens/wcrouse/UKB_LDR_0.1/` and the b37 reference is available at `/project2/mstephens/wcrouse/UKB_LDR_0.1_b37/`.
+
+We illustrated below how cTWAS uses the LD matrices. We obtained the example LD matrix using the following code:
 
 ```{r, eval=F}
 R_snp <- readRDS("/project2/mstephens/wcrouse/UKB_LDR_0.1/ukb_b38_0.1_chr16.R_snp.71020125_72901251.RDS")
@@ -315,11 +306,10 @@ system.file("extdata/scripts", "convert_geno_to_LDR_chr_b37.R", package = "ctwas
 
 ```
 
-On the University of Chicago RCC cluster, the b38 reference is available at `/project2/mstephens/wcrouse/UKB_LDR_0.1/` and the b37 reference is available at `/project2/mstephens/wcrouse/UKB_LDR_0.1_b37/`.
 
 ## Running cTWAS at a single locus
 
-To speed computation in our single locus example, we will also subset the prediction models to only the genes at the HPR locus that we analyzed in the paper. Subsetting the prediction models is not strictly necessary (simply specifying a single region for the fine-mapping step will yield the same output), but subsetting the weights lets us avoid imputing all the genes during the imputation step. 
+To speed computation in our single locus example, we will subset the prediction models to only the genes at the HPR locus that we analyzed in the paper. Subsetting the prediction models is not strictly necessary (simply specifying a single region for the fine-mapping step will yield the same output), but subsetting the weights lets us avoid imputing all the genes during the imputation step. 
 
 ```{r}
 
@@ -358,7 +348,7 @@ weight_subset <- system.file("extdata/weights_nolnc", "mashr_Liver_nolnc_subset.
 
 ### Imputing gene z-scores
 
-Now that the input data is prepared, we are ready to impute gene z-scores using cTWAS. We will use the suset of prediction models that we prepared earlier, along with the LD matrix that we examined. We will also subset the GWAS z-scores to only the variants in this region:
+Now that the input data is prepared, we are ready to impute gene z-scores using cTWAS. This step basically performs Transcriptome-wide association studies (TWAS) on each gene with a prediction model. The underlying calculation is based on [S-PrediXcan](https://www.nature.com/articles/s41467-018-03621-1).  We will use the suset of prediction models that we prepared earlier, along with the LD matrix that we examined. We will also subset the GWAS z-scores to only the variants in this region:
 
 ```{r eval=F}
 
@@ -402,7 +392,7 @@ res <- impute_expr_z(z_snp = z_snp_subset,
 
 ```
 
-The log is supressed in this tutorial. When running it, it tells us that there is only chromosome information for chromosome 16, as expected. For each chromosome, it also tells us that we've harmonized (flipped) the GWAS z-scores and weights, and that we've harmonized strand ambiguous variants for the weights. Chromsome 16 has 11 prediction models and all of them are successfully imputed. The warnings tell us that 21 of the chromosomes did not have any imputed genes.
+The log tells us that there is only chromosome information for chromosome 16, as expected. For each chromosome, it also tells us that we've harmonized (flipped) the GWAS z-scores and weights, and that we've harmonized strand ambiguous variants for the weights. Chromsome 16 has 11 prediction models and all of them are successfully imputed. The warnings tell us that 21 of the chromosomes did not have any imputed genes.
 
 We've now successfully harmonized the data and imputed the gene z-scores. The function has returned a list containing three objects: the imputed gene z-scores, the harmonized GWAS z-scores, and paths to `.expr.gz` files for each chromosome. We will store all three of these for use in the next step. Make sure to store the harmonized GWAS z-scores or this will introduce inconsistencies during the fine-mapping step.
 
@@ -410,17 +400,15 @@ We've now successfully harmonized the data and imputed the gene z-scores. The fu
 str(res)
 
 z_gene_subset <- res$z_gene #imputed gene z-scores
-ld_exprfs <- res$ld_exprfs #individual level imputed gene expression files
 z_snp_subset <- res$z_snp #harmonized GWAS z-scores
+ld_exprvarfs <- paste0(outputdir, outname, "_chr", 1:22, ".exprvar") #position information for each imputed gene
 
 save(z_gene_subset, file = paste0(outputdir, outname, "_z_gene.Rd"))
-save(ld_exprfs, file = paste0(outputdir, outname, "_ld_exprfs.Rd"))
 save(z_snp_subset, file = paste0(outputdir, outname, "_z_snp.Rd"))
 
 ```
 
-In the directory, we have generated 4 files per chromosome during gene imputation. The `.expr.gz` files contain individual level imputed gene expression; these files are empty when using the summary statistics version of cTWAS but populated when using the individual level version of cTWAS. The `exprqc.Rd` files contain QC information about imputation for each gene. The `.exprvar` file contains position information for each imputed gene, including start positions and end positions; these positions are determined by the first and last variant positions for each gene prediction model. The `_ld_R_*.txt` file contains information about the LD regions and matrices used.
-
+In the directory, we have generated 3 files per chromosome during gene imputation. The `exprqc.Rd` files contain QC information about imputation for each gene. The `.exprvar` file contains position information for each imputed gene, including start positions and end positions; these positions are determined by the first and last variant positions for each gene prediction model. The `_ld_R_*.txt` file contains information about the LD regions and matrices used.
 
 ```{r}
 list.files(outputdir, pattern="chr16")
@@ -432,7 +420,7 @@ After imputing gene z-scores, we are ready to run the cTWAS analysis. The full a
 
 Note that cTWAS expects the output of `impute_expr_z`. Currently, it is not possible to specify gene z-scores obtained using other software. This is because we cannot ensure that the LD reference used for imputation with other software is the same as the LD reference used for fine-mapping. This scenario would be fine for parameter estimation, which does not depend on LD, but it would be problematic for fine-mapping. 
 
-```{r eval=F}
+```{r}
 
 #the estimated prior inclusion probabilities for genes and variants from the paper
 group_prior <- c(0.0107220302, 0.0001715896)
@@ -443,7 +431,7 @@ group_prior_var <- c(41.327666, 9.977841)
 # run ctwas_rss
 ctwas_rss(z_gene = z_gene_subset, 
           z_snp = z_snp_subset, 
-          ld_exprfs = ld_exprfs, 
+          ld_exprvarfs = ld_exprvarfs, 
           ld_R_dir = ld_R_dir, 
           ld_regions_custom = regions_file, 
           outputdir = outputdir, 
@@ -455,7 +443,9 @@ ctwas_rss(z_gene = z_gene_subset,
 
 ```
 
-The log file tells us that cTWAS detected one region on chromosome 16, and no other regions on other chromosomes. cTWAS also added variant-by-gene and gene-by-gene correlation information ("R matrix info") for all regions, by chromosome; this is saved in a directory called `[outname]_LDR`. Finally, cTWAS ran a single iteration of SuSiE for all regions and reported the parameters used.
+Most of the arguments of this function should be self-explained. The arguments `estimate_group_prior` and `estimate_group_prior_var` control whether cTWAS will perform estimation of the two sets of parameters: the prior inclusion probabilities and the prior effect size variance. The `outputdir` argument specifies the directory to save the output files, and the `outname` argument is used as the prefix for the output files.  
+
+The log file tells us that cTWAS detected one region on chromosome 16, and no other regions on other chromosomes. This function computed variant-by-gene and gene-by-gene correlation information ("R matrix info") for all regions, by chromosome. These matrices are saved in a directory called `[outname]_LDR`. Finally, cTWAS ran a single iteration of SuSiE for all regions and reported the parameters used.
 
 In the output directory, we've created a number of files. We've created the `[outname]_LDR` directory with the gene correlation information; this folder is not created if using genotype information instead of LD matrices.  The `[outname]_ld_R_*.txt` files contains information about the LD regions and matrices used. We also created two files related to region indexing, `[outname].regions.txt` and `[outname].regionlist.RDS`. 
 
@@ -538,48 +528,21 @@ ctwas_locus_plot(ctwas_res = ctwas_res,
                  xlim = c(71.6,72.4),
                  ymax_twas = 85,
                  twas_sig_thresh = twas_sig_thresh,
-                 alt_names = "genename",
-                 legend_panel = "TWAS",
-                 legend_side="left",
+                 alt_names = "genename", #the column that specify gene names
+                 legend_panel = "TWAS", #the panel to plot legend
+                 legend_side="left", #the position of the panel
                  outputdir = outputdir,
                  outname = outname)
 
 ```
 
-This plot function has an option include an empty space to add a gene track (`empty_gene_track=T`); however, the gene track must be plotted separately and manually aligned due to plotting incompatibilities between base R and the `Gviz` package. Here is an example that generates both the locus plot and the gene track, with the plot sizes that we used in the paper to manually align the plots.
-
-```{r, eval=F}
-
-#locus plot with empty space at the bottom for the gene track
-pdf(file = paste0(outputdir, "HPR_locus_plot.pdf"), width = 5, height = 3.5)
-plot_df <- ctwas_locus_plot(ctwas_res = ctwas_res,
-                            region_tag = "16_1",
-                            xlim = c(71.6,72.4),
-                            ymax_twas = 85,
-                            twas_sig_thresh = twas_sig_thresh,
-                            alt_names = "genename",
-                            legend_panel = "TWAS",
-                            legend_side="left",
-                            outputdir = outputdir,
-                            outname = outname,
-                            return_table = T,
-                            empty_gene_track = T)
-dev.off()
-
-#gene track for the locus plot
-pdf(file = paste0(outputdir, "HPR_locus_plot_genetrack.pdf"), width = 3.86, height = 0.6)
-ctwas_locus_plot_genetrack(plot_df)
-dev.off()
-
-```
-
 ## Running cTWAS genome-wide
 
-We now provide a workflow for the same analysis, but using the full data and estimating parameters. This can be computationally intensive. We performed these analyses with 10 cores and 56GB of RAM, although the exact resource requirements will vary with the numbers of genes and variants provided.
+We now provide a workflow for the same analysis, but using the full data and estimating parameters. This can be computationally intensive. We performed these analyses with 6 cores and 56GB of RAM, although the exact resource requirements will vary with the numbers of genes and variants provided.
 
 ### Imputing gene z-scores
 
-To impute gene z-scores genome-wide, we specify the full set of GWAS summary statistics, the full PredictDB liver weights, and the full set of LD reference matrices. This step can be slow, especially with both of the advanced harmonization options turned on. There is a parallelized version of this function in the `multigroup` branch of cTWAS. As specified here, imputation took approximately 6 hours, using a single core (the only option using the `main` branch). When getting started with your own data, it may be helpful to run `impute_expr_z` with both `recover_strand_ambig_wgt = F` and `strand_ambig_action_z = "none"` to make sure everything runs correctly, before turning on these features for the final analysis. 
+To impute gene z-scores genome-wide, we specify the full set of GWAS summary statistics, the full PredictDB liver weights, and the full set of LD reference matrices. This step can be slow, especially with both of the advanced harmonization options turned on. There is a parallelized version of this function in the `multigroup` branch of cTWAS, currently under development. As specified here, imputation took approximately 6 hours, using a single core (the only option using the `main` branch). 
 
 ```{r}
 
@@ -590,9 +553,9 @@ ld_R_dir <- "/project2/mstephens/wcrouse/UKB_LDR_0.1/"
 
 dir.create(outputdir, showWarnings=F, recursive=T)
 
-# get gene z score
+# get gene z scores
 if (file.exists(paste0(outputdir, outname, "_z_gene.Rd"))){
-  ld_exprfs <- paste0(outputdir, outname, "_chr", 1:22, ".expr.gz")
+  ld_exprvarfs <- paste0(outputdir, outname, "_chr", 1:22, ".exprvar")
   load(file = paste0(outputdir, outname, "_z_gene.Rd"))
   load(file = paste0(outputdir, outname, "_z_snp.Rd"))
 } else {
@@ -607,11 +570,10 @@ if (file.exists(paste0(outputdir, outname, "_z_gene.Rd"))){
                      recover_strand_ambig_wgt = T)
   
   z_gene <- res$z_gene
-  ld_exprfs <- res$ld_exprfs
   z_snp <- res$z_snp
+  ld_exprvarfs <- paste0(outputdir, outname, "_chr", 1:22, ".exprvar")
   
   save(z_gene, file = paste0(outputdir, outname, "_z_gene.Rd"))
-  save(ld_exprfs, file = paste0(outputdir, outname, "_ld_exprfs.Rd"))
   save(z_snp, file = paste0(outputdir, outname, "_z_snp.Rd"))
 }
 
@@ -638,7 +600,7 @@ We pass these arguments the `ctwas_rss` and run the full analysis. As specified,
 # run ctwas_rss
 ctwas_rss(z_gene = z_gene, 
           z_snp = z_snp, 
-          ld_exprfs = ld_exprfs, 
+          ld_exprvarfs = ld_exprvarfs, 
           ld_R_dir = ld_R_dir, 
           ld_regions = "EUR",
           ld_regions_version = "b38",
@@ -650,10 +612,9 @@ ctwas_rss(z_gene = z_gene,
 
 ```
 
-
 The files in the output directory are similar to the single locus example, but there are several additional files since we've performed parameter estimation. Parameter estimation involves two steps. The first step obtains a rough estimate for the parameters. These estimates are saved in the `*.s1.susieIrssres.Rd` file. The SuSiE output from the last iteration in this step is saved in `*.s1.susieIrss.txt`; this file contains the total number of variants analyzed by cTWAS, as used in PVE estimation, scaled by `thin`. The second step obtains a more precise estimate for the parameters using a subset of regions. These estimates are saved in the `*.s2.susieIrssres.Rd` file; the final entry of this file is the estimated parameters, scaled by the `thin` parameter. The `*.s2.susieIrss.txt` file contains the SuSiE output from the final iteration of this step. 
 
-After parameter estimation, cTWAS performs a first pass at fine-mapping, using the proportion of variants specified in `thin`. These results are saved in the `*.s3.susieIrss.txt`. If `thin` is specified, then for regions with a gene having PIP greater than `rerun_gene_PIP`, cTWAS will make a final pass, analyzing these regions using the full set of variants. The final output of cTWAS is `*.susieIrss.txt`; this file contains results for all genes, all variants in regions with strong gene signals, and 10% of variants in other regions.
+After parameter estimation, cTWAS performs a first pass at fine-mapping, using the proportion of variants specified in `thin`. These results are saved in the `*.s3.susieIrss.txt`. If `thin` is specified, then for regions with a gene having PIP greater than `rerun_gene_PIP`, cTWAS will make a final pass, analyzing these regions using the full set of variants. The default value of `rerun_gene_PIP` is 0.8, but it can be changed by the user. The final output of cTWAS is `*.susieIrss.txt`; this file contains results for all genes, all variants in regions with strong gene signals, and 10% of variants in other regions.
  
 ### Assessing parameter estimates
 
