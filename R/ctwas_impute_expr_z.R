@@ -199,9 +199,9 @@ impute_expr_z <- function (z_snp, weight, ld_pgenfs = NULL, ld_R_dir = NULL, met
     #  system(paste0("gzip -f ", exprf))
     #  exprf <- paste0(exprf, ".gz")
     #}
-    #loginfo("Imputation done: number of genes with imputed expression: %s for chr %s", 
-    #        length(gnames), b)
-    #z_genelist[[b]] <- z_gene_chr
+    loginfo("Imputation done: number of genes with imputed expression: %s for chr %s", 
+            length(gnames), b)
+    z_genelist[[b]] <- z_gene_chr
     #ld_exprfs[b] <- exprf
   }
   z_gene <- do.call(rbind, z_genelist)
