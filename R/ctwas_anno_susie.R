@@ -7,18 +7,19 @@ anno_susie <- function(susieres,
                        sidx,
                        region_tag1,
                        region_tag2,
-                       type) {
+                       type,
+                       context) {
 
   anno.gene <- NULL
   if (length(geneinfo) !=0){
     anno.gene <- cbind(geneinfo[gidx,  c("chrom", "id", "p0")],
-                       type)
-    colnames(anno.gene) <-  c("chrom", "id", "pos", "type")
+                       type,context)
+    colnames(anno.gene) <-  c("chrom", "id", "pos", "type","context")
   }
 
   anno.SNP <- cbind(snpinfo[sidx, c("chrom", "id", "pos")],
-                    "SNP")
-  colnames(anno.SNP) <-  c("chrom", "id", "pos", "type")
+                    "SNP","SNP")
+  colnames(anno.SNP) <-  c("chrom", "id", "pos", "type","context")
 
   anno <- rbind(anno.gene, anno.SNP)
 
@@ -37,7 +38,7 @@ anno_susie <- function(susieres,
     }
   }
   outdf.rn <- cbind(anno, susieres$pip)
-  colnames(outdf.rn)[8] <- "susie_pip"
+  colnames(outdf.rn)[9] <- "susie_pip"
   p <- length(gidx) + length(sidx)
   outdf.rn$mu2 <- colSums(susieres$mu2[ ,
                                         seq(1, p)[1:p!=susieres$null_index], drop = F]) #WARN: not sure for L>1

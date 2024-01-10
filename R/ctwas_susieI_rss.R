@@ -45,9 +45,10 @@
 #'
 #' @param group_prior_var_structure a string indicating the structure to put on the prior variance parameters.
 #' "independent" is the default and allows all groups to have their own separate variance parameters.
-#' "shared" allows all groups to share the same variance parameter.
+#' "shared_all" allows all groups to share the same variance parameter.
 #' "shared+snps" allows all groups to share the same variance parameter, and this variance parameter is also shared with SNPs.
 #' "inv_gamma" places an inverse-gamma prior on the variance parameters for each group, with shape and rate hypeparameters.
+#' "shared_type" allows all groups in one molecular QTL type to share the same variance parameter.
 #' 
 #' @param estimate_group_prior TRUE/FALSE. If TRUE, the prior inclusion probabilities for SNPs and genes are estimated
 #' using the data. If FALSE, \code{group_prior} must be specified
@@ -76,7 +77,7 @@
 #' 
 susieI_rss <- function(zdf,
                        regionlist,
-                       ld_exprfs,
+                       ld_exprvarfs,
                        ld_pgenfs = NULL,
                        ld_Rfs = NULL,
                        niter = 20,
@@ -84,7 +85,7 @@ susieI_rss <- function(zdf,
                        z_ld_weight = 0,
                        group_prior = NULL,
                        group_prior_var = NULL,
-                       group_prior_var_structure = c("independent","shared","shared+snps","inv_gamma"),
+                       group_prior_var_structure = c("independent","shared_all","shared+snps","inv_gamma","shared_type"),
                        estimate_group_prior = T,
                        estimate_group_prior_var = T,
                        use_null_weight = T,
@@ -100,8 +101,6 @@ susieI_rss <- function(zdf,
   
   group_prior_var_structure <- match.arg(group_prior_var_structure)
 
-  ld_exprvarfs <- sapply(ld_exprfs, prep_exprvar)
-
   if (is.null(ld_pgenfs) & is.null(ld_Rfs)){
     stop("Error: need to provide either .pgen file or ld_R file")
   }
@@ -111,6 +110,7 @@ susieI_rss <- function(zdf,
   }
 
   types <- unique(zdf$type)
+  contexts <- unique(zdf$context)
   K <- length(types)
 
   group_prior_rec <- matrix(NA, nrow = K , ncol =  niter)
@@ -165,6 +165,7 @@ susieI_rss <- function(zdf,
             g_type <- zdf$type[match(gid, zdf$id)]
             s_type <- zdf$type[match(sid, zdf$id)]
             gs_type <- c(g_type, s_type)
+            g_context <- zdf$context[match(gid, zdf$id)]
 
             p <- length(gidx) + length(sidx)
 
@@ -250,7 +251,8 @@ susieI_rss <- function(zdf,
                                     sidx,
                                     b, 
                                     rn,
-                                    g_type)
+                                    g_type,
+                                    g_context)
 
             outdf.core.list[[reg]] <- outdf.reg
           }
@@ -280,7 +282,7 @@ susieI_rss <- function(zdf,
       
       if (group_prior_var_structure=="independent"){
         V_prior <- sapply(names(V_prior), function(x){outdf_temp <- outdf[outdf$type==x,]; sum(outdf_temp$susie_pip*outdf_temp$mu2)/sum(outdf_temp$susie_pip)})
-      } else if (group_prior_var_structure=="shared"){
+      } else if (group_prior_var_structure=="shared_all"){
         outdf_temp <- outdf[outdf$type=="SNP",]
         V_prior["SNP"] <- sum(outdf_temp$susie_pip*outdf_temp$mu2)/sum(outdf_temp$susie_pip)
         
@@ -292,6 +294,15 @@ susieI_rss <- function(zdf,
         V_prior[names(V_prior)] <- sum(outdf$susie_pip*outdf$mu2)/sum(outdf$susie_pip)
       } else if (group_prior_var_structure=="inv_gamma"){
         V_prior[names(V_prior)] <- sapply(names(V_prior), function(x){outdf_temp <- outdf[outdf$type==x,]; sum(0.5*outdf_temp$susie_pip*outdf_temp$mu2, inv_gamma_rate)/sum(0.5*outdf_temp$susie_pip, inv_gamma_shape-1)})
+      } else if (group_prior_var_structure=="shared_type"){
+        outdf_temp <- outdf[outdf$context=="SNP",]
+        V_prior["SNP"] <- sum(outdf_temp$susie_pip*outdf_temp$mu2)/sum(outdf_temp$susie_pip)
+        for(i in contexts){
+          if (i != "SNP"){
+          outdf_temp <- outdf[outdf$context==i,]
+          V_prior[sapply(names(V_prior), function(x){unlist(strsplit(x, "[_]"))[2]})==i] <- sum(outdf_temp$susie_pip*outdf_temp$mu2)/sum(outdf_temp$susie_pip)
+          }
+        }
       }
       
       group_prior_var_rec[names(V_prior), iter] <- V_prior
