@@ -139,7 +139,7 @@ ctwas_rss <- function(
   L= 5,
   group_prior = NULL,
   group_prior_var = NULL,
-  group_prior_var_structure = c("independent","shared_all","shared+snps","inv_gamma","shared_type"),
+  group_prior_var_structure = c("independent","shared_all","shared+snps","inv_gamma","shared_QTLtype"),
   inv_gamma_shape=1,
   inv_gamma_rate=0,
   estimate_group_prior = T,
@@ -195,15 +195,15 @@ ctwas_rss <- function(
   loginfo("LD region file: %s", regionfile)
 
   z_snp$type <- "SNP"
-  z_snp$context <- "SNP"   
+  z_snp$QTLtype <- "SNP"   
   if (is.null(z_gene$type)){
     z_gene$type <- "gene"
   }
-  if (is.null(z_gene$context)){
-    z_gene$context <- "gene"
+  if (is.null(z_gene$QTLtype)){
+    z_gene$QTLtype <- "gene"
   }
   
-  zdf <- rbind(z_snp[, c("id", "z", "type", "context")], z_gene[, c("id", "z", "type", "context")]) 
+  zdf <- rbind(z_snp[, c("id", "z", "type", "QTLtype")], z_gene[, c("id", "z", "type", "QTLtype")]) 
   group_prior_var_structure <- match.arg(group_prior_var_structure)
   
   rm(z_snp, ld_snpinfo)
@@ -352,7 +352,17 @@ ctwas_rss <- function(
                                   ncore = ncore_LDR,
                                   reuse_R_gene = T) # susie_rss can't take 1 var.
       
+      saveRDS(regionlist, file=paste0(outputdir, "/", outname, ".regionlist_fullSNPs.RDS"))
+      temp_regs <- lapply(1:22, function(x) cbind(x,
+                                              unlist(lapply(regionlist[[x]], "[[", "start")),
+                                              unlist(lapply(regionlist[[x]], "[[", "stop"))))
+                 
+      regs <- do.call(rbind, lapply(temp_regs, function(x) if (ncol(x) == 3){x}))
+      write.table(regs , file= paste0(outputdir,"/", outname, ".regions_fullSNPs.txt")
+               , row.names=F, col.names=T, sep="\t", quote = F)
+
       res <- data.table::fread(paste0(file.path(outputdir, outname), ".temp.susieIrss.txt"))
+      
       
       # filter out regions based on max gene PIP of the region
       res.keep <- NULL

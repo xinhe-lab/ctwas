@@ -85,7 +85,7 @@ susieI_rss <- function(zdf,
                        z_ld_weight = 0,
                        group_prior = NULL,
                        group_prior_var = NULL,
-                       group_prior_var_structure = c("independent","shared_all","shared+snps","inv_gamma","shared_type"),
+                       group_prior_var_structure = c("independent","shared_all","shared+snps","inv_gamma","shared_QTLtype"),
                        estimate_group_prior = T,
                        estimate_group_prior_var = T,
                        use_null_weight = T,
@@ -110,7 +110,7 @@ susieI_rss <- function(zdf,
   }
 
   types <- unique(zdf$type)
-  contexts <- unique(zdf$context)
+  QTLtypes <- unique(zdf$QTLtype)
   K <- length(types)
 
   group_prior_rec <- matrix(NA, nrow = K , ncol =  niter)
@@ -165,7 +165,7 @@ susieI_rss <- function(zdf,
             g_type <- zdf$type[match(gid, zdf$id)]
             s_type <- zdf$type[match(sid, zdf$id)]
             gs_type <- c(g_type, s_type)
-            g_context <- zdf$context[match(gid, zdf$id)]
+            g_QTLtype <- zdf$QTLtype[match(gid, zdf$id)]
 
             p <- length(gidx) + length(sidx)
 
@@ -252,7 +252,7 @@ susieI_rss <- function(zdf,
                                     b, 
                                     rn,
                                     g_type,
-                                    g_context)
+                                    g_QTLtype)
 
             outdf.core.list[[reg]] <- outdf.reg
           }
@@ -294,12 +294,12 @@ susieI_rss <- function(zdf,
         V_prior[names(V_prior)] <- sum(outdf$susie_pip*outdf$mu2)/sum(outdf$susie_pip)
       } else if (group_prior_var_structure=="inv_gamma"){
         V_prior[names(V_prior)] <- sapply(names(V_prior), function(x){outdf_temp <- outdf[outdf$type==x,]; sum(0.5*outdf_temp$susie_pip*outdf_temp$mu2, inv_gamma_rate)/sum(0.5*outdf_temp$susie_pip, inv_gamma_shape-1)})
-      } else if (group_prior_var_structure=="shared_type"){
-        outdf_temp <- outdf[outdf$context=="SNP",]
+      } else if (group_prior_var_structure=="shared_QTLtype"){
+        outdf_temp <- outdf[outdf$QTLtype=="SNP",]
         V_prior["SNP"] <- sum(outdf_temp$susie_pip*outdf_temp$mu2)/sum(outdf_temp$susie_pip)
-        for(i in contexts){
+        for(i in QTLtypes){
           if (i != "SNP"){
-          outdf_temp <- outdf[outdf$context==i,]
+          outdf_temp <- outdf[outdf$QTLtype==i,]
           V_prior[sapply(names(V_prior), function(x){unlist(strsplit(x, "[_]"))[2]})==i] <- sum(outdf_temp$susie_pip*outdf_temp$mu2)/sum(outdf_temp$susie_pip)
           }
         }

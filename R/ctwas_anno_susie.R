@@ -8,18 +8,18 @@ anno_susie <- function(susieres,
                        region_tag1,
                        region_tag2,
                        type,
-                       context) {
+                       QTLtype) {
 
   anno.gene <- NULL
   if (length(geneinfo) !=0){
     anno.gene <- cbind(geneinfo[gidx,  c("chrom", "id", "p0")],
-                       type,context)
-    colnames(anno.gene) <-  c("chrom", "id", "pos", "type","context")
+                       type,QTLtype)
+    colnames(anno.gene) <-  c("chrom", "id", "pos", "type","QTLtype")
   }
 
   anno.SNP <- cbind(snpinfo[sidx, c("chrom", "id", "pos")],
                     "SNP","SNP")
-  colnames(anno.SNP) <-  c("chrom", "id", "pos", "type","context")
+  colnames(anno.SNP) <-  c("chrom", "id", "pos", "type","QTLtype")
 
   anno <- rbind(anno.gene, anno.SNP)
 
