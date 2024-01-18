@@ -16,7 +16,7 @@ ctwas_rss(
   thin = 1,
   prob_single = 0.8,
   max_snp_region = Inf,
-  rerun_gene_PIP = 0.8,
+  rerun_gene_PIP = 0.5,
   niter1 = 3,
   niter2 = 30,
   L = 5,

@@ -2,7 +2,7 @@
 % Please edit documentation in R/ctwas_harmonize_data.R
 \name{harmonize_wgt_ld}
 \alias{harmonize_wgt_ld}
-\title{Harmonize z scores from GWAS to match ld reference genotypes.
+\title{Harmonize weight to match ld reference genotypes.
 Flip signs when reverse complement matches, remove/recover strand ambiguous SNPs}
 \usage{
 harmonize_wgt_ld(
@@ -26,10 +26,10 @@ for FUSION is alt.}
 \item{ld_snpinfo}{a data frame, snp info for LD reference,
 with columns "chrom", "id", "pos", "alt", "ref".}
 
-\item{strand_ambig_action}{the action to take to harmonize strand ambiguous variants (A/T, G/C) between 
-the weights and LD reference. "drop" removes the ambiguous variant from the prediction models. "none" treats the variant 
+\item{strand_ambig_action}{the action to take to harmonize strand ambiguous variants (A/T, G/C) between
+the weights and LD reference. "drop" removes the ambiguous variant from the prediction models. "none" treats the variant
 as unambiguous, flipping the weights to match the LD reference and then taking no additional action. "recover" uses a procedure
-to recover strand ambiguous variants. This procedure compares correlations between variants in the 
+to recover strand ambiguous variants. This procedure compares correlations between variants in the
 LD reference and prediction models, and it can only be used with PredictDB format prediction models, which include this
 information.}
 
@@ -49,6 +49,6 @@ to present in the same directory. If .bed files are given, then .bim and
 wgt.matrix and snps with alleles flipped to match
 }
 \description{
-Harmonize z scores from GWAS to match ld reference genotypes.
+Harmonize weight to match ld reference genotypes.
 Flip signs when reverse complement matches, remove/recover strand ambiguous SNPs
 }

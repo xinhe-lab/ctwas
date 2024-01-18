@@ -14,18 +14,14 @@ impute_expr_z(
   outname = NULL,
   logfile = NULL,
   compress = T,
-  harmonize_z = T,
-  harmonize_wgt = T,
-  strand_ambig_action_z = c("drop", "none", "recover"),
-  strand_ambig_action_wgt = c("drop", "none", "recover"),
   ncore = 1,
   chrom = 1:22,
   scale_by_ld_variance = T
 )
 }
 \arguments{
-\item{z_snp}{A data frame with two columns: "id", "A1", "A2", "z". giving the z scores for
-snps. "A1" is effect allele. "A2" is the other allele. If `harmonize= False`, A1 and A2 are not required.}
+\item{z_snp}{A data frame with columns: "id", "A1", "A2", "z". giving the z scores for
+snps. "A1" is effect allele. "A2" is the other allele. For harmonized data, A1 and A2 are not required.}
 
 \item{weight}{a string, pointing to a directory with the fusion/twas format of weights, or a .db file in predictdb format.
 A vector of multiple sets of weights in PredictDB format can also be specified; genes will have their filename appended
@@ -37,8 +33,8 @@ needs to be 22. If .pgen files are given, then .pvar and .psam are assumed
 to present in the same directory. If .bed files are given, then .bim and
 .fam files are assumed to present in the same directory.}
 
-\item{method}{a string, blup/bslmm/lasso/top1/enet/best. This option is only used for fusion weights. 
-"best" means the method giving the best cross #' validation R^2. Note that top1 uses only the weight 
+\item{method}{a string, blup/bslmm/lasso/top1/enet/best. This option is only used for fusion weights.
+"best" means the method giving the best cross #' validation R^2. Note that top1 uses only the weight
 with largest effect.}
 
 \item{outputdir}{a string, the directory to store output}
@@ -49,32 +45,15 @@ with largest effect.}
 
 \item{compress}{TRUE/FALSE. If TRUE, the imputed expression files are compressed}
 
-\item{harmonize_z}{TRUE/FALSE. If TRUE, GWAS and eQTL genotype alleles are harmonized}
-
-\item{harmonize_wgt}{TRUE/FALSE. If TRUE, GWAS and eQTL genotype alleles are harmonized}
-
-\item{strand_ambig_action_z}{the action to take to harmonize strand ambiguous variants (A/T, G/C) between 
-the z scores and LD reference. "drop" removes the ambiguous variant from the z scores. "none" treats the variant 
-as unambiguous, flipping the z score to match the LD reference and then taking no additional action. "recover" 
-imputes the sign of ambiguous z scores using unambiguous z scores and the LD reference and flips the z scores 
-if there is a mismatch between the imputed sign and the observed sign of the z score. This option is computationally intensive}
-
-\item{strand_ambig_action_wgt}{the action to take to harmonize strand ambiguous variants (A/T, G/C) between 
-the weights and LD reference. "drop" removes the ambiguous variant from the prediction models. "none" treats the variant 
-as unambiguous, flipping the weights to match the LD reference and then taking no additional action. "recover" uses a procedure
-to recover strand ambiguous variants. This procedure compares correlations between variants in the 
-LD reference and prediction models, and it can only be used with PredictDB format prediction models, which include this
-information.}
-
 \item{ncore}{The number of cores used to parallelize imputation over weights}
 
 \item{chrom}{a numeric vector of chromosomes to perform z score imputation over. Useful for large jobs requiring batches}
 
-\item{scale_by_ld_variance}{TRUE/FALSE. If TRUE, PredictDB weights are scaled by genotype variance, which is the default 
+\item{scale_by_ld_variance}{TRUE/FALSE. If TRUE, PredictDB weights are scaled by genotype variance, which is the default
 behavior for PredictDB}
 
 \item{LD_R_dir}{a string, pointing to a directory containing all LD matrix files and variant information. Expects .RDS files which contain LD correlation matrices for a region/block.
-For each RDS file, a file with same base name but ended with .Rvar needs to be present in the same folder. the .Rvar file has 5 required columns: "chrom", "id", "pos", "alt", "ref". 
+For each RDS file, a file with same base name but ended with .Rvar needs to be present in the same folder. the .Rvar file has 5 required columns: "chrom", "id", "pos", "alt", "ref".
 If using PredictDB format weights and \code{scale_by_ld_variance=T}, a 6th column is also required: "variance", which is the variance of the each SNP.
 The order of rows needs to match the order of rows in .RDS file.}
 }

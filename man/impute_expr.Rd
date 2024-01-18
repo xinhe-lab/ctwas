@@ -14,7 +14,7 @@ impute_expr(
   compress = T,
   harmonize_wgt = T,
   ncore = 1,
-  scale_by_ld_variance = T,
+  scale_by_ld_variance = F,
   strand_ambig_action_wgt = c("drop", "none", "recover")
 )
 }

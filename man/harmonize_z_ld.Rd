@@ -20,10 +20,10 @@ Z scores for every SNP. "A1" is the effect allele.}
 \item{ld_snpinfo}{a data frame, snp info for LD reference,
 with columns "chrom", "id", "pos", "alt", "ref".}
 
-\item{strand_ambig_action}{the action to take to harmonize strand ambiguous variants (A/T, G/C) between 
-the z scores and LD reference. "drop" removes the ambiguous variant from the z scores. "none" treats the variant 
-as unambiguous, flipping the z score to match the LD reference and then taking no additional action. "recover" 
-imputes the sign of ambiguous z scores using unambiguous z scores and the LD reference and flips the z scores 
+\item{strand_ambig_action}{the action to take to harmonize strand ambiguous variants (A/T, G/C) between
+the z scores and LD reference. "drop" removes the ambiguous variant from the z scores. "none" treats the variant
+as unambiguous, flipping the z score to match the LD reference and then taking no additional action. "recover"
+imputes the sign of ambiguous z scores using unambiguous z scores and the LD reference and flips the z scores
 if there is a mismatch between the imputed sign and the observed sign of the z score. This option is computationally intensive}
 
 \item{ld_pgenfs}{a character vector of .pgen or .bed files. One file for one
