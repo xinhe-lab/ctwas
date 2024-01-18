@@ -113,7 +113,7 @@ detect_ld_mismatch_susie_rss <- function (z_snp,
 #'
 #' @param logfile the log file, if NULL will print log info on screen.
 #'
-#' @param strand_ambig_action_z the action to take to harmonize strand ambiguous variants (A/T, G/C) between
+#' @param strand_ambig_action the action to take to harmonize strand ambiguous variants (A/T, G/C) between
 #' the z scores and LD reference. "drop" removes the ambiguous variant from the z scores. "none" treats the variant
 #' as unambiguous, flipping the z score to match the LD reference and then taking no additional action. "recover"
 #' imputes the sign of ambiguous z scores using unambiguous z scores and the LD reference and flips the z scores
@@ -143,7 +143,7 @@ preprocess_z_ld <- function (z_snp,
                              outputdir = getwd(),
                              outname = NULL,
                              logfile = NULL,
-                             strand_ambig_action_z = c("none", "drop", "recover")
+                             strand_ambig_action = c("none", "drop", "recover"),
                              drop_multiallelic = T,
                              filter_ld_mismatch_susie = T,
                              ncore = 1){
@@ -191,7 +191,7 @@ preprocess_z_ld <- function (z_snp,
 
     # harmonize between z_snp and LD reference
     z_snp <- harmonize_z_ld(z_snp, ld_snpinfo,
-                            strand_ambig_action = strand_ambig_action_z,
+                            strand_ambig_action = strand_ambig_action,
                             ld_pgenfs = NULL,
                             ld_Rinfo = ld_Rinfo)
   }
@@ -261,7 +261,7 @@ preprocess_z_ld <- function (z_snp,
 #'
 #' @param outname a string, the output name
 #'
-#' @param strand_ambig_action_wgt the action to take to harmonize strand ambiguous variants (A/T, G/C) between
+#' @param strand_ambig_action the action to take to harmonize strand ambiguous variants (A/T, G/C) between
 #' the weights and LD reference. "drop" removes the ambiguous variant from the prediction models. "none" treats the variant
 #' as unambiguous, flipping the weights to match the LD reference and then taking no additional action. "recover" uses a procedure
 #' to recover strand ambiguous variants. This procedure compares correlations between variants in the
@@ -277,9 +277,9 @@ preprocess_wgt_ld <- function (weight,
                                ld_R_dir,
                                outputdir = getwd(),
                                outname,
-                               strand_ambig_action_wgt = c("drop", "none", "recover")){
+                               strand_ambig_action = c("drop", "none", "recover")){
 
-  strand_ambig_action_wgt <- match.arg(strand_ambig_action_wgt)
+  strand_ambig_action <- match.arg(strand_ambig_action)
 
   dir.create(outputdir, showWarnings = F)
 
@@ -316,7 +316,7 @@ preprocess_wgt_ld <- function (weight,
   # subset to variants in weight table
   ld_snpinfo <- ld_snpinfo[ld_snpinfo$id %in% weight_table$rsid,]
 
-  if (strand_ambig_action_wgt=="recover"){
+  if (strand_ambig_action=="recover"){
     # load covariances for variants in each gene (accompanies .db file)
     R_wgt_all <- read.table(gzfile(paste0(file_path_sans_ext(weight), ".txt.gz")), header=T)
     loginfo("Harmonizing strand ambiguous weights using correlations with unambiguous variants")
@@ -352,7 +352,7 @@ preprocess_wgt_ld <- function (weight,
     chrom <- unique(snps$chrom)
     ld_Rinfo_chrom <- ld_Rinfo[ld_Rinfo$chrom==chrom,]
 
-    if (strand_ambig_action_wgt=="recover"){
+    if (strand_ambig_action=="recover"){
       #subset R_wgt_all to current weight
       R_wgt <- R_wgt_all[R_wgt_all$GENE == gname,]
 
@@ -373,7 +373,7 @@ preprocess_wgt_ld <- function (weight,
     w <- harmonize_wgt_ld(wgt.matrix,
                           snps,
                           ld_snpinfo,
-                          strand_ambig_action=strand_ambig_action_wgt,
+                          strand_ambig_action=strand_ambig_action,
                           ld_Rinfo=ld_Rinfo_chrom,
                           R_wgt=R_wgt,
                           wgt=wgt)
