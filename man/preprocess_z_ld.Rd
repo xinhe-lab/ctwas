@@ -7,7 +7,7 @@
 preprocess_z_ld(
   z_snp,
   ld_R_dir,
-  chr = NULL,
+  chr = 1:22,
   ld_regions = c("EUR", "ASN", "AFR"),
   ld_regions_version = c("b37", "b38"),
   ld_regions_custom = NULL,
