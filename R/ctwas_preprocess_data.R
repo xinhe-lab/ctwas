@@ -134,7 +134,7 @@ detect_ld_mismatch_susie_rss <- function (z_snp,
 #'
 preprocess_z_ld <- function (z_snp,
                              ld_R_dir,
-                             chr=NULL,
+                             chr=1:22,
                              ld_regions = c("EUR", "ASN", "AFR"),
                              ld_regions_version = c("b37", "b38"),
                              ld_regions_custom = NULL,
@@ -169,11 +169,6 @@ preprocess_z_ld <- function (z_snp,
     }
   }
 
-  if(is.null(chr)){
-    chr <- 1:22
-  }else{
-    outname <- paste0(outname, ".chr", chr)
-  }
   loginfo("Process summary statistics for chromosomes: %s", chr)
 
   for (b in chr){
@@ -240,8 +235,12 @@ preprocess_z_ld <- function (z_snp,
   }
 
   loginfo("Save processed result to %s", outputdir)
-  saveRDS(res, file.path(outputdir, paste0(outname, ".res.RDS")))
 
+  if(length(chr) == 1){
+    saveRDS(res, file.path(outputdir, paste0(outname, ".chr", chr, ".res.RDS")))
+  }else{
+    saveRDS(res, file.path(outputdir, paste0(outname, ".res.RDS")))
+  }
   return(res)
 }
 
