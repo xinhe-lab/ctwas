@@ -1,17 +1,17 @@
 #' Summarize and plot cTWAS parameter estimates
-#' 
+#'
 #' @param outputdir a string, the directory where ctwas output is stored
-#' 
+#'
 #' @param outname a string, the output name
-#' 
+#'
 #' @param gwas_n the sample size of the GWAS summary statistics
-#' 
+#'
 #' @param thin the proportion of SNPs used for parameter estimation, as supplied to \code{ctwas_rss}
-#' 
+#'
 #' @param plot_estimates if TRUE, return a plot of the estimated parameters
 #'
 #' @export
-#' 
+#'
 ctwas_summarize_parameters <- function(outputdir,
                                        outname,
                                        gwas_n = NA,
@@ -19,35 +19,35 @@ ctwas_summarize_parameters <- function(outputdir,
                                        plot_estimates = T){
   library(ggplot2)
   library(cowplot)
-  
+
   load(paste0(outputdir, outname, ".s2.susieIrssres.Rd"))
-  
+
   #estimated group prior (all iterations)
   estimated_group_prior_all <- group_prior_rec
   estimated_group_prior_all["SNP",] <- estimated_group_prior_all["SNP",]*thin #adjust parameter to account for thin argument
   group_prior <- estimated_group_prior_all[,ncol(estimated_group_prior_all)]
-  
+
   #estimated group prior variance (all iterations)
   estimated_group_prior_var_all <- group_prior_var_rec
   group_prior_var <- estimated_group_prior_var_all[,ncol(estimated_group_prior_var_all)]
-  
+
   #set group size
   ctwas_res_s1 <- as.data.frame(data.table::fread(paste0(outputdir, outname, ".s1.susieIrss.txt"), header = T))
-  
+
   group_size <- table(ctwas_res_s1$type)
   group_size["SNP"] <- group_size["SNP"]/thin #adjust to account for thin argument
-  
+
   group_size <- group_size[rownames(estimated_group_prior_all)]
-  
+
   #estimated group PVE (all iterations)
   estimated_group_pve_all <- estimated_group_prior_var_all*estimated_group_prior_all*group_size/gwas_n
   group_pve <- estimated_group_pve_all[,ncol(estimated_group_pve_all)]
-  
+
   #estimated enrichment of genes (all iterations)
-  estimated_enrichment_all <- t(sapply(rownames(estimated_group_prior_all)[rownames(estimated_group_prior_all)!="SNP"], 
+  estimated_enrichment_all <- t(sapply(rownames(estimated_group_prior_all)[rownames(estimated_group_prior_all)!="SNP"],
                                        function(x){estimated_group_prior_all[rownames(estimated_group_prior_all)==x,]/estimated_group_prior_all[rownames(estimated_group_prior_all)=="SNP"]}))
   enrichment <- estimated_enrichment_all[,ncol(estimated_enrichment_all)]
-  
+
   outlist <- list(group_size = group_size,
                   group_prior = group_prior,
                   group_prior_var = group_prior_var,
@@ -55,84 +55,428 @@ ctwas_summarize_parameters <- function(outputdir,
                   group_pve = group_pve,
                   total_pve = sum(group_pve),
                   attributable_pve = group_pve/sum(group_pve))
-  
+
   if (plot_estimates){
     title_size <- 12
-    
+
     #inclusion plot
     df <- data.frame(niter = rep(1:ncol(estimated_group_prior_all), nrow(estimated_group_prior_all)),
                      value = unlist(lapply(1:nrow(estimated_group_prior_all), function(x){estimated_group_prior_all[x,]})),
                      group = rep(rownames(estimated_group_prior_all), each=ncol(estimated_group_prior_all)))
     df$group <- as.factor(df$group)
     factor_levels <- levels(df$group)
-    
+
     p_pi <- ggplot(df, aes(x=niter, y=value, group=group)) +
       geom_line(aes(color=group)) +
       geom_point(aes(color=group)) +
       xlab("Iteration") + ylab(bquote(pi)) +
       ggtitle("Proportion Causal") +
       theme_cowplot()
-    
-    p_pi <- p_pi + theme(plot.title=element_text(size=title_size)) + 
-      expand_limits(y=0) + 
+
+    p_pi <- p_pi + theme(plot.title=element_text(size=title_size)) +
+      expand_limits(y=0) +
       guides(color = guide_legend(title = "Group")) + theme (legend.title = element_text(size=12, face="bold"))
-    
+
     #effect size plot
     df <- data.frame(niter = rep(1:ncol(estimated_group_prior_var_all), nrow(estimated_group_prior_var_all)),
                      value = unlist(lapply(1:nrow(estimated_group_prior_var_all), function(x){estimated_group_prior_var_all[x,]})),
                      group = rep(rownames(estimated_group_prior_var_all), each=ncol(estimated_group_prior_var_all)))
     df$group <- as.factor(df$group)
-    
+
     p_sigma2 <- ggplot(df, aes(x=niter, y=value, group=group)) +
       geom_line(aes(color=group)) +
       geom_point(aes(color=group)) +
       xlab("Iteration") + ylab(bquote(sigma^2)) +
       ggtitle("Effect Size") +
       theme_cowplot()
-    
-    p_sigma2 <- p_sigma2 + theme(plot.title=element_text(size=title_size)) + 
-      expand_limits(y=0) + 
+
+    p_sigma2 <- p_sigma2 + theme(plot.title=element_text(size=title_size)) +
+      expand_limits(y=0) +
       guides(color = guide_legend(title = "Group")) + theme (legend.title = element_text(size=12, face="bold"))
-    
+
     #PVE plot
     df <- data.frame(niter = rep(1:ncol(estimated_group_pve_all), nrow(estimated_group_pve_all)),
                      value = unlist(lapply(1:nrow(estimated_group_pve_all), function(x){estimated_group_pve_all[x,]})),
                      group = rep(rownames(estimated_group_pve_all), each=ncol(estimated_group_pve_all)))
     df$group <- as.factor(df$group)
-    
+
     p_pve <- ggplot(df, aes(x=niter, y=value, group=group)) +
       geom_line(aes(color=group)) +
       geom_point(aes(color=group)) +
       xlab("Iteration") + ylab(bquote(h[G]^2)) +
       ggtitle("PVE") +
       theme_cowplot()
-    
-    p_pve <- p_pve + theme(plot.title=element_text(size=title_size)) + 
-      expand_limits(y=0) + 
+
+    p_pve <- p_pve + theme(plot.title=element_text(size=title_size)) +
+      expand_limits(y=0) +
       guides(color = guide_legend(title = "Group")) + theme (legend.title = element_text(size=12, face="bold"))
-    
+
     #enrichment plot
     df <- data.frame(niter = rep(1:ncol(estimated_enrichment_all), nrow(estimated_enrichment_all)),
                      value = unlist(lapply(1:nrow(estimated_enrichment_all), function(x){estimated_enrichment_all[x,]})),
                      group = rep(rownames(estimated_enrichment_all), each=ncol(estimated_enrichment_all)))
     df$group <- as.factor(df$group)
     #levels(df$group) <- factor_levels
-    
+
     p_enrich <- ggplot(df, aes(x=niter, y=value, group=group)) +
       geom_line(aes(color=group)) +
       geom_point(aes(color=group)) +
       xlab("Iteration") + ylab(bquote(pi[G]/pi[S])) +
       ggtitle("Enrichment") +
       theme_cowplot()
-    
-    p_enrich <- p_enrich + theme(plot.title=element_text(size=title_size)) + 
-      expand_limits(y=0) + 
+
+    p_enrich <- p_enrich + theme(plot.title=element_text(size=title_size)) +
+      expand_limits(y=0) +
       guides(color = guide_legend(title = "Group")) + theme (legend.title = element_text(size=12, face="bold")) + scale_colour_discrete(drop = FALSE)
-    
+
     convergence_plot <- plot_grid(p_pi, p_sigma2, p_enrich, p_pve)
-    
+
     outlist[["convergence_plot"]] <- convergence_plot
   }
-  
+
   return(outlist)
 }
+
+#' Plot the output of cTWAS at a single locus
+#'
+#' @param ctwas_res the main output of \code{ctwas_rss} as a data frame, with z-scores included
+#'
+#' @param region_tag a character with format "regiontag1_regiontag2" indicating the reigon to plot; e.g. "16_1"
+#'
+#' @param outputdir a string, the directory where ctwas output is stored
+#'
+#' @param outname a string, the output name
+#'
+#' @param focus the focal gene; points are colored by correlations with this gene. The lead TWAS gene by default
+#'
+#' @param xlim a vector with the start and end positions to plot, in megabases
+#'
+#' @param ymax_twas the ymax parameter of the TWAS panel
+#'
+#' @param twas_sig_thresh the significance threshold for TWAS as a p-value
+#'
+#' @param alt_names the name of the column that contains alternative gene names in \code{ctwas_res}; null by default
+#'
+#' @param label_panel the panel(s) to plot gene gene names; both cTWAS and TWAS panels by default
+#'
+#' @param label_genes the gene names to label; all by default
+#'
+#' @param label_pos a vector of the same length as \code{label_genes} indicating the position of the gene labels; 1=below, 2=left, 3=above, 4=right. Above by default.
+#'
+#' @param plot_eqtl the genes to plot eQTL tracks for; the gene specified by \code{focus} by default
+#'
+#' @param legend_panel the panel to plot the legend in
+#'
+#' @param legend_side the side to plot the legend on
+#'
+#' @param rerun_ctwas if TRUE, cTWAS will be re-run at this locus with \code{thin=1} to ensure all variants are plotted
+#'
+#' @param rerun_load_only if TRUE, the function will look for results generated by \code{rerun_ctwas=T} without running cTWAS again
+#'
+#' @param return_table if TRUE, return the table that underlies the plot
+#'
+#' @param show_correlations if TRUE, genes and variants are colored by their correlations with \code{focus}
+#'
+#' @param z_snp the \code{z_snp} argument supplied to \code{ctwas_rss}; required if \code{rerun_ctwas=T}
+#'
+#' @param z_gene the \code{z_gene} argument supplied to \code{ctwas_rss}; required if \code{rerun_ctwas=T}
+#'
+#' @param empty_gene_track if TRUE, leave space below the plot for the gene track generated by the \code{ctwas_locus_plot_genetrack} function
+#'
+#' @export
+ctwas_locus_plot <- function(ctwas_res,
+                             region_tag,
+                             outputdir,
+                             outname,
+                             focus = NULL,
+                             xlim = NULL,
+                             ymax_twas=NULL,
+                             twas_sig_thresh = NULL,
+                             alt_names = NULL,
+                             label_panel = c("both", "cTWAS", "TWAS"),
+                             label_genes = NULL,
+                             label_pos = NULL,
+                             plot_eqtl = NULL,
+                             legend_panel = c("cTWAS", "TWAS"),
+                             legend_side=c("right","left"),
+                             rerun_ctwas = F,
+                             rerun_load_only = F,
+                             return_table = F,
+                             show_correlations = T,
+                             z_snp = NULL,
+                             z_gene = NULL,
+                             empty_gene_track = F){
+
+  label_panel <- match.arg(label_panel)
+  legend_panel <- match.arg(legend_panel)
+  legend_side <- match.arg(legend_side)
+
+  region_tag1 <- unlist(strsplit(region_tag, "_"))[1]
+  region_tag2 <- unlist(strsplit(region_tag, "_"))[2]
+
+  plot_df <- ctwas_res[ctwas_res$region_tag1==region_tag1 & ctwas_res$region_tag2==region_tag2,]
+
+  if (show_correlations | rerun_ctwas){
+    if (is.null(outputdir) | is.null(outname)){
+      stop("outputdir and outname must be specified if show_correlations=T pr rerun_ctwas=T")
+    }
+
+    regionlist <- readRDS(paste0(outputdir, outname, ".regionlist.RDS"))
+    region <- regionlist[[as.numeric(region_tag1)]][[region_tag2]]
+
+    R_snp_info <- do.call(rbind, lapply(region$regRDS, function(x){data.table::fread(paste0(tools::file_path_sans_ext(x), ".Rvar"))}))
+
+    if (isTRUE(rerun_ctwas)){
+      if (is.null(z_snp) | is.null(z_gene)){
+        stop("z_snp and z_gene must be specified if rerun_ctwas=T")
+      }
+
+      ld_exprfs <- paste0(outputdir, outname, "_chr", 1:22, ".expr.gz")
+      temp_reg <- data.frame("chr" = paste0("chr",region_tag1), "start" = region$start, "stop" = region$stop)
+
+      temp_dir <- paste0(outputdir, "temp_plot")
+      dir.create(temp_dir, showWarnings=F)
+
+      write.table(temp_reg,
+                  file=paste0(temp_dir, "/temp_reg.bed"),
+                  row.names=F, col.names=T, sep="\t", quote = F)
+
+
+      z_gene_temp <-  z_gene[z_gene$id %in% plot_df$id[plot_df$type=="gene"],]
+      z_snp_temp <-  z_snp[z_snp$id %in% R_snp_info$id,]
+
+      if (!rerun_load_only){
+
+        load(paste0(outputdir,outname, ".s2.susieIrssres.Rd"))
+
+        group_prior <- group_prior_rec[,ncol(group_prior_rec)]
+        group_prior_var <- group_prior_var_rec[,ncol(group_prior_var_rec)]
+
+        ctwas::ctwas_rss(z_gene = z_gene_temp,
+                         z_snp = z_snp_temp,
+                         ld_exprfs = ld_exprfs,
+                         ld_R_dir = dirname(region$regRDS)[1],
+                         ld_regions_custom = paste0(temp_dir, "/temp_reg.bed"),
+                         thin = 1,
+                         outputdir = temp_dir,
+                         outname = "temp_plot",
+                         group_prior = group_prior,
+                         group_prior_var = group_prior_var,
+                         estimate_group_prior = F,
+                         estimate_group_prior_var = F)
+      }
+
+      a_bkup <- plot_df
+      plot_df <- as.data.frame(data.table::fread(paste0(temp_dir, "/temp_plot.susieIrss.txt"), header = T))
+
+      rownames(z_snp_temp) <- z_snp_temp$id
+      z_snp_temp <- z_snp_temp[plot_df$id[plot_df$type=="SNP"],]
+      z_gene_temp <- z_gene_temp[plot_df$id[plot_df$type=="gene"],]
+
+      plot_df[[alt_names]] <- NA
+      plot_df[plot_df$type=="gene", alt_names] <- a_bkup[match(plot_df$id[plot_df$type=="gene"], a_bkup$id), alt_names]
+
+      plot_df$pos[plot_df$type=="gene"] <- a_bkup$pos[match(plot_df$id[plot_df$type=="gene"], a_bkup$id)]
+
+      plot_df$z <- NA
+      plot_df$z[plot_df$type=="SNP"] <- z_snp_temp$z
+      plot_df$z[plot_df$type=="gene"] <- z_gene_temp$z
+    }
+  }
+
+  plot_df$pos <- plot_df$pos/1000000
+
+
+  if (!is.null(xlim)){
+    if (is.na(xlim[1])){
+      xlim[1] <- min(plot_df$pos)
+    }
+
+    if (is.na(xlim[2])){
+      xlim[2] <- max(plot_df$pos)
+    }
+
+    plot_df <- plot_df[plot_df$pos>=xlim[1] & plot_df$pos<=xlim[2],,drop=F]
+  }
+
+  plot_df$name <- plot_df$id
+  if (!is.null(alt_names)){
+    plot_df$name[plot_df$type=="gene"] <- plot_df[plot_df$type=="gene", alt_names]
+  }
+
+  if (is.null(focus)){
+    focus <- plot_df$name[plot_df$type=="gene"][which.max(abs(plot_df$z)[plot_df$type=="gene"])]
+  }
+
+  if (is.null(label_genes)){
+    label_genes <- plot_df$name[plot_df$type=="gene"]
+  }
+
+  if (is.null(label_pos)){
+    label_pos <- rep(3, length(label_genes))
+  }
+
+  if (is.null(plot_eqtl)){
+    plot_eqtl <- focus
+  }
+
+  focus <- plot_df$id[which(plot_df$name==focus)]
+  plot_df$focus <- 0
+  plot_df$focus <- as.numeric(plot_df$id==focus)
+
+  plot_df$PVALUE <- (-log(2) - pnorm(abs(plot_df$z), lower.tail=F, log.p=T))/log(10)
+
+  if (show_correlations){
+    R_gene <- readRDS(region$R_g_file)
+    R_snp_gene <- readRDS(region$R_sg_file)
+    R_snp <- as.matrix(Matrix::bdiag(lapply(region$regRDS, readRDS)))
+
+    rownames(R_gene) <- region$gid
+    colnames(R_gene) <- region$gid
+    rownames(R_snp_gene) <- R_snp_info$id
+    colnames(R_snp_gene) <- region$gid
+    rownames(R_snp) <- R_snp_info$id
+    colnames(R_snp) <- R_snp_info$id
+
+    plot_df$r2max <- NA
+    plot_df$r2max[plot_df$type=="gene"] <- R_gene[focus,plot_df$id[plot_df$type=="gene"]]
+    plot_df$r2max[plot_df$type=="SNP"] <- R_snp_gene[plot_df$id[plot_df$type=="SNP"],focus]
+  } else {
+    plot_df$r2max <- 0
+  }
+
+  r2cut <- 0.4
+  colorsall <- c("#7fc97f", "#beaed4", "#fdc086")
+
+  start <- min(plot_df$pos)
+  end <- max(plot_df$pos)
+
+  #prepare the plot
+
+  if (empty_gene_track){
+    layout(matrix(1:4, ncol = 1), widths = 1, heights = c(1.5,0.25,1.75,0.75), respect = FALSE)
+  } else {
+    layout(matrix(1:3, ncol = 1), widths = 1, heights = c(1.5,0.25,1.75), respect = FALSE)
+  }
+
+  #first panel - TWAS
+  par(mar = c(0, 4.1, 0, 2.1))
+
+  if (is.null(ymax_twas)){
+    ymax_twas <- max(plot_df$PVALUE)*1.1
+  }
+
+  plot(plot_df$pos[plot_df$type=="SNP"], plot_df$PVALUE[plot_df$type == "SNP"], pch = 21, xlab=paste0("Chromosome ", region_tag1, " position (Mb)"), frame.plot=FALSE, bg = colorsall[1], ylab = "-log10(p value)", panel.first = grid(), ylim =c(0, ymax_twas), xaxt = 'n', xlim=c(start, end))
+
+  if (!is.null(twas_sig_thresh)){
+    abline(h=-log10(twas_sig_thresh), col ="red", lty = 2)
+  }
+  points(plot_df$pos[plot_df$type=="SNP" & plot_df$r2max > r2cut], plot_df$PVALUE[plot_df$type == "SNP"  & plot_df$r2max > r2cut], pch = 21, bg = "purple")
+  points(plot_df$pos[plot_df$type=="SNP" & plot_df$focus == 1], plot_df$PVALUE[plot_df$type == "SNP" & plot_df$focus == 1], pch = 21, bg = "salmon")
+  points(plot_df$pos[plot_df$type=="gene"], plot_df$PVALUE[plot_df$type == "gene"], pch = 22, bg = colorsall[1], cex = 2)
+  points(plot_df$pos[plot_df$type=="gene" & plot_df$r2max > r2cut], plot_df$PVALUE[plot_df$type == "gene"  & plot_df$r2max > r2cut], pch = 22, bg = "purple", cex = 2)
+  points(plot_df$pos[plot_df$type=="gene" & plot_df$focus == 1], plot_df$PVALUE[plot_df$type == "gene" & plot_df$focus == 1], pch = 22, bg = "salmon", cex = 2)
+
+  if (legend_panel=="TWAS"){
+    x_pos <- ifelse(legend_side=="right", max(plot_df$pos)-0.2*(max(plot_df$pos)-min(plot_df$pos)), min(plot_df$pos))
+    legend(x_pos, y= ymax_twas*0.95, c("Gene", "SNP","Lead TWAS Gene", "R2 > 0.4", "R2 <= 0.4"), pch = c(22,21,19,19,19), col = c("black", "black", "salmon", "purple", colorsall[1]), cex=0.7, title.adj = 0)
+  }
+
+  if (label_panel=="TWAS" | label_panel=="both"){
+    for (i in 1:length(label_genes)){
+      text(plot_df$pos[plot_df$name==label_genes[i]], plot_df$PVALUE[plot_df$name==label_genes[i]], labels=label_genes[i], pos=label_pos[i], cex=0.7)
+    }
+  }
+
+  #second panel - eQTL
+  par(mar = c(0.25, 4.1, 0.25, 2.1))
+
+  plot(NA, xlim = c(start, end), ylim = c(0, length(plot_eqtl)), frame.plot = F, axes = F, xlab = NA, ylab = NA)
+
+  for (i in 1:length(plot_eqtl)){
+    cgene <- plot_df$id[which(plot_df$name==plot_eqtl[i])]
+
+    load(paste0(outputdir, outname, "_chr", region_tag1, ".exprqc.Rd"))
+
+    eqtls <- rownames(wgtlist[[cgene]])
+    eqtl_pos <- plot_df$pos[plot_df$id %in% eqtls]
+
+    col="#c6e8f0"
+
+    rect(start, length(plot_eqtl)+1-i-0.8, end, length(plot_eqtl)+1-i-0.2, col = col, border = T, lwd = 1)
+
+    if (length(eqtl_pos)>0){
+      for (j in 1:length(eqtl_pos)){
+        segments(x0=eqtl_pos[j], x1=eqtl_pos[j], y0=length(plot_eqtl)+1-i-0.2, length(plot_eqtl)+1-i-0.8, lwd=1.5)
+      }
+    }
+  }
+
+  text(start, length(plot_eqtl)-(1:length(plot_eqtl))+0.5,
+       labels = paste0(plot_eqtl, " eQTL"), srt = 0, pos = 2, xpd = TRUE, cex=0.7)
+
+  #third panel - eQTL
+  par(mar = c(4.1, 4.1, 0, 2.1))
+
+  plot(plot_df$pos[plot_df$type=="SNP"], plot_df$susie_pip[plot_df$type == "SNP"], pch = 19, xlab=paste0("Chromosome ", region_tag1, " position (Mb)"),frame.plot=FALSE, col = "white", ylim= c(0,1.1), ylab = "cTWAS PIP", xlim = c(start, end))
+
+  grid()
+  points(plot_df$pos[plot_df$type=="SNP"], plot_df$susie_pip[plot_df$type == "SNP"], pch = 21, xlab="Genomic position", bg = colorsall[1])
+  points(plot_df$pos[plot_df$type=="SNP" & plot_df$r2max > r2cut], plot_df$susie_pip[plot_df$type == "SNP"  & plot_df$r2max >r2cut], pch = 21, bg = "purple")
+  points(plot_df$pos[plot_df$type=="SNP" & plot_df$focus == 1], plot_df$susie_pip[plot_df$type == "SNP" & plot_df$focus == 1], pch = 21, bg = "salmon")
+  points(plot_df$pos[plot_df$type=="gene"], plot_df$susie_pip[plot_df$type == "gene"], pch = 22, bg = colorsall[1], cex = 2)
+  points(plot_df$pos[plot_df$type=="gene" & plot_df$r2max > r2cut], plot_df$susie_pip[plot_df$type == "gene"  & plot_df$r2max > r2cut], pch = 22, bg = "purple", cex = 2)
+  points(plot_df$pos[plot_df$type=="gene" & plot_df$focus == 1], plot_df$susie_pip[plot_df$type == "gene" & plot_df$focus == 1], pch = 22, bg = "salmon", cex = 2)
+
+  if (legend_panel=="cTWAS"){
+    x_pos <- ifelse(legend_side=="right", max(plot_df$pos)-0.2*(max(plot_df$pos)-min(plot_df$pos)), min(plot_df$pos))
+    legend(x_pos, y= 1 ,c("Gene", "SNP","Lead TWAS Gene", "R2 > 0.4", "R2 <= 0.4"), pch = c(22,21,19,19,19), col = c("black", "black", "salmon", "purple", colorsall[1]), cex=0.7, title.adj = 0)
+  }
+
+  if (label_panel=="cTWAS" | label_panel=="both"){
+    for (i in 1:length(label_genes)){
+      text(plot_df$pos[plot_df$name==label_genes[i]], plot_df$susie_pip[plot_df$name==label_genes[i]], labels=label_genes[i], pos=label_pos[i], cex=0.7)
+    }
+  }
+
+  if (return_table){
+    return(plot_df)
+  }
+}
+
+#' Create the gene track for the cTWAS locus plot
+#'
+#' @param plot_df the output of \code{ctwas_locus_plot}
+#'
+#' @param label_pos the position of the gene labels. Default is NULL, which places gene names to the left of the gene; can also specify "above"
+#'
+#' @export
+#'
+ctwas_locus_plot_genetrack <- function(plot_df, label_pos=NULL){
+  require(biomaRt)
+  require(Gviz)
+
+  chr <- unique(plot_df$chrom)
+  start <- min(plot_df$pos)*1000000
+  end <- max(plot_df$pos)*1000000
+
+  ensembl <- useEnsembl(biomart="ENSEMBL_MART_ENSEMBL", dataset="hsapiens_gene_ensembl")
+  biomTrack <- BiomartGeneRegionTrack(chromosome = chr,
+                                      start = start,
+                                      end = end,
+                                      name = "ENSEMBL",
+                                      biomart = ensembl,
+                                      filters=list(biotype="protein_coding"))
+
+  biomTrack <- as(biomTrack, "GeneRegionTrack")
+  biomTrack <- biomTrack[biomTrack@range@elementMetadata@listData$feature %in% c("protein_coding", "utr3", "utr5")]
+
+  if (isTRUE(label_pos=="above")){
+    displayPars(biomTrack)$just.group <- "above"
+  }
+
+  grid.newpage()
+
+  plotTracks(biomTrack, collapseTranscripts = "meta", transcriptAnnotation = "symbol", from=start, to=end, panel.only=T, add=F)
+}
+
