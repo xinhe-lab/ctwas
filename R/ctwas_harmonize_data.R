@@ -72,6 +72,10 @@ harmonize_z_ld <- function(z_snp, ld_snpinfo, strand_ambig_action = c("drop", "n
     z_snp[flip.idx, "z"] <- -z_snp[flip.idx, "z"]
     loginfo("Flip signs for %s (%.2f%%) variants", length(flip.idx), length(flip.idx)/length(z.idx)*100)
 
+    if (any(ifremove)) {
+      loginfo("Number of strand ambiguous variants: %s", sum(ifremove))
+    }
+
     if (strand_ambig_action=="recover" & any(ifremove)){
       #compare sign of imputed z score with observed z score for strand ambiguous variants
       #following imputation strategy in https://dx.doi.org/10.1093%2Fbioinformatics%2Fbtu416
