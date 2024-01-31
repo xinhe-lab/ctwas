@@ -162,7 +162,7 @@ preprocess_z_ld <- function (z_snp,
 }
 
 
-# Detect LD mismatches using SuSiE RSS
+#' Detect LD mismatches using SuSiE RSS
 #'
 #' @param z_snp A data frame with two columns: "id", "A1", "A2", "z". giving the z scores for
 #' snps. "A1" is effect allele. "A2" is the other allele.

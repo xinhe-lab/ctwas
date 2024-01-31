@@ -16,15 +16,16 @@ preprocess_z_ld(
   outputdir = getwd(),
   outname = NULL,
   logfile = NULL,
-  strand_ambig_action = c("none", "drop", "recover"),
   drop_multiallelic = T,
-  filter_ld_mismatch_susie = T,
+  detect_ld_mismatch = F,
+  flip_allele = T,
+  remove_ld_mismatch = F,
   ncore = 1
 )
 }
 \arguments{
 \item{z_snp}{A data frame with two columns: "id", "A1", "A2", "z". giving the z scores for
-snps. "A1" is effect allele. "A2" is the other allele. If `harmonize= False`, A1 and A2 are not required.}
+snps. "A1" is effect allele. "A2" is the other allele.}
 
 \item{chr}{a vector containing the chromosome numbers to process.}
 
@@ -44,16 +45,14 @@ snps. "A1" is effect allele. "A2" is the other allele. If `harmonize= False`, A1
 
 \item{logfile}{the log file, if NULL will print log info on screen.}
 
-\item{strand_ambig_action}{the action to take to harmonize strand ambiguous variants (A/T, G/C) between
-the z scores and LD reference. "drop" removes the ambiguous variant from the z scores. "none" treats the variant
-as unambiguous, flipping the z score to match the LD reference and then taking no additional action. "recover"
-imputes the sign of ambiguous z scores using unambiguous z scores and the LD reference and flips the z scores
-if there is a mismatch between the imputed sign and the observed sign of the z score. This option is computationally intensive.}
-
 \item{drop_multiallelic}{TRUE/FALSE. If TRUE, multiallelic variants will be dropped from the summary statistics.}
 
-\item{filter_ld_mismatch_susie}{TRUE/FALSE. If TRUE, detect LD mismatches using susie_rss,
-flip the sign for variants detected with allele flipping, and filter problematic variants with p-value < 5e-8.}
+\item{detect_ld_mismatch}{TRUE/FALSE. If TRUE, detect LD mismatches by susie_rss, and report problematic variants, and
+variants with allele flipping.}
+
+\item{flip_allele}{TRUE/FALSE. If TRUE, flip the sign for variants detected with allele flipping.}
+
+\item{remove_ld_mismatch}{TRUE/FALSE. If TRUE, remove problematic variants with LD mismatches.}
 
 \item{ncore}{integer, number of cores for parallel computing.}
 
