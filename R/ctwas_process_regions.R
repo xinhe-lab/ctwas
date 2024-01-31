@@ -81,6 +81,12 @@ index_regions <- function(regionfile,
     selectid <- select$id
   }
 
+  #load all weights info
+  wgtall <- lapply(exprvarfs, function(x){load(paste0(strsplit(x, ".exprvar")[[1]], ".exprqc.Rd")); wgtlist})
+  wgtlistall <- do.call(c, wgtall)
+  names(wgtlistall) <- do.call(c, lapply(wgtall, names))
+  rm(wgtall)  
+
   regionlist <- list()
   for (b in 1:length(exprvarfs)){
 
@@ -198,7 +204,71 @@ index_regions <- function(regionfile,
 
     loginfo("No. regions with at least one SNP/gene for chr%s after merging: %s",
             b, length(regionlist[[b]]))
+
+
+    ld_Rf <- ld_Rfs[b]
+    ld_Rinfo <- as.data.frame(data.table::fread(ld_Rf, header = T))
+
+    if (!isTRUE(merge) & nrow(regions) >=2){
+    for (rn in 1:(nrow(regions)-1)){
+      current <- regionlist[[b]][[as.character(rn)]]
+      nextone <- regionlist[[b]][[as.character(rn+1)]]
+      gnames <- regionlist[[b]][[as.character(rn)]][["gid"]]
+      tmp_region <- regionlist[[b]][[as.character(rn)]]
+      if(length(gnames>0)){
+        ifreg <- ifelse(regionlist[[b]][[as.character(rn)]][["start"]] < ld_Rinfo[, "stop"] & regionlist[[b]][[as.character(rn)]][["stop"]] >= ld_Rinfo[, "start"], T, F)
+        regRDS <- ld_Rinfo[ifreg, "RDS_file"]
+        R_snp_anno <- as.data.frame(do.call(rbind, lapply(regRDS, ctwas:::read_ld_Rvar_RDS)))
+        for (i in 1:length(gnames)){
+          gname <- gnames[i]
+          wgt <- wgtlistall[[gname]] 
+          snpnames <- rownames(wgt)
+          ld.idx <- match(snpnames, R_snp_anno$id)
+          if(anyNA(ld.idx)){
+            thisindex <- !is.na(ld.idx)
+            nextindex <- is.na(ld.idx)
+            thisr2 <- sum(wgt[thisindex]^2)
+            nextr2 <- sum(wgt[nextindex]^2)
+            if(thisr2<nextr2){
+              #modify weights file - drop weights in other regions
+              tmp_wgt <- wgtlistall[[gname]][nextindex]
+              if(length(tmp_wgt)==1){
+                wgtlistall[[gname]] <- matrix(tmp_wgt,nrow = 1,ncol = 1)
+                rownames(wgtlistall[[gname]]) <- snpnames[nextindex]
+                colnames(wgtlistall[[gname]]) <- "weight"
+              }
+              else{
+                wgtlistall[[gname]] <- matrix(tmp_wgt,nrow = length(tmp_wgt),ncol = 1)
+                rownames(wgtlistall[[gname]]) <- snpnames[nextindex]
+                colnames(wgtlistall[[gname]]) <- "weight"
+              }
+              #add gene to next region
+              regionlist[[b]][[as.character(rn+1)]][["gidx"]] <- c(regionlist[[b]][[as.character(rn+1)]][["gidx"]],tmp_region[["gidx"]][which(gnames==gname)])
+              regionlist[[b]][[as.character(rn+1)]][["gid"]] <- c(regionlist[[b]][[as.character(rn+1)]][["gid"]],gname)
+              #remove gene from this region
+              regionlist[[b]][[as.character(rn)]][["gidx"]] <- regionlist[[b]][[as.character(rn)]][["gidx"]][which(gnames!=gname)]
+              regionlist[[b]][[as.character(rn)]][["gid"]] <- regionlist[[b]][[as.character(rn)]][["gid"]][!regionlist[[b]][[as.character(rn)]][["gid"]]==gname]
+            }
+            else{
+              #modify weights file - drop weights in other regions
+              tmp_wgt <- wgtlistall[[gname]][thisindex]
+              if(length(tmp_wgt)==1){
+                wgtlistall[[gname]] <- matrix(tmp_wgt,nrow = 1,ncol = 1)
+                rownames(wgtlistall[[gname]]) <- snpnames[thisindex]
+                colnames(wgtlistall[[gname]]) <- "weight"
+              }
+              else{
+                wgtlistall[[gname]] <- matrix(tmp_wgt,nrow = length(tmp_wgt),ncol = 1)
+                rownames(wgtlistall[[gname]]) <- snpnames[thisindex]
+                colnames(wgtlistall[[gname]]) <- "weight"
+              }
+            }
+          }
+        }
+      }
+    }
   }
+}
 
 
   loginfo("Trim regions with SNPs more than %s", maxSNP)
@@ -236,11 +306,6 @@ index_regions <- function(regionfile,
     loginfo("Adding R matrix info, as genotype is not given")
     
     dir.create(file.path(outputdir, paste0(outname, "_LDR")), showWarnings = F)
-    
-    wgtall <- lapply(exprvarfs, function(x){load(paste0(strsplit(x, ".exprvar")[[1]], ".exprqc.Rd")); wgtlist})
-    wgtlistall <- do.call(c, wgtall)
-    names(wgtlistall) <- do.call(c, lapply(wgtall, names))
-    rm(wgtall)
     
     regionlist_all <- list()
     
@@ -318,20 +383,21 @@ index_regions <- function(regionfile,
               R_gene[t(gene_pairs[c(2,1),])] <- gene_corrs
             }
           }
-          
+          #print("passed calculate correlations")
           #remove genes with NA in R_snp_gene (e.g. boundary spanning with merge=F) from analysis
           gene_not_NA <- which(apply(R_snp_gene, 2, function(x){!any(is.na(x))}))
+          gene_NA <- which(apply(R_snp_gene, 2, function(x){any(is.na(x))}))
           outlist_core_region[["gidx"]] <- regionlist[[b]][[rn]][["gidx"]][gene_not_NA]
           outlist_core_region[["gid"]] <- regionlist[[b]][[rn]][["gid"]][gene_not_NA]
           R_snp_gene <- R_snp_gene[,gene_not_NA,drop=F]
           R_gene <- R_gene[gene_not_NA,gene_not_NA,drop=F]
-          
+          #print("passed remove NA genes")
           #save R_snp_gene and R_gene
           outlist_core_region[["regRDS"]] <- regRDS
           R_sg_file <- file.path(outputdir, paste0(outname, "_LDR"), paste0("chr", b, "_reg", rn, ".R_snp_gene.RDS"))
           R_g_file <- file.path(outputdir, paste0(outname, "_LDR"), paste0("chr", b, "_reg", rn, ".R_gene.RDS"))
           saveRDS(R_snp_gene, file=R_sg_file)
-          
+          #print("saved R_snp_gene")
           if (!reuse_R_gene){
             saveRDS(R_gene, file=R_g_file)
           }
@@ -345,10 +411,12 @@ index_regions <- function(regionfile,
             saveRDS(R_snp, file=R_s_file)
             outlist_core_region[["R_s_file"]] <- R_s_file
           }
-          
+          #print("saved R_snp")
           outlist_core[[length(outlist_core)+1]] <- outlist_core_region
+          #print("laste step in dopar")
         }
       }
+      #print("finish rn loop")
       outlist_core
     }
 
