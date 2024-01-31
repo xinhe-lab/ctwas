@@ -77,7 +77,7 @@ preprocess_z_ld <- function (z_snp,
   if (isTRUE(drop_multiallelic)) {
     duplicated.idx <- which(z_snp$id %in% z_snp$id[duplicated(z_snp$id)])
     if(length(duplicated.idx) > 0){
-      loginfo("Remove %d multiallelic variants", length(duplicated.idx))
+      loginfo("Drop %d multiallelic variants", length(duplicated.idx))
       z_snp <- z_snp[-duplicated.idx,]
     }
   }
@@ -105,7 +105,10 @@ preprocess_z_ld <- function (z_snp,
   }
 
   z_snp <- z_snp[z_snp$id %in% ld_snplist,]
-  loginfo("%s variants left after allele harmonization.", length(z_snp$id))
+  loginfo("%d variants left after allele harmonization.", length(z_snp$id))
+
+  if(length(z_snp$id) == 0)
+    stop("No variants left!")
 
   if( isTRUE(detect_ld_mismatch) ) {
     # select LD regions to run
@@ -113,34 +116,34 @@ preprocess_z_ld <- function (z_snp,
                                   ld_regions_version = ld_regions_version,
                                   ld_regions_custom = ld_regions_custom)
     regions_df <- regions_df[regions_df$chr %in% paste0("chr", chr), ]
-    loginfo("Detect LD mismatches in %s LD regions", nrow(regions_df))
+    loginfo("Detect LD mismatches in %d LD regions", nrow(regions_df))
 
     # detect LD mismatches using susie_rss
-    detect_ld_mismatch_res <- detect_ld_mismatch_susie_rss(z_snp,
-                                                           regions_df,
-                                                           ld_R_dir = ld_R_dir,
-                                                           filestem = filestem,
-                                                           gwas_n = gwas_n,
-                                                           ncore = ncore)
+    ld_mismatch_res <- detect_ld_mismatch_susie_rss(z_snp,
+                                                    regions_df,
+                                                    ld_R_dir = ld_R_dir,
+                                                    filestem = filestem,
+                                                    gwas_n = gwas_n,
+                                                    ncore = ncore)
 
-    condz_dist <- detect_ld_mismatch_res$condz_dist
-    problematic_snps <- detect_ld_mismatch_res$problematic_snps
-    flipped_snps <- detect_ld_mismatch_res$flipped_snps
+    condz_dist <- ld_mismatch_res$condz_dist
+    problematic_snps <- ld_mismatch_res$problematic_snps
+    flipped_snps <- ld_mismatch_res$flipped_snps
 
     if (isTRUE(flip_allele)) {
       flip.idx <- which(z_snp$id %in% flipped_snps)
-      loginfo("Flip %s variants.", length(flip.idx))
+      loginfo("Flip %d variants.", length(flip.idx))
       z_snp$z[flip.idx] <- -z_snp$z[flip.idx]
       problematic_snps <- setdiff(problematic_snps, flipped_snps)
     }
 
-    loginfo("%s problematic variants.", length(problematic_snps))
+    loginfo("Number of problematic variants: %d", length(problematic_snps))
 
     if (isTRUE(remove_ld_mismatch)) {
       filter.idx <- which(z_snp$id %in% problematic_snps)
-      loginfo("Remove %d variants", length(filter.idx))
+      loginfo("Remove %d variants with LD mismatches.", length(filter.idx))
       z_snp <- z_snp[-filter.idx, ]
-      loginfo("%s variants left after LD mismatch filtering.", length(z_snp$id))
+      loginfo("%d variants left after LD mismatch filtering.", length(z_snp$id))
     }
 
     ld_mismatch_res <- list(condz_dist = condz_dist,
@@ -160,57 +163,94 @@ preprocess_z_ld <- function (z_snp,
 
 
 # Detect LD mismatches using SuSiE RSS
+#'
+#' @param z_snp A data frame with two columns: "id", "A1", "A2", "z". giving the z scores for
+#' snps. "A1" is effect allele. "A2" is the other allele.
+#' @param regions_df A data frame with regions to be analyzed
+#' @param LD_R_dir a string, pointing to a directory containing all LD matrix files and variant information. Expects .RDS files which contain LD correlation matrices for a region/block.
+#' For each RDS file, a file with same base name but ended with .Rvar needs to be present in the same folder. the .Rvar file has 5 required columns: "chrom", "id", "pos", "alt", "ref".
+#' If using PredictDB format weights and \code{scale_by_ld_variance=T}, a 6th column is also required: "variance", which is the variance of the each SNP.
+#' The order of rows needs to match the order of rows in .RDS file.
+#' @param filestem a string, filestem of reference LD matrix.
+#' @param gwas_n integer, GWAS sample size
+#' @param ncore integer, number of cores for parallel computing.
+#'
+#' @importFrom logging addHandler loginfo
+#' @importFrom tools file_ext
+#' @importFrom foreach %dopar% foreach
+#'
+#' @export
+#'
 detect_ld_mismatch_susie_rss <- function (z_snp,
                                           regions_df,
-                                          locusIDs=NULL,
-                                          gwas_n,
-                                          ld_R_dir = "/project2/mstephens/wcrouse/UKB_LDR_0.1",
-                                          filestem = "ukb_b38_0.1",
+                                          ld_R_dir = NULL,
+                                          filestem = NULL,
+                                          gwas_n = NULL,
                                           ncore = 1){
 
-  if(is.null(locusIDs)){
-    locusIDs <- regions_df$locusID
-  }
+  locusIDs <- regions_df$locusID
   loginfo("Run LD mismatch diagnosis in %d loci", length(locusIDs))
 
-  # register DoParallel
-  doParallel::registerDoParallel(cores=ncore)
+  nregions <- length(locusIDs)
+  corelist <- lapply(1:ncore, function(core){
+    njobs <- ceiling(nregions/ncore);
+    jobs <- ((core-1)*njobs+1):(core*njobs);
+    jobs[jobs<=nregions]
+  })
+  names(corelist) <- 1:ncore
 
-  condz_dist <- foreach(locusID = locusIDs) %dopar%{
+  cl <- parallel::makeCluster(ncore, outfile = "")
+  doParallel::registerDoParallel(cl)
 
-    region_df <- regions_df[regions_df$locusID == locusID,]
-    ldref_res <- load_R_snp_info(region_df, ld_R_dir, filestem)
-    matched.z.ld <- match_gwas_R_snp(z_snp, ldref_res$R_snp, ldref_res$R_snp_info)
-    z.locus <- matched.z.ld$sumstats
-    R.locus <- matched.z.ld$R
-    rm(matched.z.ld)
+  outlist <- foreach(core = 1:ncore, .combine = "c", .packages = c("ctwas", "stats")) %dopar% {
 
-    # # Estimate lambda (consistency) between the z-scores and LD matrix
-    # lambda <- estimate_s_rss(z = z.locus$z, R = R.locus, n = gwas_n)
+    locuslist_core <- locusIDs[corelist[[core]]]
 
-    # Compute expected z-scores based on conditional distribution of z-scores
-    condz <- kriging_rss(z = z.locus$z, R = R.locus, n = gwas_n)
-    condz$conditional_dist <- cbind(z.locus[,1:3], condz$conditional_dist)
-    # compute p-values
-    condz$conditional_dist$p_diff <- pchisq(condz$conditional_dist$z_std_diff^2, df = 1, lower.tail=FALSE)
+    outlist_core <- list()
+    for(locusID in locuslist_core) {
 
-    condz$conditional_dist
+      # Load reference LD matrix and SNP info in the locus
+      region_df <- regions_df[regions_df$locusID == locusID,]
+      filename <- sprintf("%s_chr%s.R_snp.%d_%d", filestem,
+                          gsub("chr", "", region_df$chr), region_df$start, region_df$stop)
+      if(!file.exists(file.path(ld_R_dir, paste0(filename, ".RDS"))) || !file.exists(file.path(ld_R_dir, paste0(filename, ".Rvar")))){
+        stop("LD Reference files not exist!")
+      }
+      R_snp <- readRDS(file.path(ld_R_dir, paste0(filename, ".RDS")))
+      R_snp_info <- read.table(file.path(ld_R_dir, paste0(filename, ".Rvar")), header=T)
+
+      # Match GWAS sumstats with LD reference files. Only keep variants included in LD reference.
+      z.locus <- z_snp[z_snp$id %in% R_snp_info$id,]
+      R_snp_index <- na.omit(match(z.locus$id, R_snp_info$id))
+      z.locus$R_snp_index <- R_snp_index
+      R.locus <- R_snp[R_snp_index, R_snp_index]
+      stopifnot(nrow(z.locus) == nrow(R.locus))
+
+      # # Estimate lambda (consistency) between the z-scores and LD matrix
+      # lambda <- estimate_s_rss(z = z.locus$z, R = R.locus, n = gwas_n)
+
+      # Compute expected z-scores based on conditional distribution of z-scores
+      condz_dist <- kriging_rss(z = z.locus$z, R = R.locus, n = gwas_n)$conditional_dist
+      condz_dist <- cbind(z.locus[,c("id", "A1", "A2")], condz_dist)
+      # compute p-values
+      condz_dist$p_diff <- pchisq(condz_dist$z_std_diff^2, df = 1, lower.tail=F)
+
+      outlist_core[[as.character(locusID)]] <- condz_dist
+    }
+    outlist_core
   }
-  if(length(condz_dist) != length(locusIDs)){
-    loginfo("Incomplete LD mismatch diagnosis result! Only done in %s out of %s loci.", length(condz_dist), length(locusIDs))
-  }else{
-    names(condz_dist) <- as.character(locusIDs)
-  }
+  parallel::stopCluster(cl)
+  stopifnot(length(outlist) == length(locusIDs))
 
-  # report problematic variants with LD mismatches
-  condz_dist_df <- data.table::rbindlist(condz_dist, idcol = "locus")
-  problematic_snps <- condz_dist_df$id[which(condz_dist_df$p_diff < 5e-8)]
-  flipped_snps <- condz_dist_df$id[which(condz_dist_df$logLR > 2 & abs(condz_dist_df$z) > 2)]
+  # return problematic variants and flipped variants
+  condz_dist <- data.table::rbindlist(outlist, idcol = "locus")
+  problematic_snps <- condz_dist$id[which(condz_dist$p_diff < 5e-8)]
+  flipped_snps <- condz_dist$id[which(condz_dist$logLR > 2 & abs(condz_dist$z) > 2)]
 
-  return(list(condz_dist = condz_dist, problematic_snps = problematic_snps, flipped_snps = flipped_snps))
+  return(list(condz_dist = condz_dist,
+              problematic_snps = problematic_snps,
+              flipped_snps = flipped_snps))
 }
-
-
 
 #' Preprocess PredictDB weights and harmonize with LD reference
 #' (adapted from preharmonize_wgt_ld)
@@ -412,27 +452,4 @@ load_ld_regions <- function(ld_regions = c("EUR", "ASN", "AFR"),
   regions_df$locusID <- 1:nrow(regions_df)
 
   return(regions_df)
-}
-
-
-# Load reference LD matrix and SNP info
-load_R_snp_info <- function(region_df, ld_R_dir, filestem = "ukb_b38_0.1"){
-  filename <- sprintf("%s_chr%s.R_snp.%d_%d", filestem,
-                      gsub("chr", "", region_df$chr), region_df$start, region_df$stop)
-  if(!file.exists(file.path(ld_R_dir, paste0(filename, ".RDS"))) || !file.exists(file.path(ld_R_dir, paste0(filename, ".Rvar")))){
-    stop("LD Reference files not exist!")
-  }
-  R_snp <- readRDS(file.path(ld_R_dir, paste0(filename, ".RDS")))
-  R_snp_info <- read.table(file.path(ld_R_dir, paste0(filename, ".Rvar")), header=TRUE)
-  return(list(R_snp = R_snp, R_snp_info = R_snp_info))
-}
-
-# Match GWAS sumstats with LD reference files. Only keep variants included in LD reference.
-match_gwas_R_snp <- function(sumstats, R, snp_info){
-  sumstats <- sumstats[sumstats$id %in% snp_info$id,]
-  R_snp_index <- na.omit(match(sumstats$id, snp_info$id))
-  sumstats$R_snp_index <- R_snp_index
-  R <- R[R_snp_index, R_snp_index]
-  stopifnot(nrow(sumstats) == nrow(R))
-  return(list(sumstats = sumstats, R = R))
 }
