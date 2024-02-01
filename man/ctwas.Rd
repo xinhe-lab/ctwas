@@ -24,6 +24,7 @@ ctwas(
   estimate_group_prior_var = T,
   use_null_weight = T,
   coverage = 0.95,
+  min_abs_corr = 0.5,
   stardardize = T,
   ncore = 1,
   outputdir = getwd(),
@@ -68,8 +69,8 @@ LD regions. See \code{ld_regions}.}
 \item{ld_regions_custom}{A bed format file defining LD regions. The default
 is \code{NULL}; when specified, \code{ld_regions} and \code{ld_regions_version} will be ignored.}
 
-\item{thin}{The proportion of SNPs to be used for the parameter estimation and initial fine 
-mapping steps. Smaller \code{thin} parameters reduce runtime at the expense of accuracy. The fine mapping step is rerun using full SNPs 
+\item{thin}{The proportion of SNPs to be used for the parameter estimation and initial fine
+mapping steps. Smaller \code{thin} parameters reduce runtime at the expense of accuracy. The fine mapping step is rerun using full SNPs
 for regions with strong gene signals; see \code{rerun_gene_PIP}.}
 
 \item{prob_single}{Blocks with probability greater than \code{prob_single} of having 1 or fewer effects will be
@@ -90,10 +91,10 @@ all blocks will rerun with full SNPs}
 
 \item{L}{the number of effects for susie during the fine mapping steps}
 
-\item{group_prior}{a vector of two prior inclusion probabilities for SNPs and genes. This is ignored 
+\item{group_prior}{a vector of two prior inclusion probabilities for SNPs and genes. This is ignored
 if \code{estimate_group_prior = T}}
 
-\item{group_prior_var}{a vector of two prior variances for SNPs and gene effects. This is ignored 
+\item{group_prior_var}{a vector of two prior variances for SNPs and gene effects. This is ignored
 if \code{estimate_group_prior_var = T}}
 
 \item{estimate_group_prior}{TRUE/FALSE. If TRUE, the prior inclusion probabilities for SNPs and genes are estimated
@@ -105,6 +106,11 @@ using the data. If FALSE, \code{group_prior_var} must be specified}
 \item{use_null_weight}{TRUE/FALSE. If TRUE, allow for a probability of no effect in susie}
 
 \item{coverage}{A number between 0 and 1 specifying the \dQuote{coverage} of the estimated confidence sets}
+
+\item{min_abs_corr}{Minimum absolute correlation allowed in a
+credible set. The default, 0.5, corresponds to a squared
+correlation of 0.25, which is a commonly used threshold for
+genotype data in genetic studies.}
 
 \item{ncore}{The number of cores used to parallelize susie over regions}
 

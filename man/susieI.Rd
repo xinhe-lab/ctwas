@@ -17,6 +17,7 @@ susieI(
   estimate_group_prior_var = T,
   use_null_weight = T,
   coverage = 0.95,
+  min_abs_corr = 0.5,
   standardize = T,
   ncore = 1,
   outputdir = getwd(),
@@ -34,17 +35,17 @@ to present in the same directory. If .bed files are given, then .bim and
 \item{Y}{a vector of length n, phenotype, the same order as provided
 by `.pgenfs` (defined in .psam or .fam files).}
 
-\item{regionlist}{a list object indexing regions, variants and genes. The output of 
+\item{regionlist}{a list object indexing regions, variants and genes. The output of
 \code{index_regions}}
 
 \item{niter}{the number of iterations of the E-M algorithm to perform}
 
 \item{L}{the number of effects for susie}
 
-\item{group_prior}{a vector of two prior inclusion probabilities for SNPs and genes. This is ignored 
+\item{group_prior}{a vector of two prior inclusion probabilities for SNPs and genes. This is ignored
 if \code{estimate_group_prior = T}}
 
-\item{group_prior_var}{a vector of two prior variances for SNPs and gene effects. This is ignored 
+\item{group_prior_var}{a vector of two prior variances for SNPs and gene effects. This is ignored
 if \code{estimate_group_prior_var = T}}
 
 \item{estimate_group_prior}{TRUE/FALSE. If TRUE, the prior inclusion probabilities for SNPs and genes are estimated
@@ -56,6 +57,11 @@ using the data. If FALSE, \code{group_prior_var} must be specified}
 \item{use_null_weight}{TRUE/FALSE. If TRUE, allow for a probability of no effect in susie}
 
 \item{coverage}{A number between 0 and 1 specifying the \dQuote{coverage} of the estimated confidence sets}
+
+\item{min_abs_corr}{Minimum absolute correlation allowed in a
+credible set. The default, 0.5, corresponds to a squared
+correlation of 0.25, which is a commonly used threshold for
+genotype data in genetic studies.}
 
 \item{standardize}{TRUE/FALSE. If TRUE, all variables are standardized to unit variance}
 
