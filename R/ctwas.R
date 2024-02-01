@@ -1,5 +1,5 @@
 #' Causal inference for TWAS
-#' 
+#'
 #' @param pgenfs A character vector of .pgen or .bed files. One file for one
 #' chromosome, in the order of 1 to 22. Therefore, the length of this vector
 #' needs to be 22. If .pgen files are given, then .pvar and .psam are assumed
@@ -32,12 +32,12 @@
 #'
 #' @param ld_regions_version A string representing the genome reference build ("b37", "b38") to use for defining
 #' LD regions. See \code{ld_regions}.
-#'  
+#'
 #' @param ld_regions_custom A bed format file defining LD regions. The default
 #' is \code{NULL}; when specified, \code{ld_regions} and \code{ld_regions_version} will be ignored.
-#'  
-#' @param thin The proportion of SNPs to be used for the parameter estimation and initial fine 
-#' mapping steps. Smaller \code{thin} parameters reduce runtime at the expense of accuracy. The fine mapping step is rerun using full SNPs 
+#'
+#' @param thin The proportion of SNPs to be used for the parameter estimation and initial fine
+#' mapping steps. Smaller \code{thin} parameters reduce runtime at the expense of accuracy. The fine mapping step is rerun using full SNPs
 #' for regions with strong gene signals; see \code{rerun_gene_PIP}.
 #'
 #' @param prob_single Blocks with probability greater than \code{prob_single} of having 1 or fewer effects will be
@@ -51,37 +51,42 @@
 #' @param rerun_gene_PIP if thin <1, will rerun blocks with the max gene PIP
 #' > \code{rerun_gene_PIP} using full SNPs. if \code{rerun_gene_PIP} is 0, then
 #' all blocks will rerun with full SNPs
-#' 
+#'
 #' @param niter1 the number of iterations of the E-M algorithm to perform during the initial parameter estimation step
-#' 
+#'
 #' @param niter2 the number of iterations of the E-M algorithm to perform during the complete parameter estimation step
-#' 
+#'
 #' @param L the number of effects for susie during the fine mapping steps
-#' 
-#' @param group_prior a vector of two prior inclusion probabilities for SNPs and genes. This is ignored 
+#'
+#' @param group_prior a vector of two prior inclusion probabilities for SNPs and genes. This is ignored
 #' if \code{estimate_group_prior = T}
-#' 
-#' @param group_prior_var a vector of two prior variances for SNPs and gene effects. This is ignored 
+#'
+#' @param group_prior_var a vector of two prior variances for SNPs and gene effects. This is ignored
 #' if \code{estimate_group_prior_var = T}
-#' 
+#'
 #' @param estimate_group_prior TRUE/FALSE. If TRUE, the prior inclusion probabilities for SNPs and genes are estimated
 #' using the data. If FALSE, \code{group_prior} must be specified
-#' 
+#'
 #' @param estimate_group_prior_var TRUE/FALSE. If TRUE, the prior variances for SNPs and genes are estimated
 #' using the data. If FALSE, \code{group_prior_var} must be specified
-#' 
+#'
 #' @param use_null_weight TRUE/FALSE. If TRUE, allow for a probability of no effect in susie
-#' 
+#'
 #' @param coverage A number between 0 and 1 specifying the \dQuote{coverage} of the estimated confidence sets
-#' 
+#'
+#' @param min_abs_corr Minimum absolute correlation allowed in a
+#'   credible set. The default, 0.5, corresponds to a squared
+#'   correlation of 0.25, which is a commonly used threshold for
+#'   genotype data in genetic studies.
+#'
 #' @param standardize TRUE/FALSE. If TRUE, all variables are standardized to unit variance
-#' 
+#'
 #' @param ncore The number of cores used to parallelize susie over regions
-#' 
+#'
 #' @param outputdir a string, the directory to store output
-#' 
+#'
 #' @param outname a string, the output name
-#' 
+#'
 #' @param logfile the log file, if NULL will print log info on screen
 #'
 #' @importFrom logging addHandler loginfo
@@ -107,6 +112,7 @@ ctwas <- function(pgenfs,
                   estimate_group_prior_var = T,
                   use_null_weight = T,
                   coverage = 0.95,
+                  min_abs_corr = 0.5,
                   stardardize = T,
                   ncore = 1,
                   outputdir = getwd(),
@@ -156,7 +162,7 @@ ctwas <- function(pgenfs,
   temp_regs <- lapply(1:22, function(x) cbind(x,
                    unlist(lapply(regionlist[[x]], "[[", "start")),
                      unlist(lapply(regionlist[[x]], "[[", "stop"))))
-                 
+
   regs <- do.call(rbind, lapply(temp_regs, function(x) if (ncol(x) == 3){x}))
 
   write.table(regs , file= paste0(outputdir,"/", outname, ".regions.txt")
@@ -181,10 +187,10 @@ ctwas <- function(pgenfs,
                    use_null_weight = use_null_weight,
                    coverage = coverage,
                    standardize = stardardize,
+                   min_abs_corr = min_abs_corr,
                    ncore = ncore,
                    outputdir = outputdir,
                    outname = paste0(outname, ".s1"))
-
 
     group_prior <- pars[["group_prior"]]
     group_prior_var <- pars[["group_prior_var"]]
@@ -209,6 +215,7 @@ ctwas <- function(pgenfs,
                    estimate_group_prior_var = estimate_group_prior_var,
                    use_null_weight = use_null_weight,
                    coverage = coverage,
+                   min_abs_corr = min_abs_corr,
                    standardize = stardardize,
                    ncore = ncore,
                    outputdir = outputdir,
@@ -230,6 +237,7 @@ ctwas <- function(pgenfs,
                  estimate_group_prior_var = estimate_group_prior_var,
                  use_null_weight = use_null_weight,
                  coverage = coverage,
+                 min_abs_corr = min_abs_corr,
                  standardize = stardardize,
                  ncore = ncore,
                  outputdir = outputdir,
@@ -286,6 +294,7 @@ ctwas <- function(pgenfs,
                      estimate_group_prior_var = estimate_group_prior_var,
                      use_null_weight = use_null_weight,
                      coverage = coverage,
+                     min_abs_corr = min_abs_corr,
                      standardize = stardardize,
                      ncore = ncore,
                      outputdir = outputdir,

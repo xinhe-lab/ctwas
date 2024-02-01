@@ -4,10 +4,10 @@ Package for the causal TWAS project.
 
 # Install
 
-Install `ctwas`:
+Install `ctwas` (`multigroup` branch):
 
 ```
-remotes::install_github("simingz/ctwas",ref = "main")
+remotes::install_github("xinhe-lab/ctwas",ref = "multigroup")
 ```
 
 # Acknowledgement

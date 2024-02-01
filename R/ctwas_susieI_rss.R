@@ -1,12 +1,12 @@
 #' Iteratively run susie and estimate parameters - RSS version
-#' 
-#' @param zdf A data frame with three columns: "id", "z", "type". 
+#'
+#' @param zdf A data frame with three columns: "id", "z", "type".
 #' This data frame gives the the z scores for SNPs and genes, denoted in "type".
 #' The "type" column can also be use to specify multiple sets of weights
-#' 
-#' @param regionlist a list object indexing regions, variants and genes. The output of 
+#'
+#' @param regionlist a list object indexing regions, variants and genes. The output of
 #' \code{index_regions}
-#' 
+#'
 #' @param ld_exprfs A character vector of .`expr` or `.expr.gz` files. One file for
 #' one chromosome, in the order of 1 to 22. Therefore, the length of this vector
 #' needs to be 22.  `.expr.gz` file is gzip compressed `.expr` files. `.expr` is
@@ -22,25 +22,25 @@
 #' }
 #' Its rows should be in the same order as the columns for corresponding `.expr`
 #' files.
-#' 
+#'
 #' @param ld_pgenfs A character vector of .pgen or .bed files. One file for one
 #' chromosome, in the order of 1 to 22. Therefore, the length of this vector
 #' needs to be 22. If .pgen files are given, then .pvar and .psam are assumed
 #' to present in the same directory. If .bed files are given, then .bim and
 #' .fam files are assumed to present in the same directory.
-#' 
+#'
 #' @param ld_Rfs a vector of paths to the LD matrices
-#' 
-#' @param niter the number of iterations of the E-M algorithm to perform 
-#' 
+#'
+#' @param niter the number of iterations of the E-M algorithm to perform
+#'
 #' @param L the number of effects for susie
-#' 
+#'
 #' @param z_ld_weight the z_ld_weight parameter for susie_rss
-#' 
-#' @param group_prior a vector of two prior inclusion probabilities for SNPs and genes. This is ignored 
+#'
+#' @param group_prior a vector of two prior inclusion probabilities for SNPs and genes. This is ignored
 #' if \code{estimate_group_prior = T}
-#' 
-#' @param group_prior_var a vector of two prior variances for SNPs and gene effects. This is ignored 
+#'
+#' @param group_prior_var a vector of two prior variances for SNPs and gene effects. This is ignored
 #' if \code{estimate_group_prior_var = T}
 #'
 #' @param group_prior_var_structure a string indicating the structure to put on the prior variance parameters.
@@ -49,32 +49,37 @@
 #' "shared+snps" allows all groups to share the same variance parameter, and this variance parameter is also shared with SNPs.
 #' "inv_gamma" places an inverse-gamma prior on the variance parameters for each group, with shape and rate hypeparameters.
 #' "shared_type" allows all groups in one molecular QTL type to share the same variance parameter.
-#' 
+#'
 #' @param estimate_group_prior TRUE/FALSE. If TRUE, the prior inclusion probabilities for SNPs and genes are estimated
 #' using the data. If FALSE, \code{group_prior} must be specified
-#' 
+#'
 #' @param estimate_group_prior_var TRUE/FALSE. If TRUE, the prior variances for SNPs and genes are estimated
 #' using the data. If FALSE, \code{group_prior_var} must be specified
-#' 
+#'
 #' @param use_null_weight TRUE/FALSE. If TRUE, allow for a probability of no effect in susie
-#' 
+#'
 #' @param coverage A number between 0 and 1 specifying the \dQuote{coverage} of the estimated confidence sets
-#' 
+#'
+#' @param min_abs_corr Minimum absolute correlation allowed in a
+#'   credible set. The default, 0.5, corresponds to a squared
+#'   correlation of 0.25, which is a commonly used threshold for
+#'   genotype data in genetic studies.
+#'
 #' @param ncore The number of cores used to parallelize susie over regions
-#' 
+#'
 #' @param outputdir a string, the directory to store output
-#' 
+#'
 #' @param outname a string, the output name
-#' 
+#'
 #' @param inv_gamma_shape the shape hyperparameter if using "inv_gamma" for \code{group_prior_var_structure}
-#' 
+#'
 #' @param inv_gamma_rate the rate hyperparameter if using "inv_gamma" for \code{group_prior_var_structure}
-#' 
+#'
 #' @param report_parameters TRUE/FALSE. If TRUE, estimated parameters are reported at the end of iteration
 #'
 #' @importFrom logging loginfo
 #' @importFrom foreach %dopar% foreach
-#' 
+#'
 susieI_rss <- function(zdf,
                        regionlist,
                        ld_exprvarfs,
@@ -90,6 +95,7 @@ susieI_rss <- function(zdf,
                        estimate_group_prior_var = T,
                        use_null_weight = T,
                        coverage = 0.95,
+                       min_abs_corr = 0.5,
                        ncore = 1,
                        outputdir = getwd(),
                        outname = NULL,
@@ -98,7 +104,7 @@ susieI_rss <- function(zdf,
                        report_parameters=T){
 
   outname <- file.path(outputdir, outname)
-  
+
   group_prior_var_structure <- match.arg(group_prior_var_structure)
 
   if (is.null(ld_pgenfs) & is.null(ld_Rfs)){
@@ -115,27 +121,27 @@ susieI_rss <- function(zdf,
 
   group_prior_rec <- matrix(NA, nrow = K , ncol =  niter)
   group_prior_var_rec <- matrix(NA, nrow = K , ncol =  niter)
-  
+
   rownames(group_prior_rec) <- types
   rownames(group_prior_var_rec) <- types
-  
-  
+
+
   if (is.null(group_prior)){
     group_prior <- structure(as.numeric(rep(NA,length(types))), names=types)
   }
-  
+
   if (is.null(group_prior_var)){
     group_prior_var <- structure(as.numeric(rep(NA,length(types))), names=types)
   }
-  
+
   pi_prior <- list()
   V_prior <- list()
-  
+
   for (type in types){
     pi_prior[[type]] <- unname(group_prior[type])
     V_prior[[type]] <- unname(group_prior_var[type])
   }
-  
+
   pi_prior <- unlist(pi_prior)
   V_prior <- unlist(V_prior)
 
@@ -174,7 +180,7 @@ susieI_rss <- function(zdf,
             } else {
               prior <- unname(pi_prior[gs_type])
             }
-            
+
             if (any(is.na(V_prior))){
               V <- matrix(rep(50, L * p), nrow = L)
               # following the default in susieR::susie_rss
@@ -234,7 +240,8 @@ susieI_rss <- function(zdf,
                                   null_weight = nw,
                                   prior_variance = V,
                                   estimate_prior_variance = F,
-                                  coverage = coverage)
+                                  coverage = coverage,
+                                  min_abs_corr = min_abs_corr)
 
             geneinfo <- read_exprvar(ld_exprvarfs[b])
 
@@ -249,7 +256,7 @@ susieI_rss <- function(zdf,
                                     snpinfo,
                                     gidx,
                                     sidx,
-                                    b, 
+                                    b,
                                     rn,
                                     g_type,
                                     g_QTLtype)
@@ -265,12 +272,12 @@ susieI_rss <- function(zdf,
       pi_prior <- sapply(names(pi_prior), function(x){mean(outdf$susie_pip[outdf$type==x])})
       group_prior_rec[names(pi_prior),iter] <- pi_prior
     }
-    
+
     if (report_parameters){
       loginfo("After iteration %s, priors {%s}: {%s}",
               iter, names(pi_prior), pi_prior)
     }
-    
+
     if (isTRUE(estimate_group_prior_var)){
       # in susie, mu2 is under standardized scale (if performed)
       # e.g. X = matrix(rnorm(n*p),nrow=n,ncol=p)
@@ -279,16 +286,16 @@ susieI_rss <- function(zdf,
       # X2 = 5*X
       # res2 = susie(X2,y,L=10)
       # res$mu2 is identical to res2$mu2 but coefficients are on diff scale.
-      
+
       if (group_prior_var_structure=="independent"){
         V_prior <- sapply(names(V_prior), function(x){outdf_temp <- outdf[outdf$type==x,]; sum(outdf_temp$susie_pip*outdf_temp$mu2)/sum(outdf_temp$susie_pip)})
       } else if (group_prior_var_structure=="shared_all"){
         outdf_temp <- outdf[outdf$type=="SNP",]
         V_prior["SNP"] <- sum(outdf_temp$susie_pip*outdf_temp$mu2)/sum(outdf_temp$susie_pip)
-        
+
         outdf_temp <- outdf[outdf$type!="SNP",]
         V_prior[names(V_prior)!="SNP"] <- sum(outdf_temp$susie_pip*outdf_temp$mu2)/sum(outdf_temp$susie_pip)
-        
+
         rm(outdf_temp)
       } else if (group_prior_var_structure=="shared+snps"){
         V_prior[names(V_prior)] <- sum(outdf$susie_pip*outdf$mu2)/sum(outdf$susie_pip)
@@ -304,10 +311,10 @@ susieI_rss <- function(zdf,
           }
         }
       }
-      
+
       group_prior_var_rec[names(V_prior), iter] <- V_prior
     }
-    
+
     save(group_prior_rec, group_prior_var_rec,
          file = paste0(outname, ".susieIrssres.Rd"))
     data.table::fwrite(outdf, file= paste0(outname, ".susieIrss.txt"),
