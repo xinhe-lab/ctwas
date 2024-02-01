@@ -12,7 +12,8 @@ anno_susie(
   sidx,
   region_tag1,
   region_tag2,
-  type
+  type,
+  QTLtype
 )
 }
 \description{
