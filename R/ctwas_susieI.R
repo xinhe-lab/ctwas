@@ -1,11 +1,11 @@
 #' Iteratively run susie and estimate parameters
-#' 
+#'
 #' @param pgenfs A character vector of .pgen or .bed files. One file for one
 #' chromosome, in the order of 1 to 22. Therefore, the length of this vector
 #' needs to be 22. If .pgen files are given, then .pvar and .psam are assumed
 #' to present in the same directory. If .bed files are given, then .bim and
 #' .fam files are assumed to present in the same directory.
-#' 
+#'
 #' @param A character vector of .`expr` or `.expr.gz` files. One file for
 #' one chromosome, in the order of 1 to 22. Therefore, the length of this vector
 #' needs to be 22.  `.expr.gz` file is gzip compressed `.expr` files. `.expr` is
@@ -21,46 +21,51 @@
 #' }
 #' Its rows should be in the same order as the columns for corresponding `.expr`
 #' files.
-#' 
+#'
 #' @param Y a vector of length n, phenotype, the same order as provided
 #' by `.pgenfs` (defined in .psam or .fam files).
-#' 
-#' @param regionlist a list object indexing regions, variants and genes. The output of 
+#'
+#' @param regionlist a list object indexing regions, variants and genes. The output of
 #' \code{index_regions}
-#' 
-#' @param niter the number of iterations of the E-M algorithm to perform 
-#' 
+#'
+#' @param niter the number of iterations of the E-M algorithm to perform
+#'
 #' @param L the number of effects for susie
-#' 
-#' @param group_prior a vector of two prior inclusion probabilities for SNPs and genes. This is ignored 
+#'
+#' @param group_prior a vector of two prior inclusion probabilities for SNPs and genes. This is ignored
 #' if \code{estimate_group_prior = T}
-#' 
-#' @param group_prior_var a vector of two prior variances for SNPs and gene effects. This is ignored 
+#'
+#' @param group_prior_var a vector of two prior variances for SNPs and gene effects. This is ignored
 #' if \code{estimate_group_prior_var = T}
-#' 
+#'
 #' @param estimate_group_prior TRUE/FALSE. If TRUE, the prior inclusion probabilities for SNPs and genes are estimated
 #' using the data. If FALSE, \code{group_prior} must be specified
-#' 
+#'
 #' @param estimate_group_prior_var TRUE/FALSE. If TRUE, the prior variances for SNPs and genes are estimated
 #' using the data. If FALSE, \code{group_prior_var} must be specified
-#' 
+#'
 #' @param use_null_weight TRUE/FALSE. If TRUE, allow for a probability of no effect in susie
-#' 
+#'
 #' @param coverage A number between 0 and 1 specifying the \dQuote{coverage} of the estimated confidence sets
-#' 
+#'
+#' @param min_abs_corr Minimum absolute correlation allowed in a
+#'   credible set. The default, 0.5, corresponds to a squared
+#'   correlation of 0.25, which is a commonly used threshold for
+#'   genotype data in genetic studies.
+#'
 #' @param standardize TRUE/FALSE. If TRUE, all variables are standardized to unit variance
-#' 
+#'
 #' @param ncore The number of cores used to parallelize susie over regions
-#' 
+#'
 #' @param outputdir a string, the directory to store output
-#' 
+#'
 #' @param outname a string, the output name
-#' 
+#'
 #' @param report_parameters TRUE/FALSE. If TRUE, estimated parameters are reported at the end of iteration
 #'
 #' @importFrom logging loginfo
 #' @importFrom foreach %dopar% foreach
-#' 
+#'
 susieI <- function(pgenfs,
                    exprfs,
                    Y,
@@ -73,6 +78,7 @@ susieI <- function(pgenfs,
                    estimate_group_prior_var = T,
                    use_null_weight = T,
                    coverage = 0.95,
+                   min_abs_corr = 0.5,
                    standardize = T,
                    ncore = 1,
                    outputdir = getwd(),
@@ -158,7 +164,9 @@ susieI <- function(pgenfs,
             susieres <- susie(X, Y, L = L, prior_weights = prior,
                               null_weight = nw, scaled_prior_variance = V.scaled,
                               standardize = standardize,
-                              estimate_prior_variance = F, coverage = coverage)
+                              estimate_prior_variance = F,
+                              coverage = coverage,
+                              min_abs_corr = min_abs_corr)
 
             geneinfo <- read_exprvar(exprvarfs[b])
             snpinfo <- read_pvar(pvarfs[b])
