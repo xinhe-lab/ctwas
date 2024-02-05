@@ -7,7 +7,7 @@
 susieI_rss(
   zdf,
   regionlist,
-  ld_exprfs,
+  ld_exprvarfs,
   ld_pgenfs = NULL,
   ld_Rfs = NULL,
   niter = 20,
@@ -26,20 +26,16 @@ susieI_rss(
 )
 }
 \arguments{
-\item{zdf}{A data frame with three columns: "id", "z", "type". 
+\item{zdf}{A data frame with three columns: "id", "z", "type".
 This data frame gives the the z scores for SNPs and genes, denoted in "type".
 The "type" column can also be use to specify multiple sets of weights}
 
-\item{regionlist}{a list object indexing regions, variants and genes. The output of 
+\item{regionlist}{a list object indexing regions, variants and genes. The output of
 \code{index_regions}}
 
-\item{ld_exprfs}{A character vector of .`expr` or `.expr.gz` files. One file for
+\item{ld_exprvarfs}{A character vector of `.exprvar` files. One file for
 one chromosome, in the order of 1 to 22. Therefore, the length of this vector
-needs to be 22.  `.expr.gz` file is gzip compressed `.expr` files. `.expr` is
-a matrix of imputed expression values, row is for each sample, column is for
-each gene. Its sample order is same as in files provided by `.pgenfs`. We also
-assume corresponding `.exprvar` files are present in the same directory.
-`.exprvar` files are just tab delimited text files, with columns:
+needs to be 22. `.exprvar` files are tab delimited text files, with columns:
 \describe{
   \item{chrom}{chromosome number, numeric}
   \item{p0}{gene boundary position, the smaller value}
@@ -63,10 +59,10 @@ to present in the same directory. If .bed files are given, then .bim and
 
 \item{z_ld_weight}{the z_ld_weight parameter for susie_rss}
 
-\item{group_prior}{a vector of two prior inclusion probabilities for SNPs and genes. This is ignored 
+\item{group_prior}{a vector of two prior inclusion probabilities for SNPs and genes. This is ignored
 if \code{estimate_group_prior = T}}
 
-\item{group_prior_var}{a vector of two prior variances for SNPs and gene effects. This is ignored 
+\item{group_prior_var}{a vector of two prior variances for SNPs and gene effects. This is ignored
 if \code{estimate_group_prior_var = T}}
 
 \item{estimate_group_prior}{TRUE/FALSE. If TRUE, the prior inclusion probabilities for SNPs and genes are estimated
