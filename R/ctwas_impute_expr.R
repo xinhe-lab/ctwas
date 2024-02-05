@@ -65,9 +65,9 @@ impute_expr <- function(pgenfs,
 
     loginfo("Reading weights for chromosome ", b)
     if (dir.exists(weight)){
-      weightall <- read_weight_fusion(weight, b, snpinfo, z_snp = NULL, method = method, harmonize = T)
+      weightall <- read_weight_fusion(weight, b, snpinfo, z_snp = NULL, method = method, harmonize = harmonize)
     } else if (file_ext(weight)=='db'){
-      weightall <- read_weight_predictdb(weight, b, snpinfo, z_snp = NULL, harmonize = T)
+      weightall <- read_weight_predictdb(weight, b, snpinfo, z_snp = NULL, harmonize = harmonize)
     } else{
       stop("Unrecognized weight format, need to use either FUSION format or predict.db format")
     }

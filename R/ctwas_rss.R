@@ -81,8 +81,6 @@
 #' 
 #' @param coverage A number between 0 and 1 specifying the \dQuote{coverage} of the estimated confidence sets
 #' 
-#' @param standardize TRUE/FALSE. If TRUE, all variables are standardized to unit variance
-#' 
 #' @param ncore The number of cores used to parallelize susie over regions
 #' 
 #' @param ncore.rerun integer, number of cores to rerun regions with strong signals
@@ -122,7 +120,6 @@ ctwas_rss <- function(
   estimate_group_prior_var = T,
   use_null_weight = T,
   coverage = 0.95,
-  stardardize = T,
   max_snp_region = Inf,
   ncore = 1,
   ncore.rerun = 1,
