@@ -17,7 +17,7 @@
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">ctwas</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">0.1.35</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">0.1.36</span>
       </span>
     </div>
 
@@ -32,17 +32,17 @@
     <span class="caret"></span>
   </a>
   <ul class="dropdown-menu" role="menu"><li>
-      <a href="../articles/transition.html">How to use cTWAS software</a>
+      <a href="../articles/ctwas_summary_statistics.html">Using cTWAS with summary statistics</a>
     </li>
     <li>
-      <a href="../articles/harmonization.html">Topics on Harmonization</a>
+      <a href="../articles/harmonization.html">Harmonization</a>
     </li>
     <li>
-      <a href="../articles/regionmerging.html">Topics on Region Merging</a>
+      <a href="../articles/regionmerging.html">Region Merging</a>
     </li>
   </ul></li>
       </ul><ul class="nav navbar-nav navbar-right"><li>
-  <a href="https://github.com/simingz/ctwas" class="external-link">Source</a>
+  <a href="https://github.com/xinhe-lab/ctwas" class="external-link">Source</a>
 </li>
       </ul></div><!--/.nav-collapse -->
   </div><!--/.container -->
@@ -54,7 +54,7 @@
   <div class="col-md-9 contents">
     <div class="page-header">
     <h1>Causal inference for TWAS using summary statistics</h1>
-    
+    <small class="dont-index">Source: <a href="https://github.com/xinhe-lab/ctwas/blob/main/R/ctwas_rss.R" class="external-link"><code>R/ctwas_rss.R</code></a></small>
     <div class="hidden name"><code>ctwas_rss.Rd</code></div>
     </div>
 
@@ -66,7 +66,7 @@
     <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="fu">ctwas_rss</span><span class="op">(</span></span>
 <span>  <span class="va">z_gene</span>,</span>
 <span>  <span class="va">z_snp</span>,</span>
-<span>  <span class="va">ld_exprfs</span>,</span>
+<span>  <span class="va">ld_exprvarfs</span>,</span>
 <span>  ld_pgenfs <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  ld_R_dir <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  ld_regions <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"EUR"</span>, <span class="st">"ASN"</span>, <span class="st">"AFR"</span><span class="op">)</span>,</span>
@@ -84,7 +84,6 @@
 <span>  estimate_group_prior_var <span class="op">=</span> <span class="cn">T</span>,</span>
 <span>  use_null_weight <span class="op">=</span> <span class="cn">T</span>,</span>
 <span>  coverage <span class="op">=</span> <span class="fl">0.95</span>,</span>
-<span>  stardardize <span class="op">=</span> <span class="cn">T</span>,</span>
 <span>  max_snp_region <span class="op">=</span> <span class="cn">Inf</span>,</span>
 <span>  ncore <span class="op">=</span> <span class="fl">1</span>,</span>
 <span>  ncore.rerun <span class="op">=</span> <span class="fl">1</span>,</span>
@@ -106,14 +105,10 @@
 giving the z scores for snps. "A1" is effect allele. "A2" is the other allele.</p></dd>
 
 
-<dt>ld_exprfs</dt>
-<dd><p>A character vector of .`expr` or `.expr.gz` files. One file for
+<dt>ld_exprvarfs</dt>
+<dd><p>A character vector of `.exprvar` files. One file for
 one chromosome, in the order of 1 to 22. Therefore, the length of this vector
-needs to be 22.  `.expr.gz` file is gzip compressed `.expr` files. `.expr` is
-a matrix of imputed expression values, row is for each sample, column is for
-each gene. Its sample order is same as in files provided by `.pgenfs`. We also
-assume corresponding `.exprvar` files are present in the same directory.
-`.exprvar` files are just tab delimited text files, with columns:</p><dl><dt>chrom</dt>
+needs to be 22. `.exprvar` files are tab delimited text files, with columns:</p><dl><dt>chrom</dt>
 <dd><p>chromosome number, numeric</p></dd>
 
   <dt>p0</dt>
@@ -156,8 +151,8 @@ is <code>NULL</code>; when specified, <code>ld_regions</code> and <code>ld_regio
 
 
 <dt>thin</dt>
-<dd><p>The proportion of SNPs to be used for the parameter estimation and initial fine 
-mapping steps. Smaller <code>thin</code> parameters reduce runtime at the expense of accuracy. The fine mapping step is rerun using full SNPs 
+<dd><p>The proportion of SNPs to be used for the parameter estimation and initial fine
+mapping steps. Smaller <code>thin</code> parameters reduce runtime at the expense of accuracy. The fine mapping step is rerun using full SNPs
 for regions with strong gene signals; see <code>rerun_gene_PIP</code>.</p></dd>
 
 
@@ -185,12 +180,12 @@ all blocks will rerun with full SNPs</p></dd>
 
 
 <dt>group_prior</dt>
-<dd><p>a vector of two prior inclusion probabilities for SNPs and genes. This is ignored 
+<dd><p>a vector of two prior inclusion probabilities for SNPs and genes. This is ignored
 if <code>estimate_group_prior = T</code></p></dd>
 
 
 <dt>group_prior_var</dt>
-<dd><p>a vector of two prior variances for SNPs and gene effects. This is ignored 
+<dd><p>a vector of two prior variances for SNPs and gene effects. This is ignored
 if <code>estimate_group_prior_var = T</code></p></dd>
 
 
@@ -246,13 +241,9 @@ using full SNPs.</p></dd>
 
 <dt>LD_R_dir</dt>
 <dd><p>a string, pointing to a directory containing all LD matrix files and variant information. Expects .RDS files which contain LD correlation matrices for a region/block.
-For each RDS file, a file with same base name but ended with .Rvar needs to be present in the same folder. the .Rvar file has 5 required columns: "chrom", "id", "pos", "alt", "ref". 
+For each RDS file, a file with same base name but ended with .Rvar needs to be present in the same folder. the .Rvar file has 5 required columns: "chrom", "id", "pos", "alt", "ref".
 If using PredictDB format weights and <code>scale_by_ld_variance=T</code>, a 6th column is also required: "variance", which is the variance of the each SNP.
 The order of rows needs to match the order of rows in .RDS file.</p></dd>
-
-
-<dt>standardize</dt>
-<dd><p>TRUE/FALSE. If TRUE, all variables are standardized to unit variance</p></dd>
 
 </dl></div>
 
@@ -264,7 +255,7 @@ The order of rows needs to match the order of rows in .RDS file.</p></dd>
 
 
       <footer><div class="copyright">
-  <p></p><p>Developed by Siming Zhao.</p>
+  <p></p><p>Developed by Siming Zhao, Wesley Crouse, Sheng Qian, Kaixuan Luo, Matthew Stephens, Xin He.</p>
 </div>
 
 <div class="pkgdown">
