@@ -14,8 +14,8 @@ Install `ctwas`:
 remotes::install_github("xinhe-lab/ctwas",ref = "main")
 ```
 
-Currently, `ctwas` can only be installed on linux systems. 
-We recommend using run `ctwas` on a High-Performance Computing system.
+Currently, `ctwas` has only been tested on linux systems. 
+We recommend running `ctwas` on a High-Performance Computing system.
 
 ## Citing this work
 
@@ -29,11 +29,11 @@ repository useful for your work, please cite:
 
 ## Useful resources
 
-We have pre-computed the LD matrices of European samples from UK Biobank. They can be downloaded [here](https://uchicago.box.com/s/jqocacd2fulskmhoqnasrknbt59x3xkn). 
+We have pre-computed the LD matrices of European samples from UK Biobank. 
+They can be downloaded [here](https://uchicago.box.com/s/jqocacd2fulskmhoqnasrknbt59x3xkn). 
 
-cTWAS requires the expression prediction models, or weights, of genes. The pre-computed weights of GTEx expression and splicing traits can be downloaded from [PredictDB](https://predictdb.org/post/2021/07/21/gtex-v8-models-on-eqtl-and-sqtl/). 
-
-To run cTWAS, it is useful to perform some pre-processing on the GWAS summary statistics, to check allele flipping and filter problemetic variants due to LD mismatch between reference and in-sample LD. Some useful software for this purpose, include [SuSiE-RSS](https://stephenslab.github.io/susieR/articles/susierss_diagnostic.html) and [DENTIST](https://github.com/Yves-CHEN/DENTIST/). 
+cTWAS requires the expression prediction models, or weights, of genes. 
+The pre-computed weights of GTEx expression and splicing traits can be downloaded from [PredictDB](https://predictdb.org/post/2021/07/21/gtex-v8-models-on-eqtl-and-sqtl/). 
 
 ## Acknowledgement
 

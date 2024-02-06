@@ -116,7 +116,11 @@
 </h3>
 <p>There are a few potential problems when preparing the input data. First, the variants in the three sets of input data may not match. Only variants in all three input data will be used in cTWAS. So it is important to maximize the overlap of the variants in the three sets. This can be done for example, by imputing GWAS summary statistics of the variants missing in GWAS but in the LD reference. Another useful pre-processing step is to perform Minor allele frequency (MAF) filtering on the GWAS data so that only those with MAF above a certain cutoff would be used in the analysis, ideally the same cutoff used in the LD references. Additionally, when building the prediction models of gene expression, it is better to impute the genotype data using the LD reference, if possible. All these steps should be done before running cTWAS.</p>
 <p>The second potential problem is that the effect alleles in the prediction model, GWAS and LD reference may not agree with each other, thus we need to ``harmonize’’ the data to ensure that the effect alleles match. If the data are not already harmonized, we provide some options for harmonization. Please see the topics on <a href="https://xinhe-lab.github.io/mapgen/articles/harmonization.html" class="external-link">harmonization</a> for more details.</p>
-<p>The third potential problem is the LD of the GWAS data (in-sample LD) do not match the reference LD. This can lead to false positives in fine-mapping tools. Diagonistic tools including <a href="https://stephenslab.github.io/susieR/articles/susierss_diagnostic.html" class="external-link">SuSiE-RSS</a>, and DENTIST (<a href="https://github.com/Yves-CHEN/DENTIST/" class="external-link uri">https://github.com/Yves-CHEN/DENTIST/</a>), have been developed to check possible LD mismatch. ### GWAS z-scores</p>
+<p>The third potential problem is the LD of the GWAS data (in-sample LD) do not match the reference LD. This can lead to false positives in fine-mapping tools. Diagnostic tools including <a href="https://stephenslab.github.io/susieR/articles/susierss_diagnostic.html" class="external-link">SuSiE-RSS</a>, and <a href="https://github.com/Yves-CHEN/DENTIST/" class="external-link">DENTIST</a>, have been developed to check possible LD mismatch.</p>
+</div>
+<div class="section level3">
+<h3 id="gwas-z-scores">GWAS z-scores<a class="anchor" aria-label="anchor" href="#gwas-z-scores"></a>
+</h3>
 <p>For this analysis, we will use summary statistics from a GWAS of LDL cholesterol in the UK Biobank. We will download the VCF from the IEU Open GWAS Project.</p>
 <div class="sourceCode" id="cb3"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># set the working directory, download the summary statistics, and unzip the file.</span></span>
@@ -768,14 +772,14 @@
 <span>                 z_snp <span class="op">=</span> <span class="va">z_snp</span>,</span>
 <span>                 z_gene <span class="op">=</span> <span class="va">z_gene</span><span class="op">)</span></span></code></pre></div>
 </div>
-<div class="section level3">
-<h3 id="cleaning-up">Cleaning up<a class="anchor" aria-label="anchor" href="#cleaning-up"></a>
-</h3>
+</div>
+<div class="section level2">
+<h2 id="cleaning-up">Cleaning up<a class="anchor" aria-label="anchor" href="#cleaning-up"></a>
+</h2>
 <p>The summary statistics version of cTWAS generates a lot of files. cTWAS added variant-by-gene and gene-by-gene correlation information (“R matrix info”) for all regions in a directory called <code>[outname]_LDR</code>, and it also stored thinned version of the LD matrices in the same directory. We store all these files to speed computation, and we leave them unzipped at the end of the analysis so that they can be used with <code>ctwas_locus_plot</code>. However, once you are done with an analysis, we recommend zipping the contents of the <code>[outname]_LDR</code> folder.</p>
 <div class="sourceCode" id="cb66"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/system.html" class="external-link">system</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/paste.html" class="external-link">paste0</a></span><span class="op">(</span><span class="st">"tar -zcvf "</span>, <span class="va">outputdir</span>, <span class="va">outname</span>, <span class="st">"_LDR.tar.gz "</span>, <span class="va">outputdir</span>, <span class="va">outname</span>, <span class="st">"_LDR"</span><span class="op">)</span><span class="op">)</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/system.html" class="external-link">system</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/paste.html" class="external-link">paste0</a></span><span class="op">(</span><span class="st">"rm -r "</span>, <span class="va">outputdir</span>, <span class="va">outname</span>, <span class="st">"_LDR"</span><span class="op">)</span><span class="op">)</span></span></code></pre></div>
-</div>
 </div>
 <div class="section level2">
 <h2 id="session-information">Session information<a class="anchor" aria-label="anchor" href="#session-information"></a>

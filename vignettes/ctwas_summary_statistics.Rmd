@@ -51,7 +51,8 @@ There are a few potential problems when preparing the input data. First, the var
 
 The second potential problem is that the effect alleles in the prediction model, GWAS and LD reference may not agree with each other, thus we need to ``harmonize'' the data to ensure that the effect alleles match. If the data are not already harmonized, we provide some options for harmonization. Please see the topics on [harmonization](https://xinhe-lab.github.io/mapgen/articles/harmonization.html) for more details.
     
-The third potential problem is the LD of the GWAS data (in-sample LD) do not match the reference LD. This can lead to false positives in fine-mapping tools. Diagonistic tools including [SuSiE-RSS](https://stephenslab.github.io/susieR/articles/susierss_diagnostic.html), and DENTIST (https://github.com/Yves-CHEN/DENTIST/), have been developed to check possible LD mismatch. 
+The third potential problem is the LD of the GWAS data (in-sample LD) do not match the reference LD. This can lead to false positives in fine-mapping tools. Diagnostic tools including [SuSiE-RSS](https://stephenslab.github.io/susieR/articles/susierss_diagnostic.html), and [DENTIST](https://github.com/Yves-CHEN/DENTIST/), have been developed to check possible LD mismatch. 
+
 ### GWAS z-scores
 
 For this analysis, we will use summary statistics from a GWAS of LDL cholesterol in the UK Biobank. We will download the VCF from the IEU Open GWAS Project. 
@@ -674,7 +675,7 @@ ctwas_locus_plot(ctwas_res = ctwas_res,
                  z_gene = z_gene)
 ```
 
-### Cleaning up
+## Cleaning up
 
 The summary statistics version of cTWAS generates a lot of files. cTWAS added variant-by-gene and gene-by-gene correlation information ("R matrix info") for all regions in a directory called `[outname]_LDR`, and it also stored thinned version of the LD matrices in the same directory. We store all these files to speed computation, and we leave them unzipped at the end of the analysis so that they can be used with `ctwas_locus_plot`. However, once you are done with an analysis, we recommend zipping the contents of the `[outname]_LDR` folder.
 
