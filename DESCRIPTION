@@ -15,7 +15,7 @@ Description: This package implements the causal-TWAS (cTWAS) method we developed
   but when analyzing any gene, it adjusts for other nearby genes and all nearby genetic variants.
 URL: https://github.com/xinhe-lab/ctwas
 BugReports: https://github.com/xinhe-lab/ctwas/issues
-Depends: R (>= 3.0.0)
+Depends: R (>= 3.5.0)
 License: MIT + file LICENCE
 Encoding: UTF-8
 LazyData: true
