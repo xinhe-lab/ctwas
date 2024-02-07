@@ -1,56 +1,62 @@
-# get regions with problematic high PIP SNPs or genes
-get_problematic_highpip_regions <- function(outputdir, outname, weight, problematic_snps, pip_thresh = 0.5){
 
-  loginfo('Get regions with problematic SNPs')
-  loginfo('Number of problematic SNPs: %d', length(problematic_snps))
-
-  if (length(problematic_snps) > 0) {
-    # read the PredictDB weights
-    stopifnot(file.exists(weight))
-    sqlite <- RSQLite::dbDriver("SQLite")
-    db <- RSQLite::dbConnect(sqlite, weight)
-    query <- function(...) RSQLite::dbGetQuery(db, ...)
-    weight_table <- query("select * from weights")
-    extra_table <- query("select * from extra")
-    # load gene information from PredictDB weights
-    gene_info <- query("select gene, genename, gene_type from extra")
-    RSQLite::dbDisconnect(db)
-
-    # load cTWAS result
-    ctwas_res <- as.data.frame(data.table::fread(file.path(outputdir, paste0(outname, ".susieIrss.txt")), header=T))
-
-    # add gene names to cTWAS results and weight table
-    ctwas_res$genename[ctwas_res$type=="gene"] <- gene_info$genename[match(ctwas_res$id[ctwas_res$type=="gene"], gene_info$gene)]
-
-    # find regions with high PIP variants or genes
-    ctwas_highpip_res <- ctwas_res[ctwas_res$susie_pip > pip_thresh, ]
-    ctwas_highpip_snp_res <- ctwas_highpip_res[ctwas_highpip_res$type == "SNP", ]
-    ctwas_highpip_gene_res <- ctwas_highpip_res[ctwas_highpip_res$type == "gene", ]
-    ctwas_highpip_gene_weight_table <- weight_table[weight_table$gene %in% ctwas_highpip_gene_res$id, ]
-
-    # find regions with high PIP variants (PIP > 0.5) that are problematic;
-    # or high PIP genes with problematic variants in its weights
-    problematic_highpip_snps <- intersect(ctwas_highpip_snp_res$id, problematic_snps)
-    loginfo('Number of problematic high PIP SNPs: %d', length(problematic_highpip_snps))
-    problematic_highpip_genes <- ctwas_highpip_gene_weight_table$gene[which(ctwas_highpip_gene_weight_table$rsid %in% problematic_snps)]
-    loginfo('Number of problematic high PIP genes: %d', length(problematic_highpip_genes))
-
-    # get problematic high PIP regions
-    ctwas_problematic_res <- ctwas_highpip_res[ctwas_highpip_res$id %in% c(problematic_highpip_snps, problematic_highpip_genes),]
-    problematic_regions <- unique(ctwas_problematic_res[,c("region_tag1", "region_tag2")])
-    problematic_regions <- problematic_regions[order(problematic_regions$region_tag1,problematic_regions$region_tag2), ]
-    problematic_region_tags <- paste0(problematic_regions$region_tag1, "_", problematic_regions$region_tag2)
-    loginfo('Number of problematic high PIP regions: %d', length(problematic_region_tags))
-  }else{
-    loginfo('No problematic SNPs')
-    problematic_region_tags <- NULL
-  }
-
-  # return a data frame of the problematic region tags
-  return(problematic_region_tags)
-}
-
-# rerun finemapping with L = 1 for problematic regions
+#' Rerun cTWAS finemapping using summary statistics with L = 1 for problematic regions
+#'
+#' @param z_gene A data frame with two columns: "id", "z". giving the z scores for genes.
+#' Optionally, a "type" column can also be supplied; this is for using multiple sets of weights
+#'
+#' @param z_snp A data frame with four columns: "id", "A1", "A2", "z".
+#' giving the z scores for snps. "A1" is effect allele. "A2" is the other allele.
+#'
+#' @param weight a string, weight filename used in ctwas
+#'
+#' @param problematic_snps a character vector of problematic SNP IDs
+#'
+#' @param rerun_region_tags a character vector of region tags to rerun
+#'
+#' @param pip_thresh Minimum PIP value to select regions
+#'
+#' @param ctwas_outputdir a string, the directory to ctwas output
+#'
+#' @param ctwas_outname a string, the directory to ctwas output name
+#'
+#' @param LD_R_dir a string, pointing to a directory containing all LD matrix files and variant information.
+#'
+#' @param outputdir a string, the directory to store output
+#'
+#' @param outname a string, the output name
+#'
+#' @param group_prior a vector of two prior inclusion probabilities for SNPs and genes. This is ignored
+#' if \code{estimate_group_prior = T}
+#'
+#' @param group_prior_var a vector of two prior variances for SNPs and gene effects. This is ignored
+#' if \code{estimate_group_prior_var = T}
+#'
+#' @param group_prior_var_structure a string indicating the structure to put on the prior variance parameters.
+#' "independent" is the default and allows all groups to have their own separate variance parameters.
+#' "shared" allows all groups to share the same variance parameter.
+#' "shared+snps" allows all groups to share the same variance parameter, and this variance parameter is also shared with SNPs.
+#' "inv_gamma" places an inverse-gamma prior on the variance parameters for each group, with shape and rate hypeparameters.
+#' "shared_type" allows all groups in one molecular QTL type to share the same variance parameter.
+#'
+#' @param inv_gamma_shape the shape hyperparameter if using "inv_gamma" for \code{group_prior_var_structure}
+#'
+#' @param inv_gamma_rate the rate hyperparameter if using "inv_gamma" for \code{group_prior_var_structure}
+#'
+#' @param use_null_weight TRUE/FALSE. If TRUE, allow for a probability of no effect in susie
+#'
+#' @param coverage A number between 0 and 1 specifying the \dQuote{coverage} of the estimated confidence sets
+#'
+#' @param min_abs_corr Minimum absolute correlation allowed in a
+#'   credible set. The default, 0.5, corresponds to a squared
+#'   correlation of 0.25, which is a commonly used threshold for
+#'   genotype data in genetic studies.
+#'#'
+#' @param ncore The number of cores used to parallelize susie over regions
+#'
+#' @param logfile the log file, if NULL will print log info on screen
+#'
+#' @export
+#'
 rerun_ctwas_finemap_regions_L1_rss <- function(z_snp,
                                                z_gene,
                                                weight,
@@ -155,6 +161,59 @@ rerun_ctwas_finemap_regions_L1_rss <- function(z_snp,
 
   }
 
+}
+
+# Get regions with problematic high PIP SNPs or genes,
+# return a character vector of region tags with problematic high PIP SNPs or genes
+get_problematic_highpip_regions <- function(outputdir, outname, weight, problematic_snps, pip_thresh = 0.5){
+
+  loginfo('Get regions with problematic SNPs')
+  loginfo('Number of problematic SNPs: %d', length(problematic_snps))
+
+  if (length(problematic_snps) > 0) {
+    # read the PredictDB weights
+    stopifnot(file.exists(weight))
+    sqlite <- RSQLite::dbDriver("SQLite")
+    db <- RSQLite::dbConnect(sqlite, weight)
+    query <- function(...) RSQLite::dbGetQuery(db, ...)
+    weight_table <- query("select * from weights")
+    extra_table <- query("select * from extra")
+    # load gene information from PredictDB weights
+    gene_info <- query("select gene, genename, gene_type from extra")
+    RSQLite::dbDisconnect(db)
+
+    # load cTWAS result
+    ctwas_res <- as.data.frame(data.table::fread(file.path(outputdir, paste0(outname, ".susieIrss.txt")), header=T))
+
+    # add gene names to cTWAS results and weight table
+    ctwas_res$genename[ctwas_res$type=="gene"] <- gene_info$genename[match(ctwas_res$id[ctwas_res$type=="gene"], gene_info$gene)]
+
+    # find regions with high PIP variants or genes
+    ctwas_highpip_res <- ctwas_res[ctwas_res$susie_pip > pip_thresh, ]
+    ctwas_highpip_snp_res <- ctwas_highpip_res[ctwas_highpip_res$type == "SNP", ]
+    ctwas_highpip_gene_res <- ctwas_highpip_res[ctwas_highpip_res$type == "gene", ]
+    ctwas_highpip_gene_weight_table <- weight_table[weight_table$gene %in% ctwas_highpip_gene_res$id, ]
+
+    # find regions with high PIP variants (PIP > 0.5) that are problematic;
+    # or high PIP genes with problematic variants in its weights
+    problematic_highpip_snps <- intersect(ctwas_highpip_snp_res$id, problematic_snps)
+    loginfo('Number of problematic high PIP SNPs: %d', length(problematic_highpip_snps))
+    problematic_highpip_genes <- ctwas_highpip_gene_weight_table$gene[which(ctwas_highpip_gene_weight_table$rsid %in% problematic_snps)]
+    loginfo('Number of problematic high PIP genes: %d', length(problematic_highpip_genes))
+
+    # get problematic high PIP regions
+    ctwas_problematic_res <- ctwas_highpip_res[ctwas_highpip_res$id %in% c(problematic_highpip_snps, problematic_highpip_genes),]
+    problematic_regions <- unique(ctwas_problematic_res[,c("region_tag1", "region_tag2")])
+    problematic_regions <- problematic_regions[order(problematic_regions$region_tag1,problematic_regions$region_tag2), ]
+    problematic_region_tags <- paste0(problematic_regions$region_tag1, "_", problematic_regions$region_tag2)
+    loginfo('Number of problematic high PIP regions: %d', length(problematic_region_tags))
+  }else{
+    loginfo('No problematic SNPs')
+    problematic_region_tags <- NULL
+  }
+
+  # return problematic region tags
+  return(problematic_region_tags)
 }
 
 # select and assemble a subset of regionlist by region_tags
