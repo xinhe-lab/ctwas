@@ -83,10 +83,12 @@ rerun_ctwas_finemap_regions_L1_rss <- function(z_snp,
     addHandler(writeToFile, file= logfile, level='DEBUG')
   }
 
+  # Load cTWAS result
+  ctwas_res <- as.data.frame(data.table::fread(file.path(ctwas_outputdir, paste0(ctwas_outname, ".susieIrss.txt")), header=T))
+
   # get regions with problematic high PIP SNPs or genes
   if (is.null(rerun_region_tags) && length(problematic_snps) > 0) {
-    rerun_region_tags <- get_problematic_highpip_regions(outputdir = ctwas_outputdir,
-                                                         outname = ctwas_outname,
+    rerun_region_tags <- get_problematic_highpip_regions(ctwas_res = ctwas_res,
                                                          weight = weight,
                                                          problematic_snps = problematic_snps,
                                                          pip_thresh = pip_thresh)
@@ -101,9 +103,6 @@ rerun_ctwas_finemap_regions_L1_rss <- function(z_snp,
       outname <- ctwas_outname
     }
     dir.create(outputdir, showWarnings=F, recursive = T)
-
-    # Load cTWAS result
-    ctwas_res <- as.data.frame(data.table::fread(file.path(ctwas_outputdir, paste0(ctwas_outname, ".susieIrss.txt")), header=T))
 
     # Load estimated parameters
     if (is.null(group_prior) || is.null(group_prior_var)) {
@@ -165,7 +164,7 @@ rerun_ctwas_finemap_regions_L1_rss <- function(z_snp,
 
 # Get regions with problematic high PIP SNPs or genes,
 # return a character vector of region tags with problematic high PIP SNPs or genes
-get_problematic_highpip_regions <- function(outputdir, outname, weight, problematic_snps, pip_thresh = 0.5){
+get_problematic_highpip_regions <- function(ctwas_res, weight, problematic_snps, pip_thresh = 0.5){
 
   loginfo('Get regions with problematic SNPs')
   loginfo('Number of problematic SNPs: %d', length(problematic_snps))
@@ -181,12 +180,6 @@ get_problematic_highpip_regions <- function(outputdir, outname, weight, problema
     # load gene information from PredictDB weights
     gene_info <- query("select gene, genename, gene_type from extra")
     RSQLite::dbDisconnect(db)
-
-    # load cTWAS result
-    ctwas_res <- as.data.frame(data.table::fread(file.path(outputdir, paste0(outname, ".susieIrss.txt")), header=T))
-
-    # add gene names to cTWAS results and weight table
-    ctwas_res$genename[ctwas_res$type=="gene"] <- gene_info$genename[match(ctwas_res$id[ctwas_res$type=="gene"], gene_info$gene)]
 
     # find regions with high PIP variants or genes
     ctwas_highpip_res <- ctwas_res[ctwas_res$susie_pip > pip_thresh, ]
