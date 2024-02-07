@@ -7,7 +7,7 @@
 ctwas_rss(
   z_gene,
   z_snp,
-  ld_exprfs,
+  ld_exprvarfs,
   ld_pgenfs = NULL,
   ld_R_dir = NULL,
   ld_regions = c("EUR", "ASN", "AFR"),
@@ -25,7 +25,6 @@ ctwas_rss(
   estimate_group_prior_var = T,
   use_null_weight = T,
   coverage = 0.95,
-  stardardize = T,
   max_snp_region = Inf,
   ncore = 1,
   ncore.rerun = 1,
@@ -41,13 +40,9 @@ ctwas_rss(
 \item{z_snp}{A data frame with four columns: "id", "A1", "A2", "z".
 giving the z scores for snps. "A1" is effect allele. "A2" is the other allele.}
 
-\item{ld_exprfs}{A character vector of .`expr` or `.expr.gz` files. One file for
+\item{ld_exprvarfs}{A character vector of `.exprvar` files. One file for
 one chromosome, in the order of 1 to 22. Therefore, the length of this vector
-needs to be 22.  `.expr.gz` file is gzip compressed `.expr` files. `.expr` is
-a matrix of imputed expression values, row is for each sample, column is for
-each gene. Its sample order is same as in files provided by `.pgenfs`. We also
-assume corresponding `.exprvar` files are present in the same directory.
-`.exprvar` files are just tab delimited text files, with columns:
+needs to be 22. `.exprvar` files are tab delimited text files, with columns:
 \describe{
   \item{chrom}{chromosome number, numeric}
   \item{p0}{gene boundary position, the smaller value}
@@ -74,8 +69,8 @@ LD regions. See \code{ld_regions}.}
 \item{ld_regions_custom}{A bed format file defining LD regions. The default
 is \code{NULL}; when specified, \code{ld_regions} and \code{ld_regions_version} will be ignored.}
 
-\item{thin}{The proportion of SNPs to be used for the parameter estimation and initial fine 
-mapping steps. Smaller \code{thin} parameters reduce runtime at the expense of accuracy. The fine mapping step is rerun using full SNPs 
+\item{thin}{The proportion of SNPs to be used for the parameter estimation and initial fine
+mapping steps. Smaller \code{thin} parameters reduce runtime at the expense of accuracy. The fine mapping step is rerun using full SNPs
 for regions with strong gene signals; see \code{rerun_gene_PIP}.}
 
 \item{prob_single}{Blocks with probability greater than \code{prob_single} of having 1 or fewer effects will be
@@ -91,10 +86,10 @@ all blocks will rerun with full SNPs}
 
 \item{L}{the number of effects for susie during the fine mapping steps}
 
-\item{group_prior}{a vector of two prior inclusion probabilities for SNPs and genes. This is ignored 
+\item{group_prior}{a vector of two prior inclusion probabilities for SNPs and genes. This is ignored
 if \code{estimate_group_prior = T}}
 
-\item{group_prior_var}{a vector of two prior variances for SNPs and gene effects. This is ignored 
+\item{group_prior_var}{a vector of two prior variances for SNPs and gene effects. This is ignored
 if \code{estimate_group_prior_var = T}}
 
 \item{estimate_group_prior}{TRUE/FALSE. If TRUE, the prior inclusion probabilities for SNPs and genes are estimated
@@ -126,11 +121,9 @@ using full SNPs.}
 \item{merge}{TRUE/FALSE. If TRUE, merge regions when a gene spans a region boundary (i.e. belongs to multiple regions.)}
 
 \item{LD_R_dir}{a string, pointing to a directory containing all LD matrix files and variant information. Expects .RDS files which contain LD correlation matrices for a region/block.
-For each RDS file, a file with same base name but ended with .Rvar needs to be present in the same folder. the .Rvar file has 5 required columns: "chrom", "id", "pos", "alt", "ref". 
+For each RDS file, a file with same base name but ended with .Rvar needs to be present in the same folder. the .Rvar file has 5 required columns: "chrom", "id", "pos", "alt", "ref".
 If using PredictDB format weights and \code{scale_by_ld_variance=T}, a 6th column is also required: "variance", which is the variance of the each SNP.
 The order of rows needs to match the order of rows in .RDS file.}
-
-\item{standardize}{TRUE/FALSE. If TRUE, all variables are standardized to unit variance}
 }
 \description{
 Causal inference for TWAS using summary statistics

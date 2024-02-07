@@ -5,16 +5,18 @@
 <meta charset="utf-8">
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Adjusting for genetic confounders in transcriptome-wide association studies leads to reliable detection of causal genes application to genetic fine mapping • ctwas</title>
+<title>Adjusting for genetic confounders in transcriptome-wide association studies 
+  improves discovery of risk genes of complex traits • ctwas</title>
 <!-- jquery --><script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.4.1/jquery.min.js" integrity="sha256-CSXorXvZcTkaix6Yvo6HppcZGetbYMGWSFlBw8HfCJo=" crossorigin="anonymous"></script><!-- Bootstrap --><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/3.4.1/css/bootstrap.min.css" integrity="sha256-bZLfwXAP04zRMK2BjiO8iu9pf4FbLqX6zitd+tIvLhE=" crossorigin="anonymous">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/3.4.1/js/bootstrap.min.js" integrity="sha256-nuL8/2cJ5NDSSwnKD8VqreErSWHtnEP9E7AySL+1ev4=" crossorigin="anonymous"></script><!-- bootstrap-toc --><link rel="stylesheet" href="bootstrap-toc.css">
 <script src="bootstrap-toc.js"></script><!-- Font Awesome icons --><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.12.1/css/all.min.css" integrity="sha256-mmgLkCYLUQbXn0B1SRqzHar6dCnv9oZFPEC1g1cwlkk=" crossorigin="anonymous">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.12.1/css/v4-shims.min.css" integrity="sha256-wZjR52fzng1pJHwx4aV2AO3yyTOXrcDW7jBpJtTwVxw=" crossorigin="anonymous">
 <!-- clipboard.js --><script src="https://cdnjs.cloudflare.com/ajax/libs/clipboard.js/2.0.6/clipboard.min.js" integrity="sha256-inc5kl9MA1hkeYUt+EC3BhlIgyp/2jDIyBLS6k3UxPI=" crossorigin="anonymous"></script><!-- headroom.js --><script src="https://cdnjs.cloudflare.com/ajax/libs/headroom/0.11.0/headroom.min.js" integrity="sha256-AsUX4SJE1+yuDu5+mAVzJbuYNPHj/WroHuZ8Ir/CkE0=" crossorigin="anonymous"></script><script src="https://cdnjs.cloudflare.com/ajax/libs/headroom/0.11.0/jQuery.headroom.min.js" integrity="sha256-ZX/yNShbjqsohH1k95liqY9Gd8uOiE1S4vZc+9KQ1K4=" crossorigin="anonymous"></script><!-- pkgdown --><link href="pkgdown.css" rel="stylesheet">
-<script src="pkgdown.js"></script><meta property="og:title" content="Adjusting for genetic confounders in transcriptome-wide association studies leads to reliable detection of causal genes application to genetic fine mapping">
-<meta property="og:description" content="These package implements a method we developed to identify
-  causal genes in GWAS. We improve the current TWAS analysis mainly by 
-  reducing false positives. ">
+<script src="pkgdown.js"></script><meta property="og:title" content="Adjusting for genetic confounders in transcriptome-wide association studies 
+  improves discovery of risk genes of complex traits">
+<meta property="og:description" content="This package implements the causal-TWAS (cTWAS) method we developed to identify
+  causal genes in GWAS. It is a generalization of Transcriptome-wide association studies (TWAS), 
+  but when analyzing any gene, it adjusts for other nearby genes and all nearby genetic variants.">
 <!-- mathjax --><script src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/MathJax.js" integrity="sha256-nvJJv9wWKEm88qvoQl9ekL2J+k/RWIsaSScxxlsrv8k=" crossorigin="anonymous"></script><script src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/config/TeX-AMS-MML_HTMLorMML.js" integrity="sha256-84DKXVJXs0/F8OTMzX4UR909+jtl4G7SPypPavF+GfA=" crossorigin="anonymous"></script><!--[if lt IE 9]>
 <script src="https://oss.maxcdn.com/html5shiv/3.7.3/html5shiv.min.js"></script>
 <script src="https://oss.maxcdn.com/respond/1.4.2/respond.min.js"></script>
@@ -35,7 +37,7 @@
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="index.html">ctwas</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">0.1.35</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">0.1.36</span>
       </span>
     </div>
 
@@ -52,20 +54,20 @@
   </a>
   <ul class="dropdown-menu" role="menu">
 <li>
-      <a href="articles/transition.html">How to use cTWAS software</a>
+      <a href="articles/ctwas_summary_statistics.html">Using cTWAS with summary statistics</a>
     </li>
     <li>
-      <a href="articles/harmonization.html">Topics on Harmonization</a>
+      <a href="articles/harmonization.html">Harmonization</a>
     </li>
     <li>
-      <a href="articles/regionmerging.html">Topics on Region Merging</a>
+      <a href="articles/regionmerging.html">Region Merging</a>
     </li>
   </ul>
 </li>
       </ul>
 <ul class="nav navbar-nav navbar-right">
 <li>
-  <a href="https://github.com/simingz/ctwas" class="external-link">Source</a>
+  <a href="https://github.com/xinhe-lab/ctwas" class="external-link">Source</a>
 </li>
       </ul>
 </div>
@@ -82,28 +84,27 @@
 <div class="section level1">
 <div class="page-header"><h1 id="ctwas-integrating-molecular-qtls-and-gwas-for-gene-discovery">cTWAS: integrating molecular QTLs and GWAS for gene discovery<a class="anchor" aria-label="anchor" href="#ctwas-integrating-molecular-qtls-and-gwas-for-gene-discovery"></a>
 </h1></div>
-<p>Expression Quantitative Trait Loci (eQTLs) have often been used to nominate candidate genes from Genome-wide association studies (GWAS). However, commonly used methods are susceptiable to false positives largely due to Linkage Disequilibrium of eQTLs with causal variants acting on the phenotype directly. Our method, causal-TWAS (cTWAS), addressed this challenge by borrowing ideas from statistical fine-mapping. It is a generalization of Transcriptome-wide association studies (TWAS), but when analyzing any gene, it adjusts for other nearby genes and all nearby geentic variants.</p>
-<p>Running cTWAS involves four main steps: preparing input data, imputing gene z-scores, estimating parameters, and fine-mapping genes and variants. The output of cTWAS are posterior inclusion probabilities (PIPs) for all variants and genes with expression models. We have included a <a href="https://xinhe-lab.github.io/ctwas/articles/transition.html" class="external-link">tutorial</a> of how to use the ctwas software. You can <a href="https://github.com/xinhe-lab/ctwas" class="external-link">browse source code</a> and <a href="https://github.com/xinhe-lab/ctwas/issues" class="external-link">report a bug</a> here.</p>
-<p><img style="display:block;margin:auto" width="600" height="300" src="./workflow.png"></p>
+<p>Expression Quantitative Trait Loci (eQTLs) have often been used to nominate candidate genes from Genome-wide association studies (GWAS). However, commonly used methods are susceptible to false positives largely due to Linkage Disequilibrium of eQTLs with causal variants acting on the phenotype directly. Our method, causal-TWAS (cTWAS), addressed this challenge by borrowing ideas from statistical fine-mapping. It is a generalization of Transcriptome-wide association studies (TWAS), but when analyzing any gene, it adjusts for other nearby genes and all nearby genetic variants.</p>
+<p>Running cTWAS involves four main steps: preparing input data, imputing gene z-scores, estimating parameters, and fine-mapping genes and variants. The output of cTWAS are posterior inclusion probabilities (PIPs) for all variants and genes with expression models. We have included a <a href="https://xinhe-lab.github.io/ctwas/articles/ctwas_summary_statistics.html" class="external-link">tutorial</a> of how to use the ctwas software. You can <a href="https://github.com/xinhe-lab/ctwas" class="external-link">browse source code</a> and <a href="https://github.com/xinhe-lab/ctwas/issues" class="external-link">report a bug</a> here.</p>
+<p><img style="display:block;margin:auto" width="700" height="300" src="./workflow.png"></p>
 <div class="section level2">
 <h2 id="install">Install<a class="anchor" aria-label="anchor" href="#install"></a>
 </h2>
 <p>Install <code>ctwas</code>:</p>
-<pre><code><span><span class="fu">remotes</span><span class="fu">::</span><span class="fu"><a href="https://remotes.r-lib.org/reference/install_github.html" class="external-link">install_github</a></span><span class="op">(</span><span class="st">"xinhe-lab/ctwas"</span>,ref <span class="op">=</span> <span class="st">"main"</span><span class="op">)</span></span></code></pre>
-<p>Currently, ctwas can only be installed on linux systems. We suggset to run ctwas using a high throughput computing system.</p>
+<pre><code><span><span class="fu">remotes</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/remotes/man/install_github.html" class="external-link">install_github</a></span><span class="op">(</span><span class="st">"xinhe-lab/ctwas"</span>,ref <span class="op">=</span> <span class="st">"main"</span><span class="op">)</span></span></code></pre>
+<p>Currently, <code>ctwas</code> has only been tested on linux systems. We recommend running <code>ctwas</code> on a High-Performance Computing system.</p>
 </div>
 <div class="section level2">
 <h2 id="citing-this-work">Citing this work<a class="anchor" aria-label="anchor" href="#citing-this-work"></a>
 </h2>
 <p>If you find the <code>ctwas</code> package or any of the source code in this repository useful for your work, please cite:</p>
-<blockquote><p>Siming, Z., Wesley, C., Sheng, Q., Kaixuan, L., Stephens, M. &amp; Xin, H. (2022). Adjusting for genetic confounders in transcriptome-wide association studies leads to reliable detection of causal genes application to genetic fine mapping. *bioRxiv <a href="https://doi.org/10.1101/2022.09.27.509700" class="external-link uri">https://doi.org/10.1101/2022.09.27.509700</a></p></blockquote>
+<blockquote><p>Zhao S, Crouse W, Qian S, Luo K, Stephens M, He X. Adjusting for genetic confounders in transcriptome-wide association studies improves discovery of risk genes of complex traits. Nat Genet (2024). <a href="https://doi.org/10.1038/s41588-023-01648-9" class="external-link uri">https://doi.org/10.1038/s41588-023-01648-9</a></p></blockquote>
 </div>
 <div class="section level2">
 <h2 id="useful-resources">Useful resources<a class="anchor" aria-label="anchor" href="#useful-resources"></a>
 </h2>
 <p>We have pre-computed the LD matrices of European samples from UK Biobank. They can be downloaded <a href="https://uchicago.box.com/s/jqocacd2fulskmhoqnasrknbt59x3xkn" class="external-link">here</a>.</p>
 <p>cTWAS requires the expression prediction models, or weights, of genes. The pre-computed weights of GTEx expression and splicing traits can be downloaded from <a href="https://predictdb.org/post/2021/07/21/gtex-v8-models-on-eqtl-and-sqtl/" class="external-link">PredictDB</a>.</p>
-<p>To run cTWAS, it is useful to perform some pre-processing on the GWAS summary statistics, to check allele flipping and filter problemetic variants due to LD mismatch between reference and in-sample LD. Some useful software for this purpose, include <a href="https://stephenslab.github.io/susieR/articles/susierss_diagnostic.html" class="external-link">SuSiE-RSS</a> and <a href="https://github.com/Yves-CHEN/DENTIST/" class="external-link">DENTIST</a>.</p>
 </div>
 <div class="section level2">
 <h2 id="acknowledgement">Acknowledgement<a class="anchor" aria-label="anchor" href="#acknowledgement"></a>
@@ -118,7 +119,15 @@ git checkout c7934c0</code></pre>
   </div>
 
   <div class="col-md-3 hidden-xs hidden-sm" id="pkgdown-sidebar">
-    <div class="license">
+    <div class="links">
+<h2 data-toc-skip>Links</h2>
+<ul class="list-unstyled">
+<li><a href="https://github.com/xinhe-lab/ctwas/" class="external-link">Browse source code</a></li>
+<li><a href="https://github.com/xinhe-lab/ctwas/issues" class="external-link">Report a bug</a></li>
+</ul>
+</div>
+
+<div class="license">
 <h2 data-toc-skip>License</h2>
 <ul class="list-unstyled">
 <li>
@@ -138,7 +147,12 @@ git checkout c7934c0</code></pre>
 <div class="developers">
 <h2 data-toc-skip>Developers</h2>
 <ul class="list-unstyled">
-<li>Siming Zhao <br><small class="roles"> Maintainer </small>  </li>
+<li>Siming Zhao <br><small class="roles"> Author </small>  </li>
+<li>Wesley Crouse <br><small class="roles"> Author </small>  </li>
+<li>Sheng Qian <br><small class="roles"> Author, maintainer </small>  </li>
+<li>Kaixuan Luo <br><small class="roles"> Author </small>  </li>
+<li>Matthew Stephens <br><small class="roles"> Author </small>  </li>
+<li>Xin He <br><small class="roles"> Author </small>  </li>
 </ul>
 </div>
 
@@ -150,7 +164,7 @@ git checkout c7934c0</code></pre>
 
       <footer><div class="copyright">
   <p></p>
-<p>Developed by Siming Zhao.</p>
+<p>Developed by Siming Zhao, Wesley Crouse, Sheng Qian, Kaixuan Luo, Matthew Stephens, Xin He.</p>
 </div>
 
 <div class="pkgdown">

@@ -24,7 +24,7 @@ ctwas(
   estimate_group_prior_var = T,
   use_null_weight = T,
   coverage = 0.95,
-  stardardize = T,
+  standardize = T,
   ncore = 1,
   outputdir = getwd(),
   outname = NULL,
@@ -106,6 +106,8 @@ using the data. If FALSE, \code{group_prior_var} must be specified}
 
 \item{coverage}{A number between 0 and 1 specifying the \dQuote{coverage} of the estimated confidence sets}
 
+\item{standardize}{TRUE/FALSE. If TRUE, all variables are standardized to unit variance}
+
 \item{ncore}{The number of cores used to parallelize susie over regions}
 
 \item{outputdir}{a string, the directory to store output}
@@ -113,8 +115,6 @@ using the data. If FALSE, \code{group_prior_var} must be specified}
 \item{outname}{a string, the output name}
 
 \item{logfile}{the log file, if NULL will print log info on screen}
-
-\item{standardize}{TRUE/FALSE. If TRUE, all variables are standardized to unit variance}
 }
 \description{
 Causal inference for TWAS

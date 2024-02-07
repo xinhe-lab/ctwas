@@ -17,7 +17,7 @@
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">ctwas</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">0.1.35</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">0.1.36</span>
       </span>
     </div>
 
@@ -32,17 +32,17 @@
     <span class="caret"></span>
   </a>
   <ul class="dropdown-menu" role="menu"><li>
-      <a href="../articles/transition.html">How to use cTWAS software</a>
+      <a href="../articles/ctwas_summary_statistics.html">Using cTWAS with summary statistics</a>
     </li>
     <li>
-      <a href="../articles/harmonization.html">Topics on Harmonization</a>
+      <a href="../articles/harmonization.html">Harmonization</a>
     </li>
     <li>
-      <a href="../articles/regionmerging.html">Topics on Region Merging</a>
+      <a href="../articles/regionmerging.html">Region Merging</a>
     </li>
   </ul></li>
       </ul><ul class="nav navbar-nav navbar-right"><li>
-  <a href="https://github.com/simingz/ctwas" class="external-link">Source</a>
+  <a href="https://github.com/xinhe-lab/ctwas" class="external-link">Source</a>
 </li>
       </ul></div><!--/.nav-collapse -->
   </div><!--/.container -->
@@ -54,7 +54,7 @@
   <div class="col-md-9 contents">
     <div class="page-header">
     <h1>Causal inference for TWAS</h1>
-    
+    <small class="dont-index">Source: <a href="https://github.com/xinhe-lab/ctwas/blob/main/R/ctwas.R" class="external-link"><code>R/ctwas.R</code></a></small>
     <div class="hidden name"><code>ctwas.Rd</code></div>
     </div>
 
@@ -83,7 +83,7 @@
 <span>  estimate_group_prior_var <span class="op">=</span> <span class="cn">T</span>,</span>
 <span>  use_null_weight <span class="op">=</span> <span class="cn">T</span>,</span>
 <span>  coverage <span class="op">=</span> <span class="fl">0.95</span>,</span>
-<span>  stardardize <span class="op">=</span> <span class="cn">T</span>,</span>
+<span>  standardize <span class="op">=</span> <span class="cn">T</span>,</span>
 <span>  ncore <span class="op">=</span> <span class="fl">1</span>,</span>
 <span>  outputdir <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/getwd.html" class="external-link">getwd</a></span><span class="op">(</span><span class="op">)</span>,</span>
 <span>  outname <span class="op">=</span> <span class="cn">NULL</span>,</span>
@@ -211,6 +211,10 @@ using the data. If FALSE, <code>group_prior_var</code> must be specified</p></dd
 <dd><p>A number between 0 and 1 specifying the “coverage” of the estimated confidence sets</p></dd>
 
 
+<dt>standardize</dt>
+<dd><p>TRUE/FALSE. If TRUE, all variables are standardized to unit variance</p></dd>
+
+
 <dt>ncore</dt>
 <dd><p>The number of cores used to parallelize susie over regions</p></dd>
 
@@ -226,10 +230,6 @@ using the data. If FALSE, <code>group_prior_var</code> must be specified</p></dd
 <dt>logfile</dt>
 <dd><p>the log file, if NULL will print log info on screen</p></dd>
 
-
-<dt>standardize</dt>
-<dd><p>TRUE/FALSE. If TRUE, all variables are standardized to unit variance</p></dd>
-
 </dl></div>
 
   </div>
@@ -240,7 +240,7 @@ using the data. If FALSE, <code>group_prior_var</code> must be specified</p></dd
 
 
       <footer><div class="copyright">
-  <p></p><p>Developed by Siming Zhao.</p>
+  <p></p><p>Developed by Siming Zhao, Wesley Crouse, Sheng Qian, Kaixuan Luo, Matthew Stephens, Xin He.</p>
 </div>
 
 <div class="pkgdown">

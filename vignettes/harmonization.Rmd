@@ -2,9 +2,11 @@
 title: "Harmonization"
 author: "wesleycrouse"
 date: "2023-08-31"
-output: workflowr::wflow_html
-editor_options:
-  chunk_output_type: console
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{Harmonization}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
 ---
 
 ### Harmonization
