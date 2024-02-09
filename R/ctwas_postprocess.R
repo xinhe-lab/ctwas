@@ -51,7 +51,7 @@
 #'   correlation of 0.25, which is a commonly used threshold for
 #'   genotype data in genetic studies.
 #'#'
-#' @param ncore The number of cores used to parallelize susie over regions
+#' @param ncore The number of cores used to parallelize over regions
 #'
 #' @param logfile the log file, if NULL will print log info on screen
 #'
@@ -217,8 +217,8 @@ subset_regionlist <- function(regionlist, region_tags){
     b = sapply(strsplit(region_tags, "_"), "[[", 1),
     rn = sapply(strsplit(region_tags, "_"), "[[", 2))
 
-  regionlist_subset <- vector("list", length = 22)
-  for (b in 1:22) {
+  regionlist_subset <- vector("list", length = length(regionlist))
+  for (b in 1:length(regionlist)) {
     rn <- region_tags_df[region_tags_df$b == b, "rn"]
     regionlist_subset[[b]] <- regionlist[[b]][as.character(rn)]
   }

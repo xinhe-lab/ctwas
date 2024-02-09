@@ -1,0 +1,97 @@
+---
+title: "Postprocessing problematic regions"
+author: "Kaixuan Luo"
+date: "`r Sys.Date()`"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{Postprocessing problematic regions}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(message = FALSE, warning = FALSE)
+```
+
+## Overview
+
+This document is a tutorial for fine-mapping problematic regions with LD mismatches. 
+We will use the `multigroup` version of the package, but the procedure below works for 
+using a single prediction model, or multiple prediction models.
+
+## Getting started
+
+Install the `harmonize_test` branch of `cTWAS` package.
+(it will be merged to the `multigroup` branch later)
+
+```{r install_package, eval=FALSE}
+remotes::install_github("xinhe-lab/ctwas", ref = "harmonize_test")
+```
+
+```{r, include=FALSE}
+devtools::load_all("/home/kaixuan/projects/cTWAS_package/branches/ctwas/.")
+```
+
+Load the package and set the working directory where you want to perform the analysis.
+
+```{r load_package, eval=FALSE}
+library(ctwas)
+```
+
+```{r, eval=FALSE}
+# set the working directory interactively
+setwd("/project2/xinhe/shared_data/ctwas_tutorial")
+
+# set the working directory when compiling this document with Knitr
+knitr::opts_knit$set(root.dir = "/project2/xinhe/shared_data/ctwas_tutorial")
+```
+
+Follow the section on data preparation about harmonizing GWAS z-scores and LD reference 
+and LD mismatch diagnosis. 
+
+First, we load the LD mismatch diagnosis result from running the `preprocess_z_ld` step, 
+and gets a list of problematic SNPs with rsIDs.
+
+```{r, eval=FALSE}
+ctwas_outputdir <- "multigroup/processed_data/"
+ctwas_outname <- "example"
+
+ld_mismatch_res <- readRDS(file.path(ctwas_outputdir, paste0(ctwas_outname, ".ld_mismatch_res.RDS")))
+problematic_snps <- ld_mismatch_res$problematic_snps
+```
+
+Then, let's load the `cTWAS` full result, and harmonized `z_snp` and `z_gene` data.
+
+```{r, eval=FALSE}
+ctwas_res <- read.table(file.path(ctwas_outputdir, paste0(ctwas_outname, ".susieIrss.txt")), header=T)
+
+# load processed z_snp file
+load(file = file.path(ctwas_outputdir, paste0(ctwas_outname, ".harmonized.z_snp.Rd")))
+
+# load processed z_snp file
+load(file = file.path(ctwas_outputdir, paste0(ctwas_outname, "_z_gene.Rd")))
+
+# harmonized prediction models
+weight_dir <- "multigroup/processed_data/weights_nolnc/"
+weight <- c(file.path(weight_dir, "mashr_Liver_nolnc_harmonized.db"), 
+            file.path(weight_dir, "mashr_Adipose_Subcutaneous_nolnc_harmonized.db"))
+```
+
+We will rerun the fine-mapping step with L = 1 for the regions containing high PIP (>0.5) 
+problematic SNPs or genes problematic SNPs in their weights. 
+The following function runs the region in parallel (with 6 cores) 
+and save results to a file named "*.L1.susieIrss.txt".
+
+```{r, eval=FALSE}
+rerun_ctwas_finemap_regions_L1_rss(z_snp,
+                                   z_gene,
+                                   weight = weight,
+                                   problematic_snps = problematic_snps,
+                                   pip_thresh = 0.5,
+                                   ctwas_outputdir = ctwas_outputdir,
+                                   ctwas_outname = ctwas_outname,
+                                   ncore = 6)
+```
+
+
+
