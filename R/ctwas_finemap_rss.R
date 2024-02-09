@@ -88,7 +88,7 @@
 #'
 #' @param compress_LDR TRUE/FALSE. If FALSE, correlation matrix folder are not compressed. If TRUE, compressed.
 #'
-#' @importFrom logging addHandler loginfo
+#' @importFrom logging addHandler loginfo writeToFile
 #' @importFrom tools file_ext
 #'
 #' @export
@@ -172,7 +172,8 @@ ctwas_finemap_rss <- function(
                                 pvarfs = ld_pvarfs,
                                 ld_Rfs = ld_Rfs,
                                 select = zdf$id,
-                                thin = thin, minvar = 2,
+                                thin = 1,
+                                minvar = 2,
                                 outname = outname,
                                 outputdir = outputdir,
                                 merge = merge,
@@ -204,12 +205,10 @@ ctwas_finemap_rss <- function(
       regs <- data.table::fread(paste0(outputdir,"/", outname, ".regions.txt"))
       # select and assemble a subset of regionlist by region_tags
       if (length(region_tags) > 0){
-        loginfo("select %d regions from the regionlist", length(region_tags))
         subset_regionlist_res <- subset_regionlist(regionlist, region_tags)
         regionlist <- subset_regionlist_res$regionlist
         regs <- subset_regionlist_res$regs
       }
-
     }
   }
 

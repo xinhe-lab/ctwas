@@ -55,6 +55,8 @@
 #'
 #' @param logfile the log file, if NULL will print log info on screen
 #'
+#' @importFrom logging addHandler loginfo writeToFile
+#' @importFrom tools file_ext
 #' @export
 #'
 rerun_ctwas_finemap_regions_L1_rss <- function(z_snp,
@@ -63,8 +65,8 @@ rerun_ctwas_finemap_regions_L1_rss <- function(z_snp,
                                                problematic_snps = NULL,
                                                rerun_region_tags = NULL,
                                                pip_thresh = 0.5,
-                                               ctwas_outputdir,
-                                               ctwas_outname,
+                                               ctwas_outputdir = NULL,
+                                               ctwas_outname = NULL,
                                                ld_R_dir = NULL,
                                                outputdir = NULL,
                                                outname = NULL,
@@ -83,6 +85,8 @@ rerun_ctwas_finemap_regions_L1_rss <- function(z_snp,
     addHandler(writeToFile, file= logfile, level='DEBUG')
   }
 
+  group_prior_var_structure <- match.arg(group_prior_var_structure)
+
   # Load cTWAS result
   ctwas_res <- as.data.frame(data.table::fread(file.path(ctwas_outputdir, paste0(ctwas_outname, ".susieIrss.txt")), header=T))
 
@@ -94,8 +98,9 @@ rerun_ctwas_finemap_regions_L1_rss <- function(z_snp,
                                                          pip_thresh = pip_thresh)
   }
 
-  if (length(rerun_region_tags) > 0) {
-
+  if (length(rerun_region_tags) == 0) {
+    loginfo("No region to rerun.")
+  }else{
     if (is.null(outputdir)) {
       outputdir <- paste0(ctwas_outputdir, "/rerun_regions/")
     }
@@ -112,13 +117,13 @@ rerun_ctwas_finemap_regions_L1_rss <- function(z_snp,
       group_prior_var <- group_prior_var_rec[,ncol(group_prior_var_rec)]
       rm(group_prior_rec, group_prior_var_rec)
     }
-    group_prior_var_structure <- match.arg(group_prior_var_structure)
 
     # Load regionlist
     regionlist <- readRDS(paste0(ctwas_outputdir, "/", ctwas_outname, ".regionlist.RDS"))
     regs <- data.table::fread(paste0(ctwas_outputdir,"/", ctwas_outname, ".regions.txt"))
 
     # select and assemble regionlist for rerunning finemapping
+    print(rerun_region_tags)
     subset_regionlist_res <- subset_regionlist(regionlist, rerun_region_tags)
     rerun_regionlist <- subset_regionlist_res$regionlist
     rerun_regs <- subset_regionlist_res$regs
@@ -168,6 +173,7 @@ get_problematic_highpip_regions <- function(ctwas_res, weight, problematic_snps,
 
   loginfo('Get regions with problematic SNPs')
   loginfo('Number of problematic SNPs: %d', length(problematic_snps))
+  problematic_region_tags <- NULL
 
   if (length(problematic_snps) > 0) {
     # read the PredictDB weights
@@ -196,13 +202,16 @@ get_problematic_highpip_regions <- function(ctwas_res, weight, problematic_snps,
 
     # get problematic high PIP regions
     ctwas_problematic_res <- ctwas_highpip_res[ctwas_highpip_res$id %in% c(problematic_highpip_snps, problematic_highpip_genes),]
-    problematic_regions <- unique(ctwas_problematic_res[,c("region_tag1", "region_tag2")])
-    problematic_regions <- problematic_regions[order(problematic_regions$region_tag1,problematic_regions$region_tag2), ]
-    problematic_region_tags <- paste0(problematic_regions$region_tag1, "_", problematic_regions$region_tag2)
-    loginfo('Number of problematic high PIP regions: %d', length(problematic_region_tags))
+    if (nrow(ctwas_problematic_res) > 0) {
+      problematic_regions <- unique(ctwas_problematic_res[,c("region_tag1", "region_tag2")])
+      problematic_regions <- problematic_regions[order(problematic_regions$region_tag1,problematic_regions$region_tag2), ]
+      problematic_region_tags <- paste0(problematic_regions$region_tag1, "_", problematic_regions$region_tag2)
+      loginfo('Number of problematic high PIP regions: %d', length(problematic_region_tags))
+    }else{
+      loginfo('No problematic high PIP regions found')
+    }
   }else{
     loginfo('No problematic SNPs')
-    problematic_region_tags <- NULL
   }
 
   # return problematic region tags
