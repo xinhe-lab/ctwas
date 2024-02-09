@@ -36,9 +36,9 @@
 #'
 #' @param remove_ld_mismatch TRUE/FALSE. If TRUE, remove problematic variants with LD mismatches.
 #'
-#' @param ncore integer, number of cores for parallel computing used when detecting LD mismatches.
+#' @param ncore integer, number of cores for parallel computing when detecting LD mismatches.
 #'
-#' @importFrom logging addHandler loginfo
+#' @importFrom logging addHandler loginfo writeToFile
 #' @importFrom tools file_ext
 #' @importFrom foreach %dopar% foreach
 #'
@@ -149,9 +149,12 @@ preprocess_z_ld <- function (z_snp,
     ld_mismatch_res <- list(condz_dist = condz_dist,
                             problematic_snps = problematic_snps,
                             flipped_snps = flipped_snps)
+    saveRDS(ld_mismatch_res, file.path(outputdir, paste0(outname, ".ld_mismatch_res.RDS")))
   }else{
     ld_mismatch_res <- NULL
   }
+
+  save(z_snp, file = file.path(outputdir, paste0(outname, ".harmonized.z_snp.Rd")))
 
   return(list(z_snp = z_snp, ld_mismatch_res = ld_mismatch_res))
 }
