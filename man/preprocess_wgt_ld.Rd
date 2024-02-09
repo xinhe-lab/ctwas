@@ -20,7 +20,7 @@ to their gene name to ensure IDs are unique.}
 
 \item{outputdir}{a string, the directory to store output}
 
-\item{outname}{a string, the output name}
+\item{outname}{a string, the output name.}
 
 \item{strand_ambig_action}{the action to take to harmonize strand ambiguous variants (A/T, G/C) between
 the weights and LD reference. "drop" removes the ambiguous variant from the prediction models. "none" treats the variant

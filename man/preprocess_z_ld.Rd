@@ -7,7 +7,7 @@
 preprocess_z_ld(
   z_snp,
   ld_R_dir,
-  chr = 1:22,
+  chrom = 1:22,
   ld_regions = c("EUR", "ASN", "AFR"),
   ld_regions_version = c("b37", "b38"),
   ld_regions_custom = NULL,
@@ -17,17 +17,19 @@ preprocess_z_ld(
   outname = NULL,
   logfile = NULL,
   drop_multiallelic = T,
+  strand_ambig_action = c("none", "drop", "recover"),
   detect_ld_mismatch = F,
   flip_allele = T,
   remove_ld_mismatch = F,
-  ncore = 1
+  ncore = 1,
+  save_result = F
 )
 }
 \arguments{
 \item{z_snp}{A data frame with two columns: "id", "A1", "A2", "z". giving the z scores for
 snps. "A1" is effect allele. "A2" is the other allele.}
 
-\item{chr}{a vector containing the chromosome numbers to process.}
+\item{chrom}{a vector containing the chromosome numbers to process.}
 
 \item{ld_regions}{a string, population of LD reference, "EUR", "ASN", or "AFR".}
 
@@ -41,20 +43,30 @@ snps. "A1" is effect allele. "A2" is the other allele.}
 
 \item{outputdir}{a string, the directory to store output.}
 
-\item{outname}{a string, the output name.}
+\item{outname}{a string, the output name. It does not save output file if outname is NULL.}
 
 \item{logfile}{the log file, if NULL will print log info on screen.}
 
 \item{drop_multiallelic}{TRUE/FALSE. If TRUE, multiallelic variants will be dropped from the summary statistics.}
 
-\item{detect_ld_mismatch}{TRUE/FALSE. If TRUE, detect LD mismatches by susie_rss, and report problematic variants, and
-variants with allele flipping.}
+\item{strand_ambig_action}{the action to take to harmonize strand ambiguous variants (A/T, G/C) between
+the z scores and LD reference.
+"drop" removes the ambiguous variant from the z scores.
+"none" takes no additional action.
+"recover" imputes the sign of ambiguous z scores using unambiguous z scores and the LD reference and
+flips the z scores if there is a mismatch between the imputed sign and the observed sign of the z score.
+This option is computationally intensive.}
+
+\item{detect_ld_mismatch}{TRUE/FALSE. If TRUE, detect LD mismatches by susie_rss,
+and report problematic variants, and variants with allele flipping.}
 
 \item{flip_allele}{TRUE/FALSE. If TRUE, flip the sign for variants detected with allele flipping.}
 
 \item{remove_ld_mismatch}{TRUE/FALSE. If TRUE, remove problematic variants with LD mismatches.}
 
-\item{ncore}{integer, number of cores for parallel computing.}
+\item{ncore}{integer, number of cores for parallel computing when detecting LD mismatches.}
+
+\item{save_result}{TRUE/FALSE. If TRUE, save results in the outputdir directory.}
 
 \item{LD_R_dir}{a string, pointing to a directory containing all LD matrix files and variant information. Expects .RDS files which contain LD correlation matrices for a region/block.
 For each RDS file, a file with same base name but ended with .Rvar needs to be present in the same folder. the .Rvar file has 5 required columns: "chrom", "id", "pos", "alt", "ref".

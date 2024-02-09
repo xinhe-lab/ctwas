@@ -9,7 +9,7 @@
 #' If using PredictDB format weights and \code{scale_by_ld_variance=T}, a 6th column is also required: "variance", which is the variance of the each SNP.
 #' The order of rows needs to match the order of rows in .RDS file.
 #'
-#' @param chr a vector containing the chromosome numbers to process.
+#' @param chrom a vector containing the chromosome numbers to process.
 #'
 #' @param ld_regions a string, population of LD reference, "EUR", "ASN", or "AFR".
 #'
@@ -23,20 +23,30 @@
 #'
 #' @param outputdir a string, the directory to store output.
 #'
-#' @param outname a string, the output name.
+#' @param outname a string, the output name. It does not save output file if outname is NULL.
 #'
 #' @param logfile the log file, if NULL will print log info on screen.
 #'
 #' @param drop_multiallelic TRUE/FALSE. If TRUE, multiallelic variants will be dropped from the summary statistics.
 #'
-#' @param detect_ld_mismatch TRUE/FALSE. If TRUE, detect LD mismatches by susie_rss, and report problematic variants, and
-#' variants with allele flipping.
+#' @param strand_ambig_action the action to take to harmonize strand ambiguous variants (A/T, G/C) between
+#' the z scores and LD reference.
+#' "drop" removes the ambiguous variant from the z scores.
+#' "none" takes no additional action.
+#' "recover" imputes the sign of ambiguous z scores using unambiguous z scores and the LD reference and
+#' flips the z scores if there is a mismatch between the imputed sign and the observed sign of the z score.
+#' This option is computationally intensive.
+#'
+#' @param detect_ld_mismatch TRUE/FALSE. If TRUE, detect LD mismatches by susie_rss,
+#' and report problematic variants, and variants with allele flipping.
 #'
 #' @param flip_allele TRUE/FALSE. If TRUE, flip the sign for variants detected with allele flipping.
 #'
 #' @param remove_ld_mismatch TRUE/FALSE. If TRUE, remove problematic variants with LD mismatches.
 #'
 #' @param ncore integer, number of cores for parallel computing when detecting LD mismatches.
+#'
+#' @param save_result TRUE/FALSE. If TRUE, save results in the outputdir directory.
 #'
 #' @importFrom logging addHandler loginfo writeToFile
 #' @importFrom tools file_ext
@@ -46,7 +56,7 @@
 #'
 preprocess_z_ld <- function (z_snp,
                              ld_R_dir,
-                             chr=1:22,
+                             chrom=1:22,
                              ld_regions = c("EUR", "ASN", "AFR"),
                              ld_regions_version = c("b37", "b38"),
                              ld_regions_custom = NULL,
@@ -56,16 +66,20 @@ preprocess_z_ld <- function (z_snp,
                              outname = NULL,
                              logfile = NULL,
                              drop_multiallelic = T,
+                             strand_ambig_action = c("none", "drop", "recover"),
                              detect_ld_mismatch = F,
                              flip_allele = T,
                              remove_ld_mismatch = F,
-                             ncore = 1){
-
-  dir.create(outputdir, showWarnings = F, recursive=T)
+                             ncore = 1,
+                             save_result = F){
 
   if (!is.null(logfile)) {
     addHandler(writeToFile, file = logfile, level = "DEBUG")
   }
+
+  strand_ambig_action <- match.arg(strand_ambig_action)
+
+  dir.create(outputdir, showWarnings = F, recursive=T)
 
   ld_Rfs <- write_ld_Rf(ld_R_dir, outname = outname, outputdir = outputdir)
 
@@ -82,25 +96,23 @@ preprocess_z_ld <- function (z_snp,
     }
   }
 
-  loginfo("Process summary statistics for chromosomes: %s", chr)
+  loginfo("Process summary statistics for chromosomes: %s", chrom)
 
-  for (b in chr){
+  for (b in chrom){
     loginfo("Harmonizing summary statistics for chromosome %s", b)
 
     ld_Rf <- ld_Rfs[b]
     ld_Rinfo <- data.table::fread(ld_Rf, header = T)
     ld_snpinfo <- read_ld_Rvar(ld_Rf)
 
-    chrom <- unique(ld_snpinfo$chrom)
-    if (length(chrom) > 1) {
+    if (length(unique(ld_snpinfo$chrom)) > 1) {
       stop("Input LD reference not split by chromosome")
     }
     ld_snplist <- c(ld_snplist, ld_snpinfo$id) #store names of snps in ld reference
 
     # harmonize alleles between z_snp and LD reference
     z_snp <- harmonize_z_ld(z_snp, ld_snpinfo,
-                            strand_ambig_action = "none",
-                            ld_pgenfs = NULL,
+                            strand_ambig_action = strand_ambig_action,
                             ld_Rinfo = ld_Rinfo)
   }
 
@@ -115,7 +127,7 @@ preprocess_z_ld <- function (z_snp,
     regions_df <- load_ld_regions(ld_regions = ld_regions,
                                   ld_regions_version = ld_regions_version,
                                   ld_regions_custom = ld_regions_custom)
-    regions_df <- regions_df[regions_df$chr %in% paste0("chr", chr), ]
+    regions_df <- regions_df[regions_df$chr %in% paste0("chr", chrom), ]
     loginfo("Detect LD mismatches in %d LD regions", nrow(regions_df))
 
     # detect LD mismatches using susie_rss
@@ -149,12 +161,17 @@ preprocess_z_ld <- function (z_snp,
     ld_mismatch_res <- list(condz_dist = condz_dist,
                             problematic_snps = problematic_snps,
                             flipped_snps = flipped_snps)
-    saveRDS(ld_mismatch_res, file.path(outputdir, paste0(outname, ".ld_mismatch_res.RDS")))
+
+    if (isTRUE(save_result)) {
+      saveRDS(ld_mismatch_res, file.path(outputdir, paste0(outname, ".ld_mismatch_res.RDS")))
+    }
   }else{
     ld_mismatch_res <- NULL
   }
 
-  save(z_snp, file = file.path(outputdir, paste0(outname, ".harmonized.z_snp.Rd")))
+  if (isTRUE(save_result)) {
+    saveRDS(z_snp, file.path(outputdir, paste0(outname, ".harmonized.z_snp.RDS")))
+  }
 
   return(list(z_snp = z_snp, ld_mismatch_res = ld_mismatch_res))
 }
@@ -264,7 +281,7 @@ detect_ld_mismatch_susie_rss <- function (z_snp,
 #'
 #' @param outputdir a string, the directory to store output
 #'
-#' @param outname a string, the output name
+#' @param outname a string, the output name.
 #'
 #' @param strand_ambig_action the action to take to harmonize strand ambiguous variants (A/T, G/C) between
 #' the weights and LD reference. "drop" removes the ambiguous variant from the prediction models. "none" treats the variant

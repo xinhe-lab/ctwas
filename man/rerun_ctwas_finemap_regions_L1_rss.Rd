@@ -11,8 +11,8 @@ rerun_ctwas_finemap_regions_L1_rss(
   problematic_snps = NULL,
   rerun_region_tags = NULL,
   pip_thresh = 0.5,
-  ctwas_outputdir,
-  ctwas_outname,
+  ctwas_outputdir = NULL,
+  ctwas_outname = NULL,
   ld_R_dir = NULL,
   outputdir = NULL,
   outname = NULL,
@@ -79,7 +79,7 @@ if \code{estimate_group_prior_var = T}}
   genotype data in genetic studies.
 #'}
 
-\item{ncore}{The number of cores used to parallelize susie over regions}
+\item{ncore}{The number of cores used to parallelize over regions}
 
 \item{logfile}{the log file, if NULL will print log info on screen}
 
