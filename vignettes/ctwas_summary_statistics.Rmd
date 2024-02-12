@@ -1,10 +1,10 @@
 ---
-title: "Using cTWAS with summary statistics"
+title: "Using cTWAS single-group version with summary statistics"
 author: "Wesley Crouse, Sheng Qian, Kaixuan Luo, Xin He"
 date: "`r Sys.Date()`"
 output: rmarkdown::html_vignette
 vignette: >
-  %\VignetteIndexEntry{Using cTWAS with summary statistics}
+  %\VignetteIndexEntry{Using cTWAS single-group version with summary statistics}
   %\VignetteEngine{knitr::rmarkdown}
   %\VignetteEncoding{UTF-8}
 ---

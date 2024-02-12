@@ -19,15 +19,14 @@ This document is a tutorial for preparing and preprocessing input data for cTWAS
 
 ## Getting started
 
-Install the `harmonize_test` branch of `cTWAS` package.
-(it will be merged to the `multigroup` branch later)
+Install the `multigroup_kevin` branch of `cTWAS` package
 
 ```{r install_package, eval=FALSE}
-remotes::install_github("xinhe-lab/ctwas", ref = "harmonize_test")
+remotes::install_github("xinhe-lab/ctwas", ref = "multigroup_kevin")
 ```
 
 ```{r, include=FALSE}
-devtools::load_all("/home/kaixuan/projects/cTWAS_package/branches/ctwas/.")
+devtools::load_all("/home/kaixuan/projects/cTWAS_package/multigroup_kevin/ctwas/.")
 ```
 
 Load the package and set the working directory where you want to perform the analysis.

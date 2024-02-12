@@ -1,10 +1,10 @@
 ---
-title: "Using cTWAS multigroup version with summary statistics"
+title: "Using cTWAS multi-group version with summary statistics"
 author: "Kaixuan Luo, Sheng Qian, Wesley Crouse, Xin He"
 date: "`r Sys.Date()`"
 output: rmarkdown::html_vignette
 vignette: >
-  %\VignetteIndexEntry{Using cTWAS multigroup version with summary statistics}
+  %\VignetteIndexEntry{Using cTWAS multi-group version with summary statistics}
   %\VignetteEngine{knitr::rmarkdown}
   %\VignetteEncoding{UTF-8}
 ---
@@ -31,14 +31,14 @@ This document assumes that you have already read the main tutorial for cTWAS (si
 
 ## Getting started
 
-Install the `multigroup` branch of `cTWAS` package
+Install the `multigroup_kevin` branch of `cTWAS` package
 
 ```{r install_package, eval=FALSE}
-remotes::install_github("xinhe-lab/ctwas", ref = "multigroup")
+remotes::install_github("xinhe-lab/ctwas", ref = "multigroup_kevin")
 ```
 
 ```{r, include=FALSE}
-devtools::load_all("/home/kaixuan/projects/cTWAS_package/branches/ctwas/.")
+devtools::load_all("/home/kaixuan/projects/cTWAS_package/multigroup_kevin/ctwas/.")
 ```
 
 Load the package and set the working directory where you want to perform the analysis.

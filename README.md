@@ -4,10 +4,10 @@ Package for the causal TWAS project.
 
 # Install
 
-Install `ctwas` (`harmonize_test` branch):
+Install `ctwas` (`multigroup_kevin` branch):
 
 ```
-remotes::install_github("xinhe-lab/ctwas",ref = "harmonize_test")
+remotes::install_github("xinhe-lab/ctwas",ref = "multigroup_kevin")
 ```
 
 # Acknowledgement
