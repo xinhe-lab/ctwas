@@ -60,6 +60,8 @@ ld_mismatch_res <- readRDS(file.path(outputdir, paste0(outname, ".ld_mismatch_re
 problematic_snps <- ld_mismatch_res$problematic_snps
 ```
 
+You can also use those problematic SNPs (rsIDs) obtained by other tools, e.g. DENTIST.
+
 Then, let's load the `cTWAS` full result, and harmonized `z_snp` and `z_gene` data.
 
 ```{r, eval=FALSE}
@@ -79,8 +81,9 @@ weight <- c(file.path(weight_dir, "mashr_Liver_nolnc_harmonized.db"),
 
 We will rerun the fine-mapping step with L = 1 for the regions containing high PIP (>0.5) 
 problematic SNPs or genes problematic SNPs in their weights. 
-The following function runs the region in parallel (with 6 cores) 
-and save results to a file named `[outname].L1.susieIrss.txt`.
+
+The following function runs fine-mapping for the regions in parallel (with 6 cores) 
+and saves results to `[outname].L1.susieIrss.txt`.
 
 ```{r, eval=FALSE}
 rerun_ctwas_finemap_regions_L1_rss(z_snp,

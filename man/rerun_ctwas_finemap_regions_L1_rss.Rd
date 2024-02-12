@@ -18,10 +18,6 @@ rerun_ctwas_finemap_regions_L1_rss(
   outname = NULL,
   group_prior = NULL,
   group_prior_var = NULL,
-  group_prior_var_structure = c("independent", "shared_all", "shared+snps", "inv_gamma",
-    "shared_QTLtype"),
-  inv_gamma_shape = 1,
-  inv_gamma_rate = 0,
   use_null_weight = T,
   coverage = 0.95,
   min_abs_corr = 0.5,
@@ -36,17 +32,17 @@ giving the z scores for snps. "A1" is effect allele. "A2" is the other allele.}
 \item{z_gene}{A data frame with two columns: "id", "z". giving the z scores for genes.
 Optionally, a "type" column can also be supplied; this is for using multiple sets of weights}
 
-\item{weight}{a string, weight filename used in ctwas}
+\item{weight}{a string, weight filename used in cTWAS}
 
-\item{problematic_snps}{a character vector of problematic SNP IDs}
+\item{problematic_snps}{a character vector of problematic SNP rsIDs}
 
 \item{rerun_region_tags}{a character vector of region tags to rerun}
 
 \item{pip_thresh}{Minimum PIP value to select regions}
 
-\item{ctwas_outputdir}{a string, the directory to ctwas output}
+\item{ctwas_outputdir}{a string, the directory to cTWAS output}
 
-\item{ctwas_outname}{a string, the directory to ctwas output name}
+\item{ctwas_outname}{a string, the directory to cTWAS output name}
 
 \item{outputdir}{a string, the directory to store output}
 
@@ -57,17 +53,6 @@ if \code{estimate_group_prior = T}}
 
 \item{group_prior_var}{a vector of two prior variances for SNPs and gene effects. This is ignored
 if \code{estimate_group_prior_var = T}}
-
-\item{group_prior_var_structure}{a string indicating the structure to put on the prior variance parameters.
-"independent" is the default and allows all groups to have their own separate variance parameters.
-"shared" allows all groups to share the same variance parameter.
-"shared+snps" allows all groups to share the same variance parameter, and this variance parameter is also shared with SNPs.
-"inv_gamma" places an inverse-gamma prior on the variance parameters for each group, with shape and rate hypeparameters.
-"shared_type" allows all groups in one molecular QTL type to share the same variance parameter.}
-
-\item{inv_gamma_shape}{the shape hyperparameter if using "inv_gamma" for \code{group_prior_var_structure}}
-
-\item{inv_gamma_rate}{the rate hyperparameter if using "inv_gamma" for \code{group_prior_var_structure}}
 
 \item{use_null_weight}{TRUE/FALSE. If TRUE, allow for a probability of no effect in susie}
 
