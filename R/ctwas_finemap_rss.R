@@ -54,17 +54,6 @@
 #' @param group_prior_var a vector of two prior variances for SNPs and gene effects. This is ignored
 #' if \code{estimate_group_prior_var = T}
 #'
-#' @param group_prior_var_structure a string indicating the structure to put on the prior variance parameters.
-#' "independent" is the default and allows all groups to have their own separate variance parameters.
-#' "shared" allows all groups to share the same variance parameter.
-#' "shared+snps" allows all groups to share the same variance parameter, and this variance parameter is also shared with SNPs.
-#' "inv_gamma" places an inverse-gamma prior on the variance parameters for each group, with shape and rate hypeparameters.
-#' "shared_type" allows all groups in one molecular QTL type to share the same variance parameter.
-#'
-#' @param inv_gamma_shape the shape hyperparameter if using "inv_gamma" for \code{group_prior_var_structure}
-#'
-#' @param inv_gamma_rate the rate hyperparameter if using "inv_gamma" for \code{group_prior_var_structure}
-#'
 #' @param use_null_weight TRUE/FALSE. If TRUE, allow for a probability of no effect in susie
 #'
 #' @param coverage A number between 0 and 1 specifying the \dQuote{coverage} of the estimated confidence sets
@@ -108,9 +97,6 @@ ctwas_finemap_rss <- function(
     L= 5,
     group_prior = NULL,
     group_prior_var = NULL,
-    group_prior_var_structure = c("independent","shared_all","shared+snps","inv_gamma","shared_QTLtype"),
-    inv_gamma_shape=1,
-    inv_gamma_rate=0,
     use_null_weight = T,
     coverage = 0.95,
     min_abs_corr = 0.5,
@@ -119,14 +105,14 @@ ctwas_finemap_rss <- function(
     outputdir = getwd(),
     outname = NULL,
     logfile = NULL,
-    merge = TRUE,
+    merge = F,
     compress_LDR = F){
 
   if (!is.null(logfile)){
     addHandler(writeToFile, file= logfile, level='DEBUG')
   }
 
-  loginfo('ctwas finemapping regions ... ')
+  loginfo('cTWAS finemapping ... ')
 
   if (is.null(ld_pgenfs) & is.null(ld_R_dir)){
     stop("Error: need to provide either .pgen file or ld_R file")
@@ -212,7 +198,7 @@ ctwas_finemap_rss <- function(
     }
   }
 
-  loginfo("Run finemapping with L = %d", L)
+  loginfo("Run cTWAS finemapping with L = %d", L)
 
   if (is.null(group_prior) || is.null(group_prior_var)) {
     stop("Error: need to provide both group_prior and group_prior_var")
@@ -222,6 +208,7 @@ ctwas_finemap_rss <- function(
     stop("Error: need to provide regionlist")
   }
 
+  # run finemapping using SuSiE RSS
   pars <- susieI_rss(zdf = zdf,
                      regionlist = regionlist,
                      ld_exprvarfs = ld_exprvarfs,
@@ -232,15 +219,12 @@ ctwas_finemap_rss <- function(
                      z_ld_weight = 0,
                      group_prior = group_prior,
                      group_prior_var = group_prior_var,
-                     group_prior_var_structure = group_prior_var_structure,
                      use_null_weight = use_null_weight,
                      coverage = coverage,
                      min_abs_corr = min_abs_corr,
                      ncore = ncore,
                      outputdir = outputdir,
                      outname = outname,
-                     inv_gamma_shape=inv_gamma_shape,
-                     inv_gamma_rate=inv_gamma_rate,
                      report_parameters=F)
 
   if(compress_LDR){

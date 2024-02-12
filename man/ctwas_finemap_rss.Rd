@@ -19,10 +19,6 @@ ctwas_finemap_rss(
   L = 5,
   group_prior = NULL,
   group_prior_var = NULL,
-  group_prior_var_structure = c("independent", "shared_all", "shared+snps", "inv_gamma",
-    "shared_QTLtype"),
-  inv_gamma_shape = 1,
-  inv_gamma_rate = 0,
   use_null_weight = T,
   coverage = 0.95,
   min_abs_corr = 0.5,
@@ -31,7 +27,7 @@ ctwas_finemap_rss(
   outputdir = getwd(),
   outname = NULL,
   logfile = NULL,
-  merge = TRUE,
+  merge = F,
   compress_LDR = F
 )
 }
@@ -85,17 +81,6 @@ if \code{estimate_group_prior = T}}
 
 \item{group_prior_var}{a vector of two prior variances for SNPs and gene effects. This is ignored
 if \code{estimate_group_prior_var = T}}
-
-\item{group_prior_var_structure}{a string indicating the structure to put on the prior variance parameters.
-"independent" is the default and allows all groups to have their own separate variance parameters.
-"shared" allows all groups to share the same variance parameter.
-"shared+snps" allows all groups to share the same variance parameter, and this variance parameter is also shared with SNPs.
-"inv_gamma" places an inverse-gamma prior on the variance parameters for each group, with shape and rate hypeparameters.
-"shared_type" allows all groups in one molecular QTL type to share the same variance parameter.}
-
-\item{inv_gamma_shape}{the shape hyperparameter if using "inv_gamma" for \code{group_prior_var_structure}}
-
-\item{inv_gamma_rate}{the rate hyperparameter if using "inv_gamma" for \code{group_prior_var_structure}}
 
 \item{use_null_weight}{TRUE/FALSE. If TRUE, allow for a probability of no effect in susie}
 
