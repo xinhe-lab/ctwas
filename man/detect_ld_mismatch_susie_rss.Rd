@@ -6,29 +6,24 @@
 \usage{
 detect_ld_mismatch_susie_rss(
   z_snp,
-  regions_df,
-  ld_R_dir = NULL,
-  filestem = NULL,
+  ld_Rinfo = NULL,
   gwas_n = NULL,
-  ncore = 1
+  ncore = 1,
+  p_diff_thresh = 5e-08
 )
 }
 \arguments{
 \item{z_snp}{A data frame with two columns: "id", "A1", "A2", "z". giving the z scores for
 snps. "A1" is effect allele. "A2" is the other allele.}
 
-\item{regions_df}{A data frame with regions to be analyzed}
-
-\item{filestem}{a string, filestem of reference LD matrix.}
+\item{ld_Rinfo}{a vector of paths to the variant information for all LD matrices}
 
 \item{gwas_n}{integer, GWAS sample size}
 
 \item{ncore}{integer, number of cores for parallel computing.}
 
-\item{LD_R_dir}{a string, pointing to a directory containing all LD matrix files and variant information. Expects .RDS files which contain LD correlation matrices for a region/block.
-For each RDS file, a file with same base name but ended with .Rvar needs to be present in the same folder. the .Rvar file has 5 required columns: "chrom", "id", "pos", "alt", "ref".
-If using PredictDB format weights and \code{scale_by_ld_variance=T}, a 6th column is also required: "variance", which is the variance of the each SNP.
-The order of rows needs to match the order of rows in .RDS file.}
+\item{p_diff_thresh}{numeric, p-value threshold for identifying problematic SNPs
+with significant difference between observed z-scores and estimated values}
 }
 \description{
 Detect LD mismatches using SuSiE RSS

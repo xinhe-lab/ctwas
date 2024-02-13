@@ -2,27 +2,22 @@
 % Please edit documentation in R/ctwas_preprocess_data.R
 \name{preprocess_z_ld}
 \alias{preprocess_z_ld}
-\title{Preprocess GWAS summary statistics, harmonize GWAS z-scores and LD reference, and filter LD mismatches using susie_rss}
+\title{Preprocess GWAS summary statistics, harmonize GWAS z-scores and LD reference, and detect LD mismatches using susie_rss}
 \usage{
 preprocess_z_ld(
   z_snp,
   ld_R_dir,
   chrom = 1:22,
-  ld_regions = c("EUR", "ASN", "AFR"),
-  ld_regions_version = c("b37", "b38"),
-  ld_regions_custom = NULL,
-  filestem,
-  gwas_n,
-  outputdir = getwd(),
-  outname = NULL,
-  logfile = NULL,
+  gwas_n = NULL,
   drop_multiallelic = T,
-  strand_ambig_action = c("none", "drop", "recover"),
+  strand_ambig_action = c("none", "drop"),
   detect_ld_mismatch = F,
   flip_allele = T,
-  remove_ld_mismatch = F,
+  filter_ld_mismatch = F,
+  outputdir = getwd(),
+  outname = NULL,
   ncore = 1,
-  save_result = F
+  logfile = NULL
 )
 }
 \arguments{
@@ -31,48 +26,38 @@ snps. "A1" is effect allele. "A2" is the other allele.}
 
 \item{chrom}{a vector containing the chromosome numbers to process.}
 
-\item{ld_regions}{a string, population of LD reference, "EUR", "ASN", or "AFR".}
-
-\item{ld_regions_version}{a string, version LD reference, "b37", "b38".}
-
-\item{ld_regions_custom}{a string, path of LD regions file.}
-
-\item{filestem}{a string, filestem of reference LD matrix.}
-
 \item{gwas_n}{integer, GWAS sample size}
-
-\item{outputdir}{a string, the directory to store output.}
-
-\item{outname}{a string, the output name. It does not save output file if outname is NULL.}
-
-\item{logfile}{the log file, if NULL will print log info on screen.}
 
 \item{drop_multiallelic}{TRUE/FALSE. If TRUE, multiallelic variants will be dropped from the summary statistics.}
 
 \item{strand_ambig_action}{the action to take to harmonize strand ambiguous variants (A/T, G/C) between
 the z scores and LD reference.
 "drop" removes the ambiguous variant from the z scores.
-"none" takes no additional action.
-"recover" imputes the sign of ambiguous z scores using unambiguous z scores and the LD reference and
-flips the z scores if there is a mismatch between the imputed sign and the observed sign of the z score.
-This option is computationally intensive.}
+"none" takes no additional action.}
 
 \item{detect_ld_mismatch}{TRUE/FALSE. If TRUE, detect LD mismatches by susie_rss,
 and report problematic variants, and variants with allele flipping.}
 
 \item{flip_allele}{TRUE/FALSE. If TRUE, flip the sign for variants detected with allele flipping.}
 
-\item{remove_ld_mismatch}{TRUE/FALSE. If TRUE, remove problematic variants with LD mismatches.}
+\item{filter_ld_mismatch}{TRUE/FALSE. If TRUE, remove problematic variants with LD mismatches.}
+
+\item{outputdir}{a string, the directory to store output.}
+
+\item{outname}{a string, the output name. It does not save output file if outname is NULL.}
 
 \item{ncore}{integer, number of cores for parallel computing when detecting LD mismatches.}
 
-\item{save_result}{TRUE/FALSE. If TRUE, save results in the outputdir directory.}
+\item{logfile}{the log file, if NULL will print log info on screen.}
 
 \item{LD_R_dir}{a string, pointing to a directory containing all LD matrix files and variant information. Expects .RDS files which contain LD correlation matrices for a region/block.
 For each RDS file, a file with same base name but ended with .Rvar needs to be present in the same folder. the .Rvar file has 5 required columns: "chrom", "id", "pos", "alt", "ref".
 If using PredictDB format weights and \code{scale_by_ld_variance=T}, a 6th column is also required: "variance", which is the variance of the each SNP.
 The order of rows needs to match the order of rows in .RDS file.}
 }
+\value{
+a list of processed z_snp and LD mismatch results
+}
 \description{
-Preprocess GWAS summary statistics, harmonize GWAS z-scores and LD reference, and filter LD mismatches using susie_rss
+Preprocess GWAS summary statistics, harmonize GWAS z-scores and LD reference, and detect LD mismatches using susie_rss
 }
