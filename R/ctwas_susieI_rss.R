@@ -216,14 +216,7 @@ susieI_rss <- function(zdf,
               }
 
               regRDS <- regionlist[[b]][[rn]][["regRDS"]]
-
-              if (is.null(regionlist[[b]][[rn]][["R_s_file"]])){
-                R_snp <- lapply(regRDS, readRDS)
-                R_snp <- suppressWarnings({as.matrix(Matrix::bdiag(R_snp))})
-                R_snp <- R_snp[sidx, sidx, drop = F]
-              } else {
-                R_snp <- readRDS(regionlist[[b]][[rn]][["R_s_file"]])
-              }
+              R_snp <- readRDS(regionlist[[b]][[rn]][["R_s_file"]])
               R_snp_gene <- readRDS(regionlist[[b]][[rn]][["R_sg_file"]])
               R_snp_gene <- R_snp_gene[sidx, , drop = F]
               R_gene <- readRDS(regionlist[[b]][[rn]][["R_g_file"]])

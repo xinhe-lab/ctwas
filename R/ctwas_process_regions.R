@@ -392,25 +392,19 @@ index_regions <- function(regionfile,
           R_snp_gene <- R_snp_gene[,gene_not_NA,drop=F]
           R_gene <- R_gene[gene_not_NA,gene_not_NA,drop=F]
           #print("passed remove NA genes")
-          #save R_snp_gene and R_gene
+          #save R_snp_gene and R_gene and R_SNP
           outlist_core_region[["regRDS"]] <- regRDS
           R_sg_file <- file.path(outputdir, paste0(outname, "_LDR"), paste0("chr", b, "_reg", rn, ".R_snp_gene.RDS"))
           R_g_file <- file.path(outputdir, paste0(outname, "_LDR"), paste0("chr", b, "_reg", rn, ".R_gene.RDS"))
+          R_s_file <- file.path(outputdir, paste0(outname, "_LDR"), paste0("chr", b, "_reg", rn, ".R_snp.RDS"))
+          R_snp <- R_snp[sidx, sidx, drop = F]
+          saveRDS(R_snp, file=R_s_file)
           saveRDS(R_snp_gene, file=R_sg_file)
-          #print("saved R_snp_gene")
-          if (!reuse_R_gene){
-            saveRDS(R_gene, file=R_g_file)
-          }
+          saveRDS(R_gene, file=R_g_file)
           
           outlist_core_region[["R_sg_file"]] <- R_sg_file
           outlist_core_region[["R_g_file"]] <- R_g_file
-          
-          if (thin < 1){
-            R_s_file <- file.path(outputdir, paste0(outname, "_LDR"), paste0("chr", b, "_reg", rn, ".R_snp.RDS"))
-            R_snp <- R_snp[sidx, sidx, drop = F]
-            saveRDS(R_snp, file=R_s_file)
-            outlist_core_region[["R_s_file"]] <- R_s_file
-          }
+          outlist_core_region[["R_s_file"]] <- R_s_file
           #print("saved R_snp")
           outlist_core[[length(outlist_core)+1]] <- outlist_core_region
           #print("laste step in dopar")

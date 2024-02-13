@@ -41,10 +41,7 @@
 #' @param thin The proportion of SNPs to be used for the parameter estimation and initial fine
 #' mapping steps. Smaller \code{thin} parameters reduce runtime at the expense of accuracy. The fine mapping step is rerun using full SNPs
 #' for regions with strong gene signals; see \code{rerun_gene_PIP}.
-#'
-#' @param prob_single Blocks with probability greater than \code{prob_single} of having 1 or fewer effects will be
-#' used for parameter estimation
-#'
+
 #' @param max_snp_region Inf or integer. Maximum number of SNPs in a region. Default is
 #' Inf, no limit. This can be useful if there are many SNPs in a region and you don't
 #' have enough memory to run the program. This applies to the last rerun step
@@ -53,10 +50,6 @@
 #' @param rerun_gene_PIP if thin <1, will rerun blocks with the max gene PIP
 #' > \code{rerun_gene_PIP} using full SNPs. if \code{rerun_gene_PIP} is 0, then
 #' all blocks will rerun with full SNPs
-#'
-#' @param niter1 the number of iterations of the E-M algorithm to perform during the initial parameter estimation step
-#'
-#' @param niter2 the number of iterations of the E-M algorithm to perform during the complete parameter estimation step
 #'
 #' @param L the number of effects for susie during the fine mapping steps
 #'
@@ -68,10 +61,10 @@
 #'
 #' @param group_prior_var_structure a string indicating the structure to put on the prior variance parameters.
 #' "independent" is the default and allows all groups to have their own separate variance parameters.
-#' "shared" allows all groups to share the same variance parameter.
+#' "shared_all" allows all groups to share the same variance parameter.
 #' "shared+snps" allows all groups to share the same variance parameter, and this variance parameter is also shared with SNPs.
 #' "inv_gamma" places an inverse-gamma prior on the variance parameters for each group, with shape and rate hypeparameters.
-#' "shared_type" allows all groups in one molecular QTL type to share the same variance parameter.
+#' "shared_QTLtype" allows all groups in one molecular QTL type to share the same variance parameter.
 #'
 #' @param inv_gamma_shape the shape hyperparameter if using "inv_gamma" for \code{group_prior_var_structure}
 #'
@@ -91,8 +84,6 @@
 #'   credible set. The default, 0.5, corresponds to a squared
 #'   correlation of 0.25, which is a commonly used threshold for
 #'   genotype data in genetic studies.
-#'
-#' @param standardize TRUE/FALSE. If TRUE, all variables are standardized to unit variance
 #'
 #' @param ncore The number of cores used to parallelize susie over regions
 #'
@@ -125,7 +116,7 @@
 #'
 #' @export
 #'
-ctwas_rss <- function(
+ctwas_fine_mapping <- function(
   z_gene,
   z_snp,
   ld_exprvarfs,
@@ -135,19 +126,14 @@ ctwas_rss <- function(
   ld_regions_version = c("b37", "b38"),
   ld_regions_custom = NULL,
   thin = 1,
-  prob_single = 0.8,
   max_snp_region = Inf,
   rerun_gene_PIP = 0.5,
-  niter1 = 3,
-  niter2 = 30,
   L= 5,
   group_prior = NULL,
   group_prior_var = NULL,
   group_prior_var_structure = c("independent","shared_all","shared+snps","inv_gamma","shared_QTLtype"),
   inv_gamma_shape=1,
   inv_gamma_rate=0,
-  estimate_group_prior = T,
-  estimate_group_prior_var = T,
   use_null_weight = T,
   coverage = 0.95,
   min_abs_corr = 0.5,
@@ -161,7 +147,7 @@ ctwas_rss <- function(
   fine_map = T,
   reuse_regionlist = F,
   reuse_regionlist_allSNPs = F,
-  compress_LDR = F){
+  compress_LDR = T){
 
   if (!is.null(logfile)){
     addHandler(writeToFile, file= logfile, level='DEBUG')
@@ -245,111 +231,46 @@ ctwas_rss <- function(
     regs <- fread(paste0(outputdir,"/", outname, ".regions.txt"))
   }
 
-  if (isTRUE(estimate_group_prior) | isTRUE(estimate_group_prior_var)){
+  loginfo("Run susie for all regions.")
 
-    loginfo("Run susie iteratively, getting rough estimate ...")
-
-    if (!is.null(group_prior)){
-      group_prior["SNP"] <- group_prior["SNP"]/thin
-    }
-
-    pars <- susieI_rss(zdf = zdf,
-                       regionlist = regionlist,
-                       ld_exprvarfs = ld_exprvarfs,
-                       ld_pgenfs = ld_pgenfs,
-                       ld_Rfs = ld_Rfs,
-                       niter = niter1,
-                       L = 1,
-                       z_ld_weight = 0,
-                       group_prior = group_prior,
-                       group_prior_var = group_prior_var,
-                       group_prior_var_structure = group_prior_var_structure,
-                       estimate_group_prior = estimate_group_prior,
-                       estimate_group_prior_var = estimate_group_prior_var,
-                       use_null_weight = use_null_weight,
-                       coverage = coverage,
-                       min_abs_corr = min_abs_corr,
-                       ncore = ncore,
-                       outputdir = outputdir,
-                       outname = paste0(outname, ".s1"),
-                       inv_gamma_shape=inv_gamma_shape,
-                       inv_gamma_rate=inv_gamma_rate)
-
-    group_prior <- pars[["group_prior"]]
-    group_prior_var <- pars[["group_prior_var"]]
-
-    # filter blocks
-    regionlist2 <- filter_regions(regionlist,
-                                  group_prior,
-                                  prob_single,
-                                  zdf)
-
-    loginfo("Blocks are filtered: %s blocks left",
-            sum(unlist(lapply(regionlist2, length))))
-
-    loginfo("Run susie iteratively, getting accurate estimate ...")
-
-    pars <- susieI_rss(zdf = zdf,
-                       regionlist = regionlist2,
-                       ld_exprvarfs = ld_exprvarfs,
-                       ld_pgenfs = ld_pgenfs,
-                       ld_Rfs = ld_Rfs,
-                       niter = niter2,
-                       L = 1,
-                       z_ld_weight = 0,
-                       group_prior = group_prior,
-                       group_prior_var = group_prior_var,
-                       group_prior_var_structure = group_prior_var_structure,
-                       estimate_group_prior = estimate_group_prior,
-                       estimate_group_prior_var = estimate_group_prior_var,
-                       use_null_weight = use_null_weight,
-                       coverage = coverage,
-                       min_abs_corr = min_abs_corr,
-                       ncore = ncore,
-                       outputdir = outputdir,
-                       outname = paste0(outname, ".s2"),
-                       inv_gamma_shape=inv_gamma_shape,
-                       inv_gamma_rate=inv_gamma_rate)
-
-    group_prior <- pars[["group_prior"]]
-    group_prior_var <- pars[["group_prior_var"]]
+  if (!is.null(group_prior) & !is.null(group_prior_var)){
+    load(paste0(outputdir, "/", outname, ".s2.susieIrssres.Rd"))
+    group_prior <- group_prior_rec[,ncol(group_prior_rec)]
+    group_prior_var <- group_prior_var_rec[,ncol(group_prior_var_rec)]
   }
 
-  if (fine_map){
-    loginfo("Run susie for all regions.")
+  pars <- susieI_rss(zdf = zdf,
+                     regionlist = regionlist,
+                     ld_exprvarfs = ld_exprvarfs,
+                     ld_pgenfs = ld_pgenfs,
+                     ld_Rfs = ld_Rfs,
+                     niter = 1,
+                     L = L,
+                     z_ld_weight = 0,
+                     group_prior = group_prior,
+                     group_prior_var = group_prior_var,
+                     estimate_group_prior = F,
+                     estimate_group_prior_var = F,
+                     group_prior_var_structure = group_prior_var_structure,
+                     use_null_weight = use_null_weight,
+                     coverage = coverage,
+                     min_abs_corr = min_abs_corr,
+                     ncore = ncore,
+                     outputdir = outputdir,
+                     outname = paste0(outname, ".temp"),
+                     inv_gamma_shape=inv_gamma_shape,
+                     inv_gamma_rate=inv_gamma_rate,
+                     report_parameters=F)
 
-    pars <- susieI_rss(zdf = zdf,
-                       regionlist = regionlist,
-                       ld_exprvarfs = ld_exprvarfs,
-                       ld_pgenfs = ld_pgenfs,
-                       ld_Rfs = ld_Rfs,
-                       niter = 1,
-                       L = L,
-                       z_ld_weight = 0,
-                       group_prior = group_prior,
-                       group_prior_var = group_prior_var,
-                       estimate_group_prior = estimate_group_prior,
-                       estimate_group_prior_var = estimate_group_prior_var,
-                       group_prior_var_structure = group_prior_var_structure,
-                       use_null_weight = use_null_weight,
-                       coverage = coverage,
-                       min_abs_corr = min_abs_corr,
-                       ncore = ncore,
-                       outputdir = outputdir,
-                       outname = paste0(outname, ".temp"),
-                       inv_gamma_shape=inv_gamma_shape,
-                       inv_gamma_rate=inv_gamma_rate,
-                       report_parameters=F)
+  group_prior["SNP"] <- group_prior["SNP"] * thin # convert snp pi1
 
-    group_prior["SNP"] <- group_prior["SNP"] * thin # convert snp pi1
-
-    if (thin == 1) {
-      file.rename(paste0(file.path(outputdir, outname), ".temp.susieIrss.txt"),
-                  paste0(file.path(outputdir, outname), ".susieIrss.txt"))
-    } else {
-      # get full SNPs
-      if(!reuse_regionlist_allSNPs){
-        regionlist <- index_regions(regionfile = regionfile,
+  if (thin == 1) {
+    file.rename(paste0(file.path(outputdir, outname), ".temp.susieIrss.txt"),
+                paste0(file.path(outputdir, outname), ".susieIrss.txt"))
+  } else {
+    # get full SNPs
+    if(!reuse_regionlist_allSNPs){
+      regionlist <- index_regions(regionfile = regionfile,
                                   exprvarfs = ld_exprvarfs,
                                   pvarfs = ld_pvarfs,
                                   ld_Rfs = ld_Rfs,
@@ -360,83 +281,78 @@ ctwas_rss <- function(
                                   ncore = ncore_LDR,
                                   reuse_R_gene = T) # susie_rss can't take 1 var.
 
-        saveRDS(regionlist, file=paste0(outputdir, "/", outname, ".allSNPs.regionlist.RDS"))
-        temp_regs <- lapply(1:22, function(x) cbind(x,
-                                              unlist(lapply(regionlist[[x]], "[[", "start")),
-                                              unlist(lapply(regionlist[[x]], "[[", "stop"))))
+      saveRDS(regionlist, file=paste0(outputdir, "/", outname, ".allSNPs.regionlist.RDS"))
+      temp_regs <- lapply(1:22, function(x) cbind(x,
+                                            unlist(lapply(regionlist[[x]], "[[", "start")),
+                                            unlist(lapply(regionlist[[x]], "[[", "stop"))))
 
-        regs <- do.call(rbind, lapply(temp_regs, function(x) if (ncol(x) == 3){x}))
-        write.table(regs , file= paste0(outputdir,"/", outname, ".allSNPs.regions.txt")
-               , row.names=F, col.names=T, sep="\t", quote = F)
-      }
-      else{
-        regionlist <- readRDS(paste0(outputdir, "/", outname, ".allSNPs.regionlist.RDS"))
-        regs <- fread(paste0(outputdir,"/", outname, ".allSNPs.regions.txt"))
-      }
+      regs <- do.call(rbind, lapply(temp_regs, function(x) if (ncol(x) == 3){x}))
+      write.table(regs , file= paste0(outputdir,"/", outname, ".allSNPs.regions.txt")
+              , row.names=F, col.names=T, sep="\t", quote = F)
+    }
+    else{
+      regionlist <- readRDS(paste0(outputdir, "/", outname, ".allSNPs.regionlist.RDS"))
+      regs <- fread(paste0(outputdir,"/", outname, ".allSNPs.regions.txt"))
+    }
       
-      res <- data.table::fread(paste0(file.path(outputdir, outname), ".temp.susieIrss.txt"))
-      # filter out regions based on max gene PIP of the region
-      res.keep <- NULL
-      for (b in 1: length(regionlist)){
-        for (rn in names(regionlist[[b]])){
-          #gene_PIP <- max(res$susie_pip[res$type != "SNP" & res$region_tag1 == b & res$region_tag2 == rn], 0)
-          gene_PIP <- sum(res$susie_pip[res$type != "SNP" & res$region_tag1 == b & res$region_tag2 == rn])
-          gene_PIP <- ifelse(is.na(gene_PIP), 0, gene_PIP) #0 if gene_PIP is NA (no genes in this region)
-          if (gene_PIP < rerun_gene_PIP) {
-            regionlist[[b]][[rn]] <- NULL
-            res.keep <- rbind(res.keep, res[res$region_tag1 ==b & res$region_tag2 == rn, ])
-          }
+    res <- data.table::fread(paste0(file.path(outputdir, outname), ".temp.susieIrss.txt"))
+    # filter out regions based on max gene PIP of the region
+    res.keep <- NULL
+    for (b in 1: length(regionlist)){
+      for (rn in names(regionlist[[b]])){
+        #gene_PIP <- max(res$susie_pip[res$type != "SNP" & res$region_tag1 == b & res$region_tag2 == rn], 0)
+        gene_PIP <- sum(res$susie_pip[res$type != "SNP" & res$region_tag1 == b & res$region_tag2 == rn])
+        gene_PIP <- ifelse(is.na(gene_PIP), 0, gene_PIP) #0 if gene_PIP is NA (no genes in this region)
+        if (gene_PIP < rerun_gene_PIP) {
+          regionlist[[b]][[rn]] <- NULL
+          res.keep <- rbind(res.keep, res[res$region_tag1 ==b & res$region_tag2 == rn, ])
         }
       }
+    }
 
-      nreg <- sum(unlist(lapply(regionlist, length)))
+    nreg <- sum(unlist(lapply(regionlist, length)))
 
-      loginfo("Number of regions that contain strong gene signals: %s", nreg)
-      if (nreg == 0){
-        file.rename(paste0(file.path(outputdir, outname), ".temp.susieIrss.txt"),
-                    paste0(file.path(outputdir, outname), ".susieIrss.txt"))
+    loginfo("Number of regions that contain strong gene signals: %s", nreg)
+    if (nreg == 0){
+      file.rename(paste0(file.path(outputdir, outname), ".temp.susieIrss.txt"),
+                  paste0(file.path(outputdir, outname), ".susieIrss.txt"))
 
-      } else {
+    } 
+    else {
+      loginfo("Rerun susie for regions with strong gene signals using full SNPs.")
+      pars <- susieI_rss(zdf = zdf,
+                         regionlist = regionlist,
+                         ld_exprvarfs = ld_exprvarfs,
+                         ld_pgenfs = ld_pgenfs,
+                         ld_Rfs = ld_Rfs,
+                         niter = 1,
+                         L = L,
+                         z_ld_weight = 0,
+                         group_prior = group_prior,
+                         group_prior_var = group_prior_var,
+                         group_prior_var_structure = group_prior_var_structure,
+                         estimate_group_prior = F,
+                         estimate_group_prior_var = F,
+                         use_null_weight = use_null_weight,
+                         coverage = coverage,
+                         min_abs_corr = min_abs_corr,
+                         ncore = ncore.rerun,
+                         outputdir = outputdir,
+                         outname = paste0(outname, ".s3"),
+                         inv_gamma_shape=inv_gamma_shape,
+                         inv_gamma_rate=inv_gamma_rate,
+                         report_parameters=F)
 
-        loginfo("Rerun susie for regions with strong gene signals using full SNPs.")
-        pars <- susieI_rss(zdf = zdf,
-                           regionlist = regionlist,
-                           ld_exprvarfs = ld_exprvarfs,
-                           ld_pgenfs = ld_pgenfs,
-                           ld_Rfs = ld_Rfs,
-                           niter = 1,
-                           L = L,
-                           z_ld_weight = 0,
-                           group_prior = group_prior,
-                           group_prior_var = group_prior_var,
-                           group_prior_var_structure = group_prior_var_structure,
-                           estimate_group_prior = estimate_group_prior,
-                           estimate_group_prior_var = estimate_group_prior_var,
-                           use_null_weight = use_null_weight,
-                           coverage = coverage,
-                           min_abs_corr = min_abs_corr,
-                           ncore = ncore.rerun,
-                           outputdir = outputdir,
-                           outname = paste0(outname, ".s3"),
-                           inv_gamma_shape=inv_gamma_shape,
-                           inv_gamma_rate=inv_gamma_rate,
-                           report_parameters=F)
+      res.rerun <- data.table::fread(paste0(file.path(outputdir, outname), ".s3.susieIrss.txt"))
+      res <- rbind(res.keep, res.rerun)
 
-        res.rerun <- data.table::fread(paste0(file.path(outputdir, outname), ".s3.susieIrss.txt"))
-
-        res <- rbind(res.keep, res.rerun)
-
-        data.table::fwrite(res, file = paste0(file.path(outputdir, outname), ".susieIrss.txt"),
-                           sep = "\t", quote = F)
-        file.remove((paste0(file.path(outputdir, outname), ".temp.susieIrss.txt")))
-      }
+      data.table::fwrite(res, file = paste0(file.path(outputdir, outname), ".susieIrss.txt"),
+                         sep = "\t", quote = F)
+      file.remove((paste0(file.path(outputdir, outname), ".temp.susieIrss.txt")))
+      file.remove((paste0(file.path(outputdir, outname), ".temp.susieIrssres.Rd")))
     }
   }
-
-  list("group_prior" = group_prior,
-       "group_prior_var" = group_prior_var)
-
-   if(fine_map & compress_LDR){
+  if(compress_LDR){
     system(paste0("tar -zcf ", outputdir, outname, "_LDR.tar.gz ", outputdir, outname, "_LDR"))
     system(paste0("rm -r ", outputdir, outname, "_LDR"))
     system(paste0("tar -zcf ", outputdir, outname, "_allSNPs_LDR.tar.gz ", outputdir, outname, "_allSNPs_LDR"))
