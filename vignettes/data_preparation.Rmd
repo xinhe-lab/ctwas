@@ -82,7 +82,7 @@ saveRDS(gwas_n, file="gwas_summary_stats/gwas_n.RDS")
 
 After the previous step, we can load the data and look at the format. `z_snp` is a data frame, and each row is a variant. `A1` is the alternate allele, and `A2` is the reference allele. The sample size for this GWAS is `N=343,621`.
 
-```{r load_z_snp, eval=FALSE}
+```{r load_z_snp}
 z_snp <- readRDS("gwas_summary_stats/ukb-d-30780_irnt.RDS")
 gwas_n <- readRDS("gwas_summary_stats/gwas_n.RDS")
 
@@ -224,29 +224,29 @@ These inputs should be harmonized prior to analysis (i.e. the reference and alte
 This step will harmonize GWAS z-scores and LD reference, then perform LD mismatch diagnosis using SuSiE RSS, and flip z-scores with allele flipping issues.
 
 We use SuSiE RSS to perform LD mismatch diagnosis and flip z-scores for allele flipped variants. This procedure can be time consuming. So we can split this task by chromosomes and combine the results.
-```{r, eval=FALSE, include=FALSE}
+
+```{r, eval=FALSE}
 outputdir <- "multigroup/processed_data/"
 dir.create(outputdir, showWarnings=F, recursive=T)
 outname <- "example"
-# number of cores to parallelize regions for LD mismatch diagnoisis
+
+# number of cores to parallelize regions for LD mismatch diagnosis
 ncore <- 6
 
-for (i in 1:22) {
+for (i in 1:22){
   if (!file.exists(file.path(outputdir, paste0(outname, "_chr", i, ".harmonized.z_snp.RDS")))){
-    cat("Processing z-scores in chr", i, "\n")
     res <- preprocess_z_ld(z_snp = z_snp,
                            ld_R_dir = ld_R_dir,
                            chrom = i,
-                           ld_regions = "EUR",
-                           ld_regions_version = "b38",
-                           filestem = "ukb_b38_0.1",
                            gwas_n = gwas_n,
+                           detect_ld_mismatch = T, # If TRUE, detect SNPs with LD mismatches
+                           flip_allele = T, # If TRUE, flip z-scores with allele flipping issues
+                           filter_ld_mismatch = F, # do not filter problematic SNPs
                            outputdir = outputdir,
-                           outname = paste0(outname, "_chr", i),
-                           detect_ld_mismatch = T, # If TRUE, detect LD mismatches using SuSiE RSS
-                           flip_allele = T, # If TRUE, flip z-scores with allele flipping
-                           ncore = ncore,
-                           save_result = T)
+                           outname = outname,
+                           ncore = ncore)
+    saveRDS(res$z_snp, file.path(outputdir, paste0(outname, "_chr", i, ".harmonized.z_snp.RDS")))
+    saveRDS(res$ld_mismatch_res[[i]], file.path(outputdir, paste0(outname, "_chr", i, ".ld_mismatch_res.RDS")))
   }
 }
 
@@ -260,20 +260,18 @@ rownames(z_snp) <- NULL
 save(z_snp, file = file.path(outputdir, paste0(outname, ".harmonized.z_snp.Rd")))
 
 # extract and save the problematic variants
-problematic_snps <- list()
+problematic_snps <- c()
 for (i in 1:22){
-  ld_mismatch_chr_res <- readRDS(file.path(outputdir, paste0(outname, "_chr", i, ".ld_mismatch_res.RDS")))
-  problematic_snps[[i]] <- ld_mismatch_chr_res$problematic_snps
+  ld_mismatch_res <- readRDS(file.path(outputdir, paste0(outname, "_chr", i, ".ld_mismatch_res.RDS")))
+  problematic_snps <- c(problematic_snps, ld_mismatch_res$problematic_snps)
 }
-problematic_snps <- unlist(problematic_snps)
 write.table(problematic_snps, file.path(outputdir, paste0(outname, ".problematic_snps.txt")), 
             col.names = F, row.names = F, quote = F)
 ```
 
-If you do not want to detect LD mismatches (and allele flipping) using use SuSiE RSS, you can turn off `detect_ld_mismatch`. It runs much faster without detecting LD mismatches, 
-so we can simply run all the chromosomes together. 
+If you do not want to detect LD mismatches (and allele flipping) using use SuSiE RSS, you can turn off `detect_ld_mismatch`. It runs much faster without detecting LD mismatches, so we can simply run all the chromosomes together. 
 
-```{r, eval=FALSE, include=FALSE}
+```{r, eval=FALSE}
 outputdir <- "multigroup/processed_data/"
 dir.create(outputdir, showWarnings=F, recursive=T)
 outname <- "example"
@@ -333,6 +331,8 @@ To impute gene z-scores genome-wide, we specify the GWAS summary statistics, bot
 
 If specifying only a single `.db` file (or a single set of FUSION weights), the output of this function using the `multigroup` branch is identical to the output using the `main` branch. If specifying more than one `.db` file, the gene names will have the name of the corresponding `.db` file appended after the gene name, e.g. "gene1|mashr_Liver_nolnc", but otherwise the output is the same.
 
+In this version of cTWAS, we've included two options to parallelize and divide up the imputation. First, we've added the option `ncore` to specify the number of cores to use during imputation. Second, we've added the option to impute over a subset of chromosomes, allowing the imputation to be divided into multiple jobs.
+
 Here, we impute gene z-scores for individual chromosomes using multiple cores, and then combining the results:
 
 ```{r, eval=FALSE}
@@ -379,12 +379,4 @@ head(z_gene)
 
 rm(qclist, wgtlist, z_gene_chr)
 ```
-
-In this version of cTWAS, we've included two options to parallelize and divide up the imputation. First, we've added the option `ncore` to specify the number of cores to use during imputation. Second, we've added the option to impute over a subset of chromosomes, allowing the imputation to be divided into multiple jobs.
-
---
-
-<span style="color: red;">NOTE: We've added an option to take no additional action beyond simple harmonization with strand ambiguous weights. We replaced the option `recover_strand_ambig_wgt = TRUE/FALSE` from the `main` branch with the option `strand_ambig_action_wgt = c("drop", "none", "recover")`. The `"drop"` option is equivalent to `FALSE` from the `main` branch, and `"recover"` is equivalent to `TRUE`. The new `"none"` option treats strand ambiguous weights as unambiguous; it does the initial simple harmonization (flipping based on allele matching) but then doesn't do anything else to the ambiguous weights. The default behavior has changed from `recover_strand_ambig_wgt = TRUE` in the `main` branch to `recover_strand_ambig_wgt = "drop"` in order to be consistent with default of `strand_ambig_action_z`. Code using `cTWAS` from the `main` branch or previous versions of the `multigroup` branch (`0.1.39` or earlier) needs to be updated to reflect this change. </span>
-
-<span style="color: red;">NOTE: The parallelized version of this function has some memory issues when `strand_ambig_action_wgt = "recover"` and multiple cores are used. I think that this needs to be fixed by dividing up the covariances provided by PredictDB into chunks, storing them, and then loading specific groups by core. Currently, all the covariances are made available to every core. For analyses with many sets of weights, it may not be possible to recover strand ambiguous weights and also use multiple cores until this memory issue is corrected. </span>
 

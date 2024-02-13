@@ -68,7 +68,7 @@ Let's run the cTWAS fine-mapping step at the HPR locus using the estimated param
 Load the processed example data (also used in the `main` branch tutorial):
 
 ```{r load_processed_data, eval=FALSE}
-outputdir <- "/project2/xinhe/shared_data/ctwas_tutorial/results/single_locus/"
+outputdir <- "/project2/xinhe/shared_data/ctwas_tutorial/multigroup/results/single_locus/"
 outname <- "example_locus"
 
 # load imputed gene z-scores, the harmonized GWAS z-scores
@@ -77,10 +77,6 @@ load(paste0(outputdir, "/", outname, "_z_snp.Rd"))
 
 ld_exprvarfs <- paste0(outputdir, "/", outname, "_chr", 1:22, ".exprvar")
 stopifnot(file.exists(ld_exprvarfs))
-
-# Load regionlist
-regionlist <- readRDS(paste0(outputdir, "/", outname, ".regionlist.RDS"))
-regs <- data.table::fread(paste0(outputdir,"/", outname, ".regions.txt"))
 
 ld_R_dir <- "/project2/mstephens/wcrouse/UKB_LDR_0.1/"
 ```
@@ -95,42 +91,37 @@ group_prior <- c(0.0107220302, 0.0001715896)
 group_prior_var <- c(41.327666, 9.977841)
 ```
 
-We could run finemapping on regions listed in a custom region file:
+If we want to rerun a region using precomputed regionlist, we can simply specify the `region_tags` to rerun, and set `reuse_regionlist = TRUE`. 
 
 ```{r, eval=FALSE}
-regions_file <- "/project2/xinhe/shared_data/ctwas_tutorial/regions/regions_subset.bed"
-regions_df <- read.table(regions_file, header = T)
-print(regions_df)
-
-outputdir <- "/project2/xinhe/shared_data/ctwas_tutorial/multigroup/results/single_locus/"
-
 ctwas_finemap_rss(z_gene = z_gene_subset,
                   z_snp = z_snp_subset,
                   ld_exprvarfs = ld_exprvarfs,
                   ld_R_dir = ld_R_dir,
-                  ld_regions_custom = regions_file,
+                  reuse_regionlist = T,
+                  region_tags = "16_1", # rerun on region 1 in chr16
                   outputdir = outputdir,
                   outname = outname,
                   group_prior = group_prior,
                   group_prior_var = group_prior_var)
 ```
 
-Or if we want to rerun a region reusing existing regionlist, we can simply specify the `region_tags`, 
-and set `reuse_regionlist = TRUE`. 
+or we could run finemapping on regions listed in a custom region file:
 
 ```{r, eval=FALSE}
-region_tags <- "16_1" # rerun on region 1 in chr16
+regions_file <- "/project2/xinhe/shared_data/ctwas_tutorial/regions/regions_subset.bed"
+regions_df <- read.table(regions_file, header = T)
+print(regions_df)
 
-ctwas_finemap_rss(z_gene = z_gene_subset,
-                  z_snp = z_snp_subset,
-                  ld_exprvarfs = ld_exprvarfs,
-                  ld_R_dir = ld_R_dir,
-                  reuse_regionlist = T,
-                  region_tags = region_tags,
-                  outputdir = outputdir,
-                  outname = outname,
-                  group_prior = group_prior,
-                  group_prior_var = group_prior_var)
+ctwas_finemap_regions_rss(z_gene = z_gene_subset,
+                          z_snp = z_snp_subset,
+                          ld_exprvarfs = ld_exprvarfs,
+                          ld_R_dir = ld_R_dir,
+                          ld_regions_custom = regions_file,
+                          outputdir = outputdir,
+                          outname = outname,
+                          group_prior = group_prior,
+                          group_prior_var = group_prior_var)
 ```
 
 
@@ -294,7 +285,7 @@ for (i in 1:length(weight)){
   query <- function(...) RSQLite::dbGetQuery(db, ...)
   gene_info_current <- query("select gene, genename, gene_type from extra")
   RSQLite::dbDisconnect(db)
-
+  
   gene_info_current$weight <- weight[i]
   
   gene_info <- rbind(gene_info, gene_info_current)
