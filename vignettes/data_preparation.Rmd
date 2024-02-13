@@ -10,7 +10,7 @@ vignette: >
 ---
 
 ```{r setup, include=FALSE}
-knitr::opts_chunk$set(message = FALSE, warning = FALSE)
+knitr::opts_chunk$set(message = FALSE, warning = FALSE, eval = FALSE)
 ```
 
 ## Overview
@@ -82,7 +82,7 @@ saveRDS(gwas_n, file="gwas_summary_stats/gwas_n.RDS")
 
 After the previous step, we can load the data and look at the format. `z_snp` is a data frame, and each row is a variant. `A1` is the alternate allele, and `A2` is the reference allele. The sample size for this GWAS is `N=343,621`.
 
-```{r load_z_snp}
+```{r load_z_snp, eval=FALSE}
 z_snp <- readRDS("gwas_summary_stats/ukb-d-30780_irnt.RDS")
 gwas_n <- readRDS("gwas_summary_stats/gwas_n.RDS")
 
