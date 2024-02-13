@@ -71,8 +71,6 @@ rerun_ctwas_finemap_regions_L1_rss <- function(z_snp,
     addHandler(writeToFile, file= logfile, level='DEBUG')
   }
 
-  group_prior_var_structure <- match.arg(group_prior_var_structure)
-
   # Load cTWAS result
   ctwas_res <- as.data.frame(data.table::fread(file.path(ctwas_outputdir, paste0(ctwas_outname, ".susieIrss.txt")), header=T))
 
@@ -109,7 +107,6 @@ rerun_ctwas_finemap_regions_L1_rss <- function(z_snp,
     regs <- data.table::fread(paste0(ctwas_outputdir,"/", ctwas_outname, ".regions.txt"))
 
     # select and assemble regionlist for rerunning finemapping
-    print(rerun_region_tags)
     subset_regionlist_res <- subset_regionlist(regionlist, rerun_region_tags)
     rerun_regionlist <- subset_regionlist_res$regionlist
     rerun_regs <- subset_regionlist_res$regs
@@ -130,21 +127,21 @@ rerun_ctwas_finemap_regions_L1_rss <- function(z_snp,
     loginfo('Output directory: %s', outputdir)
 
     # Rerun finemapping with L = 1
-    ctwas_finemap_rss(z_gene = z_gene,
-                      z_snp = z_snp,
-                      ld_exprvarfs = ld_exprvarfs,
-                      ld_R_dir = ld_R_dir,
-                      reuse_regionlist = T,
-                      regionlist_custom = rerun_regionlist,
-                      outputdir = outputdir,
-                      outname = paste0(outname, ".L1"),
-                      L = 1,
-                      group_prior = group_prior,
-                      group_prior_var = group_prior_var,
-                      use_null_weight = use_null_weight,
-                      coverage = coverage,
-                      min_abs_corr = min_abs_corr,
-                      ncore = ncore)
+    ctwas_finemap_regions(z_gene = z_gene,
+                          z_snp = z_snp,
+                          ld_exprvarfs = ld_exprvarfs,
+                          ld_R_dir = ld_R_dir,
+                          reuse_regionlist = T,
+                          regionlist_custom = rerun_regionlist,
+                          outputdir = outputdir,
+                          outname = paste0(outname, ".L1"),
+                          L = 1,
+                          group_prior = group_prior,
+                          group_prior_var = group_prior_var,
+                          use_null_weight = use_null_weight,
+                          coverage = coverage,
+                          min_abs_corr = min_abs_corr,
+                          ncore = ncore)
 
   }
 

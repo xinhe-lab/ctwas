@@ -1,4 +1,4 @@
-#' cTWAS finemapping using summary statistics
+#' cTWAS finemapping for specific regions with full SNPs (thin = 1)
 #'
 #' @param z_gene A data frame with two columns: "id", "z". giving the z scores for genes.
 #' Optionally, a "type" column can also be supplied; this is for using multiple sets of weights
@@ -82,7 +82,7 @@
 #'
 #' @export
 #'
-ctwas_finemap_rss <- function(
+ctwas_finemap_regions <- function(
     z_gene,
     z_snp,
     ld_exprvarfs,
@@ -112,7 +112,7 @@ ctwas_finemap_rss <- function(
     addHandler(writeToFile, file= logfile, level='DEBUG')
   }
 
-  loginfo('cTWAS finemapping ... ')
+  loginfo("cTWAS finemapping regions with full SNPs... ")
 
   if (is.null(ld_pgenfs) & is.null(ld_R_dir)){
     stop("Error: need to provide either .pgen file or ld_R file")
@@ -121,7 +121,10 @@ ctwas_finemap_rss <- function(
     ld_snpinfo <- lapply(ld_pvarfs, read_pvar)
     ld_Rfs <- NULL # do not use R matrix info if genotype is given
   } else {
-    ld_Rfs <- write_ld_Rf(ld_R_dir, outname = outname, outputdir = outputdir)
+    ld_Rfs <- file.path(outputdir, paste0(outname, "_ld_R_chr", 1:22, ".txt"))
+    if (!all(file.exists(ld_Rfs))) {
+      ld_Rfs <- write_ld_Rf(ld_R_dir, outname = outname, outputdir = outputdir)
+    }
     ld_snpinfo <- lapply(ld_Rfs, read_ld_Rvar)
     ld_pvarfs <- NULL
   }
@@ -138,8 +141,6 @@ ctwas_finemap_rss <- function(
   zdf <- rbind(z_snp[, c("id", "z", "type", "QTLtype")],
                z_gene[, c("id", "z", "type", "QTLtype")])
   rm(z_snp, ld_snpinfo)
-
-  group_prior_var_structure <- match.arg(group_prior_var_structure)
 
   if (!reuse_regionlist){
     # index regions using region file and and save regionlist
@@ -191,6 +192,7 @@ ctwas_finemap_rss <- function(
       regs <- data.table::fread(paste0(outputdir,"/", outname, ".regions.txt"))
       # select and assemble a subset of regionlist by region_tags
       if (length(region_tags) > 0){
+        loginfo("subset %s regions from precomputed regionlist", length(region_tags))
         subset_regionlist_res <- subset_regionlist(regionlist, region_tags)
         regionlist <- subset_regionlist_res$regionlist
         regs <- subset_regionlist_res$regs
@@ -209,23 +211,23 @@ ctwas_finemap_rss <- function(
   }
 
   # run finemapping using SuSiE RSS
-  pars <- susieI_rss(zdf = zdf,
-                     regionlist = regionlist,
-                     ld_exprvarfs = ld_exprvarfs,
-                     ld_pgenfs = ld_pgenfs,
-                     ld_Rfs = ld_Rfs,
-                     niter = 1,
-                     L = L,
-                     z_ld_weight = 0,
-                     group_prior = group_prior,
-                     group_prior_var = group_prior_var,
-                     use_null_weight = use_null_weight,
-                     coverage = coverage,
-                     min_abs_corr = min_abs_corr,
-                     ncore = ncore,
-                     outputdir = outputdir,
-                     outname = outname,
-                     report_parameters=F)
+  pars <- ctwas::susieI_rss(zdf = zdf,
+                            regionlist = regionlist,
+                            ld_exprvarfs = ld_exprvarfs,
+                            ld_pgenfs = ld_pgenfs,
+                            ld_Rfs = ld_Rfs,
+                            niter = 1,
+                            L = L,
+                            z_ld_weight = 0,
+                            group_prior = group_prior,
+                            group_prior_var = group_prior_var,
+                            use_null_weight = use_null_weight,
+                            coverage = coverage,
+                            min_abs_corr = min_abs_corr,
+                            ncore = ncore,
+                            outputdir = outputdir,
+                            outname = outname,
+                            report_parameters=F)
 
   if(compress_LDR){
     system(paste0("tar -zcvf ", outputdir, outname, "_LDR.tar.gz ", outputdir, outname, "_LDR"))

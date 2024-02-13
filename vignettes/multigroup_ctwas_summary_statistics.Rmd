@@ -37,13 +37,9 @@ Install the `multigroup_kevin` branch of `cTWAS` package
 remotes::install_github("xinhe-lab/ctwas", ref = "multigroup_kevin")
 ```
 
-```{r, include=FALSE}
-devtools::load_all("/home/kaixuan/projects/cTWAS_package/multigroup_kevin/ctwas/.")
-```
-
 Load the package and set the working directory where you want to perform the analysis.
 
-```{r load_package, eval=FALSE}
+```{r load_package}
 library(ctwas)
 ```
 
