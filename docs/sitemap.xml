@@ -52,6 +52,9 @@
     <loc>/reference/ctwas.html</loc>
   </url>
   <url>
+    <loc>/reference/ctwas_fine_mapping.html</loc>
+  </url>
+  <url>
     <loc>/reference/ctwas_finemap_regions.html</loc>
   </url>
   <url>
@@ -62,6 +65,9 @@
   </url>
   <url>
     <loc>/reference/ctwas_locus_plot_genetrack.html</loc>
+  </url>
+  <url>
+    <loc>/reference/ctwas_parameter_estimation.html</loc>
   </url>
   <url>
     <loc>/reference/ctwas_rss.html</loc>
