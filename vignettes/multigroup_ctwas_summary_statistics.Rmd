@@ -53,7 +53,7 @@ knitr::opts_knit$set(root.dir = "/project2/xinhe/shared_data/ctwas_tutorial/mult
 
 ## Preparing input data
 
-In this version of `cTWAS` package, we require running the data preparation steps before running parameter estimation and finemapping steps of cTWAS analysis. Please see the [data preparation tutorial][here](https://xinhe-lab.github.io/ctwas/articles/data_preparation.html) on preparing and harmonizing GWAS summary statistics, prediction models, and LD reference. 
+In this version of `cTWAS` package, we require running the data preparation steps before running parameter estimation and finemapping steps of cTWAS analysis. Please see the [data preparation tutorial](https://kevinlkx.github.io/ctwas/articles/data_preparation.html) on preparing and harmonizing GWAS summary statistics, prediction models, and LD reference. 
 
 ## Running cTWAS fine-mapping with fixed parameters at a single locus
 
@@ -94,16 +94,16 @@ group_prior_var <- c(41.327666, 9.977841)
 If we want to rerun a region using precomputed regionlist, we can simply specify the `region_tags` to rerun, and set `reuse_regionlist = TRUE`. 
 
 ```{r, eval=FALSE}
-ctwas_finemap_rss(z_gene = z_gene_subset,
-                  z_snp = z_snp_subset,
-                  ld_exprvarfs = ld_exprvarfs,
-                  ld_R_dir = ld_R_dir,
-                  reuse_regionlist = T,
-                  region_tags = "16_1", # rerun on region 1 in chr16
-                  outputdir = outputdir,
-                  outname = outname,
-                  group_prior = group_prior,
-                  group_prior_var = group_prior_var)
+ctwas_finemap_regions(z_gene = z_gene_subset,
+                      z_snp = z_snp_subset,
+                      ld_exprvarfs = ld_exprvarfs,
+                      ld_R_dir = ld_R_dir,
+                      reuse_regionlist = T,
+                      region_tags = "16_1", # rerun on region 1 in chr16
+                      outputdir = outputdir,
+                      outname = outname,
+                      group_prior = group_prior,
+                      group_prior_var = group_prior_var)
 ```
 
 or we could run finemapping on regions listed in a custom region file:
@@ -113,17 +113,18 @@ regions_file <- "/project2/xinhe/shared_data/ctwas_tutorial/regions/regions_subs
 regions_df <- read.table(regions_file, header = T)
 print(regions_df)
 
-ctwas_finemap_regions_rss(z_gene = z_gene_subset,
-                          z_snp = z_snp_subset,
-                          ld_exprvarfs = ld_exprvarfs,
-                          ld_R_dir = ld_R_dir,
-                          ld_regions_custom = regions_file,
-                          outputdir = outputdir,
-                          outname = outname,
-                          group_prior = group_prior,
-                          group_prior_var = group_prior_var)
+ctwas_finemap_regions(z_gene = z_gene_subset,
+                      z_snp = z_snp_subset,
+                      ld_exprvarfs = ld_exprvarfs,
+                      ld_R_dir = ld_R_dir,
+                      ld_regions_custom = regions_file,
+                      outputdir = outputdir,
+                      outname = outname,
+                      group_prior = group_prior,
+                      group_prior_var = group_prior_var)
 ```
 
+<span style="color: red;">TODO: Needs to fix a bug in the `index_region` function. </span>
 
 ## Running cTWAS genome-wide with multiple weights
 
