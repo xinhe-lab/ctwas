@@ -114,49 +114,54 @@
 #'
 #' @param reuse_regionlist TRUE/FALSE. If FALSE, call index_regions function to get gene and SNP index and correlation matrix for each region.
 #' If True, skip the index_regions function and load pre-computed indexed regions.
+#'
+#' @param reuse_regionlist_allSNPs TRUE/FALSE. If FALSE, call index_regions function to get gene and all SNP index and correlation matrix for each region.
+#' If True, skip the index_regions function and load pre-computed indexed regions.
+#'
 #' @param compress_LDR TRUE/FALSE. If FALSE, correlation matrix folder are not compressed. If TRUE, compressed.
+#'
 #' @importFrom logging addHandler loginfo
 #' @importFrom tools file_ext
 #'
 #' @export
 #'
 ctwas_rss <- function(
-  z_gene,
-  z_snp,
-  ld_exprvarfs,
-  ld_pgenfs = NULL,
-  ld_R_dir = NULL,
-  ld_regions = c("EUR", "ASN", "AFR"),
-  ld_regions_version = c("b37", "b38"),
-  ld_regions_custom = NULL,
-  thin = 1,
-  prob_single = 0.8,
-  max_snp_region = Inf,
-  rerun_gene_PIP = 0.5,
-  niter1 = 3,
-  niter2 = 30,
-  L= 5,
-  group_prior = NULL,
-  group_prior_var = NULL,
-  group_prior_var_structure = c("independent","shared_all","shared+snps","inv_gamma","shared_QTLtype"),
-  inv_gamma_shape=1,
-  inv_gamma_rate=0,
-  estimate_group_prior = T,
-  estimate_group_prior_var = T,
-  use_null_weight = T,
-  coverage = 0.95,
-  min_abs_corr = 0.5,
-  stardardize = T,
-  ncore = 1,
-  ncore.rerun = 1,
-  ncore_LDR = 1,
-  outputdir = getwd(),
-  outname = NULL,
-  logfile = NULL,
-  merge = TRUE,
-  fine_map = T,
-  reuse_regionlist = F,
-  compress_LDR = F){
+    z_gene,
+    z_snp,
+    ld_exprvarfs,
+    ld_pgenfs = NULL,
+    ld_R_dir = NULL,
+    ld_regions = c("EUR", "ASN", "AFR"),
+    ld_regions_version = c("b37", "b38"),
+    ld_regions_custom = NULL,
+    thin = 1,
+    prob_single = 0.8,
+    max_snp_region = Inf,
+    rerun_gene_PIP = 0.5,
+    niter1 = 3,
+    niter2 = 30,
+    L= 5,
+    group_prior = NULL,
+    group_prior_var = NULL,
+    group_prior_var_structure = c("independent","shared_all","shared+snps","inv_gamma","shared_QTLtype"),
+    inv_gamma_shape=1,
+    inv_gamma_rate=0,
+    estimate_group_prior = T,
+    estimate_group_prior_var = T,
+    use_null_weight = T,
+    coverage = 0.95,
+    min_abs_corr = 0.5,
+    ncore = 1,
+    ncore.rerun = 1,
+    ncore_LDR = 1,
+    outputdir = getwd(),
+    outname = NULL,
+    logfile = NULL,
+    merge = TRUE,
+    fine_map = T,
+    reuse_regionlist = F,
+    reuse_regionlist_allSNPs = F,
+    compress_LDR = F){
 
   if (!is.null(logfile)){
     addHandler(writeToFile, file= logfile, level='DEBUG')
@@ -214,26 +219,26 @@ ctwas_rss <- function(
 
   if (!reuse_regionlist){
     regionlist <- index_regions(regionfile = regionfile,
-                              exprvarfs = ld_exprvarfs,
-                              pvarfs = ld_pvarfs,
-                              ld_Rfs = ld_Rfs,
-                              select = zdf$id,
-                              thin = thin, minvar = 2,
-                              outname = outname,
-                              outputdir = outputdir,
-                              merge = merge,
-                              ncore = ncore_LDR) # susie_rss can't take 1 var.
+                                exprvarfs = ld_exprvarfs,
+                                pvarfs = ld_pvarfs,
+                                ld_Rfs = ld_Rfs,
+                                select = zdf$id,
+                                thin = thin, minvar = 2,
+                                outname = outname,
+                                outputdir = outputdir,
+                                merge = merge,
+                                ncore = ncore_LDR) # susie_rss can't take 1 var.
 
     saveRDS(regionlist, file=paste0(outputdir, "/", outname, ".regionlist.RDS"))
 
     temp_regs <- lapply(1:22, function(x) cbind(x,
-                                              unlist(lapply(regionlist[[x]], "[[", "start")),
-                                              unlist(lapply(regionlist[[x]], "[[", "stop"))))
+                                                unlist(lapply(regionlist[[x]], "[[", "start")),
+                                                unlist(lapply(regionlist[[x]], "[[", "stop"))))
 
     regs <- do.call(rbind, lapply(temp_regs, function(x) if (ncol(x) == 3){x}))
 
     write.table(regs , file= paste0(outputdir,"/", outname, ".regions.txt")
-               , row.names=F, col.names=T, sep="\t", quote = F)
+                , row.names=F, col.names=T, sep="\t", quote = F)
   }
   else{
     regionlist <- readRDS(paste0(outputdir, "/", outname, ".regionlist.RDS"))
@@ -343,35 +348,40 @@ ctwas_rss <- function(
                   paste0(file.path(outputdir, outname), ".susieIrss.txt"))
     } else {
       # get full SNPs
-      regionlist <- index_regions(regionfile = regionfile,
-                                  exprvarfs = ld_exprvarfs,
-                                  pvarfs = ld_pvarfs,
-                                  ld_Rfs = ld_Rfs,
-                                  select = zdf,
-                                  thin = 1, maxSNP = max_snp_region, minvar = 2,
-                                  outname = outname, outputdir = outputdir,
-                                  merge = merge,
-                                  ncore = ncore_LDR,
-                                  reuse_R_gene = T) # susie_rss can't take 1 var.
+      if(!reuse_regionlist_allSNPs){
+        regionlist <- index_regions(regionfile = regionfile,
+                                    exprvarfs = ld_exprvarfs,
+                                    pvarfs = ld_pvarfs,
+                                    ld_Rfs = ld_Rfs,
+                                    select = zdf,
+                                    thin = 1, maxSNP = max_snp_region, minvar = 2,
+                                    outname = paste0(outname,"_allSNPs"), outputdir = outputdir,
+                                    merge = merge,
+                                    ncore = ncore_LDR,
+                                    reuse_R_gene = T) # susie_rss can't take 1 var.
 
-      saveRDS(regionlist, file=paste0(outputdir, "/", outname, ".regionlist_fullSNPs.RDS"))
-      temp_regs <- lapply(1:22, function(x) cbind(x,
-                                              unlist(lapply(regionlist[[x]], "[[", "start")),
-                                              unlist(lapply(regionlist[[x]], "[[", "stop"))))
+        saveRDS(regionlist, file=paste0(outputdir, "/", outname, ".allSNPs.regionlist.RDS"))
+        temp_regs <- lapply(1:22, function(x) cbind(x,
+                                                    unlist(lapply(regionlist[[x]], "[[", "start")),
+                                                    unlist(lapply(regionlist[[x]], "[[", "stop"))))
 
-      regs <- do.call(rbind, lapply(temp_regs, function(x) if (ncol(x) == 3){x}))
-      write.table(regs , file= paste0(outputdir,"/", outname, ".regions_fullSNPs.txt")
-               , row.names=F, col.names=T, sep="\t", quote = F)
+        regs <- do.call(rbind, lapply(temp_regs, function(x) if (ncol(x) == 3){x}))
+        write.table(regs , file= paste0(outputdir,"/", outname, ".allSNPs.regions.txt")
+                    , row.names=F, col.names=T, sep="\t", quote = F)
+      }
+      else{
+        regionlist <- readRDS(paste0(outputdir, "/", outname, ".allSNPs.regionlist.RDS"))
+        regs <- fread(paste0(outputdir,"/", outname, ".allSNPs.regions.txt"))
+      }
 
       res <- data.table::fread(paste0(file.path(outputdir, outname), ".temp.susieIrss.txt"))
-
-
       # filter out regions based on max gene PIP of the region
       res.keep <- NULL
       for (b in 1: length(regionlist)){
         for (rn in names(regionlist[[b]])){
           #gene_PIP <- max(res$susie_pip[res$type != "SNP" & res$region_tag1 == b & res$region_tag2 == rn], 0)
           gene_PIP <- sum(res$susie_pip[res$type != "SNP" & res$region_tag1 == b & res$region_tag2 == rn])
+          gene_PIP <- ifelse(is.na(gene_PIP), 0, gene_PIP) #0 if gene_PIP is NA (no genes in this region)
           if (gene_PIP < rerun_gene_PIP) {
             regionlist[[b]][[rn]] <- NULL
             res.keep <- rbind(res.keep, res[res$region_tag1 ==b & res$region_tag2 == rn, ])
@@ -389,7 +399,6 @@ ctwas_rss <- function(
       } else {
 
         loginfo("Rerun susie for regions with strong gene signals using full SNPs.")
-
         pars <- susieI_rss(zdf = zdf,
                            regionlist = regionlist,
                            ld_exprvarfs = ld_exprvarfs,
@@ -427,9 +436,11 @@ ctwas_rss <- function(
   list("group_prior" = group_prior,
        "group_prior_var" = group_prior_var)
 
-  if(compress_LDR){
-    system(paste0("tar -zcvf ", outputdir, outname, "_LDR.tar.gz ", outputdir, outname, "_LDR"))
+  if(fine_map & compress_LDR){
+    system(paste0("tar -zcf ", outputdir, outname, "_LDR.tar.gz ", outputdir, outname, "_LDR"))
+    system(paste0("rm -r ", outputdir, outname, "_LDR"))
+    system(paste0("tar -zcf ", outputdir, outname, "_allSNPs_LDR.tar.gz ", outputdir, outname, "_allSNPs_LDR"))
+    system(paste0("rm -r ", outputdir, outname, "_allSNPs_LDR"))
   }
 }
-
 

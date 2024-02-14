@@ -41,3 +41,4 @@ Suggests:
 VignetteBuilder: knitr
 NeedsCompilation: no
 RoxygenNote: 7.3.0
+
