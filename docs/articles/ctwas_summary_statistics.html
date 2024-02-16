@@ -81,7 +81,7 @@
       <h1 data-toc-skip>Using cTWAS with summary statistics</h1>
                         <h4 data-toc-skip class="author">Wesley Crouse, Sheng Qian, Kaixuan Luo, Xin He</h4>
             
-            <h4 data-toc-skip class="date">2024-02-05</h4>
+            <h4 data-toc-skip class="date">2024-02-16</h4>
       
       <small class="dont-index">Source: <a href="https://github.com/xinhe-lab/ctwas/blob/main/vignettes/ctwas_summary_statistics.Rmd" class="external-link"><code>vignettes/ctwas_summary_statistics.Rmd</code></a></small>
       <div class="hidden name"><code>ctwas_summary_statistics.Rmd</code></div>
@@ -115,7 +115,7 @@
 <h3 id="data-harmonization">Data harmonization<a class="anchor" aria-label="anchor" href="#data-harmonization"></a>
 </h3>
 <p>There are a few potential problems when preparing the input data. First, the variants in the three sets of input data may not match. Only variants in all three input data will be used in cTWAS. So it is important to maximize the overlap of the variants in the three sets. This can be done for example, by imputing GWAS summary statistics of the variants missing in GWAS but in the LD reference. Another useful pre-processing step is to perform Minor allele frequency (MAF) filtering on the GWAS data so that only those with MAF above a certain cutoff would be used in the analysis, ideally the same cutoff used in the LD references. Additionally, when building the prediction models of gene expression, it is better to impute the genotype data using the LD reference, if possible. All these steps should be done before running cTWAS.</p>
-<p>The second potential problem is that the effect alleles in the prediction model, GWAS and LD reference may not agree with each other, thus we need to ``harmonize’’ the data to ensure that the effect alleles match. If the data are not already harmonized, we provide some options for harmonization. Please see the topics on <a href="https://xinhe-lab.github.io/mapgen/articles/harmonization.html" class="external-link">harmonization</a> for more details.</p>
+<p>The second potential problem is that the effect alleles in the prediction model, GWAS and LD reference may not agree with each other, thus we need to ``harmonize’’ the data to ensure that the effect alleles match. If the data are not already harmonized, we provide some options for harmonization. Please see the topics on <a href="https://xinhe-lab.github.io/ctwas/articles/harmonization.html" class="external-link">harmonization</a> for more details.</p>
 <p>The third potential problem is the LD of the GWAS data (in-sample LD) do not match the reference LD. This can lead to false positives in fine-mapping tools. Diagnostic tools including <a href="https://stephenslab.github.io/susieR/articles/susierss_diagnostic.html" class="external-link">SuSiE-RSS</a>, and <a href="https://github.com/Yves-CHEN/DENTIST/" class="external-link">DENTIST</a>, have been developed to check possible LD mismatch.</p>
 </div>
 <div class="section level3">
@@ -124,6 +124,7 @@
 <p>For this analysis, we will use summary statistics from a GWAS of LDL cholesterol in the UK Biobank. We will download the VCF from the IEU Open GWAS Project.</p>
 <div class="sourceCode" id="cb3"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># set the working directory, download the summary statistics, and unzip the file.</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/base/getwd.html" class="external-link">setwd</a></span><span class="op">(</span><span class="st">"/project2/xinhe/shared_data/ctwas_tutorial/"</span><span class="op">)</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/files2.html" class="external-link">dir.create</a></span><span class="op">(</span><span class="st">"/project2/xinhe/shared_data/ctwas_tutorial/gwas_summary_stats"</span><span class="op">)</span></span>
 <span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/system.html" class="external-link">system</a></span><span class="op">(</span><span class="st">"wget https://gwas.mrcieu.ac.uk/files/ukb-d-30780_irnt/ukb-d-30780_irnt.vcf.gz -P gwas_summary_stats"</span><span class="op">)</span></span>
@@ -231,7 +232,7 @@
 <div class="section level4">
 <h4 id="fusion-format">FUSION format<a class="anchor" aria-label="anchor" href="#fusion-format"></a>
 </h4>
-<p>Please check <a href="http://gusevlab.org/projects/fusion/#compute-your-own-predictive-models" class="external-link">Fusion/TWAS</a> for the format of FUSION weights. Below is an example.</p>
+<p>Please check <a href="http://gusevlab.org/projects/fusion/#compute-your-own-predictive-models" class="external-link">FUSION/TWAS</a> for the format of FUSION weights. Below is an example.</p>
 <div class="sourceCode" id="cb11"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">weight_fusion</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/system.file.html" class="external-link">system.file</a></span><span class="op">(</span><span class="st">"extdata/example_fusion_weights"</span>, <span class="st">"Tissue"</span>, package <span class="op">=</span> <span class="st">"ctwas"</span><span class="op">)</span></span></code></pre></div>
 <p>To specify weights in FUSION format, provide the directory that contains all the <code>.rdata</code> files as above. We assume a file with the same name as the directory with the suffix <code>.pos</code> is present in the same level as the directory. The program will search for this file automatically. For example, we have both the directory <code>Tissue/</code> and <code>Tissue.pos</code> present under the <code>extdata/example_fusion_weights</code> folder. Note that FUSION weights don’t come with covariance information among variants. So you need to turn off the option “recover_strand_ambig_wgt” in the “impute_expr_z” function.</p>
@@ -282,7 +283,7 @@
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/files2.html" class="external-link">dir.create</a></span><span class="op">(</span><span class="st">"/project2/xinhe/shared_data/ctwas_tutorial/regions"</span>, showWarnings<span class="op">=</span><span class="cn">F</span><span class="op">)</span></span>
 <span><span class="va">regions_file</span> <span class="op">&lt;-</span> <span class="st">"/project2/xinhe/shared_data/ctwas_tutorial/regions/regions_subset.bed"</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/utils/write.table.html" class="external-link">write.table</a></span><span class="op">(</span><span class="va">regions_df</span>, file<span class="op">=</span><span class="va">regions_file</span>, row.names<span class="op">=</span><span class="cn">F</span>, col.names<span class="op">=</span><span class="cn">T</span>, sep<span class="op">=</span><span class="st">"\t"</span>, quote <span class="op">=</span> <span class="cn">F</span><span class="op">)</span></span></code></pre></div>
-<p>Note that the default behavior of cTWAS is to merge regions that have a gene spanning the region boundary (<code>merge=T</code>). For this reason, the regions specified here may not correspond exactly to the final regions analyzed by cTWAS. See the section on [region merging]<a href="https://xinhe-lab.github.io/mapgen/articles/regionmerging.html" class="external-link uri">https://xinhe-lab.github.io/mapgen/articles/regionmerging.html</a>) for more details.</p>
+<p>Note that the default behavior of cTWAS is to merge regions that have a gene spanning the region boundary (<code>merge=T</code>). For this reason, the regions specified here may not correspond exactly to the final regions analyzed by cTWAS. See the section on <a href="https://xinhe-lab.github.io/ctwas/articles/regionmerging.html" class="external-link">region merging</a> for more details.</p>
 </div>
 <div class="section level4">
 <h4 id="ld-matrices">LD matrices<a class="anchor" aria-label="anchor" href="#ld-matrices"></a>
@@ -296,7 +297,7 @@
 <span><span class="fu"><a href="https://rdrr.io/r/base/list.files.html" class="external-link">list.files</a></span><span class="op">(</span><span class="va">ld_R_dir</span><span class="op">)</span></span></code></pre></div>
 <pre><code><span><span class="co">## [1] "example_locus_chr16.R_snp.71020125_72901251.RDS" </span></span>
 <span><span class="co">## [2] "example_locus_chr16.R_snp.71020125_72901251.Rvar"</span></span></code></pre>
-<p>The <code>.RDS</code> file is <a href="https://www.rdocumentation.org/packages/base/versions/3.3.2/topics/readRDS?tap_a=5644-dce66f&amp;tap_s=10907-287229" class="external-link">R .RDS format</a>. It stores the LD correlation matrix for a region (a <span class="math inline">\(p \times p\)</span> matrix, <span class="math inline">\(p\)</span> is the number of variants in the region). We require that for each <code>.RDS</code> file, in the same directory, there is a corresponding file with the same stem but ending with the suffix <code>.Rvar</code>. This <code>.Rvar</code> files includes variant information for the region, and the order of its rows must match the order of rows and columns in the <code>.RDS</code> file. The format of these files is:</p>
+<p>The <code>.RDS</code> file is in <code>.RDS</code> format. It stores the LD correlation matrix for a region (a <span class="math inline">\(p \times p\)</span> matrix, <span class="math inline">\(p\)</span> is the number of variants in the region). We require that for each <code>.RDS</code> file, in the same directory, there is a corresponding file with the same stem but ending with the suffix <code>.Rvar</code>. This <code>.Rvar</code> files includes variant information for the region, and the order of its rows must match the order of rows and columns in the <code>.RDS</code> file. The format of these files is:</p>
 <div class="sourceCode" id="cb22"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># correlation matrix</span></span>
 <span><span class="va">R_snp</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/readRDS.html" class="external-link">readRDS</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/system.file.html" class="external-link">system.file</a></span><span class="op">(</span><span class="st">"extdata/ld_matrices"</span>, <span class="st">"example_locus_chr16.R_snp.71020125_72901251.RDS"</span>, package <span class="op">=</span> <span class="st">"ctwas"</span><span class="op">)</span><span class="op">)</span></span>

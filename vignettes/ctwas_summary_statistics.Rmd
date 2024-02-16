@@ -49,9 +49,9 @@ We used the directories and files on the University of Chicago RCC cluster as ex
 
 There are a few potential problems when preparing the input data. First, the variants in the three sets of input data may not match. Only variants in all three input data will be used in cTWAS. So it is important to maximize the overlap of the variants in the three sets. This can be done for example, by imputing GWAS summary statistics of the variants missing in GWAS but in the LD reference. Another useful pre-processing step is to perform Minor allele frequency (MAF) filtering on the GWAS data so that only those with MAF above a certain cutoff would be used in the analysis, ideally the same cutoff used in the LD references. Additionally, when building the prediction models of gene expression, it is better to impute the genotype data using the LD reference, if possible.  All these steps should be done before running cTWAS.  
 
-The second potential problem is that the effect alleles in the prediction model, GWAS and LD reference may not agree with each other, thus we need to ``harmonize'' the data to ensure that the effect alleles match. If the data are not already harmonized, we provide some options for harmonization. Please see the topics on [harmonization](https://xinhe-lab.github.io/mapgen/articles/harmonization.html) for more details.
+The second potential problem is that the effect alleles in the prediction model, GWAS and LD reference may not agree with each other, thus we need to ``harmonize'' the data to ensure that the effect alleles match. If the data are not already harmonized, we provide some options for harmonization. Please see the topics on [harmonization][harmonization] for more details.
     
-The third potential problem is the LD of the GWAS data (in-sample LD) do not match the reference LD. This can lead to false positives in fine-mapping tools. Diagnostic tools including [SuSiE-RSS](https://stephenslab.github.io/susieR/articles/susierss_diagnostic.html), and [DENTIST](https://github.com/Yves-CHEN/DENTIST/), have been developed to check possible LD mismatch. 
+The third potential problem is the LD of the GWAS data (in-sample LD) do not match the reference LD. This can lead to false positives in fine-mapping tools. Diagnostic tools including [SuSiE-RSS][susierss_diagnostic], and [DENTIST][DENTIST], have been developed to check possible LD mismatch. 
 
 ### GWAS z-scores
 
@@ -59,6 +59,7 @@ For this analysis, we will use summary statistics from a GWAS of LDL cholesterol
 
 ```{r, eval=FALSE}
 # set the working directory, download the summary statistics, and unzip the file.
+setwd("/project2/xinhe/shared_data/ctwas_tutorial/")
 dir.create("/project2/xinhe/shared_data/ctwas_tutorial/gwas_summary_stats")
 
 system("wget https://gwas.mrcieu.ac.uk/files/ukb-d-30780_irnt/ukb-d-30780_irnt.vcf.gz -P gwas_summary_stats")
@@ -114,7 +115,7 @@ Often, a research may perform eQTL mapping and have a list of significant eQTLs 
 
 #### PredictDB format
 
-Please check [PredictDB](http://predictdb.org/) for the format of PredictDB weights. To specify weights in PredictDB format, provide the path to the `.db` file. 
+Please check [PredictDB][PredictDB] for the format of PredictDB weights. To specify weights in PredictDB format, provide the path to the `.db` file. 
 
 For this analysis, we will use liver gene expression models trained on GTEx v8 in the PredictDB format. We will download both the prediction models (`.db`) and the covariances between variants in the prediction models (`.txt.gz`). The covariances can optionally be used during harmonization to recover strand ambiguous variants.
 
@@ -172,7 +173,7 @@ weight <- "/project2/xinhe/shared_data/ctwas_tutorial/weights_nolnc/mashr_Liver_
 
 #### FUSION format
 
-Please check [Fusion/TWAS](http://gusevlab.org/projects/fusion/#compute-your-own-predictive-models) for the format of FUSION weights. Below is an example.
+Please check [FUSION/TWAS][FUSION_format] for the format of FUSION weights. Below is an example.
 
 ```{r FUSION_weight}
 weight_fusion <- system.file("extdata/example_fusion_weights", "Tissue", package = "ctwas")
@@ -202,7 +203,7 @@ The choice of LD reference population is important for fine-mapping. Best practi
 
 #### Defining regions
 
-cTWAS includes pre-defined regions based on European (EUR), Asian (ASN), or African (AFR) populations, using either genome build b38 or b37. These regions were previously generated using [LDetect](https://github.com/endrebak/ldetect). These regions are specified in `ctwas_rss` function using the `ld_regions` and `ld_regions_version` arguments, respectively (see function [reference](https://xinhe-lab.github.io/ctwas/reference/index.html)). 
+cTWAS includes pre-defined regions based on European (EUR), Asian (ASN), or African (AFR) populations, using either genome build b38 or b37. These regions were previously generated using [LDetect][LDetect]. These regions are specified in `ctwas_rss` function using the `ld_regions` and `ld_regions_version` arguments, respectively (see function [reference][reference]). 
 
 Here we focus on an example region containing the HPR locus using b38 European region file, which is included in the package.
 
@@ -226,13 +227,14 @@ regions_file <- "/project2/xinhe/shared_data/ctwas_tutorial/regions/regions_subs
 write.table(regions_df, file=regions_file, row.names=F, col.names=T, sep="\t", quote = F)
 ```
 
-Note that the default behavior of cTWAS is to merge regions that have a gene spanning the region boundary (`merge=T`). For this reason, the regions specified here may not correspond exactly to the final regions analyzed by cTWAS. See the section on [region merging]https://xinhe-lab.github.io/mapgen/articles/regionmerging.html) for more details.
+Note that the default behavior of cTWAS is to merge regions that have a gene spanning the region boundary (`merge=T`). For this reason, the regions specified here may not correspond exactly to the final regions analyzed by cTWAS. See the section on [region merging][region_merging] for more details.
 
 #### LD matrices
 
 To use LD matrices for the LD reference, provide a directory containing all of the `.RDS` matrix files and matching `.Rvar` variant information files. 
 
-The complete LD matrices of European individuals from UK Biobank can be downloaded [here](https://uchicago.box.com/s/jqocacd2fulskmhoqnasrknbt59x3xkn). On the University of Chicago RCC cluster, the b38 reference is available at `/project2/mstephens/wcrouse/UKB_LDR_0.1/` and the b37 reference is available at `/project2/mstephens/wcrouse/UKB_LDR_0.1_b37/`.
+The complete LD matrices of European individuals from UK Biobank can be downloaded [here][UKBB_LD_ref]. 
+On the University of Chicago RCC cluster, the b38 reference is available at `/project2/mstephens/wcrouse/UKB_LDR_0.1/` and the b37 reference is available at `/project2/mstephens/wcrouse/UKB_LDR_0.1_b37/`.
 
 We illustrated below how cTWAS uses the LD matrices. We have included an LD matrix for the HPR locus that we analyzed in the paper as part of the package. The complete LD matrix for this region was too large to include in the package, so we include only half of the variants at this locus, including the ones needed for the prediction models at this locus. 
 
@@ -260,7 +262,7 @@ ld_R_dir <- system.file("extdata/ld_matrices", package = "ctwas")
 list.files(ld_R_dir)
 ```
 
-The `.RDS` file is [R .RDS format](https://www.rdocumentation.org/packages/base/versions/3.3.2/topics/readRDS?tap_a=5644-dce66f&tap_s=10907-287229). It stores the LD correlation matrix for a region (a $p \times p$ matrix, $p$ is the number of variants in the region). We require that for each `.RDS` file, in the same directory, there is a corresponding file with the same stem but ending with the suffix `.Rvar`. This `.Rvar` files includes variant information for the region, and the order of its rows must match the order of rows and columns in the `.RDS` file. The format of these files is:
+The `.RDS` file is in `.RDS` format. It stores the LD correlation matrix for a region (a $p \times p$ matrix, $p$ is the number of variants in the region). We require that for each `.RDS` file, in the same directory, there is a corresponding file with the same stem but ending with the suffix `.Rvar`. This `.Rvar` files includes variant information for the region, and the order of its rows must match the order of rows and columns in the `.RDS` file. The format of these files is:
 
 ```{r}
 # correlation matrix
@@ -344,7 +346,7 @@ rm(R_snp_info)
 
 ### Imputing gene z-scores
 
-Now that the input data is prepared, we are ready to impute gene z-scores using cTWAS. This step basically performs Transcriptome-wide association studies (TWAS) on each gene with a prediction model. The underlying calculation is based on [S-PrediXcan](https://www.nature.com/articles/s41467-018-03621-1).
+Now that the input data is prepared, we are ready to impute gene z-scores using cTWAS. This step basically performs Transcriptome-wide association studies (TWAS) on each gene with a prediction model. The underlying calculation is based on [S-PrediXcan][S-PrediXcan].
 To impute gene z-scores at this locus, we use the `impute_expr_z` function. Here, we use the option `harmonize_z = T` and `harmonize_wgt = T` to harmonize both the z-scores and the weights to the LD reference. Because the z-scores and the LD reference are from the same source (UK Biobank), we expect that the strand is consistent between the GWAS and LD reference, so we use the option `strand_ambig_action_z = "none"` to treat strand ambiguous variants as unambiguous. The prediction models are from a different population (GTEx), so we use the option `recover_strand_ambig_wgt` to recover strand ambiguous variants in the prediction models. The detailed procedure is described in the paper.
 
 ```{r}
@@ -692,4 +694,15 @@ versions of R, and the R packages, used to generate these results.
 ```{r}
 sessionInfo()
 ```
+
+[harmonization]: https://xinhe-lab.github.io/ctwas/articles/harmonization.html
+[region_merging]: https://xinhe-lab.github.io/ctwas/articles/regionmerging.html
+[reference]: https://xinhe-lab.github.io/ctwas/reference/index.html
+[UKBB_LD_ref]: https://uchicago.box.com/s/jqocacd2fulskmhoqnasrknbt59x3xkn
+[LDetect]: https://github.com/endrebak/ldetect
+[PredictDB]: http://predictdb.org/
+[FUSION_format]: http://gusevlab.org/projects/fusion/#compute-your-own-predictive-models
+[S-PrediXcan]: https://www.nature.com/articles/s41467-018-03621-1
+[susierss_diagnostic]: https://stephenslab.github.io/susieR/articles/susierss_diagnostic.html
+[DENTIST]: https://github.com/Yves-CHEN/DENTIST/
 
