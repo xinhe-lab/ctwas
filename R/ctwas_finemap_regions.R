@@ -1,4 +1,4 @@
-#' cTWAS finemapping for specific regions with full SNPs (thin = 1)
+#' cTWAS fine-map specific regions with full SNPs (thin = 1)
 #'
 #' @param z_gene A data frame with two columns: "id", "z". giving the z scores for genes.
 #' Optionally, a "type" column can also be supplied; this is for using multiple sets of weights
@@ -6,53 +6,13 @@
 #' @param z_snp A data frame with four columns: "id", "A1", "A2", "z".
 #' giving the z scores for snps. "A1" is effect allele. "A2" is the other allele.
 #'
-#' @param ld_exprvarfs A character vector of `.exprvar` files.
-#' `.exprvar` files are tab delimited text files, containing position information for each imputed gene,
-#' with columns:
-#' \describe{
-#'   \item{chrom}{chromosome number, numeric}
-#'   \item{p0}{gene boundary position, the smaller value}
-#'   \item{p1}{gene boundary position, the larger value}
-#'   \item{id}{gene id}
-#' }
+#' @param param a list of estimated parameters, including \code{group_prior} and \code{group_prior_var}.
 #'
-#' @param ld_pgenfs A character vector of .pgen or .bed files. One file for one
-#' chromosome, in the order of 1 to 22. Therefore, the length of this vector
-#' needs to be 22. If .pgen files are given, then .pvar and .psam are assumed
-#' to present in the same directory. If .bed files are given, then .bim and
-#' .fam files are assumed to present in the same directory.
+#' @param region_info a data frame of region definition and associated file names
 #'
-#' @param LD_R_dir a string, pointing to a directory containing all LD matrix files and variant information. Expects .RDS files which contain LD correlation matrices for a region/block.
-#' For each RDS file, a file with same base name but ended with .Rvar needs to be present in the same folder. the .Rvar file has 5 required columns: "chrom", "id", "pos", "alt", "ref".
-#' If using PredictDB format weights and \code{scale_by_ld_variance=T}, a 6th column is also required: "variance", which is the variance of the each SNP.
-#' The order of rows needs to match the order of rows in .RDS file.
-#'
-#' @param ld_regions A string representing the population to use for defining
-#' LD regions. These LD regions were previously defined by ldetect. The user can also
-#' provide custom LD regions matching genotype data, see
-#' \code{ld_regions_custom}.
-#'
-#' @param ld_regions_version A string representing the genome reference build ("b37", "b38") to use for defining
-#' LD regions. See \code{ld_regions}.
-#'
-#' @param ld_regions_custom A bed format file defining LD regions. The default
-#' is \code{NULL}; when specified, \code{ld_regions} and \code{ld_regions_version} will be ignored.
-#'#'
-#' @param reuse_regionlist TRUE/FALSE. If FALSE, call index_regions function to get gene and SNP index and correlation matrix for each region.
-#' If TRUE, skip the index_regions function and load pre-computed indexed regions.
-#'
-#' @param regionlist_custom a list object of pre-computed indexed regions.
-#'
-#' @param region_tags a character vector of region tags, in the format of "chromosome"_"region number". If reuse_regionlist is TRUE,
-#' will select a subset of regions from the pre-computed regionlist with the specified region tags.
+#' @param regionlist the list of regions to be fine-mapped.
 #'
 #' @param L the number of effects for susie during the fine mapping steps
-#'
-#' @param group_prior a vector of two prior inclusion probabilities for SNPs and genes. This is ignored
-#' if \code{estimate_group_prior = T}
-#'
-#' @param group_prior_var a vector of two prior variances for SNPs and gene effects. This is ignored
-#' if \code{estimate_group_prior_var = T}
 #'
 #' @param use_null_weight TRUE/FALSE. If TRUE, allow for a probability of no effect in susie
 #'
@@ -65,48 +25,25 @@
 #'#'
 #' @param ncore The number of cores used to parallelize susie over regions
 #'
-#' @param ncore_LDR integer, number of cores to use to parallelize construction of the SNP x gene and gene x gene LD matrices
-#'
-#' @param outputdir a string, the directory to store output
-#'
-#' @param outname a string, the output name
-#'
-#' @param logfile the log file, if NULL will print log info on screen
-#'
-#' @param merge TRUE/FALSE. If TRUE, merge regions when a gene spans a region boundary (i.e. belongs to multiple regions.)
-#'
-#' @param compress_LDR TRUE/FALSE. If FALSE, correlation matrix folder are not compressed. If TRUE, compressed.
-#'
 #' @importFrom logging addHandler loginfo writeToFile
 #' @importFrom tools file_ext
 #'
+#' @return a list of PIPs and CS.
+#'
 #' @export
 #'
-ctwas_finemap_regions <- function(
+finemap_regions <- function(
     z_gene,
     z_snp,
-    ld_exprvarfs,
-    ld_pgenfs = NULL,
-    ld_R_dir = NULL,
-    ld_regions = c("EUR", "ASN", "AFR"),
-    ld_regions_version = c("b37", "b38"),
-    ld_regions_custom = NULL,
-    reuse_regionlist = F,
-    regionlist_custom = NULL,
-    region_tags = NULL,
+    param,
+    region_info,
+    regionlist,
     L= 5,
-    group_prior = NULL,
-    group_prior_var = NULL,
     use_null_weight = T,
     coverage = 0.95,
     min_abs_corr = 0.5,
     ncore = 1,
-    ncore_LDR = 1,
-    outputdir = getwd(),
-    outname = NULL,
-    logfile = NULL,
-    merge = F,
-    compress_LDR = F){
+    logfile){
 
   if (!is.null(logfile)){
     addHandler(writeToFile, file= logfile, level='DEBUG')
@@ -211,23 +148,21 @@ ctwas_finemap_regions <- function(
   }
 
   # run finemapping using SuSiE RSS
-  pars <- ctwas::susieI_rss(zdf = zdf,
-                            regionlist = regionlist,
-                            ld_exprvarfs = ld_exprvarfs,
-                            ld_pgenfs = ld_pgenfs,
-                            ld_Rfs = ld_Rfs,
-                            niter = 1,
-                            L = L,
-                            z_ld_weight = 0,
-                            group_prior = group_prior,
-                            group_prior_var = group_prior_var,
-                            use_null_weight = use_null_weight,
-                            coverage = coverage,
-                            min_abs_corr = min_abs_corr,
-                            ncore = ncore,
-                            outputdir = outputdir,
-                            outname = outname,
-                            report_parameters=F)
+  pars <- ctwas_susieI_rss(zdf = zdf,
+                           regionlist = regionlist,
+                           ld_exprvarfs = ld_exprvarfs,
+                           ld_pgenfs = ld_pgenfs,
+                           ld_Rfs = ld_Rfs,
+                           niter = 1,
+                           L = L,
+                           z_ld_weight = 0,
+                           group_prior = group_prior,
+                           group_prior_var = group_prior_var,
+                           use_null_weight = use_null_weight,
+                           coverage = coverage,
+                           min_abs_corr = min_abs_corr,
+                           ncore = ncore,
+                           report_parameters=F)
 
   if(compress_LDR){
     system(paste0("tar -zcvf ", outputdir, outname, "_LDR.tar.gz ", outputdir, outname, "_LDR"))
