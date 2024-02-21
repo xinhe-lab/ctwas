@@ -6,9 +6,17 @@
 #' @param z_snp A data frame with four columns: "id", "A1", "A2", "z".
 #' giving the z scores for snps. "A1" is effect allele. "A2" is the other allele.
 #'
-#' @param param a list of estimated parameters, including \code{group_prior} and \code{group_prior_var}.
-#'
 #' @param region_info a data frame of region definition and associated file names
+#'
+#' @param gene_info a data frame of gene information obtained from \code{compute_gene_z}
+#'
+#' @param weight a string, pointing to a directory with the FUSION/TWAS format of weights, or a .db file in predictdb format.
+#' A vector of multiple sets of weights in PredictDB format can also be specified; genes will have their filename appended
+#' to their gene name to ensure IDs are unique.
+#'
+#' @param group_prior a vector of two prior inclusion probabilities for SNPs and genes.
+#'
+#' @param group_prior_var a vector of two prior variances for SNPs and gene effects.
 #'
 #' @param thin The proportion of SNPs to be used for the parameter estimation and initial fine
 #' mapping steps. Smaller \code{thin} parameters reduce runtime at the expense of accuracy. The fine mapping step is rerun using full SNPs
@@ -56,6 +64,8 @@ screen_regions <- function(
   z_gene,
   z_snp,
   region_info,
+  gene_info = NULL,
+  weight = NULL,
   regionlist = NULL,
   regionlist_allSNPs = NULL,
   thin = 1,
@@ -95,9 +105,9 @@ screen_regions <- function(
     if (is.null(regionlist)){
       loginfo("Compute correlation matrices and generate regionlist with thin = %.2f", thin)
 
-      regionlist <- compute_cor(region_info,
-                                gene_info,
-                                weight_list,
+      regionlist <- compute_cor(region_info = region_info,
+                                gene_info = gene_info,
+                                weight = weight,
                                 select = zdf$id,
                                 thin = thin,
                                 minvar = 2,
@@ -120,8 +130,8 @@ screen_regions <- function(
 
     # run finemapping for all regions with thinned correlation matrices
     susieI_res <- ctwas_susieI_rss(zdf = zdf,
-                                   regionlist = regionlist,
                                    region_info = region_info,
+                                   regionlist = regionlist,
                                    niter = 1,
                                    L = L,
                                    group_prior = group_prior,
@@ -141,9 +151,9 @@ screen_regions <- function(
     if(is.null(regionlist_allSNPs)){
       loginfo("Compute correlation matrices and generate regionlist with all SNPs (thin = 1)")
 
-      regionlist <- compute_cor(region_info,
-                                gene_info,
-                                weight_list,
+      regionlist <- compute_cor(region_info = region_info,
+                                gene_info = gene_info,
+                                weight = weight,
                                 select = zdf$id,
                                 thin = 1,
                                 maxSNP = max_snp_region,

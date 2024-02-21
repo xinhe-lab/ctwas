@@ -41,6 +41,7 @@ ctwas_sumstats <- function(
   res <- est_param(z_snp = z_snp,
                    z_gene = z_gene,
                    region_info = region_info,
+                   gene_info = gene_info,
                    thin = thin,
                    group_prior_var_structure = group_prior_var_structure,
                    niter1 = niter1,

@@ -8,6 +8,12 @@
 #'
 #' @param region_info a data frame of region definition and associated file names
 #'
+#' @param gene_info a data frame of gene information obtained from \code{compute_gene_z}
+#'
+#' @param weight a string, pointing to a directory with the FUSION/TWAS format of weights, or a .db file in predictdb format.
+#' A vector of multiple sets of weights in PredictDB format can also be specified; genes will have their filename appended
+#' to their gene name to ensure IDs are unique.
+#'
 #' @param regionlist the list of regions to be fine-mapped.
 #'
 #' @param region_tags a character string of region tags
@@ -38,18 +44,20 @@
 #' @export
 #'
 finemap_regions <- function(z_gene,
-                             z_snp,
-                             regionlist,
-                             region_info,
-                             region_tags = NULL,
-                             L = 5,
-                             group_prior = NULL,
-                             group_prior_var = NULL,
-                             use_null_weight = T,
-                             coverage = 0.95,
-                             min_abs_corr = 0.5,
-                             ncore = 1,
-                             logfile = NULL){
+                            z_snp,
+                            region_info,
+                            gene_info = NULL,
+                            weight = NULL,
+                            regionlist = NULL,
+                            region_tags = NULL,
+                            L = 5,
+                            group_prior = NULL,
+                            group_prior_var = NULL,
+                            use_null_weight = T,
+                            coverage = 0.95,
+                            min_abs_corr = 0.5,
+                            ncore = 1,
+                            logfile = NULL){
 
   if (!is.null(logfile)){
     addHandler(writeToFile, file=logfile, level='DEBUG')
@@ -64,9 +72,9 @@ finemap_regions <- function(z_gene,
   if (is.null(regionlist)){
     loginfo("Compute correlation matrices and generate regionlist with all SNPs (thin = 1)")
 
-    regionlist <- compute_cor(region_info,
-                              gene_info,
-                              weight_list,
+    regionlist <- compute_cor(region_info = region_info,
+                              gene_info = gene_info,
+                              weight = weight,
                               select = zdf$id,
                               thin = 1,
                               minvar = 2,
@@ -100,8 +108,8 @@ finemap_regions <- function(z_gene,
 
   # run finemapping using SuSiE RSS
   finemap_res <- ctwas_susieI_rss(zdf = zdf,
-                                  regionlist = regionlist,
                                   region_info = region_info,
+                                  regionlist = regionlist,
                                   niter = 1,
                                   L = L,
                                   group_prior = group_prior,
