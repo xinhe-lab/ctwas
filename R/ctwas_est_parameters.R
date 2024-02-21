@@ -1,12 +1,27 @@
 #' Estimate cTWAS parameters
 #'
-#' @param z_gene A data frame with two columns: "id", "z". giving the z scores for genes.
-#' Optionally, a "type" column can also be supplied; this is for using multiple sets of weights
-#'
 #' @param z_snp A data frame with four columns: "id", "A1", "A2", "z".
 #' giving the z scores for snps. "A1" is effect allele. "A2" is the other allele.
 #'
+#' @param z_gene A data frame with two columns: "id", "z". giving the z scores for genes.
+#' Optionally, a "type" column can also be supplied; this is for using multiple sets of weights
+#'
 #' @param region_info a data frame of region definition and associated file names
+#'
+#' @param gene_info a data frame of gene information obtained from \code{compute_gene_z}
+#'
+#' @param weight a string, pointing to a directory with the FUSION/TWAS format of weights, or a .db file in predictdb format.
+#' A vector of multiple sets of weights in PredictDB format can also be specified; genes will have their filename appended
+#' to their gene name to ensure IDs are unique.
+
+#' @param weight_format a string, the format of weight, PredictDB or FUSION
+#'
+#' @param method a string, blup/bslmm/lasso/top1/enet/best. This option is only used for FUSION weights.
+#' "best" means the method giving the best cross #' validation R^2. Note that top1 uses only the weight
+#' with largest effect.
+#'
+#' @param scale_by_ld_variance TRUE/FALSE. If TRUE, PredictDB weights are scaled by genotype variance, which is the default
+#' behavior for PredictDB
 #'
 #' @param thin The proportion of SNPs to be used for the parameter estimation and initial fine
 #' mapping steps. Smaller \code{thin} parameters reduce runtime at the expense of accuracy.
@@ -48,23 +63,32 @@
 #'
 #' @param outname a string, the output name
 #'
+#' @param logfile the log file, if NULL will print log info on screen
+#'
+#' @importFrom logging addHandler loginfo writeToFile
+#'
 #' @return a list with estimated parameters, and updated region_info: containing correlation file names for each region.
 #'
 #' @export
 #'
 est_param <- function(
-    z_gene,
     z_snp,
+    z_gene,
     region_info,
+    gene_info = NULL,
+    weight = NULL,
+    weight_format = c("PredictDB", "FUSION"),
+    method = c("lasso", "blup", "bslmm", "top1", "enet", "best"),
+    scale_by_ld_variance = TRUE,
     thin = 1,
     prob_single = 0.8,
     niter1 = 3,
     niter2 = 30,
-    L= 5,
+    L = 5,
     group_prior = NULL,
     group_prior_var = NULL,
     group_prior_var_structure = c("independent","shared_all","shared+snps","shared_QTLtype"),
-    use_null_weight = T,
+    use_null_weight = TRUE,
     coverage = 0.95,
     min_abs_corr = 0.5,
     ncore = 1,
@@ -76,138 +100,102 @@ est_param <- function(
     addHandler(writeToFile, file= logfile, level='DEBUG')
   }
 
-  loginfo('ctwas started ... ')
+  loginfo('Estimating cTWAS parameters ... ')
 
-  if (length(ld_exprvarfs) != 22){
-    stop("Not all imputed expression files for 22 chromosomes are provided.")
-  }
-
-  if (is.null(ld_pgenfs) & is.null(ld_R_dir)){
-    stop("Error: need to provide either .pgen file or ld_R file")
-  } else if (!is.null(ld_pgenfs)){
-    if (length(ld_pgenfs) != 22){
-      stop("Not all pgen files for 22 chromosomes are provided.")
-    }
-    ld_pvarfs <- sapply(ld_pgenfs, prep_pvar, outputdir = outputdir)
-    ld_snpinfo <- lapply(ld_pvarfs, read_pvar)
-    ld_Rfs <- NULL # do not use R matrix info if genotype is given
-  } else {
-    ld_Rfs <- write_ld_Rf(ld_R_dir, outname = outname, outputdir = outputdir)
-    ld_snpinfo <- lapply(ld_Rfs, read_ld_Rvar)
-    ld_pvarfs <- NULL
-  }
-
-  if (is.null(ld_regions_custom)){
-    ld_regions <- match.arg(ld_regions)
-    ld_regions_version <- match.arg(ld_regions_version)
-    regionfile <- system.file("extdata", "ldetect",
-                              paste0(ld_regions, "." , ld_regions_version, ".bed"), package="ctwas")
-  } else {
-    regionfile <- ld_regions_custom
-  }
-
-  loginfo("LD region file: %s", regionfile)
-
-  z_snp$type <- "SNP"
-  z_snp$QTLtype <- "SNP"
-  if (is.null(z_gene$type)){
-    z_gene$type <- "gene"
-  }
-  if (is.null(z_gene$QTLtype)){
-    z_gene$QTLtype <- "gene"
-  }
-
-  zdf <- rbind(z_snp[, c("id", "z", "type", "QTLtype")], z_gene[, c("id", "z", "type", "QTLtype")])
   group_prior_var_structure <- match.arg(group_prior_var_structure)
 
-  rm(z_snp, ld_snpinfo)
+  if (missing(z_gene)) {
+    # impute gene z-scores
+    res <- compute_gene_z(z_snp = z_snp,
+                          weight = weight,
+                          region_info = region_info,
+                          weight_format = weight_format,
+                          method = method,
+                          scale_by_ld_variance=scale_by_ld_variance,
+                          ncore=ncore)
+    z_gene <- res$z_gene
+    z_snp <- res$z_snp
+    gene_info <- res$gene_info
+  }
 
-  if (thin <=0 | thin > 1){
+  # combine z-scores of SNPs and genes
+  zdf <- combine_z(z_gene, z_snp)
+
+  if (thin <= 0 | thin > 1){
     stop("thin value needs to be in (0,1]")
   }
 
-  if (!reuse_regionlist){
-    regionlist <- index_regions(regionfile = regionfile,
-                                exprvarfs = ld_exprvarfs,
-                                pvarfs = ld_pvarfs,
-                                ld_Rfs = ld_Rfs,
-                                select = zdf$id,
-                                thin = thin, minvar = 2,
-                                outname = outname,
-                                outputdir = outputdir,
-                                merge = merge,
-                                ncore = ncore_LDR) # susie_rss can't take 1 var.
+  if (is.null(regionlist)){
+    loginfo("Computing correlation matrices and generating regionlist with thin = %.2f", thin)
 
-    saveRDS(regionlist, file=paste0(outputdir, "/", outname, ".regionlist.RDS"))
+    regionlist <- compute_cor(region_info,
+                              gene_info = gene_info,
+                              weight_list = weight,
+                              select = zdf$id,
+                              thin = thin,
+                              minvar = 2,
+                              outname = outname,
+                              outputdir = outputdir,
+                              merge = FALSE,
+                              ncore = ncore)
 
-    temp_regs <- lapply(1:22, function(x) cbind(x,
-                                                unlist(lapply(regionlist[[x]], "[[", "start")),
-                                                unlist(lapply(regionlist[[x]], "[[", "stop"))))
+    # saveRDS(regionlist, file=paste0(outputdir, "/", outname, ".regionlist.RDS"))
 
-    regs <- do.call(rbind, lapply(temp_regs, function(x) if (ncol(x) == 3){x}))
-
-    write.table(regs , file= paste0(outputdir,"/", outname, ".regions.txt")
-                , row.names=F, col.names=T, sep="\t", quote = F)
-  }
-  else{
-    regionlist <- readRDS(paste0(outputdir, "/", outname, ".regionlist.RDS"))
-    regs <- fread(paste0(outputdir,"/", outname, ".regions.txt"))
+    # temp_regs <- lapply(1:22, function(x) cbind(x,
+    #                                             unlist(lapply(regionlist[[x]], "[[", "start")),
+    #                                             unlist(lapply(regionlist[[x]], "[[", "stop"))))
+    #
+    # regs <- do.call(rbind, lapply(temp_regs, function(x) if (ncol(x) == 3){x}))
+    #
+    # write.table(regs , file= paste0(outputdir,"/", outname, ".regions.txt")
+    #             , row.names=F, col.names=T, sep="\t", quote = F)
   }
 
-  loginfo("Run susie iteratively, getting rough estimate ...")
+  loginfo("Run susieI for %d iterations, getting rough estimate ...", niter1)
 
-  pars <- ctwas_susieI_rss(zdf = zdf,
-                           regionlist = regionlist,
-                           ld_exprvarfs = ld_exprvarfs,
-                           ld_pgenfs = ld_pgenfs,
-                           ld_Rfs = ld_Rfs,
-                           niter = niter1,
-                           L = 1,
-                           z_ld_weight = 0,
-                           group_prior = group_prior,
-                           group_prior_var = group_prior_var,
-                           group_prior_var_structure = group_prior_var_structure,
-                           estimate_group_prior = T,
-                           estimate_group_prior_var = T,
-                           use_null_weight = use_null_weight,
-                           coverage = coverage,
-                           min_abs_corr = min_abs_corr,
-                           ncore = ncore,
-                           outputdir = outputdir,
-                           outname = paste0(outname, ".s1"))
+  susieI_res <- ctwas_susieI_rss(zdf = zdf,
+                                 regionlist = regionlist,
+                                 region_info = region_info,
+                                 niter = niter1,
+                                 L = 1,
+                                 group_prior = group_prior,
+                                 group_prior_var = group_prior_var,
+                                 group_prior_var_structure = group_prior_var_structure,
+                                 estimate_group_prior = TRUE,
+                                 estimate_group_prior_var = TRUE,
+                                 use_null_weight = use_null_weight,
+                                 coverage = coverage,
+                                 min_abs_corr = min_abs_corr,
+                                 ncore = ncore)
 
-  group_prior <- pars[["group_prior"]]
-  group_prior_var <- pars[["group_prior_var"]]
+  group_prior <- susieI_res$param[["group_prior"]]
+  group_prior_var <- susieI_res$param[["group_prior_var"]]
 
   # filter blocks
-  regionlist2 <- filter_regions(regionlist,
-                                group_prior,
-                                prob_single,
-                                zdf)
+  filtered_regionlist <- filter_regions(regionlist, group_prior, prob_single, zdf)
 
-  loginfo("Blocks are filtered: %s blocks left",
-          sum(unlist(lapply(regionlist2, length))))
+  loginfo("Blocks are filtered: %d blocks left",
+          sum(unlist(lapply(filtered_regionlist, length))))
 
-  loginfo("Run susie iteratively, getting accurate estimate ...")
+  loginfo("Run susieI for %d iterations, getting accurate estimate ...", niter2)
 
-  pars <- ctwas_susieI_rss(zdf = zdf,
-                           regionlist = regionlist2,
-                           ld_exprvarfs = ld_exprvarfs,
-                           ld_pgenfs = ld_pgenfs,
-                           ld_Rfs = ld_Rfs,
-                           niter = niter2,
-                           L = 1,
-                           z_ld_weight = 0,
-                           group_prior = group_prior,
-                           group_prior_var = group_prior_var,
-                           group_prior_var_structure = group_prior_var_structure,
-                           estimate_group_prior = T,
-                           estimate_group_prior_var = T,
-                           use_null_weight = use_null_weight,
-                           coverage = coverage,
-                           min_abs_corr = min_abs_corr,
-                           ncore = ncore,
-                           outputdir = outputdir,
-                           outname = paste0(outname, ".s2"))
+  susieI_res <- ctwas_susieI_rss(zdf = zdf,
+                                 regionlist = filtered_regionlist,
+                                 region_info = region_info,
+                                 niter = niter2,
+                                 L = 1,
+                                 group_prior = group_prior,
+                                 group_prior_var = group_prior_var,
+                                 group_prior_var_structure = group_prior_var_structure,
+                                 estimate_group_prior = TRUE,
+                                 estimate_group_prior_var = TRUE,
+                                 use_null_weight = use_null_weight,
+                                 coverage = coverage,
+                                 min_abs_corr = min_abs_corr,
+                                 ncore = ncore)
+
+  return(list("param" = susieI_res$param,
+              "regionlist" = regionlist))
+
 }
 
