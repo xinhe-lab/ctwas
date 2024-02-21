@@ -49,8 +49,9 @@ compute_gene_z <- function (z_snp,
   # read and check Rvar from the region_info table
   ld_Rinfo_list <- read_region_ld_Rinfo(region_info)
 
-  z_genelist <- list()
-  ld_snplist <- c() # list to store names of snps in ld reference
+  z_gene_list <- vector("list", length = 22)
+
+  ld_ref_snps <- c() # list to store names of snps in ld reference
 
   for (b in chr) {
 
@@ -61,13 +62,14 @@ compute_gene_z <- function (z_snp,
       loginfo("Impute gene z scores for chromosome %s", b)
 
       # read snp info in all the regions in the chromosome
-      ld_snpinfo <- read_ld_Rvar_snp_info(ld_Rinfo$R_snp_info)
+      # ld_snpinfo <- read_ld_Rvar_snp_info(ld_Rinfo$Rvar_file)
+      ld_snpinfo <- do.call(rbind, lapply(ld_Rinfo$Rvar_file, data.table::fread))
 
       chrom <- unique(ld_snpinfo$chrom)
       if (length(chrom) > 1) {
         stop("Input LD reference not split by chromosome")
       }
-      ld_snplist <- c(ld_snplist, ld_snpinfo$id) #store names of snps in ld reference
+      ld_ref_snps <- c(ld_ref_snps, ld_snpinfo$id) #store names of snps in ld reference
 
       loginfo("Reading weights with %s format for chromosome %s", weight_format, b)
       if (weight_format == "FUSION") {
@@ -114,7 +116,7 @@ compute_gene_z <- function (z_snp,
         cl <- parallel::makeCluster(ncore, outfile = "")
         doParallel::registerDoParallel(cl)
 
-        outlist <- foreach(core = 1:ncore, .combine = "c", .packages = c("ctwas", "tools")) %dopar% {
+        outlist <- foreach(core = 1:ncore, .combine = "c", .packages = c("ctwas")) %dopar% {
 
           batches <- corelist[[core]]
 
@@ -123,15 +125,19 @@ compute_gene_z <- function (z_snp,
           for (batch in batches) {
             gnames <- regs[regs$reg == batch, "gid"]
             regnames <- strsplit(batch, ";")[[1]]
-            regRDS <- ld_Rinfo$RDS_file[match(regnames, ld_Rinfo$region_name)]
-            R_snp <- lapply(regRDS, readRDS)
+            reg_idx <- match(regnames, ld_Rinfo$region_name)
+            reg_RDS_files <- ld_Rinfo$RDS_file[reg_idx]
+            reg_Rvar_files <- ld_Rinfo$Rvar_file[reg_idx]
+            R_snp <- lapply(reg_RDS_files, readRDS)
             R_snp <- suppressWarnings({as.matrix(Matrix::bdiag(R_snp))})
-            R_snp_anno <- do.call(rbind, lapply(regRDS, read_ld_Rvar_RDS))
+            # R_snp_info <- do.call(rbind, lapply(reg_Rvar_files, read_ld_Rvar_file))
+            R_snp_info <- do.call(rbind, lapply(reg_Rvar_files, data.table::fread))
+
             for (i in 1:length(gnames)) {
               gname <- gnames[i]
               wgt <- exprlist[[gname]][["wgt"]]
               snpnames <- rownames(wgt)
-              ld.idx <- match(snpnames, R_snp_anno$id)
+              ld.idx <- match(snpnames, R_snp_info$id)
               zdf.idx <- match(snpnames, z_snp$id)
               R.s <- R_snp[ld.idx, ld.idx]
               z.s <- as.matrix(z_snp$z[zdf.idx])
@@ -169,22 +175,19 @@ compute_gene_z <- function (z_snp,
       }
 
       z_gene_chr <- data.frame(id = gnames, z = z.g)
+
       loginfo("Number of genes with imputed expression: %s for chr %s", length(gnames), b)
-      z_genelist[[b]] <- z_gene_chr
+      z_gene_list[[b]] <- z_gene_chr
     }
 
   }
-  z_gene <- do.call(rbind, z_genelist)
+  z_gene <- do.call(rbind, z_gene_list)
 
   # filter z_snp to snps in LD reference
-  z_snp <- z_snp[z_snp$id %in% ld_snplist,]
-
-  # combine z-scores of genes and SNPs
-  zdf <- combine_z(z_gene, z_snp)
+  z_snp <- z_snp[z_snp$id %in% ld_ref_snps,]
 
   return(list(z_gene = z_gene,
               z_snp = z_snp,
-              zdf = zdf,
               gene_info = gene_info))
 }
 
