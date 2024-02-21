@@ -17,97 +17,83 @@
 #'
 #' @param ncore The number of cores used to parallelize imputation over weights
 #'
-#' @param chrom a numeric vector of chromosomes to perform z score imputation over. Useful for large jobs requiring batches
+#' @param chr a numeric vector of chromosomes to perform z score imputation over. Useful for large jobs requiring batches
 #'
 #' @param scale_by_ld_variance TRUE/FALSE. If TRUE, PredictDB weights are scaled by genotype variance, which is the default
 #' behavior for PredictDB
 #'
-#' @importFrom tools file_ext
+#' @param logfile the log file, if NULL will print log info on screen
 #'
-#' @return gene z-scores
+#' @return a list of gene z-scores and SNP z-scores
+#'
+#' @importFrom logging addHandler loginfo
 #'
 #' @export
-compute_gene_z <- function (z_snp, weight, region_info,
+compute_gene_z <- function (z_snp,
+                            weight,
+                            region_info,
                             weight_format = c("PredictDB", "FUSION"),
-                            method = "lasso",
-                            ncore=1, chrom=1:22,
-                            scale_by_ld_variance=TRUE){
+                            method = c("lasso", "blup", "bslmm", "top1", "enet", "best"),
+                            ncore=1,
+                            chr=1:22,
+                            scale_by_ld_variance=TRUE,
+                            logfile = NULL){
 
-  if (is.null(ld_pgenfs) & is.null(ld_R_dir)) {
-    stop("Stopped: missing LD information.\n         LD information needs to be provided either in genotype form\n         (see parameter description for ld_pgenfs) or R matrix form\n         (see parameter description for ld_R_dir) ")
-  } else if (is.null(ld_pgenfs)) {
-    ld_Rfs <- write_ld_Rf(ld_R_dir, outname = outname, outputdir = outputdir)
+  if (!is.null(logfile)) {
+    addHandler(writeToFile, file = logfile, level = "DEBUG")
   }
-  outname <- file.path(outputdir, outname)
-  #ld_exprfs <- vector()
-  z_genelist <- list()
-  ld_snplist <- c() #list to store names of snps in ld reference
-  for (b in chrom) {
-    if (!is.null(ld_pgenfs)) {
-      ld_pgenf <- ld_pgenfs[b]
-      ld_pvarf <- prep_pvar(ld_pgenf, outputdir = outputdir)
-      ld_snpinfo <- read_pvar(ld_pvarf)
-    } else {
-      ld_Rf <- ld_Rfs[b]
-      ld_Rinfo <- data.table::fread(ld_Rf, header = T)
-      ld_snpinfo <- read_ld_Rvar(ld_Rf)
-    }
-    chrom <- unique(ld_snpinfo$chrom)
-    if (length(chrom) > 1) {
-      stop("Input LD reference not split by chromosome")
-    }
-    ld_snplist <- c(ld_snplist, ld_snpinfo$id) #store names of snps in ld reference
 
-    loginfo("Reading weights for chromosome %s", b)
-    if (weight_format == "FUSION") {
-      weightall <- read_weight_FUSION(weight,
-                                      b,
-                                      ld_snpinfo,
-                                      z_snp,
-                                      method = method,
-                                      harmonize_wgt=F)
-    } else if (weight_format == "PredictDB") {
-      weightall <- read_weight_predictdb(weight,
-                                         b,
-                                         ld_snpinfo,
-                                         z_snp,
-                                         harmonize_wgt=F,
-                                         ld_Rinfo=ld_Rinfo,
-                                         ncore=ncore,
-                                         scale_by_ld_variance=scale_by_ld_variance)
-    } else {
-      stop("Unrecognized weight format, need to use either FUSION format or predict.db format")
-    }
-    exprlist <- weightall[["exprlist"]]
-    qclist <- weightall[["qclist"]]
-    if (length(exprlist) > 0) {
-      loginfo("Start gene z score imputation ...")
-      if (!is.null(ld_pgenfs)) {
-        loginfo("ld genotype is given, using genotypes to impute gene z score.")
-        ld_pgen <- prep_pgen(ld_pgenf, ld_pvarf)
-        gnames <- names(exprlist)
-        for (i in 1:length(gnames)) {
-          gname <- gnames[i]
-          wgt <- exprlist[[gname]][["wgt"]]
-          snpnames <- rownames(wgt)
-          ld.idx <- match(snpnames, ld_snpinfo$id)
-          z.idx <- match(snpnames, z_snp$id)
-          X.g <- read_pgen(ld_pgen, variantidx = ld.idx)
-          X.g <- scale(X.g)
-          gexpr <- X.g %*% wgt
-          if (abs(max(gexpr) - min(gexpr)) < 1e-08) {
-            exprlist[[gname]] <- NULL
-          } else {
-            z.s <- as.matrix(z_snp[z.idx, "z"])
-            var.s <- sqrt(apply(X.g, 2, var))
-            Gamma.g <- cov(X.g)
-            z.g <- (t(wgt) * var.s) %*% z.s/sqrt(t(wgt) %*%
-                                                   Gamma.g %*% wgt)
-            exprlist[[gname]][["expr"]] <- gexpr
-            exprlist[[gname]][["z.g"]] <- z.g
-          }
-        }
+  weight_format <- match.arg(weight_format)
+  method <- match.arg(method)
+
+  # read and check Rvar from the region_info table
+  ld_Rinfo_list <- read_region_ld_Rinfo(region_info)
+
+  z_genelist <- list()
+  ld_snplist <- c() # list to store names of snps in ld reference
+
+  for (b in chr) {
+
+    # region info in the chromosome
+    ld_Rinfo <- ld_Rinfo_list[[b]]
+
+    if(!is.null(ld_Rinfo)){
+      loginfo("Impute gene z scores for chromosome %s", b)
+
+      # read snp info in all the regions in the chromosome
+      ld_snpinfo <- read_ld_Rvar_snp_info(ld_Rinfo$R_snp_info)
+
+      chrom <- unique(ld_snpinfo$chrom)
+      if (length(chrom) > 1) {
+        stop("Input LD reference not split by chromosome")
+      }
+      ld_snplist <- c(ld_snplist, ld_snpinfo$id) #store names of snps in ld reference
+
+      loginfo("Reading weights with %s format for chromosome %s", weight_format, b)
+      if (weight_format == "FUSION") {
+        weightall <- read_weight_FUSION(weight,
+                                        b,
+                                        ld_snpinfo,
+                                        z_snp,
+                                        method = method,
+                                        harmonize_wgt=F)
+      } else if (weight_format == "PredictDB") {
+        weightall <- read_weight_predictdb(weight,
+                                           b,
+                                           ld_snpinfo,
+                                           z_snp,
+                                           harmonize_wgt=F,
+                                           ld_Rinfo=ld_Rinfo,
+                                           ncore=ncore,
+                                           scale_by_ld_variance=scale_by_ld_variance)
       } else {
+        stop("Unrecognized weight format, need to use either FUSION format or predict.db format")
+      }
+
+      exprlist <- weightall[["exprlist"]]
+      qclist <- weightall[["qclist"]]
+      if (length(exprlist) > 0) {
+        loginfo("Start gene z score imputation ...")
         loginfo("Using given LD matrices to impute gene z score.")
 
         for (gname in names(exprlist)) {
@@ -120,7 +106,9 @@ compute_gene_z <- function (z_snp, weight, region_info,
         regs <- data.frame(gid = names(exprlist), reg = unlist(lapply(exprlist, "[[", "reg")), stringsAsFactors = F)
         batches <- names(sort(-table(regs$reg)))
 
-        corelist <- lapply(1:ncore, function(core){batches_core <- batches[0:ceiling(length(batches)/ncore-1)*ncore+core]; batches_core[!is.na(batches_core)]})
+        corelist <- lapply(1:ncore, function(core){
+          batches_core <- batches[0:ceiling(length(batches)/ncore-1)*ncore+core];
+          batches_core[!is.na(batches_core)]})
         names(corelist) <- 1:ncore
 
         cl <- parallel::makeCluster(ncore, outfile = "")
@@ -160,46 +148,60 @@ compute_gene_z <- function (z_snp, weight, region_info,
         for (gname in names(outlist)){
           exprlist[[gname]][["z.g"]] <- outlist[[gname]][["z.g"]]
         }
+
       }
-    }
-    loginfo("Imputation done, writing results to output...")
-    z.g <- unlist(lapply(exprlist, "[[", "z.g"))
-    gnames <- names(exprlist)
-    chrom <- unlist(lapply(exprlist, "[[", "chrom"))
-    p0 <- unlist(lapply(exprlist, "[[", "p0"))
-    p1 <- unlist(lapply(exprlist, "[[", "p1"))
-    wgtlist <- lapply(exprlist, "[[", "wgt")
-    exprvarf <- paste0(outname, "_chr", b, ".exprvar")
+      loginfo("Gene z score imputation done.")
+      gnames <- names(exprlist)
+      z.g <- unlist(lapply(exprlist, "[[", "z.g"))
+      chrom <- unlist(lapply(exprlist, "[[", "chrom"))
+      p0 <- unlist(lapply(exprlist, "[[", "p0"))
+      p1 <- unlist(lapply(exprlist, "[[", "p1"))
+      wgtlist <- lapply(exprlist, "[[", "wgt")
+      gene_name <- lapply(exprlist, "[[", "gname")
+      weight_name <- lapply(exprlist, "[[", "weight_name")
 
-    gene_name <- lapply(exprlist, "[[", "gname")
-    weight_name <- lapply(exprlist, "[[", "weight_name")
-
-    if (length(exprlist) == 0) {
-      geneinfo <- data.table::data.table(NULL)
-    } else {
-      geneinfo <- data.frame(chrom = chrom, id = gnames, p0 = p0, p1 = p1)
-      geneinfo$gene_name <- gene_name
-      geneinfo$weight_name <- weight_name
-    }
-    data.table::fwrite(geneinfo, file = exprvarf, sep = "\t", quote = F)
-    z_gene_chr <- data.frame(id = gnames, z = z.g)
-    exprqcf <- paste0(outname, "_chr", b, ".exprqc.Rd")
-    save(wgtlist, qclist, z_gene_chr, file = exprqcf)
-    exprf <- paste0(outname, "_chr", b, ".expr")
-    if (!is.null(ld_pgenfs)) {
       if (length(exprlist) == 0) {
-        expr <- data.table::data.table(NULL)
+        gene_info <- data.table::data.table(NULL)
       } else {
-        expr <- do.call(cbind, lapply(exprlist, "[[", "expr"))
+        gene_info <- data.frame(chrom = chrom, id = gnames, p0 = p0, p1 = p1)
+        gene_info$gene_name <- gene_name
+        gene_info$weight_name <- weight_name
       }
-    } else {
-      expr <- data.table::data.table(NA)
+
+      z_gene_chr <- data.frame(id = gnames, z = z.g)
+      loginfo("Number of genes with imputed expression: %s for chr %s", length(gnames), b)
+      z_genelist[[b]] <- z_gene_chr
     }
-    loginfo("Imputation done: number of genes with imputed expression: %s for chr %s", length(gnames), b)
-    z_genelist[[b]] <- z_gene_chr
+
   }
   z_gene <- do.call(rbind, z_genelist)
-  z_snp <- z_snp[z_snp$id %in% ld_snplist,] #subset z_snp to snps in ld reference
 
-  return(list(z_gene = z_gene, z_snp = z_snp))
+  # filter z_snp to snps in LD reference
+  z_snp <- z_snp[z_snp$id %in% ld_snplist,]
+
+  # combine z-scores of genes and SNPs
+  zdf <- combine_z(z_gene, z_snp)
+
+  return(list(z_gene = z_gene,
+              z_snp = z_snp,
+              zdf = zdf,
+              gene_info = gene_info))
 }
+
+# combine z-scores of genes and SNPs
+combine_z <- function(z_gene, z_snp){
+
+  z_snp$type <- "SNP"
+  z_snp$QTLtype <- "SNP"
+  if (is.null(z_gene$type)){
+    z_gene$type <- "gene"
+  }
+  if (is.null(z_gene$QTLtype)){
+    z_gene$QTLtype <- "gene"
+  }
+  zdf <- rbind(z_snp[, c("id", "z", "type", "QTLtype")],
+               z_gene[, c("id", "z", "type", "QTLtype")])
+
+  return(zdf)
+}
+
