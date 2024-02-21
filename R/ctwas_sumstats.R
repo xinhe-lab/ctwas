@@ -1,33 +1,24 @@
 #' Causal inference for TWAS using summary statistics
-#'
-#' @param z_snp A data frame with four columns: "id", "A1", "A2", "z".
-#' giving the z scores for snps. "A1" is effect allele. "A2" is the other allele.
-#'
-#' @param weight a string, pointing to a directory with the fusion/twas format of weights, or a .db file in predictdb format.
-#' A vector of multiple sets of weights in PredictDB format can also be specified; genes will have their filename appended
-#' to their gene name to ensure IDs are unique.
-
-#' @param region_info a data frame of region definition and associated file names
-#'
-#' @param outputdir a string, the directory to store output
-#'
-#' @param outname a string, the output name
-#'
-#' @param logfile the log file, if NULL will print log info on screen
-#'
-#' @importFrom logging addHandler loginfo writeToFile
-#'
-#' @return a list of imputed gene z-scores, estimated parameters,
-#' finemapping PIPs and credible sets, and updated region_info
-#'
-#' @export
-#'
 ctwas_sumstats <- function(
     z_snp,
     weight,
     region_info,
+    weight_format = c("PredictDB", "FUSION"),
+    method = c("lasso", "blup", "bslmm", "top1", "enet", "best"),
+    niter1 = 3,
+    niter2 = 30,
+    L = 5,
+    group_prior = NULL,
+    group_prior_var = NULL,
+    group_prior_var_structure = c("independent","shared_all","shared+snps","shared_QTLtype"),
+    thin = 1,
+    prob_single = 0.8,
+    use_null_weight = T,
+    coverage = 0.95,
+    min_abs_corr = 0.5,
+    ncore = 1,
     outputdir = getwd(),
-    outname = "ctwas_sumstats",
+    outname = NULL,
     logfile = NULL){
 
   if (!is.null(logfile)){
@@ -35,21 +26,57 @@ ctwas_sumstats <- function(
   }
 
   # compute gene z-scores
-  z_gene <- compute_gene_z(z_snp, weight, region_info)
+  res <- compute_gene_z(z_snp = z_snp,
+                        weight = weight,
+                        region_info = region_info,
+                        weight_format = weight_format,
+                        method = method,
+                        ncore = ncore)
+  z_gene <- res$z_gene
+  z_snp <- res$z_snp
+  gene_info <- res$gene_info
+  rm(res)
 
-  # estimate parameters (including compute_cor)
-  param <- est_param(z_snp, z_gene, region_info, outputdir, outname)
+  # estimate parameters (including computing correlation matrices)
+  res <- est_param(z_snp = z_snp,
+                   z_gene = z_gene,
+                   region_info = region_info,
+                   thin = thin,
+                   group_prior_var_structure = group_prior_var_structure,
+                   niter1 = niter1,
+                   niter2 = niter2,
+                   outputdir = outputdir,
+                   outname = outname,
+                   ncore = ncore)
+
+  param <- res$param
+  group_prior <- param$group_prior
+  group_prior_var <- param$group_prior_var
+  regionlist <- res$regionlist
+  rm(res)
 
   # screen regions
-  regionlist <- screen_regions(z_snp, z_gene, param, region_info)
+  screened_regionlist <- screen_regions(z_snp = z_snp,
+                                        z_gene = z_gene,
+                                        region_info = region_info,
+                                        regionlist = regionlist,
+                                        group_prior = group_prior,
+                                        group_prior_var = group_prior_var)
 
-  # fine-map selected regions (including compute_cor)
-  fine_map_regions(z_snp, z_gene, param, region_info, regionlist)
+  # fine-map selected regions
+  finemap_res <- finemap_regions(z_snp = z_snp,
+                                 z_gene = z_gene,
+                                 region_info = region_info,
+                                 regionlist = screened_regionlist,
+                                 L = L,
+                                 group_prior = group_prior,
+                                 group_prior_var = group_prior_var)
 
-  return(list("z_gene" = z_gene,
-              "param" = par,
-              "ctwas_susie_res" = ctwas_susie_res,
-              "region_info" = updated_region_info))
+  return(
+    list("finemap_res" = finemap_res,
+         "z_gene" = z_gene,
+         "param" = param,
+         "region_info" = region_info))
 
 }
 
