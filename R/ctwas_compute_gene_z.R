@@ -46,22 +46,23 @@ compute_gene_z <- function (z_snp,
   weight_format <- match.arg(weight_format)
   method <- match.arg(method)
 
-  # read and check Rvar from the region_info table
+  # read and check Rvar files from the region_info table,
+  # return a list of updated region_info table (with region names) for each chromosome
   ld_Rinfo_list <- read_region_ld_Rinfo(region_info)
 
   z_gene_list <- vector("list", length = 22)
-
-  ld_ref_snps <- c() # list to store names of snps in ld reference
+  gene_info_list <- vector("list", length = 22)
+  ld_ref_snps <- c() # store all SNPs in LD reference
 
   for (b in chr) {
 
-    # region info in the chromosome
+    # updated region info table in the chromosome
     ld_Rinfo <- ld_Rinfo_list[[b]]
 
     if(!is.null(ld_Rinfo)){
       loginfo("Impute gene z scores for chromosome %s", b)
 
-      # read snp info in all the regions in the chromosome
+      # read SNP info from Rvar file of all the regions in the chromosome
       # ld_snpinfo <- read_ld_Rvar_snp_info(ld_Rinfo$Rvar_file)
       ld_snpinfo <- do.call(rbind, lapply(ld_Rinfo$Rvar_file, data.table::fread))
 
@@ -69,7 +70,7 @@ compute_gene_z <- function (z_snp,
       if (length(chrom) > 1) {
         stop("Input LD reference not split by chromosome")
       }
-      ld_ref_snps <- c(ld_ref_snps, ld_snpinfo$id) #store names of snps in ld reference
+      ld_ref_snps <- c(ld_ref_snps, ld_snpinfo$id) # store names of SNPs in LD reference
 
       loginfo("Reading weights with %s format for chromosome %s", weight_format, b)
       if (weight_format == "FUSION") {
@@ -119,7 +120,6 @@ compute_gene_z <- function (z_snp,
         outlist <- foreach(core = 1:ncore, .combine = "c", .packages = c("ctwas")) %dopar% {
 
           batches <- corelist[[core]]
-
           outlist_core <- list()
 
           for (batch in batches) {
@@ -148,14 +148,13 @@ compute_gene_z <- function (z_snp,
           }
           outlist_core
         }
-
         parallel::stopCluster(cl)
 
         for (gname in names(outlist)){
           exprlist[[gname]][["z.g"]] <- outlist[[gname]][["z.g"]]
         }
-
       }
+
       loginfo("Gene z score imputation done.")
       gnames <- names(exprlist)
       z.g <- unlist(lapply(exprlist, "[[", "z.g"))
@@ -165,25 +164,34 @@ compute_gene_z <- function (z_snp,
       wgtlist <- lapply(exprlist, "[[", "wgt")
       gene_name <- lapply(exprlist, "[[", "gname")
       weight_name <- lapply(exprlist, "[[", "weight_name")
+      loginfo("Number of genes with imputed expression: %s for chr %s", length(gnames), b)
 
-      if (length(exprlist) == 0) {
-        gene_info <- data.table::data.table(NULL)
+      if (length(gnames) > 0) {
+        gene_info_chr <- data.frame(chrom = chrom,
+                                    id = gnames,
+                                    p0 = p0,
+                                    p1 = p1,
+                                    gene_name = gene_name,
+                                    weight_name = weight_name)
       } else {
-        gene_info <- data.frame(chrom = chrom, id = gnames, p0 = p0, p1 = p1)
-        gene_info$gene_name <- gene_name
-        gene_info$weight_name <- weight_name
+        gene_info_chr <- data.table::data.table(NULL)
       }
 
-      z_gene_chr <- data.frame(id = gnames, z = z.g)
+      gene_info_list[[b]] <- gene_info_chr
 
-      loginfo("Number of genes with imputed expression: %s for chr %s", length(gnames), b)
-      z_gene_list[[b]] <- z_gene_chr
+      # data frame with gene ids, and imputed gene z-scores
+      z_gene_list[[b]] <- data.frame(id = gnames, z = z.g)
     }
 
   }
+
+  # gene z-score data frame with gene ids, and imputed gene z-scores
   z_gene <- do.call(rbind, z_gene_list)
 
-  # filter z_snp to snps in LD reference
+  # gene info data frame with gene ids, gene names, gene coordinates and weight names
+  gene_info <- do.call(rbind, gene_info_list)
+
+  # SNP z-score data frame, only include SNPs in LD reference
   z_snp <- z_snp[z_snp$id %in% ld_ref_snps,]
 
   return(list(z_gene = z_gene,

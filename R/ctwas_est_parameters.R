@@ -1,12 +1,14 @@
 #' Estimate cTWAS parameters
 #'
-#' @param z_snp A data frame with four columns: "id", "A1", "A2", "z".
-#' giving the z scores for snps. "A1" is effect allele. "A2" is the other allele.
-#'
-#' @param z_gene A data frame with two columns: "id", "z". giving the z scores for genes.
-#' Optionally, a "type" column can also be supplied; this is for using multiple sets of weights
+#' @param z_snp a data frame with four columns: "id", "A1", "A2", "z".
+#' giving the z scores for SNPs. "A1" is effect allele. "A2" is the other allele.
 #'
 #' @param region_info a data frame of region definition and associated file names
+#'
+#' @param regionlist a list object indexing regions, variants and genes.
+#'
+#' @param z_gene a data frame with two columns: "id", "z". giving the z scores for genes.
+#' Optionally, a "type" column can also be supplied; this is for using multiple sets of weights
 #'
 #' @param gene_info a data frame of gene information obtained from \code{compute_gene_z}
 #'
@@ -23,12 +25,13 @@
 #' @param scale_by_ld_variance TRUE/FALSE. If TRUE, PredictDB weights are scaled by genotype variance, which is the default
 #' behavior for PredictDB
 #'
-#' @param thin The proportion of SNPs to be used for the parameter estimation and initial fine
-#' mapping steps. Smaller \code{thin} parameters reduce runtime at the expense of accuracy.
+#' @param thin The proportion of SNPs to be used for the parameter estimation and
+#' initial screening region steps.
+#' Smaller \code{thin} parameters reduce runtime at the expense of accuracy.
 #' The fine mapping step is rerun using full SNPs for regions with strong gene signals.
 #'
-#' @param prob_single Blocks with probability greater than \code{prob_single} of having 1 or fewer effects will be
-#' used for parameter estimation
+#' @param prob_single Blocks with probability greater than \code{prob_single} of
+#' having 1 or fewer effects will be used for parameter estimation
 #'
 #' @param niter1 the number of iterations of the E-M algorithm to perform during the initial parameter estimation step
 #'
@@ -36,11 +39,9 @@
 #'
 #' @param L the number of effects for susie during the fine mapping steps
 #'
-#' @param group_prior a vector of two prior inclusion probabilities for SNPs and genes. This is ignored
-#' if \code{estimate_group_prior = T}
+#' @param group_prior a vector of two prior inclusion probabilities for SNPs and genes.
 #'
-#' @param group_prior_var a vector of two prior variances for SNPs and gene effects. This is ignored
-#' if \code{estimate_group_prior_var = T}
+#' @param group_prior_var a vector of two prior variances for SNPs and gene effects.
 #'
 #' @param group_prior_var_structure a string indicating the structure to put on the prior variance parameters.
 #' "independent" is the default and allows all groups to have their own separate variance parameters.
@@ -57,24 +58,25 @@
 #'   correlation of 0.25, which is a commonly used threshold for
 #'   genotype data in genetic studies.
 #'
-#' @param ncore The number of cores used to parallelize susie over regions
+#' @param ncore The number of cores used to parallelize computation over regions
 #'
-#' @param outputdir a string, the directory to store output
+#' @param outputdir a string, the directory to store the correlation files
 #'
-#' @param outname a string, the output name
+#' @param outname a string, the output name for the correlation files
 #'
 #' @param logfile the log file, if NULL will print log info on screen
 #'
 #' @importFrom logging addHandler loginfo writeToFile
 #'
-#' @return a list with estimated parameters, and updated region_info: containing correlation file names for each region.
+#' @return a list with estimated parameters, and updated region_info with correlation file names for each region.
 #'
 #' @export
 #'
 est_param <- function(
     z_snp,
-    z_gene,
     region_info,
+    regionlist = NULL,
+    z_gene = NULL,
     gene_info = NULL,
     weight = NULL,
     weight_format = c("PredictDB", "FUSION"),
@@ -85,7 +87,7 @@ est_param <- function(
     niter1 = 3,
     niter2 = 30,
     L = 5,
-    group_prior = NULL,
+    group_prior = NULL, # DO WE NEED to specify the priors here?
     group_prior_var = NULL,
     group_prior_var_structure = c("independent","shared_all","shared+snps","shared_QTLtype"),
     use_null_weight = TRUE,
@@ -104,18 +106,20 @@ est_param <- function(
 
   group_prior_var_structure <- match.arg(group_prior_var_structure)
 
-  if (missing(z_gene)) {
-    # impute gene z-scores
-    res <- compute_gene_z(z_snp = z_snp,
-                          weight = weight,
-                          region_info = region_info,
-                          weight_format = weight_format,
-                          method = method,
-                          scale_by_ld_variance=scale_by_ld_variance,
-                          ncore=ncore)
-    z_gene <- res$z_gene
-    z_snp <- res$z_snp
-    gene_info <- res$gene_info
+  # compute gene z-scores if not available
+  if (is.null(z_gene)) {
+    loginfo("Computing gene z-scores ...")
+    compute_gene_z_res <- compute_gene_z(z_snp = z_snp,
+                                         weight = weight,
+                                         region_info = region_info,
+                                         weight_format = weight_format,
+                                         method = method,
+                                         scale_by_ld_variance=scale_by_ld_variance,
+                                         ncore=ncore)
+    z_gene <- compute_gene_z_res$z_gene
+    z_snp <- compute_gene_z_res$z_snp
+    gene_info <- compute_gene_z_res$gene_info
+    rm(compute_gene_z_res)
   }
 
   # combine z-scores of SNPs and genes
@@ -125,40 +129,39 @@ est_param <- function(
     stop("thin value needs to be in (0,1]")
   }
 
-  if (is.null(regionlist)){
-    loginfo("Computing correlation matrices and generating regionlist with thin = %.2f", thin)
+  # if correlation files not available, computing correlation matrices and generating regionlist
+  if (is.null(region_info$cor_file)) {
+    loginfo("Compute correlation matrices and generate regionlist with thin = %.2f", thin)
+    compute_cor_res <- compute_cor(region_info = region_info,
+                                   gene_info = gene_info,
+                                   weight_list = weight,
+                                   select = zdf$id,
+                                   thin = thin,
+                                   minvar = 2,
+                                   outname = outname,
+                                   outputdir = outputdir,
+                                   merge = FALSE,
+                                   ncore = ncore)
 
-    regionlist <- compute_cor(region_info,
-                              gene_info = gene_info,
-                              weight_list = weight,
-                              select = zdf$id,
-                              thin = thin,
-                              minvar = 2,
-                              outname = outname,
-                              outputdir = outputdir,
-                              merge = FALSE,
-                              ncore = ncore)
-
-    # saveRDS(regionlist, file=paste0(outputdir, "/", outname, ".regionlist.RDS"))
-
-    # temp_regs <- lapply(1:22, function(x) cbind(x,
-    #                                             unlist(lapply(regionlist[[x]], "[[", "start")),
-    #                                             unlist(lapply(regionlist[[x]], "[[", "stop"))))
-    #
-    # regs <- do.call(rbind, lapply(temp_regs, function(x) if (ncol(x) == 3){x}))
-    #
-    # write.table(regs , file= paste0(outputdir,"/", outname, ".regions.txt")
-    #             , row.names=F, col.names=T, sep="\t", quote = F)
+    regionlist <- compute_cor_res$regionlist
+    region_info <- compute_cor_res$region_info # updated region_info containing correlation file names for each region
+    # saveRDS(regionlist, file=file.path(outputdir, paste0(outname, ".regionlist.RDS")))
+    rm(compute_cor_res)
   }
 
-  loginfo("Run susieI for %d iterations, getting rough estimate ...", niter1)
+  # Run susieI with L = 1 for a few (niter1) iterations, getting rough estimates
+  loginfo("Run susieI for %d iterations, getting rough estimates ...", niter1)
+
+  if (!is.null(group_prior)){
+    group_prior["SNP"] <- group_prior["SNP"]/thin
+  }
 
   susieI_res <- ctwas_susieI_rss(zdf = zdf,
                                  regionlist = regionlist,
                                  region_info = region_info,
                                  niter = niter1,
                                  L = 1,
-                                 group_prior = group_prior,
+                                 group_prior = group_prior, # DO WE NEED to take the priors here?
                                  group_prior_var = group_prior_var,
                                  group_prior_var_structure = group_prior_var_structure,
                                  estimate_group_prior = TRUE,
@@ -168,23 +171,32 @@ est_param <- function(
                                  min_abs_corr = min_abs_corr,
                                  ncore = ncore)
 
-  group_prior <- susieI_res$param[["group_prior"]]
-  group_prior_var <- susieI_res$param[["group_prior_var"]]
+  param <- susieI_res$param
+  group_prior <- param$group_prior
+  group_prior_var <- param$group_prior_var
+  print("Roughly estimated group_prior: \n")
+  print(group_prior)
+  print("Roughly estimated group_prior_var: \n")
+  print(group_prior_var)
+  rm(susieI_res, param)
 
-  # filter blocks
-  filtered_regionlist <- filter_regions(regionlist, group_prior, prob_single, zdf)
+  # filter regions based on prob_single
+  filtered_regionlist <- filter_regions(regionlist = regionlist,
+                                        group_prior = group_prior,
+                                        prob_single = prob_single,
+                                        zdf = zdf)
+  n_filtered_regions <- sum(unlist(lapply(filtered_regionlist, length)))
+  loginfo("%d regions left after filtering with prob_single = %.2f",
+          n_filtered_regions, prob_single)
 
-  loginfo("Blocks are filtered: %d blocks left",
-          sum(unlist(lapply(filtered_regionlist, length))))
-
-  loginfo("Run susieI for %d iterations, getting accurate estimate ...", niter2)
-
+  # Run susieI with L = 1 for more (niter2) iterations, getting rough estimates
+  loginfo("Run susieI with L = 1 for %d iterations, getting accurate estimates ...", niter2)
   susieI_res <- ctwas_susieI_rss(zdf = zdf,
                                  regionlist = filtered_regionlist,
                                  region_info = region_info,
                                  niter = niter2,
                                  L = 1,
-                                 group_prior = group_prior,
+                                 group_prior = group_prior, # DO WE NEED to take the priors here?
                                  group_prior_var = group_prior_var,
                                  group_prior_var_structure = group_prior_var_structure,
                                  estimate_group_prior = TRUE,
@@ -194,8 +206,16 @@ est_param <- function(
                                  min_abs_corr = min_abs_corr,
                                  ncore = ncore)
 
-  return(list("param" = susieI_res$param,
-              "regionlist" = regionlist))
+  param <- susieI_res$param
+  print("Estimated group_prior: \n")
+  print(param$group_prior)
+  print("Estimated group_prior_var: \n")
+  print(param$group_prior_var)
+
+  return(list("param" = param,
+              "region_info" = region_info,
+              "regionlist" = regionlist,
+              "filtered_regionlist" = filtered_regionlist))
 
 }
 

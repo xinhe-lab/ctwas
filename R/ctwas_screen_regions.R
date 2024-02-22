@@ -1,10 +1,10 @@
 #' Screen regions
 #'
-#' @param z_gene A data frame with two columns: "id", "z". giving the z scores for genes.
-#' Optionally, a "type" column can also be supplied; this is for using multiple sets of weights
-#'
 #' @param z_snp A data frame with four columns: "id", "A1", "A2", "z".
 #' giving the z scores for snps. "A1" is effect allele. "A2" is the other allele.
+#'
+#' @param z_gene A data frame with two columns: "id", "z". giving the z scores for genes.
+#' Optionally, a "type" column can also be supplied; this is for using multiple sets of weights
 #'
 #' @param region_info a data frame of region definition and associated file names
 #'
@@ -14,12 +14,9 @@
 #' A vector of multiple sets of weights in PredictDB format can also be specified; genes will have their filename appended
 #' to their gene name to ensure IDs are unique.
 #'
-#' @param group_prior a vector of two prior inclusion probabilities for SNPs and genes.
-#'
-#' @param group_prior_var a vector of two prior variances for SNPs and gene effects.
-#'
-#' @param thin The proportion of SNPs to be used for the parameter estimation and initial fine
-#' mapping steps. Smaller \code{thin} parameters reduce runtime at the expense of accuracy. The fine mapping step is rerun using full SNPs
+#' @param thin The proportion of SNPs to be used for parameter estimation and initial screening regions.
+#' Smaller \code{thin} parameters reduce runtime at the expense of accuracy.
+#' The fine mapping step is rerun using full SNPs
 #' for regions with strong gene signals; see \code{rerun_gene_PIP}.
 
 #' @param max_snp_region Inf or integer. Maximum number of SNPs in a region. Default is
@@ -32,6 +29,10 @@
 #' all blocks will rerun with full SNPs
 #'
 #' @param L the number of effects for susie during the fine mapping steps
+#'
+#' @param group_prior a vector of two prior inclusion probabilities for SNPs and genes.
+#'
+#' @param group_prior_var a vector of two prior variances for SNPs and gene effects.
 #'
 #' @param use_null_weight TRUE/FALSE. If TRUE, allow for a probability of no effect in susie
 #'
@@ -50,37 +51,33 @@
 #'
 #' @param logfile the log file, if NULL will print log info on screen
 #'
-#' @param compress_LDR TRUE/FALSE. If FALSE, correlation matrix folder are not compressed. If TRUE, compressed.
-#'
-#' @importFrom logging addHandler loginfo
-#'
-#' @importFrom tools file_ext
+#' @importFrom logging addHandler loginfo writeToFile
 #'
 #' @return a list of regions to be fine-mapped
 #'
 #' @export
 #'
 screen_regions <- function(
-  z_gene,
-  z_snp,
-  region_info,
-  gene_info = NULL,
-  weight = NULL,
-  regionlist = NULL,
-  regionlist_allSNPs = NULL,
-  thin = 1,
-  max_snp_region = Inf,
-  rerun_gene_PIP = 0.5,
-  group_prior = NULL,
-  group_prior_var = NULL,
-  L = 5,
-  use_null_weight = T,
-  coverage = 0.95,
-  min_abs_corr = 0.5,
-  ncore = 1,
-  outputdir = getwd(),
-  outname = NULL,
-  logfile = NULL){
+    z_snp,
+    z_gene,
+    region_info,
+    gene_info = NULL,
+    weight = NULL,
+    regionlist = NULL,
+    regionlist_allSNPs = NULL,
+    thin = 1,
+    max_snp_region = Inf,
+    rerun_gene_PIP = 0.5,
+    L = 5,
+    group_prior = NULL,
+    group_prior_var = NULL,
+    use_null_weight = T,
+    coverage = 0.95,
+    min_abs_corr = 0.5,
+    ncore = 1,
+    outputdir = getwd(),
+    outname = NULL,
+    logfile = NULL){
 
   if (!is.null(logfile)){
     addHandler(writeToFile, file= logfile, level='DEBUG')
@@ -95,40 +92,33 @@ screen_regions <- function(
     stop("thin value needs to be in (0,1]")
   }
 
-  if (thin == 1) {
-    loginfo("thin = 1, skip screening regions.")
-    return(regionlist)
+  # TODO: confirm if thin = 1, skip screening regions
+  if (thin != 1) {
 
-  } else {
-    loginfo("Screening regions.")
+    loginfo("Screening regions ...")
 
-    if (is.null(regionlist)){
+    if (is.null(regionlist)) {
       loginfo("Compute correlation matrices and generate regionlist with thin = %.2f", thin)
+      compute_cor_res <- compute_cor(region_info = region_info,
+                                     gene_info = gene_info,
+                                     weight_list = weight,
+                                     select = zdf$id,
+                                     thin = thin,
+                                     minvar = 2,
+                                     outname = outname,
+                                     outputdir = outputdir,
+                                     merge = FALSE,
+                                     ncore = ncore)
 
-      regionlist <- compute_cor(region_info = region_info,
-                                gene_info = gene_info,
-                                weight = weight,
-                                select = zdf$id,
-                                thin = thin,
-                                minvar = 2,
-                                outname = outname,
-                                outputdir = outputdir,
-                                merge = FALSE,
-                                ncore = ncore)
-
-      saveRDS(regionlist, file=paste0(outputdir, "/", outname, ".regionlist.RDS"))
-
-      # temp_regs <- lapply(1:22, function(x) cbind(x,
-      #                                             unlist(lapply(regionlist[[x]], "[[", "start")),
-      #                                             unlist(lapply(regionlist[[x]], "[[", "stop"))))
-      #
-      # regs <- do.call(rbind, lapply(temp_regs, function(x) if (ncol(x) == 3){x}))
-      #
-      # write.table(regs , file= paste0(outputdir,"/", outname, ".regions.txt"),
-      #             row.names=F, col.names=T, sep="\t", quote = F)
+      regionlist <- compute_cor_res$regionlist
+      region_info <- compute_cor_res$region_info # updated region_info containing correlation file names for each region
+      # saveRDS(regionlist, file=file.path(outputdir, paste0(outname, ".regionlist.RDS")))
+      rm(compute_cor_res)
     }
 
-    # run finemapping for all regions with thinned correlation matrices
+    # run finemapping for all regions containing thinned SNPs
+    loginfo("Run initial screening for all regions ...")
+
     susieI_res <- ctwas_susieI_rss(zdf = zdf,
                                    region_info = region_info,
                                    regionlist = regionlist,
@@ -143,60 +133,64 @@ screen_regions <- function(
                                    min_abs_corr = min_abs_corr,
                                    ncore = ncore,
                                    verbose = F)
+
     finemap_res <- susieI_res$susieIrss_res
 
-    group_prior["SNP"] <- group_prior["SNP"] * thin # convert snp pi1
-
-    # get regionlist with all SNPs
+    # get correlation matrices and regionlist containing all SNPs (thin = 1)
     if(is.null(regionlist_allSNPs)){
-      loginfo("Compute correlation matrices and generate regionlist with all SNPs (thin = 1)")
+      loginfo("Compute correlation matrices and generate regionlist containing all SNPs")
 
-      regionlist <- compute_cor(region_info = region_info,
-                                gene_info = gene_info,
-                                weight = weight,
-                                select = zdf$id,
-                                thin = 1,
-                                maxSNP = max_snp_region,
-                                minvar = 2,
-                                outname = paste0(outname,".allSNPs"),
-                                outputdir = outputdir,
-                                merge = FALSE,
-                                ncore = ncore,
-                                reuse_R_gene = T)
+      compute_cor_res <- compute_cor(region_info = region_info,
+                                     gene_info = gene_info,
+                                     weight = weight,
+                                     select = zdf$id,
+                                     thin = 1,
+                                     maxSNP = max_snp_region,
+                                     minvar = 2,
+                                     outname = paste0(outname,".allSNPs"),
+                                     outputdir = outputdir,
+                                     merge = FALSE,
+                                     ncore = ncore,
+                                     reuse_R_gene = T)
 
-      saveRDS(regionlist, file=paste0(outputdir, "/", outname, ".allSNPs.regionlist.RDS"))
-      # temp_regs <- lapply(1:22, function(x) cbind(x,
-      #                                             unlist(lapply(regionlist[[x]], "[[", "start")),
-      #                                             unlist(lapply(regionlist[[x]], "[[", "stop"))))
-      #
-      # regs <- do.call(rbind, lapply(temp_regs, function(x) if (ncol(x) == 3){x}))
-      # write.table(regs , file= paste0(outputdir,"/", outname, ".allSNPs.regions.txt"),
-      #             row.names=F, col.names=T, sep="\t", quote = F)
-    }else{
-      regionlist <- regionlist_allSNPs
+      regionlist_allSNPs <- compute_cor_res$regionlist
+      region_info <- compute_cor_res$region_info # updated region_info containing correlation file names for each region
+      # saveRDS(regionlist_allSNPs, file=file.path(outputdir, paste0(outname, ".regionlist.allSNPs.RDS")))
+      rm(compute_cor_res)
     }
 
-    # filter out regions based on max gene PIP of the region
-    res.keep <- NULL
-    for (b in 1: length(regionlist)){
-      for (rn in names(regionlist[[b]])){
-        #gene_PIP <- max(finemap_res$susie_pip[res$type != "SNP" & finemap_res$region_tag1 == b & finemap_res$region_tag2 == rn], 0)
-        gene_PIP <- sum(finemap_res$susie_pip[res$type != "SNP" & finemap_res$region_tag1 == b & finemap_res$region_tag2 == rn])
-        gene_PIP <- ifelse(is.na(gene_PIP), 0, gene_PIP) #0 if gene_PIP is NA (no genes in this region)
+    # select regions based on max gene PIP of the region
+    # TODO: confirm the change to use TOTAL none SNP PIP rather than MAX gene PIP?
+    finemap_weak_res <- NULL
+    screened_regionlist <- regionlist_allSNPs
+    for (b in 1: length(regionlist_allSNPs)){
+      for (rn in names(regionlist_allSNPs[[b]])){
+        #gene_PIP <- max(finemap_res$susie_pip[finemap_res$type != "SNP" & finemap_res$region_tag1 == b & finemap_res$region_tag2 == rn], 0)
+        gene_PIP <- sum(finemap_res$susie_pip[finemap_res$type != "SNP" & finemap_res$region_tag1 == b & finemap_res$region_tag2 == rn])
+        gene_PIP <- ifelse(is.na(gene_PIP), 0, gene_PIP) # 0 if gene_PIP is NA (no genes in this region)
         if (gene_PIP < rerun_gene_PIP) {
-          regionlist[[b]][[rn]] <- NULL
-          res.keep <- rbind(res.keep, res[res$region_tag1 ==b & res$region_tag2 == rn, ])
+          screened_regionlist[[b]][[rn]] <- NULL
+          # keep the finemapping results for the regions without strong signals (will not rerun)
+          finemap_weak_res <- rbind(finemap_weak_res, finemap_res[finemap_res$region_tag1 == b & finemap_res$region_tag2 == rn, ])
         }
       }
     }
 
-    nreg <- sum(unlist(lapply(regionlist, length)))
-
+    nreg <- sum(unlist(lapply(screened_regionlist, length)))
     loginfo("Number of regions that contain strong gene signals: %d", nreg)
 
+  }else{
+    loginfo("thin = 1, skip screening regions.")
+    finemap_weak_res <- NULL
+    regionlist_allSNPs <- regionlist
+    screened_regionlist <- regionlist
   }
 
-  return(regionlist)
+  return(list("region_info" = region_info,
+              "finemap_weak_res" = finemap_weak_res,
+              "regionlist" = regionlist,
+              "regionlist_allSNPs" = regionlist_allSNPs,
+              "screened_regionlist" = screened_regionlist))
 }
 
 

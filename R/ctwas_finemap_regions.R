@@ -1,10 +1,10 @@
 #' cTWAS fine-map specific regions with full SNPs (thin = 1)
 #'
-#' @param z_gene A data frame with two columns: "id", "z". giving the z scores for genes.
-#' Optionally, a "type" column can also be supplied; this is for using multiple sets of weights
-#'
 #' @param z_snp A data frame with four columns: "id", "A1", "A2", "z".
 #' giving the z scores for snps. "A1" is effect allele. "A2" is the other allele.
+#'
+#' @param z_gene A data frame with two columns: "id", "z". giving the z scores for genes.
+#' Optionally, a "type" column can also be supplied; this is for using multiple sets of weights
 #'
 #' @param region_info a data frame of region definition and associated file names
 #'
@@ -43,8 +43,8 @@
 #'
 #' @export
 #'
-finemap_regions <- function(z_gene,
-                            z_snp,
+finemap_regions <- function(z_snp,
+                            z_gene,
                             region_info,
                             gene_info = NULL,
                             weight = NULL,
@@ -68,45 +68,39 @@ finemap_regions <- function(z_gene,
   # combine z-scores of different types
   zdf <- combine_z(z_gene, z_snp)
 
-  # Compute correlation matrices and generate regionlist
-  if (is.null(regionlist)){
-    loginfo("Compute correlation matrices and generate regionlist with all SNPs (thin = 1)")
+  # TODO: do we want to include compute_cor() here?
+  # in the case that people may run finemapping with fixed parameter (without precomputed correlation matrices)
 
-    regionlist <- compute_cor(region_info = region_info,
-                              gene_info = gene_info,
-                              weight = weight,
-                              select = zdf$id,
-                              thin = 1,
-                              minvar = 2,
-                              outname = outname,
-                              outputdir = outputdir,
-                              merge = merge,
-                              ncore = ncore)
+  # if correlation files not available, computing correlation matrices and generating regionlist
+  if (is.null(region_info$cor_file)) {
+    loginfo("Compute correlation matrices and generate regionlist with thin = %.2f", thin)
+    compute_cor_res <- compute_cor(region_info = region_info,
+                                   gene_info = gene_info,
+                                   weight_list = weight,
+                                   select = zdf$id,
+                                   thin = thin,
+                                   minvar = 2,
+                                   outname = outname,
+                                   outputdir = outputdir,
+                                   merge = FALSE,
+                                   ncore = ncore)
 
-    saveRDS(regionlist, file=paste0(outputdir, "/", outname, ".regionlist.RDS"))
-
-    # temp_regs <- lapply(1:22, function(x) cbind(x,
-    #                                             unlist(lapply(regionlist[[x]], "[[", "start")),
-    #                                             unlist(lapply(regionlist[[x]], "[[", "stop"))))
-    #
-    # regs <- do.call(rbind, lapply(temp_regs, function(x) if (ncol(x) == 3){x}))
-    #
-    # write.table(regs , file= paste0(outputdir,"/", outname, ".regions.txt")
-    #             , row.names=F, col.names=T, sep="\t", quote = F)
-  } else {
-    loginfo("Use existing regionlist")
+    regionlist <- compute_cor_res$regionlist
+    region_info <- compute_cor_res$region_info # updated region_info containing correlation file names for each region
+    # saveRDS(regionlist, file=file.path(outputdir, paste0(outname, ".regionlist.RDS")))
+    rm(compute_cor_res)
   }
 
   # select and assemble a subset of regionlist by region_tags
   if (length(region_tags) > 0){
-    loginfo("subset %s regions", length(region_tags))
+    loginfo("Subset %s regions from the regionlist", length(region_tags))
     subset_regionlist_res <- subset_regionlist(regionlist, region_tags)
     regionlist <- subset_regionlist_res$regionlist
   }
 
-  loginfo("Run cTWAS finemapping with L = %d", L)
+  loginfo("Run finemapping with L = %d", L)
 
-  # run finemapping using SuSiE RSS
+  # run finemapping
   finemap_res <- ctwas_susieI_rss(zdf = zdf,
                                   region_info = region_info,
                                   regionlist = regionlist,
