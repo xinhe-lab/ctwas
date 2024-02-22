@@ -58,6 +58,7 @@
 ctwas_susieI_rss <- function(zdf,
                              regionlist,
                              region_info,
+                             geneinfo,
                              niter = 20,
                              L = 1,
                              group_prior = NULL,
@@ -117,32 +118,82 @@ ctwas_susieI_rss <- function(zdf,
         b <- regs[reg, "b"]
         rn <- regs[reg, "rn"]
 
-        region_data <- extract_region_data(zdf,
-                                           regionlist[[b]][[rn]],
-                                           b = b,
-                                           rn = rn,
-                                           pi_prior = pi_prior,
-                                           V_prior = V_prior,
-                                           use_null_weight = use_null_weight)
+        gidx <- regionlist[[b]][[rn]][["gidx"]]
+        sidx <- regionlist[[b]][[rn]][["sidx"]]
+        gid <- regionlist[[b]][[rn]][["gid"]]
+        sid <- regionlist[[b]][[rn]][["sid"]]
+        g_type <- zdf$type[match(gid, zdf$id)]
+        s_type <- zdf$type[match(sid, zdf$id)]
+        gs_type <- c(g_type, s_type)
+        g_QTLtype <- zdf$QTLtype[match(gid, zdf$id)]
 
-        z <- region_data$z
-        R <- region_data$R
-        prior <- region_data$prior
-        V <- region_data$V
-        nw <- region_data$nw
+        p <- length(gidx) + length(sidx)
+
+        if (any(is.na(pi_prior))){
+          prior <- rep(1/p, p)
+        } else {
+          prior <- unname(pi_prior[gs_type])
+        }
+
+        if (any(is.na(V_prior))){
+          V <- matrix(rep(50, L * p), nrow = L)
+          # following the default in susieR::susie_rss
+        } else{
+          V <- unname(V_prior[gs_type])
+          V <- matrix(rep(V, each = L), nrow=L)
+        }
+
+        if (isTRUE(use_null_weight)){
+          null_weight <- max(0, 1 - sum(prior))
+          prior <- prior/(1-null_weight)
+        } else {
+          null_weight <- NULL
+        }
+
+        z.g <- zdf[match(gid, zdf$id), ][["z"]]
+        z.s <- zdf[match(sid, zdf$id), ][["z"]]
+        z <- c(z.g, z.s)
+
+        # prepare R matrix
+        if (!("regRDS" %in% names(regionlist[[b]][[rn]]))){
+          stop("R matrix info not available for region", b, ",", rn)
+        }
+
+        regRDS <- regionlist[[b]][[rn]][["regRDS"]]
+        R_snp <- readRDS(regionlist[[b]][[rn]][["R_s_file"]])
+        R_snp_gene <- readRDS(regionlist[[b]][[rn]][["R_sg_file"]])
+        R_snp_gene <- R_snp_gene[sidx, , drop = F]
+        R_gene <- readRDS(regionlist[[b]][[rn]][["R_g_file"]])
+
+        # gene first then SNPs
+        R <- rbind(cbind(R_gene, t(R_snp_gene)),
+                   cbind(R_snp_gene, R_snp))
 
         # in susie, prior_variance is under standardized scale (if performed)
-        susie_region_res <- ctwas_susie_rss(z = z,
-                                            R = R,
-                                            region_data = region_data,
-                                            prior_weights = prior,
-                                            prior_variance = V,
-                                            L = L,
-                                            null_weight = nw,
-                                            coverage = coverage,
-                                            min_abs_corr = min_abs_corr)
+        susie_res <- ctwas_susie_rss(z = z,
+                                     R = R,
+                                     prior_weights = prior,
+                                     prior_variance = V,
+                                     L = L,
+                                     null_weight = null_weight,
+                                     coverage = coverage,
+                                     min_abs_corr = min_abs_corr)
 
-        susieI_res.core.list[[reg]] <- susie_region_res
+        # annotate susie results with SNP, gene information
+        # geneinfo_chr <- read_exprvar(ld_exprvarfs[b])
+        gene_info_chr <- gene_info[gene_info$chrom == b, ]
+        snp_info_region <- do.call(rbind, lapply(regRDS, read_ld_Rvar_RDS))
+
+        susie_annot_res <- anno_susie(susie_res,
+                                      gene_info = gene_info_chr,
+                                      snp_info = snp_info_region,
+                                      gidx = gidx,
+                                      sidx = sidx,
+                                      region_tag = rn,
+                                      type = type,
+                                      QTLtype = QTLtype)
+
+        susieI_res.core.list[[reg]] <- susie_annot_res
       }
 
       susieI_res.core <- do.call(rbind, susieI_res.core.list)
@@ -227,8 +278,6 @@ ctwas_susieI_rss <- function(zdf,
 #' @param R A p by p symmetric, positive semidefinite correlation
 #' matrix.
 #'
-#' @param region_data
-#'
 #' @param prior_weights A vector of length p, in which each entry
 #'   gives the prior probability that SNP j has non-zero effect.
 #'
@@ -251,13 +300,12 @@ ctwas_susieI_rss <- function(zdf,
 #'   correlation of 0.25, which is a commonly used threshold for
 #'   genotype data in genetic studies.
 #'
-#' @return a data frame of annotated susie result
+#' @return A \code{"susie"} object
 #'
 #' @export
 #'
 ctwas_susie_rss <- function(z,
                             R,
-                            region_data,
                             prior_weights = NULL,
                             prior_variance = NULL,
                             L = 5,
@@ -278,116 +326,7 @@ ctwas_susie_rss <- function(z,
                          coverage = coverage,
                          min_abs_corr = min_abs_corr)
 
-  # annotate susie results with SNP, gene information
-  susie_region_res <- anno_susie(susie_res, region_data)
-
-  return(susie_region_res)
-}
-
-extract_region_data <- function(zdf,
-                                region_info,
-                                b,
-                                rn,
-                                ld_exprvarfs,
-                                ld_pgenfs = NULL,
-                                ld_Rfs = NULL,
-                                pi_prior = NULL,
-                                V_prior = NULL,
-                                use_null_weight = TRUE){
-
-  gidx <- region_info[["gidx"]]
-  sidx <- region_info[["sidx"]]
-  gid <- region_info[["gid"]]
-  sid <- region_info[["sid"]]
-  g_type <- zdf$type[match(gid, zdf$id)]
-  s_type <- zdf$type[match(sid, zdf$id)]
-  gs_type <- c(g_type, s_type)
-  g_QTLtype <- zdf$QTLtype[match(gid, zdf$id)]
-
-  p <- length(gidx) + length(sidx)
-
-  if (any(is.na(pi_prior))){
-    prior <- rep(1/p, p)
-  } else {
-    prior <- unname(pi_prior[gs_type])
-  }
-
-  if (any(is.na(V_prior))){
-    V <- matrix(rep(50, L * p), nrow = L)
-    # following the default in susieR::susie_rss
-  } else{
-    V <- unname(V_prior[gs_type])
-    V <- matrix(rep(V, each = L), nrow=L)
-  }
-
-  if (isTRUE(use_null_weight)){
-    nw <- max(0, 1 - sum(prior))
-    prior <- prior/(1-nw)
-  } else {
-    nw <- NULL
-  }
-
-  z.g <- zdf[match(gid, zdf$id), ][["z"]]
-  z.s <- zdf[match(sid, zdf$id), ][["z"]]
-  z <- c(z.g, z.s)
-
-  if (!(is.null(ld_pgenfs))){
-    # prepare LD genotype data
-    # ***** DO WE STILL KEEP THIS ?
-    ld_pgen <- prep_pgen(pgenf = ld_pgenfs[b], ld_pvarfs[b])
-
-    X.g <- read_expr(ld_exprfs[b], variantidx = gidx)
-    X.s <- read_pgen(ld_pgen, variantidx = sidx)
-    X <- cbind(X.g, X.s)
-    R <- Rfast::cora(X)
-  } else {
-    # prepare R matrix
-    if (!("regRDS" %in% names())){
-      stop("R matrix info not available for region", b, ",", rn)
-    }
-
-    regRDS <- region_info[["regRDS"]]
-    R_snp <- readRDS(region_info[["R_s_file"]])
-    R_snp_gene <- readRDS(region_info[["R_sg_file"]])
-    R_snp_gene <- R_snp_gene[sidx, , drop = F]
-    R_gene <- readRDS(region_info[["R_g_file"]])
-
-    # gene first then SNPs
-    R <- rbind(cbind(R_gene, t(R_snp_gene)),
-               cbind(R_snp_gene, R_snp))
-  }
-
-  geneinfo <- read_exprvar(ld_exprvarfs[b])
-
-  if (!is.null(ld_pgenfs)){
-    snpinfo <-  read_pvar(ld_pvarfs[b])
-  } else {
-    snpinfo <- do.call(rbind, lapply(regRDS, read_ld_Rvar_RDS))
-  }
-
-  region_data <- list(z = z,
-                      R = R,
-                      geneinfo = geneinfo,
-                      snpinfo = snpinfo,
-                      gidx = gidx,
-                      gid = gid,
-                      sidx = sidx,
-                      sid = sid,
-                      g_type,
-                      s_type,
-                      gs_type,
-                      g_QTLtype,
-                      p = p,
-                      region_tag1 = region_tag1,
-                      region_tag2 = region_tag2,
-                      type = type,
-                      QTLtype = QTLtype,
-                      prior = prior,
-                      V = V,
-                      nw = nw)
-
-  return(region_data)
-
+  return(susie_res)
 }
 
 
