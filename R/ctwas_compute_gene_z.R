@@ -3,9 +3,7 @@
 #' @param z_snp A data frame with columns: "id", "A1", "A2", "z". giving the z scores for
 #' snps. "A1" is effect allele. "A2" is the other allele. For harmonized data, A1 and A2 are not required.
 #'
-#' @param weights a string, pointing to a directory with the weights (.db file) in predictdb format.
-#' A vector of multiple sets of weights in PredictDB format can also be specified;
-#' genes will have their filename appended to their gene name to ensure IDs are unique.
+#' @param weight_list a list of weights by chromosome
 #'
 #' @param region_info a data frame of region definition and associated file names.
 #'
@@ -21,7 +19,7 @@
 #'
 #' @export
 compute_gene_z <- function (z_snp,
-                            weights,
+                            weight_list,
                             region_info,
                             ncore=1,
                             chr=1:22,
@@ -57,16 +55,17 @@ compute_gene_z <- function (z_snp,
       }
       ld_ref_snps <- c(ld_ref_snps, ld_snpinfo$id) # store names of SNPs in LD reference
 
-      loginfo("Reading weights for chromosome %s", b)
-      weightall <- read_weights(weights,
-                                b,
-                                ld_snpinfo = ld_snpinfo,
-                                z_snp = z_snp,
-                                ld_Rinfo = ld_Rinfo,
-                                ncore = ncore)
+      # loginfo("Reading weights for chromosome %s", b)
+      # weights_chr <- read_weights(weights,
+      #                             b,
+      #                             ld_snpinfo = ld_snpinfo,
+      #                             z_snp = z_snp,
+      #                             ld_Rinfo = ld_Rinfo,
+      #                             ncore = ncore)
 
-      exprlist <- weightall[["exprlist"]]
-      qclist <- weightall[["qclist"]]
+      weights_chr <- weight_list[[b]]
+      exprlist <- weights_chr[["exprlist"]]
+      qclist <- weights_chr[["qclist"]]
       if (length(exprlist) > 0) {
         loginfo("Start gene z score imputation ...")
         loginfo("Using given LD matrices to impute gene z score.")
