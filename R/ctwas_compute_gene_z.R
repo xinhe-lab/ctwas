@@ -3,24 +3,15 @@
 #' @param z_snp A data frame with columns: "id", "A1", "A2", "z". giving the z scores for
 #' snps. "A1" is effect allele. "A2" is the other allele. For harmonized data, A1 and A2 are not required.
 #'
-#' @param weight a string, pointing to a directory with the FUSION/TWAS format of weights, or a .db file in predictdb format.
-#' A vector of multiple sets of weights in PredictDB format can also be specified; genes will have their filename appended
-#' to their gene name to ensure IDs are unique.
+#' @param weight a string, pointing to a directory with the weights (.db file) in predictdb format.
+#' A vector of multiple sets of weights in PredictDB format can also be specified;
+#' genes will have their filename appended to their gene name to ensure IDs are unique.
 #'
-#' @param region_info a data frame of region definition and associated file names
-#'
-#' @param weight_format a string, the format of weight, PredictDB or FUSION
-#'
-#' @param method a string, blup/bslmm/lasso/top1/enet/best. This option is only used for FUSION weights.
-#' "best" means the method giving the best cross #' validation R^2. Note that top1 uses only the weight
-#' with largest effect.
+#' @param region_info a data frame of region definition and associated file names.
 #'
 #' @param ncore The number of cores used to parallelize imputation over weights
 #'
 #' @param chr a numeric vector of chromosomes to perform z score imputation over. Useful for large jobs requiring batches
-#'
-#' @param scale_by_ld_variance TRUE/FALSE. If TRUE, PredictDB weights are scaled by genotype variance, which is the default
-#' behavior for PredictDB
 #'
 #' @param logfile the log file, if NULL will print log info on screen
 #'
@@ -32,19 +23,13 @@
 compute_gene_z <- function (z_snp,
                             weight,
                             region_info,
-                            weight_format = c("PredictDB", "FUSION"),
-                            method = c("lasso", "blup", "bslmm", "top1", "enet", "best"),
                             ncore=1,
                             chr=1:22,
-                            scale_by_ld_variance=TRUE,
                             logfile = NULL){
 
   if (!is.null(logfile)) {
     addHandler(writeToFile, file = logfile, level = "DEBUG")
   }
-
-  weight_format <- match.arg(weight_format)
-  method <- match.arg(method)
 
   # read and check Rvar files from the region_info table,
   # return a list of updated region_info table (with region names) for each chromosome
@@ -72,26 +57,14 @@ compute_gene_z <- function (z_snp,
       }
       ld_ref_snps <- c(ld_ref_snps, ld_snpinfo$id) # store names of SNPs in LD reference
 
-      loginfo("Reading weights with %s format for chromosome %s", weight_format, b)
-      if (weight_format == "FUSION") {
-        weightall <- read_weight_FUSION(weight,
-                                        b,
-                                        ld_snpinfo,
-                                        z_snp,
-                                        method = method,
-                                        harmonize_wgt=F)
-      } else if (weight_format == "PredictDB") {
-        weightall <- read_weight_predictdb(weight,
-                                           b,
-                                           ld_snpinfo,
-                                           z_snp,
-                                           harmonize_wgt=F,
-                                           ld_Rinfo=ld_Rinfo,
-                                           ncore=ncore,
-                                           scale_by_ld_variance=scale_by_ld_variance)
-      } else {
-        stop("Unrecognized weight format, need to use either FUSION format or predict.db format")
-      }
+      loginfo("Reading weights for chromosome %s", b)
+      weightall <- read_weight_predictdb(weight,
+                                         chrom = b,
+                                         ld_snpinfo = ld_snpinfo,
+                                         z_snp = z_snp,
+                                         harmonize_wgt=FALSE,
+                                         ld_Rinfo = ld_Rinfo,
+                                         ncore = ncore)
 
       exprlist <- weightall[["exprlist"]]
       qclist <- weightall[["qclist"]]
@@ -197,22 +170,5 @@ compute_gene_z <- function (z_snp,
   return(list(z_gene = z_gene,
               z_snp = z_snp,
               gene_info = gene_info))
-}
-
-# combine z-scores of genes and SNPs
-combine_z <- function(z_gene, z_snp){
-
-  z_snp$type <- "SNP"
-  z_snp$QTLtype <- "SNP"
-  if (is.null(z_gene$type)){
-    z_gene$type <- "gene"
-  }
-  if (is.null(z_gene$QTLtype)){
-    z_gene$QTLtype <- "gene"
-  }
-  zdf <- rbind(z_snp[, c("id", "z", "type", "QTLtype")],
-               z_gene[, c("id", "z", "type", "QTLtype")])
-
-  return(zdf)
 }
 
