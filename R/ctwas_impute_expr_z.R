@@ -193,19 +193,20 @@ impute_expr_z <- function (z_snp, weight, ld_pgenfs = NULL, ld_R_dir = NULL, met
     } else {
       expr <- data.table::data.table(NA)
     }
-    #data.table::fwrite(expr, file = exprf, row.names = F, 
-    #                   col.names = F, sep = "\t", quote = F)
-    #if (isTRUE(compress)) {
-    #  system(paste0("gzip -f ", exprf))
-    #  exprf <- paste0(exprf, ".gz")
-    #}
+
+    if(!is.null(ld_pgenfs)){
+      data.table::fwrite(expr, file = exprf, row.names = F, col.names = F, sep = "\t", quote = F)
+      if (isTRUE(compress)) {
+        system(paste0("gzip -f ", exprf))
+        exprf <- paste0(exprf, ".gz")
+      }
+    }
+
     loginfo("Imputation done: number of genes with imputed expression: %s for chr %s", 
             length(gnames), b)
     z_genelist[[b]] <- z_gene_chr
-    #ld_exprfs[b] <- exprf
   }
   z_gene <- do.call(rbind, z_genelist)
   z_snp <- z_snp[z_snp$id %in% ld_snplist,] #subset z_snp to snps in ld reference
-  #return(list(z_gene = z_gene, ld_exprfs = ld_exprfs, z_snp = z_snp))
   return(list(z_gene = z_gene, z_snp = z_snp))
 }
