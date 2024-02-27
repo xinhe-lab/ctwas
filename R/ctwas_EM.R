@@ -13,11 +13,9 @@
 #'
 #' @param niter the number of iterations of the E-M algorithm to perform
 #'
-#' @param group_prior a vector of two prior inclusion probabilities for SNPs and genes. This is ignored
-#' if \code{estimate_group_prior = T}
+#' @param group_prior a vector of two prior inclusion probabilities for SNPs and genes.
 #'
-#' @param group_prior_var a vector of two prior variances for SNPs and gene effects. This is ignored
-#' if \code{estimate_group_prior_var = T}
+#' @param group_prior_var a vector of two prior variances for SNPs and gene effects.
 #'
 #' @param group_prior_var_structure a string indicating the structure to put on the prior variance parameters.
 #' "independent" is the default and allows all groups to have their own separate variance parameters.
@@ -36,12 +34,6 @@
 #'   genotype data in genetic studies.
 #'
 #' @param ncore The number of cores used to parallelize susie over regions
-#'
-#' @param outputdir a string, the directory to store output
-#'
-#' @param outname a string, the output name
-#'
-#' @param report_parameters TRUE/FALSE. If TRUE, estimated parameters are reported at the end of iteration
 #'
 #' @importFrom logging loginfo
 #' @importFrom foreach %dopar% foreach
@@ -62,7 +54,7 @@ ctwas_EM <- function(zdf,
                      coverage = 0.95,
                      min_abs_corr = 0.5,
                      ncore = 1,
-                     verbose = T){
+                     verbose = TRUE){
 
   types <- unique(zdf$type)
   QTLtypes <- unique(zdf$QTLtype)
@@ -93,9 +85,8 @@ ctwas_EM <- function(zdf,
 
   for (iter in 1:niter){
 
-    if (verbose){
+    if (verbose)
       loginfo("run iteration %s", iter)
-    }
 
     cl <- parallel::makeCluster(ncore, outfile = "")
     doParallel::registerDoParallel(cl)
@@ -149,7 +140,7 @@ ctwas_EM <- function(zdf,
 
         # prepare R matrix
         if (!("regRDS" %in% names(regionlist[[b]][[rn]]))){
-          stop("R matrix info not available for region", b, ",", rn)
+          stop("R matrix info not available for region", b, ":", rn)
         }
 
         regRDS <- regionlist[[b]][[rn]][["regRDS"]]
@@ -180,16 +171,21 @@ ctwas_EM <- function(zdf,
         # annotate susie results with SNP, gene information
         # geneinfo_chr <- read_exprvar(ld_exprvarfs[b])
         gene_info_chr <- gene_info[gene_info$chrom == b, ]
+        if (length(gene_info_chr) !=0){
+          gene_anno <- data.frame(gene_info_chr[gidx,  c("chrom", "id", "p0")], type = type, QTLtype = QTLtype)
+          colnames(gene_anno) <-  c("chrom", "id", "pos", "type", "QTLtype")
+        }else{
+          gene_anno <- NULL
+        }
+
         snp_info_region <- do.call(rbind, lapply(regRDS, read_ld_Rvar_RDS))
+        snp_anno <- data.frame(snp_info_region[sidx, c("chrom", "id", "pos")], type = "SNP", QTLtype = "SNP")
+        colnames(snp_anno) <-  c("chrom", "id", "pos", "type", "QTLtype")
 
         susie_res <- anno_susie(susie_res,
-                                gene_info = gene_info_chr,
-                                snp_info = snp_info_region,
-                                gidx = gidx,
-                                sidx = sidx,
-                                region_tag = rn,
-                                type = type,
-                                QTLtype = QTLtype)
+                                gene_anno = gene_anno,
+                                snp_anno = snp_anno,
+                                region_tag = region_tag)
 
         susie_res.core.list[[reg]] <- susie_res
       }
