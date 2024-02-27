@@ -10,7 +10,7 @@
 #'
 #' @param gene_info a data frame of gene information obtained from \code{compute_gene_z}
 #'
-#' @param weight a string, pointing to a directory with the FUSION/TWAS format of weights, or a .db file in predictdb format.
+#' @param weights a string, pointing to a directory with the FUSION/TWAS format of weights, or a .db file in predictdb format.
 #' A vector of multiple sets of weights in PredictDB format can also be specified; genes will have their filename appended
 #' to their gene name to ensure IDs are unique.
 #'
@@ -58,7 +58,7 @@ screen_regions <- function(
     z_gene,
     region_info,
     gene_info = NULL,
-    weight = NULL,
+    weights = NULL,
     regionlist = NULL,
     regionlist_allSNPs = NULL,
     thin = 1,
@@ -78,7 +78,7 @@ screen_regions <- function(
   }
 
   # combine z-scores of different types
-  zdf <- combine_z(z_gene, z_snp)
+  zdf <- combine_z(z_snp, z_gene)
 
   if (thin <= 0 || thin > 1){
     stop("thin value needs to be in (0,1]")
@@ -89,7 +89,7 @@ screen_regions <- function(
     loginfo("Get regionlist containing all SNPs")
     res <- get_region_idx(region_info = region_info,
                           gene_info = gene_info,
-                          weight = weight,
+                          weights = weights,
                           select = zdf$id,
                           thin = 1,
                           maxSNP = max_snp_region,
@@ -118,7 +118,7 @@ screen_regions <- function(
       loginfo("Get regionlist with thin = %.2f", thin)
       res <- get_region_idx(region_info = region_info,
                             gene_info = gene_info,
-                            weight_list = weight,
+                            weights = weights,
                             select = zdf$id,
                             thin = thin,
                             minvar = 2,

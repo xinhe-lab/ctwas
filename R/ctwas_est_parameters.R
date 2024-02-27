@@ -99,7 +99,7 @@ est_param <- function(
   }
 
   # combine z-scores of SNPs and genes
-  zdf <- combine_z(z_gene, z_snp)
+  zdf <- combine_z(z_snp, z_gene)
 
   if (thin <= 0 | thin > 1){
     stop("thin value needs to be in (0,1]")

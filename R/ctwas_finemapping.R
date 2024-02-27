@@ -71,7 +71,7 @@ finemap_region <- function(z_snp,
   loginfo("Run finemapping with L = %d for region %s", L, region_tag)
 
   # combine z-scores of different types
-  zdf <- combine_z(z_gene, z_snp)
+  zdf <- combine_z(z_snp, z_gene)
 
   types <- unique(zdf$type)
 
@@ -148,7 +148,7 @@ finemap_region <- function(z_snp,
     if (file.exists(region_idx[["R_file"]])){
 
       # load precomputed correlation matrix
-      R <- readRDS(region_idx[["R_file"]])
+      R <- read_LD(region_idx[["R_file"]])
 
     }else {
       # compute correlation matrix

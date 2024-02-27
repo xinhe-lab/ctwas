@@ -3,7 +3,7 @@
 #' @param z_snp A data frame with columns: "id", "A1", "A2", "z". giving the z scores for
 #' snps. "A1" is effect allele. "A2" is the other allele. For harmonized data, A1 and A2 are not required.
 #'
-#' @param weight a string, pointing to a directory with the weights (.db file) in predictdb format.
+#' @param weights a string, pointing to a directory with the weights (.db file) in predictdb format.
 #' A vector of multiple sets of weights in PredictDB format can also be specified;
 #' genes will have their filename appended to their gene name to ensure IDs are unique.
 #'
@@ -21,7 +21,7 @@
 #'
 #' @export
 compute_gene_z <- function (z_snp,
-                            weight,
+                            weights,
                             region_info,
                             ncore=1,
                             chr=1:22,
@@ -58,13 +58,12 @@ compute_gene_z <- function (z_snp,
       ld_ref_snps <- c(ld_ref_snps, ld_snpinfo$id) # store names of SNPs in LD reference
 
       loginfo("Reading weights for chromosome %s", b)
-      weightall <- read_weight_predictdb(weight,
-                                         chrom = b,
-                                         ld_snpinfo = ld_snpinfo,
-                                         z_snp = z_snp,
-                                         harmonize_wgt=FALSE,
-                                         ld_Rinfo = ld_Rinfo,
-                                         ncore = ncore)
+      weightall <- read_weights(weights,
+                                b,
+                                ld_snpinfo = ld_snpinfo,
+                                z_snp = z_snp,
+                                ld_Rinfo = ld_Rinfo,
+                                ncore = ncore)
 
       exprlist <- weightall[["exprlist"]]
       qclist <- weightall[["qclist"]]
