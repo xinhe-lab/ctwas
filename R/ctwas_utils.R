@@ -653,17 +653,39 @@ combine_z <- function(z_snp, z_gene){
 }
 
 # read LD by file format
-read_LD <- function(file, format = c("RDS", "RData", "CSV", "TXT", "TSV")) {
+read_LD <- function(filename, format = c("rds", "rdata", "csv", "txt", "tsv")) {
   format <- match.arg(format)
 
-  if (format == "RDS"){
-    R <- readRDS(file)
-  }else if (format == "RData"){
-    R <- get(load(file))
-  }else if (format == "CSV"){
-    R <- as.matrix(read.csv(file, sep=",", row.names=1))
-  }else if (format == "TXT" | type == "TSV"){
-    R <- as.matrix(data.table::fread(file))
+  # if format is missing, try to guess format by file extension
+  if (missing(format)) {
+    file_ext_lower <- tolower(tools::file_ext(filename))
+
+    if (file_ext_lower == "rds"){
+      format <- "rds"
+    } else if (file_ext_lower %in% c("rdata", "rd", "rda", "rdat")){
+      format <- "rd"
+    } else if (file_ext_upper %in% c("csv", "csv.gz")) {
+      format <- "csv"
+    } else if (file_ext_lower %in% c("txt", "txt.gz")){
+      format <- "txt"
+    } else if (file_ext_lower %in% c("tsv", "tsv.gz")){
+      format <- "tsv"
+    } else{
+      stop("Unknown LD file format!")
+    }
   }
-  return(R)
+
+  if (format == "rds"){
+    res <- readRDS(file)
+  }else if (format == "rd"){
+    res <- get(load(file))
+  }else if (format == "csv"){
+    res <- as.matrix(read.csv(file, sep=",", row.names=1))
+  }else if (format %in% c("txt", "tsv")){
+    res <- as.matrix(data.table::fread(file))
+  }else{
+    stop("Unknown LD file format!")
+  }
+
+  return(res)
 }
