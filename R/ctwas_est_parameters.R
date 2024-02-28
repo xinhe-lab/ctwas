@@ -12,9 +12,7 @@
 #'
 #' @param gene_info a data frame of gene information obtained from \code{compute_gene_z}
 #'
-#' @param weight a string, pointing to a directory with the weights (.db file) in predictdb format.
-#' A vector of multiple sets of weights in PredictDB format can also be specified;
-#' genes will have their filename appended to their gene name to ensure IDs are unique.
+#' @param weight_list a list of weights by chromosome
 #'
 #' @param thin The proportion of SNPs to be used for the parameter estimation and
 #' initial screening region steps.
@@ -63,7 +61,7 @@ est_param <- function(
     regionlist = NULL,
     z_gene = NULL,
     gene_info = NULL,
-    weight = NULL,
+    weight_list = NULL,
     thin = 1,
     prob_single = 0.8,
     niter1 = 3,
@@ -89,7 +87,7 @@ est_param <- function(
   if (is.null(z_gene)) {
     loginfo("Computing gene z-scores ...")
     compute_gene_z_res <- compute_gene_z(z_snp = z_snp,
-                                         weight = weight,
+                                         weight_list = weight_list,
                                          region_info = region_info,
                                          ncore=ncore)
     z_gene <- compute_gene_z_res$z_gene
@@ -110,7 +108,7 @@ est_param <- function(
     loginfo("Get regionlist with thin = %.2f", thin)
     res <- get_region_idx(region_info = region_info,
                           gene_info = gene_info,
-                          weight_list = weight,
+                          weight_list = weight_list,
                           select = zdf$id,
                           thin = thin,
                           minvar = 2,
@@ -154,9 +152,7 @@ est_param <- function(
                                         group_prior = group_prior,
                                         prob_single = prob_single,
                                         zdf = zdf)
-  n_filtered_regions <- sum(unlist(lapply(filtered_regionlist, length)))
-  loginfo("%d regions left after filtering with prob_single = %.2f",
-          n_filtered_regions, prob_single)
+  loginfo("%d regions left after filtering", sum(unlist(lapply(filtered_regionlist, length))))
 
   # Run EM for more (niter2) iterations, getting rough estimates
   loginfo("Run EM for %d iterations on filtered regions, getting accurate estimates ...", niter2)
@@ -179,8 +175,7 @@ est_param <- function(
 
   return(list("param" = param,
               "region_info" = region_info,
-              "regionlist" = regionlist,
-              "filtered_regionlist" = filtered_regionlist))
+              "regionlist" = regionlist))
 
 }
 

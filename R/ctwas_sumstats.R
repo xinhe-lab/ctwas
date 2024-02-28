@@ -5,10 +5,8 @@
 #'
 #' @param region_info a data frame of region definition and associated LD file names
 #'
-#' @param weights a string, pointing to a directory with the weights (.db file) in predictdb format.
-#' A vector of multiple sets of weights in PredictDB format can also be specified;
-#' genes will have their filename appended to their gene name to ensure IDs are unique.
-#'
+#' @param weight_list a list of weights by chromosome
+
 #' @param niter1 the number of iterations of the E-M algorithm to perform during the initial parameter estimation step
 #'
 #' @param niter2 the number of iterations of the E-M algorithm to perform during the complete parameter estimation step
@@ -16,7 +14,7 @@
 #' @param thin The proportion of SNPs to be used for parameter estimation and initial screening regions.
 #' Smaller \code{thin} parameters reduce runtime at the expense of accuracy.
 #' The fine mapping step is rerun using full SNPs
-#' for regions with strong gene signals; see \code{rerun_gene_PIP}.
+#' for regions with strong gene signals; see \code{min_gene_PIP}.
 #'
 #' @param L the number of effects for susie during the fine mapping steps
 #'
@@ -35,9 +33,8 @@
 #' have enough memory to run the program. This applies to the last rerun step
 #' (using full SNPs and rerun susie for regions with strong gene signals) only.
 #'
-#' @param rerun_gene_PIP if thin <1, will rerun regions with the max gene PIP > \code{rerun_gene_PIP}
-#' using full SNPs. if \code{rerun_gene_PIP} is 0, then
-#' all blocks will rerun with full SNPs
+#' @param min_gene_PIP Regions with non-SNP PIP >= \code{min_gene_PIP}
+#' will be selected to run finemapping using full SNPs.
 #'
 #' @param prob_single Regions with probability greater than \code{prob_single} of
 #' having 1 or fewer effects will be used for parameter estimation
@@ -53,7 +50,7 @@
 #'
 #' @param ncore The number of cores used to parallelize susie over regions
 #'
-#' @param save_R TRUE/FALSE. If TRUE, save correlation (R) matrices to \code{outputdir}
+#' @param save_LD_R TRUE/FALSE. If TRUE, save correlation (R) matrices to \code{outputdir}
 #'
 #' @param outputdir a string, the directory to store correlation (R) matrices
 #'
@@ -70,8 +67,8 @@
 #'
 ctwas_sumstats <- function(
     z_snp,
-    weights,
     region_info,
+    weight_list,
     niter1 = 3,
     niter2 = 30,
     thin = 1,
@@ -80,13 +77,13 @@ ctwas_sumstats <- function(
     group_prior_var = NULL,
     group_prior_var_structure = c("independent","shared_all","shared+snps","shared_QTLtype"),
     max_snp_region = Inf,
-    rerun_gene_PIP = 0.5,
+    min_gene_PIP = 0.5,
     prob_single = 0.8,
     use_null_weight = T,
     coverage = 0.95,
     min_abs_corr = 0.5,
     ncore = 1,
-    save_R = FALSE,
+    save_LD_R = FALSE,
     outputdir = getwd(),
     outname = NULL,
     logfile = NULL){
@@ -97,7 +94,7 @@ ctwas_sumstats <- function(
 
   # Compute gene z-scores
   res <- compute_gene_z(z_snp = z_snp,
-                        weights = weights,
+                        weight_list = weight_list,
                         region_info = region_info,
                         ncore = ncore)
   z_gene <- res$z_gene
@@ -123,7 +120,7 @@ ctwas_sumstats <- function(
   group_prior <- param$group_prior
   group_prior_var <- param$group_prior_var
   region_info <- res$region_info
-  regionlist_thinned <- res$regionlist
+  regionlist <- res$regionlist
   rm(res)
 
   # Screen regions
@@ -134,11 +131,11 @@ ctwas_sumstats <- function(
                         z_gene = z_gene,
                         region_info = region_info,
                         gene_info = gene_info,
-                        weights = weights,
-                        regionlist = regionlist_thinned,
+                        weight_list = weight_list,
+                        regionlist = regionlist,
                         thin = thin,
                         max_snp_region = max_snp_region,
-                        rerun_gene_PIP = rerun_gene_PIP,
+                        min_gene_PIP = min_gene_PIP,
                         L = 1,
                         group_prior = group_prior,
                         group_prior_var = group_prior_var,
@@ -147,10 +144,10 @@ ctwas_sumstats <- function(
                         min_abs_corr = min_abs_corr,
                         ncore = ncore)
 
-  region_info <- res$region_info
-  regionlist_allSNPs <- res$regionlist_allSNPs
+  screened_region_info <- res$screened_region_info
+  screened_regionlist <- res$screened_regionlist
   screened_region_tags <- res$screened_region_tags
-  finemap_weak_res <- res$finemap_weak_res
+  weak_region_finemap_res <- res$weak_region_finemap_res
   rm(res)
 
   # convert SNP prior
@@ -158,33 +155,35 @@ ctwas_sumstats <- function(
   param$group_prior <- group_prior
 
   # Run fine-mapping for regions with strong gene signals using all SNPs
-  #.  save correlation (R) matrices if save_R is TRUE
+  #.  save correlation (R) matrices if save_LD_R is TRUE
   for (region_tag in screened_region_tags) {
-    finemap_strong_res <- finemap_region(z_snp = z_snp,
-                                         z_gene = z_gene,
-                                         region_info = region_info,
-                                         gene_info = gene_info,
-                                         regionlist = regionlist_allSNPs,
-                                         region_tag = region_tag,
-                                         L = L,
-                                         group_prior = group_prior,
-                                         group_prior_var = group_prior_var,
-                                         use_null_weight = use_null_weight,
-                                         coverage = coverage,
-                                         min_abs_corr = min_abs_corr,
-                                         save_R = save_R,
-                                         outputdir = outputdir,
-                                         outname = outname)
+    strong_region_finemap_res <- finemap_region(z_snp = z_snp,
+                                                z_gene = z_gene,
+                                                gene_info = gene_info,
+                                                region_info = screened_region_info,
+                                                regionlist = screened_regionlist,
+                                                region_tag = region_tag,
+                                                L = L,
+                                                group_prior = group_prior,
+                                                group_prior_var = group_prior_var,
+                                                use_null_weight = use_null_weight,
+                                                coverage = coverage,
+                                                min_abs_corr = min_abs_corr,
+                                                save_LD_R = save_LD_R,
+                                                outputdir = outputdir,
+                                                outname = outname)
   }
 
   return(list("param" = param,
-              "finemap_weak_res" = finemap_weak_res,
-              "finemap_strong_res" = finemap_strong_res,
+              "strong_region_finemap_res" = strong_region_finemap_res,
+              "weak_region_finemap_res" = weak_region_finemap_res,
               "z_gene" = z_gene,
               "gene_info" = gene_info,
               "region_info" = region_info,
               "regionlist" = regionlist,
-              "regionlist_allSNPs" = regionlist_allSNPs))
+              "screened_region_info" = screened_region_info,
+              "screened_regionlist" = screened_regionlist,
+              "screened_region_tags" = screened_region_tags))
 
 }
 
