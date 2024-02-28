@@ -49,7 +49,7 @@ ctwas_EM <- function(zdf,
                      niter = 20,
                      group_prior = NULL,
                      group_prior_var = NULL,
-                     group_prior_var_structure = c("independent","shared_all","shared+snps","inv_gamma","shared_QTLtype"),
+                     group_prior_var_structure = c("independent","shared_all","shared+snps","shared_QTLtype"),
                      use_null_weight = TRUE,
                      coverage = 0.95,
                      min_abs_corr = 0.5,
@@ -102,14 +102,15 @@ ctwas_EM <- function(zdf,
         b <- regs[reg, "b"]
         rn <- regs[reg, "rn"]
 
-        gidx <- regionlist[[b]][[rn]][["gidx"]]
-        sidx <- regionlist[[b]][[rn]][["sidx"]]
-        gid <- regionlist[[b]][[rn]][["gid"]]
-        sid <- regionlist[[b]][[rn]][["sid"]]
+        region_idx <- regionlist[[b]][[rn]]
+        gidx <- region_idx[["gidx"]]
+        sidx <- region_idx[["sidx"]]
+        gid <- region_idx[["gid"]]
+        sid <- region_idx[["sid"]]
         g_type <- zdf$type[match(gid, zdf$id)]
         s_type <- zdf$type[match(sid, zdf$id)]
         gs_type <- c(g_type, s_type)
-        g_QTLtype <- zdf$QTLtype[match(gid, zdf$id)]
+        # g_QTLtype <- zdf$QTLtype[match(gid, zdf$id)]
 
         p <- length(gidx) + length(sidx)
 
@@ -138,12 +139,12 @@ ctwas_EM <- function(zdf,
         z.s <- zdf[match(sid, zdf$id), ][["z"]]
         z <- c(z.g, z.s)
 
-        # prepare R matrix
-        if (!("regRDS" %in% names(regionlist[[b]][[rn]]))){
-          stop("R matrix info not available for region", b, ":", rn)
-        }
-
-        regRDS <- regionlist[[b]][[rn]][["regRDS"]]
+        # # prepare R matrix
+        # if (!("regRDS" %in% names(regionlist[[b]][[rn]]))){
+        #   stop("R matrix info not available for region", b, ":", rn)
+        # }
+        #
+        # regRDS <- regionlist[[b]][[rn]][["regRDS"]]
 
         # # load correlation matrices
         # R_snp <- readRDS(regionlist[[b]][[rn]][["R_s_file"]])
@@ -169,23 +170,15 @@ ctwas_EM <- function(zdf,
                                      min_abs_corr = min_abs_corr)
 
         # annotate susie results with SNP, gene information
-        # geneinfo_chr <- read_exprvar(ld_exprvarfs[b])
+        # gene_info_chr <- read_exprvar(ld_exprvarfs[b])
         gene_info_chr <- gene_info[gene_info$chrom == b, ]
-        if (length(gene_info_chr) !=0){
-          gene_anno <- data.frame(gene_info_chr[gidx,  c("chrom", "id", "p0")], type = type, QTLtype = QTLtype)
-          colnames(gene_anno) <-  c("chrom", "id", "pos", "type", "QTLtype")
-        }else{
-          gene_anno <- NULL
-        }
-
-        snp_info_region <- do.call(rbind, lapply(regRDS, read_ld_Rvar_RDS))
-        snp_anno <- data.frame(snp_info_region[sidx, c("chrom", "id", "pos")], type = "SNP", QTLtype = "SNP")
-        colnames(snp_anno) <-  c("chrom", "id", "pos", "type", "QTLtype")
+        snp_info_region <- do.call(rbind, lapply(LD_R_file, read_ld_Rvar_RDS))
 
         susie_res <- anno_susie(susie_res,
-                                gene_anno = gene_anno,
-                                snp_anno = snp_anno,
-                                region_tag = region_tag)
+                                gene_info_chr,
+                                snp_info_region,
+                                region_idx,
+                                zdf)
 
         susie_res.core.list[[reg]] <- susie_res
       }

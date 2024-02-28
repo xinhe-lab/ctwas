@@ -6,15 +6,11 @@
 #' @param z_gene A data frame with two columns: "id", "z". giving the z scores for genes.
 #' Optionally, a "type" column can also be supplied; this is for using multiple sets of weights
 #'
-#' @param region_info a data frame of region definition and associated file names
-#'
 #' @param gene_info a data frame of gene information obtained from \code{compute_gene_z}
 #'
-#' @param weight a string, pointing to a directory with the weights (.db file) in predictdb format.
-#' A vector of multiple sets of weights in PredictDB format can also be specified;
-#' genes will have their filename appended to their gene name to ensure IDs are unique.
-#'
 #' @param regionlist the list of regions with SNP and gene indices.
+#'
+#' @param region_info a data frame of region definition and associated file names
 #'
 #' @param region_tag a character string of region tag to be finemapped
 #'
@@ -33,17 +29,13 @@
 #'   correlation of 0.25, which is a commonly used threshold for
 #'   genotype data in genetic studies.
 #'
-#' @param ncore The number of cores used to parallelize susie over regions
-#'
-#' @param logfile the log file, if NULL will print log info on screen
-#'
 #' @param save_LD_R TRUE/FALSE. If TRUE, save correlation (R) matrices
 #'
 #' @param outputdir a string, the directory to store output
 #'
 #' @param outname a string, the output name
 #'
-#' @importFrom logging addHandler loginfo writeToFile
+#' @importFrom logging loginfo
 #'
 #' @return finemapping results.
 #'
@@ -51,9 +43,9 @@
 #'
 finemap_region <- function(z_snp,
                            z_gene,
+                           gene_info,
                            regionlist,
                            region_info,
-                           gene_info,
                            region_tag,
                            L = 5,
                            group_prior = NULL,
@@ -61,18 +53,14 @@ finemap_region <- function(z_snp,
                            use_null_weight = TRUE,
                            coverage = 0.95,
                            min_abs_corr = 0.5,
-                           logfile = NULL,
-                           save_LD_R = FALSE){
-
-  if (!is.null(logfile)){
-    addHandler(writeToFile, file=logfile, level='DEBUG')
-  }
+                           save_LD_R = FALSE,
+                           outputdir = getwd(),
+                           outname = NULL){
 
   loginfo("Run finemapping with L = %d for region %s", L, region_tag)
 
   # combine z-scores of different types
   zdf <- combine_z(z_snp, z_gene)
-
   types <- unique(zdf$type)
 
   # priors
@@ -94,17 +82,18 @@ finemap_region <- function(z_snp,
   V_prior <- unlist(V_prior)
 
   # run susie for this region
-  b <- as.numeric(unlist(strsplit(region_tag, split = ":"))[1])
+  b <- unlist(strsplit(region_tag, split = ":"))[1]
   rn <- unlist(strsplit(region_tag, split = ":"))[2]
 
-  gidx <- regionlist[[b]][[rn]][["gidx"]]
-  sidx <- regionlist[[b]][[rn]][["sidx"]]
-  gid <- regionlist[[b]][[rn]][["gid"]]
-  sid <- regionlist[[b]][[rn]][["sid"]]
+  region_idx <- regionlist[[b]][[rn]]
+  gidx <- region_idx[["gidx"]]
+  sidx <- region_idx[["sidx"]]
+  gid <- region_idx[["gid"]]
+  sid <- region_idx[["sid"]]
   g_type <- zdf$type[match(gid, zdf$id)]
   s_type <- zdf$type[match(sid, zdf$id)]
   gs_type <- c(g_type, s_type)
-  g_QTLtype <- zdf$QTLtype[match(gid, zdf$id)]
+  # g_QTLtype <- zdf$QTLtype[match(gid, zdf$id)]
 
   p <- length(gidx) + length(sidx)
 
@@ -134,27 +123,25 @@ finemap_region <- function(z_snp,
   z <- c(z.g, z.s)
 
   # prepare R matrix
-  if (!("regRDS" %in% names(regionlist[[b]][[rn]]))){
-    stop("R matrix info not available for region", region_tag)
-  }
+  LD_R_file <- region_idx[["LD_R_file"]]
 
-  regRDS <- regionlist[[b]][[rn]][["regRDS"]]
-
-  if (file.exists(regRDS)){
+  if (file.exists(LD_R_file)){
     # load precomputed correlation matrix
-    R <- read_LD(regRDS)
+    R <- read_LD(LD_R_file)
   } else {
     # compute correlation matrix
-    if (L >1) {
+    if (isTRUE(save_LD_R)) {
       R <- compute_cor()
-      if (isTRUE(save_LD_R)) {
-        LD_R_file <- file.path(outputdir, paste0(outname, "_LDR"), paste0("chr", b, "_reg", rn, ".R.RDS"))
-        saveRDS(R, LD_R_file)
-        regionlist[[b]][[rn]][["regRDS"]] <- LD_R_file
+      LD_R_file <- file.path(outputdir, paste0(outname, "_LDR"), paste0("chr", b, "_reg", rn, ".R.RDS"))
+      saveRDS(R, LD_R_file)
+      region_idx[["LD_R_file"]] <- LD_R_file
+    } else {
+      if (L == 1) {
+        # R does not matter for susie when L = 1
+        R <- diag(length(z))
+      } else {
+        R <- compute_cor()
       }
-    }else{
-      # R does not matter for susie when L = 1
-      R <- diag(length(z))
     }
   }
 
@@ -169,23 +156,15 @@ finemap_region <- function(z_snp,
                                min_abs_corr = min_abs_corr)
 
   # annotate susie results with SNP, gene information
-  # geneinfo_chr <- read_exprvar(ld_exprvarfs[b])
+  # gene_info_chr <- read_exprvar(ld_exprvarfs[b])
   gene_info_chr <- gene_info[gene_info$chrom == b, ]
-  if (length(gene_info_chr) !=0){
-    gene_anno <- data.frame(gene_info_chr[gidx,  c("chrom", "id", "p0")], type = type, QTLtype = QTLtype)
-    colnames(gene_anno) <-  c("chrom", "id", "pos", "type", "QTLtype")
-  }else{
-    gene_anno <- NULL
-  }
-
-  snp_info_region <- do.call(rbind, lapply(regRDS, read_ld_Rvar_RDS))
-  snp_anno <- data.frame(snp_info_region[sidx, c("chrom", "id", "pos")], type = "SNP", QTLtype = "SNP")
-  colnames(snp_anno) <-  c("chrom", "id", "pos", "type", "QTLtype")
+  snp_info_region <- do.call(rbind, lapply(LD_R_file, read_ld_Rvar_RDS))
 
   susie_res <- anno_susie(susie_res,
-                          gene_anno = gene_anno,
-                          snp_anno = snp_anno,
-                          region_tag = region_tag)
+                          gene_info_chr,
+                          snp_info_region,
+                          region_idx,
+                          zdf)
 
   return(susie_res)
 
@@ -227,15 +206,33 @@ ctwas_susie_rss <- function(z,
   return(susie_res)
 }
 
-# annotate susie results
+# annotate susie results with SNP and gene information
 anno_susie <- function(susie_res,
-                       gene_anno,
-                       snp_anno,
-                       region_tag) {
+                       gene_info,
+                       snp_info,
+                       region_idx,
+                       zdf) {
+
+  gidx <- region_idx[["gidx"]]
+  sidx <- region_idx[["sidx"]]
+  gid <- region_idx[["gid"]]
+  sid <- region_idx[["sid"]]
+  g_type <- zdf$type[match(gid, zdf$id)]
+  g_QTLtype <- zdf$QTLtype[match(gid, zdf$id)]
+
+  if (length(gene_info) != 0) {
+    gene_anno <- data.frame(gene_info[gidx,  c("chrom", "id", "p0")], type = g_type, QTLtype = g_QTLtype)
+    colnames(gene_anno) <-  c("chrom", "id", "pos", "type", "QTLtype")
+  } else {
+    gene_anno <- NULL
+  }
+
+  snp_anno <- data.frame(snp_info[sidx, c("chrom", "id", "pos")], type = "SNP", QTLtype = "SNP")
+  colnames(snp_anno) <-  c("chrom", "id", "pos", "type", "QTLtype")
 
   res <- as.data.frame(rbind(gene_anno, snp_anno))
 
-  res$region_tag <- region_tag
+  res$region_tag <- region_idx$region_tag
 
   res$susie_pip <- susie_res$pip
 
