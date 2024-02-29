@@ -133,7 +133,7 @@ read_pvar <- function(pvarf){
 
   pvardt <- data.table::fread(pvarf, skip = "#CHROM")
   pvardt <- dplyr::rename(pvardt, "chrom" = "#CHROM", "pos" = "POS",
-                "alt" = "ALT", "ref" = "REF", "id" = "ID")
+                          "alt" = "ALT", "ref" = "REF", "id" = "ID")
   pvardt <- pvardt[, c("chrom", "id", "pos", "alt", "ref")]
   pvardt
 }
@@ -498,34 +498,26 @@ read_weight_predictdb <- function (weight,
   return(list(exprlist = exprlist, qclist = qclist))
 }
 
-
-read_weights <- function (weights,
+# read weights in PredictDB format, do not perform harmonization on weights
+read_weights <- function (weight_files,
                           chr = 1:22,
                           ld_snpinfo,
                           z_snp = NULL,
-                          ld_pgenfs=NULL,
-                          ld_Rinfo=NULL,
                           scale_by_ld_variance=TRUE,
                           ncore=1){
 
-  exprlist <- list()
-  qclist <- list()
-  gnames_all <- list()
-
   sqlite <- RSQLite::dbDriver("SQLite")
 
-  for (i in 1:length(weights)){
-    weight <- weights[i]
-
-    db = RSQLite::dbConnect(sqlite, weight)
+  # read gene names in each weight file
+  gnames_all <- list()
+  for (i in 1:length(weight_files)){
+    weight_file <- weight_files[i]
+    db <- RSQLite::dbConnect(sqlite, weight_file)
     query <- function(...) RSQLite::dbGetQuery(db, ...)
     gnames <- unique(query("select gene from weights")[, 1])
-
-    gnames_all[[i]] <- cbind(gnames,weight)
-
+    gnames_all[[i]] <- cbind(gnames, weight_file)
     RSQLite::dbDisconnect(db)
   }
-
   gnames_all <- as.data.frame(do.call(rbind, gnames_all))
   colnames(gnames_all) <- c("gname", "weight")
 
@@ -541,23 +533,24 @@ read_weights <- function (weights,
   cl <- parallel::makeCluster(ncore, outfile = "")
   doParallel::registerDoParallel(cl)
 
-  outlist <- foreach(core = 1:ncore, .combine = "c", .packages = "ctwas") %dopar% {
+  weightlist <- foreach(core = 1:ncore, .combine = "c", .packages = "ctwas") %dopar% {
     gnames_core <- gnames_all[corelist[[core]],,drop=F]
     weights_core <- unique(gnames_core$weight)
 
-    outlist_core <- list()
+    weightlist_core <- list()
 
     for (weight in weights_core){
-      loginfo("Current weight: %s (core %s)", weight, core)
 
+      cat("weight", weight, "\n")
       weight_name <- tools::file_path_sans_ext(basename(weight))
       gnames_core_weight <- gnames_core$gname[gnames_core$weight==weight]
 
-      db = RSQLite::dbConnect(sqlite, weight)
+      db <- RSQLite::dbConnect(sqlite, weight)
       query <- function(...) RSQLite::dbGetQuery(db, ...)
 
       for (gname in gnames_core_weight) {
 
+        # if more than one weight file, append gene name with weight name
         if (length(weights)>1){
           gname_weight <- paste0(gname, "|", weight_name)
         } else {
@@ -566,33 +559,41 @@ read_weights <- function (weights,
 
         wgt <- query("select * from weights where gene = ?", params = list(gname))
         wgt.matrix <- as.matrix(wgt[, "weight", drop = F])
-
         rownames(wgt.matrix) <- wgt$rsid
+
         chrpos <- do.call(rbind, strsplit(wgt$varID, "_"))
 
-        snps <- data.frame(gsub("chr", "", chrpos[, 1]), wgt$rsid,
-                           "0", chrpos[, 2], wgt$eff_allele, wgt$ref_allele,
+        chrom <- as.integer(gsub("chr", "", chrpos[1, 1]))
+
+        snps <- data.frame(chrom = as.integer(chrom),
+                           id = wgt$rsid,
+                           cm = "0",
+                           pos = as.integer(chrpos[, 2]),
+                           alt = wgt$eff_allele,
+                           ref = wgt$ref_allele,
                            stringsAsFactors = F)
-        colnames(snps) <- c("chrom", "id", "cm", "pos", "alt", "ref")
-        snps$chrom <- as.integer(snps$chrom)
-        snps$pos <- as.integer(snps$pos)
 
-        if (!any(snps$chrom %in% chr)){
+        if (!chrom %in% chr)
           next
-        }
 
-        g.method = "weight"
+        # select weight matrix by the prediction method used for this gene
+        g.method <- "weight"
         wgt.matrix <- wgt.matrix[abs(wgt.matrix[, g.method]) > 0, , drop = F]
         wgt.matrix <- wgt.matrix[complete.cases(wgt.matrix),, drop = F]
         if (nrow(wgt.matrix) == 0)
           next
+
         if (is.null(z_snp)) {
+          # select SNPs in both weight and LD reference
           snpnames <- intersect(rownames(wgt.matrix), ld_snpinfo$id)
         } else {
+          # if z_snp is available, select SNPs in weight and LD reference and SNP zscores
           snpnames <- Reduce(intersect, list(rownames(wgt.matrix), ld_snpinfo$id, z_snp$id))
         }
+
         if (length(snpnames) == 0)
           next
+
         wgt.idx <- match(snpnames, rownames(wgt.matrix))
         wgt <- wgt.matrix[wgt.idx, g.method, drop = F]
 
@@ -606,33 +607,35 @@ read_weights <- function (weights,
         p1 <- max(snps[snps[, "id"] %in% snpnames, "pos"])
         nwgt <- nrow(wgt.matrix)
         nmiss <- nrow(wgt.matrix) - length(snpnames)
-        outlist_core[[gname_weight]] <- list(chrom = chrom, p0 = p0, p1 = p1,
-                                             wgt = wgt, gname=gname, weight_name=weight_name,
-                                             n = nwgt, nmiss = nmiss, missrate = nwgt/nmiss)
+        # TODO: check missrate calculation
+        weightlist_core[[gname_weight]] <- list(chrom = chrom, p0 = p0, p1 = p1,
+                                                wgt = wgt, gname=gname, weight_name=weight_name,
+                                                n = nwgt, nmiss = nmiss, missrate = nwgt/nmiss)
+
       }
 
       RSQLite::dbDisconnect(db)
     }
 
-    outlist_core
+    weightlist_core
   }
 
   parallel::stopCluster(cl)
 
-  exprlist_weight <- lapply(names(outlist), function(x){
-    outlist[[x]][c("chrom","p0","p1","wgt","gname","weight_name")]})
-  names(exprlist_weight) <- names(outlist)
+  exprlist <- lapply(names(weightlist), function(x){
+    weightlist[[x]][c("chrom","p0","p1","wgt","gname","weight_name")]})
+  names(exprlist) <- names(weightlist)
 
-  qclist_weight <- lapply(names(outlist), function(x){
-    outlist[[x]][c("n","nmiss","missrate")]})
-  names(qclist_weight) <- names(outlist)
+  qclist <- lapply(names(weightlist), function(x){
+    weightlist[[x]][c("n","nmiss","missrate")]})
+  names(qclist) <- names(weightlist)
 
-  exprlist <- c(exprlist, exprlist_weight)
-  qclist <- c(qclist, qclist_weight)
+  weight_info <- lapply(names(weightlist), function(x){
+    as.data.frame(weightlist[[x]][c("chrom", "p0","p1", "gname", "weight_name", "n", "nmiss")])})
+  weight_info <- do.call(rbind, weight_info)
+  rownames(weight_info) <- names(weightlist)
 
-  rm(outlist, exprlist_weight, qclist_weight)
-
-  return(list(exprlist = exprlist, qclist = qclist))
+  return(list(exprlist = exprlist, qclist = qclist, weight_info = weight_info))
 }
 
 # combine gene z-scores and SNP z-scores
@@ -670,20 +673,20 @@ read_LD <- function(filename, format = c("rds", "rdata", "csv", "txt", "tsv")) {
       format <- "txt"
     } else if (file_ext_lower %in% c("tsv", "tsv.gz")){
       format <- "tsv"
-    } else{
+    } else {
       stop("Unknown LD file format!")
     }
   }
 
   if (format == "rds"){
     res <- readRDS(file)
-  }else if (format == "rd"){
+  } else if (format == "rd"){
     res <- get(load(file))
-  }else if (format == "csv"){
+  } else if (format == "csv"){
     res <- as.matrix(read.csv(file, sep=",", row.names=1))
-  }else if (format %in% c("txt", "tsv")){
+  } else if (format %in% c("txt", "tsv")){
     res <- as.matrix(data.table::fread(file))
-  }else{
+  } else {
     stop("Unknown LD file format!")
   }
 
