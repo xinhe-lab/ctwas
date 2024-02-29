@@ -44,6 +44,17 @@ region2core <- function(regionlist, ncore = 1){
   return(corelist)
 }
 
+get_region_tags <- function(regionlist){
+  region_tags <- NULL
+  for (b in 1:length(regionlist)){
+    if (length(regionlist[[b]]) > 0){
+      rn <- names(regionlist[[b]])
+      region_tags <- c(region_tags, paste0(b, "_", rn))
+    }
+  }
+  return(region_tags)
+}
+
 # select and assemble a subset of regionlist by region_tags
 subset_regionlist <- function(regionlist, region_tags = NULL){
 
@@ -75,113 +86,3 @@ subset_regionlist <- function(regionlist, region_tags = NULL){
 }
 
 
-#' Merge regions.
-#'
-#' @param region_info a data frame of region definition and associated file names
-#'
-#' @param regionlist the list of regions to be merged.
-#'
-#' @param chrom the list of chromosomes to be merged.
-#'
-#' @importFrom logging loginfo
-#'
-#' @return a list of merged regions.
-#'
-merge_regions <- function(region_info, regionlist, chrom = 1:22) {
-
-  for (b in chrom){
-
-    for (rn in 2:nrow(region_info)){
-      current <- regionlist[[b]][[as.character(rn)]]
-      previous <- regionlist[[b]][[as.character(rn - 1)]]
-
-      if (length(intersect(current[["gid"]], previous[["gid"]]))> 0){
-
-        gidx <-  unique(c(previous[["gidx"]], current[["gidx"]]))
-        sidx <-  unique(c(previous[["sidx"]], current[["sidx"]]))
-
-        gid <- geneinfo$id[gidx]
-        sid <- snpinfo$id[sidx]
-
-        regionlist[[b]][[as.character(rn)]] <- list("gidx" = gidx,
-                                                    "gid"  = gid,
-                                                    "sidx" = sidx,
-                                                    "sid"  = sid,
-                                                    "start" = previous$start,
-                                                    "stop" = current$stop,
-                                                    "minpos" = previous$minpos,
-                                                    "maxpos" = current$maxpos)
-
-        regionlist[[b]][[as.character(rn -1)]] <- NULL
-      }
-    }
-  }
-
-  loginfo("No. regions with at least one SNP/gene for chr%s after merging: %s",
-          b, length(regionlist[[b]]))
-
-  ld_Rf <- ld_Rfs[b]
-  ld_Rinfo <- as.data.frame(data.table::fread(ld_Rf, header = T))
-
-  if (!isTRUE(merge) & nrow(regions) >=2){
-    for (rn in 1:(nrow(regions)-1)){
-      current <- regionlist[[b]][[as.character(rn)]]
-      nextone <- regionlist[[b]][[as.character(rn+1)]]
-      gnames <- regionlist[[b]][[as.character(rn)]][["gid"]]
-      tmp_region <- regionlist[[b]][[as.character(rn)]]
-      if(length(gnames>0)){
-        ifreg <- ifelse(regionlist[[b]][[as.character(rn)]][["start"]] < ld_Rinfo[, "stop"] & regionlist[[b]][[as.character(rn)]][["stop"]] >= ld_Rinfo[, "start"], T, F)
-        regRDS <- ld_Rinfo[ifreg, "RDS_file"]
-        R_snp_anno <- as.data.frame(do.call(rbind, lapply(regRDS, ctwas:::read_ld_Rvar_RDS)))
-        for (i in 1:length(gnames)){
-          gname <- gnames[i]
-          wgt <- wgtlistall[[gname]]
-          snpnames <- rownames(wgt)
-          ld.idx <- match(snpnames, R_snp_anno$id)
-          if(anyNA(ld.idx)){
-            thisindex <- !is.na(ld.idx)
-            nextindex <- is.na(ld.idx)
-            thisr2 <- sum(wgt[thisindex]^2)
-            nextr2 <- sum(wgt[nextindex]^2)
-            if(thisr2<nextr2){
-              #modify weights file - drop weights in other regions
-              tmp_wgt <- wgtlistall[[gname]][nextindex]
-              if(length(tmp_wgt)==1){
-                wgtlistall[[gname]] <- matrix(tmp_wgt,nrow = 1,ncol = 1)
-                rownames(wgtlistall[[gname]]) <- snpnames[nextindex]
-                colnames(wgtlistall[[gname]]) <- "weight"
-              }
-              else{
-                wgtlistall[[gname]] <- matrix(tmp_wgt,nrow = length(tmp_wgt),ncol = 1)
-                rownames(wgtlistall[[gname]]) <- snpnames[nextindex]
-                colnames(wgtlistall[[gname]]) <- "weight"
-              }
-              #add gene to next region
-              regionlist[[b]][[as.character(rn+1)]][["gidx"]] <- c(regionlist[[b]][[as.character(rn+1)]][["gidx"]],tmp_region[["gidx"]][which(gnames==gname)])
-              regionlist[[b]][[as.character(rn+1)]][["gid"]] <- c(regionlist[[b]][[as.character(rn+1)]][["gid"]],gname)
-              #remove gene from this region
-              regionlist[[b]][[as.character(rn)]][["gidx"]] <- regionlist[[b]][[as.character(rn)]][["gidx"]][which(gnames!=gname)]
-              regionlist[[b]][[as.character(rn)]][["gid"]] <- regionlist[[b]][[as.character(rn)]][["gid"]][!regionlist[[b]][[as.character(rn)]][["gid"]]==gname]
-            }
-            else{
-              #modify weights file - drop weights in other regions
-              tmp_wgt <- wgtlistall[[gname]][thisindex]
-              if(length(tmp_wgt)==1){
-                wgtlistall[[gname]] <- matrix(tmp_wgt,nrow = 1,ncol = 1)
-                rownames(wgtlistall[[gname]]) <- snpnames[thisindex]
-                colnames(wgtlistall[[gname]]) <- "weight"
-              }
-              else{
-                wgtlistall[[gname]] <- matrix(tmp_wgt,nrow = length(tmp_wgt),ncol = 1)
-                rownames(wgtlistall[[gname]]) <- snpnames[thisindex]
-                colnames(wgtlistall[[gname]]) <- "weight"
-              }
-            }
-          }
-        }
-      }
-    }
-  }
-
-  return(regionlist)
-}
