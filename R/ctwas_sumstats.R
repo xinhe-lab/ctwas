@@ -5,7 +5,7 @@
 #'
 #' @param region_info a data frame of region definition and associated LD file names
 #'
-#' @param weight_list a list of weights by chromosome
+#' @param weights a list of weights by chromosome
 
 #' @param niter1 the number of iterations of the E-M algorithm to perform during the initial parameter estimation step
 #'
@@ -68,7 +68,7 @@
 ctwas_sumstats <- function(
     z_snp,
     region_info,
-    weight_list,
+    weights,
     niter1 = 3,
     niter2 = 30,
     thin = 1,
@@ -94,12 +94,14 @@ ctwas_sumstats <- function(
 
   # Compute gene z-scores
   res <- compute_gene_z(z_snp = z_snp,
-                        weight_list = weight_list,
+                        weights = weights,
                         region_info = region_info,
                         ncore = ncore)
   z_gene <- res$z_gene
   z_snp <- res$z_snp
   gene_info <- res$gene_info
+  wgtlist <- res$wgtlist
+  weight_info <- res$weight_info
   rm(res)
 
   # Estimate parameters
@@ -131,7 +133,7 @@ ctwas_sumstats <- function(
                         z_gene = z_gene,
                         region_info = region_info,
                         gene_info = gene_info,
-                        weight_list = weight_list,
+                        wgtlist = wgtlist,
                         regionlist = regionlist,
                         thin = thin,
                         max_snp_region = max_snp_region,
@@ -163,6 +165,7 @@ ctwas_sumstats <- function(
                                                 region_info = screened_region_info,
                                                 regionlist = screened_regionlist,
                                                 region_tag = region_tag,
+                                                wgtlist = wgtlist,
                                                 L = L,
                                                 group_prior = group_prior,
                                                 group_prior_var = group_prior_var,

@@ -14,6 +14,8 @@
 #'
 #' @param region_tag a character string of region tag to be finemapped
 #'
+#' @param wgtlist a list of weights for each gene
+#'
 #' @param L the number of effects for susie during the fine mapping steps
 #'
 #' @param group_prior a vector of two prior inclusion probabilities for SNPs and genes.
@@ -47,6 +49,7 @@ finemap_region <- function(z_snp,
                            regionlist,
                            region_info,
                            region_tag,
+                           wgtlist = NULL,
                            L = 5,
                            group_prior = NULL,
                            group_prior_var = NULL,
@@ -59,8 +62,18 @@ finemap_region <- function(z_snp,
 
   loginfo("Run finemapping with L = %d for region %s", L, region_tag)
 
-  # combine z-scores of different types
-  zdf <- combine_z(z_snp, z_gene)
+  # combine z-scores of SNPs and genes
+  z_snp$type <- "SNP"
+  z_snp$QTLtype <- "SNP"
+  if (is.null(z_gene$type)){
+    z_gene$type <- "gene"
+  }
+  if (is.null(z_gene$QTLtype)){
+    z_gene$QTLtype <- "gene"
+  }
+  zdf <- rbind(z_snp[, c("id", "z", "type", "QTLtype")],
+               z_gene[, c("id", "z", "type", "QTLtype")])
+
   types <- unique(zdf$type)
 
   # priors
@@ -122,28 +135,41 @@ finemap_region <- function(z_snp,
   z.s <- zdf[match(sid, zdf$id), ][["z"]]
   z <- c(z.g, z.s)
 
-  # prepare R matrix
-  LD_R_file <- region_idx[["LD_R_file"]]
+  # compute correlation matrix
+  LD_R_file <- file.path(region_idx[["cor_dir"]], region_idx[["cor_file"]])
 
   if (file.exists(LD_R_file)){
     # load precomputed correlation matrix
-    R <- read_LD(LD_R_file)
+    res <- readRDS(LD_R_file)
+    R_snp <- res$R_snp
+    R_snp_gene <- res$R_snp_gene
+    R_snp_gene <- R_snp_gene[sidx, , drop = F]
+    R_gene <- res$R_gene
+    # gene first then SNPs
+    R <- rbind(cbind(R_gene, t(R_snp_gene)),
+               cbind(R_snp_gene, R_snp))
   } else {
-    # compute correlation matrix
-    if (isTRUE(save_LD_R)) {
-      R <- compute_cor()
-      LD_R_file <- file.path(outputdir, paste0(outname, "_LDR"), paste0("chr", b, "_reg", rn, ".R.RDS"))
-      saveRDS(R, LD_R_file)
-      region_idx[["LD_R_file"]] <- LD_R_file
+    # compute correlation matrix if not available
+    if (L == 1 && save_LD_R == FALSE) {
+      # R does not matter for susie when L = 1
+      R <- diag(length(z))
     } else {
-      if (L == 1) {
-        # R does not matter for susie when L = 1
-        R <- diag(length(z))
-      } else {
-        R <- compute_cor()
-      }
+      res <- compute_region_cor(regionlist,
+                                wgtlist = wgtlist,
+                                b = b, rn = rn,
+                                save = save_LD_R,
+                                outputdir = outputdir,
+                                outname = outname)
+      R_snp <- res$R_snp
+      R_snp_gene <- res$R_snp_gene
+      R_snp_gene <- R_snp_gene[sidx, , drop = F]
+      R_gene <- res$R_gene
+      # gene first then SNPs
+      R <- rbind(cbind(R_gene, t(R_snp_gene)),
+                 cbind(R_snp_gene, R_snp))
     }
   }
+  rm(res)
 
   # in susie, prior_variance is under standardized scale (if performed)
   susie_res <- ctwas_susie_rss(z = z,
