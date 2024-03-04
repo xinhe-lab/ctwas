@@ -85,9 +85,8 @@ compute_cor <- function(regionlist, wgtlistall, outname = NULL,
           R_snp <- suppressWarnings(as.matrix(Matrix::bdiag(R_snp)))
         }
           
-        ld_snpinfo <- ctwas:::read_LD_SNP_file(regionlist[[b]][[rn]][["SNP_info"]])
-        #sidx <-  match(regionlist[[b]][[rn]][["sid"]], ld_snpinfo$id)
-        #outlist_core_region[["sidx"]] <- sidx
+        ld_snpinfo <- read_LD_SNP_file(regionlist[[b]][[rn]][["SNP_info"]]) #ctwas
+        sidx <-  match(regionlist[[b]][[rn]][["sid"]], ld_snpinfo$id)
         gnames <- regionlist[[b]][[rn]][["gid"]]
         R_snp_gene <- matrix(NA, nrow(R_snp), length(gnames))
         R_gene <- diag(length(gnames))

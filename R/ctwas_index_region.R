@@ -53,7 +53,7 @@ index_region <- function(regions,
       
     rn.start <- regions$start[rn]
     rn.stop <- regions$stop[rn]
-
+    region_tag <- paste0(rn.start,"_",rn.stop)
     gidx <- which(geneinfo$p0 >= rn.start & geneinfo$p0 < rn.stop
                   & geneinfo$keep == 1) # temporarily assign to the first region if its QTLs are across boundary
 
@@ -68,7 +68,7 @@ index_region <- function(regions,
     minpos <- min(c(geneinfo$p0[gidx], snpinfo$pos[sidx]))
     maxpos <- max(c(geneinfo$p1[gidx], snpinfo$pos[sidx]))
 
-    regionlist[[as.character(rn)]] <- list("gidx" = gidx,
+    regionlist[[region_tag]] <- list("gidx" = gidx,
                              "gid"  = gid,
                              "sidx" = sidx,
                              "sid"  = sid,

@@ -73,7 +73,7 @@ get_region_idx <- function(region_info,
      # select genes in chromosome b
     geneinfo <- gene_info[gene_info$chrom == b, ]
     # get snp info in LD in the chromosome
-    snpinfo <- ctwas:::read_LD_SNP_files(regions$SNP_info)
+    snpinfo <- read_LD_SNP_files(regions$SNP_info) #ctwas
     if (isTRUE(unique(snpinfo$chrom) != b)){
       stop("Input genotype file not split by chromosome or not in correct order")
     }

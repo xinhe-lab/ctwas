@@ -45,12 +45,15 @@ adjust_boundary <- function(regions, weight_list, regionlist){
   boundary_genes <- data.frame(matrix(nrow = 0, ncol = 4))
   colnames(boundary_genes) <- c("gene","chr","region1","region2")
   for (rn in 1:(nrow(regions)-1)){
-    current <- regionlist[[as.character(rn)]]
-    nextone <- regionlist[[as.character(rn+1)]]
-    gnames <- regionlist[[as.character(rn)]][["gid"]]
-    tmp_region <- regionlist[[as.character(rn)]]
+    
+    region_tag_current <- paste0(regions$start[rn],"_",regions$stop[rn])
+    region_tag_next <- paste0(regions$start[rn+1],"_",regions$stop[rn+1])
+    current <- regionlist[[region_tag_current]]
+    nextone <- regionlist[[region_tag_next]]
+    gnames <- regionlist[[region_tag_current]][["gid"]]
+    tmp_region <- regionlist[[region_tag_current]]
     if(length(gnames>0)){
-      ld_snpinfo <- ctwas:::read_LD_SNP_file(regionlist[[as.character(rn)]][["SNP_info"]])
+      ld_snpinfo <- read_LD_SNP_file(regionlist[[region_tag_current]][["SNP_info"]]) #ctwas:::
       for (i in 1:length(gnames)){
         gname <- gnames[i]
         wgt <- weight_list[[gname]] 
@@ -76,11 +79,11 @@ adjust_boundary <- function(regions, weight_list, regionlist){
               colnames(weight_list[[gname]]) <- "weight"
             }
             #add gene to next region
-            regionlist[[as.character(rn+1)]][["gidx"]] <- c(regionlist[[as.character(rn+1)]][["gidx"]],tmp_region[["gidx"]][which(gnames==gname)])
-            regionlist[[as.character(rn+1)]][["gid"]] <- c(regionlist[[as.character(rn+1)]][["gid"]],gname)
+            regionlist[[region_tag_next]][["gidx"]] <- c(regionlist[[region_tag_next]][["gidx"]],tmp_region[["gidx"]][which(gnames==gname)])
+            regionlist[[region_tag_next]][["gid"]] <- c(regionlist[[region_tag_next]][["gid"]],gname)
             #remove gene from this region
-            regionlist[[as.character(rn)]][["gidx"]] <- regionlist[[as.character(rn)]][["gidx"]][which(gnames!=gname)]
-            regionlist[[as.character(rn)]][["gid"]] <- regionlist[[as.character(rn)]][["gid"]][!regionlist[[as.character(rn)]][["gid"]]==gname]
+            regionlist[[region_tag_current]][["gidx"]] <- regionlist[[region_tag_current]][["gidx"]][which(gnames!=gname)]
+            regionlist[[region_tag_current]][["gid"]] <- regionlist[[region_tag_current]][["gid"]][!regionlist[[region_tag_current]][["gid"]]==gname]
           }
           else{
             #modify weights file - drop weights in other regions
