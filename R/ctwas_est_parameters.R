@@ -61,7 +61,7 @@ est_param <- function(
     regionlist = NULL,
     z_gene = NULL,
     gene_info = NULL,
-    weight_list = NULL,
+    weights = NULL,
     thin = 1,
     prob_single = 0.8,
     niter1 = 3,
@@ -86,18 +86,29 @@ est_param <- function(
   # compute gene z-scores if not available
   if (is.null(z_gene)) {
     loginfo("Computing gene z-scores ...")
-    compute_gene_z_res <- compute_gene_z(z_snp = z_snp,
-                                         weight_list = weight_list,
-                                         region_info = region_info,
-                                         ncore=ncore)
-    z_gene <- compute_gene_z_res$z_gene
-    z_snp <- compute_gene_z_res$z_snp
-    gene_info <- compute_gene_z_res$gene_info
-    rm(compute_gene_z_res)
+    res <- compute_gene_z(z_snp = z_snp,
+                          weights = weights,
+                          region_info = region_info,
+                          ncore=ncore)
+    z_gene <- res$z_gene
+    z_snp <- res$z_snp
+    gene_info <- res$gene_info
+    wgtlist <- res$wgtlist
+    weight_info <- res$weight_info
+    rm(res)
   }
 
   # combine z-scores of SNPs and genes
-  zdf <- combine_z(z_snp, z_gene)
+  z_snp$type <- "SNP"
+  z_snp$QTLtype <- "SNP"
+  if (is.null(z_gene$type)){
+    z_gene$type <- "gene"
+  }
+  if (is.null(z_gene$QTLtype)){
+    z_gene$QTLtype <- "gene"
+  }
+  zdf <- rbind(z_snp[, c("id", "z", "type", "QTLtype")],
+               z_gene[, c("id", "z", "type", "QTLtype")])
 
   if (thin <= 0 | thin > 1){
     stop("thin value needs to be in (0,1]")
@@ -108,12 +119,10 @@ est_param <- function(
     loginfo("Get regionlist with thin = %.2f", thin)
     res <- get_region_idx(region_info = region_info,
                           gene_info = gene_info,
-                          weight_list = weight_list,
+                          weight_list = wgtlist,
                           select = zdf$id,
                           thin = thin,
-                          minvar = 2,
-                          merge = FALSE,
-                          ncore = ncore)
+                          minvar = 2)
 
     regionlist <- res$regionlist
     region_info <- res$region_info # updated region_info containing correlation file names for each region

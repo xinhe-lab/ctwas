@@ -10,7 +10,9 @@
 #'
 #' @param gene_info a data frame of gene information obtained from \code{compute_gene_z}
 #'
-#' @param weight_list
+#' @param regionlist a list object indexing regions, variants and genes.
+#'
+#' @param wgtlist
 #'
 #' @param thin The proportion of SNPs to be used for parameter estimation and initial screening regions.
 #' Smaller \code{thin} parameters reduce runtime at the expense of accuracy.
@@ -55,7 +57,7 @@ screen_regions <- function(
     z_gene,
     region_info,
     gene_info = NULL,
-    weight_list = NULL,
+    wgtlist = NULL,
     regionlist = NULL,
     thin = 1,
     max_snp_region = Inf,
@@ -73,8 +75,17 @@ screen_regions <- function(
     addHandler(writeToFile, file= logfile, level='DEBUG')
   }
 
-  # combine z-scores of different types
-  zdf <- combine_z(z_snp, z_gene)
+  # combine z-scores of SNPs and genes
+  z_snp$type <- "SNP"
+  z_snp$QTLtype <- "SNP"
+  if (is.null(z_gene$type)){
+    z_gene$type <- "gene"
+  }
+  if (is.null(z_gene$QTLtype)){
+    z_gene$QTLtype <- "gene"
+  }
+  zdf <- rbind(z_snp[, c("id", "z", "type", "QTLtype")],
+               z_gene[, c("id", "z", "type", "QTLtype")])
 
   if (thin <= 0 || thin > 1){
     stop("thin value needs to be in (0,1]")
@@ -86,13 +97,11 @@ screen_regions <- function(
     loginfo("Get regionlist with thin = %.2f", thin)
     res <- get_region_idx(region_info = region_info,
                           gene_info = gene_info,
-                          weight_list = weight_list,
+                          weight_list = wgtlist,
                           select = zdf$id,
                           thin = thin,
                           maxSNP = max_snp_region,
-                          minvar = 2,
-                          merge = FALSE,
-                          ncore = ncore)
+                          minvar = 2)
 
     regionlist <- res$regionlist
     rm(res)
@@ -113,6 +122,7 @@ screen_regions <- function(
     for (i in 1: nrow(regs)) {
       b <- regs[i, "b"]
       rn <- regs[i, "rn"]
+      region_idx <- regionlist[[b]][[rn]]
       region_tag <- paste0(b, ":", rn)
       susie_res <- finemap_region(z_snp = z_snp,
                                   z_gene = z_gene,
@@ -120,6 +130,7 @@ screen_regions <- function(
                                   gene_info = gene_info,
                                   regionlist = regionlist,
                                   region_tag = region_tag,
+                                  wgtlist = wgtlist,
                                   L = L,
                                   group_prior = group_prior,
                                   group_prior_var = group_prior_var,
@@ -159,13 +170,11 @@ screen_regions <- function(
     loginfo("Get screened regionlist containing all SNPs")
     res <- get_region_idx(region_info = screened_region_info,
                           gene_info = gene_info,
-                          weight_list = weight_list,
+                          weight_list = wgtlist,
                           select = zdf$id,
                           thin = 1,
                           maxSNP = max_snp_region,
-                          minvar = 2,
-                          merge = FALSE,
-                          ncore = ncore)
+                          minvar = 2)
     screened_regionlist <- res$regionlist
     rm(res)
   }

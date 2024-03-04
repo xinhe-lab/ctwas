@@ -139,23 +139,6 @@ ctwas_EM <- function(zdf,
         z.s <- zdf[match(sid, zdf$id), ][["z"]]
         z <- c(z.g, z.s)
 
-        # # prepare R matrix
-        # if (!("regRDS" %in% names(regionlist[[b]][[rn]]))){
-        #   stop("R matrix info not available for region", b, ":", rn)
-        # }
-        #
-        # regRDS <- regionlist[[b]][[rn]][["regRDS"]]
-
-        # # load correlation matrices
-        # R_snp <- readRDS(regionlist[[b]][[rn]][["R_s_file"]])
-        # R_snp_gene <- readRDS(regionlist[[b]][[rn]][["R_sg_file"]])
-        # R_snp_gene <- R_snp_gene[sidx, , drop = F]
-        # R_gene <- readRDS(regionlist[[b]][[rn]][["R_g_file"]])
-        #
-        # # gene first then SNPs
-        # R <- rbind(cbind(R_gene, t(R_snp_gene)),
-        #            cbind(R_snp_gene, R_snp))
-
         # R does not matter for susie when L = 1
         R <- diag(length(z))
 
@@ -169,16 +152,15 @@ ctwas_EM <- function(zdf,
                                      coverage = coverage,
                                      min_abs_corr = min_abs_corr)
 
-        # annotate susie results with SNP, gene information
-        # gene_info_chr <- read_exprvar(ld_exprvarfs[b])
+        # annotate susie result with SNP and gene information
         gene_info_chr <- gene_info[gene_info$chrom == b, ]
-        snp_info_region <- do.call(rbind, lapply(LD_R_file, read_ld_Rvar_RDS))
+        ld_snpinfo <- read_LD_SNP_file(region_idx[["SNP_info"]])
 
         susie_res <- anno_susie(susie_res,
-                                gene_info_chr,
-                                snp_info_region,
-                                region_idx,
-                                zdf)
+                                gene_info = gene_info_chr,
+                                snp_info = ld_snpinfo,
+                                region_idx = region_idx,
+                                zdf = zdf)
 
         susie_res.core.list[[reg]] <- susie_res
       }

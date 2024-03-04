@@ -8,13 +8,15 @@
 #'
 #' @param gene_info a data frame of gene information obtained from \code{compute_gene_z}
 #'
-#' @param regionlist the list of regions with SNP and gene indices.
-#'
-#' @param region_info a data frame of region definition and associated file names
+#' @param regionlist a list object indexing regions, variants and genes.
 #'
 #' @param region_tag a character string of region tag to be finemapped
 #'
 #' @param wgtlist a list of weights for each gene
+#'
+#' @param R_snp Reference LD matrix
+#'
+#' @param ld_snpinfo SNP information of the SNPs in \code{R_snp} matrix
 #'
 #' @param L the number of effects for susie during the fine mapping steps
 #'
@@ -31,7 +33,7 @@
 #'   correlation of 0.25, which is a commonly used threshold for
 #'   genotype data in genetic studies.
 #'
-#' @param save_LD_R TRUE/FALSE. If TRUE, save correlation (R) matrices
+#' @param save TRUE/FALSE. If TRUE, save correlation (R) matrices
 #'
 #' @param outputdir a string, the directory to store output
 #'
@@ -47,16 +49,17 @@ finemap_region <- function(z_snp,
                            z_gene,
                            gene_info,
                            regionlist,
-                           region_info,
                            region_tag,
                            wgtlist = NULL,
+                           R_snp = NULL,
+                           ld_snpinfo = NULL,
                            L = 5,
                            group_prior = NULL,
                            group_prior_var = NULL,
                            use_null_weight = TRUE,
                            coverage = 0.95,
                            min_abs_corr = 0.5,
-                           save_LD_R = FALSE,
+                           save = FALSE,
                            outputdir = getwd(),
                            outname = NULL){
 
@@ -135,11 +138,18 @@ finemap_region <- function(z_snp,
   z.s <- zdf[match(sid, zdf$id), ][["z"]]
   z <- c(z.g, z.s)
 
-  # compute correlation matrix
+  # gene and SNP information in this region
+  gene_info_chr <- gene_info[gene_info$chrom == b, ]
+
+  if (is.null(ld_snpinfo)){
+    ld_snpinfo <- read_LD_SNP_file(region_idx[["SNP_info"]])
+  }
+
+  # compute correlation matrices
   LD_R_file <- file.path(region_idx[["cor_dir"]], region_idx[["cor_file"]])
 
-  if (file.exists(LD_R_file)){
-    # load precomputed correlation matrix
+  if (file.exists(LD_R_file)) {
+    # load precomputed correlation matrices
     res <- readRDS(LD_R_file)
     R_snp <- res$R_snp
     R_snp_gene <- res$R_snp_gene
@@ -149,17 +159,28 @@ finemap_region <- function(z_snp,
     R <- rbind(cbind(R_gene, t(R_snp_gene)),
                cbind(R_snp_gene, R_snp))
   } else {
-    # compute correlation matrix if not available
-    if (L == 1 && save_LD_R == FALSE) {
+
+    if (L == 1 && save == FALSE) {
       # R does not matter for susie when L = 1
       R <- diag(length(z))
     } else {
-      res <- compute_region_cor(regionlist,
-                                wgtlist = wgtlist,
-                                b = b, rn = rn,
-                                save = save_LD_R,
+      # compute correlation matrix if not available
+      if (is.null(R_snp)) {
+        R_snp <- lapply(region_idx[["LD_matrix"]], read_LD)
+        if (length(R_snp)==1){
+          R_snp <- unname(R_snp[[1]])
+        } else {
+          R_snp <- suppressWarnings(as.matrix(Matrix::bdiag(R_snp)))
+        }
+      }
+
+      res <- compute_region_cor(R_snp = R_snp,
+                                ld_snpinfo = ld_snpinfo,
+                                region_idx = region_idx,
+                                wgtlist = wgtlist[gid],
+                                save = save,
                                 outputdir = outputdir,
-                                outname = outname)
+                                outname = paste0(outname, ".chr", b, ".rn", rn,".cor"))
       R_snp <- res$R_snp
       R_snp_gene <- res$R_snp_gene
       R_snp_gene <- R_snp_gene[sidx, , drop = F]
@@ -171,6 +192,7 @@ finemap_region <- function(z_snp,
   }
   rm(res)
 
+  # run susie
   # in susie, prior_variance is under standardized scale (if performed)
   susie_res <- ctwas_susie_rss(z = z,
                                R = R,
@@ -181,16 +203,12 @@ finemap_region <- function(z_snp,
                                coverage = coverage,
                                min_abs_corr = min_abs_corr)
 
-  # annotate susie results with SNP, gene information
-  # gene_info_chr <- read_exprvar(ld_exprvarfs[b])
-  gene_info_chr <- gene_info[gene_info$chrom == b, ]
-  snp_info_region <- do.call(rbind, lapply(LD_R_file, read_ld_Rvar_RDS))
-
+  # annotate susie result with SNP and gene information
   susie_res <- anno_susie(susie_res,
-                          gene_info_chr,
-                          snp_info_region,
-                          region_idx,
-                          zdf)
+                          gene_info = gene_info_chr,
+                          snp_info = ld_snpinfo,
+                          region_idx = region_idx,
+                          zdf = zdf)
 
   return(susie_res)
 
