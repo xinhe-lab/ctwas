@@ -1,3 +1,14 @@
+#' Function to identify consecutive regions and label them
+label_merged_regions <- function(df) {
+  # Identify consecutive regions
+  df$merged <- c(FALSE, df$start[-1] == df$stop[-length(df$stop)])
+  df$label <- cumsum(!df$merged)
+  
+  # Remove the consecutive column as it's no longer needed
+  df$merged <- NULL
+  
+  return(df)
+}
 
 #' read all LD SNP info files as a data frame
 read_LD_SNP_files <- function(files){

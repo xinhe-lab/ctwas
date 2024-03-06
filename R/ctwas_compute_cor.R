@@ -78,14 +78,16 @@ compute_cor <- function(regionlist, wgtlistall, outname = NULL,
       for (rn in regionlist_core_b){
         outlist_core_region <- list(b=b, rn=rn) 
         R_snp <- lapply(regionlist[[b]][[rn]][["LD_matrix"]], readRDS)
-          
         if (length(R_snp)==1){
           R_snp <- unname(R_snp[[1]])
         } else {
           R_snp <- suppressWarnings(as.matrix(Matrix::bdiag(R_snp)))
         }
-          
-        ld_snpinfo <- read_LD_SNP_file(regionlist[[b]][[rn]][["SNP_info"]]) #ctwas
+        
+        ld_snpinfo <- lapply(regionlist[[b]][[rn]][["SNP_info"]],read_LD_SNP_file)
+        if (length(ld_snpinfo) > 1){
+          ld_snpinfo <- do.call(rbind,ld_snpinfo)
+        }
         sidx <-  match(regionlist[[b]][[rn]][["sid"]], ld_snpinfo$id)
         gnames <- regionlist[[b]][[rn]][["gid"]]
         R_snp_gene <- matrix(NA, nrow(R_snp), length(gnames))

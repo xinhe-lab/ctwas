@@ -68,10 +68,9 @@ index_region <- function(regions,
     minpos <- min(c(geneinfo$p0[gidx], snpinfo$pos[sidx]))
     maxpos <- max(c(geneinfo$p1[gidx], snpinfo$pos[sidx]))
 
-    regionlist[[region_tag]] <- list("gidx" = gidx,
+    regionlist[[region_tag]] <- list(
                              "gid"  = gid,
                              "sidx" = sidx,
-                             "sid"  = sid,
                              "start" = rn.start,
                              "stop" = rn.stop,
                              "minpos" = minpos,
