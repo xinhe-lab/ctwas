@@ -120,7 +120,7 @@ get_region_idx <- function(region_info,
           idx <- match(regionlist[[b]][[rn]][["sid"]], select[, "id"])
           z.abs <- abs(select[idx, "z"])
           ifkeep <- rank(-z.abs) <= maxSNP
-          regionlist[[b]][[rn]][["sidx"]] <-  regionlist[[b]][[rn]][["sidx"]][ifkeep]
+          #regionlist[[b]][[rn]][["sidx"]] <-  regionlist[[b]][[rn]][["sidx"]][ifkeep]
           regionlist[[b]][[rn]][["sid"]] <-  regionlist[[b]][[rn]][["sid"]][ifkeep]
         }
       }
@@ -134,7 +134,7 @@ get_region_idx <- function(region_info,
           ifkeep <- rep(F, n.ori)
           set.seed <- 99
           ifkeep[sample.int(n.ori, size = maxSNP)] <- T
-          regionlist[[b]][[rn]][["sidx"]] <-  regionlist[[b]][[rn]][["sidx"]][ifkeep]
+          #regionlist[[b]][[rn]][["sidx"]] <-  regionlist[[b]][[rn]][["sidx"]][ifkeep]
           regionlist[[b]][[rn]][["sid"]] <-  regionlist[[b]][[rn]][["sid"]][ifkeep]
         }
       }
