@@ -32,26 +32,11 @@
     <span class="caret"></span>
   </a>
   <ul class="dropdown-menu" role="menu"><li>
-      <a href="../articles/data_preparation.html">Data preparation</a>
-    </li>
-    <li>
-      <a href="../articles/postprocessing_regions.html">Postprocessing problematic regions</a>
-    </li>
-    <li>
-      <a href="../articles/ctwas_summary_statistics.html">Using cTWAS single-group version with summary statistics</a>
-    </li>
-    <li>
-      <a href="../articles/multigroup_ctwas_summary_statistics.html">Using cTWAS multi-group version with summary statistics</a>
-    </li>
-    <li>
-      <a href="../articles/harmonization.html">Harmonization</a>
-    </li>
-    <li>
-      <a href="../articles/regionmerging.html">Region Merging</a>
+      <a href="../articles/multigroup_ctwas_pipeline.html">Pipepline of using multigroup cTWAS with summary statistics</a>
     </li>
   </ul></li>
       </ul><ul class="nav navbar-nav navbar-right"><li>
-  <a href="https://github.com/xinhe-lab/ctwas" class="external-link">Source</a>
+  <a href="https://github.com/xinhe-lab/ctwas/tree/multigroup_test" class="external-link">Source</a>
 </li>
       </ul></div><!--/.nav-collapse -->
   </div><!--/.container -->
@@ -70,29 +55,34 @@
           <p class="section-desc"></p>
         </th>
       </tr></tbody><tbody><tr><td>
-          <p><code><a href="anno_susie.html">anno_susie()</a></code> </p>
+          <p><code><a href="adjust_boundary.html">adjust_boundary()</a></code> </p>
         </td>
-        <td><p>annotate susie results. this will generate output text files</p></td>
+        <td><p>Get gene and SNP index for each region</p></td>
       </tr><tr><td>
           <p><code><a href="coef.susie.html">coef(<i>&lt;susie&gt;</i>)</a></code> </p>
         </td>
         <td><p>Extract regression coefficients from susie fit</p></td>
       </tr><tr><td>
+          <p><code><a href="compute_cor.html">compute_cor()</a></code> </p>
+        </td>
+        <td><p>Get gene and SNP index for each region</p></td>
+      </tr><tr><td>
+          <p><code><a href="compute_gene_z.html">compute_gene_z()</a></code> </p>
+        </td>
+        <td><p>Compute gene z-scores</p></td>
+      </tr><tr><td>
+          <p><code><a href="compute_region_cor.html">compute_region_cor()</a></code> </p>
+        </td>
+        <td><p>Compute correlation matrices for a region</p></td>
+      </tr><tr><td>
           <p><code><a href="compute_ss.html">compute_ss()</a></code> </p>
         </td>
         <td><p>Compute sufficient statistics for susie.</p></td>
       </tr><tr><td>
-          <p><code><a href="ctwas.html">ctwas()</a></code> </p>
+          <p><code><a href="ctwas_EM.html">ctwas_EM()</a></code> </p>
         </td>
-        <td><p>Causal inference for TWAS</p></td>
-      </tr><tr><td>
-          <p><code><a href="ctwas_fine_mapping.html">ctwas_fine_mapping()</a></code> </p>
-        </td>
-        <td><p>Causal inference for TWAS using summary statistics</p></td>
-      </tr><tr><td>
-          <p><code><a href="ctwas_finemap_regions.html">ctwas_finemap_regions()</a></code> </p>
-        </td>
-        <td><p>cTWAS finemapping for specific regions with full SNPs (thin = 1)</p></td>
+        <td><p>Run EM to estimate parameters.
+Iteratively run susie and estimate parameters - RSS version</p></td>
       </tr><tr><td>
           <p><code><a href="ctwas_locus_plot.html">ctwas_locus_plot()</a></code> </p>
         </td>
@@ -102,21 +92,21 @@
         </td>
         <td><p>Create the gene track for the cTWAS locus plot</p></td>
       </tr><tr><td>
-          <p><code><a href="ctwas_parameter_estimation.html">ctwas_parameter_estimation()</a></code> </p>
-        </td>
-        <td><p>Causal inference for TWAS using summary statistics</p></td>
-      </tr><tr><td>
-          <p><code><a href="ctwas_rss.html">ctwas_rss()</a></code> </p>
-        </td>
-        <td><p>Causal inference for TWAS using summary statistics</p></td>
-      </tr><tr><td>
           <p><code><a href="ctwas_summarize_parameters.html">ctwas_summarize_parameters()</a></code> </p>
         </td>
         <td><p>Summarize and plot cTWAS parameter estimates</p></td>
       </tr><tr><td>
+          <p><code><a href="ctwas_sumstats.html">ctwas_sumstats()</a></code> </p>
+        </td>
+        <td><p>Causal inference for TWAS using summary statistics</p></td>
+      </tr><tr><td>
           <p><code><a href="detect_ld_mismatch_susie_rss.html">detect_ld_mismatch_susie_rss()</a></code> </p>
         </td>
         <td><p>Detect LD mismatches using SuSiE RSS</p></td>
+      </tr><tr><td>
+          <p><code><a href="est_param.html">est_param()</a></code> </p>
+        </td>
+        <td><p>Estimate cTWAS parameters</p></td>
       </tr><tr><td>
           <p><code><a href="estimate_s_rss.html">estimate_s_rss()</a></code> </p>
         </td>
@@ -126,9 +116,17 @@
         </td>
         <td><p>filter regions based on probability of at most 1 causal effect</p></td>
       </tr><tr><td>
+          <p><code><a href="finemap_region.html">finemap_region()</a></code> </p>
+        </td>
+        <td><p>run cTWAS finemapping for a single region</p></td>
+      </tr><tr><td>
           <p><code><a href="get_problematic_regions.html">get_problematic_regions()</a></code> </p>
         </td>
         <td><p>Get regions with problematic high PIP SNPs or genes</p></td>
+      </tr><tr><td>
+          <p><code><a href="get_region_idx.html">get_region_idx()</a></code> </p>
+        </td>
+        <td><p>Get gene and SNP index for each region</p></td>
       </tr><tr><td>
           <p><code><a href="harmonize_wgt_ld.html">harmonize_wgt_ld()</a></code> </p>
         </td>
@@ -140,15 +138,7 @@ Flip signs when reverse complement matches, remove/recover strand ambiguous SNPs
         <td><p>Harmonize z scores from GWAS to match ld reference genotypes.
 Flip signs when reverse complement matches.</p></td>
       </tr><tr><td>
-          <p><code><a href="impute_expr.html">impute_expr()</a></code> </p>
-        </td>
-        <td><p>Impute expression</p></td>
-      </tr><tr><td>
-          <p><code><a href="impute_expr_z.html">impute_expr_z()</a></code> </p>
-        </td>
-        <td><p>Impute expression z scores</p></td>
-      </tr><tr><td>
-          <p><code><a href="index_regions.html">index_regions()</a></code> </p>
+          <p><code><a href="index_region.html">index_region()</a></code> </p>
         </td>
         <td><p>Get gene and SNP index for each region</p></td>
       </tr><tr><td>
@@ -156,21 +146,13 @@ Flip signs when reverse complement matches.</p></td>
         </td>
         <td><p>Compute Distribution of z-scores of Variant j Given Other z-scores, and Detect Possible Allele Switch Issue</p></td>
       </tr><tr><td>
+          <p><code><a href="label_merged_regions.html">label_merged_regions()</a></code> </p>
+        </td>
+        <td><p>Function to identify consecutive regions and label them</p></td>
+      </tr><tr><td>
           <p><code><a href="predict.susie.html">predict(<i>&lt;susie&gt;</i>)</a></code> </p>
         </td>
         <td><p>Predict outcomes or extract coefficients from susie fit.</p></td>
-      </tr><tr><td>
-          <p><code><a href="prep_exprvar.html">prep_exprvar()</a></code> </p>
-        </td>
-        <td><p>Prepare .exprvar file</p></td>
-      </tr><tr><td>
-          <p><code><a href="prep_pgen.html">prep_pgen()</a></code> </p>
-        </td>
-        <td><p>Read .pgen file into R</p></td>
-      </tr><tr><td>
-          <p><code><a href="prep_pvar.html">prep_pvar()</a></code> </p>
-        </td>
-        <td><p>Prepare .pvar file</p></td>
       </tr><tr><td>
           <p><code><a href="preprocess_wgt_ld.html">preprocess_wgt_ld()</a></code> </p>
         </td>
@@ -181,49 +163,37 @@ Flip signs when reverse complement matches.</p></td>
         </td>
         <td><p>Preprocess GWAS summary statistics, harmonize GWAS z-scores and LD reference, and detect LD mismatches using susie_rss</p></td>
       </tr><tr><td>
-          <p><code><a href="read_expr.html">read_expr()</a></code> </p>
+          <p><code><a href="read_LD.html">read_LD()</a></code> </p>
         </td>
-        <td><p>Read .expr file into R</p></td>
+        <td><p>read LD by file format</p></td>
       </tr><tr><td>
-          <p><code><a href="read_exprvar.html">read_exprvar()</a></code> </p>
+          <p><code><a href="read_LD_SNP_file.html">read_LD_SNP_file()</a></code> </p>
         </td>
-        <td><p>Read .exprvar file into R</p></td>
+        <td><p>read a single LD SNP info file as a data frame</p></td>
       </tr><tr><td>
-          <p><code><a href="read_ld_Rvar.html">read_ld_Rvar()</a></code> </p>
+          <p><code><a href="read_LD_SNP_files.html">read_LD_SNP_files()</a></code> </p>
         </td>
-        <td><p>read variant information for all ld matrices in `ld_Rf`.</p></td>
+        <td><p>read all LD SNP info files as a data frame</p></td>
       </tr><tr><td>
-          <p><code><a href="read_ld_Rvar_RDS.html">read_ld_Rvar_RDS()</a></code> </p>
+          <p><code><a href="read_weights.html">read_weights()</a></code> </p>
         </td>
-        <td><p>read variant information associated with a LD R matrix .RDS file.</p></td>
-      </tr><tr><td>
-          <p><code><a href="read_pgen.html">read_pgen()</a></code> </p>
-        </td>
-        <td><p>Read pgen file into R</p></td>
-      </tr><tr><td>
-          <p><code><a href="read_pvar.html">read_pvar()</a></code> </p>
-        </td>
-        <td><p>Read .pvar file into R</p></td>
+        <td><p>read weights in PredictDB format, do not perform harmonization on weights</p></td>
       </tr><tr><td>
           <p><code><a href="region2core.html">region2core()</a></code> </p>
         </td>
         <td><p>assign regions to cores</p></td>
       </tr><tr><td>
-          <p><code><a href="rerun_ctwas_finemap_regions_L1_rss.html">rerun_ctwas_finemap_regions_L1_rss()</a></code> </p>
+          <p><code><a href="rerun_finemap_regions_L1.html">rerun_finemap_regions_L1()</a></code> </p>
         </td>
         <td><p>Rerun cTWAS finemapping using summary statistics with L = 1 for problematic regions</p></td>
+      </tr><tr><td>
+          <p><code><a href="screen_regions.html">screen_regions()</a></code> </p>
+        </td>
+        <td><p>Screen regions</p></td>
       </tr><tr><td>
           <p><code><a href="susie.html">susie()</a></code> <code><a href="susie.html">susie_suff_stat()</a></code> </p>
         </td>
         <td><p>Sum of Single Effects (SuSiE) Regression</p></td>
-      </tr><tr><td>
-          <p><code><a href="susieI.html">susieI()</a></code> </p>
-        </td>
-        <td><p>Iteratively run susie and estimate parameters</p></td>
-      </tr><tr><td>
-          <p><code><a href="susieI_rss.html">susieI_rss()</a></code> </p>
-        </td>
-        <td><p>Iteratively run susie and estimate parameters - RSS version</p></td>
       </tr><tr><td>
           <p><code><a href="susie_get_methods.html">susie_get_objective()</a></code> <code><a href="susie_get_methods.html">susie_get_posterior_mean()</a></code> <code><a href="susie_get_methods.html">susie_get_posterior_sd()</a></code> <code><a href="susie_get_methods.html">susie_get_niter()</a></code> <code><a href="susie_get_methods.html">susie_get_prior_variance()</a></code> <code><a href="susie_get_methods.html">susie_get_residual_variance()</a></code> <code><a href="susie_get_methods.html">susie_get_lfsr()</a></code> <code><a href="susie_get_methods.html">susie_get_posterior_samples()</a></code> <code><a href="susie_get_methods.html">susie_get_cs()</a></code> <code><a href="susie_get_methods.html">susie_get_pip()</a></code> </p>
         </td>
@@ -240,10 +210,6 @@ Flip signs when reverse complement matches.</p></td>
           <p><code><a href="univariate_regression.html">univariate_regression()</a></code> </p>
         </td>
         <td><p>Perform Univariate Linear Regression Separately for Columns of X</p></td>
-      </tr><tr><td>
-          <p><code><a href="write_ld_Rf.html">write_ld_Rf()</a></code> </p>
-        </td>
-        <td><p>combine variant information associated with a LD R matrix .RDS file.</p></td>
       </tr></tbody></table></div>
 
   <div class="col-md-3 hidden-xs hidden-sm" id="pkgdown-sidebar">

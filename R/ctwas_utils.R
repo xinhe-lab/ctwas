@@ -3,10 +3,10 @@ label_merged_regions <- function(df) {
   # Identify consecutive regions
   df$merged <- c(FALSE, df$start[-1] == df$stop[-length(df$stop)])
   df$label <- cumsum(!df$merged)
-  
+
   # Remove the consecutive column as it's no longer needed
   df$merged <- NULL
-  
+
   return(df)
 }
 
@@ -81,7 +81,7 @@ read_LD <- function(file, format = c("rds", "rdata", "csv", "txt", "tsv")) {
     if (file_ext_lower == "rds"){
       format <- "rds"
     } else if (file_ext_lower %in% c("rdata", "rd", "rda", "rdat")){
-      format <- "rd"
+      format <- "rdata"
     } else if (file_ext_upper %in% c("csv", "csv.gz")) {
       format <- "csv"
     } else if (file_ext_lower %in% c("txt", "txt.gz")){
@@ -95,7 +95,7 @@ read_LD <- function(file, format = c("rds", "rdata", "csv", "txt", "tsv")) {
 
   if (format == "rds"){
     res <- readRDS(file)
-  } else if (format == "rd"){
+  } else if (format == "rdata"){
     res <- get(load(file))
   } else if (format == "csv"){
     res <- as.matrix(read.csv(file, sep=",", row.names=1))

@@ -46,22 +46,3 @@ Under the null, the rss model with regularized LD
   weights \eqn{\pi}  We detect the possible allele switch issue
   using likelihood ratio for each variant.
 }
-\examples{
-# See also the vignette, "Diagnostic for fine-mapping with summary
-# statistics."
-set.seed(1)
-n = 500
-p = 1000
-beta = rep(0,p)
-beta[1:4] = 0.01
-X = matrix(rnorm(n*p),nrow = n,ncol = p)
-X = scale(X,center = TRUE,scale = TRUE)
-y = drop(X \%*\% beta + rnorm(n))
-ss = univariate_regression(X,y)
-R = cor(X)
-attr(R,"eigen") = eigen(R,symmetric = TRUE)
-zhat = with(ss,betahat/sebetahat)
-cond_dist = kriging_rss(zhat,R,n = n)
-cond_dist$plot
-
-}

@@ -54,29 +54,14 @@
   </a>
   <ul class="dropdown-menu" role="menu">
 <li>
-      <a href="articles/data_preparation.html">Data preparation</a>
-    </li>
-    <li>
-      <a href="articles/postprocessing_regions.html">Postprocessing problematic regions</a>
-    </li>
-    <li>
-      <a href="articles/ctwas_summary_statistics.html">Using cTWAS single-group version with summary statistics</a>
-    </li>
-    <li>
-      <a href="articles/multigroup_ctwas_summary_statistics.html">Using cTWAS multi-group version with summary statistics</a>
-    </li>
-    <li>
-      <a href="articles/harmonization.html">Harmonization</a>
-    </li>
-    <li>
-      <a href="articles/regionmerging.html">Region Merging</a>
+      <a href="articles/multigroup_ctwas_pipeline.html">Pipepline of using multigroup cTWAS with summary statistics</a>
     </li>
   </ul>
 </li>
       </ul>
 <ul class="nav navbar-nav navbar-right">
 <li>
-  <a href="https://github.com/xinhe-lab/ctwas" class="external-link">Source</a>
+  <a href="https://github.com/xinhe-lab/ctwas/tree/multigroup_test" class="external-link">Source</a>
 </li>
       </ul>
 </div>
@@ -90,28 +75,42 @@
 
       </header><div class="row">
   <div class="contents col-md-9">
-
 <div class="section level1">
-<div class="page-header"><h1 id="ctwas">ctwas<a class="anchor" aria-label="anchor" href="#ctwas"></a>
+<div class="page-header"><h1 id="multi-group-version-of-ctwas">Multi-group version of cTWAS<a class="anchor" aria-label="anchor" href="#multi-group-version-of-ctwas"></a>
 </h1></div>
-<p>Package for the causal TWAS project.</p>
+<p>Running cTWAS involves four main steps: preparing input data, imputing gene z-scores, estimating parameters, and fine-mapping genes and variants.</p>
+<p>We have included a <a href="https://xinhe-lab.github.io/multigroup_ctwas/articles/multigroup_ctwas_pipeline.html" class="external-link">pipeline</a> of using multi-group version of cTWAS with summary statistics.</p>
+<p>You can <a href="https://github.com/xinhe-lab/ctwas/tree/multigroup_test" class="external-link">browse source code</a>.</p>
+<div class="section level2">
+<h2 id="install">Install<a class="anchor" aria-label="anchor" href="#install"></a>
+</h2>
+<p>Install <code>ctwas</code> (<code>multigroup_test</code> branch):</p>
+<pre><code><span><span class="co"># install.packages("remotes")</span></span>
+<span><span class="fu">remotes</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/remotes/man/install_github.html" class="external-link">install_github</a></span><span class="op">(</span><span class="st">"xinhe-lab/ctwas"</span>,ref <span class="op">=</span> <span class="st">"multigroup_test"</span><span class="op">)</span></span></code></pre>
+<p>Currently, <code>ctwas</code> has only been tested on linux systems. We recommend running <code>ctwas</code> on a High-Performance Computing system.</p>
 </div>
-<div class="section level1">
-<h1 id="install">Install<a class="anchor" aria-label="anchor" href="#install"></a>
-</h1>
-<p>Install <code>ctwas</code> (<code>multigroup_kevin</code> branch):</p>
-<pre><code><span><span class="fu">remotes</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/remotes/man/install_github.html" class="external-link">install_github</a></span><span class="op">(</span><span class="st">"xinhe-lab/ctwas"</span>,ref <span class="op">=</span> <span class="st">"multigroup_kevin"</span><span class="op">)</span></span></code></pre>
+<div class="section level2">
+<h2 id="citing-this-work">Citing this work<a class="anchor" aria-label="anchor" href="#citing-this-work"></a>
+</h2>
+<p>If you find the <code>ctwas</code> package or any of the source code in this repository useful for your work, please cite:</p>
+<blockquote><p>Zhao S, Crouse W, Qian S, Luo K, Stephens M, He X. Adjusting for genetic confounders in transcriptome-wide association studies improves discovery of risk genes of complex traits. Nat Genet (2024). <a href="https://doi.org/10.1038/s41588-023-01648-9" class="external-link uri">https://doi.org/10.1038/s41588-023-01648-9</a></p></blockquote>
 </div>
-<div class="section level1">
-<h1 id="acknowledgement">Acknowledgement<a class="anchor" aria-label="anchor" href="#acknowledgement"></a>
-</h1>
+<div class="section level2">
+<h2 id="useful-resources">Useful resources<a class="anchor" aria-label="anchor" href="#useful-resources"></a>
+</h2>
+<p>We have pre-computed the LD matrices of European samples from UK Biobank. They can be downloaded <a href="https://uchicago.box.com/s/jqocacd2fulskmhoqnasrknbt59x3xkn" class="external-link">here</a>.</p>
+<p>cTWAS requires the expression prediction models, or weights, of genes. The pre-computed weights of GTEx expression and splicing traits can be downloaded from <a href="https://predictdb.org/post/2021/07/21/gtex-v8-models-on-eqtl-and-sqtl/" class="external-link">PredictDB</a>.</p>
+</div>
+<div class="section level2">
+<h2 id="acknowledgement">Acknowledgement<a class="anchor" aria-label="anchor" href="#acknowledgement"></a>
+</h2>
 <p>We acknowledge the authors of <code>susieR</code> package for using their codes.</p>
 <p>Original <code>susieR</code> code obtained by:</p>
 <pre><code>git clone git@github.com:stephenslab/susieR.git
 git checkout c7934c0</code></pre>
 <p>Minor edits to make it accept different prior variances for each variable.</p>
 </div>
-
+</div>
   </div>
 
   <div class="col-md-3 hidden-xs hidden-sm" id="pkgdown-sidebar">

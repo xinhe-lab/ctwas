@@ -2,11 +2,6 @@ pandoc: 2.7.3
 pkgdown: 2.0.7
 pkgdown_sha: ~
 articles:
-  ctwas_summary_statistics: ctwas_summary_statistics.html
-  data_preparation: data_preparation.html
-  harmonization: harmonization.html
-  multigroup_ctwas_summary_statistics: multigroup_ctwas_summary_statistics.html
-  postprocessing_regions: postprocessing_regions.html
-  regionmerging: regionmerging.html
-last_built: 2024-02-14T02:28Z
+  multigroup_ctwas_pipeline: multigroup_ctwas_pipeline.html
+last_built: 2024-03-07T02:17Z
 

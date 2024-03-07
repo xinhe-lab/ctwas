@@ -40,26 +40,11 @@
     <span class="caret"></span>
   </a>
   <ul class="dropdown-menu" role="menu"><li>
-      <a href="../articles/data_preparation.html">Data preparation</a>
-    </li>
-    <li>
-      <a href="../articles/postprocessing_regions.html">Postprocessing problematic regions</a>
-    </li>
-    <li>
-      <a href="../articles/ctwas_summary_statistics.html">Using cTWAS single-group version with summary statistics</a>
-    </li>
-    <li>
-      <a href="../articles/multigroup_ctwas_summary_statistics.html">Using cTWAS multi-group version with summary statistics</a>
-    </li>
-    <li>
-      <a href="../articles/harmonization.html">Harmonization</a>
-    </li>
-    <li>
-      <a href="../articles/regionmerging.html">Region Merging</a>
+      <a href="../articles/multigroup_ctwas_pipeline.html">Pipepline of using multigroup cTWAS with summary statistics</a>
     </li>
   </ul></li>
       </ul><ul class="nav navbar-nav navbar-right"><li>
-  <a href="https://github.com/xinhe-lab/ctwas" class="external-link">Source</a>
+  <a href="https://github.com/xinhe-lab/ctwas/tree/multigroup_test" class="external-link">Source</a>
 </li>
       </ul></div><!--/.nav-collapse -->
   </div><!--/.container -->
@@ -71,7 +56,7 @@
   <div class="col-md-9 contents">
     <div class="page-header">
     <h1>Compute Distribution of z-scores of Variant j Given Other z-scores, and Detect Possible Allele Switch Issue</h1>
-    <small class="dont-index">Source: <a href="https://github.com/xinhe-lab/ctwas/blob/main/R/susie_susie_utils.R" class="external-link"><code>R/susie_susie_utils.R</code></a></small>
+    <small class="dont-index">Source: <a href="https://github.com/xinhe-lab/ctwas/blob/multigroup_test/R/susie_susie_utils.R" class="external-link"><code>R/susie_susie_utils.R</code></a></small>
     <div class="hidden name"><code>kriging_rss.Rd</code></div>
     </div>
 
@@ -135,28 +120,6 @@ semidefinite matrix of R.</p></dd>
   and expected value, the log likelihood ratio statistics.</p>
     </div>
 
-    <div id="ref-examples">
-    <h2>Examples</h2>
-    <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span><span class="co"># See also the vignette, "Diagnostic for fine-mapping with summary</span></span></span>
-<span class="r-in"><span><span class="co"># statistics."</span></span></span>
-<span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/base/Random.html" class="external-link">set.seed</a></span><span class="op">(</span><span class="fl">1</span><span class="op">)</span></span></span>
-<span class="r-in"><span><span class="va">n</span> <span class="op">=</span> <span class="fl">500</span></span></span>
-<span class="r-in"><span><span class="va">p</span> <span class="op">=</span> <span class="fl">1000</span></span></span>
-<span class="r-in"><span><span class="va">beta</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/rep.html" class="external-link">rep</a></span><span class="op">(</span><span class="fl">0</span>,<span class="va">p</span><span class="op">)</span></span></span>
-<span class="r-in"><span><span class="va">beta</span><span class="op">[</span><span class="fl">1</span><span class="op">:</span><span class="fl">4</span><span class="op">]</span> <span class="op">=</span> <span class="fl">0.01</span></span></span>
-<span class="r-in"><span><span class="va">X</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/matrix.html" class="external-link">matrix</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/stats/Normal.html" class="external-link">rnorm</a></span><span class="op">(</span><span class="va">n</span><span class="op">*</span><span class="va">p</span><span class="op">)</span>,nrow <span class="op">=</span> <span class="va">n</span>,ncol <span class="op">=</span> <span class="va">p</span><span class="op">)</span></span></span>
-<span class="r-in"><span><span class="va">X</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/scale.html" class="external-link">scale</a></span><span class="op">(</span><span class="va">X</span>,center <span class="op">=</span> <span class="cn">TRUE</span>,scale <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span></span>
-<span class="r-in"><span><span class="va">y</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/drop.html" class="external-link">drop</a></span><span class="op">(</span><span class="va">X</span> <span class="op"><a href="https://rdrr.io/r/base/matmult.html" class="external-link">%*%</a></span> <span class="va">beta</span> <span class="op">+</span> <span class="fu"><a href="https://rdrr.io/r/stats/Normal.html" class="external-link">rnorm</a></span><span class="op">(</span><span class="va">n</span><span class="op">)</span><span class="op">)</span></span></span>
-<span class="r-in"><span><span class="va">ss</span> <span class="op">=</span> <span class="fu"><a href="univariate_regression.html">univariate_regression</a></span><span class="op">(</span><span class="va">X</span>,<span class="va">y</span><span class="op">)</span></span></span>
-<span class="r-in"><span><span class="va">R</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/stats/cor.html" class="external-link">cor</a></span><span class="op">(</span><span class="va">X</span><span class="op">)</span></span></span>
-<span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/base/attr.html" class="external-link">attr</a></span><span class="op">(</span><span class="va">R</span>,<span class="st">"eigen"</span><span class="op">)</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/eigen.html" class="external-link">eigen</a></span><span class="op">(</span><span class="va">R</span>,symmetric <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span></span>
-<span class="r-in"><span><span class="va">zhat</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/with.html" class="external-link">with</a></span><span class="op">(</span><span class="va">ss</span>,<span class="va">betahat</span><span class="op">/</span><span class="va">sebetahat</span><span class="op">)</span></span></span>
-<span class="r-in"><span><span class="va">cond_dist</span> <span class="op">=</span> <span class="fu">kriging_rss</span><span class="op">(</span><span class="va">zhat</span>,<span class="va">R</span>,n <span class="op">=</span> <span class="va">n</span><span class="op">)</span></span></span>
-<span class="r-in"><span><span class="va">cond_dist</span><span class="op">$</span><span class="va">plot</span></span></span>
-<span class="r-plt img"><img src="kriging_rss-1.png" alt="" width="700" height="433"></span>
-<span class="r-in"><span></span></span>
-</code></pre></div>
-    </div>
   </div>
   <div class="col-md-3 hidden-xs hidden-sm" id="pkgdown-sidebar">
     <nav id="toc" data-toggle="toc" class="sticky-top"><h2 data-toc-skip>Contents</h2>
