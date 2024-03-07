@@ -11,10 +11,10 @@
 #' or a data frame with columns id and z (id is for gene or SNP id, z is for z scores).
 #' z will be used for remove SNPs if the total number of SNPs exceeds limit. See
 #' parameter `maxSNP` for more information.
-#' 
+#'
 #' @param thin  A scalar in (0,1]. The proportion of SNPs
 #' left after down sampling. Only applied on SNPs after selecting variants.
-#'  
+#'
 #' @param maxSNP Default is Inf, no limit for the maximum number of SNPs in a region. Or an
 #' integer indicating the maximum number of SNPs allowed in a region. This
 #' parameter is useful when a region contains many SNPs and you don't have enough memory to
@@ -23,17 +23,17 @@
 #' provided, SNPs are ranked based on |z| from high to low and only the top `maxSNP` SNPs
 #' are kept. If only variant ids are provided, then `maxSNP` number of SNPs will be chosen
 #' randomly.
-#'  
+#'
 #' @param minvar minimum number of variatns in a region
 #'
 #' @param merge TRUE/FALSE. If TRUE, merge regions when a gene spans a region boundary (i.e. belongs to multiple regions.)
-#' 
+#'
 #' @param outputdir a string, the directory to store output
-#' 
+#'
 #' @param outname a string, the output name
-#' 
+#'
 #' @param ncore the number of cores used to parallelize region indexing
-#' 
+#'
 #' @param reuse_R_gene an option to reuse the R_gene matrix when indexing for the final rerun step
 #'
 #' @return A list. Items correspond to each pvarf/exprvarf. Each Item is
@@ -49,11 +49,11 @@ index_region <- function(regions,
   regionlist <- list()
   boundary_genes <- data.frame(matrix(nrow = 0, ncol = 4))
   colnames(boundary_genes) <- c("gene","chr","region1","region2")
-  for (rn in 1:nrow(regions)){
-      
-    rn.start <- regions$start[rn]
-    rn.stop <- regions$stop[rn]
-    region_tag <- paste0(rn.start,"_",rn.stop)
+  for (i in 1:nrow(regions)){
+
+    rn.start <- regions$start[i]
+    rn.stop <- regions$stop[i]
+    rn <- paste0(rn.start,"-",rn.stop)
     gidx <- which(geneinfo$p0 >= rn.start & geneinfo$p0 < rn.stop
                   & geneinfo$keep == 1) # temporarily assign to the first region if its QTLs are across boundary
 
@@ -68,24 +68,23 @@ index_region <- function(regions,
     minpos <- min(c(geneinfo$p0[gidx], snpinfo$pos[sidx]))
     maxpos <- max(c(geneinfo$p1[gidx], snpinfo$pos[sidx]))
 
-    regionlist[[region_tag]] <- list(
-                             "gid"  = gid,
-                             "sidx" = sidx,
+    regionlist[[rn]] <- list("gid"  = gid,
+                             "sid" = sid,
                              "start" = rn.start,
                              "stop" = rn.stop,
                              "minpos" = minpos,
                              "maxpos" = maxpos,
-                             "LD_matrix" = regions$LD_matrix[rn],
-                             "SNP_info" = regions$SNP_info[rn]
-                             )
+                             "LD_matrix" = regions$LD_matrix[i],
+                             "SNP_info" = regions$SNP_info[i],
+                             "region_tag" = regions$region_tag[i])
   }
-  
+
   if (nrow(regions) >=2){
     res <- adjust_boundary(regions, weight_list, regionlist)
     regionlist <- res$regionlist
     weight_list <- res$weight_list
     boundary_genes <- res$boundary_genes
   }
-  
+
   return(list(regionlist=regionlist,weight_list=weight_list,boundary_genes=boundary_genes))
 }
