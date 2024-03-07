@@ -48,24 +48,24 @@
 #' @importFrom tools file_ext
 #' @export
 #'
-rerun_ctwas_finemap_regions_L1_rss <- function(z_snp,
-                                               z_gene,
-                                               weight,
-                                               problematic_snps = NULL,
-                                               rerun_region_tags = NULL,
-                                               pip_thresh = 0.5,
-                                               ctwas_outputdir = NULL,
-                                               ctwas_outname = NULL,
-                                               ld_R_dir = NULL,
-                                               outputdir = NULL,
-                                               outname = NULL,
-                                               group_prior = NULL,
-                                               group_prior_var = NULL,
-                                               use_null_weight = T,
-                                               coverage = 0.95,
-                                               min_abs_corr = 0.5,
-                                               ncore = 1,
-                                               logfile = NULL){
+rerun_finemap_regions_L1 <- function(z_snp,
+                                     z_gene,
+                                     weight,
+                                     problematic_snps = NULL,
+                                     rerun_region_tags = NULL,
+                                     pip_thresh = 0.5,
+                                     ctwas_outputdir = NULL,
+                                     ctwas_outname = NULL,
+                                     ld_R_dir = NULL,
+                                     outputdir = NULL,
+                                     outname = NULL,
+                                     group_prior = NULL,
+                                     group_prior_var = NULL,
+                                     use_null_weight = T,
+                                     coverage = 0.95,
+                                     min_abs_corr = 0.5,
+                                     ncore = 1,
+                                     logfile = NULL){
 
   if (!is.null(logfile)){
     addHandler(writeToFile, file= logfile, level='DEBUG')
@@ -208,35 +208,3 @@ get_problematic_regions <- function(ctwas_res, weight, problematic_snps, pip_thr
   return(problematic_region_tags)
 }
 
-# select and assemble a subset of regionlist by region_tags
-subset_regionlist <- function(regionlist, region_tags){
-
-  # subset regionlist
-  region_tags_df <- data.frame(
-    b = sapply(strsplit(region_tags, "_"), "[[", 1),
-    rn = sapply(strsplit(region_tags, "_"), "[[", 2))
-
-  regionlist_subset <- vector("list", length = length(regionlist))
-  for (b in 1:length(regionlist)) {
-    rn <- region_tags_df[region_tags_df$b == b, "rn"]
-    regionlist_subset[[b]] <- regionlist[[b]][as.character(rn)]
-  }
-  region_subset_chrs <- sort(unique(as.integer(region_tags_df$b)))
-
-  if(length(regionlist_subset) > 0){
-    # coordinates of the selected regions
-    temp_regs <- lapply(1:22, function(x) cbind(x,
-                                                unlist(lapply(regionlist_subset[[x]], "[[", "start")),
-                                                unlist(lapply(regionlist_subset[[x]], "[[", "stop"))))
-
-    regs <- do.call(rbind, lapply(temp_regs, function(x) if (ncol(x) == 3){x}))
-    loginfo("select %d regions from the regionlist", nrow(regs))
-  }else{
-    loginfo("No regions selected.")
-    regionlist_subset <- NULL
-    regs <- NULL
-  }
-
-  return(list(regionlist = regionlist_subset,
-              regs = regs))
-}

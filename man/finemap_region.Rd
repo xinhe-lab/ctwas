@@ -8,9 +8,12 @@ finemap_region(
   z_snp,
   z_gene,
   gene_info,
-  regionlist,
   region_info,
+  regionlist,
   region_tag,
+  wgtlist = NULL,
+  R_snp = NULL,
+  ld_snpinfo = NULL,
   L = 5,
   group_prior = NULL,
   group_prior_var = NULL,
@@ -31,11 +34,17 @@ Optionally, a "type" column can also be supplied; this is for using multiple set
 
 \item{gene_info}{a data frame of gene information obtained from \code{compute_gene_z}}
 
-\item{regionlist}{the list of regions with SNP and gene indices.}
+\item{region_info}{a data frame of region definition and associated LD file names}
 
-\item{region_info}{a data frame of region definition and associated file names}
+\item{regionlist}{a list object indexing regions, variants and genes.}
 
 \item{region_tag}{a character string of region tag to be finemapped}
+
+\item{wgtlist}{a list of weights for each gene}
+
+\item{R_snp}{Reference LD matrix}
+
+\item{ld_snpinfo}{SNP information of the SNPs in \code{R_snp} matrix}
 
 \item{L}{the number of effects for susie during the fine mapping steps}
 

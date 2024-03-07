@@ -10,7 +10,7 @@ est_param(
   regionlist = NULL,
   z_gene = NULL,
   gene_info = NULL,
-  weight_list = NULL,
+  weights = NULL,
   thin = 1,
   prob_single = 0.8,
   niter1 = 3,
@@ -38,8 +38,6 @@ giving the z scores for SNPs. "A1" is effect allele. "A2" is the other allele.}
 Optionally, a "type" column can also be supplied; this is for using multiple sets of weights}
 
 \item{gene_info}{a data frame of gene information obtained from \code{compute_gene_z}}
-
-\item{weight_list}{a list of weights by chromosome}
 
 \item{thin}{The proportion of SNPs to be used for the parameter estimation and
 initial screening region steps.
@@ -75,6 +73,8 @@ genotype data in genetic studies.}
 \item{ncore}{The number of cores used to parallelize computation over regions}
 
 \item{logfile}{the log file, if NULL will print log info on screen}
+
+\item{weight_list}{a list of weights by chromosome}
 }
 \value{
 a list with estimated parameters, and updated region_info with correlation file names for each region.

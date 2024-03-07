@@ -9,7 +9,7 @@ screen_regions(
   z_gene,
   region_info,
   gene_info = NULL,
-  weight_list = NULL,
+  wgtlist = NULL,
   regionlist = NULL,
   thin = 1,
   max_snp_region = Inf,
@@ -35,7 +35,9 @@ Optionally, a "type" column can also be supplied; this is for using multiple set
 
 \item{gene_info}{a data frame of gene information obtained from \code{compute_gene_z}}
 
-\item{weight_list}{}
+\item{wgtlist}{}
+
+\item{regionlist}{a list object indexing regions, variants and genes.}
 
 \item{thin}{The proportion of SNPs to be used for parameter estimation and initial screening regions.
 Smaller \code{thin} parameters reduce runtime at the expense of accuracy.

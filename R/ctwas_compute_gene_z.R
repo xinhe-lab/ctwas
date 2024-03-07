@@ -3,7 +3,7 @@
 #' @param z_snp A data frame with columns: "id", "A1", "A2", "z". giving the z scores for
 #' snps. "A1" is effect allele. "A2" is the other allele. For harmonized data, A1 and A2 are not required.
 #'
-#' @param weight_list a list of weights by chromosome
+#' @param weights a list of wgt list and weight info
 #'
 #' @param region_info a data frame of region definition and associated file names.
 #'
@@ -15,11 +15,11 @@
 #'
 #' @return a list of gene z-scores and SNP z-scores
 #'
-#' @importFrom logging addHandler loginfo
+#' @importFrom logging addHandler loginfo writeToFile
 #'
 #' @export
 compute_gene_z <- function (z_snp,
-                            weight_list,
+                            weights,
                             region_info,
                             ncore=1,
                             chr=1:22,
@@ -31,7 +31,7 @@ compute_gene_z <- function (z_snp,
 
   # read and check Rvar files from the region_info table,
   # return a list of updated region_info table (with region names) for each chromosome
-  ld_Rinfo_list <- read_region_ld_Rinfo(region_info)
+  # region_info_list <- get_region_info_list(region_info)
 
   z_gene_list <- vector("list", length = 22)
   gene_info_list <- vector("list", length = 22)
@@ -40,14 +40,17 @@ compute_gene_z <- function (z_snp,
   for (b in chr) {
 
     # updated region info table in the chromosome
-    ld_Rinfo <- ld_Rinfo_list[[b]]
+    # ld_Rinfo <- region_info_list[[b]]
+    ld_Rinfo <- region_info[region_info$chr == b, ]
+    ld_Rinfo <- ld_Rinfo[order(ld_Rinfo$start), ]
+    ld_Rinfo$region_name <- 1:nrow(ld_Rinfo)
 
     if(!is.null(ld_Rinfo)){
       loginfo("Impute gene z scores for chromosome %s", b)
 
       # read SNP info from Rvar file of all the regions in the chromosome
-      # ld_snpinfo <- read_ld_Rvar_snp_info(ld_Rinfo$Rvar_file)
-      ld_snpinfo <- do.call(rbind, lapply(ld_Rinfo$Rvar_file, data.table::fread))
+      # ld_snpinfo <- read_LD_SNP_files(ld_Rinfo$SNP_info)
+      ld_snpinfo <- do.call(rbind, lapply(ld_Rinfo$SNP_info, data.table::fread))
 
       chrom <- unique(ld_snpinfo$chrom)
       if (length(chrom) > 1) {
@@ -63,12 +66,13 @@ compute_gene_z <- function (z_snp,
       #                             ld_Rinfo = ld_Rinfo,
       #                             ncore = ncore)
 
-      weights_chr <- weight_list[[b]]
-      exprlist <- weights_chr[["exprlist"]]
-      qclist <- weights_chr[["qclist"]]
+      weight_info <- weights[["weight_info"]]
+      gnames <- rownames(weight_info)[weight_info$chrom == b]
+      exprlist <- weights[["exprlist"]][gnames]
+      qclist <- weights[["qclist"]][gnames]
+
       if (length(exprlist) > 0) {
         loginfo("Start gene z score imputation ...")
-        loginfo("Using given LD matrices to impute gene z score.")
 
         for (gname in names(exprlist)) {
           p0 <- exprlist[[gname]][["p0"]]
@@ -77,7 +81,9 @@ compute_gene_z <- function (z_snp,
           exprlist[[gname]][["reg"]] <- paste(sort(ld_Rinfo$region_name[ifreg]), collapse = ";")
         }
 
-        regs <- data.frame(gid = names(exprlist), reg = unlist(lapply(exprlist, "[[", "reg")), stringsAsFactors = F)
+        regs <- data.frame(gid = names(exprlist),
+                           reg = unlist(lapply(exprlist, "[[", "reg")),
+                           stringsAsFactors = F)
         batches <- names(sort(-table(regs$reg)))
 
         corelist <- lapply(1:ncore, function(core){
@@ -97,12 +103,12 @@ compute_gene_z <- function (z_snp,
             gnames <- regs[regs$reg == batch, "gid"]
             regnames <- strsplit(batch, ";")[[1]]
             reg_idx <- match(regnames, ld_Rinfo$region_name)
-            reg_RDS_files <- ld_Rinfo$RDS_file[reg_idx]
-            reg_Rvar_files <- ld_Rinfo$Rvar_file[reg_idx]
-            R_snp <- lapply(reg_RDS_files, readRDS)
+            reg_LD_files <- ld_Rinfo$LD_matrix[reg_idx]
+            reg_SNP_info_files <- ld_Rinfo$SNP_info[reg_idx]
+            R_snp <- lapply(reg_LD_files, readRDS)
             R_snp <- suppressWarnings({as.matrix(Matrix::bdiag(R_snp))})
-            # R_snp_info <- do.call(rbind, lapply(reg_Rvar_files, read_ld_Rvar_file))
-            R_snp_info <- do.call(rbind, lapply(reg_Rvar_files, data.table::fread))
+            # R_snp_info <- do.call(rbind, lapply(reg_SNP_info_files, read_LD_SNP_file))
+            R_snp_info <- do.call(rbind, lapply(reg_SNP_info_files, data.table::fread))
 
             for (i in 1:length(gnames)) {
               gname <- gnames[i]
@@ -135,7 +141,7 @@ compute_gene_z <- function (z_snp,
       wgtlist <- lapply(exprlist, "[[", "wgt")
       gene_name <- lapply(exprlist, "[[", "gname")
       weight_name <- lapply(exprlist, "[[", "weight_name")
-      loginfo("Number of genes with imputed expression: %s for chr %s", length(gnames), b)
+      loginfo("Number of genes with imputed expression: %d for chr%s", length(gnames), b)
 
       if (length(gnames) > 0) {
         gene_info_chr <- data.frame(chrom = chrom,
@@ -167,6 +173,9 @@ compute_gene_z <- function (z_snp,
 
   return(list(z_gene = z_gene,
               z_snp = z_snp,
-              gene_info = gene_info))
+              gene_info = gene_info,
+              wgtlist = wgtlist,
+              qclist = qclist,
+              weight_info = weight_info))
 }
 

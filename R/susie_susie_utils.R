@@ -607,31 +607,8 @@ susie_prune_single_effects = function (s,L = 0,V = NULL,verbose = FALSE) {
 #'
 #' @return A number between 0 and 1.
 #'
-#' @examples
-#' set.seed(1)
-#' n = 500
-#' p = 1000
-#' beta = rep(0,p)
-#' beta[1:4] = 0.01
-#' X = matrix(rnorm(n*p),nrow = n,ncol = p)
-#' X = scale(X,center = TRUE,scale = TRUE)
-#' y = drop(X %*% beta + rnorm(n))
-#' input_ss = compute_suff_stat(X,y,standardize = TRUE)
-#' ss = univariate_regression(X,y)
-#' R = cor(X)
-#' attr(R,"eigen") = eigen(R,symmetric = TRUE)
-#' zhat = with(ss,betahat/sebetahat)
-#'
-#' # Estimate s using the unadjusted z-scores.
-#' s0 = estimate_s_rss(zhat,R)
-#'
-#' # Estimate s using the adjusted z-scores.
-#' s1 = estimate_s_rss(zhat,R,n)
-#'
 #' @importFrom stats dnorm
 #' @importFrom stats optim
-#'
-#' @export
 #'
 estimate_s_rss = function (z, R, n, r_tol = 1e-08, method = "null-mle") {
 
@@ -733,26 +710,6 @@ estimate_s_rss = function (z, R, n, r_tol = 1e-08, method = "null-mle") {
 #' @importFrom ggplot2 labs
 #' @importFrom ggplot2 aes_string
 #' @importFrom mixsqp mixsqp
-#'
-#' @examples
-#' # See also the vignette, "Diagnostic for fine-mapping with summary
-#' # statistics."
-#' set.seed(1)
-#' n = 500
-#' p = 1000
-#' beta = rep(0,p)
-#' beta[1:4] = 0.01
-#' X = matrix(rnorm(n*p),nrow = n,ncol = p)
-#' X = scale(X,center = TRUE,scale = TRUE)
-#' y = drop(X %*% beta + rnorm(n))
-#' ss = univariate_regression(X,y)
-#' R = cor(X)
-#' attr(R,"eigen") = eigen(R,symmetric = TRUE)
-#' zhat = with(ss,betahat/sebetahat)
-#' cond_dist = kriging_rss(zhat,R,n = n)
-#' cond_dist$plot
-#'
-#' @export
 #'
 kriging_rss = function (z, R, n, r_tol = 1e-08,
                         s = estimate_s_rss(z,R,n,r_tol,method = "null-mle")) {

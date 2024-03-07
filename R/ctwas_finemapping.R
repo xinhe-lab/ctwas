@@ -8,6 +8,8 @@
 #'
 #' @param gene_info a data frame of gene information obtained from \code{compute_gene_z}
 #'
+#' @param region_info a data frame of region definition and associated LD file names
+#'
 #' @param regionlist a list object indexing regions, variants and genes.
 #'
 #' @param region_tag a character string of region tag to be finemapped
@@ -33,7 +35,7 @@
 #'   correlation of 0.25, which is a commonly used threshold for
 #'   genotype data in genetic studies.
 #'
-#' @param save TRUE/FALSE. If TRUE, save correlation (R) matrices
+#' @param save_LD_R TRUE/FALSE. If TRUE, save correlation (R) matrices
 #'
 #' @param outputdir a string, the directory to store output
 #'
@@ -48,6 +50,7 @@
 finemap_region <- function(z_snp,
                            z_gene,
                            gene_info,
+                           region_info,
                            regionlist,
                            region_tag,
                            wgtlist = NULL,
@@ -59,7 +62,7 @@ finemap_region <- function(z_snp,
                            use_null_weight = TRUE,
                            coverage = 0.95,
                            min_abs_corr = 0.5,
-                           save = FALSE,
+                           save_LD_R = FALSE,
                            outputdir = getwd(),
                            outname = NULL){
 
@@ -160,7 +163,7 @@ finemap_region <- function(z_snp,
                cbind(R_snp_gene, R_snp))
   } else {
 
-    if (L == 1 && save == FALSE) {
+    if (L == 1 && save_LD_R == FALSE) {
       # R does not matter for susie when L = 1
       R <- diag(length(z))
     } else {
@@ -178,7 +181,7 @@ finemap_region <- function(z_snp,
                                 ld_snpinfo = ld_snpinfo,
                                 region_idx = region_idx,
                                 wgtlist = wgtlist[gid],
-                                save = save,
+                                save = save_LD_R,
                                 outputdir = outputdir,
                                 outname = paste0(outname, ".chr", b, ".rn", rn,".cor"))
       R_snp <- res$R_snp

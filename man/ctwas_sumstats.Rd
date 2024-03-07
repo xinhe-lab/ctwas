@@ -7,7 +7,7 @@
 ctwas_sumstats(
   z_snp,
   region_info,
-  weight_list,
+  weights,
   niter1 = 3,
   niter2 = 30,
   thin = 1,
@@ -35,7 +35,7 @@ giving the z scores for snps. "A1" is effect allele. "A2" is the other allele.}
 
 \item{region_info}{a data frame of region definition and associated LD file names}
 
-\item{weight_list}{a list of weights by chromosome}
+\item{weights}{a list of weights by chromosome}
 
 \item{niter1}{the number of iterations of the E-M algorithm to perform during the initial parameter estimation step}
 

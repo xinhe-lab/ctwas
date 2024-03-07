@@ -6,7 +6,7 @@
 \usage{
 compute_gene_z(
   z_snp,
-  weight_list,
+  weights,
   region_info,
   ncore = 1,
   chr = 1:22,
@@ -17,7 +17,7 @@ compute_gene_z(
 \item{z_snp}{A data frame with columns: "id", "A1", "A2", "z". giving the z scores for
 snps. "A1" is effect allele. "A2" is the other allele. For harmonized data, A1 and A2 are not required.}
 
-\item{weight_list}{a list of weights and weight info tables}
+\item{weights}{a list of wgt list and weight info}
 
 \item{region_info}{a data frame of region definition and associated file names.}
 
