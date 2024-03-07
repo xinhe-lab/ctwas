@@ -250,4 +250,38 @@ read_weights <- function (weight_files,
               wgtlist = wgtlist, weight_info = weight_info))
 }
 
+#' Get region info with filenames of LD matrices and SNP information
+#'
+#' @param regions A data frame of LD regions
+#'
+#' @param LD_R_dir Directory of LD reference files
+#'
+#' @param pattern pattern of the LD reference filenames
+#'
+#' @param prefix prefix of the LD reference filenames
+#'
+#' @param LD_matrix_ext File extension of LD matrix files
+#'
+#' @param snp_info_ext File extension of SNP information files
+#'
+#' @return A data frame with information of the variants in the LD matrix.
+#' @export
+get_LD_region_info <- function(regions,
+                               LD_R_dir,
+                               pattern = "%s_chr%d.R_snp.%d_%d",
+                               prefix = "ukb_b37_0.1",
+                               LD_matrix_ext = "RDS",
+                               snp_info_ext = "Rvar") {
 
+  LD_file <- sprintf(pattern, prefix, regions$chr, regions$start, regions$stop)
+
+  if (is.null(regions$region_tag)){
+    region_tag <- paste0(regions$chr, ":", regions$start, "-", regions$stop)
+  }
+
+  region_info <- data.frame(regions,
+                            LD_matrix = file.path(LD_R_dir, paste0(LD_file, ".", LD_matrix_ext)),
+                            SNP_info = file.path(LD_R_dir, paste0(LD_file, ".", snp_info_ext)))
+
+  return(region_info)
+}
