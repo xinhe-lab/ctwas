@@ -266,17 +266,17 @@ read_weights <- function (weight_files,
 #'
 #' @return A data frame with information of the variants in the LD matrix.
 #' @export
-get_LD_region_info <- function(regions,
-                               LD_R_dir,
-                               pattern = "%s_chr%d.R_snp.%d_%d",
-                               prefix = "ukb_b37_0.1",
-                               LD_matrix_ext = "RDS",
-                               snp_info_ext = "Rvar") {
+get_UKB_LD_region_info <- function(regions,
+                                   LD_R_dir,
+                                   pattern = "%s_chr%d.R_snp.%d_%d",
+                                   prefix = "ukb_b37_0.1",
+                                   LD_matrix_ext = "RDS",
+                                   snp_info_ext = "Rvar") {
 
   LD_file <- sprintf(pattern, prefix, regions$chr, regions$start, regions$stop)
 
   if (is.null(regions$region_tag)){
-    region_tag <- paste0(regions$chr, ":", regions$start, "-", regions$stop)
+    regions$region_tag <- paste0(regions$chr, ":", regions$start, "-", regions$stop)
   }
 
   region_info <- data.frame(regions,
