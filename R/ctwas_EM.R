@@ -53,6 +53,7 @@ ctwas_EM <- function(zdf,
                      use_null_weight = TRUE,
                      coverage = 0.95,
                      min_abs_corr = 0.5,
+                     max_iter = 1,
                      ncore = 1,
                      verbose = TRUE){
 
@@ -150,7 +151,9 @@ ctwas_EM <- function(zdf,
                                      L = 1,
                                      null_weight = null_weight,
                                      coverage = coverage,
-                                     min_abs_corr = min_abs_corr)
+                                     min_abs_corr = min_abs_corr,
+                                     max_iter = max_iter,
+                                     ...)
 
         # annotate susie result with SNP and gene information
         gene_info_chr <- gene_info[gene_info$chrom == b, ]

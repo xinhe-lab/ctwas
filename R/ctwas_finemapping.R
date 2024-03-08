@@ -35,6 +35,8 @@
 #'   correlation of 0.25, which is a commonly used threshold for
 #'   genotype data in genetic studies.
 #'
+#' @param max_iter Maximum number of IBSS iterations to perform.
+#'
 #' @param save_LD_R TRUE/FALSE. If TRUE, save correlation (R) matrices
 #'
 #' @param outputdir a string, the directory to store output
@@ -62,9 +64,11 @@ finemap_region <- function(z_snp,
                            use_null_weight = TRUE,
                            coverage = 0.95,
                            min_abs_corr = 0.5,
+                           max_iter = 100,
                            save_LD_R = FALSE,
                            outputdir = getwd(),
-                           outname = NULL){
+                           outname = NULL,
+                           ...){
 
   loginfo("Run finemapping with L = %d for region %s", L, region_tag)
 
@@ -204,7 +208,9 @@ finemap_region <- function(z_snp,
                                L = L,
                                null_weight = null_weight,
                                coverage = coverage,
-                               min_abs_corr = min_abs_corr)
+                               min_abs_corr = min_abs_corr,
+                               max_iter = max_iter,
+                               ...)
 
   # annotate susie result with SNP and gene information
   susie_res <- anno_susie(susie_res,
@@ -218,7 +224,7 @@ finemap_region <- function(z_snp,
 }
 
 
-# Run susie_rss for a single region
+#' Run cTWAS version of susie_rss for a single region
 ctwas_susie_rss <- function(z,
                             R,
                             prior_weights = NULL,
@@ -227,7 +233,9 @@ ctwas_susie_rss <- function(z,
                             z_ld_weight = 0,
                             null_weight = NULL,
                             coverage = 0.95,
-                            min_abs_corr = 0.5){
+                            min_abs_corr = 0.5,
+                            max_iter = 100,
+                            ...){
 
   if (missing(R)) {
     if (L == 1){
@@ -248,7 +256,9 @@ ctwas_susie_rss <- function(z,
                          z_ld_weight = z_ld_weight,
                          null_weight = null_weight,
                          coverage = coverage,
-                         min_abs_corr = min_abs_corr)
+                         min_abs_corr = min_abs_corr,
+                         max_iter = max_iter,
+                         ...)
 
   return(susie_res)
 }

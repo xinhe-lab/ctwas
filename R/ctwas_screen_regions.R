@@ -42,6 +42,8 @@
 #'   correlation of 0.25, which is a commonly used threshold for
 #'   genotype data in genetic studies.
 #'
+#' @param max_iter Maximum number of IBSS iterations to perform.
+#'
 #' @param ncore The number of cores used to parallelize susie over regions
 #'
 #' @param logfile the log file, if NULL will print log info on screen
@@ -68,6 +70,7 @@ screen_regions <- function(
     use_null_weight = TRUE,
     coverage = 0.95,
     min_abs_corr = 0.5,
+    max_iter = 1,
     ncore = 1,
     logfile = NULL){
 
@@ -136,7 +139,9 @@ screen_regions <- function(
                                   group_prior_var = group_prior_var,
                                   use_null_weight = use_null_weight,
                                   coverage = coverage,
-                                  min_abs_corr = min_abs_corr)
+                                  min_abs_corr = min_abs_corr,
+                                  max_iter = max_iter,
+                                  ...)
       susie_res.core.list[[i]] <- susie_res
     }
     susie_res.core <- do.call(rbind, susie_res.core.list)
