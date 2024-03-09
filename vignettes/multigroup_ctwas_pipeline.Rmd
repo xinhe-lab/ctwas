@@ -10,8 +10,7 @@ vignette: >
 ---
 
 ```{r setup, include=FALSE}
-knitr::opts_chunk$set(eval=FALSE,
-                      message = FALSE,
+knitr::opts_chunk$set(message = FALSE,
                       warning = FALSE,
                       fig.width = 6,
                       fig.height = 4,
@@ -77,6 +76,22 @@ In this version of the package, we also require a data frame `region_info` conta
 "chrom", "start", "end" are the genomic coordinates of the regions, 
 "LD_matrix" stores the paths to the precomputed LD (R) matrices (`.RDS` files in our UK Biobank reference),
 "SNP_info" stores the paths to the variant information corresponding to the LD matrices (`.Rvar` files in our UK Biobank reference). 
+
+```{r region_info}
+region_file <- system.file("extdata/ldetect", "EUR.b38.bed", package = "ctwas")
+region_info <- read.table(region_file, header = TRUE)
+colnames(region_info)[1:3] <- c("chrom", "start", "stop")
+region_info$chrom <- as.numeric(gsub("chr", "", region_info$chrom))
+region_info$region_tag <- paste0(region_info$chr, ":", region_info$start, "-", region_info$stop)
+
+ld_R_dir <- "/project2/mstephens/wcrouse/UKB_LDR_0.1"
+filestem <- "ukb_b38_0.1"
+ld_filestem <- sprintf("%s_chr%s.R_snp.%s_%s", filestem, region_info$chrom, region_info$start, region_info$stop)
+region_info$LD_matrix <- file.path(ld_R_dir, paste0(ld_filestem, ".RDS"))
+region_info$SNP_info <- file.path(ld_R_dir, paste0(ld_filestem, ".Rvar"))
+
+region_info[1:3,]
+```
 
 ### Data harmonization
 

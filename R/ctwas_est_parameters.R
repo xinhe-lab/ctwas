@@ -33,7 +33,6 @@
 #' @param group_prior_var_structure a string indicating the structure to put on the prior variance parameters.
 #' "independent" is the default and allows all groups to have their own separate variance parameters.
 #' "shared" allows all groups to share the same variance parameter.
-#' "shared+snps" allows all groups to share the same variance parameter, and this variance parameter is also shared with SNPs.
 #' "shared_type" allows all groups in one molecular QTL type to share the same variance parameter.
 #'
 #' @param use_null_weight TRUE/FALSE. If TRUE, allow for a probability of no effect in susie
@@ -44,6 +43,8 @@
 #'   credible set. The default, 0.5, corresponds to a squared
 #'   correlation of 0.25, which is a commonly used threshold for
 #'   genotype data in genetic studies.
+#'
+#' @param max_iter Maximum number of IBSS iterations to perform.
 #'
 #' @param ncore The number of cores used to parallelize computation over regions
 #'
@@ -68,10 +69,11 @@ est_param <- function(
     niter2 = 30,
     group_prior = NULL,
     group_prior_var = NULL,
-    group_prior_var_structure = c("independent","shared_all","shared+snps","shared_QTLtype"),
+    group_prior_var_structure = c("independent","shared_all","shared_QTLtype"),
     use_null_weight = TRUE,
     coverage = 0.95,
     min_abs_corr = 0.5,
+    max_iter = 1,
     ncore = 1,
     logfile = NULL){
 
@@ -117,7 +119,7 @@ est_param <- function(
   # if correlation files not available, computing correlation matrices and generating regionlist
   if (is.null(regionlist)) {
     loginfo("Get regionlist with thin = %.2f", thin)
-    res <- get_region_idx(region_info = region_info,
+    res <- get_regionlist(region_info = region_info,
                           gene_info = gene_info,
                           weight_list = wgtlist,
                           select = zdf$id,
@@ -125,7 +127,6 @@ est_param <- function(
                           minvar = 2)
 
     regionlist <- res$regionlist
-    region_info <- res$region_info # updated region_info containing correlation file names for each region
     rm(res)
   }
 
@@ -146,7 +147,9 @@ est_param <- function(
                     use_null_weight = use_null_weight,
                     coverage = coverage,
                     min_abs_corr = min_abs_corr,
-                    ncore = ncore)
+                    max_iter = max_iter,
+                    ncore = ncore,
+                    ...)
 
   group_prior <- param$group_prior
   group_prior_var <- param$group_prior_var
@@ -175,7 +178,9 @@ est_param <- function(
                     use_null_weight = use_null_weight,
                     coverage = coverage,
                     min_abs_corr = min_abs_corr,
-                    ncore = ncore)
+                    max_iter = max_iter,
+                    ncore = ncore,
+                    ...)
 
   print("Estimated group_prior: \n")
   print(param$group_prior)
@@ -183,8 +188,9 @@ est_param <- function(
   print(param$group_prior_var)
 
   return(list("param" = param,
-              "region_info" = region_info,
-              "regionlist" = regionlist))
+              "regionlist" = regionlist,
+              "modified_wgtlist" = weight_list,
+              "boundary_genes" = boundary_genes))
 
 }
 

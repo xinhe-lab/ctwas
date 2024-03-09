@@ -41,7 +41,7 @@ compute_gene_z <- function (z_snp,
 
     # updated region info table in the chromosome
     # ld_Rinfo <- region_info_list[[b]]
-    ld_Rinfo <- region_info[region_info$chr == b, ]
+    ld_Rinfo <- region_info[region_info$chrom == b, ]
     ld_Rinfo <- ld_Rinfo[order(ld_Rinfo$start), ]
     ld_Rinfo$region_name <- 1:nrow(ld_Rinfo)
 
@@ -57,14 +57,6 @@ compute_gene_z <- function (z_snp,
         stop("Input LD reference not split by chromosome")
       }
       ld_ref_snps <- c(ld_ref_snps, ld_snpinfo$id) # store names of SNPs in LD reference
-
-      # loginfo("Reading weights for chromosome %s", b)
-      # weights_chr <- read_weights(weights,
-      #                             b,
-      #                             ld_snpinfo = ld_snpinfo,
-      #                             z_snp = z_snp,
-      #                             ld_Rinfo = ld_Rinfo,
-      #                             ncore = ncore)
 
       weight_info <- weights[["weight_info"]]
       gnames <- rownames(weight_info)[weight_info$chrom == b]
@@ -104,11 +96,9 @@ compute_gene_z <- function (z_snp,
             regnames <- strsplit(batch, ";")[[1]]
             reg_idx <- match(regnames, ld_Rinfo$region_name)
             reg_LD_files <- ld_Rinfo$LD_matrix[reg_idx]
-            reg_SNP_info_files <- ld_Rinfo$SNP_info[reg_idx]
             R_snp <- lapply(reg_LD_files, readRDS)
             R_snp <- suppressWarnings({as.matrix(Matrix::bdiag(R_snp))})
-            # R_snp_info <- do.call(rbind, lapply(reg_SNP_info_files, read_LD_SNP_file))
-            R_snp_info <- do.call(rbind, lapply(reg_SNP_info_files, data.table::fread))
+            R_snp_info <- do.call(rbind, lapply(ld_Rinfo$SNP_info[reg_idx], read_LD_SNP_file))
 
             for (i in 1:length(gnames)) {
               gname <- gnames[i]
@@ -173,9 +163,6 @@ compute_gene_z <- function (z_snp,
 
   return(list(z_gene = z_gene,
               z_snp = z_snp,
-              gene_info = gene_info,
-              wgtlist = wgtlist,
-              qclist = qclist,
-              weight_info = weight_info))
+              gene_info = gene_info))
 }
 

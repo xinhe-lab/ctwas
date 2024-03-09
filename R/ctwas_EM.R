@@ -20,7 +20,6 @@
 #' @param group_prior_var_structure a string indicating the structure to put on the prior variance parameters.
 #' "independent" is the default and allows all groups to have their own separate variance parameters.
 #' "shared_all" allows all groups to share the same variance parameter.
-#' "shared+snps" allows all groups to share the same variance parameter, and this variance parameter is also shared with SNPs.
 #' "inv_gamma" places an inverse-gamma prior on the variance parameters for each group, with shape and rate hypeparameters.
 #' "shared_type" allows all groups in one molecular QTL type to share the same variance parameter.
 #'
@@ -32,6 +31,8 @@
 #'   credible set. The default, 0.5, corresponds to a squared
 #'   correlation of 0.25, which is a commonly used threshold for
 #'   genotype data in genetic studies.
+#'
+#' @param max_iter Maximum number of IBSS iterations to perform.
 #'
 #' @param ncore The number of cores used to parallelize susie over regions
 #'
@@ -49,13 +50,14 @@ ctwas_EM <- function(zdf,
                      niter = 20,
                      group_prior = NULL,
                      group_prior_var = NULL,
-                     group_prior_var_structure = c("independent","shared_all","shared+snps","shared_QTLtype"),
+                     group_prior_var_structure = c("independent","shared_all","shared_QTLtype"),
                      use_null_weight = TRUE,
                      coverage = 0.95,
                      min_abs_corr = 0.5,
                      max_iter = 1,
                      ncore = 1,
-                     verbose = TRUE){
+                     verbose = TRUE,
+                     ...){
 
   types <- unique(zdf$type)
   QTLtypes <- unique(zdf$QTLtype)
@@ -98,14 +100,9 @@ ctwas_EM <- function(zdf,
       susie_res.core.list <- list()
 
       # run susie for each region
-      regs <- corelist[[core]]
-      for (reg in 1: nrow(regs)) {
-        b <- regs[reg, "b"]
-        rn <- regs[reg, "rn"]
-
-        region_idx <- regionlist[[b]][[rn]]
-        gidx <- region_idx[["gidx"]]
-        sidx <- region_idx[["sidx"]]
+      region_tags.core <- corelist[[core]]
+      for (region_tag in region_tags.core) {
+        region_idx <- regionlist[[region_tag]]
         gid <- region_idx[["gid"]]
         sid <- region_idx[["sid"]]
         g_type <- zdf$type[match(gid, zdf$id)]
@@ -140,6 +137,14 @@ ctwas_EM <- function(zdf,
         z.s <- zdf[match(sid, zdf$id), ][["z"]]
         z <- c(z.g, z.s)
 
+        # gene and SNP information in this region
+        # gene_info <- gene_info[gene_info$chrom == region_idx[["chr"]],]
+
+        ld_snpinfo <- lapply(region_idx[["SNP_info"]],read_LD_SNP_file)
+        if (length(ld_snpinfo) > 1){
+          ld_snpinfo <- do.call(rbind,ld_snpinfo)
+        }
+
         # R does not matter for susie when L = 1
         R <- diag(length(z))
 
@@ -156,16 +161,15 @@ ctwas_EM <- function(zdf,
                                      ...)
 
         # annotate susie result with SNP and gene information
-        gene_info_chr <- gene_info[gene_info$chrom == b, ]
-        ld_snpinfo <- read_LD_SNP_file(region_idx[["SNP_info"]])
+        susie_res_df <- anno_susie(susie_res,
+                                   geneinfo = gene_info,
+                                   snpinfo = ld_snpinfo,
+                                   gid = gid,
+                                   sid = sid,
+                                   zdf = zdf,
+                                   region_tag = region_tag)
 
-        susie_res <- anno_susie(susie_res,
-                                gene_info = gene_info_chr,
-                                snp_info = ld_snpinfo,
-                                region_idx = region_idx,
-                                zdf = zdf)
-
-        susie_res.core.list[[reg]] <- susie_res
+        susie_res.core.list[[region_tag]] <- susie_res_df
       }
 
       susie_res.core <- do.call(rbind, susie_res.core.list)
@@ -202,8 +206,6 @@ ctwas_EM <- function(zdf,
       temp_susie_res_regions <- susie_res_regions[susie_res_regions$type!="SNP",]
       V_prior[names(V_prior)!="SNP"] <- sum(temp_susie_res_regions$susie_pip*temp_susie_res_regions$mu2)/sum(temp_susie_res_regions$susie_pip)
 
-    } else if (group_prior_var_structure=="shared+snps"){
-      V_prior[names(V_prior)] <- sum(susie_res_regions$susie_pip*susie_res_regions$mu2)/sum(susie_res_regions$susie_pip)
     } else if (group_prior_var_structure=="shared_QTLtype"){
       temp_susie_res_regions <- susie_res_regions[susie_res_regions$QTLtype=="SNP",]
       V_prior["SNP"] <- sum(temp_susie_res_regions$susie_pip*temp_susie_res_regions$mu2)/sum(temp_susie_res_regions$susie_pip)

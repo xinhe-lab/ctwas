@@ -72,7 +72,8 @@ screen_regions <- function(
     min_abs_corr = 0.5,
     max_iter = 1,
     ncore = 1,
-    logfile = NULL){
+    logfile = NULL,
+    ...){
 
   if (!is.null(logfile)){
     addHandler(writeToFile, file= logfile, level='DEBUG')
@@ -98,7 +99,7 @@ screen_regions <- function(
 
   if (is.null(regionlist)) {
     loginfo("Get regionlist with thin = %.2f", thin)
-    res <- get_region_idx(region_info = region_info,
+    res <- get_regionlist(region_info = region_info,
                           gene_info = gene_info,
                           weight_list = wgtlist,
                           select = zdf$id,
@@ -121,15 +122,10 @@ screen_regions <- function(
   finemap_res <- foreach (core = 1:length(corelist), .combine = "rbind", .packages = "ctwas") %dopar% {
     susie_res.core.list <- list()
     # run susie for each region
-    regs <- corelist[[core]]
-    for (i in 1: nrow(regs)) {
-      b <- regs[i, "b"]
-      rn <- regs[i, "rn"]
-      region_idx <- regionlist[[b]][[rn]]
-      region_tag <- paste0(b, ":", rn)
+    region_tags.core <- corelist[[core]]
+    for (region_tag in region_tags.core) {
       susie_res <- finemap_region(z_snp = z_snp,
                                   z_gene = z_gene,
-                                  region_info = region_info,
                                   gene_info = gene_info,
                                   regionlist = regionlist,
                                   region_tag = region_tag,
@@ -154,45 +150,31 @@ screen_regions <- function(
   finemap_weak_res <- NULL
   screened_region_tags <- NULL
   screened_region_info <- NULL
-  for (b in 1: length(regionlist)){
-    for (rn in names(regionlist[[b]])){
-      #gene_PIP <- max(finemap_res$susie_pip[finemap_res$type != "SNP" & finemap_res$region_tag1 == b & finemap_res$region_tag2 == rn], 0)
-      temp_finemap_res <- finemap_res[finemap_res$region_tag1 == b & finemap_res$region_tag2 == rn,]
-      gene_PIP <- sum(temp_finemap_res$susie_pip[temp_finemap_res$type != "SNP"])
-      gene_PIP[is.na(gene_PIP)] <- 0 # 0 if gene_PIP is NA (no genes in this region)
-      if (gene_PIP >= min_gene_PIP) {
-        region_tag <- paste0(b, ":", rn)
-        screened_region_tags <- c(screened_region_tags, region_tag)
-        screened_region_info <- rbind(screened_region_info, region_info[region_info$chrom == b & region_info$region_tag == rn, ])
-      }
+  for (region_tag in names(regionlist)){
+    #gene_PIP <- max(finemap_res$susie_pip[finemap_res$type != "SNP" & finemap_res$region_tag == region_tag], 0)
+    region_finemap_res <- finemap_res[finemap_res$region_tag == region_tag,]
+    gene_PIP <- sum(region_finemap_res$susie_pip[region_finemap_res$type != "SNP"])
+    gene_PIP[is.na(gene_PIP)] <- 0 # 0 if gene_PIP is NA (no genes in this region)
+    if (gene_PIP >= min_gene_PIP) {
+      screened_region_tags <- c(screened_region_tags, region_tag)
+      screened_region_info <- rbind(screened_region_info, region_info[region_info$region_tag = region_tag, ])
     }
   }
 
+  loginfo("Number of region tags that contain strong gene signals: %d", length(screened_region_tags))
+
   # get regionlist containing all SNPs for screened regions
   if(thin == 1){
-    screened_regionlist <- subset_regionlist(regionlist, region_tags = screened_region_tags)
+    screened_regionlist <- regionlist[screened_region_tags]
   }else{
-    loginfo("Get screened regionlist containing all SNPs")
-    res <- get_region_idx(region_info = screened_region_info,
-                          gene_info = gene_info,
-                          weight_list = wgtlist,
-                          select = zdf$id,
-                          thin = 1,
-                          maxSNP = max_snp_region,
-                          minvar = 2)
-    screened_regionlist <- res$regionlist
-    rm(res)
+    # TODO: update regionlist with screened region tags
+    screened_regionlist <- update_regionlist(...)
   }
 
   # keep the finemapping results for the regions without strong signals (will not rerun)
   weak_region_finemap_res <- finemap_res[!finemap_res$region_tag %in% screened_region_tags, ]
 
-  nreg <- sum(unlist(lapply(screened_regionlist, length)))
-  loginfo("Number of regions that contain strong gene signals: %d", nreg)
-  loginfo("Number of region tags that contain strong gene signals: %d", length(screened_region_tags))
-
-  return(list("screened_region_info" = screened_region_info,
-              "screened_regionlist" = screened_regionlist,
+  return(list("screened_regionlist" = updated_regionlist,
               "screened_region_tags" = screened_region_tags,
               "weak_region_finemap_res" = weak_region_finemap_res))
 }

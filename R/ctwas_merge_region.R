@@ -1,15 +1,15 @@
 merge_region <- function(regionlist, boundary_genes){
-  
+
   unique_regions <- unique(c(boundary_genes$region1,boundary_genes$region2))
   region_info <- data.frame(do.call(rbind,lapply(unique_regions, function(x){as.numeric(unlist(strsplit(x,"_")))})))
-  colnames(region_info) <- c("chr","start","stop")
-  region_info <- region_info[order(region_info$chr, region_info$start),]
-  
+  colnames(region_info) <- c("chrom","start","stop")
+  region_info <- region_info[order(region_info$chrom, region_info$start),]
+
   regionlist_merged <- list()
-  for(b in unique(region_info$chr)){
-    regions <- region_info[region_info$chr==b,]
+  for(b in unique(region_info$chrom)){
+    regions <- region_info[region_info$chrom==b,]
     regions <- label_merged_regions(regions)
-    
+
     for (i in unique(regions$label)){
       merged_region <- regions[regions$label==i,]
       region_tag_new <- paste0(min(merged_region$start),"_",max(merged_region$stop))
