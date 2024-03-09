@@ -110,7 +110,7 @@ read_LD <- function(file, format = c("rds", "rdata", "csv", "txt", "tsv")) {
 
 #' read weights in PredictDB format, do not perform harmonization on weights
 read_weights <- function (weight_files,
-                          chr = 1:22,
+                          chrom,
                           ld_snpinfo,
                           z_snp = NULL,
                           scale_by_ld_variance=TRUE,
@@ -163,9 +163,9 @@ read_weights <- function (weight_files,
 
         # if more than one weight file, append gene name with weight name
         if (length(weights)>1){
-          gname_weight <- paste0(gname, "|", weight_name)
+          g_wgt_id <- paste0(gname, "|", weight_name)
         } else {
-          gname_weight <- gname
+          g_wgt_id <- gname
         }
 
         wgt <- query("select * from weights where gene = ?", params = list(gname))
@@ -174,9 +174,7 @@ read_weights <- function (weight_files,
 
         chrpos <- do.call(rbind, strsplit(wgt$varID, "_"))
 
-        chrom <- as.integer(gsub("chr", "", chrpos[1, 1]))
-
-        snps <- data.frame(chrom = as.integer(chrom),
+        snps <- data.frame(chrom = as.integer(gsub("chr", "", chrpos[, 1])),
                            id = wgt$rsid,
                            cm = "0",
                            pos = as.integer(chrpos[, 2]),
@@ -184,8 +182,9 @@ read_weights <- function (weight_files,
                            ref = wgt$ref_allele,
                            stringsAsFactors = F)
 
-        if (!chrom %in% chr)
+        if (!any(snps$chrom==chrom)){
           next
+        }
 
         # select weight matrix by the prediction method used for this gene
         g.method <- "weight"
@@ -219,9 +218,9 @@ read_weights <- function (weight_files,
         nwgt <- nrow(wgt.matrix)
         nmiss <- nrow(wgt.matrix) - length(snpnames)
         # TODO: check missrate calculation
-        outlist_core[[gname_weight]] <- list(chrom = chrom, p0 = p0, p1 = p1,
-                                             wgt = wgt, gname=gname, weight_name=weight_name,
-                                             n = nwgt, nmiss = nmiss, missrate = nwgt/nmiss)
+        outlist_core[[g_wgt_id]] <- list(chrom = chrom, p0 = p0, p1 = p1,
+                                         wgt = wgt, gname=gname, weight_name=weight_name,
+                                         n = nwgt, nmiss = nmiss, missrate = nwgt/nmiss)
       }
       RSQLite::dbDisconnect(db)
     }
@@ -230,24 +229,24 @@ read_weights <- function (weight_files,
 
   parallel::stopCluster(cl)
 
-  exprlist <- lapply(names(outlist), function(x){
-    outlist[[x]][c("chrom","p0","p1","wgt","gname","weight_name")]})
-  names(exprlist) <- names(outlist)
+  # exprlist <- lapply(names(outlist), function(x){
+  #   outlist[[x]][c("chrom","p0","p1","wgt","gname","weight_name")]})
+  # names(exprlist) <- names(outlist)
+  #
+  # qclist <- lapply(names(outlist), function(x){
+  #   outlist[[x]][c("n","nmiss","missrate")]})
+  # names(qclist) <- names(outlist)
 
-  qclist <- lapply(names(outlist), function(x){
-    outlist[[x]][c("n","nmiss","missrate")]})
-  names(qclist) <- names(outlist)
-
-  wgtlist <- lapply(outlist, "[[", "wgt")
-  names(wgtlist) <- names(outlist)
+  weight_list <- lapply(outlist, "[[", "wgt")
+  names(weight_list) <- names(outlist)
 
   weight_info <- lapply(names(outlist), function(x){
     as.data.frame(outlist[[x]][c("chrom", "p0","p1", "gname", "weight_name", "n", "nmiss", "missrate")])})
   weight_info <- do.call(rbind, weight_info)
+  weight_info$id <- names(outlist)
   rownames(weight_info) <- names(outlist)
 
-  return(list(exprlist = exprlist, qclist = qclist,
-              wgtlist = wgtlist, weight_info = weight_info))
+  return(list(weight_list = weight_list, weight_info = weight_info))
 }
 
 #' Get region info with filenames of LD matrices and SNP information
