@@ -102,9 +102,8 @@ ctwas_EM <- function(zdf,
       # run susie for each region
       region_tags.core <- corelist[[core]]
       for (region_tag in region_tags.core) {
-        region_idx <- regionlist[[region_tag]]
-        gid <- region_idx[["gid"]]
-        sid <- region_idx[["sid"]]
+        gid <- regionlist[[region_tag]][["gid"]]
+        sid <- regionlist[[region_tag]][["sid"]]
         g_type <- zdf$type[match(gid, zdf$id)]
         s_type <- zdf$type[match(sid, zdf$id)]
         gs_type <- c(g_type, s_type)
@@ -138,9 +137,9 @@ ctwas_EM <- function(zdf,
         z <- c(z.g, z.s)
 
         # gene and SNP information in this region
-        # gene_info <- gene_info[gene_info$chrom == region_idx[["chr"]],]
+        # gene_info <- gene_info[gene_info$chrom == regionlist[[region_tag]][["chr"]],]
 
-        ld_snpinfo <- lapply(region_idx[["SNP_info"]],read_LD_SNP_file)
+        ld_snpinfo <- lapply(regionlist[[region_tag]][["SNP_info"]],read_LD_SNP_file)
         if (length(ld_snpinfo) > 1){
           ld_snpinfo <- do.call(rbind,ld_snpinfo)
         }
