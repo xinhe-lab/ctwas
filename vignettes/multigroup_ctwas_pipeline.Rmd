@@ -123,7 +123,8 @@ compute_gene_z(z_snp, weights, region_info, ncore, ...)
 
 ## Estimating parameters
 
-We need to specify the GWAS summary statistics (`z_snp`), results from computing gene z-scores (including `z_gene`, `gene_info`), and `region_info`. 
+We need to specify the GWAS summary statistics (`z_snp`), results from computing gene z-scores (including `z_gene`, `gene_info`), 
+and `region_info`. 
 We also specify `thin`, the proportion of SNPs to be used for parameter estimation and screening regions.
 
 In the `multigroup` branch, to specify that our gene z-scores come from multiple groups, 
@@ -132,10 +133,10 @@ and we and also add a `QTLtype` column for the types of molecular traits.
 
 There are several options for how to handle the effect size prior by specifying the `group_prior_var_stucture`:
 
-  - "independent" is the default and allows all groups to have their own separate variance parameters. 
-  - "shared" allows all groups to share the same variance parameter.
-  - "shared+snps" allows all groups to share the same variance parameter, and this variance parameter is also shared with SNPs.
-  - "shared_type" allows all groups in one molecular QTL type to share the same variance parameter.
+- "independent" is the default and allows all groups to have their own separate variance parameters. 
+- "shared" allows all groups to share the same variance parameter.
+- "shared+snps" allows all groups to share the same variance parameter, and this variance parameter is also shared with SNPs.
+- "shared_type" allows all groups in one molecular QTL type to share the same variance parameter.
 
 This step will run EM algorithm to estimate parameters. 
 
@@ -176,10 +177,13 @@ If `save_LD_R = TRUE`, it will save the computed correlation matrices to `output
 
 ```{r, eval=FALSE}
 finemap_region(z_snp, z_gene, region_info, gene_info, wgtlist, regionlist, region_tag, 
-               L = 5, group_prior, group_prior_var, save_LD_R, outputdir, outname, ...)
+               L = 5, group_prior, group_prior_var, save_cor, cor_dir, ...)
 ```
 
 ## Postprocessing
+
+### Region merging
+
 
 ### Rerun finemapping with L = 1 for regions with problematic SNPs 
 
@@ -188,13 +192,10 @@ detected with LD-mismatch issue in the preprocessing step,
 or high PIP genes with problematic SNPs in their weights. 
 
 ```{r, eval=FALSE}
-rerun_finemap_regions_L1(z_snp, z_gene, problematic_snps, wgtlist, pip_thresh = 0.5, ...)
+rerun_region_tags <- get_problematic_regions(ctwas_res, weight, problematic_snps, pip_thresh = 0.5)
+finemap_regions_L1(z_snp, z_gene, gene_info, regionlist, rerun_region_tags, weight_list, group_prior, group_prior_var, ...)
 ```
-
-### Region merging
-
 
 ## Visualzing cTWAS results
 
 We could use `ctwas_locus_plot()` function to make locus plot for a region of interest.
-
