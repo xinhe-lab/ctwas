@@ -46,11 +46,11 @@ preprocess_z_ld <- function (z_snp,
                              ld_R_dir,
                              chrom=1:22,
                              gwas_n = NULL,
-                             drop_multiallelic = T,
+                             drop_multiallelic = TRUE,
                              strand_ambig_action = c("none", "drop"),
-                             detect_ld_mismatch = F,
-                             flip_allele = T,
-                             filter_ld_mismatch = F,
+                             detect_ld_mismatch = FALSE,
+                             flip_allele = TRUE,
+                             filter_ld_mismatch = FALSE,
                              outputdir = getwd(),
                              outname = NULL,
                              ncore = 1,
@@ -243,10 +243,7 @@ detect_ld_mismatch_susie_rss <- function (z_snp,
 #'
 #' @param strand_ambig_action the action to take to harmonize strand ambiguous variants (A/T, G/C) between
 #' the weights and LD reference. "drop" removes the ambiguous variant from the prediction models. "none" treats the variant
-#' as unambiguous, flipping the weights to match the LD reference and then taking no additional action. "recover" uses a procedure
-#' to recover strand ambiguous variants. This procedure compares correlations between variants in the
-#' LD reference and prediction models, and it can only be used with PredictDB format prediction models, which include this
-#' information.
+#' as unambiguous, flipping the weights to match the LD reference and then taking no additional action.
 #'
 #' @importFrom logging addHandler loginfo
 #'
@@ -256,7 +253,7 @@ preprocess_wgt_ld <- function (weight,
                                ld_R_dir,
                                outputdir = getwd(),
                                outname,
-                               strand_ambig_action = c("drop", "none", "recover")){
+                               strand_ambig_action = c("drop", "none")){
 
   strand_ambig_action <- match.arg(strand_ambig_action)
 
@@ -295,12 +292,6 @@ preprocess_wgt_ld <- function (weight,
   # subset to variants in weight table
   ld_snpinfo <- ld_snpinfo[ld_snpinfo$id %in% weight_table$rsid,]
 
-  if (strand_ambig_action=="recover"){
-    # load covariances for variants in each gene (accompanies .db file)
-    R_wgt_all <- read.table(gzfile(paste0(file_path_sans_ext(weight), ".txt.gz")), header=T)
-    loginfo("Harmonizing strand ambiguous weights using correlations with unambiguous variants")
-  }
-
   weight_table_harmonized <- list()
 
   loginfo("Processing weights for %s genes to match LD reference", length(gnames))
@@ -331,31 +322,10 @@ preprocess_wgt_ld <- function (weight,
     chrom <- unique(snps$chrom)
     ld_Rinfo_chrom <- ld_Rinfo[ld_Rinfo$chrom==chrom,]
 
-    if (strand_ambig_action=="recover"){
-      #subset R_wgt_all to current weight
-      R_wgt <- R_wgt_all[R_wgt_all$GENE == gname,]
-
-      #convert covariance to correlation
-      R_wgt_stdev <- R_wgt[R_wgt$RSID1==R_wgt$RSID2,]
-      R_wgt_stdev <- setNames(sqrt(R_wgt_stdev$VALUE), R_wgt_stdev$RSID1)
-      R_wgt$VALUE <- R_wgt$VALUE/(R_wgt_stdev[R_wgt$RSID1]*R_wgt_stdev[R_wgt$RSID2])
-
-      #discard variances
-      R_wgt <- R_wgt[R_wgt$RSID1!=R_wgt$RSID2,]
-
-      #fix edge case where variance=0; treat correlations with these variants as uninformative (=0) for harmonization
-      R_wgt$VALUE[is.nan(R_wgt$VALUE)] <- 0
-    } else {
-      R_wgt <- NULL
-    }
-
     w <- harmonize_wgt_ld(wgt.matrix,
                           snps,
                           ld_snpinfo,
-                          strand_ambig_action=strand_ambig_action,
-                          ld_Rinfo=ld_Rinfo_chrom,
-                          R_wgt=R_wgt,
-                          wgt=wgt)
+                          strand_ambig_action=strand_ambig_action)
 
     wgt.matrix <- w[["wgt"]]
     snps <- w[["snps"]]

@@ -32,7 +32,7 @@ allele.qc = function(a1,a2,ref1,ref2) {
 }
 
 #' Harmonize z scores from GWAS to match ld reference genotypes.
-#' Flip signs when reverse complement matches.
+#' Flip signs when reverse complement matches, remove strand ambiguous SNPs
 #'
 #' @param z_snp a data frame, with columns "id", "A1", "A2" and "z".
 #'     Z scores for every SNP. "A1" is the effect allele.
@@ -41,22 +41,13 @@ allele.qc = function(a1,a2,ref1,ref2) {
 #'  with columns "chrom", "id", "pos", "alt", "ref".
 #'
 #' @param strand_ambig_action the action to take to harmonize strand ambiguous variants (A/T, G/C) between
-#' the z scores and LD reference. "drop" removes the ambiguous variant from the z scores. "none" treats the variant
-#' as unambiguous, flipping the z score to match the LD reference and then taking no additional action. "recover"
-#' imputes the sign of ambiguous z scores using unambiguous z scores and the LD reference and flips the z scores
-#' if there is a mismatch between the imputed sign and the observed sign of the z score. This option is computationally intensive
-#'
-#' @param ld_pgenfs a character vector of .pgen or .bed files. One file for one
-#'  chromosome, in the order of 1 to 22. Therefore, the length of this vector
-#'  needs to be 22. If .pgen files are given, then .pvar and .psam are assumed
-#'  to present in the same directory. If .bed files are given, then .bim and
-#'  .fam files are assumed to present in the same directory.
-#'
-#' @param ld_Rinfo a vector of paths to the variant information for all LD matrices
+#' the z scores and LD reference.
+#' "drop" removes the ambiguous variant from the z scores.
+#' "none" takes no additional action.
 #'
 #' @return a data frame, z_snp with the "z" columns flipped to match LD ref.
 #'
-harmonize_z_ld <- function(z_snp, ld_snpinfo, strand_ambig_action = c("drop", "none", "recover"), ld_pgenfs = NULL, ld_Rinfo = NULL){
+harmonize_z_ld <- function(z_snp, ld_snpinfo, strand_ambig_action = c("drop", "none")){
   strand_ambig_action <- match.arg(strand_ambig_action)
   snpnames <- intersect(z_snp$id, ld_snpinfo$id)
   loginfo("Harmonize %s variants in both GWAS and LD reference", length(snpnames))
@@ -76,46 +67,7 @@ harmonize_z_ld <- function(z_snp, ld_snpinfo, strand_ambig_action = c("drop", "n
       loginfo("Number of strand ambiguous variants: %s", sum(ifremove))
     }
 
-    if (strand_ambig_action=="recover" & any(ifremove)){
-      #compare sign of imputed z score with observed z score for strand ambiguous variants
-      #following imputation strategy in https://dx.doi.org/10.1093%2Fbioinformatics%2Fbtu416
-      if (is.null(ld_pgenfs)){
-        loginfo("Harmonizing strand-ambiguous z scores using imputation by region")
-        for (i in 1:nrow(ld_Rinfo)){
-          R_snp <- readRDS(ld_Rinfo$RDS_file[i])
-          R_snp_anno <- read_ld_Rvar_RDS(ld_Rinfo$RDS_file[i])
-
-          #indicator if z.idx (on chromsome, in LD ref) is in current region
-          z.idx.ifreg <- z_snp$id[z.idx] %in% R_snp_anno$id
-
-          #index if z.idx (on chromsome, in LD ref) is in current region and unambiguous/ambiguous
-          z.idx.unambig <- z.idx[z.idx.ifreg & qc$keep]
-          z.idx.ambig <- z.idx[z.idx.ifreg & !qc$keep]
-
-          #skip region if there are no ambiguous variants
-          if (length(z.idx.ambig)>0){
-            #z scores for unambiguous and ambiguous variants in current region
-            z_t <- z_snp$z[z.idx.unambig]
-            z_i_obs <- z_snp$z[z.idx.ambig]
-
-            #impute z scores for ambiguous variants using unambiguous variants in current region
-            R_t.idx <- match(z_snp$id[z.idx.unambig], R_snp_anno$id)
-            R_i.idx <- match(z_snp$id[z.idx.ambig], R_snp_anno$id)
-            lambda <- 0.001
-            sigma_tt_inv <- solve(R_snp[R_t.idx, R_t.idx, drop=F] + lambda*diag(length(R_t.idx)))
-            sigma_it <- R_snp[R_i.idx, R_t.idx, drop=F]
-            z_i <- sigma_it%*%sigma_tt_inv%*%z_t
-
-            #flip z scores that do not match the sign of the imputation
-            #NOTE: consider replacing this with a test of significance - see "Fine-mapping from summary data with the Sum of Single Effects model" - Yuxin
-            if_sign_neq <- sign(z_i_obs) != sign(z_i)
-            z_snp[z.idx.ambig[if_sign_neq], "z"] <- -z_snp[z.idx.ambig[if_sign_neq], "z"]
-          }
-        }
-      } else {
-        #TO-DO: mirror previous section but compute R for each region using X
-      }
-    } else if (strand_ambig_action=="drop" & any(ifremove)) {
+    if (strand_ambig_action=="drop" & any(ifremove)) {
       remove.idx <- z.idx[ifremove]
       z_snp <- z_snp[-remove.idx, , drop = F]
       loginfo("Remove %s strand ambiguous variants", length(remove.idx))
@@ -125,7 +77,7 @@ harmonize_z_ld <- function(z_snp, ld_snpinfo, strand_ambig_action = c("drop", "n
 }
 
 #' Harmonize weight to match ld reference genotypes.
-#' Flip signs when reverse complement matches, remove/recover strand ambiguous SNPs
+#' Flip signs when reverse complement matches, remove ambiguous variants from the prediction models
 #'
 #' @param wgt.matrix from FUSION weight .Rdat file
 #'
@@ -137,28 +89,12 @@ harmonize_z_ld <- function(z_snp, ld_snpinfo, strand_ambig_action = c("drop", "n
 #'  with columns "chrom", "id", "pos", "alt", "ref".
 #'
 #' @param strand_ambig_action the action to take to harmonize strand ambiguous variants (A/T, G/C) between
-#' the weights and LD reference. "drop" removes the ambiguous variant from the prediction models. "none" treats the variant
-#' as unambiguous, flipping the weights to match the LD reference and then taking no additional action. "recover" uses a procedure
-#' to recover strand ambiguous variants. This procedure compares correlations between variants in the
-#' LD reference and prediction models, and it can only be used with PredictDB format prediction models, which include this
-#' information.
-#'
-#' @param ld_pgenfs a character vector of .pgen or .bed files. One file for one
-#'  chromosome, in the order of 1 to 22. Therefore, the length of this vector
-#'  needs to be 22. If .pgen files are given, then .pvar and .psam are assumed
-#'  to present in the same directory. If .bed files are given, then .bim and
-#'  .fam files are assumed to present in the same directory.
-#'
-#' @param ld_Rinfo a vector of paths to the variant information for all LD matrices
-#'
-#' @param R_wgt the LD matrix for the variants in \code{wgt.matrix}
-#'
-#' @param wgt allele information from the weights
+#' the weights and LD reference.
+#' "none" takes no additional action.
 #'
 #' @return wgt.matrix and snps with alleles flipped to match
 #'
-harmonize_wgt_ld <- function (wgt.matrix, snps, ld_snpinfo, strand_ambig_action = c("drop", "none", "recover"),
-                              ld_pgenfs=NULL, ld_Rinfo=NULL, R_wgt=NULL, wgt=NULL){
+harmonize_wgt_ld <- function (wgt.matrix, snps, ld_snpinfo, strand_ambig_action = c("drop", "none")){
 
   strand_ambig_action <- match.arg(strand_ambig_action)
 
@@ -176,71 +112,7 @@ harmonize_wgt_ld <- function (wgt.matrix, snps, ld_snpinfo, strand_ambig_action 
     snps[flip.idx, c("alt", "ref")] <- snps[flip.idx, c("ref", "alt")]
     wgt.matrix[flip.idx, ] <- -wgt.matrix[flip.idx, ]
 
-    if (strand_ambig_action == "recover" &
-        any(ifremove) &
-        sum(!ifremove)>0){
-      if (is.null(ld_pgenfs)){
-        #load correlation matrix(es) for LD reference(s) containing current weight
-        wgt_pos <- ld_snpinfo$pos[ld_snpinfo$id %in% snpnames]
-        regnames <- unique(sapply(wgt_pos, function(x){which(x >= ld_Rinfo$start & x <= ld_Rinfo$stop)}))
-        regRDS <- ld_Rinfo$RDS_file[match(regnames, ld_Rinfo$region_name)]
-        R_snp <- lapply(regRDS, readRDS)
-        R_snp <- suppressWarnings({as.matrix(Matrix::bdiag(R_snp))})
-        R_snp_anno <- do.call(rbind, lapply(regRDS, read_ld_Rvar_RDS))
-
-        #index the variant positions in LD reference
-        R_snp.idx <- match(snpnames, R_snp_anno$id)
-        R_snp.idx.unambig <- R_snp.idx[!ifremove]
-
-        #drop R_wgt correlations between ambiguous variants
-        R_wgt <- R_wgt[R_wgt$RSID1 %in% wgt$varID[!ifremove] | R_wgt$RSID2 %in% wgt$varID[!ifremove],]
-
-        #flip correlations if weights were flipped in previous step
-        for (i in flip.idx){
-          ifflip_rwgt <- R_wgt$RSID1 == wgt$varID[i] | R_wgt$RSID2 == wgt$varID[i]
-          R_wgt$VALUE[ifflip_rwgt] <- -R_wgt$VALUE[ifflip_rwgt]
-        }
-
-        unrecoverable.idx <- c()
-
-        #iterate over ambiguous snps
-        for (i in snpnames[ifremove]){
-          #index current ambiguous snp
-          snpnames.idx <- match(i, snpnames)
-
-          #sum of correlations in LD reference between current ambiguous variant and unambiguous variants
-          sumcor_R_snp <- sum(R_snp[R_snp.idx[snpnames.idx], R_snp.idx.unambig])
-
-          #sum of correlations in weights between current ambiguous variant and unambiguous variants
-          sumcor_R_wgt <- sum(R_wgt$VALUE[R_wgt$RSID1==wgt$varID[snpnames.idx] | R_wgt$RSID2==wgt$varID[snpnames.idx]])
-
-          if (sumcor_R_snp==0 | sumcor_R_wgt==0){
-            #collect ambiguous variants that do not have an unambiguous variant in the same LD region: all off-diagonal correlations = 0
-            #also collect ambiguous variants independent of unambiguous variants in weights (trivial, correlations must = exactly zero)
-            unrecoverable.idx <- c(unrecoverable.idx, snpnames.idx)
-          } else {
-            #flip weight if sign of correlations is not the same
-            if (sign(sumcor_R_snp)!=sign(sumcor_R_wgt)){
-              wgt.matrix[snpnames.idx,] <- -wgt.matrix[snpnames.idx,]
-            }
-          }
-        }
-
-        #drop ambiguous variants that cannot be recovered
-        if (length(unrecoverable.idx)>0){
-          snps <- snps[-unrecoverable.idx, , drop = F]
-          wgt.matrix <- wgt.matrix[-unrecoverable.idx, , drop = F]
-        }
-      } else {
-        stop("Recovering strand ambiguous variants is not currently suppported when using .pgen files")
-        #TO-DO: mirror following section but compute R_snp for each region using individual level data
-      }
-    } else if (strand_ambig_action == "recover" &
-               any(ifremove) &
-               sum(ifremove)==1){
-      #take no action if single variant. wrote this as separate if-statement for clarity, but it could be rolled into the following if-statement
-    } else if (strand_ambig_action == "drop" &
-               any(ifremove)){
+    if (strand_ambig_action == "drop" && any(ifremove)){
       #if dropping ambiguous variants, or >2 ambiguous variants and 0 unambiguous variants, discard the ambiguous variants
       remove.idx <- snps.idx[ifremove]
       snps <- snps[-remove.idx, , drop = F]
