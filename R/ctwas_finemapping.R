@@ -12,7 +12,7 @@
 #'
 #' @param region_tag a character string of region tag to be finemapped
 #'
-#' @param wgtlist a list of weights for each gene
+#' @param weight_list a list of weights for each gene
 #'
 #' @param L the number of effects for susie during the fine mapping steps
 #'
@@ -46,7 +46,7 @@ finemap_region <- function(z_snp,
                            gene_info,
                            regionlist,
                            region_tag,
-                           wgtlist = NULL,
+                           weight_list = NULL,
                            L = 5,
                            group_prior = NULL,
                            group_prior_var = NULL,
@@ -156,7 +156,7 @@ finemap_region <- function(z_snp,
     # compute correlation matrix if L > 1
     res <- compute_region_cor(regionlist = regionlist,
                               region_tag = region_tag,
-                              wgtlist = wgtlist)
+                              weight_list = weight_list)
 
     R_snp <- res$R_snp
     R_snp_gene <- res$R_snp_gene

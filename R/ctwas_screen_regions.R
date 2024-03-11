@@ -12,7 +12,7 @@
 #'
 #' @param regionlist a list object indexing regions, variants and genes.
 #'
-#' @param wgtlist
+#' @param weight_list a list of weights
 #'
 #' @param thin The proportion of SNPs to be used for parameter estimation and initial screening regions.
 #' Smaller \code{thin} parameters reduce runtime at the expense of accuracy.
@@ -59,7 +59,7 @@ screen_regions <- function(
     z_gene,
     region_info,
     gene_info = NULL,
-    wgtlist = NULL,
+    weight_list = NULL,
     regionlist = NULL,
     thin = 1,
     max_snp_region = Inf,
@@ -101,7 +101,7 @@ screen_regions <- function(
     loginfo("Get regionlist with thin = %.2f", thin)
     res <- get_regionlist(region_info = region_info,
                           gene_info = gene_info,
-                          weight_list = wgtlist,
+                          weight_list = weight_list,
                           select = zdf$id,
                           thin = thin,
                           maxSNP = max_snp_region,
@@ -129,7 +129,7 @@ screen_regions <- function(
                                   gene_info = gene_info,
                                   regionlist = regionlist,
                                   region_tag = region_tag,
-                                  wgtlist = wgtlist,
+                                  weight_list = weight_list,
                                   L = L,
                                   group_prior = group_prior,
                                   group_prior_var = group_prior_var,

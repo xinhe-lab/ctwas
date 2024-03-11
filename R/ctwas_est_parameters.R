@@ -12,7 +12,7 @@
 #'
 #' @param gene_info a data frame of gene information obtained from \code{compute_gene_z}
 #'
-#' @param weight_list a list of weights by chromosome
+#' @param weight_list a list of weights
 #'
 #' @param thin The proportion of SNPs to be used for the parameter estimation and
 #' initial screening region steps.
@@ -62,7 +62,8 @@ est_param <- function(
     regionlist = NULL,
     z_gene = NULL,
     gene_info = NULL,
-    weights = NULL,
+    weight_list = NULL,
+    weight_info = NULL,
     thin = 1,
     prob_single = 0.8,
     niter1 = 3,
@@ -88,15 +89,14 @@ est_param <- function(
   # compute gene z-scores if not available
   if (is.null(z_gene)) {
     loginfo("Computing gene z-scores ...")
+    # Compute gene z-scores
     res <- compute_gene_z(z_snp = z_snp,
-                          weights = weights,
                           region_info = region_info,
-                          ncore=ncore)
+                          weight_list = weight_list,
+                          weight_info = weight_info,
+                          ncore = ncore)
     z_gene <- res$z_gene
-    z_snp <- res$z_snp
     gene_info <- res$gene_info
-    wgtlist <- res$wgtlist
-    weight_info <- res$weight_info
     rm(res)
   }
 
@@ -121,7 +121,7 @@ est_param <- function(
     loginfo("Get regionlist with thin = %.2f", thin)
     res <- get_regionlist(region_info = region_info,
                           gene_info = gene_info,
-                          weight_list = wgtlist,
+                          weight_list = weight_list,
                           select = zdf$id,
                           thin = thin,
                           minvar = 2)
@@ -189,7 +189,7 @@ est_param <- function(
 
   return(list("param" = param,
               "regionlist" = regionlist,
-              "modified_wgtlist" = weight_list,
+              "modified_weight_list" = weight_list,
               "boundary_genes" = boundary_genes))
 
 }
