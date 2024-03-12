@@ -105,7 +105,8 @@ screen_regions <- function(
                           select = zdf$id,
                           thin = thin,
                           maxSNP = max_snp_region,
-                          minvar = 2)
+                          minvar = 2,
+                          adjust_boundary = TRUE)
 
     regionlist <- res$regionlist
     rm(res)
@@ -168,7 +169,16 @@ screen_regions <- function(
     screened_regionlist <- regionlist[screened_region_tags]
   }else{
     # TODO: update regionlist with screened region tags
-    screened_regionlist <- update_regionlist(...)
+    loginfo("Get screened regionlist containing all SNPs")
+    res <- get_regionlist(region_info = screened_region_info,
+                          gene_info = gene_info,
+                          weight_list = weight_list,
+                          select = zdf$id,
+                          thin = 1,
+                          maxSNP = max_snp_region,
+                          minvar = 2,
+                          adjust_boundary = FALSE)
+    screened_regionlist <- res$regionlist
   }
 
   # keep the finemapping results for the regions without strong signals (will not rerun)

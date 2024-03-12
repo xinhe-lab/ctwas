@@ -19,6 +19,11 @@
 #' Smaller \code{thin} parameters reduce runtime at the expense of accuracy.
 #' The fine mapping step is rerun using full SNPs for regions with strong gene signals.
 #'
+#' @param max_snp_region Inf or integer. Maximum number of SNPs in a region. Default is
+#' Inf, no limit. This can be useful if there are many SNPs in a region and you don't
+#' have enough memory to run the program. This applies to the last rerun step
+#' (using full SNPs and rerun susie for regions with strong gene signals) only.
+#'
 #' @param prob_single Blocks with probability greater than \code{prob_single} of
 #' having 1 or fewer effects will be used for parameter estimation
 #'
@@ -65,6 +70,7 @@ est_param <- function(
     weight_list = NULL,
     weight_info = NULL,
     thin = 1,
+    max_snp_region = Inf,
     prob_single = 0.8,
     niter1 = 3,
     niter2 = 30,
@@ -124,7 +130,9 @@ est_param <- function(
                           weight_list = weight_list,
                           select = zdf$id,
                           thin = thin,
-                          minvar = 2)
+                          maxSNP = max_snp_region,
+                          minvar = 2,
+                          adjust_boundary = TRUE)
 
     regionlist <- res$regionlist
     rm(res)

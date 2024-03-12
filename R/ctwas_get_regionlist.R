@@ -5,7 +5,8 @@ get_regionlist <- function(region_info,
                            select = NULL,
                            thin = 1,
                            maxSNP = Inf,
-                           minvar = 1
+                           minvar = 1,
+                           adjust_boundary = TRUE,
 ) {
 
   loginfo("No. LD regions: %s", nrow(region_info))
@@ -61,14 +62,21 @@ get_regionlist <- function(region_info,
       }
     }
 
-    # get regionlist and boundary_genes for regions in the chromosome, and update weight_list
-    res <- get_region_idx(regioninfo,geneinfo,snpinfo,weight_list,minvar)
-    regionlist <- c(regionlist, res$regionlist)
-    weight_list <- res$weight_list
-    boundary_genes <- rbind(boundary_genes,res$boundary_genes)
+    # assign genes and SNPs for regions in the chromosome, and return regionlist for the chromosome
+    regionlist_chr <- assign_region_ids(regioninfo,geneinfo,snpinfo,minvar)
 
-    loginfo("No. regions with at least one SNP/gene for chr%s: %s",
-            b, length(res$regionlist))
+    # identify cross-boundary genes, update regionlist and weight_list according to new gene and SNP assignment
+    if (isTRUE(adjust_boundary) && nrow(regioninfo) >=2){
+      res <- adjust_boundary(regioninfo, weight_list, regionlist_chr)
+      boundary_genes <- rbind(boundary_genes, res$boundary_genes)
+      regionlist_chr <- res$regionlist
+      weight_list <- res$weight_list
+    }
+
+    regionlist <- c(regionlist, regionlist_chr)
+
+    loginfo("No. regions with at least one SNP/gene for chr%s: %d",
+            b, length(regionlist_chr))
   }
 
   if (maxSNP < Inf){
