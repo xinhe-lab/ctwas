@@ -32,17 +32,17 @@
 #'
 #' @export
 #'
-preprocess_z_ld <- function (z_snp,
-                             region_info,
-                             chrom=1:22,
-                             gwas_n = NULL,
-                             drop_multiallelic = TRUE,
-                             drop_strand_ambig = TRUE,
-                             detect_ld_mismatch = FALSE,
-                             flip_allele = TRUE,
-                             filter_ld_mismatch = FALSE,
-                             ncore = 1,
-                             logfile = NULL){
+preprocess_z <- function (z_snp,
+                          region_info,
+                          chrom=1:22,
+                          gwas_n = NULL,
+                          drop_multiallelic = TRUE,
+                          drop_strand_ambig = TRUE,
+                          detect_ld_mismatch = FALSE,
+                          flip_allele = TRUE,
+                          filter_ld_mismatch = FALSE,
+                          ncore = 1,
+                          logfile = NULL){
 
   if (!is.null(logfile)) {
     addHandler(writeToFile, file = logfile, level = "DEBUG")

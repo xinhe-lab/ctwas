@@ -21,7 +21,7 @@
 #'
 #' @export
 #'
-preprocess_wgt_ld <- function (weight,
+preprocess_weight <- function (weight,
                                ld_R_dir,
                                outputdir = getwd(),
                                outname,
