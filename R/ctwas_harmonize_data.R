@@ -40,15 +40,14 @@ allele.qc = function(a1,a2,ref1,ref2) {
 #' @param ld_snpinfo a data frame, snp info for LD reference,
 #'  with columns "chrom", "id", "pos", "alt", "ref".
 #'
-#' @param strand_ambig_action the action to take to harmonize strand ambiguous variants (A/T, G/C) between
-#' the z scores and LD reference.
-#' "drop" removes the ambiguous variant from the z scores.
-#' "none" takes no additional action.
+#' @param drop_strand_ambig TRUE/FALSE, if TRUE remove strand ambiguous variants (A/T, G/C).
+#'
+#' @importFrom logging loginfo
 #'
 #' @return a data frame, z_snp with the "z" columns flipped to match LD ref.
 #'
-harmonize_z_ld <- function(z_snp, ld_snpinfo, strand_ambig_action = c("drop", "none")){
-  strand_ambig_action <- match.arg(strand_ambig_action)
+harmonize_z_ld <- function(z_snp, ld_snpinfo, drop_strand_ambig = TRUE){
+
   snpnames <- intersect(z_snp$id, ld_snpinfo$id)
   loginfo("Harmonize %s variants in both GWAS and LD reference", length(snpnames))
 
@@ -67,7 +66,8 @@ harmonize_z_ld <- function(z_snp, ld_snpinfo, strand_ambig_action = c("drop", "n
       loginfo("Number of strand ambiguous variants: %s", sum(ifremove))
     }
 
-    if (strand_ambig_action=="drop" & any(ifremove)) {
+
+    if (isTRUE(drop_strand_ambig) & any(ifremove)) {
       remove.idx <- z.idx[ifremove]
       z_snp <- z_snp[-remove.idx, , drop = F]
       loginfo("Remove %s strand ambiguous variants", length(remove.idx))
@@ -88,15 +88,11 @@ harmonize_z_ld <- function(z_snp, ld_snpinfo, strand_ambig_action = c("drop", "n
 #' @param ld_snpinfo a data frame, snp info for LD reference,
 #'  with columns "chrom", "id", "pos", "alt", "ref".
 #'
-#' @param strand_ambig_action the action to take to harmonize strand ambiguous variants (A/T, G/C) between
-#' the weights and LD reference.
-#' "none" takes no additional action.
+#' @param drop_strand_ambig TRUE/FALSE, if TRUE remove strand ambiguous variants (A/T, G/C).
 #'
 #' @return wgt.matrix and snps with alleles flipped to match
 #'
-harmonize_wgt_ld <- function (wgt.matrix, snps, ld_snpinfo, strand_ambig_action = c("drop", "none")){
-
-  strand_ambig_action <- match.arg(strand_ambig_action)
+harmonize_wgt_ld <- function (wgt.matrix, snps, ld_snpinfo, drop_strand_ambig = TRUE){
 
   colnames(snps) <- c("chrom", "id", "cm", "pos", "alt", "ref")
   snps <- snps[match(rownames(wgt.matrix), snps$id), ]
@@ -112,7 +108,7 @@ harmonize_wgt_ld <- function (wgt.matrix, snps, ld_snpinfo, strand_ambig_action 
     snps[flip.idx, c("alt", "ref")] <- snps[flip.idx, c("ref", "alt")]
     wgt.matrix[flip.idx, ] <- -wgt.matrix[flip.idx, ]
 
-    if (strand_ambig_action == "drop" && any(ifremove)){
+    if (isTRUE(drop_strand_ambig) && any(ifremove)){
       #if dropping ambiguous variants, or >2 ambiguous variants and 0 unambiguous variants, discard the ambiguous variants
       remove.idx <- snps.idx[ifremove]
       snps <- snps[-remove.idx, , drop = F]
