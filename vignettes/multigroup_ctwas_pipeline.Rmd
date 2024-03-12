@@ -99,14 +99,14 @@ These inputs should be harmonized prior to cTWAS analysis (i.e. the reference an
 
 #### Harmonizing GWAS z-scores and LD reference and detect LD mismatches
 
-The `preprocess_z_ld()` function first harmonizes GWAS z-scores and LD reference based on the included allele information, 
+The `preprocess_z()` function first harmonizes GWAS z-scores and LD reference based on the included allele information, 
 then performs LD mismatch diagnosis using the `kriging_rss()` function from SuSiE RSS, 
 and flips signs for variants detected with allele flipping issues. 
 Note, the LD mismatch diagnosis procedure can be time consuming.
 
 #### Harmonizing prediction models and LD reference
 
-The `preprocess_wgt_ld()` function harmonizes the PredictDB prediction models and LD reference. 
+The `preprocess_weight()` function harmonizes the PredictDB prediction models and LD reference. 
 This only needs to be done once per combination of prediction models and LD reference. 
 
 ## Imputing gene z-scores
