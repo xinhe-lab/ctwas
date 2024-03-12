@@ -1,4 +1,4 @@
-# adjust boundary
+# identify cross-boundary genes, adjust regionlist and update weigh_list
 adjust_boundary <- function(regioninfo, weight_list, regionlist){
   boundary_genes <- data.frame(matrix(nrow = 0, ncol = 4))
   colnames(boundary_genes) <- c("gene","chrom","region1","region2")

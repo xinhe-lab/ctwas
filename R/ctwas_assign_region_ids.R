@@ -2,7 +2,7 @@
 assign_region_ids <- function(regioninfo,
                               geneinfo,
                               snpinfo,
-                              minvar){
+                              minvar = 1){
   regionlist <- list()
   # boundary_genes <- data.frame(matrix(nrow = 0, ncol = 4))
   # colnames(boundary_genes) <- c("gene","chrom","region1","region2")

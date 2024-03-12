@@ -1,4 +1,36 @@
 #' Get regionlist for each region in region_info
+#'
+#' @param region_info a data frame of region definition and associated file names
+#'
+#' @param gene_info a data frame of gene information obtained from \code{compute_gene_z}
+#'
+#' @param weight_list a list of weights
+#'
+#' @param select Default is NULL, all variants will be selected. Or a vector of variant IDs,
+#' or a data frame with columns id and z (id is for gene or SNP id, z is for z scores).
+#' z will be used for remove SNPs if the total number of SNPs exceeds limit. See
+#' parameter `maxSNP` for more information.
+#'
+#' @param thin The proportion of SNPs to be used for the parameter estimation and
+#' initial screening region steps.
+#' Smaller \code{thin} parameters reduce runtime at the expense of accuracy.
+#' The fine mapping step is rerun using full SNPs for regions with strong gene signals.
+#'
+#' @param maxSNP Inf or integer. Maximum number of SNPs in a region. Default is
+#' Inf, no limit. This can be useful if there are many SNPs in a region and you don't
+#' have enough memory to run the program. This applies to the last rerun step
+#' (using full SNPs and rerun susie for regions with strong gene signals) only.
+#'
+#' @param minvar minimum number of SNPs (and genes) in a region
+#'
+#' @param adjust_boundary identify cross-boundary genes, adjust regionlist and update weigh_list
+#'
+#' @importFrom logging loginfo
+#'
+#' @return a list with regionlist, updated weight_list, and cross-bounary genes
+#'
+#' @export
+#'
 get_regionlist <- function(region_info,
                            gene_info,
                            weight_list,
@@ -6,8 +38,7 @@ get_regionlist <- function(region_info,
                            thin = 1,
                            maxSNP = Inf,
                            minvar = 1,
-                           adjust_boundary = TRUE,
-) {
+                           adjust_boundary = TRUE) {
 
   loginfo("No. LD regions: %s", nrow(region_info))
 
@@ -65,7 +96,7 @@ get_regionlist <- function(region_info,
     # assign genes and SNPs for regions in the chromosome, and return regionlist for the chromosome
     regionlist_chr <- assign_region_ids(regioninfo,geneinfo,snpinfo,minvar)
 
-    # identify cross-boundary genes, update regionlist and weight_list according to new gene and SNP assignment
+    # identify cross-boundary genes, adjust regionlist and update weigh_list
     if (isTRUE(adjust_boundary) && nrow(regioninfo) >=2){
       res <- adjust_boundary(regioninfo, weight_list, regionlist_chr)
       boundary_genes <- rbind(boundary_genes, res$boundary_genes)
