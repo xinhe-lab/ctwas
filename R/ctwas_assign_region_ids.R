@@ -2,7 +2,10 @@
 assign_region_ids <- function(regioninfo,
                               geneinfo,
                               snpinfo,
-                              minvar = 1){
+                              weight_list,
+                              minvar = 1,
+                              adjust_boundary = TRUE) {
+
   regionlist <- list()
   # boundary_genes <- data.frame(matrix(nrow = 0, ncol = 4))
   # colnames(boundary_genes) <- c("gene","chrom","region1","region2")
@@ -42,15 +45,14 @@ assign_region_ids <- function(regioninfo,
                                      "SNP_info" = regioninfo$SNP_info[i])
   }
 
-  # # identify genes across boundaries, update regionlist and weight_list according to new gene and snp assignment
-  # if (nrow(regioninfo) >=2){
-  #   res <- adjust_boundary(regioninfo, weight_list, regionlist)
-  #   regionlist <- res$regionlist
-  #   weight_list <- res$weight_list
-  #   boundary_genes <- res$boundary_genes
-  # }
+  # identify genes across boundaries, update regionlist and weight_list according to new gene and snp assignment
+  if (isTRUE(adjust_boundary) && nrow(regioninfo) >=2){
+    res <- adjust_boundary(regioninfo, weight_list, regionlist)
+    regionlist <- res$regionlist
+    weight_list <- res$weight_list
+    boundary_genes <- res$boundary_genes
+  }
 
-  # return(list(regionlist=regionlist,weight_list=weight_list,boundary_genes=boundary_genes))
+  return(list(regionlist=regionlist,weight_list=weight_list,boundary_genes=boundary_genes))
 
-  return(regionlist)
 }
