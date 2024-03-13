@@ -6,36 +6,29 @@
 #'
 #' @param thin the proportion of SNPs used for parameter estimation, as supplied to \code{est_param}
 #'
-#' @param plot_estimates if TRUE, return a plot of the estimated parameters
+#' @param plot if TRUE, return a plot of the estimated parameters
 #'
 #' @import ggplot2
 #' @import cowplot
 #'
 #' @export
 #'
-summarize_parameters <- function(param,
-                                 gwas_n = NA,
-                                 thin = 1,
-                                 plot_estimates = TRUE){
-
-  EM1_res <- param[["EM1_res"]]
-  EM2_res <- param[["EM2_res"]]
-
-  group_prior_rec <- EM2_res[["group_prior_rec"]]
-  group_prior_var_rec <- EM2_res[["group_prior_var_rec"]]
+summarize_param <- function(param,
+                            gwas_n = NA,
+                            thin = 1,
+                            plot = TRUE){
 
   # estimated group prior (all iterations)
-  estimated_group_prior_all <- group_prior_rec
+  estimated_group_prior_all <- param[["group_prior_rec"]]
   estimated_group_prior_all["SNP",] <- estimated_group_prior_all["SNP",]*thin #adjust parameter to account for thin argument
   group_prior <- estimated_group_prior_all[,ncol(estimated_group_prior_all)]
 
   # estimated group prior variance (all iterations)
-  estimated_group_prior_var_all <- group_prior_var_rec
+  estimated_group_prior_var_all <- param[["group_prior_var_rec"]]
   group_prior_var <- estimated_group_prior_var_all[,ncol(estimated_group_prior_var_all)]
 
   # set group size
-  EM1_susie_res <- EM1_res[["EM_susie_res"]]
-  group_size <- table(EM1_susie_res$type)
+  group_size <- param[["group_size"]]
   group_size["SNP"] <- group_size["SNP"]/thin #adjust to account for thin argument
 
   group_size <- group_size[rownames(estimated_group_prior_all)]
@@ -46,7 +39,7 @@ summarize_parameters <- function(param,
 
   # estimated enrichment of genes (all iterations)
   estimated_enrichment_all <- t(sapply(rownames(estimated_group_prior_all)[rownames(estimated_group_prior_all)!="SNP"], function(x){
-      estimated_group_prior_all[rownames(estimated_group_prior_all)==x,]/estimated_group_prior_all[rownames(estimated_group_prior_all)=="SNP"]}))
+    estimated_group_prior_all[rownames(estimated_group_prior_all)==x,]/estimated_group_prior_all[rownames(estimated_group_prior_all)=="SNP"]}))
   enrichment <- estimated_enrichment_all[,ncol(estimated_enrichment_all)]
 
   outlist <- list(group_size = group_size,
@@ -57,7 +50,7 @@ summarize_parameters <- function(param,
                   total_pve = sum(group_pve),
                   attributable_pve = group_pve/sum(group_pve))
 
-  if (isTRUE(plot_estimates)){
+  if (isTRUE(plot)){
     title_size <- 12
 
     # inclusion plot
@@ -132,9 +125,7 @@ summarize_parameters <- function(param,
       theme (legend.title = element_text(size=12, face="bold")) +
       scale_colour_discrete(drop = FALSE)
 
-    convergence_plot <- plot_grid(p_pi, p_sigma2, p_enrich, p_pve)
-
-    outlist[["convergence_plot"]] <- convergence_plot
+    outlist[["plot"]] <- plot_grid(p_pi, p_sigma2, p_enrich, p_pve)
   }
 
   return(outlist)

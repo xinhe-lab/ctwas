@@ -148,18 +148,18 @@ est_param <- function(
   }
 
   EM1_res <- ctwas_EM(zdf = zdf,
-                    regionlist = regionlist,
-                    region_info = region_info,
-                    niter = niter1,
-                    group_prior = group_prior,
-                    group_prior_var = group_prior_var,
-                    group_prior_var_structure = group_prior_var_structure,
-                    use_null_weight = use_null_weight,
-                    coverage = coverage,
-                    min_abs_corr = min_abs_corr,
-                    max_iter = max_iter,
-                    ncore = ncore,
-                    ...)
+                      regionlist = regionlist,
+                      region_info = region_info,
+                      niter = niter1,
+                      group_prior = group_prior,
+                      group_prior_var = group_prior_var,
+                      group_prior_var_structure = group_prior_var_structure,
+                      use_null_weight = use_null_weight,
+                      coverage = coverage,
+                      min_abs_corr = min_abs_corr,
+                      max_iter = max_iter,
+                      ncore = ncore,
+                      ...)
 
   group_prior <- EM1_res$group_prior
   group_prior_var <- EM1_res$group_prior_var
@@ -168,6 +168,7 @@ est_param <- function(
   print("Roughly estimated group_prior_var: \n")
   print(group_prior_var)
   EM1_susie_res <- EM1_res$EM_susie_res
+  group_size <- table(EM1_susie_res$type)
 
   # filter regions based on prob_single
   filtered_regionlist <- filter_regions(regionlist = regionlist,
@@ -194,16 +195,22 @@ est_param <- function(
 
   group_prior <- EM2_res$group_prior
   group_prior_var <- EM2_res$group_prior_var
-
   print("Estimated group_prior: \n")
   print(group_prior)
   print("Estimated group_prior_var: \n")
   print(group_prior_var)
 
+  group_prior_rec <- EM2_res$group_prior_rec
+  group_prior_var_rec <- EM2_res$group_prior_var_rec
+  group_prior_var_structure <- EM2_res$group_prior_var_structure
+
   return(list("group_prior" = group_prior,
               "group_prior_var" = group_prior_var,
-              "EM1_res" = EM1_res,
-              "EM2_res" = EM2_res,
+              "group_prior_rec" = group_prior_rec,
+              "group_prior_var_rec" = group_prior_var_rec,
+              "group_prior_var_structure" = group_prior_var_structure,
+              "group_size" = group_size,
+              "thin" = thin,
               "regionlist" = regionlist,
               "weight_list" = weight_list,
               "boundary_genes" = boundary_genes))
