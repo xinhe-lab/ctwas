@@ -20,7 +20,6 @@
 #' @param group_prior_var_structure a string indicating the structure to put on the prior variance parameters.
 #' "independent" is the default and allows all groups to have their own separate variance parameters.
 #' "shared_all" allows all groups to share the same variance parameter.
-#' "inv_gamma" places an inverse-gamma prior on the variance parameters for each group, with shape and rate hypeparameters.
 #' "shared_type" allows all groups in one molecular QTL type to share the same variance parameter.
 #'
 #' @param use_null_weight TRUE/FALSE. If TRUE, allow for a probability of no effect in susie
@@ -96,7 +95,7 @@ ctwas_EM <- function(zdf,
 
     corelist <- region2core(regionlist, ncore)
 
-    susie_res_regions <- foreach (core = 1:length(corelist), .combine = "rbind", .packages = "ctwas") %dopar% {
+    EM_susie_res <- foreach (core = 1:length(corelist), .combine = "rbind", .packages = "ctwas") %dopar% {
       susie_res.core.list <- list()
 
       # run susie for each region
@@ -176,7 +175,7 @@ ctwas_EM <- function(zdf,
     }
 
     # update estimated group_prior from the current iteration
-    pi_prior <- sapply(names(pi_prior), function(x){mean(susie_res_regions$susie_pip[susie_res_regions$type==x])})
+    pi_prior <- sapply(names(pi_prior), function(x){mean(EM_susie_res$susie_pip[EM_susie_res$type==x])})
     group_prior_rec[names(pi_prior),iter] <- pi_prior
 
     if (verbose){
@@ -196,24 +195,24 @@ ctwas_EM <- function(zdf,
     if (group_prior_var_structure=="independent"){
       V_prior <- sapply(names(V_prior),
                         function(x){
-                          temp_susie_res_regions <- susie_res_regions[susie_res_regions$type==x,];
-                          sum(temp_susie_res_regions$susie_pip*temp_susie_res_regions$mu2)/sum(temp_susie_res_regions$susie_pip)})
+                          tmp_EM_susie_res <- EM_susie_res[EM_susie_res$type==x,];
+                          sum(tmp_EM_susie_res$susie_pip*tmp_EM_susie_res$mu2)/sum(tmp_EM_susie_res$susie_pip)})
     } else if (group_prior_var_structure=="shared_all"){
-      temp_susie_res_regions <- susie_res_regions[susie_res_regions$type=="SNP",]
-      V_prior["SNP"] <- sum(temp_susie_res_regions$susie_pip*temp_susie_res_regions$mu2)/sum(temp_susie_res_regions$susie_pip)
+      tmp_EM_susie_res <- EM_susie_res[EM_susie_res$type=="SNP",]
+      V_prior["SNP"] <- sum(tmp_EM_susie_res$susie_pip*tmp_EM_susie_res$mu2)/sum(tmp_EM_susie_res$susie_pip)
 
-      temp_susie_res_regions <- susie_res_regions[susie_res_regions$type!="SNP",]
-      V_prior[names(V_prior)!="SNP"] <- sum(temp_susie_res_regions$susie_pip*temp_susie_res_regions$mu2)/sum(temp_susie_res_regions$susie_pip)
+      tmp_EM_susie_res <- EM_susie_res[EM_susie_res$type!="SNP",]
+      V_prior[names(V_prior)!="SNP"] <- sum(tmp_EM_susie_res$susie_pip*tmp_EM_susie_res$mu2)/sum(tmp_EM_susie_res$susie_pip)
 
     } else if (group_prior_var_structure=="shared_QTLtype"){
-      temp_susie_res_regions <- susie_res_regions[susie_res_regions$QTLtype=="SNP",]
-      V_prior["SNP"] <- sum(temp_susie_res_regions$susie_pip*temp_susie_res_regions$mu2)/sum(temp_susie_res_regions$susie_pip)
+      tmp_EM_susie_res <- EM_susie_res[EM_susie_res$QTLtype=="SNP",]
+      V_prior["SNP"] <- sum(tmp_EM_susie_res$susie_pip*tmp_EM_susie_res$mu2)/sum(tmp_EM_susie_res$susie_pip)
       for(i in QTLtypes){
         if (i != "SNP"){
-          temp_susie_res_regions <- susie_res_regions[susie_res_regions$QTLtype==i,]
+          tmp_EM_susie_res <- EM_susie_res[EM_susie_res$QTLtype==i,]
           V_prior[sapply(names(V_prior), function(x){
             unlist(strsplit(x, "[_]"))[2]})==i] <-
-            sum(temp_susie_res_regions$susie_pip*temp_susie_res_regions$mu2)/sum(temp_susie_res_regions$susie_pip)
+            sum(tmp_EM_susie_res$susie_pip*tmp_EM_susie_res$mu2)/sum(tmp_EM_susie_res$susie_pip)
         }
       }
 
@@ -228,7 +227,8 @@ ctwas_EM <- function(zdf,
               "group_prior_var" = V_prior,
               "group_prior_rec" = group_prior_rec,
               "group_prior_var_rec" = group_prior_var_rec,
-              "group_prior_var_structure" = group_prior_var_structure))
+              "group_prior_var_structure" = group_prior_var_structure,
+              "EM_susie_res" = EM_susie_res))
 }
 
 

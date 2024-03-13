@@ -96,7 +96,6 @@ screen_regions <- function(
   }
 
   loginfo("Screen regions ...")
-
   if (is.null(regionlist)) {
     loginfo("Get regionlist with thin = %.2f", thin)
     res <- get_regionlist(region_info = region_info,
@@ -109,6 +108,8 @@ screen_regions <- function(
                           adjust_boundary = TRUE)
 
     regionlist <- res$regionlist
+    weight_list <- res$weight_list
+    boundary_genes <- res$boundary_genes
     rm(res)
   }
 
@@ -150,7 +151,7 @@ screen_regions <- function(
   # TODO: confirm the change to use TOTAL none SNP PIP rather than MAX gene PIP?
   finemap_weak_res <- NULL
   screened_region_tags <- NULL
-  screened_region_info <- NULL
+  # screened_region_info <- NULL
   for (region_tag in names(regionlist)){
     #gene_PIP <- max(finemap_res$susie_pip[finemap_res$type != "SNP" & finemap_res$region_tag == region_tag], 0)
     region_finemap_res <- finemap_res[finemap_res$region_tag == region_tag,]
@@ -158,7 +159,7 @@ screen_regions <- function(
     gene_PIP[is.na(gene_PIP)] <- 0 # 0 if gene_PIP is NA (no genes in this region)
     if (gene_PIP >= min_gene_PIP) {
       screened_region_tags <- c(screened_region_tags, region_tag)
-      screened_region_info <- rbind(screened_region_info, region_info[region_info$region_tag = region_tag, ])
+      # screened_region_info <- rbind(screened_region_info, region_info[region_info$region_tag = region_tag, ])
     }
   }
 
@@ -180,7 +181,10 @@ screen_regions <- function(
 
   return(list("screened_regionlist" = screened_regionlist,
               "screened_region_tags" = screened_region_tags,
-              "weak_region_finemap_res" = weak_region_finemap_res))
+              "weak_region_finemap_res" = weak_region_finemap_res,
+              "regionlist" = regionlist,
+              "weight_list" = weight_list,
+              "boundary_genes" = boundary_genes))
 }
 
 

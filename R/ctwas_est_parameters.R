@@ -37,7 +37,7 @@
 #'
 #' @param group_prior_var_structure a string indicating the structure to put on the prior variance parameters.
 #' "independent" is the default and allows all groups to have their own separate variance parameters.
-#' "shared" allows all groups to share the same variance parameter.
+#' "shared_all" allows all groups to share the same variance parameter.
 #' "shared_type" allows all groups in one molecular QTL type to share the same variance parameter.
 #'
 #' @param use_null_weight TRUE/FALSE. If TRUE, allow for a probability of no effect in susie
@@ -135,6 +135,8 @@ est_param <- function(
                           adjust_boundary = TRUE)
 
     regionlist <- res$regionlist
+    weight_list <- res$weight_list
+    boundary_genes <- res$boundary_genes
     rm(res)
   }
 
@@ -145,7 +147,7 @@ est_param <- function(
     group_prior["SNP"] <- group_prior["SNP"]/thin
   }
 
-  param <- ctwas_EM(zdf = zdf,
+  EM1_res <- ctwas_EM(zdf = zdf,
                     regionlist = regionlist,
                     region_info = region_info,
                     niter = niter1,
@@ -159,13 +161,13 @@ est_param <- function(
                     ncore = ncore,
                     ...)
 
-  group_prior <- param$group_prior
-  group_prior_var <- param$group_prior_var
+  group_prior <- EM1_res$group_prior
+  group_prior_var <- EM1_res$group_prior_var
   print("Roughly estimated group_prior: \n")
   print(group_prior)
   print("Roughly estimated group_prior_var: \n")
   print(group_prior_var)
-  rm(param)
+  EM1_susie_res <- EM1_res$EM_susie_res
 
   # filter regions based on prob_single
   filtered_regionlist <- filter_regions(regionlist = regionlist,
@@ -176,28 +178,34 @@ est_param <- function(
 
   # Run EM for more (niter2) iterations, getting rough estimates
   loginfo("Run EM for %d iterations on filtered regions, getting accurate estimates ...", niter2)
-  param <- ctwas_EM(zdf = zdf,
-                    regionlist = filtered_regionlist,
-                    region_info = region_info,
-                    niter = niter2,
-                    group_prior = group_prior,
-                    group_prior_var = group_prior_var,
-                    group_prior_var_structure = group_prior_var_structure,
-                    use_null_weight = use_null_weight,
-                    coverage = coverage,
-                    min_abs_corr = min_abs_corr,
-                    max_iter = max_iter,
-                    ncore = ncore,
-                    ...)
+  EM2_res <- ctwas_EM(zdf = zdf,
+                      regionlist = filtered_regionlist,
+                      region_info = region_info,
+                      niter = niter2,
+                      group_prior = group_prior,
+                      group_prior_var = group_prior_var,
+                      group_prior_var_structure = group_prior_var_structure,
+                      use_null_weight = use_null_weight,
+                      coverage = coverage,
+                      min_abs_corr = min_abs_corr,
+                      max_iter = max_iter,
+                      ncore = ncore,
+                      ...)
+
+  group_prior <- EM2_res$group_prior
+  group_prior_var <- EM2_res$group_prior_var
 
   print("Estimated group_prior: \n")
-  print(param$group_prior)
+  print(group_prior)
   print("Estimated group_prior_var: \n")
-  print(param$group_prior_var)
+  print(group_prior_var)
 
-  return(list("param" = param,
+  return(list("group_prior" = group_prior,
+              "group_prior_var" = group_prior_var,
+              "EM1_res" = EM1_res,
+              "EM2_res" = EM2_res,
               "regionlist" = regionlist,
-              "modified_weight_list" = weight_list,
+              "weight_list" = weight_list,
               "boundary_genes" = boundary_genes))
 
 }

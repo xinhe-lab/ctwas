@@ -105,7 +105,7 @@ ctwas_sumstats <- function(
 
   # Estimate parameters
   #.  including computing correlation matrices for thinned SNPs
-  res <- est_param(z_snp = z_snp,
+  param <- est_param(z_snp = z_snp,
                    region_info = region_info,
                    z_gene = z_gene,
                    gene_info = gene_info,
@@ -117,11 +117,11 @@ ctwas_sumstats <- function(
                    niter2 = niter2,
                    ncore = ncore)
 
-  param <- res$param
   group_prior <- param$group_prior
   group_prior_var <- param$group_prior_var
-  region_info <- res$region_info
-  regionlist <- res$regionlist
+  regionlist <- param$regionlist
+  weight_list <- param$weight_list
+  boundary_genes <- param$boundary_genes
   rm(res)
 
   # Screen regions
@@ -176,14 +176,15 @@ ctwas_sumstats <- function(
   }
   strong_region_finemap_res <- do.call(rbind, strong_region_finemap_res)
 
-  return(list("param" = param,
-              "strong_region_finemap_res" = strong_region_finemap_res,
+  return(list("strong_region_finemap_res" = strong_region_finemap_res,
               "weak_region_finemap_res" = weak_region_finemap_res,
+              "param" = param,
               "z_gene" = z_gene,
               "gene_info" = gene_info,
               "region_info" = region_info,
               "regionlist" = regionlist,
-              "screened_region_info" = screened_region_info,
+              "weight_list" = weight_list,
+              "boundary_genes" = boundary_genes,
               "screened_regionlist" = screened_regionlist,
               "screened_region_tags" = screened_region_tags))
 
