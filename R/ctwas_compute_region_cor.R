@@ -3,13 +3,13 @@
 #'
 #' @param regionlist regionlist
 #' @param region_tag region tag
-#' @param wgtlist weight list
+#' @param weight_list weight list
 #'
 #' @return a list of correlation matrices
 #' @export
 compute_region_cor <- function(regionlist,
                                region_tag,
-                               wgtlist) {
+                               weight_list) {
 
   loginfo("Compute correlation matrices for region %s ...", region_tag)
 
@@ -28,8 +28,8 @@ compute_region_cor <- function(regionlist,
   sidx <- match(regionlist[[region_tag]][["sid"]], ld_snpinfo$id)
   gnames <- regionlist[[region_tag]][["gid"]]
 
-  # subset wgtlist for genes in this region
-  wgtlist <- wgtlist[gnames]
+  # subset weight_list for genes in this region
+  weight_list <- weight_list[gnames]
 
   loginfo("%d SNPs, %d genes in the region.", length(sidx), length(gnames))
 
@@ -44,7 +44,7 @@ compute_region_cor <- function(regionlist,
 
     for (i in 1:length(gnames)){
       gname <- gnames[i]
-      wgt <- wgtlist[[gname]]
+      wgt <- weight_list[[gname]]
       snpnames <- rownames(wgt)
       ld.idx <- match(snpnames, ld_snpinfo$id)
       ldr[[gname]] <- ld.idx
@@ -58,7 +58,7 @@ compute_region_cor <- function(regionlist,
       loginfo("Compute gene-gene correlation matrix")
 
       gene_pairs <- combn(length(gnames), 2)
-      wgtr <- wgtlist[gnames]
+      wgtr <- weight_list[gnames]
       gene_corrs <- apply(gene_pairs, 2, function(x){t(wgtr[[x[1]]])%*%R_snp[ldr[[x[1]]], ldr[[x[2]]]]%*%wgtr[[x[2]]]/(
         sqrt(t(wgtr[[x[1]]])%*%R_snp[ldr[[x[1]]], ldr[[x[1]]]]%*%wgtr[[x[1]]]) *
           sqrt(t(wgtr[[x[2]]])%*%R_snp[ldr[[x[2]]], ldr[[x[2]]]]%*%wgtr[[x[2]]]))})

@@ -10,18 +10,20 @@ est_param(
   regionlist = NULL,
   z_gene = NULL,
   gene_info = NULL,
-  weights = NULL,
+  weight_list = NULL,
+  weight_info = NULL,
   thin = 1,
+  max_snp_region = Inf,
   prob_single = 0.8,
   niter1 = 3,
   niter2 = 30,
   group_prior = NULL,
   group_prior_var = NULL,
-  group_prior_var_structure = c("independent", "shared_all", "shared+snps",
-    "shared_QTLtype"),
+  group_prior_var_structure = c("independent", "shared_all", "shared_QTLtype"),
   use_null_weight = TRUE,
   coverage = 0.95,
   min_abs_corr = 0.5,
+  max_iter = 1,
   ncore = 1,
   logfile = NULL
 )
@@ -39,10 +41,17 @@ Optionally, a "type" column can also be supplied; this is for using multiple set
 
 \item{gene_info}{a data frame of gene information obtained from \code{compute_gene_z}}
 
+\item{weight_list}{a list of weights}
+
 \item{thin}{The proportion of SNPs to be used for the parameter estimation and
 initial screening region steps.
 Smaller \code{thin} parameters reduce runtime at the expense of accuracy.
 The fine mapping step is rerun using full SNPs for regions with strong gene signals.}
+
+\item{max_snp_region}{Inf or integer. Maximum number of SNPs in a region. Default is
+Inf, no limit. This can be useful if there are many SNPs in a region and you don't
+have enough memory to run the program. This applies to the last rerun step
+(using full SNPs and rerun susie for regions with strong gene signals) only.}
 
 \item{prob_single}{Blocks with probability greater than \code{prob_single} of
 having 1 or fewer effects will be used for parameter estimation}
@@ -57,8 +66,7 @@ having 1 or fewer effects will be used for parameter estimation}
 
 \item{group_prior_var_structure}{a string indicating the structure to put on the prior variance parameters.
 "independent" is the default and allows all groups to have their own separate variance parameters.
-"shared" allows all groups to share the same variance parameter.
-"shared+snps" allows all groups to share the same variance parameter, and this variance parameter is also shared with SNPs.
+"shared_all" allows all groups to share the same variance parameter.
 "shared_type" allows all groups in one molecular QTL type to share the same variance parameter.}
 
 \item{use_null_weight}{TRUE/FALSE. If TRUE, allow for a probability of no effect in susie}
@@ -70,11 +78,11 @@ credible set. The default, 0.5, corresponds to a squared
 correlation of 0.25, which is a commonly used threshold for
 genotype data in genetic studies.}
 
+\item{max_iter}{Maximum number of IBSS iterations to perform.}
+
 \item{ncore}{The number of cores used to parallelize computation over regions}
 
 \item{logfile}{the log file, if NULL will print log info on screen}
-
-\item{weight_list}{a list of weights by chromosome}
 }
 \value{
 a list with estimated parameters, and updated region_info with correlation file names for each region.

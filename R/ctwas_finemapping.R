@@ -154,9 +154,7 @@ finemap_region <- function(z_snp,
                cbind(R_snp_gene, R_snp))
   } else if (L > 1){
     # compute correlation matrix if L > 1
-    res <- compute_region_cor(regionlist = regionlist,
-                              region_tag = region_tag,
-                              weight_list = weight_list)
+    res <- compute_region_cor(regionlist, region_tag, weight_list)
 
     R_snp <- res$R_snp
     R_snp_gene <- res$R_snp_gene
@@ -177,7 +175,7 @@ finemap_region <- function(z_snp,
       saveRDS(R_gene, file=R_g_file)
       saveRDS(R_snp, file=R_s_file)
     }
-  } else if (L = 1){
+  } else if (L == 1){
     # R does not matter for susie when L = 1
     R <- diag(length(z))
   }

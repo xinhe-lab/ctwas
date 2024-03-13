@@ -158,8 +158,7 @@ est_param <- function(
                       coverage = coverage,
                       min_abs_corr = min_abs_corr,
                       max_iter = max_iter,
-                      ncore = ncore,
-                      ...)
+                      ncore = ncore)
 
   group_prior <- EM1_res$group_prior
   group_prior_var <- EM1_res$group_prior_var
@@ -190,8 +189,7 @@ est_param <- function(
                       coverage = coverage,
                       min_abs_corr = min_abs_corr,
                       max_iter = max_iter,
-                      ncore = ncore,
-                      ...)
+                      ncore = ncore)
 
   group_prior <- EM2_res$group_prior
   group_prior_var <- EM2_res$group_prior_var

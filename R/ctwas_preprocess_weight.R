@@ -10,8 +10,6 @@
 #'
 #' @param drop_strand_ambig TRUE/FALSE, if TRUE remove strand ambiguous variants (A/T, G/C).
 #'
-#' @param logfile the log file, if NULL will print log info on screen.
-#'
 #' @param write_db TRUE/FALSE, if TRUE, write processed weights as .db file in predictdb format
 #'
 #' @param outputdir a string, the directory to store output
@@ -29,7 +27,6 @@
 preprocess_weight <- function(weight,
                               region_info,
                               drop_strand_ambig = TRUE,
-                              logfile = NULL,
                               write_db = FALSE,
                               outputdir = getwd(),
                               outname = NULL,

@@ -7,15 +7,15 @@
 ctwas_sumstats(
   z_snp,
   region_info,
-  weights,
+  weight_list,
+  weight_info,
   niter1 = 3,
   niter2 = 30,
   thin = 1,
   L = 5,
   group_prior = NULL,
   group_prior_var = NULL,
-  group_prior_var_structure = c("independent", "shared_all", "shared+snps",
-    "shared_QTLtype"),
+  group_prior_var_structure = c("independent", "shared_all", "shared_QTLtype"),
   max_snp_region = Inf,
   min_gene_PIP = 0.5,
   prob_single = 0.8,
@@ -23,10 +23,10 @@ ctwas_sumstats(
   coverage = 0.95,
   min_abs_corr = 0.5,
   ncore = 1,
-  save_LD_R = FALSE,
-  outputdir = getwd(),
-  outname = NULL,
-  logfile = NULL
+  save_cor = FALSE,
+  cor_dir = getwd(),
+  logfile = NULL,
+  ...
 )
 }
 \arguments{
@@ -35,7 +35,9 @@ giving the z scores for snps. "A1" is effect allele. "A2" is the other allele.}
 
 \item{region_info}{a data frame of region definition and associated LD file names}
 
-\item{weights}{a list of weights by chromosome}
+\item{weight_list}{a list of weights}
+
+\item{weight_info}{a data frame of weight information}
 
 \item{niter1}{the number of iterations of the E-M algorithm to perform during the initial parameter estimation step}
 
@@ -80,11 +82,9 @@ having 1 or fewer effects will be used for parameter estimation}
 
 \item{ncore}{The number of cores used to parallelize susie over regions}
 
-\item{save_LD_R}{TRUE/FALSE. If TRUE, save correlation (R) matrices to \code{outputdir}}
+\item{save_cor}{TRUE/FALSE. If TRUE, save correlation (R) matrices to \code{outputdir}}
 
-\item{outputdir}{a string, the directory to store correlation (R) matrices}
-
-\item{outname}{a string, the output name}
+\item{cor_dir}{a string, the directory to store correlation (R) matrices}
 
 \item{logfile}{the log file, if NULL will print log info on screen}
 }

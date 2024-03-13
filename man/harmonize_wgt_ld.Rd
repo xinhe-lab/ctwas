@@ -3,18 +3,9 @@
 \name{harmonize_wgt_ld}
 \alias{harmonize_wgt_ld}
 \title{Harmonize weight to match ld reference genotypes.
-Flip signs when reverse complement matches, remove/recover strand ambiguous SNPs}
+Flip signs when reverse complement matches, remove ambiguous variants from the prediction models}
 \usage{
-harmonize_wgt_ld(
-  wgt.matrix,
-  snps,
-  ld_snpinfo,
-  strand_ambig_action = c("drop", "none", "recover"),
-  ld_pgenfs = NULL,
-  ld_Rinfo = NULL,
-  R_wgt = NULL,
-  wgt = NULL
-)
+harmonize_wgt_ld(wgt.matrix, snps, ld_snpinfo, drop_strand_ambig = TRUE)
 }
 \arguments{
 \item{wgt.matrix}{from FUSION weight .Rdat file}
@@ -26,29 +17,12 @@ for FUSION is alt.}
 \item{ld_snpinfo}{a data frame, snp info for LD reference,
 with columns "chrom", "id", "pos", "alt", "ref".}
 
-\item{strand_ambig_action}{the action to take to harmonize strand ambiguous variants (A/T, G/C) between
-the weights and LD reference. "drop" removes the ambiguous variant from the prediction models. "none" treats the variant
-as unambiguous, flipping the weights to match the LD reference and then taking no additional action. "recover" uses a procedure
-to recover strand ambiguous variants. This procedure compares correlations between variants in the
-LD reference and prediction models, and it can only be used with PredictDB format prediction models, which include this
-information.}
-
-\item{ld_pgenfs}{a character vector of .pgen or .bed files. One file for one
-chromosome, in the order of 1 to 22. Therefore, the length of this vector
-needs to be 22. If .pgen files are given, then .pvar and .psam are assumed
-to present in the same directory. If .bed files are given, then .bim and
-.fam files are assumed to present in the same directory.}
-
-\item{ld_Rinfo}{a vector of paths to the variant information for all LD matrices}
-
-\item{R_wgt}{the LD matrix for the variants in \code{wgt.matrix}}
-
-\item{wgt}{allele information from the weights}
+\item{drop_strand_ambig}{TRUE/FALSE, if TRUE remove strand ambiguous variants (A/T, G/C).}
 }
 \value{
 wgt.matrix and snps with alleles flipped to match
 }
 \description{
 Harmonize weight to match ld reference genotypes.
-Flip signs when reverse complement matches, remove/recover strand ambiguous SNPs
+Flip signs when reverse complement matches, remove ambiguous variants from the prediction models
 }
