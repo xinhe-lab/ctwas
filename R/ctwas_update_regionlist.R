@@ -2,6 +2,8 @@
 #'
 #' @param regionlist a list of region gene IDs and SNP IDs and associated file names
 #'
+#' @param region_tags region tags to specify which regions to update. If NULL, update all regions in regionlist
+#'
 #' @param select Default is NULL, all variants will be selected.
 #' Or a data frame with columns id and z (id is for gene or SNP id, z is for z scores).
 #' z will be used for remove SNPs if the total number of SNPs exceeds limit. See
@@ -20,10 +22,17 @@
 #' @export
 #'
 update_regionlist <- function(regionlist,
-                              region_tags,
+                              region_tags = NULL,
                               select = NULL,
                               maxSNP = Inf,
                               minvar = 1) {
+
+  # if region_tags is null, update all regions in regionlist
+  if (is.null(region_tags)){
+    region_tags <- names(regionlist)
+  }
+
+  loginfo("Update regionlist for %d regions with full SNPs", length(region_tags))
 
   # update SNP IDs for each region
   for (region_tag in region_tags){
@@ -51,29 +60,23 @@ update_regionlist <- function(regionlist,
     regionlist[[region_tag]][["minpos"]] <- min(c(minpos, snpinfo$pos[sidx]))
     regionlist[[region_tag]][["maxpos"]] <- max(c(maxpos, snpinfo$pos[sidx]))
 
-  }
-
-  if (maxSNP < Inf){
-    loginfo("Trim regions with SNPs more than %s", maxSNP)
-
-    if ("z" %in% colnames(select)) {
-      # z score is given, trim snps with lower |z|
-      for (region_tag in region_tags){
+    # Trim regions with SNPs more than maxSNP
+    if (maxSNP < Inf){
+      if ("z" %in% colnames(select)) {
+        # z score is given, trim snps with lower |z|
         if (length(regionlist[[region_tag]][["sid"]]) > maxSNP){
           idx <- match(regionlist[[region_tag]][["sid"]], select[, "id"])
           z.abs <- abs(select[idx, "z"])
           ifkeep <- rank(-z.abs) <= maxSNP
           regionlist[[region_tag]][["sid"]] <- regionlist[[region_tag]][["sid"]][ifkeep]
         }
-      }
-    } else{
-      # if no z score information, randomly select snps
-      for (region_tag in region_tags){
+      } else{
+        # if no z score information, randomly select snps
         if (length(regionlist[[region_tag]][["sid"]]) > maxSNP){
           n.ori <- length(regionlist[[region_tag]][["sid"]])
-          ifkeep <- rep(F, n.ori)
+          ifkeep <- rep(FALSE, n.ori)
           set.seed <- 99
-          ifkeep[sample.int(n.ori, size = maxSNP)] <- T
+          ifkeep[sample.int(n.ori, size = maxSNP)] <- TRUE
           regionlist[[region_tag]][["sid"]] <-  regionlist[[region_tag]][["sid"]][ifkeep]
         }
       }

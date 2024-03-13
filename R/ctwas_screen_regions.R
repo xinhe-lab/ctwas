@@ -170,7 +170,6 @@ screen_regions <- function(
   if(thin < 1){
     loginfo("Update regionlist with all SNPs for screened regions")
     screened_regionlist <- update_regionlist(regionlist = screened_regionlist,
-                                             region_tags = screened_region_tags,
                                              select = zdf$id,
                                              maxSNP = max_snp_region,
                                              minvar = 2)
