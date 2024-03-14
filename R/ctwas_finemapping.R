@@ -46,6 +46,7 @@ finemap_region <- function(z_snp,
                            gene_info,
                            regionlist,
                            region_tag,
+                           region_info = NULL,
                            weight_list = NULL,
                            L = 5,
                            group_prior = NULL,
@@ -59,6 +60,16 @@ finemap_region <- function(z_snp,
                            ...){
 
   loginfo("Run finemapping with L = %d for region %s", L, region_tag)
+
+  # get regionlist with full SNPs if not available
+  if (missing(regionlist)) {
+    loginfo("Get regionlist for region %s", region_tag)
+    regioninfo <- region_info[region_info$region_tag == region_tag, ]
+    res <- get_regionlist(regioninfo, gene_info, adjust_boundary = FALSE)
+    regionlist <- res$regionlist
+    # boundary_genes <- res$boundary_genes
+    rm(res)
+  }
 
   # combine z-scores of SNPs and genes
   z_snp$type <- "SNP"
@@ -127,15 +138,9 @@ finemap_region <- function(z_snp,
   z.s <- zdf[match(sid, zdf$id), ][["z"]]
   z <- c(z.g, z.s)
 
-  # gene and SNP information in this region
-  # gene_info <- gene_info[gene_info$chrom == regionlist[[region_tag]][[" chrom"]],]
-
-  ld_snpinfo <- lapply(regionlist[[region_tag]][["SNP_info"]],read_LD_SNP_file)
-  if (length(ld_snpinfo) > 1){
-    ld_snpinfo <- do.call(rbind,ld_snpinfo)
-  }
-
-  sidx <- match(sid, ld_snpinfo$id)
+  # SNP information in this region
+  ld_snpinfo <- do.call(rbind, lapply(regionlist[[region_tag]][["SNP_info"]],read_LD_SNP_file))
+  # sidx <- match(sid, ld_snpinfo$id)
 
   # compute correlation matrices
   R_sg_file <- file.path(cor_dir, paste0(region_tag, ".R_snp_gene.RDS"))
@@ -144,6 +149,7 @@ finemap_region <- function(z_snp,
 
   if (all(file.exists(c(R_sg_file, R_g_file, R_s_file)))) {
     # load precomputed correlation matrices
+    loginfo("Load precomputed correlation matrices from %s", cor_dir)
     R_snp_gene <- read_LD(R_sg_file)
     R_gene <- read_LD(R_g_file)
     R_snp <- read_LD(R_s_file)
@@ -153,19 +159,14 @@ finemap_region <- function(z_snp,
     R <- rbind(cbind(R_gene, t(R_snp_gene)),
                cbind(R_snp_gene, R_snp))
   } else if (L > 1){
+
     # compute correlation matrix if L > 1
     res <- compute_region_cor(regionlist, region_tag, weight_list)
-
     R_snp <- res$R_snp
     R_snp_gene <- res$R_snp_gene
     R_gene <- res$R_gene
     # R_snp_gene <- R_snp_gene[sidx, , drop = F]
-
     rm(res)
-
-    # gene first then SNPs
-    R <- rbind(cbind(R_gene, t(R_snp_gene)),
-               cbind(R_snp_gene, R_snp))
 
     if (isTRUE(save_cor)) {
       loginfo("Save correlation matrices to %s", cor_dir)
@@ -175,6 +176,11 @@ finemap_region <- function(z_snp,
       saveRDS(R_gene, file=R_g_file)
       saveRDS(R_snp, file=R_s_file)
     }
+
+    # gene first then SNPs
+    R <- rbind(cbind(R_gene, t(R_snp_gene)),
+               cbind(R_snp_gene, R_snp))
+
   } else if (L == 1){
     # R does not matter for susie when L = 1
     R <- diag(length(z))
@@ -182,6 +188,7 @@ finemap_region <- function(z_snp,
 
   # run susie
   # in susie, prior_variance is under standardized scale (if performed)
+  loginfo("start susie_rss ...")
   susie_res <- ctwas_susie_rss(z = z,
                                R = R,
                                prior_weights = prior,
@@ -194,13 +201,14 @@ finemap_region <- function(z_snp,
                                ...)
 
   # annotate susie result with SNP and gene information
+  loginfo("annotate susie result ...")
   susie_res_df <- anno_susie(susie_res,
-                          geneinfo = gene_info,
-                          snpinfo = ld_snpinfo,
-                          gid = gid,
-                          sid = sid,
-                          zdf = zdf,
-                          region_tag = region_tag)
+                             geneinfo = gene_info,
+                             snpinfo = ld_snpinfo,
+                             gid = gid,
+                             sid = sid,
+                             zdf = zdf,
+                             region_tag = region_tag)
 
   return(susie_res_df)
 
@@ -273,7 +281,7 @@ anno_susie <- function(susie_res,
   anno <- as.data.frame(rbind(gene_anno, snp_anno))
   susie_res_df <- cbind(anno, region_tag = region_tag, susie_pip = susie_res$pip)
 
-  p <- length(gidx) + length(sidx)
+  p <- length(gid) + length(sid)
   susie_res_df$mu2 <- colSums(susie_res$mu2[, seq(1, p)[1:p!=susie_res$null_index], drop = F]) #WARN: not sure for L>1
 
   susie_res_df$cs_index <- 0

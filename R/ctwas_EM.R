@@ -108,7 +108,7 @@ ctwas_EM <- function(zdf,
         gs_type <- c(g_type, s_type)
         # g_QTLtype <- zdf$QTLtype[match(gid, zdf$id)]
 
-        p <- length(gidx) + length(sidx)
+        p <- length(gid) + length(sid)
 
         if (any(is.na(pi_prior))){
           prior <- rep(1/p, p)
@@ -135,13 +135,8 @@ ctwas_EM <- function(zdf,
         z.s <- zdf[match(sid, zdf$id), ][["z"]]
         z <- c(z.g, z.s)
 
-        # gene and SNP information in this region
-        # gene_info <- gene_info[gene_info$chrom == regionlist[[region_tag]][["chr"]],]
-
-        ld_snpinfo <- lapply(regionlist[[region_tag]][["SNP_info"]],read_LD_SNP_file)
-        if (length(ld_snpinfo) > 1){
-          ld_snpinfo <- do.call(rbind,ld_snpinfo)
-        }
+        # SNP information in this region
+        ld_snpinfo <- do.call(rbind, lapply(regionlist[[region_tag]][["SNP_info"]],read_LD_SNP_file))
 
         # R does not matter for susie when L = 1
         R <- diag(length(z))

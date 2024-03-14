@@ -122,7 +122,7 @@ est_param <- function(
     stop("thin value needs to be in (0,1]")
   }
 
-  # if correlation files not available, computing correlation matrices and generating regionlist
+  # get regionlist if not available
   if (is.null(regionlist)) {
     loginfo("Get regionlist with thin = %.2f", thin)
     res <- get_regionlist(region_info = region_info,

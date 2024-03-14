@@ -33,14 +33,14 @@
 #'
 get_regionlist <- function(region_info,
                            gene_info,
-                           weight_list,
+                           weight_list = NULL,
                            select = NULL,
                            thin = 1,
                            maxSNP = Inf,
                            minvar = 1,
                            adjust_boundary = TRUE) {
 
-  loginfo("No. LD regions: %s", nrow(region_info))
+  loginfo("No. regions: %s", nrow(region_info))
 
   if (thin > 1 | thin <= 0){
     stop("thin needs to be in (0,1]")
@@ -95,12 +95,11 @@ get_regionlist <- function(region_info,
 
     # get regionlist and boundary_genes for regions in the chromosome, and update weight_list
     res <- assign_region_ids(regioninfo,geneinfo,snpinfo,weight_list,minvar,adjust_boundary)
+    loginfo("No. regions with at least one SNP/gene for chr%s: %d", b, length(res$regionlist))
     regionlist <- c(regionlist, res$regionlist)
     weight_list <- res$weight_list
     boundary_genes <- rbind(boundary_genes,res$boundary_genes)
 
-    loginfo("No. regions with at least one SNP/gene for chr%s: %d",
-            b, length(regionlist_chr))
   }
 
   if (maxSNP < Inf){

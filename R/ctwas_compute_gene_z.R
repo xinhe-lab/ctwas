@@ -150,8 +150,7 @@ compute_gene_z <- function (z_snp,
 
   # gene info data frame with gene ids, gene names, gene coordinates and weight names
   # gene_info <- do.call(rbind, gene_info_list)
-  gene_info <- weight_info[match(z_gene$id, weight_info$id),
-                           c("chrom", "id", "p0", "p1", "gene_name", "weight_name")]
+  gene_info <- weight_info[match(z_gene$id, weight_info$id), c("chrom", "id", "p0", "p1", "gene_name", "weight_name")]
 
   return(list(z_gene = z_gene, gene_info = gene_info))
 }

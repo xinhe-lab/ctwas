@@ -240,7 +240,7 @@ read_weights <- function (weight_files,
         nmiss <- nrow(wgt.matrix) - length(snpnames)
         # TODO: check missrate calculation
         outlist_core[[g_wgt_id]] <- list(chrom = chrom, p0 = p0, p1 = p1,
-                                         wgt = wgt, gname=gname, weight_name=weight_name,
+                                         wgt = wgt, gene_name=gname, weight_name=weight_name,
                                          n = nwgt, nmiss = nmiss, missrate = nwgt/nmiss)
       }
       RSQLite::dbDisconnect(db)
@@ -262,7 +262,7 @@ read_weights <- function (weight_files,
   names(weight_list) <- names(outlist)
 
   weight_info <- lapply(names(outlist), function(x){
-    as.data.frame(outlist[[x]][c("chrom", "p0","p1", "gname", "weight_name", "n", "nmiss", "missrate")])})
+    as.data.frame(outlist[[x]][c("chrom", "p0","p1", "gene_name", "weight_name", "n", "nmiss", "missrate")])})
   weight_info <- do.call(rbind, weight_info)
   weight_info$id <- names(outlist)
   rownames(weight_info) <- names(outlist)
