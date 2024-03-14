@@ -2,7 +2,7 @@
 #' Preprocess PredictDB weights and harmonize with LD reference
 #' (adapted from preharmonize_wgt_ld)
 #'
-#' @param weight a string, pointing to a directory with the fusion/twas format of weights, or a .db file in predictdb format.
+#' @param weight_file a string, pointing to a directory with the fusion/twas format of weights, or a .db file in predictdb format.
 #' A vector of multiple sets of weights in PredictDB format can also be specified; genes will have their filename appended
 #' to their gene name to ensure IDs are unique.
 #'
@@ -15,10 +15,10 @@
 #' @export
 #'
 process_weight <- function (weight_file,
-                               region_info,
-                               weight_format = c("PredictDB", "Fusion"),
-                               drop_strand_ambig = TRUE,
-                               scale_by_ld_variance = F){
+                            region_info,
+                            weight_format = c("PredictDB", "Fusion"),
+                            drop_strand_ambig = TRUE,
+                            scale_by_ld_variance = F){
 
   weight_format <- match.arg(weight_format)
   # load LD SNPs information
