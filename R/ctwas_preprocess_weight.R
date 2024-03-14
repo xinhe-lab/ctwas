@@ -22,7 +22,7 @@ process_weight <- function (weight_file,
 
   weight_format <- match.arg(weight_format)
   # load LD SNPs information
-  region_info <- region_info[order(region_info$chr, region_info$start),]
+  region_info <- region_info[order(region_info$chrom, region_info$start),]
   ld_snpinfo <- read_LD_SNP_files(region_info$SNP_info)
   outlist <- list()
   for(weight in weight_file){
