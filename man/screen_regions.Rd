@@ -9,7 +9,7 @@ screen_regions(
   z_gene,
   region_info,
   gene_info = NULL,
-  wgtlist = NULL,
+  weight_list = NULL,
   regionlist = NULL,
   thin = 1,
   max_snp_region = Inf,
@@ -20,8 +20,10 @@ screen_regions(
   use_null_weight = TRUE,
   coverage = 0.95,
   min_abs_corr = 0.5,
+  max_iter = 1,
   ncore = 1,
-  logfile = NULL
+  logfile = NULL,
+  ...
 )
 }
 \arguments{
@@ -35,7 +37,7 @@ Optionally, a "type" column can also be supplied; this is for using multiple set
 
 \item{gene_info}{a data frame of gene information obtained from \code{compute_gene_z}}
 
-\item{wgtlist}{}
+\item{weight_list}{a list of weights}
 
 \item{regionlist}{a list object indexing regions, variants and genes.}
 
@@ -66,6 +68,8 @@ will be selected to run finemapping using full SNPs.}
 credible set. The default, 0.5, corresponds to a squared
 correlation of 0.25, which is a commonly used threshold for
 genotype data in genetic studies.}
+
+\item{max_iter}{Maximum number of IBSS iterations to perform.}
 
 \item{ncore}{The number of cores used to parallelize susie over regions}
 

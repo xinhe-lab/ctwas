@@ -62,11 +62,6 @@ harmonize_z_ld <- function(z_snp, ld_snpinfo, drop_strand_ambig = TRUE){
     z_snp[flip.idx, "z"] <- -z_snp[flip.idx, "z"]
     loginfo("Flip signs for %s (%.2f%%) variants", length(flip.idx), length(flip.idx)/length(z.idx)*100)
 
-    if (any(ifremove)) {
-      loginfo("Number of strand ambiguous variants: %s", sum(ifremove))
-    }
-
-
     if (isTRUE(drop_strand_ambig) & any(ifremove)) {
       remove.idx <- z.idx[ifremove]
       z_snp <- z_snp[-remove.idx, , drop = F]

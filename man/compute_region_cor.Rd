@@ -4,36 +4,17 @@
 \alias{compute_region_cor}
 \title{Compute correlation matrices for a region}
 \usage{
-compute_region_cor(
-  R_snp,
-  ld_snpinfo,
-  region_idx,
-  wgtlist,
-  save = FALSE,
-  outputdir = NULL,
-  outname = NULL,
-  verbose = FALSE
-)
+compute_region_cor(regionlist, region_tag, weight_list)
 }
 \arguments{
-\item{R_snp}{Reference LD matrix}
+\item{regionlist}{regionlist}
 
-\item{ld_snpinfo}{SNP information of the SNPs in \code{R_snp} matrix}
+\item{region_tag}{region tag}
 
-\item{region_idx}{region indices of the region from regionlist}
-
-\item{wgtlist}{a list of weights for genes in the region}
-
-\item{save}{TRUE/FALSE, if TRUE, save correlation matrices in \code{outputdir}}
-
-\item{outputdir}{directory of correlation matrix result}
-
-\item{outname}{filename of correlation result}
-
-\item{verbose}{TRUE/FALSE, if TRUE,}
+\item{weight_list}{weight list}
 }
 \value{
-a list of correlation matrices (R_snp, R_snp_gene, R_gene), SNP indices and gene id
+a list of correlation matrices
 }
 \description{
 Compute correlation matrices for a region

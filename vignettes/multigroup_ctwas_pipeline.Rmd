@@ -148,7 +148,7 @@ and then estimate parameters (`group_prior` and `group_prior_var`).
 est_param(z_snp, z_gene, region_info, gene_info, thin, group_prior_var_structure, ...)
 ```
 
-We could use `ctwas_summarize_parameters()` to assess the convergence of the estimated parameters and 
+We could use `summarize_param()` to assess the convergence of the estimated parameters and 
 to compute the proportion of variance explained (PVE) by variants and genes. 
 
 ## Screening regions

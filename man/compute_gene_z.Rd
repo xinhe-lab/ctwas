@@ -6,10 +6,10 @@
 \usage{
 compute_gene_z(
   z_snp,
-  weights,
   region_info,
+  weight_list,
+  weight_info,
   ncore = 1,
-  chr = 1:22,
   logfile = NULL
 )
 }
@@ -17,13 +17,13 @@ compute_gene_z(
 \item{z_snp}{A data frame with columns: "id", "A1", "A2", "z". giving the z scores for
 snps. "A1" is effect allele. "A2" is the other allele. For harmonized data, A1 and A2 are not required.}
 
-\item{weights}{a list of wgt list and weight info}
-
 \item{region_info}{a data frame of region definition and associated file names.}
 
-\item{ncore}{The number of cores used to parallelize imputation over weights}
+\item{weight_list}{a list of weights}
 
-\item{chr}{a numeric vector of chromosomes to perform z score imputation over. Useful for large jobs requiring batches}
+\item{weight_info}{a data frame of weight information}
+
+\item{ncore}{The number of cores used to parallelize imputation over weights}
 
 \item{logfile}{the log file, if NULL will print log info on screen}
 }

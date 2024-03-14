@@ -13,13 +13,14 @@ ctwas_EM(
   niter = 20,
   group_prior = NULL,
   group_prior_var = NULL,
-  group_prior_var_structure = c("independent", "shared_all", "shared+snps",
-    "shared_QTLtype"),
+  group_prior_var_structure = c("independent", "shared_all", "shared_QTLtype"),
   use_null_weight = TRUE,
   coverage = 0.95,
   min_abs_corr = 0.5,
+  max_iter = 1,
   ncore = 1,
-  verbose = TRUE
+  verbose = TRUE,
+  ...
 )
 }
 \arguments{
@@ -42,8 +43,6 @@ The "type" column can also be use to specify multiple sets of weights}
 \item{group_prior_var_structure}{a string indicating the structure to put on the prior variance parameters.
 "independent" is the default and allows all groups to have their own separate variance parameters.
 "shared_all" allows all groups to share the same variance parameter.
-"shared+snps" allows all groups to share the same variance parameter, and this variance parameter is also shared with SNPs.
-"inv_gamma" places an inverse-gamma prior on the variance parameters for each group, with shape and rate hypeparameters.
 "shared_type" allows all groups in one molecular QTL type to share the same variance parameter.}
 
 \item{use_null_weight}{TRUE/FALSE. If TRUE, allow for a probability of no effect in susie}
@@ -54,6 +53,8 @@ The "type" column can also be use to specify multiple sets of weights}
 credible set. The default, 0.5, corresponds to a squared
 correlation of 0.25, which is a commonly used threshold for
 genotype data in genetic studies.}
+
+\item{max_iter}{Maximum number of IBSS iterations to perform.}
 
 \item{ncore}{The number of cores used to parallelize susie over regions}
 }

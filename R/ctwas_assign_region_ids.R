@@ -7,8 +7,8 @@ assign_region_ids <- function(regioninfo,
                               adjust_boundary = TRUE) {
 
   regionlist <- list()
-  # boundary_genes <- data.frame(matrix(nrow = 0, ncol = 4))
-  # colnames(boundary_genes) <- c("gene","chrom","region1","region2")
+  boundary_genes <- data.frame(matrix(nrow = 0, ncol = 4))
+  colnames(boundary_genes) <- c("gene","chrom","region1","region2")
 
   # get gene IDs and SNP IDs for each region in regioninfo
   for (i in 1:nrow(regioninfo)){

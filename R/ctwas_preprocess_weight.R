@@ -10,27 +10,15 @@
 #'
 #' @param drop_strand_ambig TRUE/FALSE, if TRUE remove strand ambiguous variants (A/T, G/C).
 #'
-#' @param logfile the log file, if NULL will print log info on screen.
-#'
-#' @param write_db TRUE/FALSE, if TRUE, write processed weights as .db file in predictdb format
-#'
-#' @param outputdir a string, the directory to store output
-#'
-#' @param outname a string, the output name.
-#'
-#' @param logfile the log file, if NULL will print log info on screen.
-#'
-#' @importFrom logging addHandler loginfo writeToFile
-#'
 #' @return a list of processed weight table and extra table
 #'
 #' @export
 #'
 process_weight <- function (weight_file,
-                            region_info,
-                            weight_format = c("PredictDB", "Fusion"),
-                            drop_strand_ambig = TRUE,
-                            scale_by_ld_variance = FALSE){
+                               region_info,
+                               weight_format = c("PredictDB", "Fusion"),
+                               drop_strand_ambig = TRUE,
+                               scale_by_ld_variance = F){
 
   weight_format <- match.arg(weight_format)
   # load LD SNPs information
@@ -74,6 +62,7 @@ process_weight <- function (weight_file,
       snps$pos <- as.integer(snps$pos)
       w <- harmonize_wgt_ld(wgt.matrix,
                             snps,
+                            #ld_snpinfo,
                             ld_snpinfo_wgt,
                             drop_strand_ambig = drop_strand_ambig)
       wgt.matrix <- w[["wgt"]]
