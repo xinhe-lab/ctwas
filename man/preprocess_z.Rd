@@ -7,13 +7,12 @@
 preprocess_z(
   z_snp,
   region_info,
-  chrom = 1:22,
   gwas_n = NULL,
   drop_multiallelic = TRUE,
   drop_strand_ambig = TRUE,
   detect_ld_mismatch = FALSE,
-  flip_allele = TRUE,
-  filter_ld_mismatch = FALSE,
+  flip_ld_mismatch = TRUE,
+  drop_ld_mismatch = FALSE,
   ncore = 1,
   logfile = NULL
 )
@@ -24,8 +23,6 @@ snps. "A1" is effect allele. "A2" is the other allele.}
 
 \item{region_info}{a data frame of region definition and associated file names.}
 
-\item{chrom}{a vector containing the chromosome numbers to process.}
-
 \item{gwas_n}{integer, GWAS sample size}
 
 \item{drop_multiallelic}{TRUE/FALSE. If TRUE, multiallelic variants will be dropped from the summary statistics.}
@@ -35,13 +32,15 @@ snps. "A1" is effect allele. "A2" is the other allele.}
 \item{detect_ld_mismatch}{TRUE/FALSE. If TRUE, detect LD mismatches by susie_rss,
 and report problematic variants, and variants with allele flipping.}
 
-\item{flip_allele}{TRUE/FALSE. If TRUE, flip the sign for variants detected with allele flipping.}
+\item{flip_ld_mismatch}{TRUE/FALSE. If TRUE, flip the sign for variants detected with allele flipping.}
 
-\item{filter_ld_mismatch}{TRUE/FALSE. If TRUE, remove problematic variants with LD mismatches.}
+\item{drop_ld_mismatch}{TRUE/FALSE. If TRUE, remove problematic variants with LD mismatches.}
 
 \item{ncore}{integer, number of cores for parallel computing when detecting LD mismatches.}
 
 \item{logfile}{the log file, if NULL will print log info on screen.}
+
+\item{chrom}{a vector containing the chromosome numbers to process.}
 }
 \value{
 a list of processed z_snp and LD mismatch results
