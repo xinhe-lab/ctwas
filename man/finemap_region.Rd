@@ -10,6 +10,7 @@ finemap_region(
   gene_info,
   regionlist,
   region_tag,
+  region_info = NULL,
   weight_list = NULL,
   L = 5,
   group_prior = NULL,
@@ -18,6 +19,7 @@ finemap_region(
   coverage = 0.95,
   min_abs_corr = 0.5,
   max_iter = 100,
+  force_compute_cor = FALSE,
   save_cor = FALSE,
   cor_dir = getwd(),
   ...
@@ -54,6 +56,8 @@ correlation of 0.25, which is a commonly used threshold for
 genotype data in genetic studies.}
 
 \item{max_iter}{Maximum number of IBSS iterations to perform.}
+
+\item{force_compute_cor}{TRUE/FALSE. If TRUE, force computing correlation (R) matrices}
 
 \item{save_cor}{TRUE/FALSE. If TRUE, save correlation (R) matrices}
 

@@ -31,6 +31,8 @@
 #'
 #' @param max_iter Maximum number of IBSS iterations to perform.
 #'
+#' @param force_compute_cor TRUE/FALSE. If TRUE, force computing correlation (R) matrices
+#'
 #' @param save_cor TRUE/FALSE. If TRUE, save correlation (R) matrices
 #'
 #' @param cor_dir a string, the directory to store correlation (R) matrices
@@ -55,6 +57,7 @@ finemap_region <- function(z_snp,
                            coverage = 0.95,
                            min_abs_corr = 0.5,
                            max_iter = 100,
+                           force_compute_cor = FALSE,
                            save_cor = FALSE,
                            cor_dir = getwd(),
                            ...){
@@ -147,20 +150,8 @@ finemap_region <- function(z_snp,
   R_g_file <- file.path(cor_dir, paste0(region_tag,  ".R_gene.RDS"))
   R_s_file <- file.path(cor_dir, paste0(region_tag, ".R_snp.RDS"))
 
-  if (all(file.exists(c(R_sg_file, R_g_file, R_s_file)))) {
-    # load precomputed correlation matrices
-    loginfo("Load precomputed correlation matrices from %s", cor_dir)
-    R_snp_gene <- read_LD(R_sg_file)
-    R_gene <- read_LD(R_g_file)
-    R_snp <- read_LD(R_s_file)
-    # R_snp_gene <- R_snp_gene[sidx, , drop = F]
-
-    # gene first then SNPs
-    R <- rbind(cbind(R_gene, t(R_snp_gene)),
-               cbind(R_snp_gene, R_snp))
-  } else if (L > 1){
-
-    # compute correlation matrix if L > 1
+  if (isTRUE(force_compute_cor)) {
+    # force compute correlation matrix
     res <- compute_region_cor(regionlist, region_tag, weight_list)
     R_snp <- res$R_snp
     R_snp_gene <- res$R_snp_gene
@@ -181,14 +172,57 @@ finemap_region <- function(z_snp,
     R <- rbind(cbind(R_gene, t(R_snp_gene)),
                cbind(R_snp_gene, R_snp))
 
-  } else if (L == 1){
-    # R does not matter for susie when L = 1
-    R <- diag(length(z))
+    rm(R_gene, R_snp_gene, R_snp)
+
+  } else {
+    if (all(file.exists(c(R_sg_file, R_g_file, R_s_file)))) {
+      # load precomputed correlation matrices
+      loginfo("Load precomputed correlation matrices from %s", cor_dir)
+      R_snp_gene <- read_LD(R_sg_file)
+      R_gene <- read_LD(R_g_file)
+      R_snp <- read_LD(R_s_file)
+      # R_snp_gene <- R_snp_gene[sidx, , drop = F]
+
+      # gene first then SNPs
+      R <- rbind(cbind(R_gene, t(R_snp_gene)),
+                 cbind(R_snp_gene, R_snp))
+
+      rm(R_gene, R_snp_gene, R_snp)
+
+    } else if (L == 1){
+      # R does not matter for susie when L = 1
+      # loginfo("L = 1, skip computing correlation matrices")
+      R <- diag(length(z))
+    } else {
+      # compute correlation matrix if L > 1
+      res <- compute_region_cor(regionlist, region_tag, weight_list)
+      R_snp <- res$R_snp
+      R_snp_gene <- res$R_snp_gene
+      R_gene <- res$R_gene
+      # R_snp_gene <- R_snp_gene[sidx, , drop = F]
+      rm(res)
+
+      if (isTRUE(save_cor)) {
+        loginfo("Save correlation matrices to %s", cor_dir)
+        if (!dir.exists(cor_dir))
+          dir.create(cor_dir, recursive = TRUE)
+        saveRDS(R_snp_gene, file=R_sg_file)
+        saveRDS(R_gene, file=R_g_file)
+        saveRDS(R_snp, file=R_s_file)
+      }
+
+      # gene first then SNPs
+      R <- rbind(cbind(R_gene, t(R_snp_gene)),
+                 cbind(R_snp_gene, R_snp))
+
+      rm(R_gene, R_snp_gene, R_snp)
+
+    }
   }
 
   # run susie
   # in susie, prior_variance is under standardized scale (if performed)
-  loginfo("start susie_rss ...")
+  loginfo("run susie_rss ...")
   susie_res <- ctwas_susie_rss(z = z,
                                R = R,
                                prior_weights = prior,
