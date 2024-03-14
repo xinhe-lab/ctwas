@@ -125,7 +125,8 @@ summarize_param <- function(param,
       theme (legend.title = element_text(size=12, face="bold")) +
       scale_colour_discrete(drop = FALSE)
 
-    outlist[["plot"]] <- plot_grid(p_pi, p_sigma2, p_enrich, p_pve)
+    convergence_plot <- plot_grid(p_pi, p_sigma2, p_enrich, p_pve)
+    outlist[["convergence_plot"]] <- convergence_plot
   }
 
   return(outlist)

@@ -7,7 +7,7 @@
 get_regionlist(
   region_info,
   gene_info,
-  weight_list,
+  weight_list = NULL,
   select = NULL,
   thin = 1,
   maxSNP = Inf,
