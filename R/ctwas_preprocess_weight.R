@@ -40,8 +40,17 @@ preprocess_weight <- function(weight,
   extra_table <- query("select * from extra")
   RSQLite::dbDisconnect(db)
 
+  # subset to protein coding genes only
+  loginfo("Subset to protein coding genes only")
+  extra_table <- extra_table[extra_table$gene_type=="protein_coding",,drop=F]
+  weight_table <- weight_table[weight_table$gene %in% extra_table$gene,]
+
+  # read and subset the covariances
+  weight_info <- read.table(gzfile(paste0(tools::file_path_sans_ext(weight), ".txt.gz")), header = T)
+  weight_info <- weight_info[weight_info$GENE %in% extra_table$gene,]
+
   gnames <- unique(weight_table$gene)
-  loginfo("Number of genes with weights provided: %s", length(gnames))
+  loginfo("Number of genes with weights provided: %d", length(gnames))
 
   # load all variants in LD reference
   ld_snpinfo <- do.call(rbind, lapply(region_info$SNP_info, read_LD_SNP_file))
@@ -111,19 +120,25 @@ preprocess_weight <- function(weight,
   extra_table <- extra_table[extra_table$gene %in% weight_table_harmonized$gene,]
 
   if (isTRUE(write_db)) {
-
     if (!dir.exists(outputdir)){
       dir.create(outputdir, showWarnings = FALSE, recursive = TRUE)
     }
 
     if (file.exists(file.path(outputdir, paste0(outname, ".db")))){
       invisible(file.remove(file.path(outputdir, paste0(outname, ".db"))))
+      invisible(file.remove(file.path(outputdir, paste0(outname, ".txt.gz"))))
     }
+
+    loginfo("Write preprocessed weights to %s", file.path(outputdir, paste0(outname, ".db")))
 
     db <- RSQLite::dbConnect(sqlite, file.path(outputdir, paste0(outname, ".db")))
     RSQLite::dbWriteTable(db, "extra", extra_table)
     RSQLite::dbWriteTable(db, "weights", weight_table_harmonized)
     RSQLite::dbDisconnect(db)
+
+    weight_info_gz <- gzfile(file.path(outputdir, paste0(outname, ".txt.gz")), "w")
+    write.table(weight_info, weight_info_gz, sep=" ", quote=F, row.names=F, col.names=T)
+    close(weight_info_gz)
   }
 
   return(list(weight_table = weight_table_harmonized, extra_table = extra_table))
@@ -139,10 +154,12 @@ read_weights <- function (weight_files,
 
   sqlite <- RSQLite::dbDriver("SQLite")
 
+  # browser()
   # read gene names in each weight file
   gnames_all <- list()
   for (i in 1:length(weight_files)){
     weight_file <- weight_files[i]
+    stopifnot(file.exists(weight_file))
     db <- RSQLite::dbConnect(sqlite, weight_file)
     query <- function(...) RSQLite::dbGetQuery(db, ...)
     gnames <- unique(query("select gene from weights")[, 1])
