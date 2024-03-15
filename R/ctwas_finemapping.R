@@ -74,7 +74,15 @@ finemap_region <- function(z_snp,
     rm(res)
   }
 
-  # combine z-scores of SNPs and genes
+  # select genes and SNPs in this region
+  gid <- regionlist[[region_tag]][["gid"]]
+  sid <- regionlist[[region_tag]][["sid"]]
+
+  # keep only GWAS SNPs
+  sid <- intersect(sid, z_snp$id)
+  regionlist[[region_tag]][["sid"]] <- sid
+
+  # prepare z-scores combining SNPs and genes
   z_snp$type <- "SNP"
   z_snp$QTLtype <- "SNP"
   if (is.null(z_gene$type)){
@@ -86,9 +94,22 @@ finemap_region <- function(z_snp,
   zdf <- rbind(z_snp[, c("id", "z", "type", "QTLtype")],
                z_gene[, c("id", "z", "type", "QTLtype")])
 
+  z.g <- zdf[match(gid, zdf$id), "z"]
+  z.s <- zdf[match(sid, zdf$id), "z"]
+  z <- c(z.g, z.s)
+
+  g_type <- zdf$type[match(gid, zdf$id)]
+  s_type <- zdf$type[match(sid, zdf$id)]
+  gs_type <- c(g_type, s_type)
+  # g_QTLtype <- zdf$QTLtype[match(gid, zdf$id)]
   types <- unique(zdf$type)
 
-  # priors
+  loginfo("%d SNPs, %d genes in the z-scores", length(z.s), length(z.g))
+
+  if (anyNA(z))
+    loginfo("z-scores contains missing values!")
+
+  # priors for susie
   if (is.null(group_prior)){
     group_prior <- structure(as.numeric(rep(NA,length(types))), names=types)
   }
@@ -105,14 +126,6 @@ finemap_region <- function(z_snp,
   }
   pi_prior <- unlist(pi_prior)
   V_prior <- unlist(V_prior)
-
-  # run susie for this region
-  gid <- regionlist[[region_tag]][["gid"]]
-  sid <- regionlist[[region_tag]][["sid"]]
-  g_type <- zdf$type[match(gid, zdf$id)]
-  s_type <- zdf$type[match(sid, zdf$id)]
-  gs_type <- c(g_type, s_type)
-  # g_QTLtype <- zdf$QTLtype[match(gid, zdf$id)]
 
   p <- length(gid) + length(sid)
 
@@ -137,18 +150,13 @@ finemap_region <- function(z_snp,
     null_weight <- NULL
   }
 
-  z.g <- zdf[match(gid, zdf$id), ][["z"]]
-  z.s <- zdf[match(sid, zdf$id), ][["z"]]
-  z <- c(z.g, z.s)
-
   # SNP information in this region
   ld_snpinfo <- read_LD_SNP_files(regionlist[[region_tag]][["SNP_info"]])
-  # sidx <- match(sid, ld_snpinfo$id)
 
   # compute correlation matrices
-  R_sg_file <- file.path(cor_dir, paste0(region_tag, ".R_snp_gene.RDS"))
-  R_g_file <- file.path(cor_dir, paste0(region_tag,  ".R_gene.RDS"))
-  R_s_file <- file.path(cor_dir, paste0(region_tag, ".R_snp.RDS"))
+  R_sg_file <- file.path(cor_dir, paste0("region.", region_tag, ".R_snp_gene.RDS"))
+  R_g_file <- file.path(cor_dir, paste0("region.", region_tag,  ".R_gene.RDS"))
+  R_s_file <- file.path(cor_dir, paste0("region.", region_tag, ".R_snp.RDS"))
 
   if (isTRUE(force_compute_cor)) {
     # force compute correlation matrix
@@ -181,6 +189,7 @@ finemap_region <- function(z_snp,
       R_snp_gene <- load_LD(R_sg_file)
       R_gene <- load_LD(R_g_file)
       R_snp <- load_LD(R_s_file)
+      # R_snp <- R_snp[sidx, sidx, drop = F]
       # R_snp_gene <- R_snp_gene[sidx, , drop = F]
 
       # gene first then SNPs
@@ -199,6 +208,7 @@ finemap_region <- function(z_snp,
       R_snp <- res$R_snp
       R_snp_gene <- res$R_snp_gene
       R_gene <- res$R_gene
+      # R_snp <- R_snp[sidx, sidx, drop = F]
       # R_snp_gene <- R_snp_gene[sidx, , drop = F]
       rm(res)
 
@@ -220,7 +230,13 @@ finemap_region <- function(z_snp,
     }
   }
 
-  # run susie
+  if (anyNA(R))
+    loginfo("R matrix contains missing values!")
+
+  if (length(z) != nrow(R))
+    stop("R matrix dimension does not match with z!")
+
+  # run susie for this region
   # in susie, prior_variance is under standardized scale (if performed)
   loginfo("run susie_rss ...")
   susie_res <- ctwas_susie_rss(z = z,

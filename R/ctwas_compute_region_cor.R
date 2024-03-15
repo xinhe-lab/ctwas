@@ -28,15 +28,19 @@ compute_region_cor <- function(regionlist,
   # subset weight_list for genes in this region
   wgtlist <- weight_list[gnames]
 
-  loginfo("%d SNPs, %d genes in the region.", length(sidx), length(gnames))
+  loginfo("%d SNPs, %d genes in the region.", length(sid), length(gnames))
 
+  # subset R_snp and ld_snpinfo by sid in the region to speed up computation
+  R_snp <- R_snp[sidx, sidx, drop = F]
+  ld_snpinfo <- ld_snpinfo[sidx, , drop = F]
+
+  # compute correlation matrices
   R_snp_gene <- matrix(NA, nrow(R_snp), length(gnames))
   R_gene <- diag(length(gnames))
 
   if (length(gnames) > 0) {
     ldr <- list()
     # compute SNP-gene correlation matrix
-    loginfo("Compute SNP-gene correlation matrix")
     for (i in 1:length(gnames)){
       gname <- gnames[i]
       wgt <- wgtlist[[gname]]
@@ -50,7 +54,6 @@ compute_region_cor <- function(regionlist,
 
     # compute gene-gene correlation matrix
     if (length(gnames) > 1){
-      loginfo("Compute gene-gene correlation matrix")
       gene_pairs <- combn(length(gnames), 2)
       wgtr <- wgtlist[gnames]
       gene_corrs <- apply(gene_pairs, 2, function(x){t(wgtr[[x[1]]])%*%R_snp[ldr[[x[1]]], ldr[[x[2]]]]%*%wgtr[[x[2]]]/(
@@ -61,11 +64,11 @@ compute_region_cor <- function(regionlist,
     }
   }
 
-  # subset R_snp by sidx
-  R_snp <- R_snp[sidx, sidx, drop = F]
+  # # subset R_snp by sidx
+  # R_snp <- R_snp[sidx, sidx, drop = F]
 
-  # subset R_snp_gene by sidx
-  R_snp_gene <- R_snp_gene[sidx, , drop = F]
+  # # subset R_snp_gene by sidx
+  # R_snp_gene <- R_snp_gene[sidx, , drop = F]
 
   # loginfo("Dimension of R_snp: %d rows, %d columns", nrow(R_snp), ncol(R_snp))
   # loginfo("Dimension of R_snp_gene: %d rows, %d columns", nrow(R_snp_gene), ncol(R_snp_gene))
