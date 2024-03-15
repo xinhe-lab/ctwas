@@ -38,6 +38,21 @@ read_LD_SNP_file <- function(file){
   return(LD_SNP)
 }
 
+load_weight <- function(weight_file, weight_format = c("PredictDB","Fusion")){
+  weight_format <- match.arg(weight_format)
+  if(weight_format == "PredictDB"){
+    weight_name <- tools::file_path_sans_ext(basename(weight_file))
+    # read the PredictDB weights
+    sqlite <- RSQLite::dbDriver("SQLite")
+    db = RSQLite::dbConnect(sqlite, weight_file)
+    query <- function(...) RSQLite::dbGetQuery(db, ...)
+    weight_table <- query("select * from weights")
+    weight_table <- weight_table[weight_table$weight!=0,]
+    extra_table <- query("select * from extra")
+    RSQLite::dbDisconnect(db)
+  }
+  return(list(weight_table=weight_table,extra_table=extra_table,weight_name=weight_name))
+}
 # # check SNP_info files from the region_info table, and return a list of region_info tables
 # # adapted from old write_ld_Rf() function
 # get_region_info_list <- function(region_info){
