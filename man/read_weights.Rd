@@ -6,8 +6,7 @@
 \usage{
 read_weights(
   weight_files,
-  chrom,
-  ld_snpinfo,
+  region_info,
   z_snp = NULL,
   scale_by_ld_variance = TRUE,
   ncore = 1

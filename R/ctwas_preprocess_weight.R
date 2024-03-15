@@ -146,8 +146,7 @@ preprocess_weight <- function(weight,
 
 #' read (preprocessed) weights in PredictDB format
 read_weights <- function (weight_files,
-                          chrom,
-                          ld_snpinfo,
+                          region_info,
                           z_snp = NULL,
                           scale_by_ld_variance=TRUE,
                           ncore=1){
@@ -170,8 +169,11 @@ read_weights <- function (weight_files,
   colnames(gnames_all) <- c("gname", "weight")
 
   loginfo("Number of genes with weights provided: %s", nrow(gnames_all))
-  loginfo("Collecting gene weight information ...")
 
+  loginfo("Read SNP info from all regions ...")
+  ld_snpinfo <- do.call(rbind, lapply(region_info$SNP_info,read_LD_SNP_file))
+
+  loginfo("Collecting gene weight information ...")
   # parallelize genes into cores
   corelist <- lapply(1:ncore, function(core){
     njobs <- ceiling(nrow(gnames_all)/ncore);
@@ -220,10 +222,6 @@ read_weights <- function (weight_files,
                            ref = wgt$ref_allele,
                            stringsAsFactors = F)
 
-        if (!any(snps$chrom==chrom)){
-          next
-        }
-
         # select weight matrix by the prediction method used for this gene
         g.method <- "weight"
         wgt.matrix <- wgt.matrix[abs(wgt.matrix[, g.method]) > 0, , drop = F]
@@ -251,6 +249,8 @@ read_weights <- function (weight_files,
           wgt <- wgt*sqrt(ld_snpinfo$variance[ld_snpinfo.idx])
         }
 
+        chrom <- unique(snps[,"chrom"])
+        stopifnot(length(chrom) == 1)
         p0 <- min(snps[snps[, "id"] %in% snpnames, "pos"])
         p1 <- max(snps[snps[, "id"] %in% snpnames, "pos"])
         nwgt <- nrow(wgt.matrix)
