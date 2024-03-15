@@ -44,7 +44,7 @@ compute_gene_z <- function (z_snp,
 
   for (b in unique(region_info$chrom)) {
 
-    loginfo("Impute gene z scores for chromosome %s", b)
+    loginfo("Impute gene z scores for chr%s", b)
 
     # region info in the chromosome
     regioninfo <- region_info[region_info$chrom == b, ]
@@ -55,9 +55,8 @@ compute_gene_z <- function (z_snp,
     wgtlist <- weight_list[weightinfo$id]
 
     if (length(wgtlist) > 0) {
-      loginfo("Start gene z score imputation ...")
 
-      # fine the regions for each gene
+      # find the regions for each gene
       for (gname in weightinfo$id) {
         p0 <- weightinfo[gname, "p0"]
         p1 <- weightinfo[gname, "p1"]
@@ -94,10 +93,10 @@ compute_gene_z <- function (z_snp,
 
           for (gname in gnames) {
             wgt <- wgtlist[[gname]]
-            snpnames <- rownames(wgt.matrix)
-            # keep SNPs in weight, z_snp and LD reference
+            snpnames <- rownames(wgt)
+            # make sure to keep SNPs in weight, z_snp and LD reference
             snpnames <- Reduce(intersect, list(snpnames, z_snp$id, ld_snpinfo$id))
-            ld.idx <- match(snpnames, snpinfo$id)
+            ld.idx <- match(snpnames, ld_snpinfo$id)
             z.idx <- match(snpnames, z_snp$id)
             R.s <- R_snp[ld.idx, ld.idx]
             z.s <- as.matrix(z_snp$z[z.idx])
@@ -111,7 +110,7 @@ compute_gene_z <- function (z_snp,
       parallel::stopCluster(cl)
     }
 
-    loginfo("Gene z-score imputation done.")
+    # loginfo("Imputation done.")
     z.g <- unlist(lapply(outlist, "[[", "z.g"))
     gnames <- names(outlist)
     loginfo("Number of genes with imputed expression: %d for chr%s", length(gnames), b)
