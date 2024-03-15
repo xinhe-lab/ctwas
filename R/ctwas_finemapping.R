@@ -142,7 +142,7 @@ finemap_region <- function(z_snp,
   z <- c(z.g, z.s)
 
   # SNP information in this region
-  ld_snpinfo <- do.call(rbind, lapply(regionlist[[region_tag]][["SNP_info"]],read_LD_SNP_file))
+  ld_snpinfo <- read_LD_SNP_files(regionlist[[region_tag]][["SNP_info"]])
   # sidx <- match(sid, ld_snpinfo$id)
 
   # compute correlation matrices

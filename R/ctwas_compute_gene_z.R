@@ -13,7 +13,7 @@
 #'
 #' @param logfile the log file, if NULL will print log info on screen
 #'
-#' @return a list of gene z-scores and SNP z-scores
+#' @return a list of gene z-scores and gene info table
 #'
 #' @importFrom logging addHandler loginfo writeToFile
 #'
@@ -32,10 +32,11 @@ compute_gene_z <- function (z_snp,
   z_gene_list <- list()
 
   # check to make sure all SNPs are in LD reference
-  ld_snpinfo <- do.call(rbind, lapply(region_info$SNP_info, read_LD_SNP_file))
+  ld_snpinfo <- read_LD_SNP_files(region_info$SNP_info)
   if (!all(z_snp$id %in% ld_snpinfo$id)){
     stop("Not all SNPs are in LD reference. Have you done harmonization?")
   }
+  rm(ld_snpinfo)
 
   if (is.null(region_info$region_tag)){
     region_info$region_tag <- paste0(region_info$chrom, ":", region_info$start, "-", region_info$stop)
@@ -49,37 +50,22 @@ compute_gene_z <- function (z_snp,
     regioninfo <- region_info[region_info$chrom == b, ]
     regioninfo <- regioninfo[order(regioninfo$start), ]
 
-    # loginfo("Reading weights for chromosome %s", b)
-    # res <- read_weights(weights,
-    #                     b,
-    #                     ld_snpinfo = ld_snpinfo[ld_snpinfo$chrom == b, ],
-    #                     z_snp = z_snp,
-    #                     scale_by_ld_variance = scale_by_ld_variance,
-    #                     ncore = ncore)
-    # weight_list <- res$weight_list
-    # weight_info <- res$weight_info
-
     # genes in the chromosome
     weightinfo <- weight_info[weight_info$chrom == b, ]
     wgtlist <- weight_list[weightinfo$id]
-    # exprlist <- weights[["exprlist"]][weightinfo$id]
-    # qclist <- weights[["qclist"]][weightinfo$id]
 
     if (length(wgtlist) > 0) {
       loginfo("Start gene z score imputation ...")
 
       # fine the regions for each gene
-      for (g_wgt_id in weightinfo$id) {
-        # p0 <- exprlist[[g_wgt_id]][["p0"]]
-        # p1 <- exprlist[[g_wgt_id]][["p1"]]
-        p0 <- weightinfo[g_wgt_id, "p0"]
-        p1 <- weightinfo[g_wgt_id, "p1"]
-
+      for (gname in weightinfo$id) {
+        p0 <- weightinfo[gname, "p0"]
+        p1 <- weightinfo[gname, "p1"]
         ifreg <- ifelse(p1 >= regioninfo[, "start"] & p0 < regioninfo[, "stop"], T, F)
-        weightinfo[g_wgt_id, "region_tag"] <- paste(sort(regioninfo$region_tag[ifreg]), collapse = ";")
+        weightinfo[gname, "region_tag"] <- paste(sort(regioninfo$region_tag[ifreg]), collapse = ";")
       }
 
-      regs <- data.frame(g_wgt_id = weightinfo$id,
+      regs <- data.frame(gname = weightinfo$id,
                          region_tag = weightinfo$region_tag,
                          stringsAsFactors = F)
 
@@ -99,44 +85,42 @@ compute_gene_z <- function (z_snp,
         outlist_core <- list()
 
         for (batch in batches) {
-          g_wgt_ids <- regs[regs$region_tag == batch, "g_wgt_id"]
+          gnames <- regs[regs$region_tag == batch, "gname"]
           region_tags <- strsplit(batch, ";")[[1]]
           reg_idx <- match(region_tags, regioninfo$region_tag)
           R_snp <- lapply(regioninfo$LD_matrix[reg_idx], load_LD)
           R_snp <- suppressWarnings({as.matrix(Matrix::bdiag(R_snp))})
-          R_snp_info <- do.call(rbind, lapply(regioninfo$SNP_info[reg_idx], read_LD_SNP_file))
+          ld_snpinfo <- read_LD_SNP_files(regioninfo$SNP_info[reg_idx])
 
-          for (g_wgt_id in g_wgt_ids) {
-            wgt <- wgtlist[[g_wgt_id]]
-            snpnames <- rownames(wgt)
-            ld.idx <- match(snpnames, R_snp_info$id)
+          for (gname in gnames) {
+            wgt <- wgtlist[[gname]]
+            snpnames <- rownames(wgt.matrix)
+            # keep SNPs in weight, z_snp and LD reference
+            snpnames <- Reduce(intersect, list(snpnames, z_snp$id, ld_snpinfo$id))
+            ld.idx <- match(snpnames, snpinfo$id)
             z.idx <- match(snpnames, z_snp$id)
             R.s <- R_snp[ld.idx, ld.idx]
             z.s <- as.matrix(z_snp$z[z.idx])
             z.g <- as.matrix(crossprod(wgt, z.s)/sqrt(t(wgt)%*%R.s%*% wgt))
             dimnames(z.g) <- NULL
-            outlist_core[[g_wgt_id]][["z.g"]] <- z.g
+            outlist_core[[gname]][["z.g"]] <- z.g
           }
         }
         outlist_core
       }
       parallel::stopCluster(cl)
-
-      # for (g_wgt_id in names(outlist)){
-      #   exprlist[[g_wgt_id]][["z.g"]] <- outlist[[g_wgt_id]][["z.g"]]
-      # }
     }
 
-    loginfo("Gene z score imputation done.")
+    loginfo("Gene z-score imputation done.")
     z.g <- unlist(lapply(outlist, "[[", "z.g"))
-    g_wgt_ids <- names(outlist)
-    loginfo("Number of genes with imputed expression: %d for chr%s", length(g_wgt_ids), b)
+    gnames <- names(outlist)
+    loginfo("Number of genes with imputed expression: %d for chr%s", length(gnames), b)
 
     # data frame with gene|weight ids, and imputed gene z-scores
-    z_gene_list[[b]] <- data.frame(id = g_wgt_ids, z = z.g)
+    z_gene_list[[b]] <- data.frame(id = gnames, z = z.g)
 
-    # if (length(g_wgt_ids) > 0) {
-    #   gene_info_chr <- weight_info[g_wgt_ids, c("chrom", "id", "p0", "p1", "gene_name", "weight_name")]
+    # if (length(gnames) > 0) {
+    #   gene_info_chr <- weight_info[gnames, c("chrom", "id", "p0", "p1", "gene_name", "weight_name")]
     # } else {
     #   gene_info_chr <- data.table::data.table(NULL)
     # }

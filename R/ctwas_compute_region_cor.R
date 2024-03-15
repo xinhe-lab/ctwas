@@ -20,9 +20,9 @@ compute_region_cor <- function(regionlist,
     R_snp <- suppressWarnings(as.matrix(Matrix::bdiag(R_snp)))
   }
 
-  ld_snpinfo <- do.call(rbind, lapply(regionlist[[region_tag]][["SNP_info"]],read_LD_SNP_file))
-
-  sidx <- match(regionlist[[region_tag]][["sid"]], ld_snpinfo$id)
+  ld_snpinfo <- read_LD_SNP_files(regionlist[[region_tag]][["SNP_info"]])
+  sid <- regionlist[[region_tag]][["sid"]]
+  sidx <- match(sid, ld_snpinfo$id)
   gnames <- regionlist[[region_tag]][["gid"]]
 
   # subset weight_list for genes in this region

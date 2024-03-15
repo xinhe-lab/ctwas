@@ -7,6 +7,9 @@
 #'
 #' @param region_info a data frame of region definition and associated file names.
 #'
+#' @param z_snp A data frame with columns: "id", "A1", "A2", "z". giving the z scores for
+#' snps. "A1" is effect allele. "A2" is the other allele. For harmonized data, A1 and A2 are not required.
+#'
 #' @param weight_format weight format: PredictDB, or Fusion
 #'
 #' @param filter_protein_coding_genes TRUE/FALSE. If TRUE, keep protein coding genes only
@@ -22,6 +25,7 @@
 #'
 process_weight <- function (weight_file,
                             region_info,
+                            z_snp = NULL,
                             weight_format = c("PredictDB", "Fusion"),
                             filter_protein_coding_genes = TRUE,
                             drop_strand_ambig = TRUE,
@@ -79,14 +83,20 @@ process_weight <- function (weight_file,
       snps$pos <- as.integer(snps$pos)
       w <- harmonize_wgt_ld(wgt.matrix,
                             snps,
-                            #ld_snpinfo,
                             ld_snpinfo_wgt,
                             drop_strand_ambig = drop_strand_ambig)
       wgt.matrix <- w[["wgt"]]
       snps <- w[["snps"]]
       wgt.matrix <- wgt.matrix[abs(wgt.matrix[, "weight"]) > 0, , drop = F]
       wgt.matrix <- wgt.matrix[complete.cases(wgt.matrix),, drop = F]
-      snpnames <- intersect(rownames(wgt.matrix), ld_snpinfo_wgt$id)
+
+      if (is.null(z_snp)) {
+        # select SNPs in both weight and LD reference
+        snpnames <- intersect(rownames(wgt.matrix), ld_snpinfo_wgt$id)
+      } else {
+        # if z_snp is available, select SNPs in weight, LD reference and SNP zscores
+        snpnames <- Reduce(intersect, list(rownames(wgt.matrix), ld_snpinfo_wgt$id, z_snp$id))
+      }
 
       wgt.idx <- match(snpnames, rownames(wgt.matrix))
       wgt <- wgt.matrix[wgt.idx, "weight", drop = F]
@@ -104,7 +114,7 @@ process_weight <- function (weight_file,
         p0 <- min(snps[snps[, "id"] %in% snpnames, "pos"])
         p1 <- max(snps[snps[, "id"] %in% snpnames, "pos"])
         gname_weight <- paste0(gname, "|", weight_name)
-        outlist[[gname_weight]] <- list(chrom = chrom, p0 = p0, p1 = p1, wgt = wgt, gname=gname, weight_name=weight_name, n = nwgt)
+        outlist[[gname_weight]] <- list(chrom = chrom, p0 = p0, p1 = p1, wgt = wgt, gene_name=gname, weight_name=weight_name, n = nwgt)
       }
     }
   }
@@ -113,7 +123,7 @@ process_weight <- function (weight_file,
   names(weight_list) <- names(outlist)
 
   weight_info <- lapply(names(outlist), function(x){
-    as.data.frame(outlist[[x]][c("chrom", "p0","p1", "gname", "weight_name", "n")])})
+    as.data.frame(outlist[[x]][c("chrom", "p0","p1", "gene_name", "weight_name", "n")])})
   weight_info <- do.call(rbind, weight_info)
   weight_info$id <- names(outlist)
   rownames(weight_info) <- names(outlist)

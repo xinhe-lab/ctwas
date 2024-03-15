@@ -28,7 +28,7 @@ snps. "A1" is effect allele. "A2" is the other allele. For harmonized data, A1 a
 \item{logfile}{the log file, if NULL will print log info on screen}
 }
 \value{
-a list of gene z-scores and SNP z-scores
+a list of gene z-scores and gene info table
 }
 \description{
 Compute gene z-scores

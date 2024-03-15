@@ -7,6 +7,7 @@
 process_weight(
   weight_file,
   region_info,
+  z_snp = NULL,
   weight_format = c("PredictDB", "Fusion"),
   filter_protein_coding_genes = TRUE,
   drop_strand_ambig = TRUE,
@@ -19,6 +20,9 @@ A vector of multiple sets of weights in PredictDB format can also be specified; 
 to their gene name to ensure IDs are unique.}
 
 \item{region_info}{a data frame of region definition and associated file names.}
+
+\item{z_snp}{A data frame with columns: "id", "A1", "A2", "z". giving the z scores for
+snps. "A1" is effect allele. "A2" is the other allele. For harmonized data, A1 and A2 are not required.}
 
 \item{weight_format}{weight format: PredictDB, or Fusion}
 
