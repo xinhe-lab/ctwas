@@ -16,15 +16,12 @@
 #'
 #' @param thin The proportion of SNPs to be used for parameter estimation and initial screening regions.
 #' Smaller \code{thin} parameters reduce runtime at the expense of accuracy.
-#' The fine mapping step is rerun using full SNPs
-#' for regions with strong gene signals; see \code{min_gene_PIP}.
 #'
 #' @param max_snp_region Inf or integer. Maximum number of SNPs in a region. Default is
 #' Inf, no limit. This can be useful if there are many SNPs in a region and you don't
-#' have enough memory to run the program. This applies to the last rerun step
-#' (using full SNPs and rerun susie for regions with strong gene signals) only.
+#' have enough memory to run the program.
 #'
-#' @param min_gene_PIP Regions with non-SNP PIP >= \code{min_gene_PIP}
+#' @param min_nonSNP_PIP Regions with non-SNP PIP >= \code{min_nonSNP_PIP}
 #' will be selected to run finemapping using full SNPs.
 #'
 #' @param L the number of effects for susie
@@ -63,7 +60,7 @@ screen_regions <- function(
     regionlist = NULL,
     thin = 1,
     max_snp_region = Inf,
-    min_gene_PIP = 0.5,
+    min_nonSNP_PIP = 0.5,
     L = 1,
     group_prior = NULL,
     group_prior_var = NULL,
@@ -148,16 +145,14 @@ screen_regions <- function(
   parallel::stopCluster(cl)
 
   # select regions based on max gene PIP of the region
-  # TODO: confirm the change to use TOTAL none SNP PIP rather than MAX gene PIP?
   finemap_weak_res <- NULL
   screened_region_tags <- NULL
   # screened_region_info <- NULL
   for (region_tag in names(regionlist)){
-    #gene_PIP <- max(finemap_res$susie_pip[finemap_res$type != "SNP" & finemap_res$region_tag == region_tag], 0)
     region_finemap_res <- finemap_res[finemap_res$region_tag == region_tag,]
-    gene_PIP <- sum(region_finemap_res$susie_pip[region_finemap_res$type != "SNP"])
-    gene_PIP[is.na(gene_PIP)] <- 0 # 0 if gene_PIP is NA (no genes in this region)
-    if (gene_PIP >= min_gene_PIP) {
+    nonSNP_PIP <- sum(region_finemap_res$susie_pip[region_finemap_res$type != "SNP"])
+    nonSNP_PIP[is.na(nonSNP_PIP)] <- 0 # 0 if nonSNP_PIP is NA (no genes in this region)
+    if (nonSNP_PIP >= min_nonSNP_PIP) {
       screened_region_tags <- c(screened_region_tags, region_tag)
       # screened_region_info <- rbind(screened_region_info, region_info[region_info$region_tag = region_tag, ])
     }
@@ -168,15 +163,14 @@ screen_regions <- function(
   # update regionlist with all SNPs for screened regions
   screened_regionlist <- regionlist[screened_region_tags]
 
-  if(thin < 1){
-    loginfo("Update regionlist with all SNPs for screened regions")
-    screened_regionlist <- update_regionlist(regionlist = screened_regionlist,
-                                             select = zdf$id,
-                                             maxSNP = max_snp_region,
-                                             minvar = 2)
+  if (thin < 1){
+    loginfo("Update regionlist with full SNPs for screened regions")
+    screened_regionlist <- update_regionlist_fullSNPs(regionlist = screened_regionlist,
+                                                      select = zdf$id,
+                                                      maxSNP = max_snp_region)
   }
 
-  # keep the finemapping results for the regions without strong signals (will not rerun)
+  # keep the finemapping results for the regions without strong signals (will not rerun finemapping)
   weak_region_finemap_res <- finemap_res[!finemap_res$region_tag %in% screened_region_tags, ]
 
   return(list("screened_regionlist" = screened_regionlist,

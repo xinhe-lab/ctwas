@@ -13,7 +13,7 @@ screen_regions(
   regionlist = NULL,
   thin = 1,
   max_snp_region = Inf,
-  min_gene_PIP = 0.5,
+  min_nonSNP_PIP = 0.5,
   L = 1,
   group_prior = NULL,
   group_prior_var = NULL,
@@ -42,16 +42,13 @@ Optionally, a "type" column can also be supplied; this is for using multiple set
 \item{regionlist}{a list object indexing regions, variants and genes.}
 
 \item{thin}{The proportion of SNPs to be used for parameter estimation and initial screening regions.
-Smaller \code{thin} parameters reduce runtime at the expense of accuracy.
-The fine mapping step is rerun using full SNPs
-for regions with strong gene signals; see \code{min_gene_PIP}.}
+Smaller \code{thin} parameters reduce runtime at the expense of accuracy.}
 
 \item{max_snp_region}{Inf or integer. Maximum number of SNPs in a region. Default is
 Inf, no limit. This can be useful if there are many SNPs in a region and you don't
-have enough memory to run the program. This applies to the last rerun step
-(using full SNPs and rerun susie for regions with strong gene signals) only.}
+have enough memory to run the program.}
 
-\item{min_gene_PIP}{Regions with non-SNP PIP >= \code{min_gene_PIP}
+\item{min_nonSNP_PIP}{Regions with non-SNP PIP >= \code{min_nonSNP_PIP}
 will be selected to run finemapping using full SNPs.}
 
 \item{L}{the number of effects for susie}

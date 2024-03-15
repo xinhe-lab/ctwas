@@ -13,26 +13,23 @@
 #' Inf, no limit. This can be useful if there are many SNPs in a region and you don't
 #' have enough memory to run the program.
 #'
-#' @param minvar minimum number of SNPs (and genes) in a region
-#'
 #' @importFrom logging loginfo
 #'
-#' @return updated regionlist
+#' @return updated regionlist with full SNPs
 #'
 #' @export
 #'
-update_regionlist <- function(regionlist,
-                              region_tags = NULL,
-                              select = NULL,
-                              maxSNP = Inf,
-                              minvar = 1) {
+update_regionlist_fullSNPs <- function(regionlist,
+                                       region_tags = NULL,
+                                       select = NULL,
+                                       maxSNP = Inf) {
 
   # if region_tags is null, update all regions in regionlist
   if (is.null(region_tags)){
     region_tags <- names(regionlist)
   }
 
-  loginfo("Update regionlist for %d regions with full SNPs", length(region_tags))
+  loginfo("Update regionlist for %d regions", length(region_tags))
 
   # update SNP IDs for each region
   for (region_tag in region_tags){
@@ -40,25 +37,14 @@ update_regionlist <- function(regionlist,
     region_chrom <- regionlist[[region_tag]][["chrom"]]
     region_start <- regionlist[[region_tag]][["start"]]
     region_stop <- regionlist[[region_tag]][["stop"]]
-    minpos <- regionlist[[region_tag]][["minpos"]]
-    maxpos <- regionlist[[region_tag]][["maxpos"]]
-    gid <- regionlist[[region_tag]][["gid"]]
 
-    # get snp info in LD in the chromosome
+    # update sid in the region with all SNPs in the region
     snpinfo <- read_LD_SNP_files(regionlist[[region_tag]][["SNP_info"]]) #ctwas
-
-    # find SNPs in the region
-    sidx <- which(snpinfo$chrom == region_chrom & snpinfo$pos >= region_start & snpinfo$pos < region_stop)
-    sid <- snpinfo$id[sidx]
-
-    if (length(gidx) + length(sidx) < minvar) {next}
-
-    # update sid in the region
-    regionlist[[region_tag]][["sid"]] <- sid
+    regionlist[[region_tag]][["sid"]] <- snpinfo$id
 
     # update minpos and maxpos in the region
-    regionlist[[region_tag]][["minpos"]] <- min(c(minpos, snpinfo$pos[sidx]))
-    regionlist[[region_tag]][["maxpos"]] <- max(c(maxpos, snpinfo$pos[sidx]))
+    regionlist[[region_tag]][["minpos"]] <- min(snpinfo$pos)
+    regionlist[[region_tag]][["maxpos"]] <- max(snpinfo$pos)
 
     # Trim regions with SNPs more than maxSNP
     if (maxSNP < Inf){

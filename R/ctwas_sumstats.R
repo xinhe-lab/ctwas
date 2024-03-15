@@ -16,7 +16,7 @@
 #' @param thin The proportion of SNPs to be used for parameter estimation and initial screening regions.
 #' Smaller \code{thin} parameters reduce runtime at the expense of accuracy.
 #' The fine mapping step is rerun using full SNPs
-#' for regions with strong gene signals; see \code{min_gene_PIP}.
+#' for regions with strong gene signals; see \code{min_nonSNP_PIP}.
 #'
 #' @param L the number of effects for susie during the fine mapping steps
 #'
@@ -35,7 +35,7 @@
 #' have enough memory to run the program. This applies to the last rerun step
 #' (using full SNPs and rerun susie for regions with strong gene signals) only.
 #'
-#' @param min_gene_PIP Regions with non-SNP PIP >= \code{min_gene_PIP}
+#' @param min_nonSNP_PIP Regions with non-SNP PIP >= \code{min_nonSNP_PIP}
 #' will be selected to run finemapping using full SNPs.
 #'
 #' @param prob_single Regions with probability greater than \code{prob_single} of
@@ -78,7 +78,7 @@ ctwas_sumstats <- function(
     group_prior_var = NULL,
     group_prior_var_structure = c("independent","shared_all","shared_QTLtype"),
     max_snp_region = Inf,
-    min_gene_PIP = 0.5,
+    min_nonSNP_PIP = 0.5,
     prob_single = 0.8,
     use_null_weight = T,
     coverage = 0.95,
@@ -136,7 +136,7 @@ ctwas_sumstats <- function(
                         regionlist = regionlist,
                         thin = thin,
                         max_snp_region = max_snp_region,
-                        min_gene_PIP = min_gene_PIP,
+                        min_nonSNP_PIP = min_nonSNP_PIP,
                         L = 1,
                         group_prior = group_prior,
                         group_prior_var = group_prior_var,
