@@ -37,34 +37,3 @@ region2core <- function(regionlist, ncore = 1){
 }
 
 
-# # select and assemble a subset of regionlist by region_tags
-# subset_regionlist <- function(regionlist, region_tags = NULL){
-#
-#   if (length(region_tags) == 0){
-#     stop("No regions selected!")
-#   }
-#
-#   # subset regionlist by region_tags
-#   region_tags_df <- data.frame(
-#     b = sapply(strsplit(region_tags, "_"), "[[", 1),
-#     rn = sapply(strsplit(region_tags, "_"), "[[", 2))
-#
-#   regionlist_subset <- vector("list", length = 22)
-#   for (b in region_tags_df$b) {
-#     rn <- region_tags_df[region_tags_df$b == b, "rn"]
-#     regionlist_subset[[b]] <- regionlist[[b]][as.character(rn)]
-#   }
-#
-#   # coordinates of the subset regions
-#   temp_regs <- lapply(1:22, function(x) cbind(x,
-#                                               unlist(lapply(regionlist_subset[[x]], "[[", "start")),
-#                                               unlist(lapply(regionlist_subset[[x]], "[[", "stop"))))
-#
-#   regs_subset <- do.call(rbind, lapply(temp_regs, function(x) if (ncol(x) == 3){x}))
-#   loginfo("Subset %d regions from the regionlist", nrow(regs_subset))
-#
-#   return(list("regionlist" = regionlist_subset,
-#               "regs" = regs))
-# }
-
-

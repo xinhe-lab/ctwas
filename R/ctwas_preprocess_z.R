@@ -1,5 +1,5 @@
 
-#' Preprocess GWAS summary statistics, harmonize GWAS z-scores and LD reference, and detect LD mismatches using susie_rss
+#' Process GWAS summary statistics, harmonize GWAS z-scores and LD reference, and detect LD mismatches using susie_rss
 #'
 #' @param z_snp A data frame with two columns: "id", "A1", "A2", "z". giving the z scores for
 #' snps. "A1" is effect allele. "A2" is the other allele.
@@ -32,16 +32,16 @@
 #'
 #' @export
 #'
-preprocess_z <- function (z_snp,
-                          region_info,
-                          gwas_n = NULL,
-                          drop_multiallelic = TRUE,
-                          drop_strand_ambig = TRUE,
-                          detect_ld_mismatch = FALSE,
-                          flip_ld_mismatch = TRUE,
-                          drop_ld_mismatch = FALSE,
-                          ncore = 1,
-                          logfile = NULL){
+process_z <- function (z_snp,
+                       region_info,
+                       gwas_n = NULL,
+                       drop_multiallelic = TRUE,
+                       drop_strand_ambig = TRUE,
+                       detect_ld_mismatch = FALSE,
+                       flip_ld_mismatch = TRUE,
+                       drop_ld_mismatch = FALSE,
+                       ncore = 1,
+                       logfile = NULL){
 
   if (!is.null(logfile)) {
     addHandler(writeToFile, file = logfile, level = "DEBUG")
@@ -142,7 +142,7 @@ detect_ld_mismatch_susie <- function(z_snp,
     for(region_tag in region_tags_core) {
 
       # Load reference LD matrix and SNP info in the region
-      R_snp <- read_LD(region_info$LD_matrix[region_info$region_tag == region_tag])
+      R_snp <- load_LD(region_info$LD_matrix[region_info$region_tag == region_tag])
       ld_snpinfo <- read_LD_SNP_file(region_info$SNP_info[region_info$region_tag == region_tag])
 
       # Match GWAS sumstats with LD reference files. Only keep variants included in LD reference.

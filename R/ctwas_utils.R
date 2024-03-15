@@ -38,6 +38,7 @@ read_LD_SNP_file <- function(file){
   return(LD_SNP)
 }
 
+#' Load weight
 load_weight <- function(weight_file, weight_format = c("PredictDB","Fusion")){
   weight_format <- match.arg(weight_format)
   if(weight_format == "PredictDB"){
@@ -85,8 +86,8 @@ load_weight <- function(weight_file, weight_format = c("PredictDB","Fusion")){
 # }
 
 
-#' read LD by file format
-read_LD <- function(file, format = c("rds", "rdata", "csv", "txt", "tsv")) {
+#' Load LD matrix
+load_LD <- function(file, format = c("rds", "rdata", "csv", "txt", "tsv")) {
   format <- match.arg(format)
 
   # if format is missing, try to guess format by file extension

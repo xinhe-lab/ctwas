@@ -1,6 +1,5 @@
 
 #' Preprocess PredictDB weights and harmonize with LD reference
-#' (adapted from preharmonize_wgt_ld)
 #'
 #' @param weight_file a string, pointing to a directory with the fusion/twas format of weights, or a .db file in predictdb format.
 #' A vector of multiple sets of weights in PredictDB format can also be specified; genes will have their filename appended
@@ -8,17 +7,25 @@
 #'
 #' @param region_info a data frame of region definition and associated file names.
 #'
+#' @param weight_format weight format: PredictDB, or Fusion
+#'
+#' @param filter_protein_coding_genes TRUE/FALSE. If TRUE, keep protein coding genes only
+#'
 #' @param drop_strand_ambig TRUE/FALSE, if TRUE remove strand ambiguous variants (A/T, G/C).
 #'
-#' @return a list of processed weight table and extra table
+#' @param scale_by_ld_variance TRUE/FALSE. If TRUE, PredictDB weights are scaled by genotype variance, which is the default
+#' behavior for PredictDB
+#'
+#' @return a list of processed weight list and weight info table
 #'
 #' @export
 #'
 process_weight <- function (weight_file,
                             region_info,
                             weight_format = c("PredictDB", "Fusion"),
+                            filter_protein_coding_genes = TRUE,
                             drop_strand_ambig = TRUE,
-                            scale_by_ld_variance = F){
+                            scale_by_ld_variance = TRUE){
 
   weight_format <- match.arg(weight_format)
   # load LD SNPs information
@@ -26,9 +33,19 @@ process_weight <- function (weight_file,
   ld_snpinfo <- read_LD_SNP_files(region_info$SNP_info)
   outlist <- list()
   for(weight in weight_file){
+    loginfo("Load weight: %s", weight)
     loaded_weight <- load_weight(weight, weight_format = weight_format)
     weight_table <- loaded_weight$weight_table
+    extra_table <- loaded_weight$extra_table
     weight_name <- loaded_weight$weight_name
+
+    # subset to protein coding genes only
+    if (isTRUE(filter_protein_coding_genes)){
+      loginfo("Keep protein coding genes only")
+      extra_table <- extra_table[extra_table$gene_type=="protein_coding",,drop=F]
+      weights_table <- weights_table[weights_table$gene %in% extra_table$gene,]
+    }
+
     gnames <- unique(weight_table$gene)
     loginfo("Number of genes with weights provided: %s in %s", length(gnames), weight_name)
 
@@ -77,7 +94,7 @@ process_weight <- function (weight_file,
       snps.idx <- match(snpnames, snps$id)
       snps <- snps[snps.idx,]
 
-      if (scale_by_ld_variance){
+      if (isTRUE(scale_by_ld_variance)){
         ld_snpinfo_wgt.idx <- match(snpnames, ld_snpinfo_wgt$id)
         wgt <- wgt*sqrt(ld_snpinfo_wgt$variance[ld_snpinfo_wgt.idx])
       }

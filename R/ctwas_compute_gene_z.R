@@ -102,7 +102,7 @@ compute_gene_z <- function (z_snp,
           g_wgt_ids <- regs[regs$region_tag == batch, "g_wgt_id"]
           region_tags <- strsplit(batch, ";")[[1]]
           reg_idx <- match(region_tags, regioninfo$region_tag)
-          R_snp <- lapply(regioninfo$LD_matrix[reg_idx], read_LD)
+          R_snp <- lapply(regioninfo$LD_matrix[reg_idx], load_LD)
           R_snp <- suppressWarnings({as.matrix(Matrix::bdiag(R_snp))})
           R_snp_info <- do.call(rbind, lapply(regioninfo$SNP_info[reg_idx], read_LD_SNP_file))
 

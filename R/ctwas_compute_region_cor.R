@@ -13,7 +13,7 @@ compute_region_cor <- function(regionlist,
 
   loginfo("Compute correlation matrices for region %s ...", region_tag)
 
-  R_snp <- lapply(regionlist[[region_tag]][["LD_matrix"]], read_LD)
+  R_snp <- lapply(regionlist[[region_tag]][["LD_matrix"]], load_LD)
   if (length(R_snp)==1){
     R_snp <- unname(R_snp[[1]])
   } else {

@@ -178,9 +178,9 @@ finemap_region <- function(z_snp,
     if (all(file.exists(c(R_sg_file, R_g_file, R_s_file)))) {
       # load precomputed correlation matrices
       loginfo("Load precomputed correlation matrices from %s", cor_dir)
-      R_snp_gene <- read_LD(R_sg_file)
-      R_gene <- read_LD(R_g_file)
-      R_snp <- read_LD(R_s_file)
+      R_snp_gene <- load_LD(R_sg_file)
+      R_gene <- load_LD(R_g_file)
+      R_snp <- load_LD(R_s_file)
       # R_snp_gene <- R_snp_gene[sidx, , drop = F]
 
       # gene first then SNPs
