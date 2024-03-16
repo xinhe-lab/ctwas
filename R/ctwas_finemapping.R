@@ -46,10 +46,11 @@
 finemap_region <- function(z_snp,
                            z_gene,
                            gene_info,
-                           regionlist,
                            region_tag,
+                           regionlist = NULL,
                            region_info = NULL,
                            weight_list = NULL,
+                           max_snp_region = Inf,
                            L = 5,
                            group_prior = NULL,
                            group_prior_var = NULL,
@@ -64,24 +65,6 @@ finemap_region <- function(z_snp,
 
   loginfo("Run finemapping with L = %d for region %s", L, region_tag)
 
-  # get regionlist with full SNPs if not available
-  if (missing(regionlist)) {
-    loginfo("Get regionlist for region %s", region_tag)
-    regioninfo <- region_info[region_info$region_tag == region_tag, ]
-    res <- get_regionlist(regioninfo, gene_info, adjust_boundary = FALSE)
-    regionlist <- res$regionlist
-    # boundary_genes <- res$boundary_genes
-    rm(res)
-  }
-
-  # select genes and SNPs in this region
-  gid <- regionlist[[region_tag]][["gid"]]
-  sid <- regionlist[[region_tag]][["sid"]]
-
-  # keep only GWAS SNPs
-  sid <- intersect(sid, z_snp$id)
-  regionlist[[region_tag]][["sid"]] <- sid
-
   # prepare z-scores combining SNPs and genes
   z_snp$type <- "SNP"
   z_snp$QTLtype <- "SNP"
@@ -93,21 +76,44 @@ finemap_region <- function(z_snp,
   }
   zdf <- rbind(z_snp[, c("id", "z", "type", "QTLtype")],
                z_gene[, c("id", "z", "type", "QTLtype")])
+  types <- unique(zdf$type)
 
+  # get regionlist with full SNPs if not available
+  if (is.null(regionlist)) {
+    loginfo("Get regionlist for region %s", region_tag)
+    regioninfo <- region_info[region_info$region_tag == region_tag, ]
+    res <- get_regionlist(region_info,
+                          gene_info,
+                          select = zdf,
+                          thin = 1,
+                          maxSNP = max_snp_region,
+                          adjust_boundary = FALSE)
+    regionlist <- res$regionlist
+    rm(res)
+  }
+
+  # select genes and SNPs in this region
+  gid <- regionlist[[region_tag]][["gid"]]
+  sid <- regionlist[[region_tag]][["sid"]]
+  loginfo("%d SNPs, %d genes in the regionlist", length(sid), length(gid))
+
+  # keep only GWAS SNPs
+  sid <- intersect(sid, zdf$id)
+  regionlist[[region_tag]][["sid"]] <- sid
+
+  # combine zscores
   z.g <- zdf[match(gid, zdf$id), "z"]
   z.s <- zdf[match(sid, zdf$id), "z"]
   z <- c(z.g, z.s)
+  loginfo("%d SNPs, %d genes in the z-scores", length(z.s), length(z.g))
 
   g_type <- zdf$type[match(gid, zdf$id)]
   s_type <- zdf$type[match(sid, zdf$id)]
   gs_type <- c(g_type, s_type)
   # g_QTLtype <- zdf$QTLtype[match(gid, zdf$id)]
-  types <- unique(zdf$type)
-
-  loginfo("%d SNPs, %d genes in the z-scores", length(z.s), length(z.g))
 
   if (anyNA(z))
-    loginfo("z-scores contains missing values!")
+    loginfo("Warning: z-scores contains missing values!")
 
   # priors for susie
   if (is.null(group_prior)){
@@ -231,7 +237,7 @@ finemap_region <- function(z_snp,
   }
 
   if (anyNA(R))
-    loginfo("R matrix contains missing values!")
+    stop("R matrix contains missing values!")
 
   if (length(z) != nrow(R))
     stop("R matrix dimension does not match with z!")

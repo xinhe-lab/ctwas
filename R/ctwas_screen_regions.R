@@ -95,8 +95,8 @@ screen_regions <- function(
   loginfo("Screen regions ...")
   if (is.null(regionlist)) {
     loginfo("Get regionlist with thin = %.2f", thin)
-    res <- get_regionlist(region_info = region_info,
-                          gene_info = gene_info,
+    res <- get_regionlist(region_info,
+                          gene_info,
                           weight_list = weight_list,
                           select = zdf$id,
                           thin = thin,
@@ -123,11 +123,11 @@ screen_regions <- function(
     # run susie for each region
     region_tags.core <- corelist[[core]]
     for (region_tag in region_tags.core) {
-      susie_res <- finemap_region(z_snp = z_snp,
-                                  z_gene = z_gene,
-                                  gene_info = gene_info,
-                                  regionlist = regionlist,
+      susie_res <- finemap_region(z_snp,
+                                  z_gene,
+                                  gene_info,
                                   region_tag = region_tag,
+                                  regionlist = regionlist,
                                   weight_list = weight_list,
                                   L = L,
                                   group_prior = group_prior,
@@ -165,8 +165,8 @@ screen_regions <- function(
 
   if (thin < 1){
     loginfo("Update regionlist with full SNPs for screened regions")
-    screened_regionlist <- update_regionlist_fullSNPs(regionlist = screened_regionlist,
-                                                      select = zdf$id,
+    screened_regionlist <- update_regionlist_fullSNPs(screened_regionlist,
+                                                      select = zdf,
                                                       maxSNP = max_snp_region)
   }
 

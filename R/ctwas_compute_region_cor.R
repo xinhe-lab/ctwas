@@ -28,8 +28,6 @@ compute_region_cor <- function(regionlist,
   # subset weight_list for genes in this region
   wgtlist <- weight_list[gnames]
 
-  loginfo("%d SNPs, %d genes in the region.", length(sid), length(gnames))
-
   # subset R_snp and ld_snpinfo by sid in the region to speed up computation
   R_snp <- R_snp[sidx, sidx, drop = F]
   ld_snpinfo <- ld_snpinfo[sidx, , drop = F]
@@ -70,10 +68,6 @@ compute_region_cor <- function(regionlist,
   # # subset R_snp_gene by sidx
   # R_snp_gene <- R_snp_gene[sidx, , drop = F]
 
-  # loginfo("Dimension of R_snp: %d rows, %d columns", nrow(R_snp), ncol(R_snp))
-  # loginfo("Dimension of R_snp_gene: %d rows, %d columns", nrow(R_snp_gene), ncol(R_snp_gene))
-  # loginfo("Dimension of R_gene: %d rows, %d columns", nrow(R_gene), ncol(R_gene))
-
   if (anyNA(R_snp))
     stop("R_snp matrix contains missing values!\n")
 
@@ -82,6 +76,8 @@ compute_region_cor <- function(regionlist,
 
   if (anyNA(R_gene))
     stop("R_gene matrix contains missing values!\n")
+
+  loginfo("%d SNPs, %d genes in the region correlation matrices", nrow(R_snp_gene), ncol(R_snp_gene))
 
   return(list("R_snp" = R_snp,
               "R_snp_gene" = R_snp_gene,

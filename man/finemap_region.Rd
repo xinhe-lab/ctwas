@@ -8,10 +8,11 @@ finemap_region(
   z_snp,
   z_gene,
   gene_info,
-  regionlist,
   region_tag,
+  regionlist = NULL,
   region_info = NULL,
   weight_list = NULL,
+  max_snp_region = Inf,
   L = 5,
   group_prior = NULL,
   group_prior_var = NULL,
@@ -34,9 +35,9 @@ Optionally, a "type" column can also be supplied; this is for using multiple set
 
 \item{gene_info}{a data frame of gene information obtained from \code{compute_gene_z}}
 
-\item{regionlist}{a list object indexing regions, variants and genes.}
-
 \item{region_tag}{a character string of region tag to be finemapped}
+
+\item{regionlist}{a list object indexing regions, variants and genes.}
 
 \item{weight_list}{a list of weights for each gene}
 

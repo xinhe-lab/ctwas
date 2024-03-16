@@ -103,6 +103,15 @@ ctwas_EM <- function(zdf,
       for (region_tag in region_tags.core) {
         gid <- regionlist[[region_tag]][["gid"]]
         sid <- regionlist[[region_tag]][["sid"]]
+
+        # keep only GWAS SNPs
+        sid <- intersect(sid, zdf$id)
+        regionlist[[region_tag]][["sid"]] <- sid
+
+        z.g <- zdf[match(gid, zdf$id), ][["z"]]
+        z.s <- zdf[match(sid, zdf$id), ][["z"]]
+        z <- c(z.g, z.s)
+
         g_type <- zdf$type[match(gid, zdf$id)]
         s_type <- zdf$type[match(sid, zdf$id)]
         gs_type <- c(g_type, s_type)
@@ -131,12 +140,8 @@ ctwas_EM <- function(zdf,
           null_weight <- NULL
         }
 
-        z.g <- zdf[match(gid, zdf$id), ][["z"]]
-        z.s <- zdf[match(sid, zdf$id), ][["z"]]
-        z <- c(z.g, z.s)
-
         # SNP information in this region
-        ld_snpinfo <- do.call(rbind, lapply(regionlist[[region_tag]][["SNP_info"]],read_LD_SNP_file))
+        ld_snpinfo <- read_LD_SNP_files(regionlist[[region_tag]][["SNP_info"]])
 
         # R does not matter for susie when L = 1
         R <- diag(length(z))

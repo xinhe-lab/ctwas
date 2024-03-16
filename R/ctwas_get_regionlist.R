@@ -64,16 +64,19 @@ get_regionlist <- function(region_info,
     regioninfo <- region_info[region_info$chrom == b, ]
     # select genes in the chromosome
     geneinfo <- gene_info[gene_info$chrom == b, ]
+
     # get snp info in LD in the chromosome
     snpinfo <- read_LD_SNP_files(regioninfo$SNP_info) #ctwas
-    if (isTRUE(unique(snpinfo$chrom) != b)){
+    if (unique(snpinfo$chrom) != b){
       stop("Input genotype file not split by chromosome or not in correct order")
     }
-    # select snps
+
+    # select SNPs
     snpinfo$keep <- rep(1, nrow(snpinfo))
     if (!is.null(selectid)){
       snpinfo$keep[!(snpinfo$id %in% selectid)] <- 0
     }
+
     # downsampling for SNPs
     snpinfo$thin_tag <- rep(0, nrow(snpinfo))
     nkept <- round(nrow(snpinfo) * thin)
@@ -112,7 +115,6 @@ get_regionlist <- function(region_info,
           idx <- match(regionlist[[region_tag]][["sid"]], select[, "id"])
           z.abs <- abs(select[idx, "z"])
           ifkeep <- rank(-z.abs) <= maxSNP
-          #regionlist[[region_tag]][["sidx"]] <- regionlist[[region_tag]][["sidx"]][ifkeep]
           regionlist[[region_tag]][["sid"]] <- regionlist[[region_tag]][["sid"]][ifkeep]
         }
       }
@@ -124,15 +126,12 @@ get_regionlist <- function(region_info,
           ifkeep <- rep(F, n.ori)
           set.seed <- 99
           ifkeep[sample.int(n.ori, size = maxSNP)] <- T
-          #regionlist[[region_tag]][["sidx"]] <-  regionlist[[region_tag]][["sidx"]][ifkeep]
           regionlist[[region_tag]][["sid"]] <-  regionlist[[region_tag]][["sid"]][ifkeep]
         }
       }
     }
   }
 
-  #colnames(boundary_genes) <- c("gene","chrom","region1","region2")
-  #regionlsit <- compute_correlations(regionlist, ncore)
   return(list(regionlist=regionlist,
               weight_list=weight_list,
               boundary_genes=boundary_genes))

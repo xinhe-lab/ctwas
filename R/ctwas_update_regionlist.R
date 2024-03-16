@@ -29,22 +29,36 @@ update_regionlist_fullSNPs <- function(regionlist,
     region_tags <- names(regionlist)
   }
 
-  loginfo("Update regionlist for %d regions", length(region_tags))
+  if (is.null(dim(select))) {
+    selectid <- select
+  } else {
+    selectid <- select$id
+  }
+
+  loginfo("Update regionlist for %d regions with full SNPs", length(region_tags))
 
   # update SNP IDs for each region
   for (region_tag in region_tags){
 
-    region_chrom <- regionlist[[region_tag]][["chrom"]]
-    region_start <- regionlist[[region_tag]][["start"]]
-    region_stop <- regionlist[[region_tag]][["stop"]]
-
     # update sid in the region with all SNPs in the region
     snpinfo <- read_LD_SNP_files(regionlist[[region_tag]][["SNP_info"]]) #ctwas
-    regionlist[[region_tag]][["sid"]] <- snpinfo$id
+
+    # select snps
+    snpinfo$keep <- rep(1, nrow(snpinfo))
+    if (!is.null(selectid)){
+      snpinfo$keep[!(snpinfo$id %in% selectid)] <- 0
+    }
+    sid <- snpinfo$id[snpinfo$keep == 1]
+    sidx <- match(sid, snpinfo)
+
+    gid <- regionlist[[region_tag]][["gid"]]
+
+    # update sid in the region
+    regionlist[[region_tag]][["sid"]] <- sid
 
     # update minpos and maxpos in the region
-    regionlist[[region_tag]][["minpos"]] <- min(snpinfo$pos)
-    regionlist[[region_tag]][["maxpos"]] <- max(snpinfo$pos)
+    regionlist[[region_tag]][["minpos"]] <- min(c(regionlist[[region_tag]][["minpos"]], snpinfo$pos[sidx]))
+    regionlist[[region_tag]][["maxpos"]] <- max(c(regionlist[[region_tag]][["maxpos"]], snpinfo$pos[sidx]))
 
     # Trim regions with SNPs more than maxSNP
     if (maxSNP < Inf){

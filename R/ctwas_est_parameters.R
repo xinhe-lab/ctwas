@@ -125,8 +125,8 @@ est_param <- function(
   # get regionlist if not available
   if (is.null(regionlist)) {
     loginfo("Get regionlist with thin = %.2f", thin)
-    res <- get_regionlist(region_info = region_info,
-                          gene_info = gene_info,
+    res <- get_regionlist(region_info,
+                          gene_info,
                           weight_list = weight_list,
                           select = zdf$id,
                           thin = thin,
@@ -147,9 +147,10 @@ est_param <- function(
     group_prior["SNP"] <- group_prior["SNP"]/thin
   }
 
-  EM1_res <- ctwas_EM(zdf = zdf,
-                      regionlist = regionlist,
-                      region_info = region_info,
+  EM1_res <- ctwas_EM(zdf,
+                      regionlist,
+                      region_info,
+                      gene_info,
                       niter = niter1,
                       group_prior = group_prior,
                       group_prior_var = group_prior_var,
@@ -179,8 +180,9 @@ est_param <- function(
   # Run EM for more (niter2) iterations, getting rough estimates
   loginfo("Run EM for %d iterations on filtered regions, getting accurate estimates ...", niter2)
   EM2_res <- ctwas_EM(zdf = zdf,
-                      regionlist = filtered_regionlist,
-                      region_info = region_info,
+                      filtered_regionlist,
+                      region_info,
+                      gene_info,
                       niter = niter2,
                       group_prior = group_prior,
                       group_prior_var = group_prior_var,
