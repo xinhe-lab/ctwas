@@ -44,11 +44,6 @@ process_weight <- function (weight_file,
 
     gnames <- unique(weight_table$gene)
     loginfo("Number of genes with weights provided: %s in %s", length(gnames), weight_name)
-
-
-    # if z_snp is available, select SNPs in weight, LD reference and SNP zscores
-    snpnames <- Reduce(intersect, list(rownames(wgt.matrix), ld_snpinfo_wgt$id, z_snp$id))
-
     # remove variants in weight table, but not in LD reference and GWAS
     loginfo("Number of variants in weights: %s", length(unique(weight_table$rsid)))
     loginfo("Remove %s variants in weights but not in LD reference and GWAS", length(setdiff(weight_table$rsid, union(ld_snpinfo$id,z_snp$id))))
