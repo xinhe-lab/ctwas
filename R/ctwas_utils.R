@@ -39,7 +39,7 @@ read_LD_SNP_file <- function(file){
 }
 
 #' Load weight
-load_weight <- function(weight_file, weight_format = c("PredictDB","Fusion")){
+load_weight <- function(weight_file, weight_format = c("PredictDB","Fusion"), filter_protein_coding_genes = FALSE){
   weight_format <- match.arg(weight_format)
   if(weight_format == "PredictDB"){
     weight_name <- tools::file_path_sans_ext(basename(weight_file))
@@ -50,6 +50,14 @@ load_weight <- function(weight_file, weight_format = c("PredictDB","Fusion")){
     weight_table <- query("select * from weights")
     weight_table <- weight_table[weight_table$weight!=0,]
     extra_table <- query("select * from extra")
+
+    # subset to protein coding genes only
+    if (isTRUE(filter_protein_coding_genes)){
+      loginfo("Keep protein coding genes only")
+      extra_table <- extra_table[extra_table$gene_type=="protein_coding",,drop=F]
+      weights_table <- weights_table[weights_table$gene %in% extra_table$gene,]
+    }
+
     RSQLite::dbDisconnect(db)
   }
   return(list(weight_table=weight_table,extra_table=extra_table,weight_name=weight_name))

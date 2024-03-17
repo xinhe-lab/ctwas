@@ -12,7 +12,7 @@
 #'
 #' @param weight_format weight format: PredictDB, or Fusion
 #'
-#' @param filter_protein_coding_genes TRUE/FALSE. If TRUE, keep protein coding genes only
+#' @param filter_protein_coding_genes TRUE/FALSE. If TRUE, keep protein coding genes only. This option is only for PredictDB weights
 #'
 #' @param drop_strand_ambig TRUE/FALSE, if TRUE remove strand ambiguous variants (A/T, G/C).
 #'
@@ -25,9 +25,9 @@
 #'
 process_weight <- function (weight_file,
                             region_info,
-                            z_snp = NULL,
+                            z_snp,
                             weight_format = c("PredictDB", "Fusion"),
-                            filter_protein_coding_genes = TRUE,
+                            filter_protein_coding_genes = FALSE,
                             drop_strand_ambig = TRUE,
                             scale_by_ld_variance = TRUE){
 
@@ -40,28 +40,24 @@ process_weight <- function (weight_file,
     loginfo("Load weight: %s", weight)
     loaded_weight <- load_weight(weight, weight_format = weight_format)
     weight_table <- loaded_weight$weight_table
-    extra_table <- loaded_weight$extra_table
     weight_name <- loaded_weight$weight_name
-
-    # subset to protein coding genes only
-    if (isTRUE(filter_protein_coding_genes)){
-      loginfo("Keep protein coding genes only")
-      extra_table <- extra_table[extra_table$gene_type=="protein_coding",,drop=F]
-      weights_table <- weights_table[weights_table$gene %in% extra_table$gene,]
-    }
 
     gnames <- unique(weight_table$gene)
     loginfo("Number of genes with weights provided: %s in %s", length(gnames), weight_name)
 
-    # remove variants in weight table, but not in LD reference
+
+    # if z_snp is available, select SNPs in weight, LD reference and SNP zscores
+    snpnames <- Reduce(intersect, list(rownames(wgt.matrix), ld_snpinfo_wgt$id, z_snp$id))
+
+    # remove variants in weight table, but not in LD reference and GWAS
     loginfo("Number of variants in weights: %s", length(unique(weight_table$rsid)))
-    loginfo("Remove %s variants in weights but not in LD reference", length(setdiff(weight_table$rsid, ld_snpinfo$id)))
-    weight_table <- weight_table[weight_table$rsid %in% ld_snpinfo$id, ]
+    loginfo("Remove %s variants in weights but not in LD reference and GWAS", length(setdiff(weight_table$rsid, union(ld_snpinfo$id,z_snp$id))))
+    weight_table <- weight_table[weight_table$rsid %in% union(ld_snpinfo$id,z_snp$id) ]
 
     # remove genes with no variants in LD reference
-    loginfo("Remove %s genes with no variants in LD reference", length(setdiff(gnames, weight_table$gene)))
+    loginfo("Remove %s genes with no variants in LD reference and GWAS", length(setdiff(gnames, weight_table$gene)))
     gnames <- unique(weight_table$gene)
-    loginfo("Number of genes left after removing variants not in LD reference: %s", length(gnames))
+    loginfo("Number of genes left after removing variants not in LD reference and GWAS: %s", length(gnames))
 
     # subset to variants in weight table
     ld_snpinfo_wgt <- ld_snpinfo[ld_snpinfo$id %in% weight_table$rsid,]
@@ -89,14 +85,6 @@ process_weight <- function (weight_file,
       snps <- w[["snps"]]
       wgt.matrix <- wgt.matrix[abs(wgt.matrix[, "weight"]) > 0, , drop = F]
       wgt.matrix <- wgt.matrix[complete.cases(wgt.matrix),, drop = F]
-
-      if (is.null(z_snp)) {
-        # select SNPs in both weight and LD reference
-        snpnames <- intersect(rownames(wgt.matrix), ld_snpinfo_wgt$id)
-      } else {
-        # if z_snp is available, select SNPs in weight, LD reference and SNP zscores
-        snpnames <- Reduce(intersect, list(rownames(wgt.matrix), ld_snpinfo_wgt$id, z_snp$id))
-      }
 
       wgt.idx <- match(snpnames, rownames(wgt.matrix))
       wgt <- wgt.matrix[wgt.idx, "weight", drop = F]
