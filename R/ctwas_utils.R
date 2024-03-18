@@ -39,7 +39,7 @@ read_LD_SNP_file <- function(file){
 }
 
 #' Load weight
-load_weight <- function(weight_file, weight_format = c("PredictDB","Fusion"), filter_protein_coding_genes = FALSE){
+load_weights <- function(weight_file, weight_format = c("PredictDB","Fusion"), filter_protein_coding_genes = FALSE){
   weight_format <- match.arg(weight_format)
   if(weight_format == "PredictDB"){
     weight_name <- tools::file_path_sans_ext(basename(weight_file))

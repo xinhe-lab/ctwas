@@ -23,7 +23,7 @@
 #'
 #' @export
 #'
-process_weight <- function (weight_file,
+process_weights <- function (weight_file,
                             region_info,
                             z_snp,
                             weight_format = c("PredictDB", "Fusion"),
@@ -38,7 +38,7 @@ process_weight <- function (weight_file,
   outlist <- list()
   for(weight in weight_file){
     loginfo("Load weight: %s", weight)
-    loaded_weight <- load_weight(weight, weight_format = weight_format)
+    loaded_weight <- load_weights(weight, weight_format = weight_format)
     weight_table <- loaded_weight$weight_table
     weight_name <- loaded_weight$weight_name
 
