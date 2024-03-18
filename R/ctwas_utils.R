@@ -55,7 +55,7 @@ load_weights <- function(weight_file, weight_format = c("PredictDB","Fusion"), f
     if (isTRUE(filter_protein_coding_genes)){
       loginfo("Keep protein coding genes only")
       extra_table <- extra_table[extra_table$gene_type=="protein_coding",,drop=F]
-      weights_table <- weights_table[weights_table$gene %in% extra_table$gene,]
+      weight_table <- weight_table[weight_table$gene %in% extra_table$gene,]
     }
 
     RSQLite::dbDisconnect(db)

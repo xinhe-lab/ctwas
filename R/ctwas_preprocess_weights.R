@@ -24,12 +24,12 @@
 #' @export
 #'
 process_weights <- function (weight_file,
-                            region_info,
-                            z_snp,
-                            weight_format = c("PredictDB", "Fusion"),
-                            filter_protein_coding_genes = FALSE,
-                            drop_strand_ambig = TRUE,
-                            scale_by_ld_variance = TRUE){
+                             region_info,
+                             z_snp,
+                             weight_format = c("PredictDB", "Fusion"),
+                             drop_strand_ambig = TRUE,
+                             filter_protein_coding_genes = FALSE,
+                             scale_by_ld_variance = TRUE){
 
   weight_format <- match.arg(weight_format)
   # load LD SNPs information
@@ -38,25 +38,24 @@ process_weights <- function (weight_file,
   outlist <- list()
   for(weight in weight_file){
     loginfo("Load weight: %s", weight)
-    loaded_weight <- load_weights(weight, weight_format = weight_format)
+    loaded_weight <- load_weights(weight, weight_format = weight_format, filter_protein_coding_genes = filter_protein_coding_genes)
     weight_table <- loaded_weight$weight_table
     weight_name <- loaded_weight$weight_name
 
     gnames <- unique(weight_table$gene)
-    loginfo("Number of genes with weights provided: %s in %s", length(gnames), weight_name)
+    loginfo("Number of genes with weights provided: %d in %s", length(gnames), weight_name)
     # remove variants in weight table, but not in LD reference and GWAS
-    loginfo("Number of variants in weights: %s", length(unique(weight_table$rsid)))
-    loginfo("Remove %s variants in weights but not in LD reference and GWAS", length(setdiff(weight_table$rsid, union(ld_snpinfo$id,z_snp$id))))
-    weight_table <- weight_table[weight_table$rsid %in% union(ld_snpinfo$id,z_snp$id) ]
-
-    # remove genes with no variants in LD reference
-    loginfo("Remove %s genes with no variants in LD reference and GWAS", length(setdiff(gnames, weight_table$gene)))
+    loginfo("Number of variants in weights: %d", length(unique(weight_table$rsid)))
+    # take the intersect of SNPs in weights, LD reference and z_snp
+    snpnames <- Reduce(intersect, list(weight_table$rsid, ld_snpinfo$id, z_snp$id))
+    # loginfo("Remove %d variants after intersecting with LD reference and GWAS", length(setdiff(weight_table$rsid, snpnames)))
+    weight_table <- weight_table[weight_table$rsid %in% snpnames, ]
+    # loginfo("Remove %s genes after intersecting with LD reference and GWAS", length(setdiff(gnames, weight_table$gene)))
     gnames <- unique(weight_table$gene)
-    loginfo("Number of genes left after removing variants not in LD reference and GWAS: %s", length(gnames))
-
+    loginfo("%d variants and %d genes left after intersecting with LD reference and GWAS z_snp", length(snpnames), length(gnames))
     # subset to variants in weight table
     ld_snpinfo_wgt <- ld_snpinfo[ld_snpinfo$id %in% weight_table$rsid,]
-    loginfo("Processing weights for %s genes to match LD reference", length(gnames))
+    loginfo("Harmonize weights with LD reference")
 
     for (i in 1:length(gnames)){
       gname <- gnames[i]
@@ -81,6 +80,7 @@ process_weights <- function (weight_file,
       wgt.matrix <- wgt.matrix[abs(wgt.matrix[, "weight"]) > 0, , drop = F]
       wgt.matrix <- wgt.matrix[complete.cases(wgt.matrix),, drop = F]
 
+      snpnames <- intersect(rownames(wgt.matrix), ld_snpinfo_wgt$id)
       wgt.idx <- match(snpnames, rownames(wgt.matrix))
       wgt <- wgt.matrix[wgt.idx, "weight", drop = F]
 
