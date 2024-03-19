@@ -106,6 +106,7 @@ compute_gene_z <- function (z_snp,
 
   # gene z-score data frame with gene ids, and imputed gene z-scores
   z_gene <- do.call(rbind, z_gene_list)
+  rownames(z_gene) <- NULL
 
   # gene info data frame with gene ids, gene names, gene coordinates and weight names
   gene_info <- weight_info[match(z_gene$id, weight_info$id),

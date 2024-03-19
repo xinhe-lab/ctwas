@@ -57,7 +57,7 @@
 #'
 #' @importFrom logging addHandler loginfo writeToFile
 #'
-#' @return a list with estimated parameters, and updated region_info with correlation file names for each region.
+#' @return a list with estimated parameters, regionlist, updated weight list and boundary genes.
 #'
 #' @export
 #'
@@ -95,12 +95,7 @@ est_param <- function(
   # compute gene z-scores if not available
   if (is.null(z_gene)) {
     loginfo("Computing gene z-scores ...")
-    # Compute gene z-scores
-    res <- compute_gene_z(z_snp = z_snp,
-                          region_info = region_info,
-                          weight_list = weight_list,
-                          weight_info = weight_info,
-                          ncore = ncore)
+    res <- compute_gene_z(z_snp, region_info, weight_list, weight_info, ncore = ncore)
     z_gene <- res$z_gene
     gene_info <- res$gene_info
     rm(res)
@@ -124,7 +119,7 @@ est_param <- function(
 
   # get regionlist if not available
   if (is.null(regionlist)) {
-    loginfo("Get regionlist with thin = %.2f", thin)
+    loginfo("Get regionlist with thin = %s", thin)
     res <- get_regionlist(region_info,
                           gene_info,
                           weight_list = weight_list,
@@ -133,7 +128,6 @@ est_param <- function(
                           maxSNP = max_snp_region,
                           minvar = 2,
                           adjust_boundary = TRUE)
-
     regionlist <- res$regionlist
     weight_list <- res$weight_list
     boundary_genes <- res$boundary_genes
@@ -167,19 +161,15 @@ est_param <- function(
   print(group_prior)
   print("Roughly estimated group_prior_var: \n")
   print(group_prior_var)
-  EM1_susie_res <- EM1_res$EM_susie_res
-  group_size <- table(EM1_susie_res$type)
+  group_size <- table(EM1_res$EM_susie_res$type)
 
   # filter regions based on prob_single
-  filtered_regionlist <- filter_regions(regionlist = regionlist,
-                                        group_prior = group_prior,
-                                        prob_single = prob_single,
-                                        zdf = zdf)
-  loginfo("%d regions left after filtering", sum(unlist(lapply(filtered_regionlist, length))))
+  filtered_regionlist <- filter_regions(regionlist, zdf, group_prior, prob_single = prob_single)
+  loginfo("%d regions left after filtering by prob_single = %s", sum(unlist(lapply(filtered_regionlist, length))), prob_single)
 
   # Run EM for more (niter2) iterations, getting rough estimates
   loginfo("Run EM for %d iterations on filtered regions, getting accurate estimates ...", niter2)
-  EM2_res <- ctwas_EM(zdf = zdf,
+  EM2_res <- ctwas_EM(zdf,
                       filtered_regionlist,
                       region_info,
                       gene_info,

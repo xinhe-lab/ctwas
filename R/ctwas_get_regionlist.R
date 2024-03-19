@@ -106,12 +106,12 @@ get_regionlist <- function(region_info,
   }
 
   if (maxSNP < Inf){
-    loginfo("Trim regions with SNPs more than %s", maxSNP)
 
     if ("z" %in% colnames(select)) {
       # z score is given, trim snps with lower |z|
       for (region_tag in names(regionlist)){
         if (length(regionlist[[region_tag]][["sid"]]) > maxSNP){
+          loginfo("Trim region %s with SNPs more than %s", region_tag, maxSNP)
           idx <- match(regionlist[[region_tag]][["sid"]], select[, "id"])
           z.abs <- abs(select[idx, "z"])
           ifkeep <- rank(-z.abs) <= maxSNP
@@ -122,10 +122,11 @@ get_regionlist <- function(region_info,
       # if no z score information, randomly select snps
       for (region_tag in names(regionlist)){
         if (length(regionlist[[region_tag]][["sid"]]) > maxSNP){
+          loginfo("Trim region %s with SNPs more than %s", region_tag, maxSNP)
           n.ori <- length(regionlist[[region_tag]][["sid"]])
-          ifkeep <- rep(F, n.ori)
+          ifkeep <- rep(FALSE, n.ori)
           set.seed <- 99
-          ifkeep[sample.int(n.ori, size = maxSNP)] <- T
+          ifkeep[sample.int(n.ori, size = maxSNP)] <- TRUE
           regionlist[[region_tag]][["sid"]] <-  regionlist[[region_tag]][["sid"]][ifkeep]
         }
       }

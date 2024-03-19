@@ -40,8 +40,6 @@
 #'
 #' @return a list of parameters
 #'
-#' @export
-#'
 ctwas_EM <- function(zdf,
                      regionlist,
                      region_info,
@@ -61,6 +59,7 @@ ctwas_EM <- function(zdf,
   types <- unique(zdf$type)
   QTLtypes <- unique(zdf$QTLtype)
   K <- length(types)
+  L <- 1
 
   # store group priors from each iteration
   group_prior_rec <- matrix(NA, nrow = K , ncol =  niter)
@@ -103,13 +102,13 @@ ctwas_EM <- function(zdf,
       for (region_tag in region_tags.core) {
         gid <- regionlist[[region_tag]][["gid"]]
         sid <- regionlist[[region_tag]][["sid"]]
-
         # keep only GWAS SNPs
         sid <- intersect(sid, zdf$id)
         regionlist[[region_tag]][["sid"]] <- sid
 
-        z.g <- zdf[match(gid, zdf$id), ][["z"]]
-        z.s <- zdf[match(sid, zdf$id), ][["z"]]
+        # combine zscores
+        z.g <- zdf[match(gid, zdf$id), "z"]
+        z.s <- zdf[match(sid, zdf$id), "z"]
         z <- c(z.g, z.s)
 
         g_type <- zdf$type[match(gid, zdf$id)]

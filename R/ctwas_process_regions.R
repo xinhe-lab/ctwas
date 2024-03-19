@@ -1,6 +1,6 @@
 
 #' filter regions based on probability of at most 1 causal effect
-filter_regions <- function(regionlist, group_prior, prob_single = 0.8, zdf){
+filter_regions <- function(regionlist, zdf, group_prior, prob_single = 0.8){
   regionlist2 <- regionlist
   for (region_tag in names(regionlist)){
       gid <- regionlist[[region_tag]][["gid"]]
