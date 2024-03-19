@@ -109,7 +109,7 @@ process_weights <- function (weight_file,
     as.data.frame(outlist[[x]][c("chrom", "p0","p1", "gene_name", "weight_name", "n")])})
   weight_info <- do.call(rbind, weight_info)
   weight_info$id <- names(outlist)
-  rownames(weight_info) <- names(outlist)
+  rownames(weight_info) <- NULL
 
   return(list(weight_list = weight_list, weight_info = weight_info))
 }
