@@ -57,6 +57,7 @@ process_weights <- function (weight_file,
     ld_snpinfo_wgt <- ld_snpinfo[ld_snpinfo$id %in% weight_table$rsid,]
     loginfo("Harmonize weights with LD reference")
 
+    pb <- txtProgressBar(min = 0, max = length(gnames), initial = 0, style = 3)
     for (i in 1:length(gnames)){
       gname <- gnames[i]
       wgt <- weight_table[weight_table$gene==gname,]
@@ -99,7 +100,9 @@ process_weights <- function (weight_file,
         gname_weight <- paste0(gname, "|", weight_name)
         outlist[[gname_weight]] <- list(chrom = chrom, p0 = p0, p1 = p1, wgt = wgt, gene_name=gname, weight_name=weight_name, n = nwgt)
       }
+      setTxtProgressBar(pb, i)
     }
+    close(pb)
   }
 
   weight_list <- lapply(outlist, "[[", "wgt")
