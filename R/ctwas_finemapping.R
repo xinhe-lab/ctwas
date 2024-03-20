@@ -37,6 +37,8 @@
 #'
 #' @param cor_dir a string, the directory to store correlation (R) matrices
 #'
+#' @param verbose TRUE/FALSE. If TRUE, print detail messages
+#'
 #' @importFrom logging loginfo
 #'
 #' @return finemapping results.
@@ -61,9 +63,12 @@ finemap_region <- function(z_snp,
                            force_compute_cor = FALSE,
                            save_cor = FALSE,
                            cor_dir = getwd(),
+                           verbose = FALSE,
                            ...){
 
-  loginfo("Run finemapping with L = %d for region %s", L, region_tag)
+  if (verbose){
+    loginfo("Finemapping region %s with L = %d", region_tag, L)
+  }
 
   # prepare z-scores combining SNPs and genes
   z_snp$type <- "SNP"
@@ -82,7 +87,7 @@ finemap_region <- function(z_snp,
   if (is.null(regionlist)) {
     loginfo("Get regionlist for region %s", region_tag)
     regioninfo <- region_info[region_info$region_tag == region_tag, ]
-    res <- get_regionlist(region_info,
+    res <- get_regionlist(regioninfo,
                           gene_info,
                           select = zdf,
                           thin = 1,
@@ -95,7 +100,6 @@ finemap_region <- function(z_snp,
   # select genes and SNPs in this region
   gid <- regionlist[[region_tag]][["gid"]]
   sid <- regionlist[[region_tag]][["sid"]]
-  loginfo("%d SNPs, %d genes in the regionlist", length(sid), length(gid))
 
   # keep only GWAS SNPs
   sid <- intersect(sid, zdf$id)
@@ -105,7 +109,6 @@ finemap_region <- function(z_snp,
   z.g <- zdf[match(gid, zdf$id), "z"]
   z.s <- zdf[match(sid, zdf$id), "z"]
   z <- c(z.g, z.s)
-  loginfo("%d SNPs, %d genes in the z-scores", length(z.s), length(z.g))
 
   g_type <- zdf$type[match(gid, zdf$id)]
   s_type <- zdf$type[match(sid, zdf$id)]
@@ -174,9 +177,9 @@ finemap_region <- function(z_snp,
     rm(res)
 
     if (isTRUE(save_cor)) {
-      loginfo("Save correlation matrices to %s", cor_dir)
       if (!dir.exists(cor_dir))
         dir.create(cor_dir, recursive = TRUE)
+
       saveRDS(R_snp_gene, file=R_sg_file)
       saveRDS(R_gene, file=R_g_file)
       saveRDS(R_snp, file=R_s_file)
@@ -191,7 +194,6 @@ finemap_region <- function(z_snp,
   } else {
     if (all(file.exists(c(R_sg_file, R_g_file, R_s_file)))) {
       # load precomputed correlation matrices
-      loginfo("Load precomputed correlation matrices from %s", cor_dir)
       R_snp_gene <- load_LD(R_sg_file)
       R_gene <- load_LD(R_g_file)
       R_snp <- load_LD(R_s_file)
@@ -219,7 +221,6 @@ finemap_region <- function(z_snp,
       rm(res)
 
       if (isTRUE(save_cor)) {
-        loginfo("Save correlation matrices to %s", cor_dir)
         if (!dir.exists(cor_dir))
           dir.create(cor_dir, recursive = TRUE)
         saveRDS(R_snp_gene, file=R_sg_file)
@@ -244,7 +245,6 @@ finemap_region <- function(z_snp,
 
   # run susie for this region
   # in susie, prior_variance is under standardized scale (if performed)
-  loginfo("run susie_rss ...")
   susie_res <- ctwas_susie_rss(z = z,
                                R = R,
                                prior_weights = prior,
@@ -257,7 +257,6 @@ finemap_region <- function(z_snp,
                                ...)
 
   # annotate susie result with SNP and gene information
-  loginfo("annotate susie result ...")
   susie_res_df <- anno_susie(susie_res,
                              geneinfo = gene_info,
                              snpinfo = ld_snpinfo,
@@ -271,85 +270,59 @@ finemap_region <- function(z_snp,
 }
 
 
-#' Run cTWAS version of susie_rss for a single region
-ctwas_susie_rss <- function(z,
-                            R,
-                            prior_weights = NULL,
-                            prior_variance = NULL,
+finemap_regions <- function(z_snp,
+                            z_gene,
+                            gene_info,
+                            region_tag,
+                            regionlist = NULL,
+                            region_info = NULL,
+                            weight_list = NULL,
+                            max_snp_region = Inf,
                             L = 5,
-                            z_ld_weight = 0,
-                            null_weight = NULL,
+                            group_prior = NULL,
+                            group_prior_var = NULL,
+                            use_null_weight = TRUE,
                             coverage = 0.95,
                             min_abs_corr = 0.5,
                             max_iter = 100,
+                            ncore = 1,
+                            force_compute_cor = FALSE,
+                            save_cor = FALSE,
+                            cor_dir = getwd(),
                             ...){
 
-  if (missing(R)) {
-    if (L == 1){
-      # R does not matter for susie when L = 1
-      R <- diag(length(z))
-    } else {
-      stop("R (correlation matrix) is required when L > 1")
+  cl <- parallel::makeCluster(ncore, outfile = "")
+  doParallel::registerDoParallel(cl)
+
+  corelist <- region2core(regionlist, ncore)
+
+  finemap_res <- foreach (core = 1:length(corelist), .combine = "rbind", .packages = "ctwas") %dopar% {
+    susie_res.core.list <- list()
+    # run susie for each region
+    region_tags.core <- corelist[[core]]
+    for (region_tag in region_tags.core) {
+      susie_res <- finemap_region(z_snp,
+                                  z_gene,
+                                  gene_info,
+                                  region_tag = region_tag,
+                                  regionlist = regionlist,
+                                  weight_list = weight_list,
+                                  L = L,
+                                  group_prior = group_prior,
+                                  group_prior_var = group_prior_var,
+                                  use_null_weight = use_null_weight,
+                                  coverage = coverage,
+                                  min_abs_corr = min_abs_corr,
+                                  max_iter = max_iter,
+                                  save_cor = save_cor,
+                                  cor_dir = cor_dir,
+                                  ...)
+      susie_res.core.list[[region_tag]] <- susie_res
     }
+    susie_res.core <- do.call(rbind, susie_res.core.list)
+    susie_res.core
   }
+  parallel::stopCluster(cl)
 
-  # in susie, prior_variance is under standardized scale (if performed)
-  susie_res <- susie_rss(z,
-                         R,
-                         prior_weights = prior_weights,
-                         prior_variance = prior_variance,
-                         estimate_prior_variance = F,
-                         L = L,
-                         z_ld_weight = z_ld_weight,
-                         null_weight = null_weight,
-                         coverage = coverage,
-                         min_abs_corr = min_abs_corr,
-                         max_iter = max_iter,
-                         ...)
-
-  return(susie_res)
+  return(finemap_res)
 }
-
-# annotate susie results with SNP and gene information
-anno_susie <- function(susie_res,
-                       geneinfo,
-                       snpinfo,
-                       gid,
-                       sid,
-                       zdf,
-                       region_tag) {
-
-  gidx <- match(gid, geneinfo$id)
-  sidx <- match(sid, snpinfo$id)
-  g_type <- zdf$type[match(gid, zdf$id)]
-  g_QTLtype <- zdf$QTLtype[match(gid, zdf$id)]
-
-  if (length(geneinfo) != 0) {
-    gene_anno <- data.frame(geneinfo[gidx,  c("chrom", "id", "p0")], type = g_type, QTLtype = g_QTLtype)
-    colnames(gene_anno) <-  c("chrom", "id", "pos", "type", "QTLtype")
-  } else {
-    gene_anno <- NULL
-  }
-
-  snp_anno <- data.frame(snpinfo[sidx, c("chrom", "id", "pos")], type = "SNP", QTLtype = "SNP")
-  colnames(snp_anno) <-  c("chrom", "id", "pos", "type", "QTLtype")
-
-  anno <- as.data.frame(rbind(gene_anno, snp_anno))
-  susie_res_df <- cbind(anno, region_tag = region_tag, susie_pip = susie_res$pip)
-
-  p <- length(gid) + length(sid)
-  susie_res_df$mu2 <- colSums(susie_res$mu2[, seq(1, p)[1:p!=susie_res$null_index], drop = F]) #WARN: not sure for L>1
-
-  susie_res_df$cs_index <- 0
-  if (!is.null(susie_res$sets$cs)){
-    for (cs_i in susie_res$sets$cs_index){
-      X.idx <- susie_res$sets$cs[[paste0("L", cs_i)]]
-      X.idx <- X.idx[X.idx != susie_res$null_index] # susie_rss' bug
-      susie_res_df$cs_index[X.idx] <- cs_i
-      #TODO: note this ignores the fact that some variants can belong to multiple CS
-    }
-  }
-
-  return(susie_res_df)
-}
-

@@ -84,15 +84,16 @@ ctwas_EM <- function(zdf,
   pi_prior <- unlist(pi_prior)
   V_prior <- unlist(V_prior)
 
+  # start running EM iterations
+  cl <- parallel::makeCluster(ncore, outfile = "")
+  doParallel::registerDoParallel(cl)
+
+  corelist <- region2core(regionlist, ncore)
+
   for (iter in 1:niter){
 
     if (verbose)
-      loginfo("run iteration %s", iter)
-
-    cl <- parallel::makeCluster(ncore, outfile = "")
-    doParallel::registerDoParallel(cl)
-
-    corelist <- region2core(regionlist, ncore)
+      loginfo("EM iteration %d", iter)
 
     EM_susie_res <- foreach (core = 1:length(corelist), .combine = "rbind", .packages = "ctwas") %dopar% {
       susie_res.core.list <- list()
@@ -178,8 +179,7 @@ ctwas_EM <- function(zdf,
     group_prior_rec[names(pi_prior),iter] <- pi_prior
 
     if (verbose){
-      loginfo("After iteration %s, priors {%s}: {%s}",
-              iter, names(pi_prior), pi_prior)
+      loginfo("After iteration %d, priors {%s}: {%s}", iter, names(pi_prior), pi_prior)
     }
 
     # update estimated group_prior_var from the current iteration
@@ -199,10 +199,8 @@ ctwas_EM <- function(zdf,
     } else if (group_prior_var_structure=="shared_all"){
       tmp_EM_susie_res <- EM_susie_res[EM_susie_res$type=="SNP",]
       V_prior["SNP"] <- sum(tmp_EM_susie_res$susie_pip*tmp_EM_susie_res$mu2)/sum(tmp_EM_susie_res$susie_pip)
-
       tmp_EM_susie_res <- EM_susie_res[EM_susie_res$type!="SNP",]
       V_prior[names(V_prior)!="SNP"] <- sum(tmp_EM_susie_res$susie_pip*tmp_EM_susie_res$mu2)/sum(tmp_EM_susie_res$susie_pip)
-
     } else if (group_prior_var_structure=="shared_QTLtype"){
       tmp_EM_susie_res <- EM_susie_res[EM_susie_res$QTLtype=="SNP",]
       V_prior["SNP"] <- sum(tmp_EM_susie_res$susie_pip*tmp_EM_susie_res$mu2)/sum(tmp_EM_susie_res$susie_pip)
@@ -214,13 +212,10 @@ ctwas_EM <- function(zdf,
             sum(tmp_EM_susie_res$susie_pip*tmp_EM_susie_res$mu2)/sum(tmp_EM_susie_res$susie_pip)
         }
       }
-
     }
-
     group_prior_var_rec[names(V_prior), iter] <- V_prior
-
-    parallel::stopCluster(cl)
   }
+  parallel::stopCluster(cl)
 
   return(list("group_prior"= pi_prior,
               "group_prior_var" = V_prior,

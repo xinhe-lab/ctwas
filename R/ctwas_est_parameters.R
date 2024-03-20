@@ -136,7 +136,6 @@ est_param <- function(
 
   # Run EM for a few (niter1) iterations, getting rough estimates
   loginfo("Run EM for %d iterations, getting rough estimates ...", niter1)
-
   if (!is.null(group_prior)){
     group_prior["SNP"] <- group_prior["SNP"]/thin
   }
@@ -154,21 +153,20 @@ est_param <- function(
                       min_abs_corr = min_abs_corr,
                       max_iter = max_iter,
                       ncore = ncore)
-
   group_prior <- EM1_res$group_prior
   group_prior_var <- EM1_res$group_prior_var
-  print("Roughly estimated group_prior: \n")
-  print(group_prior)
-  print("Roughly estimated group_prior_var: \n")
-  print(group_prior_var)
+  loginfo("Roughly estimated group_prior {%s}: {%s}", names(group_prior), group_prior)
+  loginfo("Roughly estimated group_prior_var {%s}: {%s}", names(group_prior_var), group_prior_var)
   group_size <- table(EM1_res$EM_susie_res$type)
+  loginfo("group_size {%s}: {%s}", names(group_size), group_size)
 
   # filter regions based on prob_single
   filtered_regionlist <- filter_regions(regionlist, zdf, group_prior, prob_single = prob_single)
-  loginfo("%d regions left after filtering by prob_single = %s", sum(unlist(lapply(filtered_regionlist, length))), prob_single)
 
   # Run EM for more (niter2) iterations, getting rough estimates
-  loginfo("Run EM for %d iterations on filtered regions, getting accurate estimates ...", niter2)
+  loginfo("Run EM for %d iterations on %d filtered regions, getting accurate estimates ...",
+          niter2, length(filtered_regionlist))
+
   EM2_res <- ctwas_EM(zdf,
                       filtered_regionlist,
                       region_info,
@@ -185,25 +183,23 @@ est_param <- function(
 
   group_prior <- EM2_res$group_prior
   group_prior_var <- EM2_res$group_prior_var
-  print("Estimated group_prior: \n")
-  print(group_prior)
-  print("Estimated group_prior_var: \n")
-  print(group_prior_var)
-
   group_prior_rec <- EM2_res$group_prior_rec
   group_prior_var_rec <- EM2_res$group_prior_var_rec
   group_prior_var_structure <- EM2_res$group_prior_var_structure
+  loginfo("Estimated group_prior {%s}: {%s}", names(group_prior), group_prior)
+  loginfo("Estimated group_prior_var {%s}: {%s}", names(group_prior_var), group_prior_var)
 
-  return(list("group_prior" = group_prior,
-              "group_prior_var" = group_prior_var,
-              "group_prior_rec" = group_prior_rec,
-              "group_prior_var_rec" = group_prior_var_rec,
-              "group_prior_var_structure" = group_prior_var_structure,
-              "group_size" = group_size,
-              "thin" = thin,
-              "regionlist" = regionlist,
-              "weight_list" = weight_list,
-              "boundary_genes" = boundary_genes))
-
+  param <- list("group_prior" = group_prior,
+                "group_prior_var" = group_prior_var,
+                "group_prior_rec" = group_prior_rec,
+                "group_prior_var_rec" = group_prior_var_rec,
+                "group_prior_var_structure" = group_prior_var_structure,
+                "group_size" = group_size,
+                "thin" = thin,
+                "regionlist" = regionlist,
+                "weight_list" = weight_list,
+                "boundary_genes" = boundary_genes,
+                "filtered_regionlist" = filtered_regionlist)
+  return(param)
 }
 

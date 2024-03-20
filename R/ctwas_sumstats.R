@@ -106,17 +106,16 @@ ctwas_sumstats <- function(
   # Estimate parameters
   #.  including computing correlation matrices for thinned SNPs
   param <- est_param(z_snp = z_snp,
-                   region_info = region_info,
-                   z_gene = z_gene,
-                   gene_info = gene_info,
-                   thin = thin,
-                   group_prior = group_prior,
-                   group_prior_var = group_prior_var,
-                   group_prior_var_structure = group_prior_var_structure,
-                   niter1 = niter1,
-                   niter2 = niter2,
-                   ncore = ncore)
-
+                     region_info = region_info,
+                     z_gene = z_gene,
+                     gene_info = gene_info,
+                     thin = thin,
+                     group_prior = group_prior,
+                     group_prior_var = group_prior_var,
+                     group_prior_var_structure = group_prior_var_structure,
+                     niter1 = niter1,
+                     niter2 = niter2,
+                     ncore = ncore)
   group_prior <- param$group_prior
   group_prior_var <- param$group_prior_var
   regionlist <- param$regionlist
@@ -130,10 +129,10 @@ ctwas_sumstats <- function(
   #. select regions with strong gene signals
   res <- screen_regions(z_snp = z_snp,
                         z_gene = z_gene,
-                        region_info = region_info,
                         gene_info = gene_info,
-                        weight_list = weight_list,
+                        region_info = region_info,
                         regionlist = regionlist,
+                        weight_list = weight_list,
                         thin = thin,
                         max_snp_region = max_snp_region,
                         min_nonSNP_PIP = min_nonSNP_PIP,
@@ -144,7 +143,6 @@ ctwas_sumstats <- function(
                         coverage = coverage,
                         min_abs_corr = min_abs_corr,
                         ncore = ncore)
-
   screened_regionlist <- res$screened_regionlist
   screened_region_tags <- res$screened_region_tags
   weak_region_finemap_res <- res$weak_region_finemap_res
@@ -176,17 +174,18 @@ ctwas_sumstats <- function(
   }
   strong_region_finemap_res <- do.call(rbind, strong_region_finemap_res)
 
-  return(list("strong_region_finemap_res" = strong_region_finemap_res,
-              "weak_region_finemap_res" = weak_region_finemap_res,
-              "param" = param,
-              "z_gene" = z_gene,
-              "gene_info" = gene_info,
-              "region_info" = region_info,
-              "regionlist" = regionlist,
-              "weight_list" = weight_list,
-              "boundary_genes" = boundary_genes,
-              "screened_regionlist" = screened_regionlist,
-              "screened_region_tags" = screened_region_tags))
+  ctwas_res <- list("strong_region_finemap_res" = strong_region_finemap_res,
+                    "weak_region_finemap_res" = weak_region_finemap_res,
+                    "param" = param,
+                    "z_gene" = z_gene,
+                    "gene_info" = gene_info,
+                    "region_info" = region_info,
+                    "regionlist" = regionlist,
+                    "weight_list" = weight_list,
+                    "boundary_genes" = boundary_genes,
+                    "screened_regionlist" = screened_regionlist,
+                    "screened_region_tags" = screened_region_tags)
+  return(ctwas_res)
 
 }
 

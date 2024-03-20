@@ -54,10 +54,10 @@
 screen_regions <- function(
     z_snp,
     z_gene,
+    gene_info,
     region_info,
-    gene_info = NULL,
-    weight_list = NULL,
     regionlist = NULL,
+    weight_list = NULL,
     thin = 1,
     max_snp_region = Inf,
     min_nonSNP_PIP = 0.5,
@@ -136,8 +136,9 @@ screen_regions <- function(
                                   coverage = coverage,
                                   min_abs_corr = min_abs_corr,
                                   max_iter = max_iter,
+                                  verbose = FALSE,
                                   ...)
-      susie_res.core.list[[i]] <- susie_res
+      susie_res.core.list[[region_tag]] <- susie_res
     }
     susie_res.core <- do.call(rbind, susie_res.core.list)
     susie_res.core
