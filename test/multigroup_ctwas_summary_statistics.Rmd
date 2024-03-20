@@ -1,0 +1,352 @@
+---
+title: "Using cTWAS multi-group version with summary statistics"
+author: "Kaixuan Luo, Sheng Qian, Wesley Crouse, Xin He"
+date: "`r Sys.Date()`"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{Using cTWAS multi-group version with summary statistics}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(eval=FALSE,
+                      message = FALSE,
+                      warning = FALSE,
+                      fig.width = 6,
+                      fig.height = 4,
+                      fig.align = "center",
+                      fig.cap = "&nbsp;",
+                      dpi = 120)
+```
+
+## Overview
+
+This document is a tutorial for running cTWAS with summary statistics using the `multi-group` version of the R package, which extends our earlier cTWAS method (single group version) to integrate multiple groups of prediction models. This can be used to jointly analyze gene expression from multiple tissues, and/or to jointly analyze prediction models from different types of -omics data.
+
+In this tutorial, we will show one example to jointly model gene expression from multiple tissues, but the same framework could also be used to jointly modeling multiple molecular QTL data types (with slight change of the parameter settings). 
+
+This document assumes that you have already read the main tutorial for cTWAS (single group version), available [here](https://xinhe-lab.github.io/ctwas/articles/ctwas_summary_statistics.html).
+
+
+## Getting started
+
+Install the `multigroup_kevin` branch of `cTWAS` package
+
+```{r install_package, eval=FALSE}
+remotes::install_github("xinhe-lab/ctwas", ref = "multigroup_kevin")
+```
+
+Load the package and set the working directory where you want to perform the analysis.
+
+```{r load_package}
+library(ctwas)
+```
+
+```{r, eval=FALSE}
+#set the working directory interactively
+setwd("/project2/xinhe/shared_data/ctwas_tutorial/multigroup")
+
+#set the working directory when compiling this document with Knitr
+knitr::opts_knit$set(root.dir = "/project2/xinhe/shared_data/ctwas_tutorial/multigroup")
+```
+
+## Preparing input data
+
+In this version of `cTWAS` package, we require running the data preparation steps before running parameter estimation and finemapping steps of cTWAS analysis. Please see the [data preparation tutorial](https://kevinlkx.github.io/ctwas/articles/data_preparation.html) on preparing and harmonizing GWAS summary statistics, prediction models, and LD reference. 
+
+## Running cTWAS fine-mapping with fixed parameters at a single locus
+
+After preparing input data, we are ready to run the cTWAS analysis. 
+
+The full analysis involves first estimating parameters from the data, and then fine-mapping the genes and variants using these estimated parameters. This can be computationally intensive.
+
+In this example, we will only run the fine-mapping step at an example locus, using the parameters we estimated in the paper.
+
+Let's run the cTWAS fine-mapping step at the HPR locus using the estimated parameters.
+
+Load the processed example data (also used in the `main` branch tutorial):
+
+```{r load_processed_data, eval=FALSE}
+outputdir <- "/project2/xinhe/shared_data/ctwas_tutorial/multigroup/results/single_locus/"
+outname <- "example_locus"
+
+# load imputed gene z-scores, the harmonized GWAS z-scores
+load(paste0(outputdir, "/", outname, "_z_gene.Rd"))
+load(paste0(outputdir, "/", outname, "_z_snp.Rd"))
+
+ld_exprvarfs <- paste0(outputdir, "/", outname, "_chr", 1:22, ".exprvar")
+stopifnot(file.exists(ld_exprvarfs))
+
+ld_R_dir <- "/project2/mstephens/wcrouse/UKB_LDR_0.1/"
+```
+
+Here we use estimated parameters:
+
+```{r}
+# the estimated prior inclusion probabilities for genes and variants from the paper
+group_prior <- c(0.0107220302, 0.0001715896)
+
+# the estimated effect sizes for genes and variants from the paper
+group_prior_var <- c(41.327666, 9.977841)
+```
+
+If we want to rerun a region using precomputed regionlist, we can simply specify the `region_tags` to rerun, and set `reuse_regionlist = TRUE`. 
+
+```{r, eval=FALSE}
+ctwas_finemap_regions(z_gene = z_gene_subset,
+                      z_snp = z_snp_subset,
+                      ld_exprvarfs = ld_exprvarfs,
+                      ld_R_dir = ld_R_dir,
+                      reuse_regionlist = T,
+                      region_tags = "16_1", # rerun on region 1 in chr16
+                      outputdir = outputdir,
+                      outname = outname,
+                      group_prior = group_prior,
+                      group_prior_var = group_prior_var)
+```
+
+or we could run finemapping on regions listed in a custom region file:
+
+```{r, eval=FALSE}
+regions_file <- "/project2/xinhe/shared_data/ctwas_tutorial/regions/regions_subset.bed"
+regions_df <- read.table(regions_file, header = T)
+print(regions_df)
+
+ctwas_finemap_regions(z_gene = z_gene_subset,
+                      z_snp = z_snp_subset,
+                      ld_exprvarfs = ld_exprvarfs,
+                      ld_R_dir = ld_R_dir,
+                      ld_regions_custom = regions_file,
+                      outputdir = outputdir,
+                      outname = outname,
+                      group_prior = group_prior,
+                      group_prior_var = group_prior_var)
+```
+
+<span style="color: red;">TODO: Needs to fix a bug in the `index_region` function. </span>
+
+## Running cTWAS genome-wide with multiple weights
+
+<span style="color: red;">TODO: This section needs to be updated. </span>
+
+We now provide a workflow for the genome-wide analysis using cTWAS and multiple groups of weights. This can be computationally intensive. We performed these analyses with 10 cores and 56GB of RAM, although the exact resource requirements will vary with the numbers of genes and variants provided.
+
+### Estimating parameters 
+
+In the `multigroup` branch, we've included an option (`fine_map=F`) to run only the parameter estimation step in `ctwas_rss`. This makes it easier to divide larger analyses into shorter individual jobs.
+
+To specify that our gene z-scores come from multiple groups, we simply add a `type` column specifying the group name for each gene. We use the following code to extract the tissue label from the concatenated gene names. Note that this code parses the specific prediction model names in our analysis and will need to be adjusted when using other data. For example, this code would give the same group name ("Adipose") to both "Adipose_Subcutaneous" and "Adipose_Visceral_Omentum" if using those tissues.
+
+```{r, eval=FALSE}
+# set the type for each gene (i.e. tissue)
+z_gene$type <- sapply(z_gene$id, function(x){unlist(strsplit(unlist(strsplit(x, "[|]"))[2],"_"))[2]})
+
+head(z_gene)
+```
+
+In addition to the options we specified in the `main` branch cTWAS tutorial, we've added an option (`ncore_LDR`) to parallelize the creation of the SNP-by-gene and gene-by-gene correlation matrices: 
+```{r, eval=FALSE}
+# options used in main branch tutorial
+thin <- 0.1
+max_snp_region <- 20000
+ncore <- 6
+
+# additional options for the multigroup branch
+fine_map <- F
+ncore_LDR <- 6
+```
+
+In the `multigroup` branch, there are several options for how to handle the effect size prior. By default, each group has its own independent effect size parameter (`group_prior_var_stucture = "shared"`). This allows for group-specific priors but may also be too flexible if these parameters are not well informed. In this example, we specify that the non-SNP groups should share a single effect size parameter (`group_prior_var_structure = "shared"`). There is also the option to have the non-SNP groups share an effect size with the variants as well (`group_prior_var_structure = "shared+snps"`). Finally, there is an option to place an inverse-Gamma prior on independent variances for each group (`group_prior_var_structure = "inv_gamma"`); the prior parameters are controlled using the `inv_gamma_shape` and `inv_gamma_rate` options.
+
+```{r, eval=FALSE}
+# prior variance structure
+group_prior_var_structure <- "shared"
+```
+
+We are now ready to run the parameter estimation step using cTWAS. As specified, this step took approximately 9 hours, using 6 cores. 
+
+```{r, eval=FALSE}
+
+if (file.exists(paste0(outputdir, outname, ".s2.susieIrssres.Rd"))){
+  load(paste0(outputdir, outname, ".s2.susieIrssres.Rd"))
+  
+  group_prior <- group_prior_rec[,ncol(group_prior_rec)]
+  group_prior["SNP"] <- group_prior["SNP"]*thin #adjust for thin argument
+  
+  group_prior_var <- group_prior_var_rec[,ncol(group_prior_var_rec)]
+  
+  rm(group_prior_rec, group_prior_var_rec)
+} else {
+  parameters <- ctwas_rss(z_gene = z_gene, 
+                          z_snp = z_snp, 
+                          ld_exprfs = ld_exprfs, 
+                          ld_R_dir = ld_R_dir, 
+                          ld_regions = "EUR",
+                          ld_regions_version = "b38",
+                          outputdir = outputdir, 
+                          outname = outname,
+                          thin = thin,
+                          max_snp_region = max_snp_region,
+                          ncore = ncore,
+                          ncore_LDR = ncore_LDR,
+                          group_prior_var_structure = group_prior_var_structure,
+                          fine_map = fine_map)
+  
+  group_prior <- parameters$group_prior
+  group_prior_var <- parameters$group_prior_var
+}
+
+group_prior
+group_prior_var
+
+```
+
+Both the `group_prior` and `group_prior_var` objects are named vectors containing the parameter estimates. In the `main` branch, these objects were not named. Note that the effect size estimates for Liver and Adipose are identical because we specified that they would share a single parameter.
+
+<span style="color: red;">NOTE: This parameter-estimation-only step still computes the SNP-by-gene and gene-by-gene matrices even though it doesn't need to. Of the 9 hours that this ran, approximately 1.5 hours were spent computing these matrices (and indexing genes/variants to regions, not sure what proportion of time is just building the matrices). These matrices are computed again during the fine-mapping-only step although they could be recycled. They are only computed once when running the combined parameter estimation and fine-mapping. The simplest option to avoid this computation would be to set the SNP-by-gene matrices to contain all zeros and the gene-by-gene matrices to be identity matrices when `fine_map=F`. This option that would need to be passed to the `index_regions` function, which computes the LDR matrices. This would avoid some computation (not sure exactly how much) but the downside is that this would still save a lot of (effectively empty) files in the LDR folder, so it isn't the cleanest fix. </span>
+
+In this example, regions are merged (`merge=T`) and analyzed jointly when a gene spans a region boundary, which is the default behavior. However, if many prediction models are specified, this could lead to excessive region merging, even if prediction models are sparse. If more than a handful of regions are merged, there many be computational issues in subsequent steps. In my experience running this analysis using prediction models from all 49 GTEx tissues, region merging was not tractable. Turning region merging off (`merge=F`) discards all genes that span region boundaries. This will resolve computational issues around excessive region merging but will also prevent the analysis of boundary-spanning genes. For larger analyses, turning off region merging will likely be necessary. I think that this issue is currently the biggest limitation to using the `multigroup` branch.
+
+### Assessing parameter estimates
+
+We provide code to assess the convergence of the estimated parameters and to compute the proportion of variance explained (PVE) by variants and genes. Note that this function has been modified from the `main` branch in order to accommodate multiple groups and the named objects returned by the `multigroup` branch.
+
+```{r, eval=FALSE}
+ctwas_parameters <- ctwas_summarize_parameters(outputdir = outputdir, 
+                                               outname = outname, 
+                                               gwas_n = gwas_n, 
+                                               thin = thin)
+
+#estimated prior inclusion probability
+ctwas_parameters$group_prior
+
+#estimated prior effect size
+ctwas_parameters$group_prior_var
+
+#estimated enrichment of genes over variants
+ctwas_parameters$enrichment
+
+#PVE explained by genes and variants
+ctwas_parameters$group_pve
+
+#total heritability (sum of PVE)
+ctwas_parameters$total_pve
+
+#attributable heritability
+ctwas_parameters$attributable_pve
+
+#plot convergence
+ctwas_parameters$convergence_plot
+```
+
+### Fine-mapping
+
+We now perform the fine-mapping step with the parameters that we estimated in the previous step. Note that the options used in the fine-mapping step should be the same as in parameter estimation step (e.g. if setting `merge=F`, make sure to specify it in both functions). The `group_prior_var_strucutre` option is only necessary during parameter estimation.
+
+As specified, this step took approximately 3.5 hours, using 6 cores. 
+
+```{r, eval=FALSE}
+ctwas_rss(z_gene = z_gene, 
+          z_snp = z_snp, 
+          ld_exprfs = ld_exprfs, 
+          ld_R_dir = ld_R_dir, 
+          ld_regions = "EUR",
+          ld_regions_version = "b38",
+          outputdir = outputdir, 
+          outname = outname,
+          thin = thin,
+          max_snp_region = max_snp_region,
+          ncore = ncore,
+          ncore_LDR = ncore_LDR,
+          group_prior = group_prior, 
+          group_prior_var = group_prior_var, 
+          estimate_group_prior = F, 
+          estimate_group_prior_var = F)
+
+```
+
+<span style="color: red;">NOTE: If `thin` is specified, then for regions with a gene having PIP greater than `rerun_gene_PIP`, cTWAS makes a final pass, analyzing these regions using the full set of variants. However, this behavior may not be appropriate for the multigroup version. In the context of prediction models with multiple tissues, cTWAS will only be re-run if a single gene/tissue pair is over the threshold. If prediction models across tissues are correlated, there could be a high probability of a gene effect in a region, but with high uncertainty on which tissue, and thus a relatively low PIP on any particular gene/tissue pair. cTWAS would not be re-run in this case, and this region would only contain results using thinned variants. </span>
+
+### Viewing the results
+
+As before, we will add the gene names to the results (the PredictDB weights use Ensembl IDs as the primary identifier), as well as the z-scores for each SNP and gene. We then show all genes with PIP greater than 0.8, which is the threshold we used in the paper.
+
+```{r, eval=FALSE}
+
+#load cTWAS results
+ctwas_res <- read.table(paste0(outputdir, outname, ".susieIrss.txt"), header=T)
+
+#load information for all genes
+gene_info <- data.frame(gene=as.character(), genename=as.character(), gene_type=as.character(), weight=as.character())
+
+for (i in 1:length(weight)){
+  sqlite <- RSQLite::dbDriver("SQLite")
+  db = RSQLite::dbConnect(sqlite, weight[i])
+  query <- function(...) RSQLite::dbGetQuery(db, ...)
+  gene_info_current <- query("select gene, genename, gene_type from extra")
+  RSQLite::dbDisconnect(db)
+  
+  gene_info_current$weight <- weight[i]
+  
+  gene_info <- rbind(gene_info, gene_info_current)
+}
+
+gene_info$weight <- sapply(gene_info$weight, function(x){rev(unlist(strsplit(tools::file_path_sans_ext(x), "/")))[1]})
+gene_info$id <- paste(gene_info$gene, gene_info$weight, sep="|")
+
+#add gene names to cTWAS results
+ctwas_res$genename[ctwas_res$type!="SNP"] <- gene_info$genename[match(ctwas_res$id[ctwas_res$type!="SNP"], gene_info$id)]
+
+rm(gene_info)
+
+#add z-scores to cTWAS results
+ctwas_res$z[ctwas_res$type=="SNP"] <- z_snp$z[match(ctwas_res$id[ctwas_res$type=="SNP"], z_snp$id)]
+ctwas_res$z[ctwas_res$type!="SNP"] <- z_gene$z[match(ctwas_res$id[ctwas_res$type!="SNP"], z_gene$id)]
+
+#display the genes with PIP > 0.8
+ctwas_res <- ctwas_res[order(-ctwas_res$susie_pip),]
+ctwas_res[ctwas_res$type!="SNP" & ctwas_res$susie_pip > 0.8,]
+
+```
+
+In the context of genes in multiple tissues, it is also useful to evaluate the PIP for each gene combined over tissues:
+
+```{r, eval=FALSE}
+
+# aggregate by gene name
+df_gene <- aggregate(ctwas_res$susie_pip[ctwas_res$type!="SNP"], by=list(ctwas_res$genename[ctwas_res$type!="SNP"]), FUN=sum)
+colnames(df_gene) <- c("genename", "combined_pip")
+
+# drop duplicated gene names
+df_gene <- df_gene[!(df_gene$genename %in% names(which(table(ctwas_res$genename)>length(weight)))),]
+
+# collect tissue-level results
+all_tissue_names <- unique(ctwas_res$type[ctwas_res$type!="SNP"])
+
+df_gene_pips <- matrix(NA, nrow=nrow(df_gene), ncol=length(all_tissue_names))
+colnames(df_gene_pips) <- all_tissue_names
+
+ctwas_gene_res <- ctwas_res[ctwas_res$type!="SNP",]
+
+for (i in 1:nrow(df_gene)){
+  gene <- df_gene$genename[i]
+  ctwas_gene_res_subset <- ctwas_gene_res[which(ctwas_gene_res$genename==gene),]
+  df_gene_pips[i,ctwas_gene_res_subset$type] <- ctwas_gene_res_subset$susie_pip
+}
+
+df_gene <- cbind(df_gene, df_gene_pips)
+
+rm(df_gene_pips, ctwas_gene_res, ctwas_gene_res_subset)
+
+#sort by combined PIP
+df_gene <- df_gene[order(-df_gene$combined_pip),]
+df_gene <- df_gene[,apply(df_gene, 2, function(x){!all(is.na(x))})] #drop genes that weren't imputed in any tissue
+
+#genes with PIP>0.8 or 20 highest PIPs
+head(df_gene, max(sum(df_gene$combined_pip>0.8), 20))
+
+```
+
+<span style="color: red;">NOTE: To visualize individual loci, the `ctwas_locus_plot` function will need to be updated to accommodate multiple groups. </span>
+

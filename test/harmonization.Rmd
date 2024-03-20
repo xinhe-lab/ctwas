@@ -1,0 +1,26 @@
+---
+title: "Harmonization"
+author: "wesleycrouse"
+date: "2023-08-31"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{Harmonization}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+### Harmonization
+
+The input data for cTWAS must be harmonized prior to analysis (i.e. the reference and alternative alleles for each variant should match across all three data sources). We provide some options for harmonization during the gene imputation step if the data are not already harmonized. These options separately harmonizing the GWAS summary statistics and the prediction models to the LD reference. The full harmonization procedures are described in the methods section of the paper. Here, we will provide a quick description of how harmonization works, and when it should be used. 
+
+If harmonization is off, cTWAS will use the union of variants in the GWAS reference, the prediction models, and the LD reference for imputation, and it will use the z-score and weights as-is.
+
+For the GWAS summary statistics and the prediction models, there are two options that turn on "simple" harmonization: `harmonize_z = T` and `harmonize_wgt = T`. Simple harmonization flips reference and alternate alleles to match the LD reference. This procedure is fast, and for variants that are not strand ambiguous, this is all that is required for harmonization. However, strand ambiguous variants (A<->T and C<->G substitutions) are not necessarily harmonized, as the strand used to determine the ref/alt alleles could be different between different datasets, and this is indistinguishable from a ref/alt allele swap. Turning on harmonization requires making a decision about how to handle these strand ambiguous variants.
+
+For the z-scores, there are three options for strand ambiguous variants, specified by `strand_ambig_action_z`. The `"drop"` option removes strand ambiguous variants; the `"none"` option takes no action, effectively treating strand ambiguous variants as unambiguous; and the `"recover"` option uses the imputation-based procedure described in the paper to recover strand ambiguous variants. The "recover" option can be computationally expensive. 
+
+For the weights, there are two options for strand ambiguous variants, specified by `recover_strand_ambig_wgt`. Setting this equal to `FALSE` removes strand ambiguous variants; setting it to `TRUE` will use the LD-based procedure described in the paper to recover strand ambiguous weights. This recovery procedure does increase runtime, but it is less expensive than the recovery procedure for the z-scores.
+
+In the paper and in this document, because the z-scores and the LD reference were from the same source (UK Biobank), we expect that the strand is consistent between the GWAS and LD reference, so we used the option `strand_ambig_action_z = "none"` to treat strand ambiguous variants as unambiguous. The prediction models are from a different population (GTEx), so for strand ambiguous variants in the prediction models, we used `recover_strand_ambig_wgt=T`.
+
+Note that we include a function to pre-harmonize the GWAS summary statistics: `preharmonize_z_ld`. If using this function at the start of the analysis, you can set `harmonize_z = F` during imputation.

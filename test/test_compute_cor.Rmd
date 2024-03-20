@@ -1,0 +1,147 @@
+---
+title: "Test compute_cor() for example regions"
+output: html_document
+date: '2024-03-01'
+---
+
+```{r setup, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>"
+)
+```
+
+```{r}
+library(logging)
+library(data.table)
+devtools::load_all("~/projects/cTWAS_package/multigroup_test/ctwas")
+```
+
+```{r}
+region_info <- fread("/project2/xinhe/shengqian/cTWAS/cTWAS_analysis/LD_regions.txt")
+#random_indices <- sample(nrow(region_info), 200)
+#region_info <- region_info[random_indices,]
+#region_info <- region_info[region_info$chr==1,]
+```
+
+```{r}
+result_name <- "ukb-s80.45-3_7uncorr_simu1-1_config1_LDR"
+result_dir <- "/project/xinhe/shengqian/cTWAS_simulation/simulation_uncorrelated_seven_tissues/"
+
+exprvarfs <- paste0(result_dir, "/", result_name, "_chr", 1:22, ".exprvar")
+gene_info <- do.call(rbind,lapply(exprvarfs,fread))
+
+wgtall <- lapply(exprvarfs, function(x){load(paste0(strsplit(x, ".exprvar")[[1]], ".exprqc.Rd")); wgtlist})
+weight_list <- do.call(c, wgtall)
+names(weight_list) <- do.call(c, lapply(wgtall, names))
+rm(wgtall)
+```
+
+get SNP and gene indices for all the regions with thin = 0.1
+```{r}
+timing <- system.time({
+  res_thinSNPs <- get_region_idx(region_info,
+                                 gene_info,
+                                 weight_list,
+                                 select = NULL,
+                                 thin = 0.1,
+                                 maxSNP = Inf,
+                                 minvar = 1)
+})
+cat(sprintf("Computation took %0.2f seconds.\n",timing["elapsed"]))
+```
+
+```{r}
+regionlist_all <- do.call(c, res_thinSNPs$regionlist)
+regionlist_n_snps <- sapply(regionlist_all, function(x){length(x[["sid"]])})
+cat("number of SNPs in regions: \n")
+head(sort(regionlist_n_snps, decreasing = T))
+
+regionlist_n_genes <- sapply(regionlist_all, function(x){length(x[["gid"]])})
+cat("number of genes in regions: \n")
+head(sort(regionlist_n_genes, decreasing = T))
+```
+
+Compute correlation matrices for example regions
+```{r}
+timing <- system.time({
+  cor_res <- compute_region_cor(res_thinSNPs$regionlist,
+                                res_thinSNPs$weight_list,
+                                b = "6", rn = "26")
+})
+cat(sprintf("Computation took %0.2f seconds.\n",timing["elapsed"]))
+```
+
+```{r}
+timing <- system.time({
+  cor_res <- compute_region_cor(res_thinSNPs$regionlist,
+                                res_thinSNPs$weight_list,
+                                b = "11", rn = "36")
+})
+cat(sprintf("Computation took %0.2f seconds.\n",timing["elapsed"]))
+```
+
+get SNP and gene indices for all the regions with all SNPs (thin = 1)
+```{r}
+timing <- system.time({
+  res_allSNPs <- get_region_idx(region_info,
+                                gene_info,
+                                weight_list,
+                                select = NULL,
+                                thin = 1,
+                                maxSNP = 20000,
+                                minvar = 1)
+})
+cat(sprintf("Computation took %0.2f seconds.\n",timing["elapsed"]))
+```
+
+```{r}
+regionlist_all <- do.call(c, res_thinSNPs$regionlist)
+regionlist_n_snps <- sapply(regionlist_all, function(x){length(x[["sid"]])})
+cat("number of SNPs in regions: \n")
+head(sort(regionlist_n_snps, decreasing = T))
+
+regionlist_n_genes <- sapply(regionlist_all, function(x){length(x[["gid"]])})
+cat("number of genes in regions: \n")
+head(sort(regionlist_n_genes, decreasing = T))
+```
+
+Compute correlation matrices for example regions
+```{r}
+timing <- system.time({
+  cor_res <- compute_region_cor(res_allSNPs$regionlist,
+                                res_allSNPs$weight_list,
+                                b = "11", rn = "32")
+})
+cat(sprintf("Computation took %0.2f seconds.\n",timing["elapsed"]))
+```
+
+```{r}
+timing <- system.time({
+  cor_res <- compute_region_cor(res_allSNPs$regionlist,
+                                res_allSNPs$weight_list,
+                                b = "11", rn = "36")
+})
+cat(sprintf("Computation took %0.2f seconds.\n",timing["elapsed"]))
+```
+
+```{r}
+timing <- system.time({
+  cor_res <- compute_region_cor(res_allSNPs$regionlist,
+                                res_allSNPs$weight_list,
+                                b = "6", rn = "26")
+})
+cat(sprintf("Computation took %0.2f seconds.\n",timing["elapsed"]))
+```
+
+```{r}
+timing <- system.time({
+  cor_res <- compute_region_cor(res_allSNPs$regionlist,
+                                res_allSNPs$weight_list,
+                                b = "6", rn = "26",
+                                save = TRUE,
+                                outname = "test",
+                                outputdir = "/project2/xinhe/kevinluo/cTWAS/ctwas_tutorial/")
+})
+cat(sprintf("Computation took %0.2f seconds.\n",timing["elapsed"]))
+```
