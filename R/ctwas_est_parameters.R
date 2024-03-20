@@ -92,6 +92,10 @@ est_param <- function(
 
   group_prior_var_structure <- match.arg(group_prior_var_structure)
 
+  if (thin <= 0 | thin > 1){
+    stop("thin value needs to be in (0,1]")
+  }
+
   # compute gene z-scores if not available
   if (is.null(z_gene)) {
     loginfo("Computing gene z-scores ...")
@@ -102,20 +106,7 @@ est_param <- function(
   }
 
   # combine z-scores of SNPs and genes
-  z_snp$type <- "SNP"
-  z_snp$QTLtype <- "SNP"
-  if (is.null(z_gene$type)){
-    z_gene$type <- "gene"
-  }
-  if (is.null(z_gene$QTLtype)){
-    z_gene$QTLtype <- "gene"
-  }
-  zdf <- rbind(z_snp[, c("id", "z", "type", "QTLtype")],
-               z_gene[, c("id", "z", "type", "QTLtype")])
-
-  if (thin <= 0 | thin > 1){
-    stop("thin value needs to be in (0,1]")
-  }
+  zdf <- combine_z(z_snp, z_gene)
 
   # get regionlist if not available
   if (is.null(regionlist)) {
@@ -197,9 +188,15 @@ est_param <- function(
                 "group_size" = group_size,
                 "thin" = thin,
                 "regionlist" = regionlist,
-                "weight_list" = weight_list,
-                "boundary_genes" = boundary_genes,
                 "filtered_regionlist" = filtered_regionlist)
+
+  if (!is.null(weight_list)){
+    param[["weight_list"]] <- weight_list
+  }
+  if (!is.null(boundary_genes)){
+    param[["boundary_genes"]] <- boundary_genes
+  }
+
   return(param)
 }
 

@@ -38,7 +38,7 @@ ctwas_susie_rss <- function(z,
   return(susie_res)
 }
 
-# annotate susie results with SNP and gene information
+#' annotate susie results with SNP and gene information
 anno_susie <- function(susie_res,
                        geneinfo,
                        snpinfo,

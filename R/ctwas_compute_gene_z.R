@@ -116,3 +116,27 @@ compute_gene_z <- function (z_snp,
   return(list(z_gene = z_gene, gene_info = gene_info))
 }
 
+#' Combine SNP and gene z-scores
+#'
+#' @param z_snp a data frame with four columns: "id", "A1", "A2", "z".
+#' giving the z scores for SNPs. "A1" is effect allele. "A2" is the other allele.
+#'
+#' @param z_gene a data frame with two columns: "id", "z". giving the z scores for genes.
+#' Optionally, a "type" column can also be supplied; this is for using multiple sets of weights
+#'
+#' @export
+#'
+combine_z <- function(z_snp, z_gene){
+  z_snp$type <- "SNP"
+  z_snp$QTLtype <- "SNP"
+  if (is.null(z_gene$type)){
+    z_gene$type <- "gene"
+  }
+  if (is.null(z_gene$QTLtype)){
+    z_gene$QTLtype <- "gene"
+  }
+  zdf <- rbind(z_snp[, c("id", "z", "type", "QTLtype")],
+               z_gene[, c("id", "z", "type", "QTLtype")])
+  rownames(zdf) <- NULL
+  return(zdf)
+}

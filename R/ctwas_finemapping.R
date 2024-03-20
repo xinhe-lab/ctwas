@@ -71,16 +71,8 @@ finemap_region <- function(z_snp,
   }
 
   # prepare z-scores combining SNPs and genes
-  z_snp$type <- "SNP"
-  z_snp$QTLtype <- "SNP"
-  if (is.null(z_gene$type)){
-    z_gene$type <- "gene"
-  }
-  if (is.null(z_gene$QTLtype)){
-    z_gene$QTLtype <- "gene"
-  }
-  zdf <- rbind(z_snp[, c("id", "z", "type", "QTLtype")],
-               z_gene[, c("id", "z", "type", "QTLtype")])
+  zdf <- combine_z(z_snp, z_gene)
+
   types <- unique(zdf$type)
 
   # get regionlist with full SNPs if not available

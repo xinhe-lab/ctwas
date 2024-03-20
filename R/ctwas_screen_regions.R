@@ -70,29 +70,22 @@ screen_regions <- function(
     max_iter = 1,
     ncore = 1,
     logfile = NULL,
+    verbose = FALSE,
     ...){
 
   if (!is.null(logfile)){
     addHandler(writeToFile, file= logfile, level='DEBUG')
   }
 
-  # combine z-scores of SNPs and genes
-  z_snp$type <- "SNP"
-  z_snp$QTLtype <- "SNP"
-  if (is.null(z_gene$type)){
-    z_gene$type <- "gene"
-  }
-  if (is.null(z_gene$QTLtype)){
-    z_gene$QTLtype <- "gene"
-  }
-  zdf <- rbind(z_snp[, c("id", "z", "type", "QTLtype")],
-               z_gene[, c("id", "z", "type", "QTLtype")])
+  loginfo("Screen regions ...")
 
   if (thin <= 0 || thin > 1){
     stop("thin value needs to be in (0,1]")
   }
 
-  loginfo("Screen regions ...")
+  # combine z-scores of SNPs and genes
+  zdf <- combine_z(z_snp, z_gene)
+
   if (is.null(regionlist)) {
     loginfo("Get regionlist with thin = %.2f", thin)
     res <- get_regionlist(region_info,
@@ -136,7 +129,7 @@ screen_regions <- function(
                                   coverage = coverage,
                                   min_abs_corr = min_abs_corr,
                                   max_iter = max_iter,
-                                  verbose = FALSE,
+                                  verbose = verbose,
                                   ...)
       susie_res.core.list[[region_tag]] <- susie_res
     }
@@ -174,12 +167,19 @@ screen_regions <- function(
   # keep the finemapping results for the regions without strong signals (will not rerun finemapping)
   weak_region_finemap_res <- finemap_res[!finemap_res$region_tag %in% screened_region_tags, ]
 
-  return(list("screened_regionlist" = screened_regionlist,
+  res <- list("screened_regionlist" = screened_regionlist,
               "screened_region_tags" = screened_region_tags,
               "weak_region_finemap_res" = weak_region_finemap_res,
-              "regionlist" = regionlist,
-              "weight_list" = weight_list,
-              "boundary_genes" = boundary_genes))
+              "regionlist" = regionlist)
+
+  if (!is.null(weight_list)){
+    res[["weight_list"]] <- weight_list
+  }
+  if (!is.null(boundary_genes)){
+    res[["boundary_genes"]] <- boundary_genes
+  }
+
+  return()
 }
 
 
