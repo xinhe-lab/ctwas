@@ -1,0 +1,257 @@
+---
+title: "Using cTWAS with summary statistics genome-wide"
+author: "Kaixuan Luo"
+date: "`r Sys.Date()`"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{Using cTWAS with summary statistics genome-wide}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(message = FALSE,
+                      warning = FALSE,
+                      eval = FALSE,
+                      fig.width = 6,
+                      fig.height = 4,
+                      fig.align = "center",
+                      fig.cap = "&nbsp;",
+                      dpi = 120)
+```
+
+
+This document demonstrates how to use the summary statistics version of cTWAS using tutorial data from a single group. 
+
+## Getting started
+
+Install `cTWAS` package
+
+```{r install_package, eval=FALSE}
+remotes::install_github("xinhe-lab/ctwas", ref = "multigroup_test")
+```
+
+Load `cTWAS` package
+
+```{r load_package}
+# library(ctwas)
+devtools::load_all("~/projects/cTWAS_package/multigroup_test/ctwas")
+```
+
+## Preparing the input data
+
+The inputs for the summary statistics version of cTWAS include GWAS summary statistics for variants, prediction models for genes, and LD reference. 
+
+We used the directories and files on the University of Chicago RCC cluster as examples. If you are at UChicago, you can load those data from RCC as below.
+
+### GWAS z-scores
+
+For this analysis, we will use summary statistics from a GWAS of LDL cholesterol in the UK Biobank. We will download the VCF from the IEU Open GWAS Project.
+
+Next, we will read the summary statistics. Then, we will compute the z-scores and format the input data. We will also collect the sample size, which will be useful later. We will save this output for convenience.
+
+```{r, eval=FALSE}
+if (file.exists(z_snp_outfile)){
+  z_snp <- readRDS(z_snp_outfile)
+} else {
+  # read the data using the VariantAnnotation package
+  z_snp <- VariantAnnotation::readVcf("/project2/xinhe/shared_data/multigroup_ctwas/test_data/ukb-d-30780_irnt.vcf.gz")
+  z_snp <- as.data.frame(gwasvcf::vcf_to_tibble(z_snp))
+
+  # compute the z-scores
+  z_snp$Z <- z_snp$ES/z_snp$SE
+
+  # collect sample size (most frequent sample size for all variants)
+  gwas_n <- as.numeric(names(sort(table(z_snp$SS),decreasing=TRUE)[1]))
+
+  # subset the columns and format the column names
+  z_snp <- z_snp[,c("rsid", "ALT", "REF", "Z")]
+  colnames(z_snp) <- c("id", "A1", "A2", "z")
+
+  # drop multiallelic variants (id not unique)
+  z_snp <- z_snp[!(z_snp$id %in% z_snp$id[duplicated(z_snp$id)]),]
+
+  # save the formatted z-scores and GWAS sample size
+  saveRDS(z_snp, file=z_snp_outfile)
+  saveRDS(gwas_n, file=file.path(outputdir, "gwas_n.RDS"))
+  save(z_snp, gwas_n, file = file.path(outputdir, paste0(z_snp_stem, ".Rdata")))
+}
+```
+
+After the previous step, we can load the data and look at the format. 
+`z_snp` is a data frame, and each row is a variant. `A1` is the alternate allele, and `A2` is the reference allele. The sample size for this GWAS is `N=343,621`.
+
+```{r load_z_snp}
+z_snp <- load(file.path(outputdir, paste0(z_snp_stem, ".Rdata")))
+
+head(z_snp)
+
+# sample size
+gwas_n
+```
+
+### Prediction models
+
+In this version, we use the prediction models in PredictDB format.
+
+Please check [PredictDB](http://predictdb.org/) for the format of PredictDB weights. 
+
+For this analysis, we will use liver gene expression models trained on GTEx v8 in the PredictDB format. 
+
+To specify weights in PredictDB format, provide the path to the `.db` file. 
+
+```{r weight}
+weight <- "/project2/xinhe/shared_data/multigroup_ctwas/test_data/mashr_Liver_nolnc.db"
+```
+
+### LD reference and regions
+
+#### Defining regions
+
+```{r region_info}
+region_file <- system.file("extdata/ldetect", "EUR.b38.bed", package = "ctwas")
+region_info <- read.table(region_file, header = TRUE)
+colnames(region_info)[1:3] <- c("chrom", "start", "stop")
+region_info$chrom <- as.numeric(gsub("chr", "", region_info$chrom))
+region_info$region_tag <- paste0(region_info$chr, ":", region_info$start, "-", region_info$stop)
+
+ld_R_dir <- "/project2/mstephens/wcrouse/UKB_LDR_0.1"
+filestem <- "ukb_b38_0.1"
+ld_filestem <- sprintf("%s_chr%s.R_snp.%s_%s", filestem, region_info$chrom, region_info$start, region_info$stop)
+region_info$LD_matrix <- file.path(ld_R_dir, paste0(ld_filestem, ".RDS"))
+region_info$SNP_info <- file.path(ld_R_dir, paste0(ld_filestem, ".Rvar"))
+
+region_info[1:3,]
+```
+
+#### LD matrices
+
+To use LD matrices for the LD reference, provide a directory containing all of the `.RDS` matrix files and matching `.Rvar` variant information files. 
+
+The complete LD matrices of European individuals from UK Biobank can be downloaded [here](https://uchicago.box.com/s/jqocacd2fulskmhoqnasrknbt59x3xkn). On the University of Chicago RCC cluster, the b38 reference is available at `/project2/mstephens/wcrouse/UKB_LDR_0.1/` and the b37 reference is available at `/project2/mstephens/wcrouse/UKB_LDR_0.1_b37/`.
+
+### Data harmonization
+
+These inputs should be harmonized prior to cTWAS analysis (i.e. the reference and alternative alleles for each variant should match across all three data sources). 
+
+#### Harmonizing GWAS z-scores and LD reference and detect LD mismatches
+
+The `preprocess_z()` function first harmonizes GWAS z-scores and LD reference based on the included allele information, 
+then performs LD mismatch diagnosis using the `kriging_rss()` function from SuSiE RSS, 
+and flips signs for variants detected with allele flipping issues. 
+Note, the LD mismatch diagnosis procedure can be time consuming (we skip this step here).
+
+```{r}
+res <- preprocess_z(z_snp, 
+                    region_info, 
+                    gwas_n,
+                    drop_multiallelic = TRUE,
+                    drop_strand_ambig = TRUE,
+                    detect_ld_mismatch = FALSE)
+z_snp <- res$z_snp
+ld_mismatch_res <- res$ld_mismatch_res
+```
+
+#### Harmonizing prediction models and LD reference
+
+The `preprocess_weight()` function harmonizes the PredictDB prediction models and LD reference. 
+This only needs to be done once per combination of prediction models and LD reference. 
+
+```{r preprocess_weight}
+weight_fileweight <- "/project2/xinhe/kevinluo/cTWAS/ctwas_tutorial/weights/eqtl/mashr/mashr_Liver.db"
+outputdir <- "/project2/xinhe/kevinluo/cTWAS/ctwas_tutorial/"
+
+res <- preprocess_weight(weight, 
+                         region_info, 
+                         drop_strand_ambig = TRUE,
+                         write_db = TRUE,
+                         outputdir = paste0(outputdir, "/preprocessed_weights/"),
+                         outname = "mashr_Liver_nolnc")
+weight_table <- res$weight_table
+extra_table <- res$extra_table
+
+preprocessed_weight = file.path(paste0(outputdir, "/preprocessed_weights/"), "mashr_Liver_nolnc.db")
+res <- read_weights(preprocessed_weight, 
+                    region_info, 
+                    z_snp, 
+                    scale_by_ld_variance=TRUE,
+                    ncore = 6)
+weight_list <- res$weight_list
+weight_info <- res$weight_info
+saveRDS(res, file.path(paste0(outputdir, "/preprocessed_weights/"), "mashr_Liver_nolnc_processed_weights.rds"))
+```
+
+## Running cTWAS genome-wide
+
+### Imputing gene z-scores
+```{r impute_expr_z}
+res <- compute_gene_z(z_snp, region_info, weight_list, weight_info, ncore = 6)
+gene_info <- res$gene_info
+z_gene <- res$z_gene
+```
+
+### Estimating parameters
+```{r}
+thin <- 0.1
+max_snp_region <- 20000
+ncore <- 6
+group_prior_var_structure <- "independent"
+```
+
+using 6 cores and with 56GB of RAM available, this step took approximately 7 hours.
+
+```{r est_param, eval=FALSE}
+param <- est_param(z_snp = z_snp,
+                   region_info = region_info,
+                   z_gene = z_gene,
+                   gene_info = gene_info,
+                   thin = thin,
+                   max_snp_region = max_snp_region,
+                   group_prior_var_structure = group_prior_var_structure,
+                   ncore = ncore)
+```
+
+### Assessing parameter estimates
+
+We provide code to assess the convergence of the estimated parameters and to compute the proportion of variance explained (PVE) by variants and genes.
+
+```{r summarize_parameters}
+ctwas_parameters <- summarize_param(param, gwas_n, thin = thin)
+
+# number of variants in the analysis
+ctwas_parameters$n_snps
+
+# number of genes in the analysis
+ctwas_parameters$n_genes
+
+# estimated prior inclusion probability
+ctwas_parameters$group_prior
+
+# estimated prior effect size
+ctwas_parameters$group_prior_var
+
+# estimated enrichment of genes over variants
+ctwas_parameters$enrichment
+
+# PVE explained by genes and variants
+ctwas_parameters$group_pve
+
+# total heritability (sum of PVE)
+ctwas_parameters$total_pve
+
+# attributable heritability
+ctwas_parameters$attributable_pve
+
+# plot convergence
+ctwas_parameters$convergence_plot
+```
+
+## Session information
+
+Here are some details about the computing environment, including the
+versions of R, and the R packages, used to generate these results.
+
+```{r}
+sessionInfo()
+```
+

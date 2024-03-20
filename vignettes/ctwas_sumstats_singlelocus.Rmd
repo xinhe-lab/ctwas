@@ -232,13 +232,13 @@ This only needs to be done once per combination of prediction models and LD refe
 
 ```{r preprocess_weight, message=FALSE, warning=FALSE}
 weight <- "/project2/xinhe/kevinluo/cTWAS/ctwas_tutorial/weights/eqtl/mashr/mashr_Liver.db"
-res <- process_weight(weight, 
-                      region_info, 
-                      z_snp,
-                      weight_format = "PredictDB",
-                      drop_strand_ambig = TRUE,
-                      filter_protein_coding_genes = TRUE,
-                      scale_by_ld_variance = TRUE)
+res <- process_weights(weight, 
+                       region_info, 
+                       z_snp,
+                       weight_format = "PredictDB",
+                       drop_strand_ambig = TRUE,
+                       filter_protein_coding_genes = TRUE,
+                       scale_by_ld_variance = TRUE)
 weight_list <- res$weight_list
 weight_info <- res$weight_info
 ```

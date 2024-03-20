@@ -101,6 +101,9 @@ finemap_region <- function(z_snp,
   z.g <- zdf[match(gid, zdf$id), "z"]
   z.s <- zdf[match(sid, zdf$id), "z"]
   z <- c(z.g, z.s)
+  # if (verbose){
+  #   loginfo("%d genes and %d SNPs in z-scores", length(z.g), length(z.s))
+  # }
 
   g_type <- zdf$type[match(gid, zdf$id)]
   s_type <- zdf$type[match(sid, zdf$id)]
@@ -261,7 +264,56 @@ finemap_region <- function(z_snp,
 
 }
 
-
+#' run cTWAS finemapping for multiple regions
+#'
+#' @param z_snp A data frame with four columns: "id", "A1", "A2", "z".
+#' giving the z scores for snps. "A1" is effect allele. "A2" is the other allele.
+#'
+#' @param z_gene A data frame with two columns: "id", "z". giving the z scores for genes.
+#' Optionally, a "type" column can also be supplied; this is for using multiple sets of weights
+#'
+#' @param gene_info a data frame of gene information obtained from \code{compute_gene_z}
+#'
+#' @param regionlist regionlist to be finemapped
+#'
+#' @param weight_list a list of weights for each gene
+#'
+#' @param L the number of effects for susie during the fine mapping steps
+#'
+#' @param group_prior a vector of two prior inclusion probabilities for SNPs and genes.
+#'
+#' @param group_prior_var a vector of two prior variances for SNPs and gene effects.
+#'
+#' @param use_null_weight TRUE/FALSE. If TRUE, allow for a probability of no effect in susie
+#'
+#' @param coverage A number between 0 and 1 specifying the \dQuote{coverage} of the estimated confidence sets
+#'
+#' @param min_abs_corr Minimum absolute correlation allowed in a
+#'   credible set. The default, 0.5, corresponds to a squared
+#'   correlation of 0.25, which is a commonly used threshold for
+#'   genotype data in genetic studies.
+#'
+#' @param max_iter Maximum number of IBSS iterations to perform.
+#'
+#' @param ncore The number of cores used to parallelize computation over regions
+#'
+#' @param force_compute_cor TRUE/FALSE. If TRUE, force computing correlation (R) matrices
+#'
+#' @param save_cor TRUE/FALSE. If TRUE, save correlation (R) matrices
+#'
+#' @param cor_dir a string, the directory to store correlation (R) matrices
+#'
+#' @param verbose TRUE/FALSE. If TRUE, print detail messages
+#'
+#' @param logfile the log file, if NULL will print log info on screen
+#'
+#' @importFrom logging addHandler loginfo writeToFile
+#' @importFrom logging loginfo
+#'
+#' @return finemapping results.
+#'
+#' @export
+#'
 finemap_regions <- function(z_snp,
                             z_gene,
                             gene_info,
@@ -281,7 +333,14 @@ finemap_regions <- function(z_snp,
                             force_compute_cor = FALSE,
                             save_cor = FALSE,
                             cor_dir = getwd(),
+                            logfile = NULL,
                             ...){
+
+  if (!is.null(logfile)){
+    addHandler(writeToFile, file= logfile, level='DEBUG')
+  }
+
+  loginfo('Finemapping regions ... ')
 
   cl <- parallel::makeCluster(ncore, outfile = "")
   doParallel::registerDoParallel(cl)
@@ -289,30 +348,30 @@ finemap_regions <- function(z_snp,
   corelist <- region2core(regionlist, ncore)
 
   finemap_res <- foreach (core = 1:length(corelist), .combine = "rbind", .packages = "ctwas") %dopar% {
-    susie_res.core.list <- list()
-    # run susie for each region
+    finemap_res.core.list <- list()
+    # run finemapping for each region
     region_tags.core <- corelist[[core]]
     for (region_tag in region_tags.core) {
-      susie_res <- finemap_region(z_snp,
-                                  z_gene,
-                                  gene_info,
-                                  region_tag = region_tag,
-                                  regionlist = regionlist,
-                                  weight_list = weight_list,
-                                  L = L,
-                                  group_prior = group_prior,
-                                  group_prior_var = group_prior_var,
-                                  use_null_weight = use_null_weight,
-                                  coverage = coverage,
-                                  min_abs_corr = min_abs_corr,
-                                  max_iter = max_iter,
-                                  save_cor = save_cor,
-                                  cor_dir = cor_dir,
-                                  ...)
-      susie_res.core.list[[region_tag]] <- susie_res
+      finemap_res.core.list[[region_tag]] <- finemap_region(z_snp,
+                                                            z_gene,
+                                                            gene_info,
+                                                            region_tag = region_tag,
+                                                            regionlist = regionlist,
+                                                            weight_list = weight_list,
+                                                            L = L,
+                                                            group_prior = group_prior,
+                                                            group_prior_var = group_prior_var,
+                                                            use_null_weight = use_null_weight,
+                                                            coverage = coverage,
+                                                            min_abs_corr = min_abs_corr,
+                                                            max_iter = max_iter,
+                                                            save_cor = save_cor,
+                                                            cor_dir = cor_dir,
+                                                            verbose = verbose,
+                                                            ...)
     }
-    susie_res.core <- do.call(rbind, susie_res.core.list)
-    susie_res.core
+    finemap_res.core <- do.call(rbind, finemap_res.core.list)
+    finemap_res.core
   }
   parallel::stopCluster(cl)
 

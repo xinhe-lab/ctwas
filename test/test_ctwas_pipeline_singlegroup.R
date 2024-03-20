@@ -183,8 +183,7 @@ runtime <- system.time({
                         group_prior = group_prior,
                         group_prior_var = group_prior_var,
                         ncore = ncore,
-                        logfile = file.path(outputdir, paste0(outname, ".screen_regions.log")),
-                        verbose = TRUE)
+                        logfile = file.path(outputdir, paste0(outname, ".screen_regions.log")))
 })
 saveRDS(res, file.path(outputdir, paste0(outname, ".screen_regions.res.RDS")))
 cat(sprintf("Screen regions took %0.2f minutes\n",runtime["elapsed"]/60))
@@ -197,6 +196,7 @@ rm(res)
 
 ## Finemap a single region
 region_tag <- "16:71020125-72901251"
+region_tag <- "1:10583-1961168"
 runtime <- system.time({
   finemap_res <- finemap_region(z_snp = z_snp,
                                 z_gene = z_gene,
@@ -208,7 +208,7 @@ runtime <- system.time({
                                 L = 5,
                                 group_prior = group_prior,
                                 group_prior_var = group_prior_var,
-                                verbose = TRUE )
+                                verbose = TRUE)
 })
 cat(sprintf("Finemapping region took %0.2f seconds \n",runtime["elapsed"]))
 

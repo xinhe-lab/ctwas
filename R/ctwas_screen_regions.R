@@ -142,9 +142,10 @@ screen_regions <- function(
   finemap_weak_res <- NULL
   screened_region_tags <- NULL
   # screened_region_info <- NULL
-  for (region_tag in names(regionlist)){
-    region_finemap_res <- finemap_res[finemap_res$region_tag == region_tag,]
-    nonSNP_PIP <- sum(region_finemap_res$susie_pip[region_finemap_res$type != "SNP"])
+  region_tags <- names(regionlist)
+  for (region_tag in region_tags){
+    finemap_region_res <- finemap_res[finemap_res$region_tag == region_tag,]
+    nonSNP_PIP <- sum(finemap_region_res$susie_pip[finemap_region_res$type != "SNP"])
     nonSNP_PIP[is.na(nonSNP_PIP)] <- 0 # 0 if nonSNP_PIP is NA (no genes in this region)
     if (nonSNP_PIP >= min_nonSNP_PIP) {
       screened_region_tags <- c(screened_region_tags, region_tag)

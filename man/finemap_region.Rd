@@ -23,6 +23,7 @@ finemap_region(
   force_compute_cor = FALSE,
   save_cor = FALSE,
   cor_dir = getwd(),
+  verbose = FALSE,
   ...
 )
 }
@@ -63,6 +64,8 @@ genotype data in genetic studies.}
 \item{save_cor}{TRUE/FALSE. If TRUE, save correlation (R) matrices}
 
 \item{cor_dir}{a string, the directory to store correlation (R) matrices}
+
+\item{verbose}{TRUE/FALSE. If TRUE, print detail messages}
 }
 \value{
 finemapping results.

@@ -272,7 +272,7 @@ runtime <- system.time({
                         group_prior = group_prior,
                         group_prior_var = group_prior_var,
                         max_iter = 100,
-                        ncore = ncore,
+                        ncore = 1,
                         logfile = file.path(outputdir, paste0(outname, ".screen_regions.L5.max_iter100.log")),
                         verbose = TRUE)
 })

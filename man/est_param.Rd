@@ -85,7 +85,7 @@ genotype data in genetic studies.}
 \item{logfile}{the log file, if NULL will print log info on screen}
 }
 \value{
-a list with estimated parameters, and updated region_info with correlation file names for each region.
+a list with estimated parameters, regionlist, updated weight list and boundary genes.
 }
 \description{
 Estimate cTWAS parameters
