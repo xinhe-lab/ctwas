@@ -293,6 +293,7 @@ cat("##### cTWAS finemapping ##### \n")
 # Finemap a single region
 region_tag <- "16:71020125-72901251"
 region_tag <- "1:10583-1961168"
+region_tag <- "1:4320751-5853833"
 runtime <- system.time({
   ctwas_res <- finemap_region(z_snp = z_snp,
                               z_gene = z_gene,
