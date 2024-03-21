@@ -2,21 +2,21 @@
 library(ctwas)
 # library(ggplot2)
 
-## Settings
+##### Settings #####
 trait <- "LDL"
 tissue <- "Liver"
-weight_file <- "/project2/xinhe/shared_data/multigroup_ctwas/test_data/mashr_Liver_nolnc.db"
 gwas_file <- "/project2/xinhe/shared_data/multigroup_ctwas/test_data/ukb-d-30780_irnt.vcf.gz"
 gwas_n <- 343621
-ncore <- 4
+weight_file <- "/project2/xinhe/shared_data/multigroup_ctwas/test_data/mashr_Liver_nolnc.db"
 thin <- 0.1
 max_snp_region <- 20000
+ncore <- 4
+
 outputdir <- file.path("/project2/xinhe/shared_data/multigroup_ctwas/test_data/output/", paste0(trait, "_", tissue))
 outname <- paste0(trait, ".", tissue)
-
 dir.create(outputdir, showWarnings=F, recursive=T)
 
-## LD reference and region info
+##### LD region info #####
 region_info_file <- file.path(outputdir, "region_info.txt")
 if (file.exists(region_info_file)){
   region_info <- read.table(region_info_file, header = TRUE, sep = "\t", stringsAsFactors = FALSE)
@@ -35,11 +35,10 @@ if (file.exists(region_info_file)){
   write.table(region_info, file = file.path(outputdir, "region_info.txt"), quote = F, col.names = T, row.names = F, sep = "\t")
 }
 
-## Prepare GWAS z-scores
+##### Preprocess GWAS z-scores #####
+cat("##### Preprocess z-scores ##### \n")
 gwas_name <- "ukb-d-30780_irnt"
 z_snp_outfile <- file.path(outputdir, paste0(gwas_name, ".z_snp.Rd"))
-print(z_snp_outfile)
-
 if (!file.exists(z_snp_outfile)){
   # read the data using the VariantAnnotation package
   z_snp <- VariantAnnotation::readVcf("/project2/xinhe/shared_data/multigroup_ctwas/test_data/ukb-d-30780_irnt.vcf.gz")
@@ -99,7 +98,8 @@ if (file.exists(processed_z_snp_file)){
   # cat(sprintf("Preprocessing GWAS z-scores took %0.2f minutes\n",runtime["elapsed"]/60))
 }
 
-## Preprocess weights
+##### Preprocess weights #####
+cat("##### Preprocess weights ##### \n")
 processed_weight_file <- file.path(outputdir, paste0(outname, ".processed.weights.Rd"))
 if (file.exists(processed_weight_file)){
   cat(sprintf("Load preprocessed weight: %s\n", processed_weight_file))
@@ -119,7 +119,7 @@ if (file.exists(processed_weight_file)){
   cat(sprintf("Preprocessing weights took %0.2f minutes\n",runtime["elapsed"]/60))
 }
 
-## Impute gene z-scores
+##### Impute gene z-scores #####
 cat("##### Imputing gene z-scores ##### \n")
 gene_z_file <- file.path(outputdir, paste0(outname, ".gene_z.Rd"))
 if( file.exists(gene_z_file) ){
@@ -137,7 +137,7 @@ if( file.exists(gene_z_file) ){
   cat(sprintf("Imputing gene z-scores took %0.2f minutes\n",runtime["elapsed"]/60))
 }
 
-## Estimate parameters
+##### Estimate parameters #####
 cat("##### Estimating parameters ##### \n")
 param_file <- file.path(outputdir, paste0(outname, ".param.RDS"))
 if (file.exists(param_file)) {
@@ -165,7 +165,7 @@ regionlist <- param$regionlist
 weight_list <- param$weight_list
 boundary_genes <- param$boundary_genes
 
-# Assessing parameter estimates
+## Assessing parameters
 ctwas_parameters <- summarize_param(param, gwas_n, thin = thin)
 saveRDS(ctwas_parameters, paste0(outputdir, "/", outname, ".ctwas_parameters.RDS"))
 
@@ -192,11 +192,9 @@ screened_region_tags <- res$screened_region_tags
 weak_region_finemap_res <- res$weak_region_finemap_res
 rm(res)
 
-## Finemapping
-
-## Finemap a single region
+##### Finemapping regions #####
+## Finemapping a single region
 region_tag <- "16:71020125-72901251"
-region_tag <- "1:10583-1961168"
 runtime <- system.time({
   finemap_res <- finemap_region(z_snp = z_snp,
                                 z_gene = z_gene,
@@ -208,11 +206,13 @@ runtime <- system.time({
                                 L = 5,
                                 group_prior = group_prior,
                                 group_prior_var = group_prior_var,
+                                save_cor = TRUE,
+                                cor_dir = paste0(outputdir, "/cor_matrix/"),
                                 verbose = TRUE)
 })
 cat(sprintf("Finemapping region took %0.2f seconds \n",runtime["elapsed"]))
 
-## Finemap screened regions
+## Finemapping screened regions
 cat("##### Finemapping screened regions ##### \n")
 runtime <- system.time({
   finemap_res <- finemap_regions(z_snp = z_snp,
@@ -224,7 +224,10 @@ runtime <- system.time({
                                  group_prior = group_prior,
                                  group_prior_var = group_prior_var,
                                  save_cor = TRUE,
-                                 cor_dir = paste0(outputdir, "/cor_matrix/"))
+                                 cor_dir = paste0(outputdir, "/cor_matrix/"),
+                                 ncore = ncore,
+                                 logfile = file.path(outputdir, paste0(outname, ".finemapping_regions.log")),
+                                 verbose = TRUE)
 })
 saveRDS(finemap_res, file.path(outputdir, paste0(outname, ".finemap_regions.res.RDS")))
 cat(sprintf("Finemapping took %0.2f minutes\n",runtime["elapsed"]/60))
