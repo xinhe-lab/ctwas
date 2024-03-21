@@ -183,7 +183,7 @@ screen_regions <- function(
     res[["boundary_genes"]] <- boundary_genes
   }
 
-  return()
+  return(res)
 }
 
 

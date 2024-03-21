@@ -73,7 +73,7 @@ compute_region_cor <- function(regionlist,
   if (anyNA(R_gene))
     stop("R_gene matrix contains missing values!\n")
 
-  loginfo("%d genes, %d SNPs in the correlation matrices", ncol(R_snp_gene), nrow(R_snp_gene))
+  # loginfo("%d genes, %d SNPs in the correlation matrices", ncol(R_snp_gene), nrow(R_snp_gene))
 
   return(list("R_snp" = R_snp,
               "R_snp_gene" = R_snp_gene,
