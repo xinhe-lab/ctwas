@@ -21,6 +21,8 @@
 #' Inf, no limit. This can be useful if there are many SNPs in a region and you don't
 #' have enough memory to run the program.
 #'
+#' @param mingene minimum number of genes in a region
+#'
 #' @param min_nonSNP_PIP Regions with non-SNP PIP >= \code{min_nonSNP_PIP}
 #' will be selected to run finemapping using full SNPs.
 #'
@@ -60,8 +62,9 @@ screen_regions <- function(
     weight_list = NULL,
     thin = 1,
     max_snp_region = Inf,
+    mingene = 1,
     min_nonSNP_PIP = 0.5,
-    L = 1,
+    L = 5,
     group_prior = NULL,
     group_prior_var = NULL,
     use_null_weight = TRUE,
@@ -95,6 +98,7 @@ screen_regions <- function(
                           thin = thin,
                           maxSNP = max_snp_region,
                           minvar = 2,
+                          mingene = 0,
                           adjust_boundary = TRUE)
 
     regionlist <- res$regionlist
@@ -103,10 +107,15 @@ screen_regions <- function(
     rm(res)
   }
 
+  # remove regions with fewer than mingene genes
+  if (mingene > 0) {
+    n.gid <- sapply(regionlist, function(x){length(x[["gid"]])})
+    drop.idx <- which(n.gid < mingene)
+    loginfo("Remove %d regions with fewer than %d genes.", length(drop.idx), mingene)
+    regionlist[drop.idx] <- NULL
+  }
+
   # run finemapping for all regions containing thinned SNPs
-  n.gid <- sapply(regionlist, function(x){length(x[["gid"]])})
-  loginfo("Remove %d regions with no genes.", length(which(n.gid == 0)))
-  regionlist <- regionlist[which(n.gid > 0)]
   loginfo("Run initial screening for %d regions ...", length(regionlist))
 
   cl <- parallel::makeCluster(ncore, outfile = "")
@@ -170,6 +179,7 @@ screen_regions <- function(
 
   # keep the finemapping results for the regions without strong signals (will not rerun finemapping)
   weak_region_finemap_res <- finemap_res[!finemap_res$region_tag %in% screened_region_tags, ]
+  rownames(weak_region_finemap_res) <- NULL
 
   res <- list("screened_regionlist" = screened_regionlist,
               "screened_region_tags" = screened_region_tags,

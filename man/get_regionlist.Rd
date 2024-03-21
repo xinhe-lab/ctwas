@@ -12,6 +12,7 @@ get_regionlist(
   thin = 1,
   maxSNP = Inf,
   minvar = 1,
+  mingene = 0,
   adjust_boundary = TRUE
 )
 }
@@ -38,6 +39,8 @@ have enough memory to run the program. This applies to the last rerun step
 (using full SNPs and rerun susie for regions with strong gene signals) only.}
 
 \item{minvar}{minimum number of SNPs (and genes) in a region}
+
+\item{mingene}{minimum number of genes in a region}
 
 \item{adjust_boundary}{identify cross-boundary genes, adjust regionlist and update weigh_list}
 }

@@ -4,6 +4,7 @@ assign_region_ids <- function(regioninfo,
                               snpinfo,
                               weight_list,
                               minvar = 1,
+                              mingene = 0,
                               adjust_boundary = TRUE) {
 
   regionlist <- list()
@@ -26,6 +27,8 @@ assign_region_ids <- function(regioninfo,
                   & snpinfo$keep == 1 & snpinfo$thin_tag == 1)
 
     if (length(gidx) + length(sidx) < minvar) {next}
+
+    if (length(gidx) < mingene) {next}
 
     gid <- geneinfo$id[gidx]
     sid <- snpinfo$id[sidx]

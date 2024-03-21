@@ -1,12 +1,12 @@
 #' Summarize and plot cTWAS parameter estimates
 #'
-#' @param param a list of cTWAS parameter estimation result
+#' @param param a list of cTWAS parameter estimation result from \code{est_param}
 #'
 #' @param gwas_n the sample size of the GWAS summary statistics
 #'
-#' @param thin the proportion of SNPs used for parameter estimation, as supplied to \code{est_param}
-#'
 #' @param plot if TRUE, return a plot of the estimated parameters
+#'
+#' @importFrom logging loginfo
 #'
 #' @import ggplot2
 #' @import cowplot
@@ -15,12 +15,16 @@
 #'
 summarize_param <- function(param,
                             gwas_n = NA,
-                            thin = 1,
                             plot = TRUE){
+
+  thin <- param[["thin"]]
+  if (thin != 1){
+    loginfo("adjust parameters to account for thin argument")
+  }
 
   # estimated group prior (all iterations)
   estimated_group_prior_all <- param[["group_prior_rec"]]
-  estimated_group_prior_all["SNP",] <- estimated_group_prior_all["SNP",]*thin #adjust parameter to account for thin argument
+  estimated_group_prior_all["SNP",] <- estimated_group_prior_all["SNP",]*thin # adjust parameter to account for thin argument
   group_prior <- estimated_group_prior_all[,ncol(estimated_group_prior_all)]
 
   # estimated group prior variance (all iterations)
@@ -29,7 +33,7 @@ summarize_param <- function(param,
 
   # set group size
   group_size <- param[["group_size"]]
-  group_size["SNP"] <- group_size["SNP"]/thin #adjust to account for thin argument
+  group_size["SNP"] <- group_size["SNP"]/thin # adjust to account for thin argument
 
   group_size <- group_size[rownames(estimated_group_prior_all)]
 

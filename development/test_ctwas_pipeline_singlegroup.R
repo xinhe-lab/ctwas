@@ -179,7 +179,7 @@ runtime <- system.time({
                         regionlist = regionlist,
                         thin = thin,
                         max_snp_region = max_snp_region,
-                        L = 1,
+                        L = 5,
                         group_prior = group_prior,
                         group_prior_var = group_prior_var,
                         ncore = ncore,
@@ -193,6 +193,10 @@ weak_region_finemap_res <- res$weak_region_finemap_res
 rm(res)
 
 ##### Finemapping regions #####
+
+## adjust parameter to account for thin argument
+group_prior["SNP"] <- group_prior["SNP"] * thin
+
 ## Finemapping a single region
 region_tag <- "16:71020125-72901251"
 runtime <- system.time({

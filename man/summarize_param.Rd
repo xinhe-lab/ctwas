@@ -4,14 +4,12 @@
 \alias{summarize_param}
 \title{Summarize and plot cTWAS parameter estimates}
 \usage{
-summarize_param(param, gwas_n = NA, thin = 1, plot = TRUE)
+summarize_param(param, gwas_n = NA, plot = TRUE)
 }
 \arguments{
-\item{param}{a list of cTWAS parameter estimation result}
+\item{param}{a list of cTWAS parameter estimation result from \code{est_param}}
 
 \item{gwas_n}{the sample size of the GWAS summary statistics}
-
-\item{thin}{the proportion of SNPs used for parameter estimation, as supplied to \code{est_param}}
 
 \item{plot}{if TRUE, return a plot of the estimated parameters}
 }

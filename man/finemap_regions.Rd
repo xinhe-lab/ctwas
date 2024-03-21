@@ -8,9 +8,9 @@ finemap_regions(
   z_snp,
   z_gene,
   gene_info,
-  region_tag,
   regionlist = NULL,
   region_info = NULL,
+  region_tags = NULL,
   weight_list = NULL,
   max_snp_region = Inf,
   L = 5,
@@ -24,6 +24,7 @@ finemap_regions(
   force_compute_cor = FALSE,
   save_cor = FALSE,
   cor_dir = getwd(),
+  verbose = FALSE,
   logfile = NULL,
   ...
 )
@@ -66,9 +67,11 @@ genotype data in genetic studies.}
 
 \item{cor_dir}{a string, the directory to store correlation (R) matrices}
 
+\item{verbose}{TRUE/FALSE. If TRUE, print detail messages}
+
 \item{logfile}{the log file, if NULL will print log info on screen}
 
-\item{verbose}{TRUE/FALSE. If TRUE, print detail messages}
+\item{region_tag}{a character string of region tags to be finemapped}
 }
 \value{
 finemapping results.

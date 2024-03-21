@@ -23,6 +23,8 @@
 #'
 #' @param minvar minimum number of SNPs (and genes) in a region
 #'
+#' @param mingene minimum number of genes in a region
+#'
 #' @param adjust_boundary identify cross-boundary genes, adjust regionlist and update weigh_list
 #'
 #' @importFrom logging loginfo
@@ -38,6 +40,7 @@ get_regionlist <- function(region_info,
                            thin = 1,
                            maxSNP = Inf,
                            minvar = 1,
+                           mingene = 0,
                            adjust_boundary = TRUE) {
 
   loginfo("No. regions: %s", nrow(region_info))

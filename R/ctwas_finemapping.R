@@ -329,14 +329,13 @@ finemap_regions <- function(z_snp,
                             force_compute_cor = FALSE,
                             save_cor = FALSE,
                             cor_dir = getwd(),
+                            verbose = FALSE,
                             logfile = NULL,
                             ...){
 
   if (!is.null(logfile)){
     addHandler(writeToFile, file= logfile, level='DEBUG')
   }
-
-  loginfo('Finemapping regions ... ')
 
   if (is.null(regionlist)) {
     loginfo("Get regionlist for %d regions", length(region_tags))
@@ -353,6 +352,8 @@ finemap_regions <- function(z_snp,
     regionlist <- res$regionlist
     rm(res)
   }
+
+  loginfo('Finemapping %d regions ...', length(regionlist))
 
   cl <- parallel::makeCluster(ncore, outfile = "")
   doParallel::registerDoParallel(cl)
