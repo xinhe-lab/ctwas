@@ -104,7 +104,10 @@ screen_regions <- function(
   }
 
   # run finemapping for all regions containing thinned SNPs
-  loginfo("Run initial screening for all regions ...")
+  n.gid <- sapply(regionlist, function(x){length(x[["gid"]])})
+  loginfo("Remove %d regions with no genes.", length(which(n.gid == 0)))
+  regionlist <- regionlist[which(n.gid > 0)]
+  loginfo("Run initial screening for %d regions ...", length(regionlist))
 
   cl <- parallel::makeCluster(ncore, outfile = "")
   doParallel::registerDoParallel(cl)

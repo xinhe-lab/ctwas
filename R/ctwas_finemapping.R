@@ -168,7 +168,6 @@ finemap_region <- function(z_snp,
     R_snp <- res$R_snp
     R_snp_gene <- res$R_snp_gene
     R_gene <- res$R_gene
-    # R_snp_gene <- R_snp_gene[sidx, , drop = F]
     rm(res)
 
     if (isTRUE(save_cor)) {
@@ -192,8 +191,6 @@ finemap_region <- function(z_snp,
       R_snp_gene <- load_LD(R_sg_file)
       R_gene <- load_LD(R_g_file)
       R_snp <- load_LD(R_s_file)
-      # R_snp <- R_snp[sidx, sidx, drop = F]
-      # R_snp_gene <- R_snp_gene[sidx, , drop = F]
 
       # gene first then SNPs
       R <- rbind(cbind(R_gene, t(R_snp_gene)),
@@ -211,8 +208,6 @@ finemap_region <- function(z_snp,
       R_snp <- res$R_snp
       R_snp_gene <- res$R_snp_gene
       R_gene <- res$R_gene
-      # R_snp <- R_snp[sidx, sidx, drop = F]
-      # R_snp_gene <- R_snp_gene[sidx, , drop = F]
       rm(res)
 
       if (isTRUE(save_cor)) {
@@ -228,7 +223,6 @@ finemap_region <- function(z_snp,
                  cbind(R_snp_gene, R_snp))
 
       rm(R_gene, R_snp_gene, R_snp)
-
     }
   }
 
@@ -276,6 +270,8 @@ finemap_region <- function(z_snp,
 #'
 #' @param regionlist regionlist to be finemapped
 #'
+#' @param region_tag a character string of region tags to be finemapped
+#'
 #' @param weight_list a list of weights for each gene
 #'
 #' @param L the number of effects for susie during the fine mapping steps
@@ -317,9 +313,9 @@ finemap_region <- function(z_snp,
 finemap_regions <- function(z_snp,
                             z_gene,
                             gene_info,
-                            region_tag,
                             regionlist = NULL,
                             region_info = NULL,
+                            region_tags = NULL,
                             weight_list = NULL,
                             max_snp_region = Inf,
                             L = 5,
@@ -341,6 +337,22 @@ finemap_regions <- function(z_snp,
   }
 
   loginfo('Finemapping regions ... ')
+
+  if (is.null(regionlist)) {
+    loginfo("Get regionlist for %d regions", length(region_tags))
+    # combines z-scores of SNPs and genes
+    zdf <- combine_z(z_snp, z_gene)
+    # get regionlist with full SNPs for region_tags
+    regioninfo <- region_info[region_info$region_tag %in% region_tags, ]
+    res <- get_regionlist(regioninfo,
+                          gene_info,
+                          select = zdf,
+                          thin = 1,
+                          maxSNP = max_snp_region,
+                          adjust_boundary = FALSE)
+    regionlist <- res$regionlist
+    rm(res)
+  }
 
   cl <- parallel::makeCluster(ncore, outfile = "")
   doParallel::registerDoParallel(cl)

@@ -38,7 +38,7 @@ compute_region_cor <- function(regionlist,
     for (i in 1:length(gnames)){
       gname <- gnames[i]
       wgt <- wgtlist[[gname]]
-      snpnames <- rownames(wgt)
+      snpnames <- intersect(rownames(wgt), ld_snpinfo$id)
       ld.idx <- match(snpnames, ld_snpinfo$id)
       ldr[[gname]] <- ld.idx
       R.s <- R_snp[ld.idx, ld.idx]
