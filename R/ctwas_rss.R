@@ -358,7 +358,7 @@ ctwas_rss <- function(
                                   outname = paste0(outname,"_allSNPs"), outputdir = outputdir,
                                   merge = merge,
                                   ncore = ncore_LDR,
-                                  reuse_R_gene = T) # susie_rss can't take 1 var.
+                                  reuse_R_gene = F) # susie_rss can't take 1 var.
 
         saveRDS(regionlist, file=paste0(outputdir, "/", outname, ".allSNPs.regionlist.RDS"))
         temp_regs <- lapply(1:22, function(x) cbind(x,
