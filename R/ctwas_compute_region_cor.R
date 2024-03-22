@@ -11,8 +11,6 @@ compute_region_cor <- function(regionlist,
                                region_tag,
                                weight_list) {
 
-  loginfo("Compute correlation matrices for region %s ...", region_tag)
-
   if (length(regionlist[[region_tag]][["LD_matrix"]])==1){
     R_snp <- load_LD(regionlist[[region_tag]][["LD_matrix"]])
   } else {

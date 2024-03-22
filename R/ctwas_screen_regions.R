@@ -70,7 +70,7 @@ screen_regions <- function(
     use_null_weight = TRUE,
     coverage = 0.95,
     min_abs_corr = 0.5,
-    max_iter = 1,
+    max_iter = 100,
     ncore = 1,
     logfile = NULL,
     verbose = FALSE,
@@ -149,6 +149,7 @@ screen_regions <- function(
     susie_res.core
   }
   parallel::stopCluster(cl)
+  rownames(finemap_res) <- NULL
 
   # select regions based on max gene PIP of the region
   finemap_weak_res <- NULL
@@ -179,7 +180,6 @@ screen_regions <- function(
 
   # keep the finemapping results for the regions without strong signals (will not rerun finemapping)
   weak_region_finemap_res <- finemap_res[!finemap_res$region_tag %in% screened_region_tags, ]
-  rownames(weak_region_finemap_res) <- NULL
 
   res <- list("screened_regionlist" = screened_regionlist,
               "screened_region_tags" = screened_region_tags,

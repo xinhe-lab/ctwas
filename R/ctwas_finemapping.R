@@ -164,6 +164,9 @@ finemap_region <- function(z_snp,
 
   if (isTRUE(force_compute_cor)) {
     # force compute correlation matrix
+    if (verbose){
+      loginfo("Compute correlation matrices for region %s ...", region_tag)
+    }
     res <- compute_region_cor(regionlist, region_tag, weight_list)
     R_snp <- res$R_snp
     R_snp_gene <- res$R_snp_gene
@@ -387,6 +390,7 @@ finemap_regions <- function(z_snp,
     finemap_res.core
   }
   parallel::stopCluster(cl)
+  rownames(finemap_res) <- NULL
 
   return(finemap_res)
 }

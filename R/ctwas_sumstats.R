@@ -87,6 +87,7 @@ ctwas_sumstats <- function(
     save_cor = FALSE,
     cor_dir = getwd(),
     logfile = NULL,
+    verbose = FALSE,
     ...){
 
   if (!is.null(logfile)){
@@ -125,7 +126,7 @@ ctwas_sumstats <- function(
   rm(res)
 
   # Screen regions
-  #. fine-map all regions with thinned SNPs using L = 1
+  #. fine-map all regions with thinned SNPs
   #. select regions with strong non-SNP signals
   res <- screen_regions(z_snp = z_snp,
                         z_gene = z_gene,
@@ -136,7 +137,7 @@ ctwas_sumstats <- function(
                         thin = thin,
                         max_snp_region = max_snp_region,
                         min_nonSNP_PIP = min_nonSNP_PIP,
-                        L = 1,
+                        L = L,
                         group_prior = group_prior,
                         group_prior_var = group_prior_var,
                         use_null_weight = use_null_weight,
@@ -154,25 +155,21 @@ ctwas_sumstats <- function(
   # adjust group_prior parameter to account for thin argument
   group_prior["SNP"] <- group_prior["SNP"] * thin
 
-  strong_region_finemap_res <- list()
-  for (region_tag in screened_region_tags) {
-    strong_region_finemap_res[[region_tag]] <- finemap_region(z_snp = z_snp,
-                                                              z_gene = z_gene,
-                                                              gene_info = gene_info,
-                                                              regionlist = screened_regionlist,
-                                                              region_tag = region_tag,
-                                                              weight_list = weight_list,
-                                                              L = L,
-                                                              group_prior = group_prior,
-                                                              group_prior_var = group_prior_var,
-                                                              use_null_weight = use_null_weight,
-                                                              coverage = coverage,
-                                                              min_abs_corr = min_abs_corr,
-                                                              save_cor = save_cor,
-                                                              cor_dir = cor_dir,
-                                                              ...)
-  }
-  strong_region_finemap_res <- do.call(rbind, strong_region_finemap_res)
+  strong_region_finemap_res <- finemap_regions(z_snp = z_snp,
+                                               z_gene = z_gene,
+                                               gene_info = gene_info,
+                                               regionlist = screened_regionlist,
+                                               weight_list = weight_list,
+                                               L = L,
+                                               group_prior = group_prior,
+                                               group_prior_var = group_prior_var,
+                                               use_null_weight = use_null_weight,
+                                               coverage = coverage,
+                                               min_abs_corr = min_abs_corr,
+                                               save_cor = save_cor,
+                                               cor_dir = cor_dir,
+                                               ncore = ncore,
+                                               verbose = verbose)
 
   ctwas_res <- list("strong_region_finemap_res" = strong_region_finemap_res,
                     "weak_region_finemap_res" = weak_region_finemap_res,
