@@ -7,21 +7,17 @@
 screen_regions(
   z_snp,
   z_gene,
-  gene_info,
+  regionlist,
   region_info,
-  regionlist = NULL,
-  weight_list = NULL,
+  weights,
+  gene_info,
   thin = 1,
-  max_snp_region = Inf,
-  mingene = 1,
-  min_nonSNP_PIP = 0.5,
-  L = 5,
   group_prior = NULL,
   group_prior_var = NULL,
-  use_null_weight = TRUE,
-  coverage = 0.95,
-  min_abs_corr = 0.5,
-  max_iter = 1,
+  L = 5,
+  mingene = 1,
+  min_nonSNP_PIP = 0.5,
+  max_iter = 100,
   ncore = 1,
   logfile = NULL,
   verbose = FALSE,
@@ -35,31 +31,33 @@ giving the z scores for snps. "A1" is effect allele. "A2" is the other allele.}
 \item{z_gene}{A data frame with two columns: "id", "z". giving the z scores for genes.
 Optionally, a "type" column can also be supplied; this is for using multiple sets of weight_list}
 
-\item{gene_info}{a data frame of gene information obtained from \code{compute_gene_z}}
-
-\item{region_info}{a data frame of region definition and associated file names}
-
 \item{regionlist}{a list object indexing regions, variants and genes.}
 
-\item{weight_list}{a list of weights}
+\item{region_info}{a data frame of region definition and associated LD file names}
+
+\item{weights}{a list of weights}
+
+\item{gene_info}{a data frame of gene information obtained from \code{compute_gene_z}}
 
 \item{thin}{The proportion of SNPs to be used for parameter estimation and initial screening regions.
 Smaller \code{thin} parameters reduce runtime at the expense of accuracy.}
 
-\item{max_snp_region}{Inf or integer. Maximum number of SNPs in a region. Default is
-Inf, no limit. This can be useful if there are many SNPs in a region and you don't
-have enough memory to run the program.}
+\item{group_prior}{a vector of two prior inclusion probabilities for SNPs and genes.}
+
+\item{group_prior_var}{a vector of two prior variances for SNPs and gene effects.}
+
+\item{L}{the number of effects for susie}
 
 \item{mingene}{minimum number of genes in a region}
 
 \item{min_nonSNP_PIP}{Regions with non-SNP PIP >= \code{min_nonSNP_PIP}
 will be selected to run finemapping using full SNPs.}
 
-\item{L}{the number of effects for susie}
+\item{max_iter}{Maximum number of IBSS iterations to perform.}
 
-\item{group_prior}{a vector of two prior inclusion probabilities for SNPs and genes.}
+\item{ncore}{The number of cores used to parallelize susie over regions}
 
-\item{group_prior_var}{a vector of two prior variances for SNPs and gene effects.}
+\item{logfile}{the log file, if NULL will print log info on screen}
 
 \item{use_null_weight}{TRUE/FALSE. If TRUE, allow for a probability of no effect in susie}
 
@@ -69,15 +67,9 @@ will be selected to run finemapping using full SNPs.}
 credible set. The default, 0.5, corresponds to a squared
 correlation of 0.25, which is a commonly used threshold for
 genotype data in genetic studies.}
-
-\item{max_iter}{Maximum number of IBSS iterations to perform.}
-
-\item{ncore}{The number of cores used to parallelize susie over regions}
-
-\item{logfile}{the log file, if NULL will print log info on screen}
 }
 \value{
-a list of regionlist, screened region tags, fine mapping result for regions with weak signal
+a vector of screened region tags
 }
 \description{
 Screen regions

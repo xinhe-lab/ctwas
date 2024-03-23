@@ -6,15 +6,14 @@
 \usage{
 ctwas_sumstats(
   z_snp,
+  weights,
   region_info,
-  weight_list,
-  weight_info,
+  thin = 1,
   niter1 = 3,
   niter2 = 30,
-  thin = 1,
   L = 5,
-  group_prior = NULL,
-  group_prior_var = NULL,
+  init_group_prior = NULL,
+  init_group_prior_var = NULL,
   group_prior_var_structure = c("independent", "shared_all", "shared_QTLtype"),
   max_snp_region = Inf,
   min_nonSNP_PIP = 0.5,
@@ -26,6 +25,7 @@ ctwas_sumstats(
   save_cor = FALSE,
   cor_dir = getwd(),
   logfile = NULL,
+  verbose = FALSE,
   ...
 )
 }
@@ -33,26 +33,24 @@ ctwas_sumstats(
 \item{z_snp}{A data frame with four columns: "id", "A1", "A2", "z".
 giving the z scores for snps. "A1" is effect allele. "A2" is the other allele.}
 
+\item{weights}{a list of weights}
+
 \item{region_info}{a data frame of region definition and associated LD file names}
-
-\item{weight_list}{a list of weights}
-
-\item{weight_info}{a data frame of weight information}
-
-\item{niter1}{the number of iterations of the E-M algorithm to perform during the initial parameter estimation step}
-
-\item{niter2}{the number of iterations of the E-M algorithm to perform during the complete parameter estimation step}
 
 \item{thin}{The proportion of SNPs to be used for parameter estimation and initial screening regions.
 Smaller \code{thin} parameters reduce runtime at the expense of accuracy.
 The fine mapping step is rerun using full SNPs
 for regions with strong gene signals; see \code{min_nonSNP_PIP}.}
 
+\item{niter1}{the number of iterations of the E-M algorithm to perform during the initial parameter estimation step}
+
+\item{niter2}{the number of iterations of the E-M algorithm to perform during the complete parameter estimation step}
+
 \item{L}{the number of effects for susie during the fine mapping steps}
 
-\item{group_prior}{a vector of two prior inclusion probabilities for SNPs and genes.}
+\item{init_group_prior}{a vector of initial values of prior inclusion probabilities for SNPs and genes.}
 
-\item{group_prior_var}{a vector of two prior variances for SNPs and gene effects.}
+\item{init_group_prior_var}{a vector of initial values of prior variances for SNPs and gene effects.}
 
 \item{group_prior_var_structure}{a string indicating the structure to put on the prior variance parameters.
 "independent" is the default and allows all groups to have their own separate variance parameters.
@@ -87,10 +85,11 @@ having 1 or fewer effects will be used for parameter estimation}
 \item{cor_dir}{a string, the directory to store correlation (R) matrices}
 
 \item{logfile}{the log file, if NULL will print log info on screen}
+
+\item{verbose}{TRUE/FALSE. If TRUE, print detail messages}
 }
 \value{
-a list of estimated parameters, fine-mapping results,
-. updated region info, and imputed gene scores
+a list of estimated parameters, fine-mapping results, and boundary genes
 }
 \description{
 Causal inference for TWAS using summary statistics

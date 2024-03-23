@@ -6,20 +6,16 @@
 #' @param z_gene A data frame with two columns: "id", "z". giving the z scores for genes.
 #' Optionally, a "type" column can also be supplied; this is for using multiple sets of weight_list
 #'
-#' @param region_info a data frame of region definition and associated file names
+#' @param regionlist a list object indexing regions, variants and genes.
+#'
+#' @param region_info a data frame of region definition and associated LD file names
+#'
+#' @param weights a list of weights
 #'
 #' @param gene_info a data frame of gene information obtained from \code{compute_gene_z}
 #'
-#' @param regionlist a list object indexing regions, variants and genes.
-#'
-#' @param weight_list a list of weights
-#'
 #' @param thin The proportion of SNPs to be used for parameter estimation and initial screening regions.
 #' Smaller \code{thin} parameters reduce runtime at the expense of accuracy.
-#'
-#' @param max_snp_region Inf or integer. Maximum number of SNPs in a region. Default is
-#' Inf, no limit. This can be useful if there are many SNPs in a region and you don't
-#' have enough memory to run the program.
 #'
 #' @param mingene minimum number of genes in a region
 #'
@@ -49,27 +45,23 @@
 #'
 #' @importFrom logging addHandler loginfo writeToFile
 #'
-#' @return a list of regionlist, screened region tags, fine mapping result for regions with weak signal
+#' @return a vector of screened region tags
 #'
 #' @export
 #'
 screen_regions <- function(
     z_snp,
     z_gene,
-    gene_info,
+    regionlist,
     region_info,
-    regionlist = NULL,
-    weight_list = NULL,
+    weights,
+    gene_info,
     thin = 1,
-    max_snp_region = Inf,
-    mingene = 1,
-    min_nonSNP_PIP = 0.5,
-    L = 5,
     group_prior = NULL,
     group_prior_var = NULL,
-    use_null_weight = TRUE,
-    coverage = 0.95,
-    min_abs_corr = 0.5,
+    L = 5,
+    mingene = 1,
+    min_nonSNP_PIP = 0.5,
     max_iter = 100,
     ncore = 1,
     logfile = NULL,
@@ -86,26 +78,13 @@ screen_regions <- function(
     stop("thin value needs to be in (0,1]")
   }
 
+  if (thin != 1) {
+    # adjust group_prior parameter to account for thin argument
+    group_prior["SNP"] <- group_prior["SNP"] / thin
+  }
+
   # combine z-scores of SNPs and genes
   zdf <- combine_z(z_snp, z_gene)
-
-  if (is.null(regionlist)) {
-    loginfo("Get regionlist with thin = %.2f", thin)
-    res <- get_regionlist(region_info,
-                          gene_info,
-                          weight_list = weight_list,
-                          select = zdf$id,
-                          thin = thin,
-                          maxSNP = max_snp_region,
-                          minvar = 2,
-                          mingene = 0,
-                          adjust_boundary = TRUE)
-
-    regionlist <- res$regionlist
-    weight_list <- res$weight_list
-    boundary_genes <- res$boundary_genes
-    rm(res)
-  }
 
   # remove regions with fewer than mingene genes
   if (mingene > 0) {
@@ -117,83 +96,33 @@ screen_regions <- function(
 
   # run finemapping for all regions containing thinned SNPs
   loginfo("Run initial screening for %d regions ...", length(regionlist))
+  finemap_res <- finemap_regions(z_snp = z_snp,
+                                 z_gene = z_gene,
+                                 regionlist = regionlist,
+                                 region_info = region_info,
+                                 weights = weights,
+                                 gene_info = gene_info,
+                                 L = L,
+                                 group_prior = group_prior,
+                                 group_prior_var = group_prior_var,
+                                 ncore = ncore,
+                                 verbose = verbose)
 
-  cl <- parallel::makeCluster(ncore, outfile = "")
-  doParallel::registerDoParallel(cl)
-
-  corelist <- region2core(regionlist, ncore)
-
-  finemap_res <- foreach (core = 1:length(corelist), .combine = "rbind", .packages = "ctwas") %dopar% {
-    susie_res.core.list <- list()
-    # run susie for each region
-    region_tags.core <- corelist[[core]]
-    for (region_tag in region_tags.core) {
-      susie_res <- finemap_region(z_snp,
-                                  z_gene,
-                                  gene_info,
-                                  region_tag = region_tag,
-                                  regionlist = regionlist,
-                                  weight_list = weight_list,
-                                  L = L,
-                                  group_prior = group_prior,
-                                  group_prior_var = group_prior_var,
-                                  use_null_weight = use_null_weight,
-                                  coverage = coverage,
-                                  min_abs_corr = min_abs_corr,
-                                  max_iter = max_iter,
-                                  verbose = verbose,
-                                  ...)
-      susie_res.core.list[[region_tag]] <- susie_res
-    }
-    susie_res.core <- do.call(rbind, susie_res.core.list)
-    susie_res.core
-  }
-  parallel::stopCluster(cl)
-  rownames(finemap_res) <- NULL
-
-  # select regions based on max gene PIP of the region
-  finemap_weak_res <- NULL
+  # select regions based on total non-SNP PIP of the region
   screened_region_tags <- NULL
-  # screened_region_info <- NULL
   region_tags <- names(regionlist)
   for (region_tag in region_tags){
     finemap_region_res <- finemap_res[finemap_res$region_tag == region_tag,]
     nonSNP_PIP <- sum(finemap_region_res$susie_pip[finemap_region_res$type != "SNP"])
-    nonSNP_PIP[is.na(nonSNP_PIP)] <- 0 # 0 if nonSNP_PIP is NA (no genes in this region)
+    nonSNP_PIP[is.na(nonSNP_PIP)] <- 0 # 0 if nonSNP_PIP is NA
     if (nonSNP_PIP >= min_nonSNP_PIP) {
       screened_region_tags <- c(screened_region_tags, region_tag)
-      # screened_region_info <- rbind(screened_region_info, region_info[region_info$region_tag = region_tag, ])
     }
   }
 
   loginfo("Number of region tags that contain strong gene signals: %d", length(screened_region_tags))
 
-  # update regionlist with all SNPs for screened regions
-  screened_regionlist <- regionlist[screened_region_tags]
-
-  if (thin < 1){
-    loginfo("Update regionlist with full SNPs for screened regions")
-    screened_regionlist <- update_regionlist_fullSNPs(screened_regionlist,
-                                                      select = zdf,
-                                                      maxSNP = max_snp_region)
-  }
-
-  # keep the finemapping results for the regions without strong signals (will not rerun finemapping)
-  weak_region_finemap_res <- finemap_res[!finemap_res$region_tag %in% screened_region_tags, ]
-
-  res <- list("screened_regionlist" = screened_regionlist,
-              "screened_region_tags" = screened_region_tags,
-              "weak_region_finemap_res" = weak_region_finemap_res,
-              "regionlist" = regionlist)
-
-  if (!is.null(weight_list)){
-    res[["weight_list"]] <- weight_list
-  }
-  if (!is.null(boundary_genes)){
-    res[["boundary_genes"]] <- boundary_genes
-  }
-
-  return(res)
+  return(screened_region_tags)
 }
 
 

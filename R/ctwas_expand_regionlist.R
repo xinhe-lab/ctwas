@@ -1,4 +1,4 @@
-#' Update regionlist with full SNPs
+#' Expand regionlist with full SNPs
 #'
 #' @param regionlist a list of region gene IDs and SNP IDs and associated file names
 #'
@@ -19,10 +19,10 @@
 #'
 #' @export
 #'
-update_regionlist_fullSNPs <- function(regionlist,
-                                       region_tags = NULL,
-                                       select = NULL,
-                                       maxSNP = Inf) {
+expand_regionlist <- function(regionlist,
+                              region_tags = NULL,
+                              select = NULL,
+                              maxSNP = Inf) {
 
   # if region_tags is null, update all regions in regionlist
   if (is.null(region_tags)){
@@ -63,7 +63,7 @@ update_regionlist_fullSNPs <- function(regionlist,
     # Trim regions with SNPs more than maxSNP
     if (maxSNP < Inf){
       if ("z" %in% colnames(select)) {
-        # z score is given, trim snps with lower |z|
+        # SNP z-score is given, trim SNPs with lower |z|
         if (length(regionlist[[region_tag]][["sid"]]) > maxSNP){
           idx <- match(regionlist[[region_tag]][["sid"]], select[, "id"])
           z.abs <- abs(select[idx, "z"])
@@ -71,7 +71,7 @@ update_regionlist_fullSNPs <- function(regionlist,
           regionlist[[region_tag]][["sid"]] <- regionlist[[region_tag]][["sid"]][ifkeep]
         }
       } else{
-        # if no z score information, randomly select snps
+        # if no z score information, randomly select SNPs
         if (length(regionlist[[region_tag]][["sid"]]) > maxSNP){
           n.ori <- length(regionlist[[region_tag]][["sid"]])
           ifkeep <- rep(FALSE, n.ori)

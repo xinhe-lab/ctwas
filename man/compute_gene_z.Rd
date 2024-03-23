@@ -4,31 +4,17 @@
 \alias{compute_gene_z}
 \title{Compute gene z-scores}
 \usage{
-compute_gene_z(
-  z_snp,
-  region_info,
-  weight_list,
-  weight_info,
-  ncore = 1,
-  logfile = NULL
-)
+compute_gene_z(z_snp, weights, logfile = NULL)
 }
 \arguments{
-\item{z_snp}{A data frame with columns: "id", "A1", "A2", "z". giving the z scores for
-snps. "A1" is effect allele. "A2" is the other allele. For harmonized data, A1 and A2 are not required.}
+\item{z_snp}{A data frame with columns: "id", "z", giving the z-scores for SNPs.}
 
-\item{region_info}{a data frame of region definition and associated file names.}
-
-\item{weight_list}{a list of weights}
-
-\item{weight_info}{a data frame of weight information}
-
-\item{ncore}{The number of cores used to parallelize imputation over weights}
+\item{weights}{a list of weights}
 
 \item{logfile}{the log file, if NULL will print log info on screen}
 }
 \value{
-a list of gene z-scores and gene info table
+a data frame of gene z-scores
 }
 \description{
 Compute gene z-scores

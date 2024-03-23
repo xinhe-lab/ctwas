@@ -1,53 +1,29 @@
 
 #' Compute correlation matrices for a region
-#'
-#' @param regionlist regionlist
-#' @param region_tag region tag
-#' @param weight_list weight list
-#'
-#' @return a list of correlation matrices
-#' @export
-compute_region_cor <- function(regionlist,
-                               region_tag,
-                               weight_list) {
-
-  if (length(regionlist[[region_tag]][["LD_matrix"]])==1){
-    R_snp <- load_LD(regionlist[[region_tag]][["LD_matrix"]])
-  } else {
-    R_snp <- lapply(regionlist[[region_tag]][["LD_matrix"]], load_LD)
-    R_snp <- suppressWarnings(as.matrix(Matrix::bdiag(R_snp)))
-  }
-
-  ld_snpinfo <- read_LD_SNP_files(regionlist[[region_tag]][["SNP_info"]])
-  sid <- regionlist[[region_tag]][["sid"]]
-  sidx <- match(sid, ld_snpinfo$id)
-  gnames <- regionlist[[region_tag]][["gid"]]
-
-  # subset weight_list for genes in this region
-  wgtlist <- weight_list[gnames]
+compute_region_cor <- function(sids, gids, R_snp, weights, snpinfo) {
 
   # compute correlation matrices
-  R_snp_gene <- matrix(NA, nrow(R_snp), length(gnames))
-  R_gene <- diag(length(gnames))
+  R_snp_gene <- matrix(NA, nrow(R_snp), length(gids))
+  R_gene <- diag(length(gids))
 
-  if (length(gnames) > 0) {
+  if (length(gids) > 0) {
     ldr <- list()
     # compute SNP-gene correlation matrix
-    for (i in 1:length(gnames)){
-      gname <- gnames[i]
-      wgt <- wgtlist[[gname]]
-      snpnames <- intersect(rownames(wgt), ld_snpinfo$id)
-      ld.idx <- match(snpnames, ld_snpinfo$id)
-      ldr[[gname]] <- ld.idx
+    for (i in 1:length(gids)){
+      gid <- gids[i]
+      wgt <- weights[gids]$wgt
+      snpnames <- intersect(rownames(wgt), snpinfo$id)
+      ld.idx <- match(snpnames, snpinfo$id)
+      ldr[[gid]] <- ld.idx
       R.s <- R_snp[ld.idx, ld.idx]
       R_snp_gene[,i] <- sapply(1:nrow(R_snp),
                                function(x){t(wgt)%*%R_snp[ld.idx,x]/sqrt(t(wgt)%*%R.s%*%wgt*R_snp[x,x])})
     }
 
     # compute gene-gene correlation matrix
-    if (length(gnames) > 1){
-      gene_pairs <- combn(length(gnames), 2)
-      wgtr <- wgtlist[gnames]
+    if (length(gids) > 1){
+      gene_pairs <- combn(length(gids), 2)
+      wgtr <- wgtlist[gids]
       gene_corrs <- apply(gene_pairs, 2, function(x){t(wgtr[[x[1]]])%*%R_snp[ldr[[x[1]]], ldr[[x[2]]]]%*%wgtr[[x[2]]]/(
         sqrt(t(wgtr[[x[1]]])%*%R_snp[ldr[[x[1]]], ldr[[x[1]]]]%*%wgtr[[x[1]]]) *
           sqrt(t(wgtr[[x[2]]])%*%R_snp[ldr[[x[2]]], ldr[[x[2]]]]%*%wgtr[[x[2]]]))})
@@ -56,10 +32,9 @@ compute_region_cor <- function(regionlist,
     }
   }
 
-  # subset R_snp by sidx
+  # subset R_snp and R_snp_gene by sidx
+  sidx <- match(sids, snpinfo$id)
   R_snp <- R_snp[sidx, sidx, drop = F]
-
-  # subset R_snp_gene by sidx
   R_snp_gene <- R_snp_gene[sidx, , drop = F]
 
   if (anyNA(R_snp))

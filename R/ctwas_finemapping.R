@@ -6,13 +6,17 @@
 #' @param z_gene A data frame with two columns: "id", "z". giving the z scores for genes.
 #' Optionally, a "type" column can also be supplied; this is for using multiple sets of weights
 #'
+#' @param sid SNP IDs in the region
+#'
+#' @param gid gene IDs in the region
+#'
+#' @param region_tag a character string of region tags to be finemapped
+#'
+#' @param region_info a data frame of region definition and associated LD file names
+#'
 #' @param gene_info a data frame of gene information obtained from \code{compute_gene_z}
 #'
-#' @param regionlist a list object indexing regions, variants and genes.
-#'
-#' @param region_tag a character string of region tag to be finemapped
-#'
-#' @param weight_list a list of weights for each gene
+#' @param weights a list of weights for each gene
 #'
 #' @param L the number of effects for susie during the fine mapping steps
 #'
@@ -47,12 +51,12 @@
 #'
 finemap_region <- function(z_snp,
                            z_gene,
-                           gene_info,
+                           sid,
+                           gid,
                            region_tag,
-                           regionlist = NULL,
-                           region_info = NULL,
-                           weight_list = NULL,
-                           max_snp_region = Inf,
+                           region_info,
+                           gene_info,
+                           weights,
                            L = 5,
                            group_prior = NULL,
                            group_prior_var = NULL,
@@ -72,43 +76,25 @@ finemap_region <- function(z_snp,
 
   # prepare z-scores combining SNPs and genes
   zdf <- combine_z(z_snp, z_gene)
-
   types <- unique(zdf$type)
 
-  # get regionlist with full SNPs if not available
-  if (is.null(regionlist)) {
-    loginfo("Get regionlist for region %s", region_tag)
-    regioninfo <- region_info[region_info$region_tag == region_tag, ]
-    res <- get_regionlist(regioninfo,
-                          gene_info,
-                          select = zdf,
-                          thin = 1,
-                          maxSNP = max_snp_region,
-                          adjust_boundary = FALSE)
-    regionlist <- res$regionlist
-    rm(res)
-  }
-
-  # select genes and SNPs in this region
-  gid <- regionlist[[region_tag]][["gid"]]
-  sid <- regionlist[[region_tag]][["sid"]]
-
-  # keep only GWAS SNPs
-  sid <- intersect(sid, zdf$id)
-  regionlist[[region_tag]][["sid"]] <- sid
+  # keep only GWAS SNPs and imputed genes
+  sid <- intersect(sids, z_snp$id)
+  gid <- intersect(gids, z_gene$id)
 
   # combine zscores
   z.g <- zdf[match(gid, zdf$id), "z"]
   z.s <- zdf[match(sid, zdf$id), "z"]
   z <- c(z.g, z.s)
-  # if (verbose){
-  #   loginfo("%d genes and %d SNPs in z-scores", length(z.g), length(z.s))
-  # }
 
   g_type <- zdf$type[match(gid, zdf$id)]
   s_type <- zdf$type[match(sid, zdf$id)]
   gs_type <- c(g_type, s_type)
   # g_QTLtype <- zdf$QTLtype[match(gid, zdf$id)]
+
+  if (verbose){
+    loginfo("%d genes and %d SNPs in z-scores", length(z.g), length(z.s))
+  }
 
   if (anyNA(z))
     loginfo("Warning: z-scores contains missing values!")
@@ -155,7 +141,9 @@ finemap_region <- function(z_snp,
   }
 
   # SNP information in this region
-  ld_snpinfo <- read_LD_SNP_files(regionlist[[region_tag]][["SNP_info"]])
+  regioninfo <- region_info[region_info$region_tag %in% region_tag, ]
+
+  LD_snpinfo <- read_LD_SNP_files(regioninfo$SNP_info)
 
   # compute correlation matrices
   R_sg_file <- file.path(cor_dir, paste0("region.", region_tag, ".R_snp_gene.RDS"))
@@ -167,7 +155,13 @@ finemap_region <- function(z_snp,
     if (verbose){
       loginfo("Compute correlation matrices for region %s ...", region_tag)
     }
-    res <- compute_region_cor(regionlist, region_tag, weight_list)
+    if (length(regioninfo$LD_matrix)==1){
+      R_snp <- load_LD(regioninfo$LD_matrix)
+    } else {
+      R_snp <- lapply(regioninfo$LD_matrix, load_LD)
+      R_snp <- suppressWarnings(as.matrix(Matrix::bdiag(R_snp)))
+    }
+    res <- compute_region_cor(sid, gid, R_snp, weights, LD_snpinfo)
     R_snp <- res$R_snp
     R_snp_gene <- res$R_snp_gene
     R_gene <- res$R_gene
@@ -176,7 +170,6 @@ finemap_region <- function(z_snp,
     if (isTRUE(save_cor)) {
       if (!dir.exists(cor_dir))
         dir.create(cor_dir, recursive = TRUE)
-
       saveRDS(R_snp_gene, file=R_sg_file)
       saveRDS(R_gene, file=R_g_file)
       saveRDS(R_snp, file=R_s_file)
@@ -185,34 +178,34 @@ finemap_region <- function(z_snp,
     # gene first then SNPs
     R <- rbind(cbind(R_gene, t(R_snp_gene)),
                cbind(R_snp_gene, R_snp))
-
     rm(R_gene, R_snp_gene, R_snp)
-
   } else {
     if (all(file.exists(c(R_sg_file, R_g_file, R_s_file)))) {
       # load precomputed correlation matrices
       R_snp_gene <- load_LD(R_sg_file)
       R_gene <- load_LD(R_g_file)
       R_snp <- load_LD(R_s_file)
-
       # gene first then SNPs
       R <- rbind(cbind(R_gene, t(R_snp_gene)),
                  cbind(R_snp_gene, R_snp))
-
       rm(R_gene, R_snp_gene, R_snp)
-
     } else if (L == 1){
       # R does not matter for susie when L = 1
       # loginfo("L = 1, skip computing correlation matrices")
       R <- diag(length(z))
     } else {
       # compute correlation matrix if L > 1
-      res <- compute_region_cor(regionlist, region_tag, weight_list)
+      if (length(regioninfo$LD_matrix)==1){
+        R_snp <- load_LD(regioninfo$LD_matrix)
+      } else {
+        R_snp <- lapply(regioninfo$LD_matrix, load_LD)
+        R_snp <- suppressWarnings(as.matrix(Matrix::bdiag(R_snp)))
+      }
+      res <- compute_region_cor(sid, gid, R_snp, weights, LD_snpinfo)
       R_snp <- res$R_snp
       R_snp_gene <- res$R_snp_gene
       R_gene <- res$R_gene
       rm(res)
-
       if (isTRUE(save_cor)) {
         if (!dir.exists(cor_dir))
           dir.create(cor_dir, recursive = TRUE)
@@ -220,11 +213,9 @@ finemap_region <- function(z_snp,
         saveRDS(R_gene, file=R_g_file)
         saveRDS(R_snp, file=R_s_file)
       }
-
       # gene first then SNPs
       R <- rbind(cbind(R_gene, t(R_snp_gene)),
                  cbind(R_snp_gene, R_snp))
-
       rm(R_gene, R_snp_gene, R_snp)
     }
   }
@@ -251,7 +242,7 @@ finemap_region <- function(z_snp,
   # annotate susie result with SNP and gene information
   susie_res_df <- anno_susie(susie_res,
                              geneinfo = gene_info,
-                             snpinfo = ld_snpinfo,
+                             snpinfo = LD_snpinfo,
                              gid = gid,
                              sid = sid,
                              zdf = zdf,
@@ -275,7 +266,9 @@ finemap_region <- function(z_snp,
 #'
 #' @param region_tag a character string of region tags to be finemapped
 #'
-#' @param weight_list a list of weights for each gene
+#' @param region_info a data frame of region definition and associated LD file names
+#'
+#' @param weights a list of weights for each gene
 #'
 #' @param L the number of effects for susie during the fine mapping steps
 #'
@@ -315,12 +308,10 @@ finemap_region <- function(z_snp,
 #'
 finemap_regions <- function(z_snp,
                             z_gene,
-                            gene_info,
-                            regionlist = NULL,
-                            region_info = NULL,
-                            region_tags = NULL,
-                            weight_list = NULL,
-                            max_snp_region = Inf,
+                            regionlist,
+                            region_info,
+                            weights,
+                            gene_info = NULL,
                             L = 5,
                             group_prior = NULL,
                             group_prior_var = NULL,
@@ -340,22 +331,6 @@ finemap_regions <- function(z_snp,
     addHandler(writeToFile, file= logfile, level='DEBUG')
   }
 
-  if (is.null(regionlist)) {
-    loginfo("Get regionlist for %d regions", length(region_tags))
-    # combines z-scores of SNPs and genes
-    zdf <- combine_z(z_snp, z_gene)
-    # get regionlist with full SNPs for region_tags
-    regioninfo <- region_info[region_info$region_tag %in% region_tags, ]
-    res <- get_regionlist(regioninfo,
-                          gene_info,
-                          select = zdf,
-                          thin = 1,
-                          maxSNP = max_snp_region,
-                          adjust_boundary = FALSE)
-    regionlist <- res$regionlist
-    rm(res)
-  }
-
   loginfo('Finemapping %d regions ...', length(regionlist))
 
   cl <- parallel::makeCluster(ncore, outfile = "")
@@ -370,10 +345,12 @@ finemap_regions <- function(z_snp,
     for (region_tag in region_tags.core) {
       finemap_res.core.list[[region_tag]] <- finemap_region(z_snp,
                                                             z_gene,
-                                                            gene_info,
+                                                            sid = regionlist[[region_tag]][["sid"]],
+                                                            gid = regionlist[[region_tag]][["gid"]],
                                                             region_tag = region_tag,
-                                                            regionlist = regionlist,
-                                                            weight_list = weight_list,
+                                                            region_info = region_info,
+                                                            weights = weights,
+                                                            gene_info = gene_info,
                                                             L = L,
                                                             group_prior = group_prior,
                                                             group_prior_var = group_prior_var,

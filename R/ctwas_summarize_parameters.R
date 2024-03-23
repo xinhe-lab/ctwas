@@ -17,14 +17,9 @@ summarize_param <- function(param,
                             gwas_n = NA,
                             plot = TRUE){
 
-  thin <- param[["thin"]]
-  if (thin != 1){
-    loginfo("adjust parameters to account for thin argument")
-  }
-
   # estimated group prior (all iterations)
   estimated_group_prior_all <- param[["group_prior_rec"]]
-  estimated_group_prior_all["SNP",] <- estimated_group_prior_all["SNP",]*thin # adjust parameter to account for thin argument
+  # estimated_group_prior_all["SNP",] <- estimated_group_prior_all["SNP",]*thin # adjust parameter to account for thin argument
   group_prior <- estimated_group_prior_all[,ncol(estimated_group_prior_all)]
 
   # estimated group prior variance (all iterations)
@@ -33,7 +28,7 @@ summarize_param <- function(param,
 
   # set group size
   group_size <- param[["group_size"]]
-  group_size["SNP"] <- group_size["SNP"]/thin # adjust to account for thin argument
+  # group_size["SNP"] <- group_size["SNP"]/thin # adjust to account for thin argument
 
   group_size <- group_size[rownames(estimated_group_prior_all)]
 

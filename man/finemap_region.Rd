@@ -7,12 +7,12 @@
 finemap_region(
   z_snp,
   z_gene,
-  gene_info,
+  sid,
+  gid,
   region_tag,
-  regionlist = NULL,
-  region_info = NULL,
-  weight_list = NULL,
-  max_snp_region = Inf,
+  region_info,
+  gene_info,
+  weights,
   L = 5,
   group_prior = NULL,
   group_prior_var = NULL,
@@ -34,13 +34,17 @@ giving the z scores for snps. "A1" is effect allele. "A2" is the other allele.}
 \item{z_gene}{A data frame with two columns: "id", "z". giving the z scores for genes.
 Optionally, a "type" column can also be supplied; this is for using multiple sets of weights}
 
+\item{sid}{SNP IDs in the region}
+
+\item{gid}{gene IDs in the region}
+
+\item{region_tag}{a character string of region tags to be finemapped}
+
+\item{region_info}{a data frame of region definition and associated LD file names}
+
 \item{gene_info}{a data frame of gene information obtained from \code{compute_gene_z}}
 
-\item{region_tag}{a character string of region tag to be finemapped}
-
-\item{regionlist}{a list object indexing regions, variants and genes.}
-
-\item{weight_list}{a list of weights for each gene}
+\item{weights}{a list of weights for each gene}
 
 \item{L}{the number of effects for susie during the fine mapping steps}
 

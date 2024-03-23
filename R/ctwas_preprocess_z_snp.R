@@ -1,12 +1,10 @@
 
-#' Process GWAS summary statistics, harmonize GWAS z-scores and LD reference, and detect LD mismatches using susie_rss
+#' Preprocess GWAS z-scores, harmonize GWAS z-scores with LD reference
 #'
 #' @param z_snp A data frame with two columns: "id", "A1", "A2", "z". giving the z scores for
 #' snps. "A1" is effect allele. "A2" is the other allele.
 #'
 #' @param region_info a data frame of region definition and associated file names.
-#'
-#' @param chrom a vector containing the chromosome numbers to process.
 #'
 #' @param gwas_n integer, GWAS sample size
 #'
@@ -14,34 +12,20 @@
 #'
 #' @param drop_strand_ambig TRUE/FALSE, if TRUE remove strand ambiguous variants (A/T, G/C).
 #'
-#' @param detect_ld_mismatch TRUE/FALSE. If TRUE, detect LD mismatches by susie_rss,
-#' and report problematic variants, and variants with allele flipping.
-#'
-#' @param flip_ld_mismatch TRUE/FALSE. If TRUE, flip the sign for variants detected with allele flipping.
-#'
-#' @param drop_ld_mismatch TRUE/FALSE. If TRUE, remove problematic variants with LD mismatches.
-#'
-#' @param ncore integer, number of cores for parallel computing when detecting LD mismatches.
-#'
 #' @param logfile the log file, if NULL will print log info on screen.
 #'
 #' @importFrom logging addHandler loginfo writeToFile
-#' @importFrom foreach %dopar% foreach
 #'
-#' @return a list of processed z_snp and LD mismatch results
+#' @return a data frame preprocessed GWAS z-scores
 #'
 #' @export
 #'
-process_z <- function (z_snp,
-                       region_info,
-                       gwas_n = NULL,
-                       drop_multiallelic = TRUE,
-                       drop_strand_ambig = TRUE,
-                       detect_ld_mismatch = FALSE,
-                       flip_ld_mismatch = TRUE,
-                       drop_ld_mismatch = FALSE,
-                       ncore = 1,
-                       logfile = NULL){
+preprocess_z_snp <- function(z_snp,
+                             region_info,
+                             gwas_n = NULL,
+                             drop_multiallelic = TRUE,
+                             drop_strand_ambig = TRUE,
+                             logfile = NULL){
 
   if (!is.null(logfile)) {
     addHandler(writeToFile, file = logfile, level = "DEBUG")
@@ -66,36 +50,13 @@ process_z <- function (z_snp,
   # harmonize alleles between z_snp and LD reference
   z_snp <- harmonize_z_ld(z_snp, ld_snpinfo, drop_strand_ambig)
 
-  # detect LD mismatches using susie_rss
-  ld_mismatch_res <- NULL
-  if( isTRUE(detect_ld_mismatch) ) {
-    ld_mismatch_res <- detect_ld_mismatch_susie(z_snp, region_info, gwas_n, ncore)
-    problematic_snps <- ld_mismatch_res$problematic_snps
-    flipped_snps <- ld_mismatch_res$flipped_snps
-
-    if (isTRUE(flip_ld_mismatch)) {
-      flip.idx <- which(z_snp$id %in% flipped_snps)
-      loginfo("Flip %d variants.", length(flip.idx))
-      z_snp$z[flip.idx] <- -z_snp$z[flip.idx]
-      problematic_snps <- setdiff(problematic_snps, flipped_snps)
-    }
-
-    loginfo("Detected %d problematic variants.", length(problematic_snps))
-
-    if (isTRUE(drop_ld_mismatch)) {
-      filter.idx <- which(z_snp$id %in% problematic_snps)
-      loginfo("Remove %d variants with LD mismatches.", length(filter.idx))
-      z_snp <- z_snp[-filter.idx, ]
-    }
-  }
-
   if (length(z_snp$id) == 0){
     stop("No variants left after preprocessing and harmonization!")
   } else{
     loginfo("%d variants left after preprocessing and harmonization.", length(z_snp$id))
   }
 
-  return(list(z_snp = z_snp, ld_mismatch_res = ld_mismatch_res))
+  return(z_snp)
 }
 
 

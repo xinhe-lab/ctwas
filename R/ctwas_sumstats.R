@@ -3,12 +3,10 @@
 #' @param z_snp A data frame with four columns: "id", "A1", "A2", "z".
 #' giving the z scores for snps. "A1" is effect allele. "A2" is the other allele.
 #'
+#' @param weights a list of weights
+#'
 #' @param region_info a data frame of region definition and associated LD file names
 #'
-#' @param weight_list a list of weights
-#'
-#' @param weight_info a data frame of weight information
-
 #' @param niter1 the number of iterations of the E-M algorithm to perform during the initial parameter estimation step
 #'
 #' @param niter2 the number of iterations of the E-M algorithm to perform during the complete parameter estimation step
@@ -20,9 +18,9 @@
 #'
 #' @param L the number of effects for susie during the fine mapping steps
 #'
-#' @param group_prior a vector of two prior inclusion probabilities for SNPs and genes.
+#' @param init_group_prior a vector of initial values of prior inclusion probabilities for SNPs and genes.
 #'
-#' @param group_prior_var a vector of two prior variances for SNPs and gene effects.
+#' @param init_group_prior_var a vector of initial values of prior variances for SNPs and gene effects.
 #'
 #' @param group_prior_var_structure a string indicating the structure to put on the prior variance parameters.
 #' "independent" is the default and allows all groups to have their own separate variance parameters.
@@ -58,24 +56,24 @@
 #'
 #' @param logfile the log file, if NULL will print log info on screen
 #'
+#' @param verbose TRUE/FALSE. If TRUE, print detail messages
+#'
 #' @importFrom logging addHandler loginfo writeToFile
 #'
-#' @return a list of estimated parameters, fine-mapping results,
-#'. updated region info, and imputed gene scores
+#' @return a list of estimated parameters, fine-mapping results, and boundary genes
 #'
 #' @export
 #'
 ctwas_sumstats <- function(
     z_snp,
+    weights,
     region_info,
-    weight_list,
-    weight_info,
+    thin = 1,
     niter1 = 3,
     niter2 = 30,
-    thin = 1,
     L = 5,
-    group_prior = NULL,
-    group_prior_var = NULL,
+    init_group_prior = NULL,
+    init_group_prior_var = NULL,
     group_prior_var_structure = c("independent","shared_all","shared_QTLtype"),
     max_snp_region = Inf,
     min_nonSNP_PIP = 0.5,
@@ -95,93 +93,89 @@ ctwas_sumstats <- function(
   }
 
   # Compute gene z-scores
-  res <- compute_gene_z(z_snp = z_snp,
-                        region_info = region_info,
-                        weight_list = weight_list,
-                        weight_info = weight_info,
-                        ncore = ncore)
-  z_gene <- res$z_gene
-  gene_info <- res$gene_info
-  rm(res)
+  z_gene <- compute_gene_z(z_snp, weights)
+
+  # Get gene info and append to z_gene
+  gene_info <- get_gene_info(z_gene, weights, region_info)
+  z_gene <- cbind(z_gene, gene_info)[,c("chrom", "id", "p0", "p1", "z")]
+
+  # get regionlist (thinned SNPs)
+  res <- get_regionlist(region_info,
+                        gene_info,
+                        weights,
+                        select = z_snp$id,
+                        thin = thin,
+                        minvar = 2,
+                        adjust_boundary = TRUE)
+  regionlist <- res$regionlist
+  weight_list <- res$weight_list
+  boundary_genes <- res$boundary_genes
 
   # Estimate parameters
   #. get regionlist for all the regions
   #. run EM for two rounds with thinned SNPs using L = 1
-  param <- est_param(z_snp = z_snp,
-                     region_info = region_info,
-                     z_gene = z_gene,
-                     gene_info = gene_info,
-                     thin = thin,
-                     group_prior = group_prior,
-                     group_prior_var = group_prior_var,
+  param <- est_param(z_snp,
+                     z_gene,
+                     regionlist,
+                     init_group_prior = init_group_prior,
+                     init_group_prior = init_group_prior,
                      group_prior_var_structure = group_prior_var_structure,
+                     thin = thin,
                      niter1 = niter1,
                      niter2 = niter2,
+                     prob_single = prob_single,
                      ncore = ncore)
   group_prior <- param$group_prior
   group_prior_var <- param$group_prior_var
-  regionlist <- param$regionlist
-  weight_list <- param$weight_list
-  boundary_genes <- param$boundary_genes
-  rm(res)
 
   # Screen regions
   #. fine-map all regions with thinned SNPs
   #. select regions with strong non-SNP signals
-  res <- screen_regions(z_snp = z_snp,
-                        z_gene = z_gene,
-                        gene_info = gene_info,
-                        region_info = region_info,
-                        regionlist = regionlist,
-                        weight_list = weight_list,
-                        thin = thin,
-                        max_snp_region = max_snp_region,
-                        min_nonSNP_PIP = min_nonSNP_PIP,
-                        L = L,
-                        group_prior = group_prior,
-                        group_prior_var = group_prior_var,
-                        use_null_weight = use_null_weight,
-                        coverage = coverage,
-                        min_abs_corr = min_abs_corr,
-                        ncore = ncore)
-  screened_regionlist <- res$screened_regionlist
-  screened_region_tags <- res$screened_region_tags
-  weak_region_finemap_res <- res$weak_region_finemap_res
-  rm(res)
+  screened_region_tags <- screen_regions(z_snp,
+                                         z_gene,
+                                         regionlist,
+                                         region_info,
+                                         weights,
+                                         thin = thin,
+                                         group_prior = group_prior,
+                                         group_prior_var = group_prior_var,
+                                         L = L,
+                                         max_snp_region = max_snp_region,
+                                         min_nonSNP_PIP = min_nonSNP_PIP,
+                                         use_null_weight = use_null_weight,
+                                         ncore = ncore)
+
+  # expand screened regionlist with all SNPs
+  screened_regionlist <- regionlist[screened_region_tags]
+  if (thin < 1){
+    loginfo("Update regionlist with full SNPs for screened regions")
+    screened_regionlist <- expand_regionlist(screened_regionlist,
+                                             select = z_snp,
+                                             maxSNP = max_snp_region)
+  }
 
   # Run fine-mapping for regions with strong gene signals using all SNPs
   #. save correlation matrices if save_cor is TRUE
+  finemap_res <- finemap_regions(z_snp = z_snp,
+                                 z_gene = z_gene,
+                                 regionlist = screened_regionlist,
+                                 region_info = region_info,
+                                 weights = weights,
+                                 group_prior = group_prior,
+                                 group_prior_var = group_prior_var,
+                                 L = L,
+                                 use_null_weight = use_null_weight,
+                                 coverage = coverage,
+                                 min_abs_corr = min_abs_corr,
+                                 save_cor = save_cor,
+                                 cor_dir = cor_dir,
+                                 ncore = ncore,
+                                 verbose = verbose)
 
-  # adjust group_prior parameter to account for thin argument
-  group_prior["SNP"] <- group_prior["SNP"] * thin
+  ctwas_res <- list("param" = param,
+                    "finemap_res" = finemap_res,
+                    "boundary_genes" = boundary_genes)
 
-  strong_region_finemap_res <- finemap_regions(z_snp = z_snp,
-                                               z_gene = z_gene,
-                                               gene_info = gene_info,
-                                               regionlist = screened_regionlist,
-                                               weight_list = weight_list,
-                                               L = L,
-                                               group_prior = group_prior,
-                                               group_prior_var = group_prior_var,
-                                               use_null_weight = use_null_weight,
-                                               coverage = coverage,
-                                               min_abs_corr = min_abs_corr,
-                                               save_cor = save_cor,
-                                               cor_dir = cor_dir,
-                                               ncore = ncore,
-                                               verbose = verbose)
-
-  ctwas_res <- list("strong_region_finemap_res" = strong_region_finemap_res,
-                    "weak_region_finemap_res" = weak_region_finemap_res,
-                    "param" = param,
-                    "z_gene" = z_gene,
-                    "gene_info" = gene_info,
-                    "region_info" = region_info,
-                    "regionlist" = regionlist,
-                    "weight_list" = weight_list,
-                    "boundary_genes" = boundary_genes,
-                    "screened_regionlist" = screened_regionlist,
-                    "screened_region_tags" = screened_region_tags)
   return(ctwas_res)
 
 }

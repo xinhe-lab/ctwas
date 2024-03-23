@@ -4,17 +4,7 @@
 \alias{compute_region_cor}
 \title{Compute correlation matrices for a region}
 \usage{
-compute_region_cor(regionlist, region_tag, weight_list)
-}
-\arguments{
-\item{regionlist}{regionlist}
-
-\item{region_tag}{region tag}
-
-\item{weight_list}{weight list}
-}
-\value{
-a list of correlation matrices
+compute_region_cor(sids, gids, R_snp, weights, snpinfo)
 }
 \description{
 Compute correlation matrices for a region

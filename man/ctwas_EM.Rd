@@ -8,11 +8,10 @@ Iteratively run susie and estimate parameters - RSS version}
 ctwas_EM(
   zdf,
   regionlist,
-  region_info,
   gene_info,
   niter = 20,
-  group_prior = NULL,
-  group_prior_var = NULL,
+  init_group_prior = NULL,
+  init_group_prior_var = NULL,
   group_prior_var_structure = c("independent", "shared_all", "shared_QTLtype"),
   use_null_weight = TRUE,
   coverage = 0.95,
@@ -30,15 +29,13 @@ The "type" column can also be use to specify multiple sets of weights}
 
 \item{regionlist}{a list object indexing regions, variants and genes.}
 
-\item{region_info}{a data frame of region definition and associated file names}
-
 \item{gene_info}{a data frame of gene information}
 
 \item{niter}{the number of iterations of the E-M algorithm to perform}
 
-\item{group_prior}{a vector of two prior inclusion probabilities for SNPs and genes.}
+\item{init_group_prior}{a vector of initial prior inclusion probabilities for SNPs and genes.}
 
-\item{group_prior_var}{a vector of two prior variances for SNPs and gene effects.}
+\item{init_group_prior_var}{a vector of initial prior variances for SNPs and gene effects.}
 
 \item{group_prior_var_structure}{a string indicating the structure to put on the prior variance parameters.
 "independent" is the default and allows all groups to have their own separate variance parameters.

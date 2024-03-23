@@ -7,15 +7,13 @@
 #'
 #' @param regionlist a list object indexing regions, variants and genes.
 #'
-#' @param region_info a data frame of region definition and associated file names
-#'
 #' @param gene_info a data frame of gene information
 #'
 #' @param niter the number of iterations of the E-M algorithm to perform
 #'
-#' @param group_prior a vector of two prior inclusion probabilities for SNPs and genes.
+#' @param init_group_prior a vector of initial prior inclusion probabilities for SNPs and genes.
 #'
-#' @param group_prior_var a vector of two prior variances for SNPs and gene effects.
+#' @param init_group_prior_var a vector of initial prior variances for SNPs and gene effects.
 #'
 #' @param group_prior_var_structure a string indicating the structure to put on the prior variance parameters.
 #' "independent" is the default and allows all groups to have their own separate variance parameters.
@@ -42,11 +40,10 @@
 #'
 ctwas_EM <- function(zdf,
                      regionlist,
-                     region_info,
                      gene_info,
                      niter = 20,
-                     group_prior = NULL,
-                     group_prior_var = NULL,
+                     init_group_prior = NULL,
+                     init_group_prior_var = NULL,
                      group_prior_var_structure = c("independent","shared_all","shared_QTLtype"),
                      use_null_weight = TRUE,
                      coverage = 0.95,
@@ -67,19 +64,19 @@ ctwas_EM <- function(zdf,
   rownames(group_prior_rec) <- types
   rownames(group_prior_var_rec) <- types
 
-  if (is.null(group_prior)){
-    group_prior <- structure(as.numeric(rep(NA,length(types))), names=types)
+  if (is.null(init_group_prior)){
+    init_group_prior <- structure(as.numeric(rep(NA,length(types))), names=types)
   }
 
-  if (is.null(group_prior_var)){
-    group_prior_var <- structure(as.numeric(rep(NA,length(types))), names=types)
+  if (is.null(init_group_prior_var)){
+    init_group_prior_var <- structure(as.numeric(rep(NA,length(types))), names=types)
   }
 
   pi_prior <- list()
   V_prior <- list()
   for (type in types){
-    pi_prior[[type]] <- unname(group_prior[type])
-    V_prior[[type]] <- unname(group_prior_var[type])
+    pi_prior[[type]] <- unname(init_group_prior[type])
+    V_prior[[type]] <- unname(init_group_prior_var[type])
   }
   pi_prior <- unlist(pi_prior)
   V_prior <- unlist(V_prior)
