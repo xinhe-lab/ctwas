@@ -18,7 +18,7 @@ ctwas_sumstats(
   max_snp_region = Inf,
   min_nonSNP_PIP = 0.5,
   prob_single = 0.8,
-  use_null_weight = T,
+  use_null_weight = TRUE,
   coverage = 0.95,
   min_abs_corr = 0.5,
   ncore = 1,
@@ -54,9 +54,8 @@ for regions with strong gene signals; see \code{min_nonSNP_PIP}.}
 
 \item{group_prior_var_structure}{a string indicating the structure to put on the prior variance parameters.
 "independent" is the default and allows all groups to have their own separate variance parameters.
-"shared" allows all groups to share the same variance parameter.
-"shared+snps" allows all groups to share the same variance parameter, and this variance parameter is also shared with SNPs.
-"shared_type" allows all groups in one molecular QTL type to share the same variance parameter.}
+"shared_all" allows all groups to share the same variance parameter.
+"shared_QTLtype" allows all groups in one molecular QTL type to share the same variance parameter.}
 
 \item{max_snp_region}{Inf or integer. Maximum number of SNPs in a region. Default is
 Inf, no limit. This can be useful if there are many SNPs in a region and you don't

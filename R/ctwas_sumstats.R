@@ -24,9 +24,8 @@
 #'
 #' @param group_prior_var_structure a string indicating the structure to put on the prior variance parameters.
 #' "independent" is the default and allows all groups to have their own separate variance parameters.
-#' "shared" allows all groups to share the same variance parameter.
-#' "shared+snps" allows all groups to share the same variance parameter, and this variance parameter is also shared with SNPs.
-#' "shared_type" allows all groups in one molecular QTL type to share the same variance parameter.
+#' "shared_all" allows all groups to share the same variance parameter.
+#' "shared_QTLtype" allows all groups in one molecular QTL type to share the same variance parameter.
 #'
 #' @param max_snp_region Inf or integer. Maximum number of SNPs in a region. Default is
 #' Inf, no limit. This can be useful if there are many SNPs in a region and you don't
@@ -78,7 +77,7 @@ ctwas_sumstats <- function(
     max_snp_region = Inf,
     min_nonSNP_PIP = 0.5,
     prob_single = 0.8,
-    use_null_weight = T,
+    use_null_weight = TRUE,
     coverage = 0.95,
     min_abs_corr = 0.5,
     ncore = 1,
@@ -99,7 +98,7 @@ ctwas_sumstats <- function(
   gene_info <- get_gene_info(z_gene, weights)
   z_gene <- cbind(z_gene, gene_info)[,c("chrom", "id", "p0", "p1", "z")]
 
-  # combine z-scores of SNPs and genes (used in get_regionlist)
+  # combine z-scores of SNPs and genes (for selecting SNPs and genes in regionlist)
   zdf <- combine_z(z_snp, z_gene)
 
   # get regionlist (thinned SNPs)
