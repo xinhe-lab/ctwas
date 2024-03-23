@@ -96,16 +96,18 @@ ctwas_sumstats <- function(
   z_gene <- compute_gene_z(z_snp, weights)
 
   # Get gene info and append to z_gene
-  gene_info <- get_gene_info(z_gene, weights, region_info)
+  gene_info <- get_gene_info(z_gene, weights)
   z_gene <- cbind(z_gene, gene_info)[,c("chrom", "id", "p0", "p1", "z")]
+
+  # combine z-scores of SNPs and genes (used in get_regionlist)
+  zdf <- combine_z(z_snp, z_gene)
 
   # get regionlist (thinned SNPs)
   res <- get_regionlist(region_info,
                         gene_info,
                         weights,
-                        select = z_snp$id,
+                        select = zdf$id,
                         thin = thin,
-                        minvar = 2,
                         adjust_boundary = TRUE)
   regionlist <- res$regionlist
   weight_list <- res$weight_list
@@ -150,7 +152,7 @@ ctwas_sumstats <- function(
   if (thin < 1){
     loginfo("Update regionlist with full SNPs for screened regions")
     screened_regionlist <- expand_regionlist(screened_regionlist,
-                                             select = z_snp,
+                                             select = zdf,
                                              maxSNP = max_snp_region)
   }
 

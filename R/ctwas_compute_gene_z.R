@@ -39,19 +39,8 @@ compute_gene_z <- function (z_snp, weights, logfile = NULL){
 }
 
 
-#' add gene info to z_gene
-add_gene_info <- function(z_gene, weights, region_info){
-  # # find the regions overlapping with each gene
-  # weight_info <- weight_info[weight_info$chrom %in% region_info$chrom, ]
-  # for (i in 1:nrow(weight_info)) {
-  #   chrom <- weight_info[i, "chrom"]
-  #   p0 <- weight_info[i, "p0"]
-  #   p1 <- weight_info[i, "p1"]
-  #   idx <- which(region_info$chrom == chrom & region_info$start <= p1 & region_info$stop > p0)
-  #   weight_info[i, "region_tag"] <- paste(sort(region_info[idx, "region_tag"]), collapse = ";")
-  #   weight_info[i, "cross_boundary"] <- ifelse(length(idx) > 1, 1, 0)
-  # }
-  # gene_info <- weight_info[match(z_gene$id, weight_info$id), c("chrom", "id", "p0", "p1")]
+#' get gene info
+get_gene_info <- function(z_gene, weights){
   return(gene_info)
 }
 
