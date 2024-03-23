@@ -19,23 +19,23 @@
 #' @param scale_by_ld_variance TRUE/FALSE. If TRUE, PredictDB weights are scaled by genotype variance, which is the default
 #' behavior for PredictDB
 #'
-#' @return a list of processed weight list and weight info table
+#' @return a list of processed weights
 #'
 #' @export
 #'
-process_weights <- function (weight_file,
-                             region_info,
-                             z_snp,
-                             weight_format = c("PredictDB", "Fusion"),
-                             drop_strand_ambig = TRUE,
-                             filter_protein_coding_genes = FALSE,
-                             scale_by_ld_variance = TRUE){
+preprocess_weights <- function(weight_file,
+                               region_info,
+                               z_snp,
+                               weight_format = c("PredictDB", "Fusion"),
+                               drop_strand_ambig = TRUE,
+                               filter_protein_coding_genes = FALSE,
+                               scale_by_ld_variance = TRUE){
 
   weight_format <- match.arg(weight_format)
   # load LD SNPs information
   region_info <- region_info[order(region_info$chrom, region_info$start),]
   ld_snpinfo <- read_LD_SNP_files(region_info$SNP_info)
-  outlist <- list()
+  weights <- list()
   for(weight in weight_file){
     loginfo("Load weight: %s", weight)
     loaded_weight <- load_weights(weight, weight_format = weight_format, filter_protein_coding_genes = filter_protein_coding_genes)
@@ -94,25 +94,17 @@ process_weights <- function (weight_file,
       }
 
       nwgt <- nrow(wgt.matrix)
+
       if(nwgt>0){
         p0 <- min(snps[snps[, "id"] %in% snpnames, "pos"])
         p1 <- max(snps[snps[, "id"] %in% snpnames, "pos"])
-        gname_weight <- paste0(gname, "|", weight_name)
-        outlist[[gname_weight]] <- list(chrom = chrom, p0 = p0, p1 = p1, wgt = wgt, gene_name=gname, weight_name=weight_name, n = nwgt)
+        weight_id <- paste0(gname, "|", weight_name)
+        weights[[weight_id]] <- list(chrom=chrom, p0=p0, p1=p1, wgt=wgt, gene_name=gname, weight_name=weight_name, n=nwgt)
       }
       setTxtProgressBar(pb, i)
     }
     close(pb)
   }
 
-  weight_list <- lapply(outlist, "[[", "wgt")
-  names(weight_list) <- names(outlist)
-
-  weight_info <- lapply(names(outlist), function(x){
-    as.data.frame(outlist[[x]][c("chrom", "p0","p1", "gene_name", "weight_name", "n")])})
-  weight_info <- do.call(rbind, weight_info)
-  weight_info$id <- names(outlist)
-  rownames(weight_info) <- NULL
-
-  return(list(weight_list = weight_list, weight_info = weight_info))
+  return(weights)
 }
