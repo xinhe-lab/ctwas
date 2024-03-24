@@ -147,7 +147,7 @@ ctwas_sumstats <- function(
   if (thin < 1){
     loginfo("Update regionlist with full SNPs for screened regions")
     screened_regionlist <- expand_regionlist(screened_regionlist,
-                                             select = zdf,
+                                             trim_by = "z",
                                              maxSNP = max_snp_region)
   }
 
