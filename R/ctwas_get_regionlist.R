@@ -121,6 +121,17 @@ get_regionlist <- function(region_info,
   }
 
   # Trim regions with SNPs more than maxSNP
+  regionlist <- trim_regionlist(regionlist, z_snp, trim_by = trim_by, maxSNP = maxSNP, seed = seed)
+
+  return(list(regionlist=regionlist,
+              weights=weights,
+              boundary_genes=boundary_genes))
+}
+
+trim_regionlist <- function(regionlist, z_snp, trim_by = c("random", "z"), maxSNP = Inf, seed = 99){
+
+  trim_by <- match.arg(trim_by)
+
   if (maxSNP < Inf){
     if (trim_by == "z") {
       # trim SNPs with lower |z|
@@ -128,7 +139,7 @@ get_regionlist <- function(region_info,
         if (length(regionlist[[region_tag]][["sid"]]) > maxSNP){
           loginfo("Trim region %s with SNPs more than %s", region_tag, maxSNP)
           idx <- match(regionlist[[region_tag]][["sid"]], z_snp$id)
-          z.abs <- abs(zdf[idx, "z"])
+          z.abs <- abs(z_snp[idx, "z"])
           ifkeep <- rank(-z.abs) <= maxSNP
           regionlist[[region_tag]][["sid"]] <- regionlist[[region_tag]][["sid"]][ifkeep]
         }
@@ -148,7 +159,5 @@ get_regionlist <- function(region_info,
     }
   }
 
-  return(list(regionlist=regionlist,
-              weights=weights,
-              boundary_genes=boundary_genes))
+  return(regionlist)
 }

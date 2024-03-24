@@ -20,8 +20,9 @@
 #' @export
 #'
 expand_regionlist <- function(regionlist,
+                              z_snp,
                               filter_z_ids = TRUE,
-                              trim_by = c("random", "z"),
+                              trim_by = c("z", "random"),
                               maxSNP = Inf,
                               seed = 99) {
 
@@ -29,22 +30,15 @@ expand_regionlist <- function(regionlist,
 
   region_tags <- names(regionlist)
 
-  # combine z-scores of SNPs and genes (for selecting SNPs and genes in regionlist)
-  zdf <- combine_z(z_snp, z_gene)
-
-  if (is.null(gene_info)){
-    gene_info <- get_gene_info(z_gene, weights, region_info)
-  }
-
   loginfo("Update regionlist for %d regions with full SNPs", length(region_tags))
 
   # update SNP IDs for each region
   for (region_tag in region_tags){
 
-    # update sid in the region with all SNPs in the region
+    # load all SNPs in the region
     snpinfo <- read_LD_SNP_files(regionlist[[region_tag]][["SNP_info"]]) #ctwas
 
-    # select SNPs
+    # update sid in the region
     snpinfo$keep <- rep(1, nrow(snpinfo))
     if (isTRUE(filter_z_ids)){
       # remove SNPs not in z_snp
@@ -52,42 +46,15 @@ expand_regionlist <- function(regionlist,
     }
     sid <- snpinfo$id[snpinfo$keep == 1]
     sidx <- match(sid, snpinfo$id)
-
-    # update sid in the region
     regionlist[[region_tag]][["sid"]] <- sid
 
     # update minpos and maxpos in the region
     regionlist[[region_tag]][["minpos"]] <- min(c(regionlist[[region_tag]][["minpos"]], snpinfo$pos[sidx]))
     regionlist[[region_tag]][["maxpos"]] <- max(c(regionlist[[region_tag]][["maxpos"]], snpinfo$pos[sidx]))
-
-    # Trim regions with SNPs more than maxSNP
-    if (maxSNP < Inf){
-      if (trim_by == "z") {
-        # trim SNPs with lower |z|
-        for (region_tag in names(regionlist)){
-          if (length(regionlist[[region_tag]][["sid"]]) > maxSNP){
-            loginfo("Trim region %s with SNPs more than %s", region_tag, maxSNP)
-            idx <- match(regionlist[[region_tag]][["sid"]], z_snp$id)
-            z.abs <- abs(zdf[idx, "z"])
-            ifkeep <- rank(-z.abs) <= maxSNP
-            regionlist[[region_tag]][["sid"]] <- regionlist[[region_tag]][["sid"]][ifkeep]
-          }
-        }
-      } else {
-        # randomly trim snps
-        for (region_tag in names(regionlist)){
-          if (length(regionlist[[region_tag]][["sid"]]) > maxSNP){
-            loginfo("Trim region %s with SNPs more than %s", region_tag, maxSNP)
-            n.snps <- length(regionlist[[region_tag]][["sid"]])
-            ifkeep <- rep(FALSE, n.snps)
-            set.seed(seed)
-            ifkeep[sample.int(n.snps, size = maxSNP)] <- TRUE
-            regionlist[[region_tag]][["sid"]] <-  regionlist[[region_tag]][["sid"]][ifkeep]
-          }
-        }
-      }
-    }
   }
+
+  # Trim regions with SNPs more than maxSNP
+  regionlist <- trim_regionlist(regionlist, z_snp, trim_by = trim_by, maxSNP = maxSNP, seed = seed)
 
   return(regionlist)
 

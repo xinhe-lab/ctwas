@@ -6,8 +6,9 @@
 \usage{
 expand_regionlist(
   regionlist,
+  z_snp,
   filter_z_ids = TRUE,
-  trim_by = c("random", "z"),
+  trim_by = c("z", "random"),
   maxSNP = Inf,
   seed = 99
 )
