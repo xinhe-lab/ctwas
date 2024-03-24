@@ -6,11 +6,14 @@
 \usage{
 get_regionlist(
   region_info,
-  gene_info,
-  weight_list = NULL,
-  select = NULL,
+  z_snp,
+  z_gene,
+  weights = NULL,
   thin = 1,
   maxSNP = Inf,
+  filter_z_ids = TRUE,
+  trim_by = c("random", "z"),
+  seed = 99,
   minvar = 1,
   mingene = 0,
   adjust_boundary = TRUE
@@ -19,14 +22,11 @@ get_regionlist(
 \arguments{
 \item{region_info}{a data frame of region definition and associated file names}
 
-\item{gene_info}{a data frame of gene information obtained from \code{compute_gene_z}}
+\item{z_snp}{A data frame with columns: "id", "z", giving the z-scores for SNPs.}
 
-\item{weight_list}{a list of weights}
+\item{z_gene}{A data frame with columns: "id", "z", giving the z-scores for genes.}
 
-\item{select}{Default is NULL, all variants will be selected. Or a vector of variant IDs,
-or a data frame with columns id and z (id is for gene or SNP id, z is for z scores).
-z will be used for remove SNPs if the total number of SNPs exceeds limit. See
-parameter `maxSNP` for more information.}
+\item{weights}{a list of weights}
 
 \item{thin}{The proportion of SNPs to be used for the parameter estimation and
 initial screening region steps.
@@ -38,14 +38,23 @@ Inf, no limit. This can be useful if there are many SNPs in a region and you don
 have enough memory to run the program. This applies to the last rerun step
 (using full SNPs and rerun susie for regions with strong gene signals) only.}
 
+\item{filter_z_ids}{If TRUE, only keep SNPs and genes in z_snp and z_gene.}
+
+\item{trim_by}{remove SNPs if the total number of SNPs exceeds limit, options: "random",
+or "z" (trim SNPs with lower |z|) See parameter `maxSNP` for more information.}
+
+\item{seed}{seed for.random sampling}
+
 \item{minvar}{minimum number of SNPs (and genes) in a region}
 
 \item{mingene}{minimum number of genes in a region}
 
 \item{adjust_boundary}{identify cross-boundary genes, adjust regionlist and update weigh_list}
+
+\item{gene_info}{a data frame of gene information obtained from \code{get_gene_info}}
 }
 \value{
-a list with regionlist, updated weight_list, and cross-bounary genes
+a list with regionlist, updated weights, and cross-bounary genes
 }
 \description{
 Get regionlist for each region in region_info

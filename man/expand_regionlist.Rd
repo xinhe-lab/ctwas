@@ -4,21 +4,27 @@
 \alias{expand_regionlist}
 \title{Expand regionlist with full SNPs}
 \usage{
-expand_regionlist(regionlist, region_tags = NULL, select = NULL, maxSNP = Inf)
+expand_regionlist(
+  regionlist,
+  filter_z_ids = TRUE,
+  trim_by = c("random", "z"),
+  maxSNP = Inf,
+  seed = 99
+)
 }
 \arguments{
 \item{regionlist}{a list of region gene IDs and SNP IDs and associated file names}
 
-\item{region_tags}{region tags to specify which regions to update. If NULL, update all regions in regionlist}
+\item{filter_z_ids}{If TRUE, only keep SNPs and genes in z_snp and z_gene.}
 
-\item{select}{Default is NULL, all variants will be selected.
-Or a data frame with columns id and z (id is for gene or SNP id, z is for z scores).
-z will be used for remove SNPs if the total number of SNPs exceeds limit. See
-parameter `maxSNP` for more information.}
+\item{trim_by}{remove SNPs if the total number of SNPs exceeds limit, options: "random",
+or "z" (trim SNPs with lower |z|) See parameter `maxSNP` for more information.}
 
 \item{maxSNP}{Inf or integer. Maximum number of SNPs in a region. Default is
 Inf, no limit. This can be useful if there are many SNPs in a region and you don't
 have enough memory to run the program.}
+
+\item{seed}{seed for.random sampling}
 }
 \value{
 updated regionlist with full SNPs

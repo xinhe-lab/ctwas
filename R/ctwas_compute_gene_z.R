@@ -49,7 +49,7 @@ get_gene_info <- function(z_gene, weights, region_info=NULL){
 
   # gene info data frame with gene ids, gene names, gene coordinates and weight names
   gidx <- match(z_gene$id, weight_info$id)
-  gene_info <- weight_info[gidx, c("chrom", "id", "p0", "p1", "gene_name", "weight_name", "region_tag", "n_regions")]
+  gene_info <- weight_info[gidx, c("chrom", "id", "p0", "p1", "gene_name", "weight_name")]
   rownames(gene_info) <- NULL
 
   # find the regions overlapping with each gene
