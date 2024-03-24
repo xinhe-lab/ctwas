@@ -118,7 +118,7 @@ ctwas_sumstats <- function(
                      z_gene,
                      regionlist,
                      init_group_prior = init_group_prior,
-                     init_group_prior = init_group_prior,
+                     init_group_prior_var = init_group_prior_var,
                      group_prior_var_structure = group_prior_var_structure,
                      thin = thin,
                      niter1 = niter1,
@@ -145,7 +145,7 @@ ctwas_sumstats <- function(
                                          use_null_weight = use_null_weight,
                                          ncore = ncore)
 
-  # expand screened regionlist with all SNPs
+  # Expand screened regionlist with all SNPs in the regions
   screened_regionlist <- regionlist[screened_region_tags]
   if (thin < 1){
     loginfo("Update regionlist with full SNPs for screened regions")
