@@ -60,9 +60,6 @@ get_regionlist <- function(region_info,
     stop("thin needs to be in (0,1]")
   }
 
-  # combine z-scores of SNPs and genes (for selecting SNPs and genes in regionlist)
-  zdf <- combine_z(z_snp, z_gene)
-
   # get gene info from z_gene and weights
   gene_info <- get_gene_info(z_gene, weights, region_info)
 
