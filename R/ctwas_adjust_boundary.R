@@ -6,12 +6,13 @@ adjust_boundary <- function(regioninfo, weight_list, regionlist){
   for (i in 1:(nrow(regioninfo)-1)){
     region_tag_current <- regioninfo$region_tag[i]
     region_tag_next <- regioninfo$region_tag[i+1]
-    current <- regionlist[[region_tag_current]]
-    nextone <- regionlist[[region_tag_next]]
+    # current <- regionlist[[region_tag_current]]
+    # nextone <- regionlist[[region_tag_next]]
     gnames <- regionlist[[region_tag_current]][["gid"]]
     # tmp_region <- regionlist[[region_tag_current]]
     if(length(gnames>0)){
-      ld_snpinfo <- read_LD_SNP_file(regionlist[[region_tag_current]][["SNP_info"]]) #ctwas:::
+      snpinfo_file <- regioninfo[regioninfo$region_tag == region_tag_current, "SNP_info"]
+      ld_snpinfo <- read_LD_SNP_file(snpinfo_file)
       for (i in 1:length(gnames)){
         gname <- gnames[i]
         wgt <- weight_list[[gname]]

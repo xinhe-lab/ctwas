@@ -12,8 +12,6 @@
 #'
 #' @param weights a list of weights
 #'
-#' @param gene_info a data frame of gene information obtained from \code{compute_gene_z}
-#'
 #' @param thin The proportion of SNPs to be used for parameter estimation and initial screening regions.
 #' Smaller \code{thin} parameters reduce runtime at the expense of accuracy.
 #'
@@ -55,7 +53,6 @@ screen_regions <- function(
     regionlist,
     region_info,
     weights,
-    gene_info,
     thin = 1,
     group_prior = NULL,
     group_prior_var = NULL,
@@ -69,7 +66,7 @@ screen_regions <- function(
     ...){
 
   if (!is.null(logfile)){
-    addHandler(writeToFile, file= logfile, level='DEBUG')
+    addHandler(writeToFile, file=logfile, level='DEBUG')
   }
 
   loginfo("Screen regions ...")
@@ -83,9 +80,6 @@ screen_regions <- function(
     group_prior["SNP"] <- group_prior["SNP"] / thin
   }
 
-  # combine z-scores of SNPs and genes
-  zdf <- combine_z(z_snp, z_gene)
-
   # remove regions with fewer than mingene genes
   if (mingene > 0) {
     n.gid <- sapply(regionlist, function(x){length(x[["gid"]])})
@@ -96,12 +90,11 @@ screen_regions <- function(
 
   # run finemapping for all regions containing thinned SNPs
   loginfo("Run initial screening for %d regions ...", length(regionlist))
-  finemap_res <- finemap_regions(z_snp = z_snp,
-                                 z_gene = z_gene,
-                                 regionlist = regionlist,
-                                 region_info = region_info,
-                                 weights = weights,
-                                 gene_info = gene_info,
+  finemap_res <- finemap_regions(z_snp,
+                                 z_gene,
+                                 regionlist,
+                                 region_info,
+                                 weights,
                                  L = L,
                                  group_prior = group_prior,
                                  group_prior_var = group_prior_var,
@@ -109,9 +102,9 @@ screen_regions <- function(
                                  verbose = verbose)
 
   # select regions based on total non-SNP PIP of the region
+  loginfo("Select regions with non-SNP PIP >= %s", min_nonSNP_PIP)
   screened_region_tags <- NULL
-  region_tags <- names(regionlist)
-  for (region_tag in region_tags){
+  for (region_tag in names(regionlist)){
     finemap_region_res <- finemap_res[finemap_res$region_tag == region_tag,]
     nonSNP_PIP <- sum(finemap_region_res$susie_pip[finemap_region_res$type != "SNP"])
     nonSNP_PIP[is.na(nonSNP_PIP)] <- 0 # 0 if nonSNP_PIP is NA

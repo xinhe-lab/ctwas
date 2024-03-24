@@ -29,7 +29,6 @@ summarize_param <- function(param,
   # set group size
   group_size <- param[["group_size"]]
   # group_size["SNP"] <- group_size["SNP"]/thin # adjust to account for thin argument
-
   group_size <- group_size[rownames(estimated_group_prior_all)]
 
   # estimated group PVE (all iterations)

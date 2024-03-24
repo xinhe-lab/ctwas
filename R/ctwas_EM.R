@@ -1,13 +1,13 @@
 #' Run EM to estimate parameters.
 #' Iteratively run susie and estimate parameters - RSS version
 #'
-#' @param zdf A data frame with three columns: "id", "z", "type".
-#' This data frame gives the the z scores for SNPs and genes, denoted in "type".
-#' The "type" column can also be use to specify multiple sets of weights
+#' @param z_snp a data frame with four columns: "id", "A1", "A2", "z".
+#' giving the z scores for SNPs. "A1" is effect allele. "A2" is the other allele.
+#'
+#' @param z_gene a data frame with two columns: "id", "z". giving the z scores for genes.
+#' Optionally, a "type" column can also be supplied; this is for using multiple sets of weights
 #'
 #' @param regionlist a list object indexing regions, variants and genes.
-#'
-#' @param gene_info a data frame of gene information
 #'
 #' @param niter the number of iterations of the E-M algorithm to perform
 #'
@@ -38,9 +38,9 @@
 #'
 #' @return a list of parameters
 #'
-ctwas_EM <- function(zdf,
+ctwas_EM <- function(z_snp,
+                     z_gene,
                      regionlist,
-                     gene_info,
                      niter = 20,
                      init_group_prior = NULL,
                      init_group_prior_var = NULL,
@@ -52,6 +52,9 @@ ctwas_EM <- function(zdf,
                      ncore = 1,
                      verbose = TRUE,
                      ...){
+
+  # combine z-scores of SNPs and genes
+  zdf <- combine_z(z_snp, z_gene)
 
   types <- unique(zdf$type)
   QTLtypes <- unique(zdf$QTLtype)
@@ -137,9 +140,6 @@ ctwas_EM <- function(zdf,
           null_weight <- NULL
         }
 
-        # SNP information in this region
-        ld_snpinfo <- read_LD_SNP_files(regionlist[[region_tag]][["SNP_info"]])
-
         # R does not matter for susie when L = 1
         R <- diag(length(z))
 
@@ -157,8 +157,8 @@ ctwas_EM <- function(zdf,
 
         # annotate susie result with SNP and gene information
         susie_res_df <- anno_susie(susie_res,
-                                   geneinfo = gene_info,
-                                   snpinfo = ld_snpinfo,
+                                   geneinfo = NULL,
+                                   snpinfo = NULL,
                                    gid = gid,
                                    sid = sid,
                                    zdf = zdf,
@@ -214,12 +214,14 @@ ctwas_EM <- function(zdf,
   }
   parallel::stopCluster(cl)
 
+  group_size <- table(EM_susie_res$type)
+
   return(list("group_prior"= pi_prior,
               "group_prior_var" = V_prior,
               "group_prior_rec" = group_prior_rec,
               "group_prior_var_rec" = group_prior_var_rec,
               "group_prior_var_structure" = group_prior_var_structure,
-              "EM_susie_res" = EM_susie_res))
+              "group_size" = group_size))
 }
 
 

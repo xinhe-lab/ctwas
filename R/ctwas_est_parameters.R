@@ -74,18 +74,15 @@ est_param <- function(
     stop("thin value needs to be in (0,1]")
   }
 
-  # combine z-scores of SNPs and genes
-  zdf <- combine_z(z_snp, z_gene)
-
   if (!is.null(init_group_prior)){
     init_group_prior["SNP"] <- init_group_prior["SNP"]/thin # adjust to account for thin argument
   }
 
   # Run EM for a few (niter1) iterations, getting rough estimates
   loginfo("Run EM for %d iterations, getting rough estimates ...", niter1)
-  EM1_res <- ctwas_EM(zdf,
+  EM1_res <- ctwas_EM(z_snp,
+                      z_gene,
                       regionlist,
-                      gene_info,
                       niter = niter1,
                       init_group_prior = init_group_prior,
                       init_group_prior_var = init_group_prior_var,
@@ -96,16 +93,15 @@ est_param <- function(
   loginfo("Roughly estimated group_prior_var {%s}: {%s}", names(EM1_res$group_prior_var), EM1_res$group_prior_var)
 
   # filter regions based on prob_single
-  filtered_regionlist <- filter_regions(regionlist, zdf, EM1_group_prior, prob_single = prob_single)
+  filtered_regionlist <- filter_regions(regionlist, z_snp, z_gene, EM1_group_prior, prob_single = prob_single)
 
   # Run EM for more (niter2) iterations, getting rough estimates
   loginfo("Run EM for %d iterations on %d filtered regions, getting accurate estimates ...",
           niter2, length(filtered_regionlist))
 
-  EM2_res <- ctwas_EM(zdf,
+  EM2_res <- ctwas_EM(z_snp,
+                      z_gene,
                       filtered_regionlist,
-                      region_info,
-                      gene_info,
                       niter = niter2,
                       init_group_prior = EM1_res$group_prior,
                       init_group_prior_var = EM1_res$group_prior_var,
@@ -127,8 +123,8 @@ est_param <- function(
 
   # adjust parameters to account for thin argument
   group_prior["SNP"] <- group_prior["SNP"] * thin
-  group_prior_rec["SNP",] <- group_prior_rec["SNP",]*thin
-  group_size <- table(EM1_res$EM_susie_res$type)
+  group_prior_rec["SNP",] <- group_prior_rec["SNP",] * thin
+  group_size <- EM1_res$group_size
   group_size["SNP"] <- group_size["SNP"]/thin
 
   param <- list("group_prior" = group_prior,

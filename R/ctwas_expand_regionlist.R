@@ -2,6 +2,10 @@
 #'
 #' @param regionlist a list of region gene IDs and SNP IDs and associated file names
 #'
+#' @param region_info a data frame of region definition and associated LD file names
+#'
+#' @param z_snp A data frame with columns: "id", "z", giving the z-scores for SNPs.
+#'
 #' @param filter_z_ids If TRUE, only keep SNPs and genes in z_snp and z_gene.
 #'
 #' @param trim_by remove SNPs if the total number of SNPs exceeds limit, options: "random",
@@ -20,6 +24,7 @@
 #' @export
 #'
 expand_regionlist <- function(regionlist,
+                              region_info,
                               z_snp,
                               filter_z_ids = TRUE,
                               trim_by = c("z", "random"),
@@ -36,7 +41,8 @@ expand_regionlist <- function(regionlist,
   for (region_tag in region_tags){
 
     # load all SNPs in the region
-    snpinfo <- read_LD_SNP_files(regionlist[[region_tag]][["SNP_info"]]) #ctwas
+    snpinfo_file <- region_info[region_info$region_tag == region_tag_current, "SNP_info"]
+    snpinfo <- read_LD_SNP_file(snpinfo_file)
 
     # update sid in the region
     snpinfo$keep <- rep(1, nrow(snpinfo))

@@ -42,7 +42,7 @@
 get_regionlist <- function(region_info,
                            z_snp,
                            z_gene,
-                           weights = NULL,
+                           weights,
                            thin = 1,
                            maxSNP = Inf,
                            filter_z_ids = TRUE,
@@ -60,10 +60,10 @@ get_regionlist <- function(region_info,
     stop("thin needs to be in (0,1]")
   }
 
-  # get gene info from z_gene and weights
-  gene_info <- get_gene_info(z_gene, weights, region_info)
-
   region_info <- region_info[order(region_info$chrom, region_info$start),]
+
+  # get gene info from weights
+  gene_info <- get_gene_info(weights, region_info)
 
   regionlist <- list()
   boundary_genes <- data.frame(matrix(nrow = 0, ncol = 4))

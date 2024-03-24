@@ -1,6 +1,9 @@
 #' filter regions based on probability of at most 1 causal effect
-filter_regions <- function(regionlist, zdf, group_prior, prob_single = 0.8){
+filter_regions <- function(regionlist, z_snp, z_gene, group_prior, prob_single = 0.8){
   loginfo("Filtering regions (P1 >= %s) ...", prob_single)
+  # combine z-scores of SNPs and genes
+  zdf <- combine_z(z_snp, z_gene)
+
   region_tags <- names(regionlist)
   pb <- txtProgressBar(min = 0, max = length(region_tags), initial = 0, style = 3)
   selected_region_tags <- c()

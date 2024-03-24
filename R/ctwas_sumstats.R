@@ -94,7 +94,10 @@ ctwas_sumstats <- function(
   # Compute gene z-scores
   z_gene <- compute_gene_z(z_snp, weights)
 
-  # get regionlist (thinned SNPs)
+  # Get regionlist, which contains SNP and gene IDs assigned to each region, and region coordinates
+  #. downsample SNPs if thin < 1
+  #. assign SNP and gene IDs to each region
+  #. find boundary genes and adjust regionlist and weights for boundary genes
   res <- get_regionlist(region_info,
                         z_snp,
                         z_gene,
@@ -147,6 +150,7 @@ ctwas_sumstats <- function(
   if (thin < 1){
     loginfo("Update regionlist with full SNPs for screened regions")
     screened_regionlist <- expand_regionlist(screened_regionlist,
+                                             region_info,
                                              z_snp,
                                              trim_by = "z",
                                              maxSNP = max_snp_region)

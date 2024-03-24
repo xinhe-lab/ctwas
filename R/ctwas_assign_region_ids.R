@@ -36,16 +36,14 @@ assign_region_ids <- function(regioninfo,
     minpos <- min(c(geneinfo$p0[gidx], snpinfo$pos[sidx]))
     maxpos <- max(c(geneinfo$p1[gidx], snpinfo$pos[sidx]))
 
-    regionlist[[region_tag]] <- list("gid" = gid,
+    regionlist[[region_tag]] <- list("region_tag" = region_tag,
+                                     "gid" = gid,
                                      "sid" = sid,
                                      "chrom" = region_chrom,
                                      "start" = region_start,
                                      "stop" = region_stop,
                                      "minpos" = minpos,
-                                     "maxpos" = maxpos,
-                                     "region_tag" = region_tag,
-                                     "LD_matrix" = regioninfo$LD_matrix[i],
-                                     "SNP_info" = regioninfo$SNP_info[i])
+                                     "maxpos" = maxpos)
   }
 
   # identify genes across boundaries, update regionlist and weight_list according to new gene and snp assignment

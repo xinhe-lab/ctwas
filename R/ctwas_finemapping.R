@@ -14,8 +14,6 @@
 #'
 #' @param region_info a data frame of region definition and associated LD file names
 #'
-#' @param gene_info a data frame of gene information obtained from \code{compute_gene_z}
-#'
 #' @param weights a list of weights for each gene
 #'
 #' @param L the number of effects for susie during the fine mapping steps
@@ -55,7 +53,6 @@ finemap_region <- function(z_snp,
                            gid,
                            region_tag,
                            region_info,
-                           gene_info,
                            weights,
                            L = 5,
                            group_prior = NULL,
@@ -99,6 +96,9 @@ finemap_region <- function(z_snp,
   if (anyNA(z))
     loginfo("Warning: z-scores contains missing values!")
 
+  # get gene info from z_gene and weights
+  gene_info <- get_gene_info(weights)
+
   # priors for susie
   if (is.null(group_prior)){
     group_prior <- structure(as.numeric(rep(NA,length(types))), names=types)
@@ -140,12 +140,15 @@ finemap_region <- function(z_snp,
     null_weight <- NULL
   }
 
-  # SNP information in this region
+  # LD and SNP information for this region
   regioninfo <- region_info[region_info$region_tag %in% region_tag, ]
-
+  LD_matrix_file <- regioninfo$LD_matrix
   LD_snpinfo <- read_LD_SNP_files(regioninfo$SNP_info)
 
   # compute correlation matrices
+  if(length(region_tag)){
+    region_tag <- paste(region_tag, collapse = "_")
+  }
   R_sg_file <- file.path(cor_dir, paste0("region.", region_tag, ".R_snp_gene.RDS"))
   R_g_file <- file.path(cor_dir, paste0("region.", region_tag,  ".R_gene.RDS"))
   R_s_file <- file.path(cor_dir, paste0("region.", region_tag, ".R_snp.RDS"))
@@ -153,12 +156,12 @@ finemap_region <- function(z_snp,
   if (isTRUE(force_compute_cor)) {
     # force compute correlation matrix
     if (verbose){
-      loginfo("Compute correlation matrices for region %s ...", region_tag)
+      loginfo("Compute correlation matrices ...")
     }
-    if (length(regioninfo$LD_matrix)==1){
-      R_snp <- load_LD(regioninfo$LD_matrix)
+    if (length(LD_matrix_file)==1){
+      R_snp <- load_LD(LD_matrix_file)
     } else {
-      R_snp <- lapply(regioninfo$LD_matrix, load_LD)
+      R_snp <- lapply(LD_matrix_file, load_LD)
       R_snp <- suppressWarnings(as.matrix(Matrix::bdiag(R_snp)))
     }
     res <- compute_region_cor(sid, gid, R_snp, weights, LD_snpinfo)
@@ -195,10 +198,10 @@ finemap_region <- function(z_snp,
       R <- diag(length(z))
     } else {
       # compute correlation matrix if L > 1
-      if (length(regioninfo$LD_matrix)==1){
-        R_snp <- load_LD(regioninfo$LD_matrix)
+      if (length(LD_matrix_file)==1){
+        R_snp <- load_LD(LD_matrix_file)
       } else {
-        R_snp <- lapply(regioninfo$LD_matrix, load_LD)
+        R_snp <- lapply(LD_matrix_file, load_LD)
         R_snp <- suppressWarnings(as.matrix(Matrix::bdiag(R_snp)))
       }
       res <- compute_region_cor(sid, gid, R_snp, weights, LD_snpinfo)
@@ -260,11 +263,7 @@ finemap_region <- function(z_snp,
 #' @param z_gene A data frame with two columns: "id", "z". giving the z scores for genes.
 #' Optionally, a "type" column can also be supplied; this is for using multiple sets of weights
 #'
-#' @param gene_info a data frame of gene information obtained from \code{compute_gene_z}
-#'
 #' @param regionlist regionlist to be finemapped
-#'
-#' @param region_tag a character string of region tags to be finemapped
 #'
 #' @param region_info a data frame of region definition and associated LD file names
 #'
@@ -311,7 +310,6 @@ finemap_regions <- function(z_snp,
                             regionlist,
                             region_info,
                             weights,
-                            gene_info = NULL,
                             L = 5,
                             group_prior = NULL,
                             group_prior_var = NULL,
@@ -350,7 +348,6 @@ finemap_regions <- function(z_snp,
                                                             region_tag = region_tag,
                                                             region_info = region_info,
                                                             weights = weights,
-                                                            gene_info = gene_info,
                                                             L = L,
                                                             group_prior = group_prior,
                                                             group_prior_var = group_prior_var,
