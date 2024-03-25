@@ -31,7 +31,7 @@
 #'
 #' @param mingene minimum number of genes in a region
 #'
-#' @param adjust_boundary identify cross-boundary genes, adjust regionlist and update weigh_list
+#' @param adjust_boundary_genes identify cross-boundary genes, adjust regionlist and update weighs
 #'
 #' @importFrom logging loginfo
 #'
@@ -50,7 +50,7 @@ get_regionlist <- function(region_info,
                            seed = 99,
                            minvar = 1,
                            mingene = 0,
-                           adjust_boundary = TRUE) {
+                           adjust_boundary_genes = TRUE) {
 
   trim_by <- match.arg(trim_by)
 
@@ -109,12 +109,17 @@ get_regionlist <- function(region_info,
       }
     }
 
-    # get regionlist and boundary_genes for regions in the chromosome, and update weights
-    res <- assign_region_ids(regioninfo,geneinfo,snpinfo,weights,minvar,adjust_boundary)
-    loginfo("No. regions with at least one SNP/gene for chr%s: %d", b, length(res$regionlist))
-    regionlist <- c(regionlist, res$regionlist)
-    weights <- res$weights
-    boundary_genes <- rbind(boundary_genes,res$boundary_genes)
+    # get regionlist
+    regionlist_chr <- assign_region_ids(regioninfo,geneinfo,snpinfo)
+    # identify genes across boundaries, update regionlist and weights according to new gene and snp assignment
+    if (isTRUE(adjust_boundary) && nrow(regioninfo) >=2){
+      res <- adjust_boundary_genes(regioninfo, weights, regionlist_chr)
+      regionlist_chr <- res$regionlist
+      weights <- res$weights
+      boundary_genes <- rbind(boundary_genes,res$boundary_genes)
+    }
+    loginfo("No. regions with at least one SNP/gene for chr%s: %d", b, length(regionlist_chr))
+    regionlist <- c(regionlist, regionlist_chr)
   }
 
   # Trim regions with SNPs more than maxSNP

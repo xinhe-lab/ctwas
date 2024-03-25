@@ -1,5 +1,5 @@
 # identify cross-boundary genes, adjust regionlist and update weigh_list
-adjust_boundary <- function(regioninfo, weight_list, regionlist){
+adjust_boundary_genes <- function(regioninfo, weights, regionlist){
   boundary_genes <- data.frame(matrix(nrow = 0, ncol = 4))
   colnames(boundary_genes) <- c("gene","chrom","region1","region2")
 
@@ -15,7 +15,7 @@ adjust_boundary <- function(regioninfo, weight_list, regionlist){
       ld_snpinfo <- read_LD_SNP_file(snpinfo_file)
       for (i in 1:length(gnames)){
         gname <- gnames[i]
-        wgt <- weight_list[[gname]]
+        wgt <- weights[[gname]][["wgt"]]
         snpnames <- rownames(wgt)
         ld.idx <- match(snpnames, ld_snpinfo$id)
         if(anyNA(ld.idx)){ # QTLs are across boundary
@@ -29,16 +29,16 @@ adjust_boundary <- function(regioninfo, weight_list, regionlist){
           nextr2 <- sum(wgt[nextindex]^2)
           if(thisr2<nextr2){
             #modify weights file - drop weights in other regions
-            tmp_wgt <- weight_list[[gname]][nextindex]
+            tmp_wgt <- weights[[gname]][["wgt"]][nextindex]
             if(length(tmp_wgt)==1){
-              weight_list[[gname]] <- matrix(tmp_wgt,nrow = 1,ncol = 1)
-              rownames(weight_list[[gname]]) <- snpnames[nextindex]
-              colnames(weight_list[[gname]]) <- "weight"
+              weights[[gname]][["wgt"]] <- matrix(tmp_wgt,nrow = 1,ncol = 1)
+              rownames(weights[[gname]][["wgt"]]) <- snpnames[nextindex]
+              colnames(weights[[gname]][["wgt"]]) <- "weight"
             }
             else{
-              weight_list[[gname]] <- matrix(tmp_wgt,nrow = length(tmp_wgt),ncol = 1)
-              rownames(weight_list[[gname]]) <- snpnames[nextindex]
-              colnames(weight_list[[gname]]) <- "weight"
+              weights[[gname]][["wgt"]] <- matrix(tmp_wgt,nrow = length(tmp_wgt),ncol = 1)
+              rownames(weights[[gname]][["wgt"]]) <- snpnames[nextindex]
+              colnames(weights[[gname]][["wgt"]]) <- "weight"
             }
             #add gene to next region
             #regionlist[[region_tag_next]][["gidx"]] <- c(regionlist[[region_tag_next]][["gidx"]],tmp_region[["gidx"]][which(gnames==gname)])
@@ -49,21 +49,21 @@ adjust_boundary <- function(regioninfo, weight_list, regionlist){
           }
           else{
             #modify weights file - drop weights in other regions
-            tmp_wgt <- weight_list[[gname]][thisindex]
+            tmp_wgt <- weights[[gname]][["wgt"]][thisindex]
             if(length(tmp_wgt)==1){
-              weight_list[[gname]] <- matrix(tmp_wgt,nrow = 1,ncol = 1)
-              rownames(weight_list[[gname]]) <- snpnames[thisindex]
-              colnames(weight_list[[gname]]) <- "weight"
+              weights[[gname]][["wgt"]] <- matrix(tmp_wgt,nrow = 1,ncol = 1)
+              rownames(weights[[gname]][["wgt"]]) <- snpnames[thisindex]
+              colnames(weights[[gname]][["wgt"]]) <- "weight"
             }
             else{
-              weight_list[[gname]] <- matrix(tmp_wgt,nrow = length(tmp_wgt),ncol = 1)
-              rownames(weight_list[[gname]]) <- snpnames[thisindex]
-              colnames(weight_list[[gname]]) <- "weight"
+              weights[[gname]][["wgt"]] <- matrix(tmp_wgt,nrow = length(tmp_wgt),ncol = 1)
+              rownames(weights[[gname]][["wgt"]]) <- snpnames[thisindex]
+              colnames(weights[[gname]][["wgt"]]) <- "weight"
             }
           }
         }
       }
     }
   }
-  return(list(regionlist=regionlist,weight_list=weight_list,boundary_genes=boundary_genes))
+  return(list(regionlist=regionlist,weights=weights,boundary_genes=boundary_genes))
 }

@@ -76,8 +76,8 @@ finemap_region <- function(z_snp,
   types <- unique(zdf$type)
 
   # keep only GWAS SNPs and imputed genes
-  sid <- intersect(sids, z_snp$id)
-  gid <- intersect(gids, z_gene$id)
+  sid <- intersect(sid, z_snp$id)
+  gid <- intersect(gid, z_gene$id)
 
   # combine zscores
   z.g <- zdf[match(gid, zdf$id), "z"]
@@ -89,14 +89,14 @@ finemap_region <- function(z_snp,
   gs_type <- c(g_type, s_type)
   # g_QTLtype <- zdf$QTLtype[match(gid, zdf$id)]
 
-  if (verbose){
-    loginfo("%d genes and %d SNPs in z-scores", length(z.g), length(z.s))
-  }
+  # if (verbose){
+  #   loginfo("%d genes and %d SNPs in z-scores", length(z.g), length(z.s))
+  # }
 
   if (anyNA(z))
     loginfo("Warning: z-scores contains missing values!")
 
-  # get gene info from z_gene and weights
+  # get gene info from weights
   gene_info <- get_gene_info(weights)
 
   # priors for susie
@@ -143,10 +143,10 @@ finemap_region <- function(z_snp,
   # LD and SNP information for this region
   regioninfo <- region_info[region_info$region_tag %in% region_tag, ]
   LD_matrix_file <- regioninfo$LD_matrix
-  LD_snpinfo <- read_LD_SNP_files(regioninfo$SNP_info)
+  ld_snpinfo <- read_LD_SNP_files(regioninfo$SNP_info)
 
   # compute correlation matrices
-  if(length(region_tag)){
+  if (length(region_tag) > 1){
     region_tag <- paste(region_tag, collapse = "_")
   }
   R_sg_file <- file.path(cor_dir, paste0("region.", region_tag, ".R_snp_gene.RDS"))
@@ -164,7 +164,7 @@ finemap_region <- function(z_snp,
       R_snp <- lapply(LD_matrix_file, load_LD)
       R_snp <- suppressWarnings(as.matrix(Matrix::bdiag(R_snp)))
     }
-    res <- compute_region_cor(sid, gid, R_snp, weights, LD_snpinfo)
+    res <- compute_region_cor(sid, gid, R_snp, weights, ld_snpinfo)
     R_snp <- res$R_snp
     R_snp_gene <- res$R_snp_gene
     R_gene <- res$R_gene
@@ -204,7 +204,7 @@ finemap_region <- function(z_snp,
         R_snp <- lapply(LD_matrix_file, load_LD)
         R_snp <- suppressWarnings(as.matrix(Matrix::bdiag(R_snp)))
       }
-      res <- compute_region_cor(sid, gid, R_snp, weights, LD_snpinfo)
+      res <- compute_region_cor(sid, gid, R_snp, weights, ld_snpinfo)
       R_snp <- res$R_snp
       R_snp_gene <- res$R_snp_gene
       R_gene <- res$R_gene
@@ -242,14 +242,14 @@ finemap_region <- function(z_snp,
                                max_iter = max_iter,
                                ...)
 
-  # annotate susie result with SNP and gene information
+  # annotate susie result
   susie_res_df <- anno_susie(susie_res,
                              gid = gid,
                              sid = sid,
                              zdf = zdf,
                              region_tag = region_tag,
                              geneinfo = gene_info,
-                             snpinfo = LD_snpinfo)
+                             snpinfo = ld_snpinfo)
 
   return(susie_res_df)
 
@@ -337,17 +337,21 @@ finemap_regions <- function(z_snp,
   corelist <- region2core(regionlist, ncore)
 
   finemap_res <- foreach (core = 1:length(corelist), .combine = "rbind", .packages = "ctwas") %dopar% {
+  # finemap_res <- foreach (core = 1:length(corelist), .combine = "rbind", .packages = "ctwas") %do% {
+
     finemap_res.core.list <- list()
     # run finemapping for each region
     region_tags.core <- corelist[[core]]
     for (region_tag in region_tags.core) {
+      sid <- regionlist[[region_tag]][["sid"]]
+      gid <- regionlist[[region_tag]][["gid"]]
       finemap_res.core.list[[region_tag]] <- finemap_region(z_snp,
                                                             z_gene,
-                                                            sid = regionlist[[region_tag]][["sid"]],
-                                                            gid = regionlist[[region_tag]][["gid"]],
-                                                            region_tag = region_tag,
-                                                            region_info = region_info,
-                                                            weights = weights,
+                                                            sid,
+                                                            gid,
+                                                            region_tag,
+                                                            region_info,
+                                                            weights,
                                                             L = L,
                                                             group_prior = group_prior,
                                                             group_prior_var = group_prior_var,

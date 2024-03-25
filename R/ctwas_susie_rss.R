@@ -73,7 +73,7 @@ anno_susie <- function(susie_res,
   p <- length(gid) + length(sid)
   susie_res_df$mu2 <- colSums(susie_res$mu2[, seq(1, p)[1:p!=susie_res$null_index], drop = F]) #WARN: not sure for L>1
 
-  if (isTRUE(add_cs_index)) {
+  if (isTRUE(include_cs_index)) {
     susie_res_df$cs_index <- 0
     if (!is.null(susie_res$sets$cs)){
       for (cs_i in susie_res$sets$cs_index){

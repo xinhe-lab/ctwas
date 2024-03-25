@@ -42,8 +42,8 @@ compute_gene_z <- function (z_snp, weights, logfile = NULL){
 get_gene_info <- function(weights, region_info=NULL){
 
   gene_info <- lapply(names(weights), function(x){
-    as.data.frame(outlist[[x]][c("chrom", "p0","p1", "gene_name", "weight_name")])})
-  gene_info <- do.call(rbind, weight_info)
+    as.data.frame(weights[[x]][c("chrom", "p0","p1", "gene_name", "weight_name")])})
+  gene_info <- do.call(rbind, gene_info)
   gene_info$id <- names(weights)
   gene_info <- gene_info[, c("chrom", "id", "p0", "p1", "gene_name", "weight_name")]
   rownames(gene_info) <- NULL

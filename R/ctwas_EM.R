@@ -155,7 +155,7 @@ ctwas_EM <- function(z_snp,
                                      max_iter = max_iter,
                                      ...)
 
-        # annotate susie result with SNP and gene information
+        # annotate susie result
         susie_res_df <- anno_susie(susie_res,
                                    gid = gid,
                                    sid = sid,

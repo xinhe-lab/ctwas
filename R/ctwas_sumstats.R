@@ -106,7 +106,7 @@ ctwas_sumstats <- function(
                         trim_by = "random",
                         thin = thin,
                         minvar = 2,
-                        adjust_boundary = TRUE)
+                        adjust_boundary_genes = TRUE)
   regionlist <- res$regionlist
   weights <- res$weights
   boundary_genes <- res$boundary_genes
