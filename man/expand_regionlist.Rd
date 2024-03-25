@@ -6,6 +6,7 @@
 \usage{
 expand_regionlist(
   regionlist,
+  region_info,
   z_snp,
   filter_z_ids = TRUE,
   trim_by = c("z", "random"),
@@ -15,6 +16,10 @@ expand_regionlist(
 }
 \arguments{
 \item{regionlist}{a list of region gene IDs and SNP IDs and associated file names}
+
+\item{region_info}{a data frame of region definition and associated LD file names}
+
+\item{z_snp}{A data frame with columns: "id", "z", giving the z-scores for SNPs.}
 
 \item{filter_z_ids}{If TRUE, only keep SNPs and genes in z_snp and z_gene.}
 

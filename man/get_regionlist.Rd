@@ -8,7 +8,7 @@ get_regionlist(
   region_info,
   z_snp,
   z_gene,
-  weights = NULL,
+  weights,
   thin = 1,
   maxSNP = Inf,
   filter_z_ids = TRUE,

@@ -244,12 +244,12 @@ finemap_region <- function(z_snp,
 
   # annotate susie result with SNP and gene information
   susie_res_df <- anno_susie(susie_res,
-                             geneinfo = gene_info,
-                             snpinfo = LD_snpinfo,
                              gid = gid,
                              sid = sid,
                              zdf = zdf,
-                             region_tag = region_tag)
+                             region_tag = region_tag,
+                             geneinfo = gene_info,
+                             snpinfo = LD_snpinfo)
 
   return(susie_res_df)
 

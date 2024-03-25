@@ -4,7 +4,16 @@
 \alias{anno_susie}
 \title{annotate susie results with SNP and gene information}
 \usage{
-anno_susie(susie_res, geneinfo, snpinfo, gid, sid, zdf, region_tag)
+anno_susie(
+  susie_res,
+  gid,
+  sid,
+  zdf,
+  region_tag,
+  geneinfo = NULL,
+  snpinfo = NULL,
+  include_cs_index = TRUE
+)
 }
 \description{
 annotate susie results with SNP and gene information

@@ -6,9 +6,9 @@
 Iteratively run susie and estimate parameters - RSS version}
 \usage{
 ctwas_EM(
-  zdf,
+  z_snp,
+  z_gene,
   regionlist,
-  gene_info,
   niter = 20,
   init_group_prior = NULL,
   init_group_prior_var = NULL,
@@ -23,13 +23,13 @@ ctwas_EM(
 )
 }
 \arguments{
-\item{zdf}{A data frame with three columns: "id", "z", "type".
-This data frame gives the the z scores for SNPs and genes, denoted in "type".
-The "type" column can also be use to specify multiple sets of weights}
+\item{z_snp}{a data frame with four columns: "id", "A1", "A2", "z".
+giving the z scores for SNPs. "A1" is effect allele. "A2" is the other allele.}
+
+\item{z_gene}{a data frame with two columns: "id", "z". giving the z scores for genes.
+Optionally, a "type" column can also be supplied; this is for using multiple sets of weights}
 
 \item{regionlist}{a list object indexing regions, variants and genes.}
-
-\item{gene_info}{a data frame of gene information}
 
 \item{niter}{the number of iterations of the E-M algorithm to perform}
 

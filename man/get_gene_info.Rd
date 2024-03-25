@@ -4,7 +4,7 @@
 \alias{get_gene_info}
 \title{get gene info}
 \usage{
-get_gene_info(z_gene, weights, region_info = NULL)
+get_gene_info(weights, region_info = NULL)
 }
 \description{
 get gene info

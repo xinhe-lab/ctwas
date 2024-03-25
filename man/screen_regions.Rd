@@ -10,7 +10,6 @@ screen_regions(
   regionlist,
   region_info,
   weights,
-  gene_info,
   thin = 1,
   group_prior = NULL,
   group_prior_var = NULL,
@@ -36,8 +35,6 @@ Optionally, a "type" column can also be supplied; this is for using multiple set
 \item{region_info}{a data frame of region definition and associated LD file names}
 
 \item{weights}{a list of weights}
-
-\item{gene_info}{a data frame of gene information obtained from \code{compute_gene_z}}
 
 \item{thin}{The proportion of SNPs to be used for parameter estimation and initial screening regions.
 Smaller \code{thin} parameters reduce runtime at the expense of accuracy.}

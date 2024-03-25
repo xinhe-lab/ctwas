@@ -10,7 +10,6 @@ finemap_regions(
   regionlist,
   region_info,
   weights,
-  gene_info = NULL,
   L = 5,
   group_prior = NULL,
   group_prior_var = NULL,
@@ -40,8 +39,6 @@ Optionally, a "type" column can also be supplied; this is for using multiple set
 
 \item{weights}{a list of weights for each gene}
 
-\item{gene_info}{a data frame of gene information obtained from \code{compute_gene_z}}
-
 \item{L}{the number of effects for susie during the fine mapping steps}
 
 \item{group_prior}{a vector of two prior inclusion probabilities for SNPs and genes.}
@@ -70,8 +67,6 @@ genotype data in genetic studies.}
 \item{verbose}{TRUE/FALSE. If TRUE, print detail messages}
 
 \item{logfile}{the log file, if NULL will print log info on screen}
-
-\item{region_tag}{a character string of region tags to be finemapped}
 }
 \value{
 finemapping results.

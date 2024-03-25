@@ -11,7 +11,6 @@ finemap_region(
   gid,
   region_tag,
   region_info,
-  gene_info,
   weights,
   L = 5,
   group_prior = NULL,
@@ -41,8 +40,6 @@ Optionally, a "type" column can also be supplied; this is for using multiple set
 \item{region_tag}{a character string of region tags to be finemapped}
 
 \item{region_info}{a data frame of region definition and associated LD file names}
-
-\item{gene_info}{a data frame of gene information obtained from \code{compute_gene_z}}
 
 \item{weights}{a list of weights for each gene}
 

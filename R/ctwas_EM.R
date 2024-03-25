@@ -157,12 +157,11 @@ ctwas_EM <- function(z_snp,
 
         # annotate susie result with SNP and gene information
         susie_res_df <- anno_susie(susie_res,
-                                   geneinfo = NULL,
-                                   snpinfo = NULL,
                                    gid = gid,
                                    sid = sid,
                                    zdf = zdf,
-                                   region_tag = region_tag)
+                                   region_tag = region_tag,
+                                   include_cs_index = FALSE)
 
         susie_res.core.list[[region_tag]] <- susie_res_df
       }

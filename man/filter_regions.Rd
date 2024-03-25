@@ -4,7 +4,7 @@
 \alias{filter_regions}
 \title{filter regions based on probability of at most 1 causal effect}
 \usage{
-filter_regions(regionlist, zdf, group_prior, prob_single = 0.8)
+filter_regions(regionlist, z_snp, z_gene, group_prior, prob_single = 0.8)
 }
 \description{
 filter regions based on probability of at most 1 causal effect
