@@ -13,6 +13,8 @@
 #' @param weight_format weight format: PredictDB, or Fusion
 #'
 #' @param filter_protein_coding_genes TRUE/FALSE. If TRUE, keep protein coding genes only. This option is only for PredictDB weights
+#' 
+#' @param load_predictdb_LD TRUE/FALSE. If TRUE, load pre-computed LD among weight SNPs. This option is only for PredictDB weights
 #'
 #' @param drop_strand_ambig TRUE/FALSE, if TRUE remove strand ambiguous variants (A/T, G/C).
 #'
@@ -29,6 +31,7 @@ preprocess_weights <- function(weight_file,
                                weight_format = c("PredictDB", "Fusion"),
                                drop_strand_ambig = TRUE,
                                filter_protein_coding_genes = FALSE,
+                               load_predictdb_LD = FALSE,
                                scale_by_ld_variance = TRUE){
 
   weight_format <- match.arg(weight_format)
@@ -38,10 +41,10 @@ preprocess_weights <- function(weight_file,
   weights <- list()
   for(weight in weight_file){
     loginfo("Load weight: %s", weight)
-    loaded_weight <- load_weights(weight, weight_format = weight_format, filter_protein_coding_genes = filter_protein_coding_genes)
+    loaded_weight <- load_weights(weight, weight_format = weight_format, filter_protein_coding_genes = filter_protein_coding_genes, load_predictdb_LD = load_predictdb_LD)
     weight_table <- loaded_weight$weight_table
     weight_name <- loaded_weight$weight_name
-
+    R_wgt_all <- loaded_weight$R_wgt
     gnames <- unique(weight_table$gene)
     loginfo("Number of genes with weights provided: %d in %s", length(gnames), weight_name)
     # remove variants in weight table, but not in LD reference and GWAS
@@ -56,13 +59,14 @@ preprocess_weights <- function(weight_file,
     # subset to variants in weight table
     ld_snpinfo_wgt <- ld_snpinfo[ld_snpinfo$id %in% weight_table$rsid,]
     loginfo("Harmonize weights with LD reference")
+    rsid_varID <- weight_table[,c("rsid", "varID")]
+
 
     pb <- txtProgressBar(min = 0, max = length(gnames), initial = 0, style = 3)
     for (i in 1:length(gnames)){
       gname <- gnames[i]
       wgt <- weight_table[weight_table$gene==gname,]
       wgt.matrix <- as.matrix(wgt[, "weight", drop = F])
-      rsid_varID <- wgt[,c("rsid", "varID")]
       rownames(wgt.matrix) <- wgt$rsid
       chrpos <- do.call(rbind, strsplit(wgt$varID, "_"))
       snps <- data.frame(gsub("chr", "", chrpos[, 1]), wgt$rsid,
@@ -95,11 +99,20 @@ preprocess_weights <- function(weight_file,
 
       nwgt <- nrow(wgt.matrix)
 
+      #Add LD matrix of weights
+      if(!is.null(R_wgt_all)){
+        R_wgt <- get_weight_LD(R_wgt_all,gname,rsid_varID)
+        R_wgt <- R_wgt[snps$id,snps$id,drop=F]
+      }
+      else{
+        R_wgt=NULL
+      }
+
       if(nwgt>0){
         p0 <- min(snps[snps[, "id"] %in% snpnames, "pos"])
         p1 <- max(snps[snps[, "id"] %in% snpnames, "pos"])
         weight_id <- paste0(gname, "|", weight_name)
-        weights[[weight_id]] <- list(chrom=chrom, p0=p0, p1=p1, wgt=wgt, gene_name=gname, weight_name=weight_name, n=nwgt)
+        weights[[weight_id]] <- list(chrom=chrom, p0=p0, p1=p1, wgt=wgt, R_wgt=R_wgt, gene_name=gname, weight_name=weight_name, n=nwgt)
       }
       setTxtProgressBar(pb, i)
     }

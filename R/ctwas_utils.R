@@ -39,7 +39,7 @@ read_LD_SNP_file <- function(file){
 }
 
 #' Load weight
-load_weights <- function(weight_file, weight_format = c("PredictDB","Fusion"), filter_protein_coding_genes = FALSE){
+load_weights <- function(weight_file, weight_format = c("PredictDB","Fusion"), filter_protein_coding_genes = FALSE, load_predictdb_LD = FALSE){
   weight_format <- match.arg(weight_format)
   if(weight_format == "PredictDB"){
     weight_name <- tools::file_path_sans_ext(basename(weight_file))
@@ -58,10 +58,57 @@ load_weights <- function(weight_file, weight_format = c("PredictDB","Fusion"), f
       weight_table <- weight_table[weight_table$gene %in% extra_table$gene,]
     }
 
+    if (isTRUE(load_predictdb_LD)){
+      R_wgt <- read.table(gzfile(paste0(tools::file_path_sans_ext(weight_file), ".txt.gz")), header=T)
+    }
+    else{
+      R_wgt <- NULL
+    }
     RSQLite::dbDisconnect(db)
   }
-  return(list(weight_table=weight_table,extra_table=extra_table,weight_name=weight_name))
+  return(list(weight_table=weight_table,extra_table=extra_table,weight_name=weight_name,R_wgt=R_wgt))
 }
+
+
+get_weight_LD <- function(R_wgt_all, gname, rsid_varID){
+  R_wgt <- R_wgt_all[R_wgt_all$GENE == gname,]
+  #convert covariance to correlation
+  R_wgt_stdev <- R_wgt[R_wgt$RSID1==R_wgt$RSID2,]
+  R_wgt_stdev <- setNames(sqrt(R_wgt_stdev$VALUE), R_wgt_stdev$RSID1)
+  R_wgt$VALUE <- R_wgt$VALUE/(R_wgt_stdev[R_wgt$RSID1]*R_wgt_stdev[R_wgt$RSID2])
+
+  unique_id <- unique(c(R_wgt$RSID1, R_wgt$RSID2))
+
+  # Create an empty correlation matrix
+  n <- length(unique_id)
+  cor_matrix <- matrix(NA, nrow = n, ncol = n)
+
+  # Fill in the correlation values
+  for (i in 1:n) {
+    for (j in i:n) {  # Only iterate over half of the matrix
+      if (i == j) {
+        cor_matrix[i, j] <- 1  # Diagonal elements are 1
+      } else {
+        # Check if there are any matches for the RSID combination
+        matches <- R_wgt[R_wgt$RSID1 == unique_id[i] & R_wgt$RSID2 == unique_id[j], "VALUE"]
+        if (length(matches) > 0) {
+          cor_matrix[i, j] <- matches
+          cor_matrix[j, i] <- matches  # Set symmetric value
+        } else {
+          cor_matrix[i, j] <- NA  # No correlation value found
+          cor_matrix[j, i] <- NA  # No correlation value found
+        }
+      }
+    }
+  }
+
+  rownames(cor_matrix) <- rsid_varID$rsid[match(unique_id, rsid_varID$varID)]
+  colnames(cor_matrix) <- rsid_varID$rsid[match(unique_id, rsid_varID$varID)]
+
+  return(cor_matrix) 
+}
+
+
 # # check SNP_info files from the region_info table, and return a list of region_info tables
 # # adapted from old write_ld_Rf() function
 # get_region_info_list <- function(region_info){
@@ -92,6 +139,8 @@ load_weights <- function(weight_file, weight_format = c("PredictDB","Fusion"), f
 #
 #   return(region_info_list)
 # }
+
+
 
 
 #' Load LD matrix
