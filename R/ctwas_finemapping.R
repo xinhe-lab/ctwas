@@ -6,15 +6,13 @@
 #' @param z_gene A data frame with two columns: "id", "z". giving the z scores for genes.
 #' Optionally, a "type" column can also be supplied; this is for using multiple sets of weights
 #'
-#' @param sid SNP IDs in the region
-#'
-#' @param gid gene IDs in the region
-#'
 #' @param region_tag a character string of region tags to be finemapped
 #'
 #' @param region_info a data frame of region definition and associated LD file names
 #'
 #' @param weights a list of weights for each gene
+#'
+#' @param regionlist a list object indexing regions, variants and genes.
 #'
 #' @param L the number of effects for susie during the fine mapping steps
 #'
@@ -49,11 +47,10 @@
 #'
 finemap_region <- function(z_snp,
                            z_gene,
-                           sid,
-                           gid,
                            region_tag,
                            region_info,
                            weights,
+                           regionlist = NULL,
                            L = 5,
                            group_prior = NULL,
                            group_prior_var = NULL,
@@ -70,6 +67,26 @@ finemap_region <- function(z_snp,
   if (verbose){
     loginfo("Finemapping region %s with L = %d", region_tag, L)
   }
+
+  # get regionlist with full SNPs if not available
+  if (is.null(regionlist)) {
+    loginfo("Get regionlist for region %s", region_tag)
+    regioninfo <- region_info[region_info$region_tag == region_tag, ]
+    res <- get_regionlist(regioninfo,
+                          z_snp,
+                          z_gene,
+                          weights,
+                          maxSNP = max_snp_region,
+                          trim_by = "z",
+                          thin = 1,
+                          adjust_boundary_genes = FALSE)
+    regionlist <- res$regionlist
+    rm(res)
+  }
+
+  # select genes and SNPs in this region
+  sid <- regionlist[[region_tag]][["sid"]]
+  gid <- regionlist[[region_tag]][["gid"]]
 
   # prepare susie input data
   zdf <- combine_z(z_snp, z_gene)
@@ -92,7 +109,7 @@ finemap_region <- function(z_snp,
   V_prior <- unlist(V_prior)
 
   susie_input <- assemble_region_susie_input(sid, gid, zdf, pi_prior, V_prior,
-                                      L = L, use_null_weight = TRUE)
+                                             L = L, use_null_weight = TRUE)
   sid <- susie_input$sid
   gid <- susie_input$gid
   z <- susie_input$z
@@ -307,15 +324,12 @@ finemap_regions <- function(z_snp,
     # run finemapping for each region
     region_tags.core <- corelist[[core]]
     for (region_tag in region_tags.core) {
-      sid <- regionlist[[region_tag]][["sid"]]
-      gid <- regionlist[[region_tag]][["gid"]]
       finemap_res.core.list[[region_tag]] <- finemap_region(z_snp,
                                                             z_gene,
-                                                            sid,
-                                                            gid,
-                                                            region_tag,
-                                                            region_info,
-                                                            weights,
+                                                            region_tag = region_tag,
+                                                            region_info = region_info,
+                                                            weights = weights,
+                                                            regionlist = regionlist,
                                                             L = L,
                                                             group_prior = group_prior,
                                                             group_prior_var = group_prior_var,
