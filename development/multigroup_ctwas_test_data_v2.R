@@ -1,22 +1,26 @@
 ## Libraries
-library(ctwas)
-library(ggplot2)
+# library(ggplot2)
+library(logging)
+library(foreach)
 
-##### Settings #####
+library(ctwas)
+devtools::load_all("/home/kaixuan/projects/cTWAS_package/multigroup_test/ctwas/.")
+
+## Settings
 trait <- "LDL"
 tissue <- "Liver"
+datadir <- "/project2/xinhe/shared_data/multigroup_ctwas/test_data/"
+weight_file <- "/project2/xinhe/shared_data/multigroup_ctwas/test_data/mashr_Liver_nolnc.db"
 gwas_file <- "/project2/xinhe/shared_data/multigroup_ctwas/test_data/ukb-d-30780_irnt.vcf.gz"
 gwas_n <- 343621
-weight_file <- "/project2/xinhe/shared_data/multigroup_ctwas/test_data/mashr_Liver_nolnc.db"
+ncore <- 4
 thin <- 0.1
 max_snp_region <- 20000
-ncore <- 6
-
-outputdir <- file.path("/project2/xinhe/shared_data/multigroup_ctwas/test_data/output/", paste0(trait, ".", tissue))
+outputdir <- paste0("/project2/xinhe/shared_data/multigroup_ctwas/test_data/output/", trait, ".", tissue, "/")
 outname <- paste0(trait, ".", tissue)
 dir.create(outputdir, showWarnings=F, recursive=T)
 
-##### LD region info #####
+## LD reference and region info
 region_info_file <- file.path(outputdir, "region_info.txt")
 if (file.exists(region_info_file)){
   region_info <- read.table(region_info_file, header = TRUE, sep = "\t", stringsAsFactors = FALSE)
@@ -35,10 +39,11 @@ if (file.exists(region_info_file)){
   write.table(region_info, file = file.path(outputdir, "region_info.txt"), quote = F, col.names = T, row.names = F, sep = "\t")
 }
 
-##### Preprocess GWAS z-scores #####
-cat("##### Preprocess z-scores ##### \n")
+## Prepare GWAS z-scores
 gwas_name <- "ukb-d-30780_irnt"
 z_snp_outfile <- file.path(outputdir, paste0(gwas_name, ".z_snp.Rd"))
+print(z_snp_outfile)
+
 if (!file.exists(z_snp_outfile)){
   # read the data using the VariantAnnotation package
   z_snp <- VariantAnnotation::readVcf("/project2/xinhe/shared_data/multigroup_ctwas/test_data/ukb-d-30780_irnt.vcf.gz")
@@ -55,11 +60,14 @@ if (!file.exists(z_snp_outfile)){
   z_snp <- z_snp[,c("rsid", "ALT", "REF", "Z")]
   colnames(z_snp) <- c("id", "A1", "A2", "z")
 
+  # # drop multiallelic variants (id not unique)
+  # z_snp <- z_snp[!(z_snp$id %in% z_snp$id[duplicated(z_snp$id)]),]
+
   # save the formatted z-scores and GWAS sample size
   save(z_snp, gwas_n, file=z_snp_outfile)
 }
 
-## Preprocess z-scores
+## Harmonize z-scores with LD reference
 processed_z_snp_file <- file.path(outputdir, paste0(outname, ".preprocessed.z_snp.Rd"))
 if (file.exists(processed_z_snp_file)){
   cat(sprintf("Load preprocessed z_snp: %s \n", processed_z_snp_file))
@@ -77,7 +85,7 @@ if (file.exists(processed_z_snp_file)){
   cat(sprintf("Preprocessing GWAS z-scores took %0.2f minutes\n",runtime["elapsed"]/60))
 }
 
-##### Preprocess weights #####
+## Preprocess weights
 processed_weight_file <- file.path(outputdir, paste0(outname, ".preprocessed.weights.Rd"))
 if (file.exists(processed_weight_file)){
   cat(sprintf("Load preprocessed weight: %s\n", processed_weight_file))
@@ -95,7 +103,7 @@ if (file.exists(processed_weight_file)){
   cat(sprintf("Preprocessing weights took %0.2f minutes\n",runtime["elapsed"]/60))
 }
 
-##### Impute gene z-scores #####
+## Imputing gene z-scores
 cat("##### Imputing gene z-scores ##### \n")
 gene_z_file <- file.path(outputdir, paste0(outname, ".gene_z.Rd"))
 if( file.exists(gene_z_file) ){
@@ -109,7 +117,16 @@ if( file.exists(gene_z_file) ){
   cat(sprintf("Imputing gene z-scores took %0.2f minutes\n",runtime["elapsed"]/60))
 }
 
-##### Get regionlist #####
+# combine z-scores of SNPs and genes
+old_outputdir <- paste0("/project2/xinhe/shared_data/multigroup_ctwas/test_data/output/", trait, "_", tissue, "/")
+processed_z_snp_file <- file.path(outputdir, paste0(outname, ".preprocessed.z_snp.Rd"))
+processed_weight_file <- file.path(outputdir, paste0(outname, ".preprocessed.weights.Rd"))
+gene_z_file <- file.path(old_outputdir, paste0(outname, ".gene_z.Rd"))
+load(processed_z_snp_file)
+load(processed_weight_file)
+load(gene_z_file)
+
+# get regionlist
 regionlist_thin_file <- file.path(outputdir, paste0(outname, ".regionlist.thin", thin, ".RDS"))
 if (file.exists(regionlist_thin_file)) {
   res <- readRDS(regionlist_thin_file)
@@ -123,6 +140,7 @@ if (file.exists(regionlist_thin_file)) {
                         trim_by = "random",
                         thin = thin,
                         minvar = 2,
+                        mingene = 0,
                         adjust_boundary_genes = TRUE)
   saveRDS(res, regionlist_thin_file)
 }
@@ -131,8 +149,12 @@ weights <- res$weights
 boundary_genes <- res$boundary_genes
 rm(res)
 
-##### Estimate parameters #####
-cat("##### Estimating parameters ##### \n")
+# old_regionlist_res <- readRDS(file.path(old_outputdir, paste0(outname, ".regionlist.thin", thin, ".RDS")))
+# identical(regionlist[[100]]$gid, old_regionlist_res$regionlist[[100]]$gid)
+# identical(regionlist[[100]]$sid, old_regionlist_res$regionlist[[100]]$sid)
+
+##### ctwas_rss parameter estimation #####
+cat("##### Estimate parameters ##### \n")
 ## est_param
 param_file <- file.path(outputdir, paste0(outname, ".param.RDS"))
 if (file.exists(param_file)) {
@@ -147,7 +169,7 @@ if (file.exists(param_file)) {
                        niter2 = 30,
                        group_prior_var_structure = "independent",
                        logfile = file.path(outputdir, paste0(outname, ".est_param.log")),
-                       ncore = ncore)
+                       ncore = 6)
   })
   cat(sprintf("Parameter estimation took %0.2f minutes\n",runtime["elapsed"]/60))
   saveRDS(param, param_file)
@@ -155,50 +177,108 @@ if (file.exists(param_file)) {
 group_prior <- param$group_prior
 group_prior_var <- param$group_prior_var
 
-##### Assess parameter estimates #####
+old_param <- readRDS(file.path(old_outputdir, paste0(outname, ".param.RDS")))
+
+# Assessing parameter estimates
 ctwas_parameters <- summarize_param(param, gwas_n)
 saveRDS(ctwas_parameters, paste0(outputdir, "/", outname, ".ctwas_parameters.RDS"))
 
 ##### Screen regions #####
-screen_regions_file <- file.path(outputdir, paste0(outname, ".screened_regionlist.RDS"))
-if (file.exists(screen_regions_file)) {
-  screened_regionlist <- readRDS(screen_regions_file)
-} else{
-  runtime <- system.time({
-    screened_region_tags <- screen_regions(z_snp,
-                                           z_gene,
-                                           regionlist,
-                                           region_info,
-                                           weights,
-                                           thin = thin,
-                                           L = 5,
-                                           group_prior = group_prior,
-                                           group_prior_var = group_prior_var,
-                                           max_snp_region = max_snp_region,
-                                           ncore = ncore,
-                                           logfile = file.path(outputdir, paste0(outname, ".screen_regions.L5.log")),
-                                           verbose = TRUE)
-  })
-  cat(sprintf("Screen regions took %0.2f minutes\n",runtime["elapsed"]/60))
-  loginfo("%d regions left after screening regions", length(screened_region_tags))
+load("/project/xinhe/shengqian/cTWAS_analysis/data/make_test_data/make_test_data_mergeoff.s2.susieIrssres.Rd")
+group_prior <- group_prior_rec[,ncol(group_prior_rec)]
+group_prior_var <- group_prior_var_rec[,ncol(group_prior_var_rec)]
+group_prior["SNP"] <- group_prior["SNP"] * thin # adjust parameter to account for thin argument
 
-  # Expand screened regionlist with all SNPs in the regions
-  screened_regionlist <- regionlist[screened_region_tags]
-  if (thin < 1){
-    loginfo("Expand regionlist with full SNPs for %d screened regions", length(screened_regionlist))
-    screened_regionlist <- expand_regionlist(screened_regionlist,
-                                             region_info,
-                                             z_snp,
-                                             trim_by = "z",
-                                             maxSNP = max_snp_region)
-  }
-  saveRDS(screened_regionlist, screen_regions_file)
+runtime <- system.time({
+  screened_region_tags <- screen_regions(z_snp,
+                                         z_gene,
+                                         regionlist,
+                                         region_info,
+                                         weights,
+                                         thin = thin,
+                                         L = 5,
+                                         group_prior = group_prior,
+                                         group_prior_var = group_prior_var,
+                                         max_snp_region = max_snp_region,
+                                         ncore = ncore,
+                                         logfile = file.path(outputdir, paste0(outname, ".screen_regions.L5.log")),
+                                         verbose = TRUE)
+})
+saveRDS(screened_region_tags, file.path(outputdir, paste0(outname, ".screen_regions.L5.res.RDS")))
+cat(sprintf("Screen regions took %0.2f minutes\n",runtime["elapsed"]/60))
+
+# Expand screened regionlist with all SNPs in the regions
+screened_regionlist <- regionlist[screened_region_tags]
+if (thin < 1){
+  loginfo("Update regionlist with full SNPs for screened regions")
+  screened_regionlist <- expand_regionlist(screened_regionlist,
+                                           region_info,
+                                           z_snp,
+                                           trim_by = "z",
+                                           maxSNP = max_snp_region)
 }
 
-##### Finemapping #####
+##### finemapping #####
+res <- readRDS(file.path(old_outputdir, paste0(outname, ".screen_regions.L5.max_iter100.res.RDS")))
+old_screened_region_tags <- res$screened_region_tags
+old_screened_regionlist <- res$screened_regionlist
+rm(res)
+
+screened_regionlist <- old_screened_regionlist
+# if (setequal(screened_region_tags, old_screened_region_tags)){
+#   cat("screened_regions PASS")
+# }else {
+#   cat("screened_regions FAIL")
+# }
+
+# Finemap a single region
+region_tag <- "16:71020125-72901251"
+runtime <- system.time({
+  finemap_region_res <- finemap_region(z_snp,
+                                       z_gene,
+                                       region_tag = region_tag,
+                                       region_info = region_info,
+                                       weights = weights,
+                                       L = 5,
+                                       group_prior = group_prior,
+                                       group_prior_var = group_prior_var,
+                                       force_compute_cor = TRUE,
+                                       save_cor = TRUE,
+                                       cor_dir = file.path(outputdir, "cor_matrix"),
+                                       verbose = TRUE)
+})
+cat(sprintf("Finemapping region took %0.2f seconds \n",runtime["elapsed"]))
+
+# old_finemap_full_res <- as.data.frame(data.table::fread("/project/xinhe/shengqian/cTWAS_analysis/data/make_test_data/make_test_data_mergeoff.susieIrss.txt", header = T))
+# old_finemap_full_res$id[old_finemap_full_res$type == "gene"] <-
+#   paste0(old_finemap_full_res$id[old_finemap_full_res$type == "gene"], "|", "mashr_Liver_nolnc")
+#
+# ids <- intersect(old_finemap_full_res$id, finemap_region_res$id)
+# old_finemap_region_res <- old_finemap_full_res[match(ids, old_finemap_full_res$id), ]
+# new_finemap_region_res <- finemap_region_res[match(ids, finemap_region_res$id), ]
+#
+# plot(old_finemap_region_res$susie_pip, new_finemap_region_res$susie_pip)
+#
+# all.equal(old_finemap_region_res$susie_pip, new_finemap_region_res$susie_pip)
+# all.equal(old_finemap_region_res$mu2, new_finemap_region_res$mu2)
+# all.equal(old_finemap_region_res$cs_index, new_finemap_region_res$cs_index)
 
 ## Finemapping screened regions
 cat("##### Finemapping screened regions ##### \n")
+region_tag <- "16:71020125-72901251"
+finemap_region_res <- finemap_region(z_snp,
+                                     z_gene,
+                                     region_tag = region_tag,
+                                     region_info = region_info,
+                                     weights = weights,
+                                     L = 5,
+                                     group_prior = group_prior,
+                                     group_prior_var = group_prior_var,
+                                     force_compute_cor = TRUE,
+                                     save_cor = TRUE,
+                                     cor_dir = file.path(outputdir, "cor_matrix"),
+                                     verbose = TRUE)
+
 runtime <- system.time({
   finemap_res <- finemap_regions(z_snp,
                                  z_gene,
@@ -217,24 +297,6 @@ runtime <- system.time({
 })
 saveRDS(finemap_res, file.path(outputdir, paste0(outname, ".finemap_regions.res.RDS")))
 cat(sprintf("Finemapping took %0.2f minutes\n",runtime["elapsed"]/60))
-
-##### Finemapping a single region with fixed parameters #####
-region_tag <- "16:71020125-72901251"
-runtime <- system.time({
-  finemap_region_res <- finemap_region(z_snp,
-                                       z_gene,
-                                       region_tag = region_tag,
-                                       region_info = region_info,
-                                       weights = weights,
-                                       L = 5,
-                                       group_prior = group_prior,
-                                       group_prior_var = group_prior_var,
-                                       force_compute_cor = TRUE,
-                                       save_cor = TRUE,
-                                       cor_dir = file.path(outputdir, "cor_matrix"),
-                                       verbose = TRUE)
-})
-cat(sprintf("Finemapping region took %0.2f seconds \n",runtime["elapsed"]))
 
 # Print sessionInfo
 sessionInfo()
