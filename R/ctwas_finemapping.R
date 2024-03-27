@@ -71,43 +71,17 @@ finemap_region <- function(z_snp,
     loginfo("Finemapping region %s with L = %d", region_tag, L)
   }
 
-  # prepare z-scores combining SNPs and genes
+  # prepare susie input data
   zdf <- combine_z(z_snp, z_gene)
+
+  # set pi_prior and V_prior based on group_prior and group_prior_var
   types <- unique(zdf$type)
-
-  # keep only GWAS SNPs and imputed genes
-  sid <- intersect(sid, z_snp$id)
-  gid <- intersect(gid, z_gene$id)
-
-  # combine zscores
-  z.g <- zdf[match(gid, zdf$id), "z"]
-  z.s <- zdf[match(sid, zdf$id), "z"]
-  z <- c(z.g, z.s)
-
-  g_type <- zdf$type[match(gid, zdf$id)]
-  s_type <- zdf$type[match(sid, zdf$id)]
-  gs_type <- c(g_type, s_type)
-  # g_QTLtype <- zdf$QTLtype[match(gid, zdf$id)]
-
-  # if (verbose){
-  #   loginfo("%d genes and %d SNPs in z-scores", length(z.g), length(z.s))
-  # }
-
-  if (anyNA(z))
-    loginfo("Warning: z-scores contains missing values!")
-
-  # get gene info from weights
-  gene_info <- get_gene_info(weights)
-
-  # priors for susie
   if (is.null(group_prior)){
     group_prior <- structure(as.numeric(rep(NA,length(types))), names=types)
   }
-
   if (is.null(group_prior_var)){
     group_prior_var <- structure(as.numeric(rep(NA,length(types))), names=types)
   }
-
   pi_prior <- list()
   V_prior <- list()
   for (type in types){
@@ -117,28 +91,20 @@ finemap_region <- function(z_snp,
   pi_prior <- unlist(pi_prior)
   V_prior <- unlist(V_prior)
 
-  p <- length(gid) + length(sid)
+  susie_input <- assemble_susie_input(sid, gid, zdf, pi_prior, V_prior,
+                                      L = L, use_null_weight = TRUE)
+  sid <- susie_input$sid
+  gid <- susie_input$gid
+  z <- susie_input$z
+  g_type <- susie_input$g_type
+  g_QTLtype <- susie_input$g_QTLtype
+  gs_type <- susie_input$gs_type
+  prior <- susie_input$prior
+  V <- susie_input$V
+  null_weight <- susie_input$null_weight
 
-  if (any(is.na(pi_prior))){
-    prior <- rep(1/p, p)
-  } else {
-    prior <- unname(pi_prior[gs_type])
-  }
-
-  if (any(is.na(V_prior))){
-    V <- matrix(rep(50, L * p), nrow = L)
-    # following the default in susieR::susie_rss
-  } else{
-    V <- unname(V_prior[gs_type])
-    V <- matrix(rep(V, each = L), nrow=L)
-  }
-
-  if (isTRUE(use_null_weight)){
-    null_weight <- max(0, 1 - sum(prior))
-    prior <- prior/(1-null_weight)
-  } else {
-    null_weight <- NULL
-  }
+  # get gene info from weights
+  gene_info <- get_gene_info(weights)
 
   # LD and SNP information for this region
   regioninfo <- region_info[region_info$region_tag %in% region_tag, ]
@@ -169,7 +135,6 @@ finemap_region <- function(z_snp,
     R_snp_gene <- res$R_snp_gene
     R_gene <- res$R_gene
     rm(res)
-
     if (isTRUE(save_cor)) {
       if (!dir.exists(cor_dir))
         dir.create(cor_dir, recursive = TRUE)
@@ -177,7 +142,6 @@ finemap_region <- function(z_snp,
       saveRDS(R_gene, file=R_g_file)
       saveRDS(R_snp, file=R_s_file)
     }
-
     # gene first then SNPs
     R <- rbind(cbind(R_gene, t(R_snp_gene)),
                cbind(R_snp_gene, R_snp))
@@ -246,7 +210,8 @@ finemap_region <- function(z_snp,
   susie_res_df <- anno_susie(susie_res,
                              gid = gid,
                              sid = sid,
-                             zdf = zdf,
+                             g_type = g_type,
+                             g_QTLtype = g_QTLtype,
                              region_tag = region_tag,
                              geneinfo = gene_info,
                              snpinfo = ld_snpinfo)
@@ -337,7 +302,6 @@ finemap_regions <- function(z_snp,
   corelist <- region2core(regionlist, ncore)
 
   finemap_res <- foreach (core = 1:length(corelist), .combine = "rbind", .packages = "ctwas") %dopar% {
-  # finemap_res <- foreach (core = 1:length(corelist), .combine = "rbind", .packages = "ctwas") %do% {
 
     finemap_res.core.list <- list()
     # run finemapping for each region

@@ -42,14 +42,12 @@ ctwas_susie_rss <- function(z,
 anno_susie <- function(susie_res,
                        gid,
                        sid,
-                       zdf,
+                       g_type,
+                       g_QTLtype,
                        region_tag,
                        geneinfo = NULL,
                        snpinfo = NULL,
                        include_cs_index = TRUE) {
-
-  g_type <- zdf$type[match(gid, zdf$id)]
-  g_QTLtype <- zdf$QTLtype[match(gid, zdf$id)]
 
   if (!is.null(geneinfo)) {
     gidx <- match(gid, geneinfo$id)
@@ -64,7 +62,7 @@ anno_susie <- function(susie_res,
     snp_anno <- data.frame(snpinfo[sidx, c("chrom", "id", "pos")], type = "SNP", QTLtype = "SNP")
     colnames(snp_anno) <-  c("chrom", "id", "pos", "type", "QTLtype")
   } else {
-    snp_anno <- data.frame(id = sid, type = g_type, QTLtype = g_QTLtype)
+    snp_anno <- data.frame(id = sid, type = "SNP", QTLtype = "SNP")
   }
 
   anno <- as.data.frame(rbind(gene_anno, snp_anno))

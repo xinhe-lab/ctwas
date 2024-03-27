@@ -34,15 +34,15 @@ expand_regionlist <- function(regionlist,
   trim_by <- match.arg(trim_by)
 
   region_tags <- names(regionlist)
-
   loginfo("Update regionlist for %d regions with full SNPs", length(region_tags))
+  pb <- txtProgressBar(min = 0, max = length(region_tags), initial = 0, style = 3)
 
   # update SNP IDs for each region
-  for (region_tag in region_tags){
+  for (i in 1:length(region_tags)){
+    region_tag <- region_tags[i]
 
     # load all SNPs in the region
-    snpinfo_file <- region_info[region_info$region_tag == region_tag_current, "SNP_info"]
-    snpinfo <- read_LD_SNP_file(snpinfo_file)
+    snpinfo <- read_LD_SNP_file(region_info[region_info$region_tag == region_tag, "SNP_info"])
 
     # update sid in the region
     snpinfo$keep <- rep(1, nrow(snpinfo))
@@ -57,7 +57,11 @@ expand_regionlist <- function(regionlist,
     # update minpos and maxpos in the region
     regionlist[[region_tag]][["minpos"]] <- min(c(regionlist[[region_tag]][["minpos"]], snpinfo$pos[sidx]))
     regionlist[[region_tag]][["maxpos"]] <- max(c(regionlist[[region_tag]][["maxpos"]], snpinfo$pos[sidx]))
+
+    setTxtProgressBar(pb, i)
   }
+
+  close(pb)
 
   # Trim regions with SNPs more than maxSNP
   regionlist <- trim_regionlist(regionlist, z_snp, trim_by = trim_by, maxSNP = maxSNP, seed = seed)

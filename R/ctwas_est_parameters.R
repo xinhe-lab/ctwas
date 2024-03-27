@@ -13,8 +13,8 @@
 #' Smaller \code{thin} parameters reduce runtime at the expense of accuracy.
 #' The fine mapping step is rerun using full SNPs for regions with strong gene signals.
 #'
-#' @param prob_single Blocks with probability greater than \code{prob_single} of
-#' having 1 or fewer effects will be used for parameter estimation
+#' @param p_single_effect Regions with probability greater than \code{p_single_effect} of
+#' having at most one causal effect will be used selected for the complete parameter estimation step
 #'
 #' @param niter1 the number of iterations of the E-M algorithm to perform during the initial parameter estimation step
 #'
@@ -42,6 +42,8 @@
 #'
 #' @param logfile the log file, if NULL will print log info on screen
 #'
+#' @param verbose TRUE/FALSE. If TRUE, print detail messages
+#'
 #' @importFrom logging addHandler loginfo writeToFile
 #'
 #' @return a list with estimated parameters, regionlist, updated weight list and boundary genes.
@@ -58,9 +60,10 @@ est_param <- function(
     thin = 1,
     niter1 = 3,
     niter2 = 30,
-    prob_single = 0.8,
+    p_single_effect = 0.8,
     ncore = 1,
-    logfile = NULL){
+    logfile = NULL,
+    verbose = FALSE){
 
   if (!is.null(logfile)){
     addHandler(writeToFile, file= logfile, level='DEBUG')
@@ -78,36 +81,52 @@ est_param <- function(
     init_group_prior["SNP"] <- init_group_prior["SNP"]/thin # adjust to account for thin argument
   }
 
+  # combine z-scores
+  loginfo("combine z-scores from SNPs and genes...")
+  zdf <- combine_z(z_snp, z_gene)
+
+  # Assemble susie input data
+  loginfo("Assemble susie input data for %d regions ...", length(regionlist))
+  susie_input_list <- assemble_susie_input_list(zdf,
+                                                regionlist,
+                                                L = 1,
+                                                group_prior = init_group_prior,
+                                                group_prior_var = init_group_prior_var,
+                                                use_null_weight = TRUE,
+                                                ncore = ncore)
+
   # Run EM for a few (niter1) iterations, getting rough estimates
-  loginfo("Run EM for %d iterations, getting rough estimates ...", niter1)
-  EM1_res <- ctwas_EM(z_snp,
-                      z_gene,
-                      regionlist,
-                      niter = niter1,
-                      init_group_prior = init_group_prior,
-                      init_group_prior_var = init_group_prior_var,
-                      group_prior_var_structure = group_prior_var_structure,
-                      max_iter = 1,
-                      ncore = ncore)
+  loginfo("Run EM for %d iterations on %d regions, getting rough estimates ...",
+          niter1, length(regionlist))
+  EM1_res <- EM_est_param(zdf,
+                          susie_input_list,
+                          niter = niter1,
+                          init_group_prior = init_group_prior,
+                          init_group_prior_var = init_group_prior_var,
+                          group_prior_var_structure = group_prior_var_structure,
+                          max_iter = 1,
+                          ncore = ncore,
+                          verbose = verbose)
   loginfo("Roughly estimated group_prior {%s}: {%s}", names(EM1_res$group_prior), EM1_res$group_prior)
   loginfo("Roughly estimated group_prior_var {%s}: {%s}", names(EM1_res$group_prior_var), EM1_res$group_prior_var)
 
-  # filter regions based on prob_single
-  filtered_regionlist <- filter_regions(regionlist, z_snp, z_gene, EM1_group_prior, prob_single = prob_single)
+  # Select regions with single effect
+  loginfo("Select single effect regions ...")
+  filtered_regionlist <- select_single_effect_regions(regionlist, z_snp, z_gene, EM1_res$group_prior, p_single_effect)
 
   # Run EM for more (niter2) iterations, getting rough estimates
-  loginfo("Run EM for %d iterations on %d filtered regions, getting accurate estimates ...",
+  loginfo("Run EM for %d iterations on %d regions, getting accurate estimates ...",
           niter2, length(filtered_regionlist))
 
-  EM2_res <- ctwas_EM(z_snp,
-                      z_gene,
-                      filtered_regionlist,
-                      niter = niter2,
-                      init_group_prior = EM1_res$group_prior,
-                      init_group_prior_var = EM1_res$group_prior_var,
-                      group_prior_var_structure = group_prior_var_structure,
-                      max_iter = 1,
-                      ncore = ncore)
+  EM2_res <- EM_est_param(zdf,
+                          susie_input_list,
+                          niter = niter2,
+                          init_group_prior = EM1_res$group_prior,
+                          init_group_prior_var = EM1_res$group_prior_var,
+                          group_prior_var_structure = group_prior_var_structure,
+                          max_iter = 1,
+                          ncore = ncore,
+                          verbose = verbose)
   group_prior <- EM2_res$group_prior
   group_prior_var <- EM2_res$group_prior_var
   group_prior_var_structure <- EM2_res$group_prior_var_structure

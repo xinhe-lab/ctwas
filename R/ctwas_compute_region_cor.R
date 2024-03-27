@@ -2,12 +2,11 @@
 #' Compute correlation matrices for a region
 compute_region_cor <- function(sids, gids, R_snp, weights, snpinfo) {
 
+  # subset to genes in this region
+  weights <- weights[gids]
   # extract wgt from weights
   wgtlist <- lapply(weights, "[[", "wgt")
   names(wgtlist) <- names(weights)
-
-  # subset to genes in this region
-  wgtlist <- wgtlist[gids]
 
   # compute correlation matrices
   R_snp_gene <- matrix(NA, nrow(R_snp), length(gids))
@@ -21,6 +20,7 @@ compute_region_cor <- function(sids, gids, R_snp, weights, snpinfo) {
       gid <- gids[i]
       wgt <- wgtlist[[gid]]
       snpnames <- intersect(rownames(wgt), snpinfo$id)
+      wgt <- wgt[snpnames,,drop=F]
       ld.idx <- match(snpnames, snpinfo$id)
       ldr[[gid]] <- ld.idx
       R.s <- R_snp[ld.idx, ld.idx]

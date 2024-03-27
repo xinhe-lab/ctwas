@@ -1,13 +1,9 @@
 #' Run EM to estimate parameters.
 #' Iteratively run susie and estimate parameters - RSS version
 #'
-#' @param z_snp a data frame with four columns: "id", "A1", "A2", "z".
-#' giving the z scores for SNPs. "A1" is effect allele. "A2" is the other allele.
+#' @param zdf a data frame with combined z_snp and z_gene from \code{combine_z()}
 #'
-#' @param z_gene a data frame with two columns: "id", "z". giving the z scores for genes.
-#' Optionally, a "type" column can also be supplied; this is for using multiple sets of weights
-#'
-#' @param regionlist a list object indexing regions, variants and genes.
+#' @param susie_input_list a list object with the susie input data (z, types and priors) for each region
 #'
 #' @param niter the number of iterations of the E-M algorithm to perform
 #'
@@ -33,48 +29,38 @@
 #'
 #' @param ncore The number of cores used to parallelize susie over regions
 #'
+#' @param ncore The number of cores used to parallelize susie over regions
+#'
+#' @param verbose TRUE/FALSE. If TRUE, print detail messages
+#'
 #' @importFrom logging loginfo
 #' @importFrom foreach %dopar% foreach
 #'
 #' @return a list of parameters
 #'
-ctwas_EM <- function(z_snp,
-                     z_gene,
-                     regionlist,
-                     niter = 20,
-                     init_group_prior = NULL,
-                     init_group_prior_var = NULL,
-                     group_prior_var_structure = c("independent","shared_all","shared_QTLtype"),
-                     use_null_weight = TRUE,
-                     coverage = 0.95,
-                     min_abs_corr = 0.5,
-                     max_iter = 1,
-                     ncore = 1,
-                     verbose = TRUE,
-                     ...){
+EM_est_param <- function(zdf,
+                         susie_input_list,
+                         niter = 20,
+                         init_group_prior = NULL,
+                         init_group_prior_var = NULL,
+                         group_prior_var_structure = c("independent","shared_all","shared_QTLtype"),
+                         use_null_weight = TRUE,
+                         max_iter = 1,
+                         ncore = 1,
+                         verbose = FALSE,
+                         ...){
 
-  # combine z-scores of SNPs and genes
-  zdf <- combine_z(z_snp, z_gene)
-
+  # prepare input data for all the regions
   types <- unique(zdf$type)
   QTLtypes <- unique(zdf$QTLtype)
-  K <- length(types)
-  L <- 1
 
-  # store group priors from each iteration
-  group_prior_rec <- matrix(NA, nrow = K , ncol =  niter)
-  group_prior_var_rec <- matrix(NA, nrow = K , ncol =  niter)
-  rownames(group_prior_rec) <- types
-  rownames(group_prior_var_rec) <- types
-
+  # set pi_prior and V_prior based on init_group_prior and init_group_prior_var
   if (is.null(init_group_prior)){
     init_group_prior <- structure(as.numeric(rep(NA,length(types))), names=types)
   }
-
   if (is.null(init_group_prior_var)){
     init_group_prior_var <- structure(as.numeric(rep(NA,length(types))), names=types)
   }
-
   pi_prior <- list()
   V_prior <- list()
   for (type in types){
@@ -84,82 +70,67 @@ ctwas_EM <- function(z_snp,
   pi_prior <- unlist(pi_prior)
   V_prior <- unlist(V_prior)
 
+  # store estimated group priors from each iteration
+  group_prior_rec <- matrix(NA, nrow = length(types), ncol = niter)
+  rownames(group_prior_rec) <- types
+  group_prior_var_rec <- matrix(NA, nrow = length(types), ncol = niter)
+  rownames(group_prior_var_rec) <- types
+
   # start running EM iterations
   cl <- parallel::makeCluster(ncore, outfile = "")
   doParallel::registerDoParallel(cl)
 
-  corelist <- region2core(regionlist, ncore)
+  corelist <- region2core(susie_input_list, ncore)
 
   for (iter in 1:niter){
 
-    if (verbose)
-      loginfo("EM iteration %d", iter)
+    loginfo("Start EM iteration %d", iter)
 
     EM_susie_res <- foreach (core = 1:length(corelist), .combine = "rbind", .packages = "ctwas") %dopar% {
+
       susie_res.core.list <- list()
 
       # run susie for each region
       region_tags.core <- corelist[[core]]
       for (region_tag in region_tags.core) {
-        gid <- regionlist[[region_tag]][["gid"]]
-        sid <- regionlist[[region_tag]][["sid"]]
-        # keep only GWAS SNPs
-        sid <- intersect(sid, zdf$id)
-        regionlist[[region_tag]][["sid"]] <- sid
+        # load susie input data
+        susie_input <- susie_input_list[[region_tag]]
+        sid <- susie_input$sid
+        gid <- susie_input$gid
+        z <- susie_input$z
+        g_type <- susie_input$g_type
+        g_QTLtype <- susie_input$g_QTLtype
+        gs_type <- susie_input$gs_type
 
-        # combine zscores
-        z.g <- zdf[match(gid, zdf$id), "z"]
-        z.s <- zdf[match(sid, zdf$id), "z"]
-        z <- c(z.g, z.s)
+        # update priors, prior variances and null_weight based on the estimated group_prior and group_prior_var from the previous iteration
+        res <- set_region_susie_priors(pi_prior, V_prior, gs_type, L = 1, use_null_weight = use_null_weight)
+        prior <- res$prior
+        V <- res$V
+        null_weight <- res$null_weight
+        rm(res)
 
-        g_type <- zdf$type[match(gid, zdf$id)]
-        s_type <- zdf$type[match(sid, zdf$id)]
-        gs_type <- c(g_type, s_type)
-        # g_QTLtype <- zdf$QTLtype[match(gid, zdf$id)]
-
-        p <- length(gid) + length(sid)
-
-        if (any(is.na(pi_prior))){
-          prior <- rep(1/p, p)
-        } else {
-          prior <- unname(pi_prior[gs_type])
-        }
-
-        if (any(is.na(V_prior))){
-          V <- matrix(rep(50, L * p), nrow = L)
-          # following the default in susieR::susie_rss
-        } else{
-          V <- unname(V_prior[gs_type])
-          V <- matrix(rep(V, each = L), nrow=L)
-        }
-
-        if (isTRUE(use_null_weight)){
-          null_weight <- max(0, 1 - sum(prior))
-          prior <- prior/(1-null_weight)
-        } else {
-          null_weight <- NULL
-        }
-
-        # R does not matter for susie when L = 1
+        # Use an identity matrix as LD, R does not matter for susie when L = 1
         R <- diag(length(z))
 
         # in susie, prior_variance is under standardized scale (if performed)
+        if (verbose)
+          loginfo("run susie for region %s", region_tag)
         susie_res <- ctwas_susie_rss(z = z,
                                      R = R,
                                      prior_weights = prior,
                                      prior_variance = V,
                                      L = 1,
                                      null_weight = null_weight,
-                                     coverage = coverage,
-                                     min_abs_corr = min_abs_corr,
                                      max_iter = max_iter,
                                      ...)
-
+        if (verbose)
+          loginfo("annotate susie result for region %s", region_tag)
         # annotate susie result
         susie_res_df <- anno_susie(susie_res,
                                    gid = gid,
                                    sid = sid,
-                                   zdf = zdf,
+                                   g_type = g_type,
+                                   g_QTLtype = g_QTLtype,
                                    region_tag = region_tag,
                                    include_cs_index = FALSE)
 
@@ -174,9 +145,7 @@ ctwas_EM <- function(z_snp,
     pi_prior <- sapply(names(pi_prior), function(x){mean(EM_susie_res$susie_pip[EM_susie_res$type==x])})
     group_prior_rec[names(pi_prior),iter] <- pi_prior
 
-    if (verbose){
-      loginfo("After iteration %d, priors {%s}: {%s}", iter, names(pi_prior), pi_prior)
-    }
+    loginfo("After iteration %d, priors {%s}: {%s}", iter, names(pi_prior), pi_prior)
 
     # update estimated group_prior_var from the current iteration
     # in susie, mu2 is under standardized scale (if performed)

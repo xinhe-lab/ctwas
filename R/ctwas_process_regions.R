@@ -1,6 +1,6 @@
-#' filter regions based on probability of at most 1 causal effect
-filter_regions <- function(regionlist, z_snp, z_gene, group_prior, prob_single = 0.8){
-  loginfo("Filtering regions (P1 >= %s) ...", prob_single)
+#' select single effect regions
+select_single_effect_regions <- function(regionlist, z_snp, z_gene, group_prior, p_single_effect = 0.8){
+  loginfo("Select regions with P(single effect) >= %s", p_single_effect)
   # combine z-scores of SNPs and genes
   zdf <- combine_z(z_snp, z_gene)
 
@@ -17,23 +17,18 @@ filter_regions <- function(regionlist, z_snp, z_gene, group_prior, prob_single =
     group_size[is.na(group_size)] <- 0
 
     P1 <- prod((1-group_prior)^group_size) * (1 + sum(group_size*(group_prior/(1-group_prior))))
-    if (P1 >= prob_single){
+    if (P1 >= p_single_effect){
       selected_region_tags <- c(selected_region_tags, region_tag)
     }
     setTxtProgressBar(pb, i)
   }
   close(pb)
-  loginfo("%d regions left after filtering", length(selected_region_tags))
-  filtered_regionlist <- regionlist[selected_region_tags]
-  return(filtered_regionlist)
+  loginfo("%d regions selected", length(selected_region_tags))
+  selected_regionlist <- regionlist[selected_region_tags]
+  return(selected_regionlist)
 }
 
 #' assign regions to cores
-#'
-#' @param ncore integer, numeber of cores, at least 1
-#' regions allocated to given number of cores
-#' regionlist need to contain at least 1 non-empty
-#'
 region2core <- function(regionlist, ncore = 1){
   region_tags <- names(regionlist)
   if (ncore > 1) {

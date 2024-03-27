@@ -11,6 +11,7 @@ preprocess_weights(
   weight_format = c("PredictDB", "Fusion"),
   drop_strand_ambig = TRUE,
   filter_protein_coding_genes = FALSE,
+  load_predictdb_LD = FALSE,
   scale_by_ld_variance = TRUE
 )
 }
@@ -29,6 +30,8 @@ snps. "A1" is effect allele. "A2" is the other allele. For harmonized data, A1 a
 \item{drop_strand_ambig}{TRUE/FALSE, if TRUE remove strand ambiguous variants (A/T, G/C).}
 
 \item{filter_protein_coding_genes}{TRUE/FALSE. If TRUE, keep protein coding genes only. This option is only for PredictDB weights}
+
+\item{load_predictdb_LD}{TRUE/FALSE. If TRUE, load pre-computed LD among weight SNPs. This option is only for PredictDB weights}
 
 \item{scale_by_ld_variance}{TRUE/FALSE. If TRUE, PredictDB weights are scaled by genotype variance, which is the default
 behavior for PredictDB}

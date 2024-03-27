@@ -54,7 +54,7 @@ get_regionlist <- function(region_info,
 
   trim_by <- match.arg(trim_by)
 
-  loginfo("No. regions: %s", nrow(region_info))
+  loginfo("No. regions in total: %s", nrow(region_info))
 
   if (thin > 1 | thin <= 0){
     stop("thin needs to be in (0,1]")
@@ -112,7 +112,7 @@ get_regionlist <- function(region_info,
     # get regionlist
     regionlist_chr <- assign_region_ids(regioninfo,geneinfo,snpinfo)
     # identify genes across boundaries, update regionlist and weights according to new gene and snp assignment
-    if (isTRUE(adjust_boundary) && nrow(regioninfo) >=2){
+    if (isTRUE(adjust_boundary_genes) && nrow(regioninfo) >=2){
       res <- adjust_boundary_genes(regioninfo, weights, regionlist_chr)
       regionlist_chr <- res$regionlist
       weights <- res$weights

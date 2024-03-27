@@ -7,7 +7,8 @@
 load_weights(
   weight_file,
   weight_format = c("PredictDB", "Fusion"),
-  filter_protein_coding_genes = FALSE
+  filter_protein_coding_genes = FALSE,
+  load_predictdb_LD = FALSE
 )
 }
 \description{

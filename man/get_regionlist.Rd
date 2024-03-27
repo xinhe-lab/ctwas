@@ -16,7 +16,7 @@ get_regionlist(
   seed = 99,
   minvar = 1,
   mingene = 0,
-  adjust_boundary = TRUE
+  adjust_boundary_genes = TRUE
 )
 }
 \arguments{
@@ -49,7 +49,7 @@ or "z" (trim SNPs with lower |z|) See parameter `maxSNP` for more information.}
 
 \item{mingene}{minimum number of genes in a region}
 
-\item{adjust_boundary}{identify cross-boundary genes, adjust regionlist and update weigh_list}
+\item{adjust_boundary_genes}{identify cross-boundary genes, adjust regionlist and update weighs}
 
 \item{gene_info}{a data frame of gene information obtained from \code{get_gene_info}}
 }

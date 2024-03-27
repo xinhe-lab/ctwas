@@ -17,7 +17,7 @@ ctwas_sumstats(
   group_prior_var_structure = c("independent", "shared_all", "shared_QTLtype"),
   max_snp_region = Inf,
   min_nonSNP_PIP = 0.5,
-  prob_single = 0.8,
+  p_single_effect = 0.8,
   use_null_weight = TRUE,
   coverage = 0.95,
   min_abs_corr = 0.5,
@@ -65,7 +65,7 @@ have enough memory to run the program. This applies to the last rerun step
 \item{min_nonSNP_PIP}{Regions with non-SNP PIP >= \code{min_nonSNP_PIP}
 will be selected to run finemapping using full SNPs.}
 
-\item{prob_single}{Regions with probability greater than \code{prob_single} of
+\item{p_single_effect}{Regions with probability greater than \code{p_single_effect} of
 having 1 or fewer effects will be used for parameter estimation}
 
 \item{use_null_weight}{TRUE/FALSE. If TRUE, allow for a probability of no effect in susie}

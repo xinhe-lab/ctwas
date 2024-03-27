@@ -35,7 +35,7 @@
 #' @param min_nonSNP_PIP Regions with non-SNP PIP >= \code{min_nonSNP_PIP}
 #' will be selected to run finemapping using full SNPs.
 #'
-#' @param prob_single Regions with probability greater than \code{prob_single} of
+#' @param p_single_effect Regions with probability greater than \code{p_single_effect} of
 #' having 1 or fewer effects will be used for parameter estimation
 #'
 #' @param use_null_weight TRUE/FALSE. If TRUE, allow for a probability of no effect in susie
@@ -76,7 +76,7 @@ ctwas_sumstats <- function(
     group_prior_var_structure = c("independent","shared_all","shared_QTLtype"),
     max_snp_region = Inf,
     min_nonSNP_PIP = 0.5,
-    prob_single = 0.8,
+    p_single_effect = 0.8,
     use_null_weight = TRUE,
     coverage = 0.95,
     min_abs_corr = 0.5,
@@ -123,7 +123,7 @@ ctwas_sumstats <- function(
                      thin = thin,
                      niter1 = niter1,
                      niter2 = niter2,
-                     prob_single = prob_single,
+                     p_single_effect = p_single_effect,
                      ncore = ncore)
   group_prior <- param$group_prior
   group_prior_var <- param$group_prior_var

@@ -14,9 +14,10 @@ est_param(
   thin = 1,
   niter1 = 3,
   niter2 = 30,
-  prob_single = 0.8,
+  p_single_effect = 0.8,
   ncore = 1,
-  logfile = NULL
+  logfile = NULL,
+  verbose = FALSE
 )
 }
 \arguments{
@@ -46,12 +47,14 @@ The fine mapping step is rerun using full SNPs for regions with strong gene sign
 
 \item{niter2}{the number of iterations of the E-M algorithm to perform during the complete parameter estimation step}
 
-\item{prob_single}{Blocks with probability greater than \code{prob_single} of
-having 1 or fewer effects will be used for parameter estimation}
+\item{p_single_effect}{Regions with probability greater than \code{p_single_effect} of
+having at most one causal effect will be used selected for the complete parameter estimation step}
 
 \item{ncore}{The number of cores used to parallelize computation over regions}
 
 \item{logfile}{the log file, if NULL will print log info on screen}
+
+\item{verbose}{TRUE/FALSE. If TRUE, print detail messages}
 
 \item{use_null_weight}{TRUE/FALSE. If TRUE, allow for a probability of no effect in susie}
 
