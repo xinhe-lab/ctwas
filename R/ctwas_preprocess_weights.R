@@ -114,12 +114,18 @@ preprocess_weights <- function(weight_file,
           regioninfo <- regioninfo[order(regioninfo$start), ]
           ifreg <- ifelse(p1 >= regioninfo[, "start"] & p0 < regioninfo[, "stop"], T, F)
           R_snp <- lapply(regioninfo$LD_matrix[ifreg], load_LD)
-          R_snp <- suppressWarnings({as.matrix(Matrix::bdiag(R_snp))})
+          if(length(R_snp)==1){
+            R_snp <- R_snp[[1]]
+          }
+          else{
+            R_snp <- suppressWarnings({as.matrix(Matrix::bdiag(R_snp))})
+          }
           R_snpinfo <- read_LD_SNP_files(regioninfo$SNP_info[ifreg])
           ld.idx <- match(snps$id, R_snpinfo$id)
-          R_wgt <- R_snp[ld.idx, ld.idx]
+          R_wgt <- R_snp[ld.idx, ld.idx, drop=F]
+          rownames(R_wgt) <- snps$id
+          colnames(R_wgt) <- snps$id
         }
-        
         weights[[weight_id]] <- list(chrom=chrom, p0=p0, p1=p1, wgt=wgt, R_wgt=R_wgt, gene_name=gname, weight_name=weight_name, n=nwgt)
       }
       setTxtProgressBar(pb, i)
