@@ -25,7 +25,7 @@ compute_gene_z <- function (z_snp, weights, logfile = NULL){
   for (id in names(weights)) {
     wgt <- weights[[id]][["wgt"]]
     snpnames <- rownames(wgt)
-    R.s <- weights[[id]][["LD_matrix"]]
+    R.s <- weights[[id]][["R_wgt"]]
     z.idx <- match(snpnames, z_snp$id)
     z.s <- as.matrix(z_snp$z[z.idx])
     z.g <- as.matrix(crossprod(wgt, z.s)/sqrt(t(wgt)%*%R.s%*% wgt))
