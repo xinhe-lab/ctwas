@@ -91,7 +91,7 @@ finemap_region <- function(z_snp,
   pi_prior <- unlist(pi_prior)
   V_prior <- unlist(V_prior)
 
-  susie_input <- assemble_susie_input(sid, gid, zdf, pi_prior, V_prior,
+  susie_input <- assemble_region_susie_input(sid, gid, zdf, pi_prior, V_prior,
                                       L = L, use_null_weight = TRUE)
   sid <- susie_input$sid
   gid <- susie_input$gid
