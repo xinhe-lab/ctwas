@@ -99,19 +99,27 @@ preprocess_weights <- function(weight_file,
 
       nwgt <- nrow(wgt.matrix)
 
-      #Add LD matrix of weights
-      if(!is.null(R_wgt_all)){
-        R_wgt <- get_weight_LD(R_wgt_all,gname,rsid_varID)
-        R_wgt <- R_wgt[snps$id,snps$id,drop=F]
-      }
-      else{
-        R_wgt=NULL
-      }
-
       if(nwgt>0){
         p0 <- min(snps[snps[, "id"] %in% snpnames, "pos"])
         p1 <- max(snps[snps[, "id"] %in% snpnames, "pos"])
         weight_id <- paste0(gname, "|", weight_name)
+
+        #Add LD matrix of weights
+        if(!is.null(R_wgt_all)){
+          R_wgt <- get_weight_LD(R_wgt_all,gname,rsid_varID)
+          R_wgt <- R_wgt[snps$id,snps$id,drop=F]
+        }
+        else{
+          regioninfo <- region_info[region_info$chrom == b, ]
+          regioninfo <- regioninfo[order(regioninfo$start), ]
+          ifreg <- ifelse(p1 >= regioninfo[, "start"] & p0 < regioninfo[, "stop"], T, F)
+          R_snp <- lapply(regioninfo$LD_matrix[ifreg], load_LD)
+          R_snp <- suppressWarnings({as.matrix(Matrix::bdiag(R_snp))})
+          R_snpinfo <- read_LD_SNP_files(regioninfo$SNP_info[ifreg])
+          ld.idx <- match(snps$id, R_snpinfo$id)
+          R_wgt <- R_snp[ld.idx, ld.idx]
+        }
+        
         weights[[weight_id]] <- list(chrom=chrom, p0=p0, p1=p1, wgt=wgt, R_wgt=R_wgt, gene_name=gname, weight_name=weight_name, n=nwgt)
       }
       setTxtProgressBar(pb, i)
