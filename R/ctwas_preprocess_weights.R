@@ -110,7 +110,7 @@ preprocess_weights <- function(weight_file,
           R_wgt <- R_wgt[snps$id,snps$id,drop=F]
         }
         else{
-          regioninfo <- region_info[region_info$chrom == b, ]
+          regioninfo <- region_info[region_info$chrom == chrom, ]
           regioninfo <- regioninfo[order(regioninfo$start), ]
           ifreg <- ifelse(p1 >= regioninfo[, "start"] & p0 < regioninfo[, "stop"], T, F)
           R_snp <- lapply(regioninfo$LD_matrix[ifreg], load_LD)
