@@ -28,6 +28,7 @@
 preprocess_weights <- function(weight_file,
                                region_info,
                                z_snp,
+                               ncore = 1,
                                weight_format = c("PredictDB", "Fusion"),
                                drop_strand_ambig = TRUE,
                                filter_protein_coding_genes = FALSE,
@@ -65,6 +66,7 @@ preprocess_weights <- function(weight_file,
     pb <- txtProgressBar(min = 0, max = length(gnames), initial = 0, style = 3)
     for (i in 1:length(gnames)){
       gname <- gnames[i]
+      #print(gname)
       wgt <- weight_table[weight_table$gene==gname,]
       wgt.matrix <- as.matrix(wgt[, "weight", drop = F])
       rownames(wgt.matrix) <- wgt$rsid
@@ -73,7 +75,7 @@ preprocess_weights <- function(weight_file,
                          "0", chrpos[, 2], wgt$eff_allele, wgt$ref_allele,
                          stringsAsFactors = F)
       colnames(snps) <- c("chrom", "id", "cm", "pos", "alt", "ref")
-      chrom <- unique(snps$chrom)
+      chrom <- as.integer(unique(snps$chrom))
       snps$chrom <- as.integer(snps$chrom)
       snps$pos <- as.integer(snps$pos)
       w <- harmonize_wgt_ld(wgt.matrix,
@@ -110,21 +112,7 @@ preprocess_weights <- function(weight_file,
           R_wgt <- R_wgt[snps$id,snps$id,drop=F]
         }
         else{
-          regioninfo <- region_info[region_info$chrom == chrom, ]
-          regioninfo <- regioninfo[order(regioninfo$start), ]
-          ifreg <- ifelse(p1 >= regioninfo[, "start"] & p0 < regioninfo[, "stop"], T, F)
-          R_snp <- lapply(regioninfo$LD_matrix[ifreg], load_LD)
-          if(length(R_snp)==1){
-            R_snp <- R_snp[[1]]
-          }
-          else{
-            R_snp <- suppressWarnings({as.matrix(Matrix::bdiag(R_snp))})
-          }
-          R_snpinfo <- read_LD_SNP_files(regioninfo$SNP_info[ifreg])
-          ld.idx <- match(snps$id, R_snpinfo$id)
-          R_wgt <- R_snp[ld.idx, ld.idx, drop=F]
-          rownames(R_wgt) <- snps$id
-          colnames(R_wgt) <- snps$id
+          R_wgt <- NULL
         }
         weights[[weight_id]] <- list(chrom=chrom, p0=p0, p1=p1, wgt=wgt, R_wgt=R_wgt, gene_name=gname, weight_name=weight_name, n=nwgt)
       }
@@ -133,5 +121,67 @@ preprocess_weights <- function(weight_file,
     close(pb)
   }
 
+
+  if(!load_predictdb_LD){
+    loginfo("Pre-computed LDs between weight variants are not availiable.")
+    loginfo("Computing LD.")
+    weight_info <- as.data.frame(do.call(rbind, weights)[,c("chrom","p0","p1","gene_name","weight_name")])
+    weight_info$weight_id <- paste0(weight_info$gene_name, "|", weight_info$weight_name)
+    for (i in 1:nrow(weight_info)) {
+      chrom <- weight_info[i, "chrom"]
+      p0 <- weight_info[i, "p0"]
+      p1 <- weight_info[i, "p1"]
+      idx <- which(region_info$chrom == chrom & region_info$start <= p1 & region_info$stop > p0)
+      weight_info[i, "region_tag"] <- paste(sort(region_info[idx, "region_tag"]), collapse = ";")
+    }
+    # impute LD for weights for each chromosome
+    cl <- parallel::makeCluster(ncore, outfile = "")
+    doParallel::registerDoParallel(cl)
+
+    for (b in unique(weight_info$chrom)) {
+      loginfo("Computing LD for weight variants on chr%s", b)
+      weightinfo <- weight_info[weight_info$chrom == b, ]
+
+      if (nrow(weightinfo) > 0) {
+        batches <- names(sort(-table(weightinfo$region_tag)))
+        corelist <- lapply(1:ncore, function(core){
+          batches_core <- batches[0:ceiling(length(batches)/ncore-1)*ncore+core];
+          batches_core[!is.na(batches_core)]})
+        names(corelist) <- 1:ncore
+        
+        outlist <- foreach(core = 1:ncore, .combine = "c", .packages = c("ctwas")) %dopar% {
+          batches <- corelist[[core]]
+          outlist_core <- list()
+
+          for (batch in batches) {
+          # load the R_snp and SNP info for the region
+            region_tags <- strsplit(batch, ";")[[1]]
+            reg_idx <- match(region_tags, region_info$region_tag)
+            if (length(reg_idx) > 1){
+              R_snp <- lapply(region_info$LD_matrix[reg_idx], load_LD)
+              R_snp <- suppressWarnings({as.matrix(Matrix::bdiag(R_snp))})
+            }
+            else{
+              R_snp <- load_LD(region_info$LD_matrix[reg_idx])
+            }
+            R_snpinfo <- read_LD_SNP_files(region_info$SNP_info[reg_idx])
+            weight_ids <- weightinfo[weightinfo$region_tag == batch, "weight_id"]
+            for(weight_id in weight_ids){
+              snpnames <- rownames(weights[[weight_id]]$wgt)
+              ld.idx <- match(snpnames, R_snpinfo$id)
+              R_wgt <- R_snp[ld.idx, ld.idx, drop=F]
+              rownames(R_wgt) <- snpnames
+              colnames(R_wgt) <- snpnames
+              outlist_core[[weight_id]] <- R_wgt
+            }
+          }
+          outlist_core
+        }
+        for(i in names(outlist)){
+          weights[[i]][["R_wgt"]] <- outlist[[i]]
+        }
+      }
+    }
+  }
   return(weights)
 }
