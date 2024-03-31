@@ -38,37 +38,22 @@
 #}
 
 compute_gene_z <- function (z_snp, weights, ncore = 1, logfile = NULL){
-  
-  if (!is.null(logfile)) {
-    addHandler(writeToFile, file = logfile, level = "DEBUG")
-  }
   z_snp <- z_snp[,c("id", "z")]
   # compute gene z-scores
   # return a data frame with gene ids, and imputed gene z-scores
-  cl <- parallel::makeCluster(ncore, outfile = "")
+  cl <- parallel::makeCluster(ncore, type = "FORK")
   doParallel::registerDoParallel(cl)
-  batches <- names(weights)
-  corelist <- lapply(1:ncore, function(core){
-    batches_core <- batches[0:ceiling(length(batches)/ncore-1)*ncore+core];
-    batches_core[!is.na(batches_core)]})
-  names(corelist) <- 1:ncore
-  
-  outlist <- foreach(core = 1:ncore, .combine = "c", .packages = c("ctwas")) %dopar% {
-    batches <- corelist[[core]]
-    outlist_core <- list()
-    for (batch in batches) {
-      wgt <- weights[[batch]][["wgt"]]
-      snpnames <- rownames(wgt)
-      R.s <- weights[[batch]][["R_wgt"]]
-      z.idx <- match(snpnames, z_snp$id)
-      z.s <- as.matrix(z_snp$z[z.idx])
-      z.g <- as.matrix(crossprod(wgt, z.s)/sqrt(t(wgt)%*%R.s%*% wgt))
-      dimnames(z.g) <- NULL
-      outlist_core[[batch]] <- data.frame(id = batch, z = z.g)
-    }
-    outlist_core
+  z_gene <- foreach(id = names(weights), .combine = "rbind") %dopar% {
+    wgt <- weights[[id]][["wgt"]]
+    snpnames <- rownames(wgt)
+    R.s <- weights[[id]][["R_wgt"]]
+    z.idx <- match(snpnames, z_snp$id)
+    z.s <- as.matrix(z_snp$z[z.idx])
+    z.g <- as.matrix(crossprod(wgt, z.s)/sqrt(t(wgt)%*%R.s%*% wgt))
+    dimnames(z.g) <- NULL
+    data.frame(id = id, z = z.g)
   }
-  z_gene <- do.call(rbind, outlist)
+  stopCluster(cl)
   rownames(z_gene) <- NULL
   return(z_gene)
 }
