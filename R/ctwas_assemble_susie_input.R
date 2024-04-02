@@ -24,7 +24,7 @@ assemble_susie_input_list <- function(zdf,
   V_prior <- unlist(V_prior)
 
   # start running EM iterations
-  cl <- parallel::makeCluster(ncore, outfile = "")
+  cl <- parallel::makeCluster(ncore, outfile = "", type = "FORK")
   doParallel::registerDoParallel(cl)
 
   corelist <- region2core(regionlist, ncore)
@@ -44,7 +44,7 @@ assemble_susie_input_list <- function(zdf,
     }
     susie_input.core
   }
-
+  parallel::stopCluster(cl)
   return(susie_input_list)
 }
 

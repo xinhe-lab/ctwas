@@ -41,7 +41,7 @@ compute_gene_z <- function (z_snp, weights, ncore = 1, logfile = NULL){
   z_snp <- z_snp[,c("id", "z")]
   # compute gene z-scores
   # return a data frame with gene ids, and imputed gene z-scores
-  cl <- parallel::makeCluster(ncore, type = "FORK")
+  cl <- parallel::makeCluster(ncore, outfile = "", type = "FORK")
   doParallel::registerDoParallel(cl)
   z_gene <- foreach(id = names(weights), .combine = "rbind") %dopar% {
     wgt <- weights[[id]][["wgt"]]
@@ -53,7 +53,7 @@ compute_gene_z <- function (z_snp, weights, ncore = 1, logfile = NULL){
     dimnames(z.g) <- NULL
     data.frame(id = id, z = z.g)
   }
-  stopCluster(cl)
+  parallel::stopCluster(cl)
   rownames(z_gene) <- NULL
   return(z_gene)
 }

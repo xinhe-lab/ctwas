@@ -112,7 +112,7 @@ est_param <- function(
 
   # Select regions with single effect
   loginfo("Select single effect regions ...")
-  filtered_regionlist <- select_single_effect_regions(regionlist, z_snp, z_gene, EM1_res$group_prior, p_single_effect)
+  filtered_regionlist <- select_single_effect_regions(regionlist, z_snp, z_gene, EM1_res$group_prior, p_single_effect, ncore=ncore)
 
   # Run EM for more (niter2) iterations, getting rough estimates
   loginfo("Run EM for %d iterations on %d regions, getting accurate estimates ...",
