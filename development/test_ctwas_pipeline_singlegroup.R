@@ -7,7 +7,7 @@ trait <- "LDL"
 tissue <- "Liver"
 gwas_file <- "/project2/xinhe/shared_data/multigroup_ctwas/test_data/ukb-d-30780_irnt.vcf.gz"
 gwas_n <- 343621
-weight_file <- "/project2/xinhe/shared_data/multigroup_ctwas/test_data/mashr_Liver_nolnc.db"
+weight_file <- "/project2/xinhe/shared_data/multigroup_ctwas/test_data/mashr_Liver.db"
 thin <- 0.1
 max_snp_region <- 20000
 ncore <- 6
@@ -87,7 +87,9 @@ if (file.exists(processed_weight_file)){
     weights <- preprocess_weights(weight_file,
                                   region_info,
                                   z_snp,
+                                  ncore = ncore,
                                   drop_strand_ambig = TRUE,
+                                  load_predictdb_LD = TRUE,
                                   filter_protein_coding_genes = TRUE,
                                   scale_by_ld_variance = TRUE)
     save(weights, file = processed_weight_file)
@@ -103,7 +105,7 @@ if( file.exists(gene_z_file) ){
   load(gene_z_file)
 }else{
   runtime <- system.time({
-    z_gene <- compute_gene_z(z_snp, weights, logfile = file.path(outputdir, paste0(outname, ".compute_gene_z.log")))
+    z_gene <- compute_gene_z(z_snp, weights, ncore=ncore, logfile = file.path(outputdir, paste0(outname, ".compute_gene_z.log")))
     save(z_gene, file = gene_z_file)
   })
   cat(sprintf("Imputing gene z-scores took %0.2f minutes\n",runtime["elapsed"]/60))
