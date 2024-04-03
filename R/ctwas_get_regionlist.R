@@ -20,8 +20,6 @@
 #' have enough memory to run the program. This applies to the last rerun step
 #' (using full SNPs and rerun susie for regions with strong gene signals) only.
 #'
-#' @param filter_z_ids If TRUE, only keep SNPs and genes in z_snp and z_gene.
-#'
 #' @param trim_by remove SNPs if the total number of SNPs exceeds limit, options: "random",
 #' or "z" (trim SNPs with lower |z|) See parameter `maxSNP` for more information.
 #'
@@ -45,7 +43,6 @@ get_regionlist <- function(region_info,
                            weights,
                            thin = 1,
                            maxSNP = Inf,
-                           filter_z_ids = TRUE,
                            trim_by = c("random", "z"),
                            seed = 99,
                            minvar = 1,
@@ -84,10 +81,8 @@ get_regionlist <- function(region_info,
 
     # select SNPs
     snpinfo$keep <- rep(1, nrow(snpinfo))
-    if (isTRUE(filter_z_ids)){
-      # remove SNPs not in z_snp
-      snpinfo$keep[!(snpinfo$id %in% z_snp$id)] <- 0
-    }
+    # remove SNPs not in z_snp
+    snpinfo$keep[!(snpinfo$id %in% z_snp$id)] <- 0
 
     # downsampling for SNPs
     snpinfo$thin_tag <- rep(0, nrow(snpinfo))
@@ -103,10 +98,8 @@ get_regionlist <- function(region_info,
 
       # select genes
       geneinfo$keep <- 1
-      if (isTRUE(filter_z_ids)){
-        # remove genes not in z_gene
-        geneinfo[!(geneinfo$id %in% z_gene$id), "keep"] <- 0
-      }
+      # remove genes not in z_gene
+      geneinfo[!(geneinfo$id %in% z_gene$id), "keep"] <- 0
     }
 
     # get regionlist

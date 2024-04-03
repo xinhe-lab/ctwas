@@ -85,28 +85,18 @@ est_param <- function(
   loginfo("combine z-scores from SNPs and genes...")
   zdf <- combine_z(z_snp, z_gene)
 
-  # Assemble susie input data
-  loginfo("Assemble susie input data for %d regions ...", length(regionlist))
-  susie_input_list <- assemble_susie_input_list(zdf,
-                                                regionlist,
-                                                L = 1,
-                                                group_prior = init_group_prior,
-                                                group_prior_var = init_group_prior_var,
-                                                use_null_weight = TRUE,
-                                                ncore = ncore)
-
   # Run EM for a few (niter1) iterations, getting rough estimates
   loginfo("Run EM for %d iterations on %d regions, getting rough estimates ...",
           niter1, length(regionlist))
-  EM1_res <- EM_est_param(zdf,
-                          susie_input_list,
-                          niter = niter1,
-                          init_group_prior = init_group_prior,
-                          init_group_prior_var = init_group_prior_var,
-                          group_prior_var_structure = group_prior_var_structure,
-                          max_iter = 1,
-                          ncore = ncore,
-                          verbose = verbose)
+  EM1_res <- EM(zdf,
+                regionlist,
+                niter = niter1,
+                init_group_prior = init_group_prior,
+                init_group_prior_var = init_group_prior_var,
+                group_prior_var_structure = group_prior_var_structure,
+                max_iter = 1,
+                ncore = ncore,
+                verbose = verbose)
   loginfo("Roughly estimated group_prior {%s}: {%s}", names(EM1_res$group_prior), EM1_res$group_prior)
   loginfo("Roughly estimated group_prior_var {%s}: {%s}", names(EM1_res$group_prior_var), EM1_res$group_prior_var)
 
@@ -118,15 +108,15 @@ est_param <- function(
   loginfo("Run EM for %d iterations on %d regions, getting accurate estimates ...",
           niter2, length(filtered_regionlist))
 
-  EM2_res <- EM_est_param(zdf,
-                          susie_input_list,
-                          niter = niter2,
-                          init_group_prior = EM1_res$group_prior,
-                          init_group_prior_var = EM1_res$group_prior_var,
-                          group_prior_var_structure = group_prior_var_structure,
-                          max_iter = 1,
-                          ncore = ncore,
-                          verbose = verbose)
+  EM2_res <- EM(zdf,
+                regionlist,
+                niter = niter2,
+                init_group_prior = EM1_res$group_prior,
+                init_group_prior_var = EM1_res$group_prior_var,
+                group_prior_var_structure = group_prior_var_structure,
+                max_iter = 1,
+                ncore = ncore,
+                verbose = verbose)
   group_prior <- EM2_res$group_prior
   group_prior_var <- EM2_res$group_prior_var
   group_prior_var_structure <- EM2_res$group_prior_var_structure

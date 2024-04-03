@@ -92,12 +92,14 @@ ctwas_sumstats <- function(
   }
 
   # Compute gene z-scores
+  loginfo("Compute gene z-scores ...")
   z_gene <- compute_gene_z(z_snp, weights)
 
   # Get regionlist, which contains SNP and gene IDs assigned to each region, and region coordinates
   #. downsample SNPs if thin < 1
   #. assign SNP and gene IDs to each region
   #. find boundary genes and adjust regionlist and weights for boundary genes
+  loginfo("Get regionlist ...")
   res <- get_regionlist(region_info,
                         z_snp,
                         z_gene,
@@ -111,9 +113,13 @@ ctwas_sumstats <- function(
   weights <- res$weights
   boundary_genes <- res$boundary_genes
 
+  loginfo("Add z-scores to regionlist ...")
+  regionlist <- add_z_to_regionlist(regionlist, z_snp, z_gene, ncore = ncore)
+
   # Estimate parameters
   #. get regionlist for all the regions
   #. run EM for two rounds with thinned SNPs using L = 1
+  loginfo("Estimating parameters...")
   param <- est_param(z_snp,
                      z_gene,
                      regionlist,
@@ -131,6 +137,7 @@ ctwas_sumstats <- function(
   # Screen regions
   #. fine-map all regions with thinned SNPs
   #. select regions with strong non-SNP signals
+  loginfo("Screening regions ...")
   screened_region_tags <- screen_regions(z_snp,
                                          z_gene,
                                          regionlist,
@@ -154,10 +161,13 @@ ctwas_sumstats <- function(
                                              z_snp,
                                              trim_by = "z",
                                              maxSNP = max_snp_region)
+    loginfo("Add z-scores to regionlist ...")
+    screened_regionlist <- add_z_to_regionlist(screened_regionlist, z_snp, z_gene, ncore = ncore)
   }
 
   # Run fine-mapping for regions with strong gene signals using all SNPs
   #. save correlation matrices if save_cor is TRUE
+  loginfo("Fine-mapping regions ...")
   finemap_res <- finemap_regions(z_snp,
                                  z_gene,
                                  screened_regionlist,

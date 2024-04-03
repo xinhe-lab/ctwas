@@ -98,6 +98,7 @@ screen_regions <- function(
                                  L = L,
                                  group_prior = group_prior,
                                  group_prior_var = group_prior_var,
+                                 annotate_susie_result = FALSE,
                                  ncore = ncore,
                                  verbose = verbose)
 

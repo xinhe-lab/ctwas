@@ -149,6 +149,12 @@ weights <- res$weights
 boundary_genes <- res$boundary_genes
 rm(res)
 
+## Add z-scores to regionlist
+runtime <- system.time({
+  loginfo("Add z-scores to regionlist ...")
+  regionlist <- add_z_to_regionlist(regionlist, z_snp, z_gene, ncore = ncore)
+})
+
 # old_regionlist_res <- readRDS(file.path(old_outputdir, paste0(outname, ".regionlist.thin", thin, ".RDS")))
 # identical(regionlist[[100]]$gid, old_regionlist_res$regionlist[[100]]$gid)
 # identical(regionlist[[100]]$sid, old_regionlist_res$regionlist[[100]]$sid)

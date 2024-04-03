@@ -37,11 +37,14 @@
 #'
 #' @param cor_dir a string, the directory to store correlation (R) matrices
 #'
+#' @param annotate_susie_result TRUE/FALSE. If TRUE, add gene and SNP information and cs_index to
+#' the data frame of finemapping results.
+#'
 #' @param verbose TRUE/FALSE. If TRUE, print detail messages
 #'
 #' @importFrom logging loginfo
 #'
-#' @return finemapping results.
+#' @return a data frame of finemapping results.
 #'
 #' @export
 #'
@@ -61,6 +64,7 @@ finemap_region <- function(z_snp,
                            force_compute_cor = FALSE,
                            save_cor = FALSE,
                            cor_dir = getwd(),
+                           annotate_susie_result = TRUE,
                            verbose = FALSE,
                            ...){
 
@@ -68,10 +72,11 @@ finemap_region <- function(z_snp,
     loginfo("Finemapping region %s with L = %d", region_tag, L)
   }
 
+  regioninfo <- region_info[region_info$region_tag == region_tag, ]
+
   # get regionlist with full SNPs if not available
   if (is.null(regionlist)) {
     loginfo("Get regionlist for region %s", region_tag)
-    regioninfo <- region_info[region_info$region_tag == region_tag, ]
     res <- get_regionlist(regioninfo,
                           z_snp,
                           z_gene,
@@ -81,18 +86,21 @@ finemap_region <- function(z_snp,
                           thin = 1,
                           adjust_boundary_genes = FALSE)
     regionlist <- res$regionlist
+    regionlist <- add_z_to_regionlist(regionlist, z_snp, z_gene)
     rm(res)
   }
 
-  # select genes and SNPs in this region
+  # get susie input data
   sid <- regionlist[[region_tag]][["sid"]]
   gid <- regionlist[[region_tag]][["gid"]]
-
-  # prepare susie input data
-  zdf <- combine_z(z_snp, z_gene)
+  z <- regionlist[[region_tag]][["z"]]
+  g_type <- regionlist[[region_tag]][["g_type"]]
+  g_QTLtype <- regionlist[[region_tag]][["g_QTLtype"]]
+  gs_type <- regionlist[[region_tag]][["gs_type"]]
 
   # set pi_prior and V_prior based on group_prior and group_prior_var
-  types <- unique(zdf$type)
+  # zdf <- combine_z(z_snp, z_gene)
+  types <- unique(gs_type)
   if (is.null(group_prior)){
     group_prior <- structure(as.numeric(rep(NA,length(types))), names=types)
   }
@@ -108,25 +116,11 @@ finemap_region <- function(z_snp,
   pi_prior <- unlist(pi_prior)
   V_prior <- unlist(V_prior)
 
-  susie_input <- assemble_region_susie_input(sid, gid, zdf, pi_prior, V_prior,
-                                             L = L, use_null_weight = TRUE)
-  sid <- susie_input$sid
-  gid <- susie_input$gid
-  z <- susie_input$z
-  g_type <- susie_input$g_type
-  g_QTLtype <- susie_input$g_QTLtype
-  gs_type <- susie_input$gs_type
-  prior <- susie_input$prior
-  V <- susie_input$V
-  null_weight <- susie_input$null_weight
-
-  # get gene info from weights
-  gene_info <- get_gene_info(weights)
-
-  # LD and SNP information for this region
-  regioninfo <- region_info[region_info$region_tag %in% region_tag, ]
-  LD_matrix_file <- regioninfo$LD_matrix
-  ld_snpinfo <- read_LD_SNP_files(regioninfo$SNP_info)
+  # set prior and prior variance values for the region
+  res <- set_region_susie_priors(pi_prior, V_prior, gs_type, L = L, use_null_weight = use_null_weight)
+  prior <- res$prior
+  V <- res$V
+  null_weight <- res$null_weight
 
   # compute correlation matrices
   if (length(region_tag) > 1){
@@ -141,12 +135,13 @@ finemap_region <- function(z_snp,
     if (verbose){
       loginfo("Compute correlation matrices ...")
     }
-    if (length(LD_matrix_file)==1){
-      R_snp <- load_LD(LD_matrix_file)
+    if (length(regioninfo$LD_matrix)==1){
+      R_snp <- load_LD(regioninfo$LD_matrix)
     } else {
-      R_snp <- lapply(LD_matrix_file, load_LD)
+      R_snp <- lapply(regioninfo$LD_matrix, load_LD)
       R_snp <- suppressWarnings(as.matrix(Matrix::bdiag(R_snp)))
     }
+    ld_snpinfo <- read_LD_SNP_files(regioninfo$SNP_info)
     res <- compute_region_cor(sid, gid, R_snp, weights, ld_snpinfo)
     R_snp <- res$R_snp
     R_snp_gene <- res$R_snp_gene
@@ -179,12 +174,13 @@ finemap_region <- function(z_snp,
       R <- diag(length(z))
     } else {
       # compute correlation matrix if L > 1
-      if (length(LD_matrix_file)==1){
-        R_snp <- load_LD(LD_matrix_file)
+      if (length(regioninfo$LD_matrix)==1){
+        R_snp <- load_LD(regioninfo$LD_matrix)
       } else {
-        R_snp <- lapply(LD_matrix_file, load_LD)
+        R_snp <- lapply(regioninfo$LD_matrix, load_LD)
         R_snp <- suppressWarnings(as.matrix(Matrix::bdiag(R_snp)))
       }
+      ld_snpinfo <- read_LD_SNP_files(regioninfo$SNP_info)
       res <- compute_region_cor(sid, gid, R_snp, weights, ld_snpinfo)
       R_snp <- res$R_snp
       R_snp_gene <- res$R_snp_gene
@@ -224,14 +220,30 @@ finemap_region <- function(z_snp,
                                ...)
 
   # annotate susie result
-  susie_res_df <- anno_susie(susie_res,
-                             gid = gid,
-                             sid = sid,
-                             g_type = g_type,
-                             g_QTLtype = g_QTLtype,
-                             region_tag = region_tag,
-                             geneinfo = gene_info,
-                             snpinfo = ld_snpinfo)
+  if (isTRUE(annotate_susie_result)) {
+    gene_info <- get_gene_info(weights)
+    ld_snpinfo <- read_LD_SNP_files(regioninfo$SNP_info)
+    susie_res_df <- anno_susie(susie_res,
+                               gid = gid,
+                               sid = sid,
+                               g_type = g_type,
+                               g_QTLtype = g_QTLtype,
+                               region_tag = region_tag,
+                               geneinfo = gene_info,
+                               snpinfo = ld_snpinfo,
+                               include_cs_index = TRUE)
+  } else {
+    # skip annotating gene and SNP info, and cs_index
+    susie_res_df <- anno_susie(susie_res,
+                               gid = gid,
+                               sid = sid,
+                               g_type = g_type,
+                               g_QTLtype = g_QTLtype,
+                               region_tag = region_tag,
+                               geneinfo = NULL,
+                               snpinfo = NULL,
+                               include_cs_index = FALSE)
+  }
 
   return(susie_res_df)
 
@@ -303,6 +315,7 @@ finemap_regions <- function(z_snp,
                             force_compute_cor = FALSE,
                             save_cor = FALSE,
                             cor_dir = getwd(),
+                            annotate_susie_result = TRUE,
                             verbose = FALSE,
                             logfile = NULL,
                             ...){
@@ -340,6 +353,7 @@ finemap_regions <- function(z_snp,
                                                             force_compute_cor = force_compute_cor,
                                                             save_cor = save_cor,
                                                             cor_dir = cor_dir,
+                                                            annotate_susie_result = annotate_susie_result,
                                                             verbose = verbose,
                                                             ...)
     }

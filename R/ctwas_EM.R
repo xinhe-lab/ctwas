@@ -3,7 +3,7 @@
 #'
 #' @param zdf a data frame with combined z_snp and z_gene from \code{combine_z()}
 #'
-#' @param susie_input_list a list object with the susie input data (z, types and priors) for each region
+#' @param regionlist a list object with the susie input data for each region
 #'
 #' @param niter the number of iterations of the E-M algorithm to perform
 #'
@@ -38,17 +38,17 @@
 #'
 #' @return a list of parameters
 #'
-EM_est_param <- function(zdf,
-                         susie_input_list,
-                         niter = 20,
-                         init_group_prior = NULL,
-                         init_group_prior_var = NULL,
-                         group_prior_var_structure = c("independent","shared_all","shared_QTLtype"),
-                         use_null_weight = TRUE,
-                         max_iter = 1,
-                         ncore = 1,
-                         verbose = FALSE,
-                         ...){
+EM <- function(zdf,
+               regionlist,
+               niter = 20,
+               init_group_prior = NULL,
+               init_group_prior_var = NULL,
+               group_prior_var_structure = c("independent","shared_all","shared_QTLtype"),
+               use_null_weight = TRUE,
+               max_iter = 1,
+               ncore = 1,
+               verbose = FALSE,
+               ...){
 
   # prepare input data for all the regions
   types <- unique(zdf$type)
@@ -80,7 +80,7 @@ EM_est_param <- function(zdf,
   cl <- parallel::makeCluster(ncore, outfile = "")
   doParallel::registerDoParallel(cl)
 
-  corelist <- region2core(susie_input_list, ncore)
+  corelist <- region2core(regionlist, ncore)
 
   for (iter in 1:niter){
 
@@ -94,13 +94,12 @@ EM_est_param <- function(zdf,
       region_tags.core <- corelist[[core]]
       for (region_tag in region_tags.core) {
         # load susie input data
-        susie_input <- susie_input_list[[region_tag]]
-        sid <- susie_input$sid
-        gid <- susie_input$gid
-        z <- susie_input$z
-        g_type <- susie_input$g_type
-        g_QTLtype <- susie_input$g_QTLtype
-        gs_type <- susie_input$gs_type
+        sid <- regionlist[[region_tag]][["sid"]]
+        gid <- regionlist[[region_tag]][["gid"]]
+        z <- regionlist[[region_tag]][["z"]]
+        g_type <- regionlist[[region_tag]][["g_type"]]
+        g_QTLtype <- regionlist[[region_tag]][["g_QTLtype"]]
+        gs_type <- regionlist[[region_tag]][["gs_type"]]
 
         # update priors, prior variances and null_weight based on the estimated group_prior and group_prior_var from the previous iteration
         res <- set_region_susie_priors(pi_prior, V_prior, gs_type, L = 1, use_null_weight = use_null_weight)

@@ -6,8 +6,6 @@
 #'
 #' @param z_snp A data frame with columns: "id", "z", giving the z-scores for SNPs.
 #'
-#' @param filter_z_ids If TRUE, only keep SNPs and genes in z_snp and z_gene.
-#'
 #' @param trim_by remove SNPs if the total number of SNPs exceeds limit, options: "random",
 #' or "z" (trim SNPs with lower |z|) See parameter `maxSNP` for more information.
 #'
@@ -26,7 +24,6 @@
 expand_regionlist <- function(regionlist,
                               region_info,
                               z_snp,
-                              filter_z_ids = TRUE,
                               trim_by = c("z", "random"),
                               maxSNP = Inf,
                               seed = 99) {
@@ -42,14 +39,13 @@ expand_regionlist <- function(regionlist,
     region_tag <- region_tags[i]
 
     # load all SNPs in the region
-    snpinfo <- read_LD_SNP_file(region_info[region_info$region_tag == region_tag, "SNP_info"])
+    snpinfo <- read_LD_SNP_files(region_info[region_info$region_tag == region_tag, "SNP_info"])
 
     # update sid in the region
     snpinfo$keep <- rep(1, nrow(snpinfo))
-    if (isTRUE(filter_z_ids)){
-      # remove SNPs not in z_snp
-      snpinfo$keep[!(snpinfo$id %in% z_snp$id)] <- 0
-    }
+    # remove SNPs not in z_snp
+    snpinfo$keep[!(snpinfo$id %in% z_snp$id)] <- 0
+
     sid <- snpinfo$id[snpinfo$keep == 1]
     sidx <- match(sid, snpinfo$id)
     regionlist[[region_tag]][["sid"]] <- sid
