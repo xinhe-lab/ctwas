@@ -35,7 +35,7 @@ preprocess_z_snp <- function(z_snp,
   loginfo("z_snp has %d variants in total", length(z_snp$id))
 
   # remove SNPs not in LD reference
-  ld_snpinfo <- do.call(rbind, lapply(region_info$SNP_info, read_LD_SNP_file))
+  ld_snpinfo <- do.call(rbind, lapply(region_info$SNP_info, read_LD_SNP_files))
   z_snp <- z_snp[z_snp$id %in% ld_snpinfo$id,]
 
   # drop multiallelic variants (id not unique)
@@ -104,7 +104,7 @@ detect_ld_mismatch_susie <- function(z_snp,
 
       # Load reference LD matrix and SNP info in the region
       R_snp <- load_LD(region_info$LD_matrix[region_info$region_tag == region_tag])
-      ld_snpinfo <- read_LD_SNP_file(region_info$SNP_info[region_info$region_tag == region_tag])
+      ld_snpinfo <- read_LD_SNP_files(region_info$SNP_info[region_info$region_tag == region_tag])
 
       # Match GWAS sumstats with LD reference files. Only keep variants included in LD reference.
       z_snp.region <- z_snp[z_snp$id %in% ld_snpinfo$id,]
