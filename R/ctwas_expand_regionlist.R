@@ -42,7 +42,7 @@ expand_regionlist <- function(regionlist,
     region_tag <- region_tags[i]
 
     # load all SNPs in the region
-    snpinfo <- read_LD_SNP_file(region_info[region_info$region_tag == region_tag, "SNP_info"])
+    snpinfo <- read_LD_SNP_files(region_info[region_info$region_tag == region_tag, "SNP_info"])
 
     # update sid in the region
     snpinfo$keep <- rep(1, nrow(snpinfo))

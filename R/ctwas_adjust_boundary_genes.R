@@ -12,7 +12,7 @@ adjust_boundary_genes <- function(regioninfo, weights, regionlist){
     # tmp_region <- regionlist[[region_tag_current]]
     if(length(gnames>0)){
       snpinfo_file <- regioninfo[regioninfo$region_tag == region_tag_current, "SNP_info"]
-      ld_snpinfo <- read_LD_SNP_file(snpinfo_file)
+      ld_snpinfo <- read_LD_SNP_files(snpinfo_file)
       for (i in 1:length(gnames)){
         gname <- gnames[i]
         wgt <- weights[[gname]][["wgt"]]
