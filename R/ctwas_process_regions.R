@@ -1,18 +1,15 @@
 #' select single effect regions
-select_single_effect_regions <- function(regionlist, z_snp, z_gene, group_prior, p_single_effect = 0.8, ncore=ncore){
+select_single_effect_regions <- function(regionlist, group_prior, p_single_effect = 0.8, ncore=ncore){
   loginfo("Select regions with P(single effect) >= %s", p_single_effect)
-  # combine z-scores of SNPs and genes
-  zdf <- combine_z(z_snp, z_gene)
 
   region_tags <- names(regionlist)
   cl <- parallel::makeCluster(ncore, outfile = "", type = "FORK")
   doParallel::registerDoParallel(cl)
 
   selected_region_tags <- foreach(region_tag = region_tags, .combine = "c") %dopar% {
-    #out <- c()
     gid <- regionlist[[region_tag]][["gid"]]
     sid <- regionlist[[region_tag]][["sid"]]
-    gs_type <- zdf$type[match(c(gid,sid), zdf$id)]
+    gs_type <- regionlist[[region_tag]][["gs_type"]]
 
     group_size <- table(gs_type)[names(group_prior)]
     group_size[is.na(group_size)] <- 0
@@ -20,12 +17,10 @@ select_single_effect_regions <- function(regionlist, z_snp, z_gene, group_prior,
     P1 <- prod((1-group_prior)^group_size) * (1 + sum(group_size*(group_prior/(1-group_prior))))
     if (P1 >= p_single_effect){
       region_tag
-      #out <- c(out,region_tag)
     }
-    #out
   }
-
   parallel::stopCluster(cl)
+
   loginfo("%d regions selected", length(selected_region_tags))
   selected_regionlist <- regionlist[selected_region_tags]
   return(selected_regionlist)

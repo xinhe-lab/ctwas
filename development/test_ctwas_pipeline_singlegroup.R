@@ -125,7 +125,8 @@ if (file.exists(regionlist_thin_file)) {
                         trim_by = "random",
                         thin = thin,
                         minvar = 2,
-                        adjust_boundary_genes = TRUE)
+                        adjust_boundary_genes = TRUE,
+                        ncore = ncore)
   saveRDS(res, regionlist_thin_file)
 }
 regionlist <- res$regionlist
@@ -191,8 +192,10 @@ if (file.exists(screen_regions_file)) {
     screened_regionlist <- expand_regionlist(screened_regionlist,
                                              region_info,
                                              z_snp,
+                                             z_gene,
                                              trim_by = "z",
-                                             maxSNP = max_snp_region)
+                                             maxSNP = max_snp_region,
+                                             ncore = ncore)
   }
   saveRDS(screened_regionlist, screen_regions_file)
 }

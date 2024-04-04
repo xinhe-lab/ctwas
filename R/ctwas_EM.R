@@ -77,7 +77,7 @@ EM <- function(zdf,
   rownames(group_prior_var_rec) <- types
 
   # start running EM iterations
-  cl <- parallel::makeCluster(ncore, outfile = "")
+  cl <- parallel::makeCluster(ncore, outfile = "", type = "FORK")
   doParallel::registerDoParallel(cl)
 
   corelist <- region2core(regionlist, ncore)

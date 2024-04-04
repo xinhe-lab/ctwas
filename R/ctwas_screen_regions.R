@@ -84,7 +84,7 @@ screen_regions <- function(
   if (mingene > 0) {
     n.gid <- sapply(regionlist, function(x){length(x[["gid"]])})
     drop.idx <- which(n.gid < mingene)
-    loginfo("Remove %d regions with fewer than %d genes.", length(drop.idx), mingene)
+    loginfo("Remove %d regions with number of genes < %d.", length(drop.idx), mingene)
     regionlist[drop.idx] <- NULL
   }
 

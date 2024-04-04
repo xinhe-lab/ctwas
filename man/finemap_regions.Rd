@@ -21,6 +21,7 @@ finemap_regions(
   force_compute_cor = FALSE,
   save_cor = FALSE,
   cor_dir = getwd(),
+  annotate_susie_result = TRUE,
   verbose = FALSE,
   logfile = NULL,
   ...

@@ -6,10 +6,9 @@
 \usage{
 select_single_effect_regions(
   regionlist,
-  z_snp,
-  z_gene,
   group_prior,
-  p_single_effect = 0.8
+  p_single_effect = 0.8,
+  ncore = ncore
 )
 }
 \description{

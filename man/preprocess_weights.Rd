@@ -8,6 +8,7 @@ preprocess_weights(
   weight_file,
   region_info,
   z_snp,
+  ncore = 1,
   weight_format = c("PredictDB", "Fusion"),
   drop_strand_ambig = TRUE,
   filter_protein_coding_genes = FALSE,

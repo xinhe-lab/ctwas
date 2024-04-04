@@ -2,7 +2,6 @@
 # library(ggplot2)
 library(logging)
 library(foreach)
-
 library(ctwas)
 devtools::load_all("/home/kaixuan/projects/cTWAS_package/multigroup_test/ctwas/.")
 
@@ -13,7 +12,7 @@ datadir <- "/project2/xinhe/shared_data/multigroup_ctwas/test_data/"
 weight_file <- "/project2/xinhe/shared_data/multigroup_ctwas/test_data/mashr_Liver_nolnc.db"
 gwas_file <- "/project2/xinhe/shared_data/multigroup_ctwas/test_data/ukb-d-30780_irnt.vcf.gz"
 gwas_n <- 343621
-ncore <- 4
+ncore <- 6
 thin <- 0.1
 max_snp_region <- 20000
 outputdir <- paste0("/project2/xinhe/shared_data/multigroup_ctwas/test_data/output/", trait, ".", tissue, "/")
@@ -141,7 +140,8 @@ if (file.exists(regionlist_thin_file)) {
                         thin = thin,
                         minvar = 2,
                         mingene = 0,
-                        adjust_boundary_genes = TRUE)
+                        adjust_boundary_genes = TRUE,
+                        ncore = ncore)
   saveRDS(res, regionlist_thin_file)
 }
 regionlist <- res$regionlist
@@ -149,11 +149,6 @@ weights <- res$weights
 boundary_genes <- res$boundary_genes
 rm(res)
 
-## Add z-scores to regionlist
-runtime <- system.time({
-  loginfo("Add z-scores to regionlist ...")
-  regionlist <- add_z_to_regionlist(regionlist, z_snp, z_gene, ncore = ncore)
-})
 
 # old_regionlist_res <- readRDS(file.path(old_outputdir, paste0(outname, ".regionlist.thin", thin, ".RDS")))
 # identical(regionlist[[100]]$gid, old_regionlist_res$regionlist[[100]]$gid)
@@ -202,6 +197,25 @@ runtime <- system.time({
                                          region_info,
                                          weights,
                                          thin = thin,
+                                         L = 1,
+                                         group_prior = group_prior,
+                                         group_prior_var = group_prior_var,
+                                         max_snp_region = max_snp_region,
+                                         ncore = ncore,
+                                         logfile = file.path(outputdir, paste0(outname, ".screen_regions.L1.log")),
+                                         verbose = TRUE)
+})
+saveRDS(screened_region_tags, file.path(outputdir, paste0(outname, ".screen_regions.L1.res.RDS")))
+cat(sprintf("Screen regions took %0.2f minutes\n",runtime["elapsed"]/60))
+
+
+runtime <- system.time({
+  screened_region_tags <- screen_regions(z_snp,
+                                         z_gene,
+                                         regionlist,
+                                         region_info,
+                                         weights,
+                                         thin = thin,
                                          L = 5,
                                          group_prior = group_prior,
                                          group_prior_var = group_prior_var,
@@ -220,9 +234,12 @@ if (thin < 1){
   screened_regionlist <- expand_regionlist(screened_regionlist,
                                            region_info,
                                            z_snp,
+                                           z_gene,
                                            trim_by = "z",
-                                           maxSNP = max_snp_region)
+                                           maxSNP = max_snp_region,
+                                           ncore = ncore)
 }
+saveRDS(screened_regionlist, file.path(outputdir, paste0(outname, ".screened_regionlist.L5.res.RDS")))
 
 ##### finemapping #####
 res <- readRDS(file.path(old_outputdir, paste0(outname, ".screen_regions.L5.max_iter100.res.RDS")))

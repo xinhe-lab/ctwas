@@ -23,13 +23,15 @@
 #' @param trim_by remove SNPs if the total number of SNPs exceeds limit, options: "random",
 #' or "z" (trim SNPs with lower |z|) See parameter `maxSNP` for more information.
 #'
-#' @param seed seed for.random sampling
-#'
 #' @param minvar minimum number of SNPs (and genes) in a region
 #'
 #' @param mingene minimum number of genes in a region
 #'
 #' @param adjust_boundary_genes identify cross-boundary genes, adjust regionlist and update weighs
+#'
+#' @param ncore The number of cores used to parallelize susie over regions
+#'
+#' @param seed seed for random sampling
 #'
 #' @importFrom logging loginfo
 #'
@@ -44,10 +46,11 @@ get_regionlist <- function(region_info,
                            thin = 1,
                            maxSNP = Inf,
                            trim_by = c("random", "z"),
-                           seed = 99,
                            minvar = 1,
                            mingene = 0,
-                           adjust_boundary_genes = TRUE) {
+                           adjust_boundary_genes = TRUE,
+                           ncore = 1,
+                           seed = 99) {
 
   trim_by <- match.arg(trim_by)
 
@@ -118,11 +121,15 @@ get_regionlist <- function(region_info,
   # Trim regions with SNPs more than maxSNP
   regionlist <- trim_regionlist(regionlist, z_snp, trim_by = trim_by, maxSNP = maxSNP, seed = seed)
 
+  loginfo("Add z-scores to regionlist ...")
+  regionlist <- add_z_to_regionlist(regionlist, z_snp, z_gene, ncore = ncore)
+
   return(list(regionlist=regionlist,
               weights=weights,
               boundary_genes=boundary_genes))
 }
 
+#' remove SNPs from regionlist if the total number of SNPs exceeds limit
 trim_regionlist <- function(regionlist, z_snp, trim_by = c("random", "z"), maxSNP = Inf, seed = 99){
 
   trim_by <- match.arg(trim_by)

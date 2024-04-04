@@ -108,13 +108,11 @@ ctwas_sumstats <- function(
                         trim_by = "random",
                         thin = thin,
                         minvar = 2,
-                        adjust_boundary_genes = TRUE)
+                        adjust_boundary_genes = TRUE,
+                        ncore = ncore)
   regionlist <- res$regionlist
   weights <- res$weights
   boundary_genes <- res$boundary_genes
-
-  loginfo("Add z-scores to regionlist ...")
-  regionlist <- add_z_to_regionlist(regionlist, z_snp, z_gene, ncore = ncore)
 
   # Estimate parameters
   #. get regionlist for all the regions
@@ -159,10 +157,10 @@ ctwas_sumstats <- function(
     screened_regionlist <- expand_regionlist(screened_regionlist,
                                              region_info,
                                              z_snp,
+                                             z_gene,
                                              trim_by = "z",
-                                             maxSNP = max_snp_region)
-    loginfo("Add z-scores to regionlist ...")
-    screened_regionlist <- add_z_to_regionlist(screened_regionlist, z_snp, z_gene, ncore = ncore)
+                                             maxSNP = max_snp_region,
+                                             ncore = ncore)
   }
 
   # Run fine-mapping for regions with strong gene signals using all SNPs

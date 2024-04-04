@@ -86,7 +86,6 @@ finemap_region <- function(z_snp,
                           thin = 1,
                           adjust_boundary_genes = FALSE)
     regionlist <- res$regionlist
-    regionlist <- add_z_to_regionlist(regionlist, z_snp, z_gene)
     rm(res)
   }
 
@@ -326,7 +325,7 @@ finemap_regions <- function(z_snp,
 
   loginfo('Finemapping %d regions ...', length(regionlist))
 
-  cl <- parallel::makeCluster(ncore, outfile = "")
+  cl <- parallel::makeCluster(ncore, outfile = "", type = "FORK")
   doParallel::registerDoParallel(cl)
 
   corelist <- region2core(regionlist, ncore)

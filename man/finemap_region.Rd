@@ -21,6 +21,7 @@ finemap_region(
   force_compute_cor = FALSE,
   save_cor = FALSE,
   cor_dir = getwd(),
+  annotate_susie_result = TRUE,
   verbose = FALSE,
   ...
 )
@@ -63,10 +64,13 @@ genotype data in genetic studies.}
 
 \item{cor_dir}{a string, the directory to store correlation (R) matrices}
 
+\item{annotate_susie_result}{TRUE/FALSE. If TRUE, add gene and SNP information and cs_index to
+the data frame of finemapping results.}
+
 \item{verbose}{TRUE/FALSE. If TRUE, print detail messages}
 }
 \value{
-finemapping results.
+a data frame of finemapping results.
 }
 \description{
 run cTWAS finemapping for a single region

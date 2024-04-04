@@ -8,9 +8,10 @@ expand_regionlist(
   regionlist,
   region_info,
   z_snp,
-  filter_z_ids = TRUE,
+  z_gene,
   trim_by = c("z", "random"),
   maxSNP = Inf,
+  ncore = 1,
   seed = 99
 )
 }
@@ -21,7 +22,7 @@ expand_regionlist(
 
 \item{z_snp}{A data frame with columns: "id", "z", giving the z-scores for SNPs.}
 
-\item{filter_z_ids}{If TRUE, only keep SNPs and genes in z_snp and z_gene.}
+\item{z_gene}{A data frame with columns: "id", "z", giving the z-scores for genes.}
 
 \item{trim_by}{remove SNPs if the total number of SNPs exceeds limit, options: "random",
 or "z" (trim SNPs with lower |z|) See parameter `maxSNP` for more information.}
@@ -30,7 +31,9 @@ or "z" (trim SNPs with lower |z|) See parameter `maxSNP` for more information.}
 Inf, no limit. This can be useful if there are many SNPs in a region and you don't
 have enough memory to run the program.}
 
-\item{seed}{seed for.random sampling}
+\item{ncore}{The number of cores used to parallelize susie over regions}
+
+\item{seed}{seed for random sampling}
 }
 \value{
 updated regionlist with full SNPs

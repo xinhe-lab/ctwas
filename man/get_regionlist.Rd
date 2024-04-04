@@ -11,12 +11,12 @@ get_regionlist(
   weights,
   thin = 1,
   maxSNP = Inf,
-  filter_z_ids = TRUE,
   trim_by = c("random", "z"),
-  seed = 99,
   minvar = 1,
   mingene = 0,
-  adjust_boundary_genes = TRUE
+  adjust_boundary_genes = TRUE,
+  ncore = 1,
+  seed = 99
 )
 }
 \arguments{
@@ -38,18 +38,18 @@ Inf, no limit. This can be useful if there are many SNPs in a region and you don
 have enough memory to run the program. This applies to the last rerun step
 (using full SNPs and rerun susie for regions with strong gene signals) only.}
 
-\item{filter_z_ids}{If TRUE, only keep SNPs and genes in z_snp and z_gene.}
-
 \item{trim_by}{remove SNPs if the total number of SNPs exceeds limit, options: "random",
 or "z" (trim SNPs with lower |z|) See parameter `maxSNP` for more information.}
-
-\item{seed}{seed for.random sampling}
 
 \item{minvar}{minimum number of SNPs (and genes) in a region}
 
 \item{mingene}{minimum number of genes in a region}
 
 \item{adjust_boundary_genes}{identify cross-boundary genes, adjust regionlist and update weighs}
+
+\item{ncore}{The number of cores used to parallelize susie over regions}
+
+\item{seed}{seed for random sampling}
 
 \item{gene_info}{a data frame of gene information obtained from \code{get_gene_info}}
 }

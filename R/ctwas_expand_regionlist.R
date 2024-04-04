@@ -6,6 +6,8 @@
 #'
 #' @param z_snp A data frame with columns: "id", "z", giving the z-scores for SNPs.
 #'
+#' @param z_gene A data frame with columns: "id", "z", giving the z-scores for genes.
+#'
 #' @param trim_by remove SNPs if the total number of SNPs exceeds limit, options: "random",
 #' or "z" (trim SNPs with lower |z|) See parameter `maxSNP` for more information.
 #'
@@ -13,7 +15,9 @@
 #' Inf, no limit. This can be useful if there are many SNPs in a region and you don't
 #' have enough memory to run the program.
 #'
-#' @param seed seed for.random sampling
+#' @param ncore The number of cores used to parallelize susie over regions
+#'
+#' @param seed seed for random sampling
 #'
 #' @importFrom logging loginfo
 #'
@@ -24,8 +28,10 @@
 expand_regionlist <- function(regionlist,
                               region_info,
                               z_snp,
+                              z_gene,
                               trim_by = c("z", "random"),
                               maxSNP = Inf,
+                              ncore = 1,
                               seed = 99) {
 
   trim_by <- match.arg(trim_by)
@@ -61,6 +67,9 @@ expand_regionlist <- function(regionlist,
 
   # Trim regions with SNPs more than maxSNP
   regionlist <- trim_regionlist(regionlist, z_snp, trim_by = trim_by, maxSNP = maxSNP, seed = seed)
+
+  loginfo("Add z-scores to regionlist ...")
+  regionlist <- add_z_to_regionlist(regionlist, z_snp, z_gene, ncore = ncore)
 
   return(regionlist)
 

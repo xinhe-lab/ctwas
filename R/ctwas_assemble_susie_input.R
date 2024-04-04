@@ -38,40 +38,6 @@ add_z_to_regionlist <- function(regionlist,
 }
 
 
-#'
-#' #' assemble susie input data for a region
-#' assemble_region_susie_input <- function(region_data, zdf) {
-#'
-#'   sid <- regionlist[[region_tag]][["sid"]]
-#'   gid <- regionlist[[region_tag]][["gid"]]
-#'
-#'   # assemble zscores
-#'   # keep only GWAS SNPs and imputed genes
-#'   sid <- intersect(sid, zdf$id)
-#'   gid <- intersect(gid, zdf$id)
-#'   g_idx <- match(gid, zdf$id)
-#'   s_idx <- match(sid, zdf$id)
-#'   gs_idx <- c(g_idx, s_idx)
-#'   z <- zdf[gs_idx, "z"]
-#'   g_type <- zdf$type[g_idx]
-#'   g_QTLtype <- zdf$QTLtype[g_idx]
-#'   gs_type <- zdf$type[gs_idx]
-#'
-#'   if (anyNA(z))
-#'     loginfo("Warning: z-scores contains missing values!")
-#'   regionlist[[region_tag]][["sid"]] <- sid
-#'   regionlist[[region_tag]][["sid"]] <- sid
-#'
-#'   susie_input <- list(sid = sid,
-#'                       gid = gid,
-#'                       z = z,
-#'                       g_type = g_type,
-#'                       g_QTLtype = g_QTLtype,
-#'                       gs_type = gs_type)
-#'
-#'   return(susie_input)
-#' }
-
 # set prior and prior variance values for the region
 set_region_susie_priors <- function(pi_prior, V_prior, gs_type, L, use_null_weight = TRUE){
 

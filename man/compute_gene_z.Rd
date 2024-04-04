@@ -4,7 +4,7 @@
 \alias{compute_gene_z}
 \title{Compute gene z-scores}
 \usage{
-compute_gene_z(z_snp, weights, logfile = NULL)
+compute_gene_z(z_snp, weights, ncore = 1, logfile = NULL)
 }
 \arguments{
 \item{z_snp}{A data frame with columns: "id", "z", giving the z-scores for SNPs.}
