@@ -131,9 +131,6 @@ finemap_region <- function(z_snp,
 
   if (isTRUE(force_compute_cor)) {
     # force compute correlation matrix
-    if (verbose){
-      loginfo("Compute correlation matrices ...")
-    }
     if (length(regioninfo$LD_matrix)==1){
       R_snp <- load_LD(regioninfo$LD_matrix)
     } else {

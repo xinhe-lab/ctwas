@@ -242,51 +242,9 @@ if (thin < 1){
 saveRDS(screened_regionlist, file.path(outputdir, paste0(outname, ".screened_regionlist.L5.res.RDS")))
 
 ##### finemapping #####
-res <- readRDS(file.path(old_outputdir, paste0(outname, ".screen_regions.L5.max_iter100.res.RDS")))
-old_screened_region_tags <- res$screened_region_tags
-old_screened_regionlist <- res$screened_regionlist
-rm(res)
-
-screened_regionlist <- old_screened_regionlist
-# if (setequal(screened_region_tags, old_screened_region_tags)){
-#   cat("screened_regions PASS")
-# }else {
-#   cat("screened_regions FAIL")
-# }
-
-# Finemap a single region
-region_tag <- "16:71020125-72901251"
-runtime <- system.time({
-  finemap_region_res <- finemap_region(z_snp,
-                                       z_gene,
-                                       region_tag = region_tag,
-                                       region_info = region_info,
-                                       weights = weights,
-                                       L = 5,
-                                       group_prior = group_prior,
-                                       group_prior_var = group_prior_var,
-                                       force_compute_cor = TRUE,
-                                       save_cor = TRUE,
-                                       cor_dir = file.path(outputdir, "cor_matrix"),
-                                       verbose = TRUE)
-})
-cat(sprintf("Finemapping region took %0.2f seconds \n",runtime["elapsed"]))
-
-# old_finemap_full_res <- as.data.frame(data.table::fread("/project/xinhe/shengqian/cTWAS_analysis/data/make_test_data/make_test_data_mergeoff.susieIrss.txt", header = T))
-# old_finemap_full_res$id[old_finemap_full_res$type == "gene"] <-
-#   paste0(old_finemap_full_res$id[old_finemap_full_res$type == "gene"], "|", "mashr_Liver_nolnc")
-#
-# ids <- intersect(old_finemap_full_res$id, finemap_region_res$id)
-# old_finemap_region_res <- old_finemap_full_res[match(ids, old_finemap_full_res$id), ]
-# new_finemap_region_res <- finemap_region_res[match(ids, finemap_region_res$id), ]
-#
-# plot(old_finemap_region_res$susie_pip, new_finemap_region_res$susie_pip)
-#
-# all.equal(old_finemap_region_res$susie_pip, new_finemap_region_res$susie_pip)
-# all.equal(old_finemap_region_res$mu2, new_finemap_region_res$mu2)
-# all.equal(old_finemap_region_res$cs_index, new_finemap_region_res$cs_index)
-
 ## Finemapping screened regions
+screened_regionlist <- readRDS(file.path(outputdir, paste0(outname, ".screened_regionlist.L5.res.RDS")))
+
 cat("##### Finemapping screened regions ##### \n")
 region_tag <- "16:71020125-72901251"
 finemap_region_res <- finemap_region(z_snp,
@@ -297,7 +255,6 @@ finemap_region_res <- finemap_region(z_snp,
                                      L = 5,
                                      group_prior = group_prior,
                                      group_prior_var = group_prior_var,
-                                     force_compute_cor = TRUE,
                                      save_cor = TRUE,
                                      cor_dir = file.path(outputdir, "cor_matrix"),
                                      verbose = TRUE)
@@ -311,7 +268,6 @@ runtime <- system.time({
                                  group_prior = group_prior,
                                  group_prior_var = group_prior_var,
                                  L = 5,
-                                 force_compute_cor = TRUE,
                                  save_cor = TRUE,
                                  cor_dir = paste0(outputdir, "/cor_matrix/"),
                                  ncore = ncore,

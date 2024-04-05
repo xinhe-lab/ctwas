@@ -12,8 +12,6 @@ add_z_to_regionlist <- function(regionlist,
   corelist <- region2core(regionlist, ncore)
 
   region_tags <- names(regionlist)
-  loginfo("Add z-scores to regionlist for %d regions", length(region_tags))
-
   regionlist2 <- foreach (core = 1:length(corelist), .combine = "c") %dopar% {
     regionlist2.core <- list()
     region_tags.core <- corelist[[core]]

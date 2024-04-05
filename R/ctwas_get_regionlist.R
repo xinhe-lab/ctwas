@@ -54,7 +54,7 @@ get_regionlist <- function(region_info,
 
   trim_by <- match.arg(trim_by)
 
-  loginfo("No. regions in total: %s", nrow(region_info))
+  loginfo("No. regions in total: %d", nrow(region_info))
 
   if (thin > 1 | thin <= 0){
     stop("thin needs to be in (0,1]")
@@ -66,21 +66,16 @@ get_regionlist <- function(region_info,
   gene_info <- get_gene_info(weights, region_info)
 
   regionlist <- list()
-  boundary_genes <- data.frame(matrix(nrow = 0, ncol = 4))
-  colnames(boundary_genes) <- c("gene","chrom","region1","region2")
-
-  # get region data for regions in each chromosome
+  # get regionlist for each chromosome
   for (b in unique(region_info$chrom)){
     # select regions in the chromosome
     regioninfo <- region_info[region_info$chrom == b, ]
+
     # select genes in the chromosome
     geneinfo <- gene_info[gene_info$chrom == b, ]
 
-    # get snp info in LD in the chromosome
-    snpinfo <- read_LD_SNP_files(regioninfo$SNP_info) #ctwas
-    if (unique(snpinfo$chrom) != b){
-      stop("Input genotype file not split by chromosome or not in correct order")
-    }
+    # get SNP info in LD in the chromosome
+    snpinfo <- read_LD_SNP_files(regioninfo$SNP_info)
 
     # select SNPs
     snpinfo$keep <- rep(1, nrow(snpinfo))
@@ -93,43 +88,41 @@ get_regionlist <- function(region_info,
     set.seed(seed)
     snpinfo$thin_tag[sample(1:nrow(snpinfo), nkept)] <- 1
 
-    # check geneinfo
     if (nrow(geneinfo)!=0){
-      if (unique(geneinfo$chrom) != b){
-        stop("Imputed expression not by chromosome or not in correct order")
-      }
-
       # select genes
       geneinfo$keep <- 1
       # remove genes not in z_gene
       geneinfo[!(geneinfo$id %in% z_gene$id), "keep"] <- 0
     }
 
-    # get regionlist
+    # get regionlist for the chromosome
     regionlist_chr <- assign_region_ids(regioninfo,geneinfo,snpinfo)
-    # identify genes across boundaries, update regionlist and weights according to new gene and snp assignment
-    if (isTRUE(adjust_boundary_genes) && nrow(regioninfo) >=2){
-      res <- adjust_boundary_genes(regioninfo, weights, regionlist_chr)
-      regionlist_chr <- res$regionlist
-      weights <- res$weights
-      boundary_genes <- rbind(boundary_genes,res$boundary_genes)
-    }
     loginfo("No. regions with at least one SNP/gene for chr%s: %d", b, length(regionlist_chr))
     regionlist <- c(regionlist, regionlist_chr)
   }
 
-  # Trim regions with SNPs more than maxSNP
+  # adjust regionlist for boundary genes
+  if (isTRUE(adjust_boundary_genes)){
+    loginfo("Adjust regionlist for across boundary genes...")
+    boundary_genes <- gene_info[gene_info$n_regions > 1, ]
+    boundary_genes <- boundary_genes[with(boundary_genes, order(chrom, p0)), ]
+    rownames(boundary_genes) <- NULL
+    if (nrow(boundary_genes) > 0) {
+      regionlist <- adjust_boundary_genes(boundary_genes, region_info, weights, regionlist)
+    }
+  }
+
+  # trim regions with SNPs more than maxSNP
   regionlist <- trim_regionlist(regionlist, z_snp, trim_by = trim_by, maxSNP = maxSNP, seed = seed)
 
-  loginfo("Add z-scores to regionlist ...")
+  # add z-scores to regionlist
+  loginfo("Add z-scores to regionlist...")
   regionlist <- add_z_to_regionlist(regionlist, z_snp, z_gene, ncore = ncore)
 
-  return(list(regionlist=regionlist,
-              weights=weights,
-              boundary_genes=boundary_genes))
+  return(list(regionlist=regionlist, boundary_genes=boundary_genes))
 }
 
-#' remove SNPs from regionlist if the total number of SNPs exceeds limit
+#' Remove SNPs from regionlist if the total number of SNPs exceeds limit
 trim_regionlist <- function(regionlist, z_snp, trim_by = c("random", "z"), maxSNP = Inf, seed = 99){
 
   trim_by <- match.arg(trim_by)

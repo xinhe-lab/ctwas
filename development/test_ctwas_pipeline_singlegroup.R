@@ -116,21 +116,23 @@ regionlist_thin_file <- file.path(outputdir, paste0(outname, ".regionlist.thin",
 if (file.exists(regionlist_thin_file)) {
   res <- readRDS(regionlist_thin_file)
 } else{
-  loginfo("Get regionlist with thin = %.2f", thin)
-  res <- get_regionlist(region_info,
-                        z_snp,
-                        z_gene,
-                        weights,
-                        maxSNP = max_snp_region,
-                        trim_by = "random",
-                        thin = thin,
-                        minvar = 2,
-                        adjust_boundary_genes = TRUE,
-                        ncore = ncore)
+  runtime <- system.time({
+    loginfo("Get regionlist with thin = %.2f", thin)
+    res <- get_regionlist(region_info,
+                          z_snp,
+                          z_gene,
+                          weights,
+                          maxSNP = max_snp_region,
+                          trim_by = "random",
+                          thin = thin,
+                          minvar = 2,
+                          adjust_boundary_genes = TRUE,
+                          ncore = ncore)
+  })
+  cat(sprintf("Get regionlist took %0.2f minutes\n",runtime["elapsed"]/60))
   saveRDS(res, regionlist_thin_file)
 }
 regionlist <- res$regionlist
-weights <- res$weights
 boundary_genes <- res$boundary_genes
 rm(res)
 
@@ -213,7 +215,6 @@ runtime <- system.time({
                                  group_prior = group_prior,
                                  group_prior_var = group_prior_var,
                                  L = 5,
-                                 force_compute_cor = TRUE,
                                  save_cor = TRUE,
                                  cor_dir = paste0(outputdir, "/cor_matrix/"),
                                  ncore = ncore,
@@ -234,7 +235,6 @@ runtime <- system.time({
                                        L = 5,
                                        group_prior = group_prior,
                                        group_prior_var = group_prior_var,
-                                       force_compute_cor = TRUE,
                                        save_cor = TRUE,
                                        cor_dir = file.path(outputdir, "cor_matrix"),
                                        verbose = TRUE)

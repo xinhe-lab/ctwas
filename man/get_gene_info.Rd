@@ -2,10 +2,10 @@
 % Please edit documentation in R/ctwas_compute_gene_z.R
 \name{get_gene_info}
 \alias{get_gene_info}
-\title{get gene info}
+\title{get gene info and regions for each gene}
 \usage{
 get_gene_info(weights, region_info = NULL)
 }
 \description{
-get gene info
+get gene info and regions for each gene
 }

@@ -95,10 +95,10 @@ ctwas_sumstats <- function(
   loginfo("Compute gene z-scores ...")
   z_gene <- compute_gene_z(z_snp, weights)
 
-  # Get regionlist, which contains SNP and gene IDs assigned to each region, and region coordinates
+  # Get regionlist, which contains SNPs and genes assigned to each region
   #. downsample SNPs if thin < 1
-  #. assign SNP and gene IDs to each region
-  #. find boundary genes and adjust regionlist and weights for boundary genes
+  #. assign SNP and gene IDs, and z-scores to each region
+  #. find boundary genes and adjust regionlist for boundary genes
   loginfo("Get regionlist ...")
   res <- get_regionlist(region_info,
                         z_snp,
@@ -111,7 +111,6 @@ ctwas_sumstats <- function(
                         adjust_boundary_genes = TRUE,
                         ncore = ncore)
   regionlist <- res$regionlist
-  weights <- res$weights
   boundary_genes <- res$boundary_genes
 
   # Estimate parameters

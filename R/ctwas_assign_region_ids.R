@@ -6,10 +6,8 @@ assign_region_ids <- function(regioninfo,
                               mingene = 0) {
 
   regionlist <- list()
-  boundary_genes <- data.frame(matrix(nrow = 0, ncol = 4))
-  colnames(boundary_genes) <- c("gene","chrom","region1","region2")
 
-  # get gene IDs and SNP IDs for each region in regioninfo
+  # assign genes and SNPs to the region
   for (i in 1:nrow(regioninfo)){
 
     region_tag <- regioninfo$region_tag[i]
@@ -17,9 +15,10 @@ assign_region_ids <- function(regioninfo,
     region_start <- regioninfo$start[i]
     region_stop <- regioninfo$stop[i]
 
-    # find genes and SNPs in the region
+    # assign genes to regions based gene p0 positions
+    # for genes across region boundaries, assign to the first region, and adjust later
     gidx <- which(geneinfo$chrom == region_chrom & geneinfo$p0 >= region_start & geneinfo$p0 < region_stop
-                  & geneinfo$keep == 1) # temporarily assign to the first region if its QTLs are across boundary
+                  & geneinfo$keep == 1)
 
     sidx <- which(snpinfo$chrom == region_chrom & snpinfo$pos >= region_start & snpinfo$pos < region_stop
                   & snpinfo$keep == 1 & snpinfo$thin_tag == 1)

@@ -2,10 +2,14 @@
 #' Compute correlation matrices for a region
 compute_region_cor <- function(sids, gids, R_snp, weights, snpinfo) {
 
-  # subset to genes in this region
+  # subset weights to genes in this region
   weights <- weights[gids]
-  # extract wgt from weights
-  wgtlist <- lapply(weights, "[[", "wgt")
+
+  # extract wgtlist and filter by SNPs in LD
+  wgtlist <- lapply(weights, function(x){
+    wgt <- x$wgt
+    wgt[rownames(wgt) %in% snpinfo$id, , drop=FALSE]
+    })
   names(wgtlist) <- names(weights)
 
   # compute correlation matrices
@@ -15,12 +19,10 @@ compute_region_cor <- function(sids, gids, R_snp, weights, snpinfo) {
   if (length(gids) > 0) {
     ldr <- list()
     # compute SNP-gene correlation matrix
-    # loginfo("compute SNP-gene correlation matrix")
     for (i in 1:length(gids)){
       gid <- gids[i]
       wgt <- wgtlist[[gid]]
-      snpnames <- intersect(rownames(wgt), snpinfo$id)
-      wgt <- wgt[snpnames,,drop=F]
+      snpnames <- rownames(wgt)
       ld.idx <- match(snpnames, snpinfo$id)
       ldr[[gid]] <- ld.idx
       R.s <- R_snp[ld.idx, ld.idx]
@@ -29,7 +31,6 @@ compute_region_cor <- function(sids, gids, R_snp, weights, snpinfo) {
     }
 
     # compute gene-gene correlation matrix
-    # loginfo("compute gene-gene correlation matrix")
     if (length(gids) > 1){
       gene_pairs <- combn(length(gids), 2)
       wgtr <- wgtlist[gids]
