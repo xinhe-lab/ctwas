@@ -21,7 +21,6 @@ Encoding: UTF-8
 LazyData: true
 Imports:
     data.table,
-    pgenlibr,
     methods,
     stats,
     tools,
@@ -30,12 +29,13 @@ Imports:
     doParallel,
     foreach,
     logging,
-    Rfast,
     readr,
     RSQLite,
     ggplot2,
     mixsqp
 Suggests: 
+    Rfast,
+    pgenlibr,
     knitr,
     rmarkdown
 VignetteBuilder: knitr
