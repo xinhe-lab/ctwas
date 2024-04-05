@@ -21,6 +21,7 @@ Encoding: UTF-8
 LazyData: true
 Imports:
     data.table,
+    utils,
     methods,
     stats,
     tools,
@@ -32,6 +33,7 @@ Imports:
     readr,
     RSQLite,
     ggplot2,
+    cowplot,
     mixsqp
 Suggests: 
     Rfast,
