@@ -8,7 +8,7 @@ adjust_boundary_genes <- function(boundary_genes, region_info, weights, regionli
     wgt <- weights[[gname]][["wgt"]]
 
     region_r2 <- sapply(region_tags, function(region_tag){
-      ld_snpinfo <- ctwas:::read_LD_SNP_files(region_info[region_info$region_tag == region_tag, "SNP_info"])
+      ld_snpinfo <- read_LD_SNP_files(region_info[region_info$region_tag == region_tag, "SNP_info"])
       sum(wgt[which(rownames(wgt) %in% ld_snpinfo$id)]^2)})
 
     # assign boundary gene to the region with max r2, and remove it from other regions
