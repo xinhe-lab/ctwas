@@ -144,9 +144,7 @@ if (file.exists(param_file)) {
   param <- readRDS(param_file)
 } else{
   runtime <- system.time({
-    param <- est_param(z_snp,
-                       z_gene,
-                       regionlist,
+    param <- est_param(regionlist,
                        thin = thin,
                        niter1 = 3,
                        niter2 = 30,
@@ -170,9 +168,7 @@ if (file.exists(screen_regions_file)) {
   screened_regionlist <- readRDS(screen_regions_file)
 } else{
   runtime <- system.time({
-    screened_region_tags <- screen_regions(z_snp,
-                                           z_gene,
-                                           regionlist,
+    screened_region_tags <- screen_regions(regionlist,
                                            region_info,
                                            weights,
                                            thin = thin,
@@ -207,9 +203,7 @@ if (file.exists(screen_regions_file)) {
 ## Finemapping screened regions
 cat("##### Finemapping screened regions ##### \n")
 runtime <- system.time({
-  finemap_res <- finemap_regions(z_snp,
-                                 z_gene,
-                                 screened_regionlist,
+  finemap_res <- finemap_regions(screened_regionlist,
                                  region_info,
                                  weights,
                                  group_prior = group_prior,
@@ -223,23 +217,6 @@ runtime <- system.time({
 })
 saveRDS(finemap_res, file.path(outputdir, paste0(outname, ".finemap_regions.res.RDS")))
 cat(sprintf("Finemapping took %0.2f minutes\n",runtime["elapsed"]/60))
-
-##### Finemapping a single region with fixed parameters #####
-region_tag <- "16:71020125-72901251"
-runtime <- system.time({
-  finemap_region_res <- finemap_region(z_snp,
-                                       z_gene,
-                                       region_tag = region_tag,
-                                       region_info = region_info,
-                                       weights = weights,
-                                       L = 5,
-                                       group_prior = group_prior,
-                                       group_prior_var = group_prior_var,
-                                       save_cor = TRUE,
-                                       cor_dir = file.path(outputdir, "cor_matrix"),
-                                       verbose = TRUE)
-})
-cat(sprintf("Finemapping region took %0.2f seconds \n",runtime["elapsed"]))
 
 # Print sessionInfo
 sessionInfo()

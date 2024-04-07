@@ -5,8 +5,6 @@
 \title{Estimate cTWAS parameters}
 \usage{
 est_param(
-  z_snp,
-  z_gene,
   regionlist,
   init_group_prior = NULL,
   init_group_prior_var = NULL,
@@ -21,12 +19,6 @@ est_param(
 )
 }
 \arguments{
-\item{z_snp}{a data frame with four columns: "id", "A1", "A2", "z".
-giving the z scores for SNPs. "A1" is effect allele. "A2" is the other allele.}
-
-\item{z_gene}{a data frame with two columns: "id", "z". giving the z scores for genes.
-Optionally, a "type" column can also be supplied; this is for using multiple sets of weights}
-
 \item{regionlist}{a list object indexing regions, variants and genes.}
 
 \item{init_group_prior}{a vector of initial values of prior inclusion probabilities for SNPs and genes.}
@@ -55,18 +47,9 @@ having at most one causal effect will be used selected for the complete paramete
 \item{logfile}{the log file, if NULL will print log info on screen}
 
 \item{verbose}{TRUE/FALSE. If TRUE, print detail messages}
-
-\item{use_null_weight}{TRUE/FALSE. If TRUE, allow for a probability of no effect in susie}
-
-\item{coverage}{A number between 0 and 1 specifying the \dQuote{coverage} of the estimated confidence sets}
-
-\item{min_abs_corr}{Minimum absolute correlation allowed in a
-credible set. The default, 0.5, corresponds to a squared
-correlation of 0.25, which is a commonly used threshold for
-genotype data in genetic studies.}
 }
 \value{
-a list with estimated parameters, regionlist, updated weight list and boundary genes.
+a list with estimated parameters
 }
 \description{
 Estimate cTWAS parameters

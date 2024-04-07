@@ -5,8 +5,6 @@
 \title{Screen regions}
 \usage{
 screen_regions(
-  z_snp,
-  z_gene,
   regionlist,
   region_info,
   weights,
@@ -24,12 +22,6 @@ screen_regions(
 )
 }
 \arguments{
-\item{z_snp}{A data frame with four columns: "id", "A1", "A2", "z".
-giving the z scores for snps. "A1" is effect allele. "A2" is the other allele.}
-
-\item{z_gene}{A data frame with two columns: "id", "z". giving the z scores for genes.
-Optionally, a "type" column can also be supplied; this is for using multiple sets of weight_list}
-
 \item{regionlist}{a list object indexing regions, variants and genes.}
 
 \item{region_info}{a data frame of region definition and associated LD file names}

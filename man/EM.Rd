@@ -6,7 +6,6 @@
 Iteratively run susie and estimate parameters - RSS version}
 \usage{
 EM(
-  zdf,
   regionlist,
   niter = 20,
   init_group_prior = NULL,
@@ -20,8 +19,6 @@ EM(
 )
 }
 \arguments{
-\item{zdf}{a data frame with combined z_snp and z_gene from \code{combine_z()}}
-
 \item{regionlist}{a list object with the susie input data for each region}
 
 \item{niter}{the number of iterations of the E-M algorithm to perform}

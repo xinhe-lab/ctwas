@@ -5,8 +5,6 @@
 \title{run cTWAS finemapping for multiple regions}
 \usage{
 finemap_regions(
-  z_snp,
-  z_gene,
   regionlist,
   region_info,
   weights,
@@ -28,12 +26,6 @@ finemap_regions(
 )
 }
 \arguments{
-\item{z_snp}{A data frame with four columns: "id", "A1", "A2", "z".
-giving the z scores for snps. "A1" is effect allele. "A2" is the other allele.}
-
-\item{z_gene}{A data frame with two columns: "id", "z". giving the z scores for genes.
-Optionally, a "type" column can also be supplied; this is for using multiple sets of weights}
-
 \item{regionlist}{regionlist to be finemapped}
 
 \item{region_info}{a data frame of region definition and associated LD file names}

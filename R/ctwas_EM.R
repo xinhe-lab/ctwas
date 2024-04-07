@@ -1,8 +1,6 @@
 #' Run EM to estimate parameters.
 #' Iteratively run susie and estimate parameters - RSS version
 #'
-#' @param zdf a data frame with combined z_snp and z_gene from \code{combine_z()}
-#'
 #' @param regionlist a list object with the susie input data for each region
 #'
 #' @param niter the number of iterations of the E-M algorithm to perform
@@ -38,8 +36,7 @@
 #'
 #' @return a list of parameters
 #'
-EM <- function(zdf,
-               regionlist,
+EM <- function(regionlist,
                niter = 20,
                init_group_prior = NULL,
                init_group_prior_var = NULL,
@@ -50,25 +47,15 @@ EM <- function(zdf,
                verbose = FALSE,
                ...){
 
-  # prepare input data for all the regions
-  types <- unique(zdf$type)
-  QTLtypes <- unique(zdf$QTLtype)
+  # get types and QTLtypes from regionlist
+  types <- unique(unlist(lapply(regionlist, "[[", "gs_type")))
+  QTLtypes <- unique(unlist(lapply(regionlist, "[[", "gs_QTLtype")))
 
   # set pi_prior and V_prior based on init_group_prior and init_group_prior_var
-  if (is.null(init_group_prior)){
-    init_group_prior <- structure(as.numeric(rep(NA,length(types))), names=types)
-  }
-  if (is.null(init_group_prior_var)){
-    init_group_prior_var <- structure(as.numeric(rep(NA,length(types))), names=types)
-  }
-  pi_prior <- list()
-  V_prior <- list()
-  for (type in types){
-    pi_prior[[type]] <- unname(init_group_prior[type])
-    V_prior[[type]] <- unname(init_group_prior_var[type])
-  }
-  pi_prior <- unlist(pi_prior)
-  V_prior <- unlist(V_prior)
+  res <- initiate_group_priors(init_group_prior, init_group_prior_var, types)
+  pi_prior <- res$pi_prior
+  V_prior <- res$V_prior
+  rm(res)
 
   # store estimated group priors from each iteration
   group_prior_rec <- matrix(NA, nrow = length(types), ncol = niter)
@@ -83,25 +70,25 @@ EM <- function(zdf,
   corelist <- region2core(regionlist, ncore)
 
   for (iter in 1:niter){
-
     loginfo("Start EM iteration %d", iter)
-
     EM_susie_res <- foreach (core = 1:length(corelist), .combine = "rbind", .packages = "ctwas") %dopar% {
-
       susie_res.core.list <- list()
-
       # run susie for each region
       region_tags.core <- corelist[[core]]
       for (region_tag in region_tags.core) {
         # load susie input data
+        if (verbose)
+          loginfo("load susie input data for region %s", region_tag)
         sid <- regionlist[[region_tag]][["sid"]]
         gid <- regionlist[[region_tag]][["gid"]]
         z <- regionlist[[region_tag]][["z"]]
+        gs_type <- regionlist[[region_tag]][["gs_type"]]
         g_type <- regionlist[[region_tag]][["g_type"]]
         g_QTLtype <- regionlist[[region_tag]][["g_QTLtype"]]
-        gs_type <- regionlist[[region_tag]][["gs_type"]]
 
         # update priors, prior variances and null_weight based on the estimated group_prior and group_prior_var from the previous iteration
+        if (verbose)
+          loginfo("update priors, prior variances for region %s", region_tag)
         res <- set_region_susie_priors(pi_prior, V_prior, gs_type, L = 1, use_null_weight = use_null_weight)
         prior <- res$prior
         V <- res$V

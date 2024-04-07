@@ -2,15 +2,10 @@
 % Please edit documentation in R/ctwas_process_regions.R
 \name{select_single_effect_regions}
 \alias{select_single_effect_regions}
-\title{select single effect regions}
+\title{Select single effect regions}
 \usage{
-select_single_effect_regions(
-  regionlist,
-  group_prior,
-  p_single_effect = 0.8,
-  ncore = ncore
-)
+select_single_effect_regions(regionlist, group_prior, p_single_effect = 0.8)
 }
 \description{
-select single effect regions
+Select single effect regions
 }

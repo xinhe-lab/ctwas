@@ -1,11 +1,5 @@
 #' Screen regions
 #'
-#' @param z_snp A data frame with four columns: "id", "A1", "A2", "z".
-#' giving the z scores for snps. "A1" is effect allele. "A2" is the other allele.
-#'
-#' @param z_gene A data frame with two columns: "id", "z". giving the z scores for genes.
-#' Optionally, a "type" column can also be supplied; this is for using multiple sets of weight_list
-#'
 #' @param regionlist a list object indexing regions, variants and genes.
 #'
 #' @param region_info a data frame of region definition and associated LD file names
@@ -48,8 +42,6 @@
 #' @export
 #'
 screen_regions <- function(
-    z_snp,
-    z_gene,
     regionlist,
     region_info,
     weights,
@@ -90,9 +82,7 @@ screen_regions <- function(
 
   # run finemapping for all regions containing thinned SNPs
   loginfo("Run initial screening for %d regions ...", length(regionlist))
-  finemap_res <- finemap_regions(z_snp,
-                                 z_gene,
-                                 regionlist,
+  finemap_res <- finemap_regions(regionlist,
                                  region_info,
                                  weights,
                                  L = L,
@@ -104,19 +94,20 @@ screen_regions <- function(
 
   # select regions based on total non-SNP PIP of the region
   loginfo("Select regions with non-SNP PIP >= %s", min_nonSNP_PIP)
-  screened_region_tags <- NULL
-  for (region_tag in names(regionlist)){
-    finemap_region_res <- finemap_res[finemap_res$region_tag == region_tag,]
-    nonSNP_PIP <- sum(finemap_region_res$susie_pip[finemap_region_res$type != "SNP"])
-    nonSNP_PIP[is.na(nonSNP_PIP)] <- 0 # 0 if nonSNP_PIP is NA
-    if (nonSNP_PIP >= min_nonSNP_PIP) {
-      screened_region_tags <- c(screened_region_tags, region_tag)
-    }
-  }
+  # screened_region_tags <- NULL
+  # for (region_tag in names(regionlist)){
+  #   finemap_region_res <- finemap_res[finemap_res$region_tag == region_tag,]
+  #   nonSNP_PIP <- sum(finemap_region_res$susie_pip[finemap_region_res$type != "SNP"])
+  #   nonSNP_PIP[is.na(nonSNP_PIP)] <- 0 # 0 if nonSNP_PIP is NA
+  #   if (nonSNP_PIP >= min_nonSNP_PIP) {
+  #     screened_region_tags <- c(screened_region_tags, region_tag)
+  #   }
+  # }
+  # loginfo("Number of regions that contain strong non-SNP signals: %d", length(screened_region_tags))
 
-  loginfo("Number of region tags that contain strong gene signals: %d", length(screened_region_tags))
+  selected_region_tags <- select_highPIP_regions(finemap_res, names(regionlist), min_nonSNP_PIP)
+  loginfo("Number of regions that contain strong non-SNP signals: %d", length(screened_region_tags))
 
   return(screened_region_tags)
 }
-
 

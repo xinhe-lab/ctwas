@@ -5,12 +5,10 @@
 \title{run cTWAS finemapping for a single region}
 \usage{
 finemap_region(
-  z_snp,
-  z_gene,
+  regionlist,
   region_tag,
   region_info,
   weights,
-  regionlist = NULL,
   L = 5,
   group_prior = NULL,
   group_prior_var = NULL,
@@ -27,19 +25,13 @@ finemap_region(
 )
 }
 \arguments{
-\item{z_snp}{A data frame with four columns: "id", "A1", "A2", "z".
-giving the z scores for snps. "A1" is effect allele. "A2" is the other allele.}
-
-\item{z_gene}{A data frame with two columns: "id", "z". giving the z scores for genes.
-Optionally, a "type" column can also be supplied; this is for using multiple sets of weights}
+\item{regionlist}{a list object indexing regions, variants and genes.}
 
 \item{region_tag}{a character string of region tags to be finemapped}
 
 \item{region_info}{a data frame of region definition and associated LD file names}
 
 \item{weights}{a list of weights for each gene}
-
-\item{regionlist}{a list object indexing regions, variants and genes.}
 
 \item{L}{the number of effects for susie during the fine mapping steps}
 

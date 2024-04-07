@@ -1,29 +1,27 @@
-#' select single effect regions
-select_single_effect_regions <- function(regionlist, group_prior, p_single_effect = 0.8, ncore=ncore){
-  loginfo("Select regions with P(single effect) >= %s", p_single_effect)
-
+#' Select single effect regions
+select_single_effect_regions <- function(regionlist, group_prior, p_single_effect = 0.8){
   region_tags <- names(regionlist)
-  cl <- parallel::makeCluster(ncore, outfile = "", type = "FORK")
-  doParallel::registerDoParallel(cl)
-
-  selected_region_tags <- foreach(region_tag = region_tags, .combine = "c") %dopar% {
-    gid <- regionlist[[region_tag]][["gid"]]
-    sid <- regionlist[[region_tag]][["sid"]]
-    gs_type <- regionlist[[region_tag]][["gs_type"]]
-
-    group_size <- table(gs_type)[names(group_prior)]
+  p1 <- sapply(region_tags, function(x){
+    group_size <- table(regionlist[[x]][["gs_type"]])
+    group_size <- group_size[names(group_prior)]
     group_size[is.na(group_size)] <- 0
+    p1 <- prod((1-group_prior)^group_size) * (1 + sum(group_size*(group_prior/(1-group_prior))))
+    return(p1)
+  })
+  selected_region_tags <- region_tags[p1 >= p_single_effect]
+  return(selected_region_tags)
+}
 
-    P1 <- prod((1-group_prior)^group_size) * (1 + sum(group_size*(group_prior/(1-group_prior))))
-    if (P1 >= p_single_effect){
-      region_tag
-    }
-  }
-  parallel::stopCluster(cl)
-
-  loginfo("%d regions selected", length(selected_region_tags))
-  selected_regionlist <- regionlist[selected_region_tags]
-  return(selected_regionlist)
+#' Select regions with high non-SNP PIPs
+select_highPIP_regions <- function(finemap_res, region_tags, min_nonSNP_PIP = 0.5){
+  nonSNP_PIPs <- sapply(region_tags, function(x){
+    finemap_region_res <- finemap_res[finemap_res$region_tag == x,]
+    nonSNP_PIP <- sum(finemap_region_res$susie_pip[finemap_region_res$type != "SNP"])
+    nonSNP_PIP[is.na(nonSNP_PIP)] <- 0 # 0 if nonSNP_PIP is NA
+    return(nonSNP_PIP)
+  })
+  selected_region_tags <- region_tags[nonSNP_PIPs >= min_nonSNP_PIP]
+  return(selected_region_tags)
 }
 
 #' assign regions to cores
@@ -37,5 +35,3 @@ region2core <- function(regionlist, ncore = 1){
   }
   return(corelist)
 }
-
-

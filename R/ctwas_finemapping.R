@@ -1,18 +1,12 @@
 #' run cTWAS finemapping for a single region
 #'
-#' @param z_snp A data frame with four columns: "id", "A1", "A2", "z".
-#' giving the z scores for snps. "A1" is effect allele. "A2" is the other allele.
-#'
-#' @param z_gene A data frame with two columns: "id", "z". giving the z scores for genes.
-#' Optionally, a "type" column can also be supplied; this is for using multiple sets of weights
+#' @param regionlist a list object indexing regions, variants and genes.
 #'
 #' @param region_tag a character string of region tags to be finemapped
 #'
 #' @param region_info a data frame of region definition and associated LD file names
 #'
 #' @param weights a list of weights for each gene
-#'
-#' @param regionlist a list object indexing regions, variants and genes.
 #'
 #' @param L the number of effects for susie during the fine mapping steps
 #'
@@ -48,12 +42,10 @@
 #'
 #' @export
 #'
-finemap_region <- function(z_snp,
-                           z_gene,
+finemap_region <- function(regionlist,
                            region_tag,
                            region_info,
                            weights,
-                           regionlist = NULL,
                            L = 5,
                            group_prior = NULL,
                            group_prior_var = NULL,
@@ -74,52 +66,27 @@ finemap_region <- function(z_snp,
 
   regioninfo <- region_info[region_info$region_tag == region_tag, ]
 
-  # get regionlist with full SNPs if not available
-  if (is.null(regionlist)) {
-    loginfo("Get regionlist for region %s", region_tag)
-    res <- get_regionlist(regioninfo,
-                          z_snp,
-                          z_gene,
-                          weights,
-                          maxSNP = max_snp_region,
-                          trim_by = "z",
-                          thin = 1,
-                          adjust_boundary_genes = FALSE)
-    regionlist <- res$regionlist
-    rm(res)
-  }
-
   # get susie input data
   sid <- regionlist[[region_tag]][["sid"]]
   gid <- regionlist[[region_tag]][["gid"]]
   z <- regionlist[[region_tag]][["z"]]
+  gs_type <- regionlist[[region_tag]][["gs_type"]]
   g_type <- regionlist[[region_tag]][["g_type"]]
   g_QTLtype <- regionlist[[region_tag]][["g_QTLtype"]]
-  gs_type <- regionlist[[region_tag]][["gs_type"]]
 
   # set pi_prior and V_prior based on group_prior and group_prior_var
-  # zdf <- combine_z(z_snp, z_gene)
   types <- unique(gs_type)
-  if (is.null(group_prior)){
-    group_prior <- structure(as.numeric(rep(NA,length(types))), names=types)
-  }
-  if (is.null(group_prior_var)){
-    group_prior_var <- structure(as.numeric(rep(NA,length(types))), names=types)
-  }
-  pi_prior <- list()
-  V_prior <- list()
-  for (type in types){
-    pi_prior[[type]] <- unname(group_prior[type])
-    V_prior[[type]] <- unname(group_prior_var[type])
-  }
-  pi_prior <- unlist(pi_prior)
-  V_prior <- unlist(V_prior)
+  res <- initiate_group_priors(group_prior, group_prior_var, types)
+  pi_prior <- res$pi_prior
+  V_prior <- res$V_prior
+  rm(res)
 
   # set prior and prior variance values for the region
   res <- set_region_susie_priors(pi_prior, V_prior, gs_type, L = L, use_null_weight = use_null_weight)
   prior <- res$prior
   V <- res$V
   null_weight <- res$null_weight
+  rm(res)
 
   # compute correlation matrices
   if (length(region_tag) > 1){
@@ -247,12 +214,6 @@ finemap_region <- function(z_snp,
 
 #' run cTWAS finemapping for multiple regions
 #'
-#' @param z_snp A data frame with four columns: "id", "A1", "A2", "z".
-#' giving the z scores for snps. "A1" is effect allele. "A2" is the other allele.
-#'
-#' @param z_gene A data frame with two columns: "id", "z". giving the z scores for genes.
-#' Optionally, a "type" column can also be supplied; this is for using multiple sets of weights
-#'
 #' @param regionlist regionlist to be finemapped
 #'
 #' @param region_info a data frame of region definition and associated LD file names
@@ -295,9 +256,7 @@ finemap_region <- function(z_snp,
 #'
 #' @export
 #'
-finemap_regions <- function(z_snp,
-                            z_gene,
-                            regionlist,
+finemap_regions <- function(regionlist,
                             region_info,
                             weights,
                             L = 5,
@@ -333,12 +292,10 @@ finemap_regions <- function(z_snp,
     # run finemapping for each region
     region_tags.core <- corelist[[core]]
     for (region_tag in region_tags.core) {
-      finemap_res.core.list[[region_tag]] <- finemap_region(z_snp,
-                                                            z_gene,
+      finemap_res.core.list[[region_tag]] <- finemap_region(regionlist = regionlist,
                                                             region_tag = region_tag,
                                                             region_info = region_info,
                                                             weights = weights,
-                                                            regionlist = regionlist,
                                                             L = L,
                                                             group_prior = group_prior,
                                                             group_prior_var = group_prior_var,

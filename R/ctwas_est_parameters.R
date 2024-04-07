@@ -1,24 +1,6 @@
 #' Estimate cTWAS parameters
 #'
-#' @param z_snp a data frame with four columns: "id", "A1", "A2", "z".
-#' giving the z scores for SNPs. "A1" is effect allele. "A2" is the other allele.
-#'
-#' @param z_gene a data frame with two columns: "id", "z". giving the z scores for genes.
-#' Optionally, a "type" column can also be supplied; this is for using multiple sets of weights
-#'
 #' @param regionlist a list object indexing regions, variants and genes.
-#'
-#' @param thin The proportion of SNPs to be used for the parameter estimation and
-#' initial screening region steps.
-#' Smaller \code{thin} parameters reduce runtime at the expense of accuracy.
-#' The fine mapping step is rerun using full SNPs for regions with strong gene signals.
-#'
-#' @param p_single_effect Regions with probability greater than \code{p_single_effect} of
-#' having at most one causal effect will be used selected for the complete parameter estimation step
-#'
-#' @param niter1 the number of iterations of the E-M algorithm to perform during the initial parameter estimation step
-#'
-#' @param niter2 the number of iterations of the E-M algorithm to perform during the complete parameter estimation step
 #'
 #' @param init_group_prior a vector of initial values of prior inclusion probabilities for SNPs and genes.
 #'
@@ -29,14 +11,17 @@
 #' "shared_all" allows all groups to share the same variance parameter.
 #' "shared_type" allows all groups in one molecular QTL type to share the same variance parameter.
 #'
-#' @param use_null_weight TRUE/FALSE. If TRUE, allow for a probability of no effect in susie
+#' @param thin The proportion of SNPs to be used for the parameter estimation and
+#' initial screening region steps.
+#' Smaller \code{thin} parameters reduce runtime at the expense of accuracy.
+#' The fine mapping step is rerun using full SNPs for regions with strong gene signals.
 #'
-#' @param coverage A number between 0 and 1 specifying the \dQuote{coverage} of the estimated confidence sets
+#' @param niter1 the number of iterations of the E-M algorithm to perform during the initial parameter estimation step
 #'
-#' @param min_abs_corr Minimum absolute correlation allowed in a
-#'   credible set. The default, 0.5, corresponds to a squared
-#'   correlation of 0.25, which is a commonly used threshold for
-#'   genotype data in genetic studies.
+#' @param niter2 the number of iterations of the E-M algorithm to perform during the complete parameter estimation step
+#'
+#' @param p_single_effect Regions with probability greater than \code{p_single_effect} of
+#' having at most one causal effect will be used selected for the complete parameter estimation step
 #'
 #' @param ncore The number of cores used to parallelize computation over regions
 #'
@@ -46,13 +31,11 @@
 #'
 #' @importFrom logging addHandler loginfo writeToFile
 #'
-#' @return a list with estimated parameters, regionlist, updated weight list and boundary genes.
+#' @return a list with estimated parameters
 #'
 #' @export
 #'
 est_param <- function(
-    z_snp,
-    z_gene,
     regionlist,
     init_group_prior = NULL,
     init_group_prior_var = NULL,
@@ -81,40 +64,33 @@ est_param <- function(
     init_group_prior["SNP"] <- init_group_prior["SNP"]/thin # adjust to account for thin argument
   }
 
-  # combine z-scores
-  loginfo("combine z-scores from SNPs and genes...")
-  zdf <- combine_z(z_snp, z_gene)
-
   # Run EM for a few (niter1) iterations, getting rough estimates
   loginfo("Run EM for %d iterations on %d regions, getting rough estimates ...",
           niter1, length(regionlist))
-  EM1_res <- EM(zdf,
-                regionlist,
+  EM1_res <- EM(regionlist,
                 niter = niter1,
                 init_group_prior = init_group_prior,
                 init_group_prior_var = init_group_prior_var,
                 group_prior_var_structure = group_prior_var_structure,
-                max_iter = 1,
                 ncore = ncore,
                 verbose = verbose)
   loginfo("Roughly estimated group_prior {%s}: {%s}", names(EM1_res$group_prior), EM1_res$group_prior)
   loginfo("Roughly estimated group_prior_var {%s}: {%s}", names(EM1_res$group_prior_var), EM1_res$group_prior_var)
 
   # Select regions with single effect
-  loginfo("Select single effect regions ...")
-  filtered_regionlist <- select_single_effect_regions(regionlist, EM1_res$group_prior, p_single_effect, ncore=ncore)
+  selected_region_tags <- select_single_effect_regions(regionlist, EM1_res$group_prior, p_single_effect)
+  loginfo("Selected %d regions with P(single effect) >= %s", length(selected_region_tags), p_single_effect)
+  selected_regionlist <- regionlist[selected_region_tags]
 
   # Run EM for more (niter2) iterations, getting rough estimates
   loginfo("Run EM for %d iterations on %d regions, getting accurate estimates ...",
-          niter2, length(filtered_regionlist))
+          niter2, length(selected_regionlist))
 
-  EM2_res <- EM(zdf,
-                regionlist,
+  EM2_res <- EM(selected_regionlist,
                 niter = niter2,
                 init_group_prior = EM1_res$group_prior,
                 init_group_prior_var = EM1_res$group_prior_var,
                 group_prior_var_structure = group_prior_var_structure,
-                max_iter = 1,
                 ncore = ncore,
                 verbose = verbose)
   group_prior <- EM2_res$group_prior
@@ -145,4 +121,5 @@ est_param <- function(
 
   return(param)
 }
+
 
