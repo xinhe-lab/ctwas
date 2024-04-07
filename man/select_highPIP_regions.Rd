@@ -4,7 +4,7 @@
 \alias{select_highPIP_regions}
 \title{Select regions with high non-SNP PIPs}
 \usage{
-select_highPIP_regions(finemap_res, region_tags, min_nonSNP_PIP = 0.5)
+select_highPIP_regions(finemap_res, min_nonSNP_PIP = 0.5)
 }
 \description{
 Select regions with high non-SNP PIPs

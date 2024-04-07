@@ -94,19 +94,8 @@ screen_regions <- function(
 
   # select regions based on total non-SNP PIP of the region
   loginfo("Select regions with non-SNP PIP >= %s", min_nonSNP_PIP)
-  # screened_region_tags <- NULL
-  # for (region_tag in names(regionlist)){
-  #   finemap_region_res <- finemap_res[finemap_res$region_tag == region_tag,]
-  #   nonSNP_PIP <- sum(finemap_region_res$susie_pip[finemap_region_res$type != "SNP"])
-  #   nonSNP_PIP[is.na(nonSNP_PIP)] <- 0 # 0 if nonSNP_PIP is NA
-  #   if (nonSNP_PIP >= min_nonSNP_PIP) {
-  #     screened_region_tags <- c(screened_region_tags, region_tag)
-  #   }
-  # }
-  # loginfo("Number of regions that contain strong non-SNP signals: %d", length(screened_region_tags))
-
-  selected_region_tags <- select_highPIP_regions(finemap_res, names(regionlist), min_nonSNP_PIP)
-  loginfo("Number of regions that contain strong non-SNP signals: %d", length(screened_region_tags))
+  screened_region_tags <- select_highPIP_regions(finemap_res, min_nonSNP_PIP)
+  loginfo("Number of regions selected: %d", length(screened_region_tags))
 
   return(screened_region_tags)
 }

@@ -13,7 +13,8 @@ select_single_effect_regions <- function(regionlist, group_prior, p_single_effec
 }
 
 #' Select regions with high non-SNP PIPs
-select_highPIP_regions <- function(finemap_res, region_tags, min_nonSNP_PIP = 0.5){
+select_highPIP_regions <- function(finemap_res, min_nonSNP_PIP = 0.5){
+  region_tags <- unique(finemap_res$region_tag)
   nonSNP_PIPs <- sapply(region_tags, function(x){
     finemap_region_res <- finemap_res[finemap_res$region_tag == x,]
     nonSNP_PIP <- sum(finemap_region_res$susie_pip[finemap_region_res$type != "SNP"])
