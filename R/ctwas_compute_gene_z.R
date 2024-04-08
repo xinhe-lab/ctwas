@@ -90,25 +90,27 @@ get_gene_info <- function(weights, region_info=NULL){
 
 #' Combine SNP and gene z-scores
 #'
-#' @param z_snp a data frame with four columns: "id", "A1", "A2", "z".
-#' giving the z scores for SNPs. "A1" is effect allele. "A2" is the other allele.
+#' @param z_snp a data frame with four columns: "id", "A1", "A2", "z". ("A1" and "A2" are optional)
 #'
-#' @param z_gene a data frame with two columns: "id", "z". giving the z scores for genes.
-#' Optionally, a "type" column can also be supplied; this is for using multiple sets of weights
+#' @param z_gene a data frame with columns: "id", "z", "type", "context", "group".
 #'
 #' @export
 #'
 combine_z <- function(z_snp, z_gene){
   z_snp$type <- "SNP"
-  z_snp$QTLtype <- "SNP"
+  z_snp$context <- "SNP"
+  z_snp$group <- "SNP"
   if (is.null(z_gene$type)){
     z_gene$type <- "gene"
   }
-  if (is.null(z_gene$QTLtype)){
-    z_gene$QTLtype <- "gene"
+  if (is.null(z_gene$context)){
+    z_gene$context <- "gene"
   }
-  zdf <- rbind(z_snp[, c("id", "z", "type", "QTLtype")],
-               z_gene[, c("id", "z", "type", "QTLtype")])
+  if (is.null(z_gene$group)){
+    z_gene$group <- "gene"
+  }
+  zdf <- rbind(z_snp[, c("id", "z", "type", "context", "group")],
+               z_gene[, c("id", "z", "type", "context", "group")])
   rownames(zdf) <- NULL
   return(zdf)
 }

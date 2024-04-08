@@ -70,19 +70,20 @@ finemap_region <- function(regionlist,
   sid <- regionlist[[region_tag]][["sid"]]
   gid <- regionlist[[region_tag]][["gid"]]
   z <- regionlist[[region_tag]][["z"]]
-  gs_type <- regionlist[[region_tag]][["gs_type"]]
+  gs_group <- regionlist[[region_tag]][["gs_group"]]
   g_type <- regionlist[[region_tag]][["g_type"]]
-  g_QTLtype <- regionlist[[region_tag]][["g_QTLtype"]]
+  g_context <- regionlist[[region_tag]][["g_context"]]
+  g_group <- regionlist[[region_tag]][["g_group"]]
 
   # set pi_prior and V_prior based on group_prior and group_prior_var
-  types <- unique(gs_type)
-  res <- initiate_group_priors(group_prior, group_prior_var, types)
+  groups <- unique(gs_group)
+  res <- initiate_group_priors(group_prior, group_prior_var, groups)
   pi_prior <- res$pi_prior
   V_prior <- res$V_prior
   rm(res)
 
   # set prior and prior variance values for the region
-  res <- set_region_susie_priors(pi_prior, V_prior, gs_type, L = L, use_null_weight = use_null_weight)
+  res <- set_region_susie_priors(pi_prior, V_prior, gs_group, L = L, use_null_weight = use_null_weight)
   prior <- res$prior
   V <- res$V
   null_weight <- res$null_weight
@@ -190,7 +191,8 @@ finemap_region <- function(regionlist,
                                gid = gid,
                                sid = sid,
                                g_type = g_type,
-                               g_QTLtype = g_QTLtype,
+                               g_context = g_context,
+                               g_group = g_group,
                                region_tag = region_tag,
                                geneinfo = gene_info,
                                snpinfo = ld_snpinfo,
@@ -201,7 +203,8 @@ finemap_region <- function(regionlist,
                                gid = gid,
                                sid = sid,
                                g_type = g_type,
-                               g_QTLtype = g_QTLtype,
+                               g_context = g_context,
+                               g_group = g_group,
                                region_tag = region_tag,
                                geneinfo = NULL,
                                snpinfo = NULL,

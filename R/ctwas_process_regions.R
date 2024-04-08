@@ -2,7 +2,7 @@
 select_single_effect_regions <- function(regionlist, group_prior, p_single_effect = 0.8){
   region_tags <- names(regionlist)
   p1 <- sapply(region_tags, function(x){
-    group_size <- table(regionlist[[x]][["gs_type"]])
+    group_size <- table(regionlist[[x]][["gs_group"]])
     group_size <- group_size[names(group_prior)]
     group_size[is.na(group_size)] <- 0
     p1 <- prod((1-group_prior)^group_size) * (1 + sum(group_size*(group_prior/(1-group_prior))))

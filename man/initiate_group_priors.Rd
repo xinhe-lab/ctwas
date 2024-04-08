@@ -4,7 +4,7 @@
 \alias{initiate_group_priors}
 \title{set pi_prior and V_prior based on init_group_prior and init_group_prior_var}
 \usage{
-initiate_group_priors(group_prior = NULL, group_prior_var = NULL, types)
+initiate_group_priors(group_prior = NULL, group_prior_var = NULL, groups)
 }
 \description{
 set pi_prior and V_prior based on init_group_prior and init_group_prior_var

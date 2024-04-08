@@ -105,42 +105,8 @@ get_weight_LD <- function(R_wgt_all, gname, rsid_varID){
   rownames(cor_matrix) <- rsid_varID$rsid[match(unique_id, rsid_varID$varID)]
   colnames(cor_matrix) <- rsid_varID$rsid[match(unique_id, rsid_varID$varID)]
 
-  return(cor_matrix) 
+  return(cor_matrix)
 }
-
-
-# # check SNP_info files from the region_info table, and return a list of region_info tables
-# # adapted from old write_ld_Rf() function
-# get_region_info_list <- function(region_info){
-#
-#   # read and check SNP info (Rvar) data and extract min and max positions in each region
-#   for (i in 1:nrow(region_info)){
-#     region_snp_info <- read_LD_SNP_file(region_info$SNP_info[i])
-#     region_info$SNP_start[i] <- min(region_snp_info$pos)
-#     region_info$SNP_stop[i] <- max(region_snp_info$pos) + 1
-#   }
-#
-#   region_info <- data.frame(region_info, stringsAsFactors = F)
-#   region_info <- transform(region_info,
-#                            chr = as.integer(chr),
-#                            SNP_start = as.integer(SNP_start),
-#                            SNP_stop = as.integer(SNP_stop))
-#
-#   # save a data frame for each chromosome with region_name
-#   region_info_list <- vector("list", length = 22)
-#
-#   for (b in sort(unique(region_info$chr))) {
-#     region_info_chr <- region_info[region_info$chr == b, , drop = F]
-#     region_info_chr <- region_info_chr[order(region_info_chr$start), ]
-#     region_info_chr$region_name <- 1:nrow(region_info_chr)
-#     region_info_chr$region_tag <- paste0(region_info_chr$start, "-", region_info_chr$stop)
-#     region_info_list[[b]] <- region_info_chr
-#   }
-#
-#   return(region_info_list)
-# }
-
-
 
 
 #' Load LD matrix

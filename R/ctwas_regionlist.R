@@ -235,9 +235,11 @@ add_z_to_regionlist <- function(regionlist,
       # regionlist2.core[[region_tag]][["zdf"]] <- zdf[gs_idx,]
       regionlist2.core[[region_tag]][["z"]] <- zdf$z[gs_idx]
       regionlist2.core[[region_tag]][["gs_type"]] <- zdf$type[gs_idx]
-      regionlist2.core[[region_tag]][["gs_QTLtype"]] <- zdf$QTLtype[gs_idx]
+      regionlist2.core[[region_tag]][["gs_context"]] <- zdf$context[gs_idx]
+      regionlist2.core[[region_tag]][["gs_group"]] <- zdf$group[gs_idx]
       regionlist2.core[[region_tag]][["g_type"]] <- zdf$type[g_idx]
-      regionlist2.core[[region_tag]][["g_QTLtype"]] <- zdf$QTLtype[g_idx]
+      regionlist2.core[[region_tag]][["g_context"]] <- zdf$context[g_idx]
+      regionlist2.core[[region_tag]][["g_group"]] <- zdf$group[g_idx]
     }
     regionlist2.core
   }

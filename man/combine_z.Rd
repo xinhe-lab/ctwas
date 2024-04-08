@@ -7,11 +7,9 @@
 combine_z(z_snp, z_gene)
 }
 \arguments{
-\item{z_snp}{a data frame with four columns: "id", "A1", "A2", "z".
-giving the z scores for SNPs. "A1" is effect allele. "A2" is the other allele.}
+\item{z_snp}{a data frame with four columns: "id", "A1", "A2", "z". ("A1" and "A2" are optional)}
 
-\item{z_gene}{a data frame with two columns: "id", "z". giving the z scores for genes.
-Optionally, a "type" column can also be supplied; this is for using multiple sets of weights}
+\item{z_gene}{a data frame with columns: "id", "z", "type", "context", "group".}
 }
 \description{
 Combine SNP and gene z-scores

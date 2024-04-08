@@ -8,6 +8,8 @@ preprocess_weights(
   weight_file,
   region_info,
   z_snp,
+  weight_type = NULL,
+  weight_context = NULL,
   ncore = 1,
   weight_format = c("PredictDB", "Fusion"),
   drop_strand_ambig = TRUE,

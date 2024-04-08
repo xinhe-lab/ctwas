@@ -42,8 +42,9 @@ ctwas_susie_rss <- function(z,
 anno_susie <- function(susie_res,
                        gid,
                        sid,
-                       g_type,
-                       g_QTLtype,
+                       g_type = "gene",
+                       g_context = "gene",
+                       g_group = "gene",
                        region_tag,
                        geneinfo = NULL,
                        snpinfo = NULL,
@@ -51,18 +52,18 @@ anno_susie <- function(susie_res,
 
   if (!is.null(geneinfo)) {
     gidx <- match(gid, geneinfo$id)
-    gene_anno <- data.frame(geneinfo[gidx,  c("chrom", "id", "p0")], type = g_type, QTLtype = g_QTLtype)
-    colnames(gene_anno) <-  c("chrom", "id", "pos", "type", "QTLtype")
+    gene_anno <- data.frame(geneinfo[gidx,  c("chrom", "id", "p0")], type = g_type, context = g_context, group = g_group)
+    colnames(gene_anno) <-  c("chrom", "id", "pos", "type", "context", "group")
   } else {
-    gene_anno <- data.frame(id = gid, type = g_type, QTLtype = g_QTLtype)
+    gene_anno <- data.frame(id = gid, type = g_type, context = g_context, group = g_group)
   }
 
   if (!is.null(snpinfo)) {
     sidx <- match(sid, snpinfo$id)
-    snp_anno <- data.frame(snpinfo[sidx, c("chrom", "id", "pos")], type = "SNP", QTLtype = "SNP")
-    colnames(snp_anno) <-  c("chrom", "id", "pos", "type", "QTLtype")
+    snp_anno <- data.frame(snpinfo[sidx, c("chrom", "id", "pos")], type = "SNP", context = "SNP", group = "SNP")
+    colnames(snp_anno) <-  c("chrom", "id", "pos", "type", "context", "group")
   } else {
-    snp_anno <- data.frame(id = sid, type = "SNP", QTLtype = "SNP")
+    snp_anno <- data.frame(id = sid, type = "SNP", context = "SNP", group = "SNP")
   }
 
   anno <- as.data.frame(rbind(gene_anno, snp_anno))

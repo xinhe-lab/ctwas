@@ -47,21 +47,22 @@ EM <- function(regionlist,
                verbose = FALSE,
                ...){
 
-  # get types and QTLtypes from regionlist
+  # get groups and types from regionlist
+  groups <- unique(unlist(lapply(regionlist, "[[", "gs_group")))
   types <- unique(unlist(lapply(regionlist, "[[", "gs_type")))
-  QTLtypes <- unique(unlist(lapply(regionlist, "[[", "gs_QTLtype")))
+  contexts <- unique(unlist(lapply(regionlist, "[[", "gs_context")))
 
   # set pi_prior and V_prior based on init_group_prior and init_group_prior_var
-  res <- initiate_group_priors(init_group_prior, init_group_prior_var, types)
+  res <- initiate_group_priors(init_group_prior, init_group_prior_var, groups)
   pi_prior <- res$pi_prior
   V_prior <- res$V_prior
   rm(res)
 
   # store estimated group priors from each iteration
-  group_prior_rec <- matrix(NA, nrow = length(types), ncol = niter)
-  rownames(group_prior_rec) <- types
-  group_prior_var_rec <- matrix(NA, nrow = length(types), ncol = niter)
-  rownames(group_prior_var_rec) <- types
+  group_prior_rec <- matrix(NA, nrow = length(groups), ncol = niter)
+  rownames(group_prior_rec) <- groups
+  group_prior_var_rec <- matrix(NA, nrow = length(groups), ncol = niter)
+  rownames(group_prior_var_rec) <- groups
 
   # start running EM iterations
   cl <- parallel::makeCluster(ncore, outfile = "", type = "FORK")
@@ -82,14 +83,15 @@ EM <- function(regionlist,
         sid <- regionlist[[region_tag]][["sid"]]
         gid <- regionlist[[region_tag]][["gid"]]
         z <- regionlist[[region_tag]][["z"]]
-        gs_type <- regionlist[[region_tag]][["gs_type"]]
+        gs_group <- regionlist[[region_tag]][["gs_group"]]
         g_type <- regionlist[[region_tag]][["g_type"]]
-        g_QTLtype <- regionlist[[region_tag]][["g_QTLtype"]]
+        g_context <- regionlist[[region_tag]][["g_context"]]
+        g_group <- regionlist[[region_tag]][["g_group"]]
 
         # update priors, prior variances and null_weight based on the estimated group_prior and group_prior_var from the previous iteration
         if (verbose)
           loginfo("update priors, prior variances for region %s", region_tag)
-        res <- set_region_susie_priors(pi_prior, V_prior, gs_type, L = 1, use_null_weight = use_null_weight)
+        res <- set_region_susie_priors(pi_prior, V_prior, gs_group, L = 1, use_null_weight = use_null_weight)
         prior <- res$prior
         V <- res$V
         null_weight <- res$null_weight
@@ -116,7 +118,8 @@ EM <- function(regionlist,
                                    gid = gid,
                                    sid = sid,
                                    g_type = g_type,
-                                   g_QTLtype = g_QTLtype,
+                                   g_context = g_context,
+                                   g_group = g_group,
                                    region_tag = region_tag,
                                    include_cs_index = FALSE)
 
@@ -128,7 +131,7 @@ EM <- function(regionlist,
     }
 
     # update estimated group_prior from the current iteration
-    pi_prior <- sapply(names(pi_prior), function(x){mean(EM_susie_res$susie_pip[EM_susie_res$type==x])})
+    pi_prior <- sapply(names(pi_prior), function(x){mean(EM_susie_res$susie_pip[EM_susie_res$group==x])})
     group_prior_rec[names(pi_prior),iter] <- pi_prior
 
     loginfo("After iteration %d, priors {%s}: {%s}", iter, names(pi_prior), pi_prior)
@@ -145,19 +148,19 @@ EM <- function(regionlist,
     if (group_prior_var_structure=="independent"){
       V_prior <- sapply(names(V_prior),
                         function(x){
-                          tmp_EM_susie_res <- EM_susie_res[EM_susie_res$type==x,];
+                          tmp_EM_susie_res <- EM_susie_res[EM_susie_res$group==x,];
                           sum(tmp_EM_susie_res$susie_pip*tmp_EM_susie_res$mu2)/sum(tmp_EM_susie_res$susie_pip)})
     } else if (group_prior_var_structure=="shared_all"){
-      tmp_EM_susie_res <- EM_susie_res[EM_susie_res$type=="SNP",]
+      tmp_EM_susie_res <- EM_susie_res[EM_susie_res$group=="SNP",]
       V_prior["SNP"] <- sum(tmp_EM_susie_res$susie_pip*tmp_EM_susie_res$mu2)/sum(tmp_EM_susie_res$susie_pip)
-      tmp_EM_susie_res <- EM_susie_res[EM_susie_res$type!="SNP",]
+      tmp_EM_susie_res <- EM_susie_res[EM_susie_res$group!="SNP",]
       V_prior[names(V_prior)!="SNP"] <- sum(tmp_EM_susie_res$susie_pip*tmp_EM_susie_res$mu2)/sum(tmp_EM_susie_res$susie_pip)
-    } else if (group_prior_var_structure=="shared_QTLtype"){
-      tmp_EM_susie_res <- EM_susie_res[EM_susie_res$QTLtype=="SNP",]
+    } else if (group_prior_var_structure=="shared_type"){
+      tmp_EM_susie_res <- EM_susie_res[EM_susie_res$group=="SNP",]
       V_prior["SNP"] <- sum(tmp_EM_susie_res$susie_pip*tmp_EM_susie_res$mu2)/sum(tmp_EM_susie_res$susie_pip)
-      for(i in QTLtypes){
+      for(i in types){
         if (i != "SNP"){
-          tmp_EM_susie_res <- EM_susie_res[EM_susie_res$QTLtype==i,]
+          tmp_EM_susie_res <- EM_susie_res[EM_susie_res$type==i,]
           V_prior[sapply(names(V_prior), function(x){
             unlist(strsplit(x, "[_]"))[2]})==i] <-
             sum(tmp_EM_susie_res$susie_pip*tmp_EM_susie_res$mu2)/sum(tmp_EM_susie_res$susie_pip)
@@ -168,7 +171,7 @@ EM <- function(regionlist,
   }
   parallel::stopCluster(cl)
 
-  group_size <- table(EM_susie_res$type)
+  group_size <- table(EM_susie_res$group)
 
   return(list("group_prior"= pi_prior,
               "group_prior_var" = V_prior,
