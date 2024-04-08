@@ -162,7 +162,7 @@ EM <- function(regionlist,
         if (i != "SNP"){
           tmp_EM_susie_res <- EM_susie_res[EM_susie_res$type==i,]
           V_prior[sapply(names(V_prior), function(x){
-            unlist(strsplit(x, "[_]"))[2]})==i] <-
+            unlist(strsplit(x, "[|]"))[1]})==i] <-
             sum(tmp_EM_susie_res$susie_pip*tmp_EM_susie_res$mu2)/sum(tmp_EM_susie_res$susie_pip)
         }
       }
