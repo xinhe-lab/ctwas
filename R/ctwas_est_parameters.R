@@ -39,7 +39,7 @@ est_param <- function(
     regionlist,
     init_group_prior = NULL,
     init_group_prior_var = NULL,
-    group_prior_var_structure = c("independent","shared_all","shared_QTLtype"),
+    group_prior_var_structure = c("independent","shared_all","shared_type"),
     thin = 1,
     niter1 = 3,
     niter2 = 30,

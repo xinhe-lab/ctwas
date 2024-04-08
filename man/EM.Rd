@@ -10,7 +10,7 @@ EM(
   niter = 20,
   init_group_prior = NULL,
   init_group_prior_var = NULL,
-  group_prior_var_structure = c("independent", "shared_all", "shared_QTLtype"),
+  group_prior_var_structure = c("independent", "shared_all", "shared_type"),
   use_null_weight = TRUE,
   max_iter = 1,
   ncore = 1,
