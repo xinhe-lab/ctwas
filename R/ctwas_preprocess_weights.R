@@ -28,6 +28,8 @@
 preprocess_weights <- function(weight_file,
                                region_info,
                                z_snp,
+                               weight_type = NULL,
+                               weight_context = NULL,
                                ncore = 1,
                                weight_format = c("PredictDB", "Fusion"),
                                drop_strand_ambig = TRUE,
@@ -40,7 +42,8 @@ preprocess_weights <- function(weight_file,
   region_info <- region_info[order(region_info$chrom, region_info$start),]
   ld_snpinfo <- read_LD_SNP_files(region_info$SNP_info)
   weights <- list()
-  for(weight in weight_file){
+  for(i in 1:length(weight_file)){
+    weight <- weight_file[i]
     loginfo("Load weight: %s", weight)
     loaded_weight <- load_weights(weight, weight_format = weight_format, filter_protein_coding_genes = filter_protein_coding_genes, load_predictdb_LD = load_predictdb_LD)
     weight_table <- loaded_weight$weight_table
@@ -62,10 +65,23 @@ preprocess_weights <- function(weight_file,
     loginfo("Harmonize weights with LD reference")
     rsid_varID <- weight_table[,c("rsid", "varID")]
 
+    if(!is.null(weight_type)){
+      type <- weight_type[i]
+    }
+    else{
+      type <- "NULL"
+    }
+
+    if(!is.null(weight_context)){
+      context <- weight_context[i]
+    }
+    else{
+      context <- "NULL"
+    }
 
     pb <- txtProgressBar(min = 0, max = length(gnames), initial = 0, style = 3)
-    for (i in 1:length(gnames)){
-      gname <- gnames[i]
+    for (j in 1:length(gnames)){
+      gname <- gnames[j]
       #print(gname)
       wgt <- weight_table[weight_table$gene==gname,]
       wgt.matrix <- as.matrix(wgt[, "weight", drop = F])
@@ -104,7 +120,8 @@ preprocess_weights <- function(weight_file,
       if(nwgt>0){
         p0 <- min(snps[snps[, "id"] %in% snpnames, "pos"])
         p1 <- max(snps[snps[, "id"] %in% snpnames, "pos"])
-        weight_id <- paste0(gname, "|", weight_name)
+        #weight_id <- paste0(gname, "|", weight_name)
+        weight_id <- paste0(gname, "|", type, "|", context)
 
         #Add LD matrix of weights
         if(!is.null(R_wgt_all)){
@@ -114,9 +131,11 @@ preprocess_weights <- function(weight_file,
         else{
           R_wgt <- NULL
         }
-        weights[[weight_id]] <- list(chrom=chrom, p0=p0, p1=p1, wgt=wgt, R_wgt=R_wgt, gene_name=gname, weight_name=weight_name, n=nwgt)
+        weights[[weight_id]] <- list(chrom=chrom, p0=p0, p1=p1, wgt=wgt, R_wgt=R_wgt, 
+                                     gene_name=gname, weight_name=weight_name, 
+                                     type = type, context = context, n=nwgt)
       }
-      setTxtProgressBar(pb, i)
+      setTxtProgressBar(pb, j)
     }
     close(pb)
   }
@@ -127,12 +146,12 @@ preprocess_weights <- function(weight_file,
     loginfo("Computing LD.")
     weight_info <- as.data.frame(do.call(rbind, weights)[,c("chrom","p0","p1","gene_name","weight_name")])
     weight_info$weight_id <- paste0(weight_info$gene_name, "|", weight_info$weight_name)
-    for (i in 1:nrow(weight_info)) {
-      chrom <- weight_info[i, "chrom"]
-      p0 <- weight_info[i, "p0"]
-      p1 <- weight_info[i, "p1"]
+    for (k in 1:nrow(weight_info)) {
+      chrom <- weight_info[k, "chrom"]
+      p0 <- weight_info[k, "p0"]
+      p1 <- weight_info[k, "p1"]
       idx <- which(region_info$chrom == chrom & region_info$start <= p1 & region_info$stop > p0)
-      weight_info[i, "region_tag"] <- paste(sort(region_info[idx, "region_tag"]), collapse = ";")
+      weight_info[k, "region_tag"] <- paste(sort(region_info[idx, "region_tag"]), collapse = ";")
     }
     # impute LD for weights for each chromosome
     cl <- parallel::makeCluster(ncore, outfile = "")
@@ -177,8 +196,8 @@ preprocess_weights <- function(weight_file,
           }
           outlist_core
         }
-        for(i in names(outlist)){
-          weights[[i]][["R_wgt"]] <- outlist[[i]]
+        for(l in names(outlist)){
+          weights[[l]][["R_wgt"]] <- outlist[[l]]
         }
       }
     }

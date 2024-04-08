@@ -47,11 +47,14 @@ compute_gene_z <- function (z_snp, weights, ncore = 1, logfile = NULL){
     wgt <- weights[[id]][["wgt"]]
     snpnames <- rownames(wgt)
     R.s <- weights[[id]][["R_wgt"]]
+    type <- weights[[id]][["type"]]
+    context <- weights[[id]][["context"]]
+    group <- paste0(type,"|",context)
     z.idx <- match(snpnames, z_snp$id)
     z.s <- as.matrix(z_snp$z[z.idx])
     z.g <- as.matrix(crossprod(wgt, z.s)/sqrt(t(wgt)%*%R.s%*% wgt))
     dimnames(z.g) <- NULL
-    data.frame(id = id, z = z.g)
+    data.frame(id = id, z = z.g, type = type, context = context, group = group)
   }
   parallel::stopCluster(cl)
   rownames(z_gene) <- NULL
