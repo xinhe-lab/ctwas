@@ -1,25 +1,19 @@
 ## Libraries
 library(ctwas)
-library(ggplot2)
-library(tools)
-library(logging)
 
 ##### Settings #####
-trait <- "LDL"
-tissue <- "Multiomics"
-gwas_file <- "/project2/xinhe/shared_data/multigroup_ctwas/test_data/ukb-d-30780_irnt.vcf.gz"
-gwas_n <- 343621
-genome_version <- "b38"
-ld_R_dir <- "/project2/mstephens/wcrouse/UKB_LDR_0.1/"
-weight_files <- c("/project/xinhe/shengqian/cTWAS_analysis/data/Liver_Expression.db",
-                 "/project/xinhe/shengqian/cTWAS_analysis/data/Lung_Expression.db",
-                 "/project/xinhe/shengqian/cTWAS_analysis/data/Liver_Splicing.db",
-                 "/project/xinhe/shengqian/cTWAS_analysis/data/Lung_Splicing.db")
+trait <- "AD"
+z_snp_file <- "/project2/xinhe/shared_data/multigroup_ctwas/debug/null_weight_debug/jansen.topremoved.RDS"
+gwas_n <- 455258
+genome_version <- "b37"
+ld_R_dir <- "/project2/mstephens/wcrouse/UKB_LDR_0.1_b37/"
+weight_files <- c("/project2/xinhe/shared_data/multigroup_ctwas/debug/null_weight_debug/wingo_888_brain_expr_lasso.db",
+                 "/project2/xinhe/shared_data/multigroup_ctwas/debug/null_weight_debug/mashr_Brain_Cerebellum.db")
 thin <- 0.1
 max_snp_region <- 20000
 ncore <- 6
-outputdir <- "/project2/xinhe/shared_data/multigroup_ctwas/test_data/output/LDL_Multiomics_Kevin/"
-outname <- paste0(trait, ".", tissue)
+outputdir <- "/project2/xinhe/shared_data/multigroup_ctwas/debug/null_weight_debug/multigroup_test/"
+outname <- "AD_esjoint_cerebellum"
 dir.create(outputdir, showWarnings=F, recursive=T)
 
 ##### LD region info #####
@@ -32,6 +26,7 @@ if (file.exists(region_info_file)){
   colnames(region_info)[1:3] <- c("chrom", "start", "stop")
   region_info$chrom <- as.numeric(gsub("chr", "", region_info$chrom))
   region_info$region_tag <- paste0(region_info$chr, ":", region_info$start, "-", region_info$stop)
+
   filestem <- paste0("ukb_", genome_version, "_0.1")
   ld_filestem <- sprintf("%s_chr%s.R_snp.%s_%s", filestem, region_info$chrom, region_info$start, region_info$stop)
   region_info$LD_matrix <- file.path(ld_R_dir, paste0(ld_filestem, ".RDS"))
@@ -43,35 +38,13 @@ if (file.exists(region_info_file)){
 
 ##### Preprocess GWAS z-scores #####
 cat("##### Preprocess z-scores ##### \n")
-gwas_name <- "ukb-d-30780_irnt"
-z_snp_outfile <- file.path(outputdir, paste0(gwas_name, ".z_snp.Rd"))
-if (!file.exists(z_snp_outfile)){
-  # read the data using the VariantAnnotation package
-  z_snp <- VariantAnnotation::readVcf("/project2/xinhe/shared_data/multigroup_ctwas/test_data/ukb-d-30780_irnt.vcf.gz")
-  z_snp <- as.data.frame(gwasvcf::vcf_to_tibble(z_snp))
-
-  # compute the z-scores
-  z_snp$Z <- z_snp$ES/z_snp$SE
-
-  # collect sample size (most frequent sample size for all variants)
-  gwas_n <- as.numeric(names(sort(table(z_snp$SS),decreasing=TRUE)[1]))
-  cat("gwas_n=", gwas_n, "\n")
-
-  # subset the columns and format the column names
-  z_snp <- z_snp[,c("rsid", "ALT", "REF", "Z")]
-  colnames(z_snp) <- c("id", "A1", "A2", "z")
-
-  # save the formatted z-scores and GWAS sample size
-  save(z_snp, gwas_n, file=z_snp_outfile)
-}
-
 ## Preprocess z-scores
 processed_z_snp_file <- file.path(outputdir, paste0(outname, ".preprocessed.z_snp.Rd"))
 if (file.exists(processed_z_snp_file)){
   cat(sprintf("Load preprocessed z_snp: %s \n", processed_z_snp_file))
   load(processed_z_snp_file)
 }else{
-  load(z_snp_outfile)
+  z_snp <- readRDS(z_snp_file)
   runtime <- system.time({
     z_snp <- preprocess_z_snp(z_snp,
                               region_info,
@@ -90,51 +63,28 @@ if (file.exists(processed_weight_file)){
   load(processed_weight_file)
 }else{
   runtime <- system.time({
-    weights_liver_expression <- preprocess_weights(weight_file = weight_files[1],
+    weights_expression <- preprocess_weights(weight_file = weight_files[1],
                                                    region_info,
                                                    z_snp,
                                                    type = "expression",
-                                                   context = "liver",
+                                                   context = "brain",
                                                    weight_format = "PredictDB",
                                                    ncore = ncore,
                                                    drop_strand_ambig = TRUE,
                                                    load_predictdb_LD = TRUE,
                                                    filter_protein_coding_genes = TRUE)
 
-    weights_lung_expression <- preprocess_weights(weight_file = weight_files[2],
+    weights_splicing <- preprocess_weights(weight_file = weight_files[2],
                                                   region_info,
                                                   z_snp,
-                                                  type = "expression",
-                                                  context = "lung",
+                                                  type = "splicing",
+                                                  context = "brain",
                                                   weight_format = "PredictDB",
                                                   ncore = ncore,
                                                   drop_strand_ambig = TRUE,
                                                   load_predictdb_LD = TRUE,
-                                                  filter_protein_coding_genes = TRUE)
-
-    weights_liver_splicing <- preprocess_weights(weight_file = weight_files[3],
-                                                 region_info,
-                                                 z_snp,
-                                                 type = "splicing",
-                                                 context = "liver",
-                                                 weight_format = "PredictDB",
-                                                 ncore = ncore,
-                                                 drop_strand_ambig = TRUE,
-                                                 load_predictdb_LD = TRUE,
-                                                 filter_protein_coding_genes = FALSE)
-
-    weights_lung_splicing <- preprocess_weights(weight_file = weight_files[4],
-                                                region_info,
-                                                z_snp,
-                                                type = "splicing",
-                                                context = "lung",
-                                                weight_format = "PredictDB",
-                                                ncore = ncore,
-                                                drop_strand_ambig = TRUE,
-                                                load_predictdb_LD = TRUE,
-                                                filter_protein_coding_genes = FALSE)
-
-    weights <- c(weights_liver_expression, weights_lung_expression, weights_liver_splicing, weights_lung_splicing)
+                                                  filter_protein_coding_genes = FALSE) # do not filter protein coding genes for splicing data
+    weights <- c(weights_expression, weights_splicing)
     save(weights, file = processed_weight_file)
   })
   cat(sprintf("Preprocessing weights took %0.2f minutes\n",runtime["elapsed"]/60))
@@ -154,9 +104,6 @@ if( file.exists(gene_z_file) ){
   })
   cat(sprintf("Imputing gene z-scores took %0.2f minutes\n",runtime["elapsed"]/60))
 }
-
-#z_gene$type <- sapply(z_gene$id, function(x){paste(unlist(strsplit(unlist(strsplit(x, "[|]"))[2],"_")), collapse="_") })
-#z_gene$QTLtype <- sapply(z_gene$id, function(x){paste(unlist(strsplit(unlist(strsplit(x, "[|]"))[2],"_"))[2], collapse="_") })
 
 ##### Get regionlist #####
 regionlist_thin_file <- file.path(outputdir, paste0(outname, ".regionlist.thin", thin, ".RDS"))
@@ -224,7 +171,7 @@ if (file.exists(screen_regions_file)) {
                                            max_snp_region = max_snp_region,
                                            ncore = ncore,
                                            verbose = TRUE,
-                                           logfile = file.path(outputdir, paste0(outname, ".screen_regions.log")))
+                                           logfile = file.path(outputdir, paste0(outname, ".screen_regions.L5.log")))
   })
   cat(sprintf("Screen regions took %0.2f minutes\n",runtime["elapsed"]/60))
   loginfo("%d regions left after screening regions", length(screened_region_tags))
@@ -255,7 +202,6 @@ runtime <- system.time({
                                  group_prior = group_prior,
                                  group_prior_var = group_prior_var,
                                  L = 5,
-                                 force_compute_cor = TRUE,
                                  save_cor = TRUE,
                                  cor_dir = paste0(outputdir, "/cor_matrix/"),
                                  ncore = ncore,

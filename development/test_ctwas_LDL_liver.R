@@ -9,6 +9,8 @@ trait <- "LDL"
 tissue <- "Liver"
 gwas_file <- "/project2/xinhe/shared_data/multigroup_ctwas/test_data/ukb-d-30780_irnt.vcf.gz"
 gwas_n <- 343621
+genome_version <- "b38"
+ld_R_dir <- "/project2/mstephens/wcrouse/UKB_LDR_0.1/"
 weight_file <- "/project2/xinhe/shared_data/multigroup_ctwas/test_data/mashr_Liver.db"
 thin <- 0.1
 max_snp_region <- 20000
@@ -22,17 +24,17 @@ region_info_file <- file.path(outputdir, "region_info.txt")
 if (file.exists(region_info_file)){
   region_info <- read.table(region_info_file, header = TRUE, sep = "\t", stringsAsFactors = FALSE)
 } else {
-  region_file <- system.file("extdata/ldetect", "EUR.b38.bed", package = "ctwas")
+  region_file <- system.file("extdata/ldetect", paste0("EUR.", genome_version, ".bed"), package = "ctwas")
   region_info <- read.table(region_file, header = TRUE)
   colnames(region_info)[1:3] <- c("chrom", "start", "stop")
   region_info$chrom <- as.numeric(gsub("chr", "", region_info$chrom))
   region_info$region_tag <- paste0(region_info$chr, ":", region_info$start, "-", region_info$stop)
-
-  ld_R_dir <- "/project2/mstephens/wcrouse/UKB_LDR_0.1"
-  filestem <- "ukb_b38_0.1"
+  filestem <- paste0("ukb_", genome_version, "_0.1")
   ld_filestem <- sprintf("%s_chr%s.R_snp.%s_%s", filestem, region_info$chrom, region_info$start, region_info$stop)
   region_info$LD_matrix <- file.path(ld_R_dir, paste0(ld_filestem, ".RDS"))
   region_info$SNP_info <- file.path(ld_R_dir, paste0(ld_filestem, ".Rvar"))
+  stopifnot(all(file.exists(region_info$LD_matrix)))
+  stopifnot(all(file.exists(region_info$SNP_info)))
   write.table(region_info, file = file.path(outputdir, "region_info.txt"), quote = F, col.names = T, row.names = F, sep = "\t")
 }
 
@@ -181,7 +183,7 @@ if (file.exists(screen_regions_file)) {
                                            max_snp_region = max_snp_region,
                                            ncore = ncore,
                                            verbose = TRUE,
-                                           logfile = file.path(outputdir, paste0(outname, ".screen_regions.L5.log")))
+                                           logfile = file.path(outputdir, paste0(outname, ".screen_regions.log")))
   })
   cat(sprintf("Screen regions took %0.2f minutes\n",runtime["elapsed"]/60))
   loginfo("%d regions left after screening regions", length(screened_region_tags))
