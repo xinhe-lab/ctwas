@@ -39,8 +39,8 @@ read_LD_SNP_file <- function(file){
 }
 
 #' Load weight
-load_weights <- function(weight_file, weight_format = c("PredictDB","Fusion"), filter_protein_coding_genes = FALSE, load_predictdb_LD = FALSE){
-  weight_format <- match.arg(weight_format)
+load_weights <- function(weight_file, weight_format, ld_snpinfo, filter_protein_coding_genes = FALSE, load_predictdb_LD = FALSE, method_Fusion = "lasso", ncore = 1){
+  #weight_format <- match.arg(weight_format)
   if(weight_format == "PredictDB"){
     weight_name <- tools::file_path_sans_ext(basename(weight_file))
     # read the PredictDB weights
@@ -54,9 +54,15 @@ load_weights <- function(weight_file, weight_format = c("PredictDB","Fusion"), f
     # subset to protein coding genes only
     if (isTRUE(filter_protein_coding_genes)){
       loginfo("Keep protein coding genes only")
-      extra_table <- extra_table[extra_table$gene_type=="protein_coding",,drop=F]
-      weight_table <- weight_table[weight_table$gene %in% extra_table$gene,]
+      if("protein_coding" %in% extra_table$gene_type){ #filter only there exist protein coding genes
+         extra_table <- extra_table[extra_table$gene_type=="protein_coding",,drop=F]
+         weight_table <- weight_table[weight_table$gene %in% extra_table$gene,]
+      }
     }
+
+    #scale predictdb weights by variance
+    ld_snpinfo.idx <- match(weight_table$rsid, ld_snpinfo$id)
+    weight_table$weight <- weight_table$weight*sqrt(ld_snpinfo$variance[ld_snpinfo.idx])
 
     if (isTRUE(load_predictdb_LD)){
       R_wgt <- read.table(gzfile(paste0(tools::file_path_sans_ext(weight_file), ".txt.gz")), header=T)
@@ -65,6 +71,50 @@ load_weights <- function(weight_file, weight_format = c("PredictDB","Fusion"), f
       R_wgt <- NULL
     }
     RSQLite::dbDisconnect(db)
+  }
+  else if (weight_format == "Fusion"){
+    weight_name <- tools::file_path_sans_ext(basename(weight_file))
+    wgtdir <- dirname(weight_file)
+    wgtposfile <- file.path(wgtdir, paste0(basename(weight_file), ".pos"))
+    wgtpos <- read.table(wgtposfile, header = T, stringsAsFactors = F)
+    wgtpos <- transform(wgtpos, ID = ifelse(duplicated(ID) | duplicated(ID, fromLast = TRUE), 
+                        paste(ID, ave(ID, ID, FUN = seq_along), sep = "_ID"), ID))
+
+    cl <- parallel::makeCluster(ncore, outfile = "", type = "FORK")
+    doParallel::registerDoParallel(cl)
+    weight_table <- NULL
+    if (nrow(wgtpos) > 0) {
+      weight_table <- foreach(i = 1:nrow(wgtpos), .combine = "rbind") %dopar% {
+        wf <- file.path(wgtdir, wgtpos[i, "WGT"])
+        load(wf)
+        gname <- wgtpos[i, "ID"]
+        colnames(snps) <- c("chrom", "rsid", "cm", "pos", "alt", "ref")
+        snps[is.na(snps$rsid),"rsid"] <- paste0("chr",snps[is.na(snps$rsid),"chrom"],"_",snps[is.na(snps$rsid),"pos"],
+                                                "_",snps[is.na(snps$rsid),"ref"], "_",snps[is.na(snps$rsid),"alt"],"_","b38")
+
+        snps[,"varID"] <- paste0("chr",snps[,"chrom"],"_",snps[,"pos"],"_",snps[,"ref"],"_",snps[,"alt"],"_","b38")
+
+        rownames(wgt.matrix) <- snps$rsid
+        g.method = method_Fusion
+        # Ensure only top magnitude snp weight in the top1 wgt.matrix column
+        if (g.method == "top1"){
+          wgt.matrix[,"top1"][-which.max(wgt.matrix[,"top1"]^2)] <- 0
+        }
+
+        wgt.matrix <- wgt.matrix[abs(wgt.matrix[, g.method]) > 0, , drop = F]
+        wgt.matrix <- wgt.matrix[complete.cases(wgt.matrix), , drop = F]
+        if (nrow(wgt.matrix) > 0){
+          out_table <- as_tibble(wgt.matrix[,g.method]) %>% mutate(rsid = rownames(wgt.matrix)) %>% left_join(as_tibble(snps) %>% select(-cm), by = "rsid")
+          out_table$gene <- gname
+          out_table <- out_table[,c("gene","rsid","varID","ref","alt","value")]
+          colnames(out_table) <- c("gene","rsid","varID","ref_allele","eff_allele","weight")
+          out_table
+        } 
+      }
+      parallel::stopCluster(cl)
+    }
+    extra_table <- NULL
+    R_wgt <- NULL
   }
   return(list(weight_table=weight_table,extra_table=extra_table,weight_name=weight_name,R_wgt=R_wgt))
 }

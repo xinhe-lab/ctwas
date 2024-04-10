@@ -34,7 +34,8 @@ Imports:
     RSQLite,
     ggplot2,
     cowplot,
-    mixsqp
+    mixsqp,
+    tidyverse
 Suggests: 
     Rfast,
     pgenlibr,
