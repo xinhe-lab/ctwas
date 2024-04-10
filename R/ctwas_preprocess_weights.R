@@ -1,25 +1,26 @@
 
-#' Preprocess PredictDB weights and harmonize with LD reference
+#' Preprocess PredictDB/Fusion weights and harmonize with LD reference
 #'
-#' @param weight_file a string, pointing to a directory with the fusion/twas format of weights, or a .db file in predictdb format.
-#' A vector of multiple sets of weights in PredictDB format can also be specified; genes will have their filename appended
-#' to their gene name to ensure IDs are unique.
+#' @param weight_file a string or a vector, pointing path to one or multiple sets of weights in PredictDB or Fusion format. 
 #'
 #' @param region_info a data frame of region definition and associated file names.
 #'
 #' @param z_snp A data frame with columns: "id", "A1", "A2", "z". giving the z scores for
 #' snps. "A1" is effect allele. "A2" is the other allele. For harmonized data, A1 and A2 are not required.
 #'
-#' @param weight_format weight format: PredictDB, or Fusion
+#' @param weight_type a string or a vector, specifying QTL type of each weight file, e.g. eQTL, sQTL, pQTL. 
+#' 
+#' @param weight_context a string or a vector, specifying tissue/cell type/condition of each weight file, e.g. Liver, Lung, Brain. 
+#' 
+#' @param weight_format a string or a vector, specifying format of each weight file, e.g. PredictDB, Fusion.
 #'
 #' @param filter_protein_coding_genes TRUE/FALSE. If TRUE, keep protein coding genes only. This option is only for PredictDB weights
 #' 
 #' @param load_predictdb_LD TRUE/FALSE. If TRUE, load pre-computed LD among weight SNPs. This option is only for PredictDB weights
 #'
 #' @param drop_strand_ambig TRUE/FALSE, if TRUE remove strand ambiguous variants (A/T, G/C).
-#'
-#' @param scale_by_ld_variance TRUE/FALSE. If TRUE, PredictDB weights are scaled by genotype variance, which is the default
-#' behavior for PredictDB
+#' 
+#' @param method_Fusion a string, specifying the method to choose in Fusion models
 #'
 #' @return a list of processed weights
 #'
@@ -30,14 +31,14 @@ preprocess_weights <- function(weight_file,
                                z_snp,
                                weight_type = NULL,
                                weight_context = NULL,
+                               weight_format = NULL,
                                ncore = 1,
-                               weight_format = c("PredictDB", "Fusion"),
                                drop_strand_ambig = TRUE,
                                filter_protein_coding_genes = FALSE,
                                load_predictdb_LD = FALSE,
-                               scale_by_ld_variance = TRUE){
+                               method_Fusion = "enet"){
 
-  weight_format <- match.arg(weight_format)
+  #weight_format <- match.arg(weight_format)
   # load LD SNPs information
   region_info <- region_info[order(region_info$chrom, region_info$start),]
   ld_snpinfo <- read_LD_SNP_files(region_info$SNP_info)
@@ -45,7 +46,9 @@ preprocess_weights <- function(weight_file,
   for(i in 1:length(weight_file)){
     weight <- weight_file[i]
     loginfo("Load weight: %s", weight)
-    loaded_weight <- load_weights(weight, weight_format = weight_format, filter_protein_coding_genes = filter_protein_coding_genes, load_predictdb_LD = load_predictdb_LD)
+    loaded_weight <- load_weights(weight, weight_format = weight_format[i], ld_snpinfo,
+                                  filter_protein_coding_genes = filter_protein_coding_genes, 
+                                  load_predictdb_LD = load_predictdb_LD, method_Fusion = method_Fusion, ncore=ncore)
     weight_table <- loaded_weight$weight_table
     weight_name <- loaded_weight$weight_name
     R_wgt_all <- loaded_weight$R_wgt
@@ -82,7 +85,6 @@ preprocess_weights <- function(weight_file,
     pb <- txtProgressBar(min = 0, max = length(gnames), initial = 0, style = 3)
     for (j in 1:length(gnames)){
       gname <- gnames[j]
-      #print(gname)
       wgt <- weight_table[weight_table$gene==gname,]
       wgt.matrix <- as.matrix(wgt[, "weight", drop = F])
       rownames(wgt.matrix) <- wgt$rsid
@@ -110,10 +112,10 @@ preprocess_weights <- function(weight_file,
       snps.idx <- match(snpnames, snps$id)
       snps <- snps[snps.idx,]
 
-      if (isTRUE(scale_by_ld_variance)){
-        ld_snpinfo_wgt.idx <- match(snpnames, ld_snpinfo_wgt$id)
-        wgt <- wgt*sqrt(ld_snpinfo_wgt$variance[ld_snpinfo_wgt.idx])
-      }
+      #if (isTRUE(scale_by_ld_variance)){
+      #  ld_snpinfo_wgt.idx <- match(snpnames, ld_snpinfo_wgt$id)
+      #  wgt <- wgt*sqrt(ld_snpinfo_wgt$variance[ld_snpinfo_wgt.idx])
+      #}
 
       nwgt <- nrow(wgt.matrix)
 
@@ -144,8 +146,8 @@ preprocess_weights <- function(weight_file,
   if(!load_predictdb_LD){
     loginfo("Pre-computed LDs between weight variants are not availiable.")
     loginfo("Computing LD.")
-    weight_info <- as.data.frame(do.call(rbind, weights)[,c("chrom","p0","p1","gene_name","weight_name")])
-    weight_info$weight_id <- paste0(weight_info$gene_name, "|", weight_info$weight_name)
+    weight_info <- as.data.frame(do.call(rbind, weights)[,c("chrom","p0","p1","gene_name","weight_name","type","context")])
+    weight_info$weight_id <- paste0(weight_info$gene_name, "|", weight_info$type, "|", weight_info$context)
     for (k in 1:nrow(weight_info)) {
       chrom <- weight_info[k, "chrom"]
       p0 <- weight_info[k, "p0"]
