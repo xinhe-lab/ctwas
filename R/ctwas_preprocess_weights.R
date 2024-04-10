@@ -40,6 +40,9 @@ preprocess_weights <- function(weight_file,
 
   # check input arguments
   weight_format <- match.arg(weight_format)
+  if (length(weight_file) > 1) {
+    stop("Please provide only one weight file in weight_file.")
+  }
   if (is.null(type)) {
     type <- "gene"
   }
@@ -48,8 +51,8 @@ preprocess_weights <- function(weight_file,
   }
 
   loginfo("Load weight: %s", weight_file)
-  loginfo("type: %s", type)
-  loginfo("context: %s", context)
+  loginfo("type = %s", type)
+  loginfo("context = %s", context)
 
   # load LD SNPs information
   region_info <- region_info[order(region_info$chrom, region_info$start),]
@@ -79,12 +82,13 @@ preprocess_weights <- function(weight_file,
   loginfo("%d variants and %d genes left after intersecting with LD reference and GWAS z_snp", length(snpnames), length(gnames))
   # subset to variants in weight table
   ld_snpinfo_wgt <- ld_snpinfo[ld_snpinfo$id %in% weight_table$rsid,]
-  loginfo("Harmonize weights with LD reference")
+  loginfo("Harmonizing weights with LD reference ...")
   rsid_varID <- weight_table[,c("rsid", "varID")]
 
   pb <- txtProgressBar(min = 0, max = length(gnames), initial = 0, style = 3)
-  for (j in 1:length(gnames)){
-    gname <- gnames[j]
+  for (i in 1:length(gnames)){
+    gname <- gnames[i]
+    # cat("gname:", gname, "\n")
     wgt <- weight_table[weight_table$gene==gname,]
     wgt.matrix <- as.matrix(wgt[, "weight", drop = F])
     rownames(wgt.matrix) <- wgt$rsid
@@ -93,11 +97,11 @@ preprocess_weights <- function(weight_file,
     if (length(chrom) > 1) {
       stop("More than one chrom in weight for %s!", gname)
     }
-    wgt_ld_idx <- match(wgt$rsid, ld_snpinfo_wgt$id)
     snp_pos <- as.integer(chrpos[, 2])
+    wgt_ld_idx <- match(wgt$rsid, ld_snpinfo_wgt$id)
     ld_snp_pos <- as.integer(ld_snpinfo_wgt[wgt_ld_idx, "pos"])
-    if (!all.equal(snp_pos, ld_snp_pos)){
-      loginfo("Variant positions in weights are not the same as positions in LD reference. Use positions in LD reference.")
+    if (any(snp_pos != ld_snp_pos)){
+      warning(sprintf("Variant positions in %s weights are different from positions in LD reference. Use the positions in LD reference.", gname))
       snp_pos <- ld_snp_pos
     }
     snps <- data.frame(chrom = chrom,
@@ -149,12 +153,12 @@ preprocess_weights <- function(weight_file,
                                    gene_name=gname, weight_name=weight_name,
                                    type = type, context = context, n_wgt=n_wgt)
     }
-    setTxtProgressBar(pb, j)
+    setTxtProgressBar(pb, i)
   }
   close(pb)
 
   if(!load_predictdb_LD){
-    loginfo("Computing LD between variants in weights.")
+    loginfo("Computing LD between variants in weights ...")
     weight_info <- as.data.frame(do.call(rbind, weights)[,c("chrom","p0","p1","gene_name","weight_name","type","context")])
     # weight_info$weight_id <- paste0(weight_info$gene_name, "|", weight_info$type, "|", weight_info$context)
     weight_info$weight_id <- paste0(weight_info$gene_name, "|", weight_name)
