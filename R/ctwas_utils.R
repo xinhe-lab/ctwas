@@ -38,9 +38,15 @@ read_LD_SNP_file <- function(file){
   return(LD_SNP)
 }
 
-#' Load weight
-load_weights <- function(weight_file, weight_format, ld_snpinfo, filter_protein_coding_genes = FALSE, load_predictdb_LD = FALSE, method_Fusion = "lasso", ncore = 1){
-  #weight_format <- match.arg(weight_format)
+#' Load PredictDB or Fusion weights
+load_weights <- function(weight_file,
+                         weight_format = c("PredictDB", "Fusion"),
+                         ld_snpinfo,
+                         filter_protein_coding_genes = FALSE,
+                         load_predictdb_LD = FALSE,
+                         method_Fusion = "lasso",
+                         ncore = 1){
+  weight_format <- match.arg(weight_format)
   if(weight_format == "PredictDB"){
     weight_name <- tools::file_path_sans_ext(basename(weight_file))
     # read the PredictDB weights
@@ -53,14 +59,14 @@ load_weights <- function(weight_file, weight_format, ld_snpinfo, filter_protein_
 
     # subset to protein coding genes only
     if (isTRUE(filter_protein_coding_genes)){
-      loginfo("Keep protein coding genes only")
-      if("protein_coding" %in% extra_table$gene_type){ #filter only there exist protein coding genes
-         extra_table <- extra_table[extra_table$gene_type=="protein_coding",,drop=F]
-         weight_table <- weight_table[weight_table$gene %in% extra_table$gene,]
+      if ("protein_coding" %in% extra_table$gene_type){ #filter only there exist protein coding genes
+        loginfo("Keep protein coding genes only")
+        extra_table <- extra_table[extra_table$gene_type=="protein_coding",,drop=F]
+        weight_table <- weight_table[weight_table$gene %in% extra_table$gene,]
       }
     }
 
-    #scale predictdb weights by variance
+    # scale predictdb weights by variance
     ld_snpinfo.idx <- match(weight_table$rsid, ld_snpinfo$id)
     weight_table$weight <- weight_table$weight*sqrt(ld_snpinfo$variance[ld_snpinfo.idx])
 
@@ -77,8 +83,8 @@ load_weights <- function(weight_file, weight_format, ld_snpinfo, filter_protein_
     wgtdir <- dirname(weight_file)
     wgtposfile <- file.path(wgtdir, paste0(basename(weight_file), ".pos"))
     wgtpos <- read.table(wgtposfile, header = T, stringsAsFactors = F)
-    wgtpos <- transform(wgtpos, ID = ifelse(duplicated(ID) | duplicated(ID, fromLast = TRUE), 
-                        paste(ID, ave(ID, ID, FUN = seq_along), sep = "_ID"), ID))
+    wgtpos <- transform(wgtpos, ID = ifelse(duplicated(ID) | duplicated(ID, fromLast = TRUE),
+                                            paste(ID, ave(ID, ID, FUN = seq_along), sep = "_ID"), ID))
 
     cl <- parallel::makeCluster(ncore, outfile = "", type = "FORK")
     doParallel::registerDoParallel(cl)
@@ -109,7 +115,7 @@ load_weights <- function(weight_file, weight_format, ld_snpinfo, filter_protein_
           out_table <- out_table[,c("gene","rsid","varID","ref","alt","value")]
           colnames(out_table) <- c("gene","rsid","varID","ref_allele","eff_allele","weight")
           out_table
-        } 
+        }
       }
       parallel::stopCluster(cl)
     }
