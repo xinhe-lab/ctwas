@@ -65,7 +65,7 @@ EM <- function(regionlist,
   rownames(group_prior_var_rec) <- groups
 
   # start running EM iterations
-  cl <- parallel::makeCluster(ncore, outfile = "", type = "FORK")
+  cl <- parallel::makeCluster(ncore, outfile = "")
   doParallel::registerDoParallel(cl)
 
   corelist <- region2core(regionlist, ncore)

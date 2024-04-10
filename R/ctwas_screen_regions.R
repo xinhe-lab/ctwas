@@ -6,28 +6,16 @@
 #'
 #' @param weights a list of weights
 #'
-#' @param thin The proportion of SNPs to be used for parameter estimation and initial screening regions.
-#' Smaller \code{thin} parameters reduce runtime at the expense of accuracy.
+#' @param group_prior a vector of two prior inclusion probabilities for SNPs and genes.
+#'
+#' @param group_prior_var a vector of two prior variances for SNPs and gene effects.
+#'
+#' @param L the number of effects for susie
 #'
 #' @param mingene minimum number of genes in a region
 #'
 #' @param min_nonSNP_PIP Regions with non-SNP PIP >= \code{min_nonSNP_PIP}
 #' will be selected to run finemapping using full SNPs.
-#'
-#' @param L the number of effects for susie
-#'
-#' @param group_prior a vector of two prior inclusion probabilities for SNPs and genes.
-#'
-#' @param group_prior_var a vector of two prior variances for SNPs and gene effects.
-#'
-#' @param use_null_weight TRUE/FALSE. If TRUE, allow for a probability of no effect in susie
-#'
-#' @param coverage A number between 0 and 1 specifying the \dQuote{coverage} of the estimated confidence sets
-#'
-#' @param min_abs_corr Minimum absolute correlation allowed in a
-#'   credible set. The default, 0.5, corresponds to a squared
-#'   correlation of 0.25, which is a commonly used threshold for
-#'   genotype data in genetic studies.
 #'
 #' @param max_iter Maximum number of IBSS iterations to perform.
 #'
@@ -45,7 +33,6 @@ screen_regions <- function(
     regionlist,
     region_info,
     weights,
-    thin = 1,
     group_prior = NULL,
     group_prior_var = NULL,
     L = 5,
@@ -63,13 +50,21 @@ screen_regions <- function(
 
   loginfo("Screen regions ...")
 
+  # extract thin value from regionlist
+  thin <- unique(sapply(regionlist, "[[", "thin"))
+  if (length(thin) > 1) {
+    thin <- min(thin)
+    loginfo("thin has more than one value in regionlist, use the minimum thin value.")
+  }
+  loginfo("thin = %s", thin)
+
   if (thin <= 0 || thin > 1){
     stop("thin value needs to be in (0,1]")
   }
 
-  if (thin != 1) {
-    # adjust group_prior parameter to account for thin argument
-    group_prior["SNP"] <- group_prior["SNP"] / thin
+  # adjust to account for thin argument
+  if (!is.null(group_prior)){
+    group_prior["SNP"] <- group_prior["SNP"]/thin
   }
 
   # remove regions with fewer than mingene genes
@@ -88,6 +83,7 @@ screen_regions <- function(
                                  L = L,
                                  group_prior = group_prior,
                                  group_prior_var = group_prior_var,
+                                 max_iter = max_iter,
                                  annotate_susie_result = FALSE,
                                  ncore = ncore,
                                  verbose = verbose)

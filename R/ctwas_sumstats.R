@@ -117,13 +117,10 @@ ctwas_sumstats <- function(
   #. get regionlist for all the regions
   #. run EM for two rounds with thinned SNPs using L = 1
   loginfo("Estimating parameters...")
-  param <- est_param(z_snp,
-                     z_gene,
-                     regionlist,
+  param <- est_param(regionlist,
                      init_group_prior = init_group_prior,
                      init_group_prior_var = init_group_prior_var,
                      group_prior_var_structure = group_prior_var_structure,
-                     thin = thin,
                      niter1 = niter1,
                      niter2 = niter2,
                      p_single_effect = p_single_effect,
@@ -135,12 +132,9 @@ ctwas_sumstats <- function(
   #. fine-map all regions with thinned SNPs
   #. select regions with strong non-SNP signals
   loginfo("Screening regions ...")
-  screened_region_tags <- screen_regions(z_snp,
-                                         z_gene,
-                                         regionlist,
+  screened_region_tags <- screen_regions(regionlist,
                                          region_info,
                                          weights,
-                                         thin = thin,
                                          group_prior = group_prior,
                                          group_prior_var = group_prior_var,
                                          L = L,
@@ -165,9 +159,7 @@ ctwas_sumstats <- function(
   # Run fine-mapping for regions with strong gene signals using all SNPs
   #. save correlation matrices if save_cor is TRUE
   loginfo("Fine-mapping regions ...")
-  finemap_res <- finemap_regions(z_snp,
-                                 z_gene,
-                                 screened_regionlist,
+  finemap_res <- finemap_regions(screened_regionlist,
                                  region_info,
                                  weights,
                                  group_prior = group_prior,

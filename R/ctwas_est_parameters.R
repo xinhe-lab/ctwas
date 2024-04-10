@@ -11,11 +11,6 @@
 #' "shared_all" allows all groups to share the same variance parameter.
 #' "shared_type" allows all groups in one molecular QTL type to share the same variance parameter.
 #'
-#' @param thin The proportion of SNPs to be used for the parameter estimation and
-#' initial screening region steps.
-#' Smaller \code{thin} parameters reduce runtime at the expense of accuracy.
-#' The fine mapping step is rerun using full SNPs for regions with strong gene signals.
-#'
 #' @param niter1 the number of iterations of the E-M algorithm to perform during the initial parameter estimation step
 #'
 #' @param niter2 the number of iterations of the E-M algorithm to perform during the complete parameter estimation step
@@ -40,7 +35,6 @@ est_param <- function(
     init_group_prior = NULL,
     init_group_prior_var = NULL,
     group_prior_var_structure = c("independent","shared_all","shared_type"),
-    thin = 1,
     niter1 = 3,
     niter2 = 30,
     p_single_effect = 0.8,
@@ -56,12 +50,17 @@ est_param <- function(
 
   group_prior_var_structure <- match.arg(group_prior_var_structure)
 
-  if (thin <= 0 | thin > 1){
-    stop("thin value needs to be in (0,1]")
+  # extract thin value from regionlist
+  thin <- unique(sapply(regionlist, "[[", "thin"))
+  if (length(thin) > 1) {
+    thin <- min(thin)
+    loginfo("thin has more than one value in regionlist, use the minimum thin value.")
   }
+  loginfo("thin = %s", thin)
 
+  # adjust to account for thin argument
   if (!is.null(init_group_prior)){
-    init_group_prior["SNP"] <- init_group_prior["SNP"]/thin # adjust to account for thin argument
+    init_group_prior["SNP"] <- init_group_prior["SNP"]/thin
   }
 
   # Run EM for a few (niter1) iterations, getting rough estimates

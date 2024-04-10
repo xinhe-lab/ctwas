@@ -77,26 +77,14 @@ get_regionlist <- function(region_info,
     # get SNP info in LD in the chromosome
     snpinfo <- read_LD_SNP_files(regioninfo$SNP_info)
 
-    # select SNPs
-    snpinfo$keep <- rep(1, nrow(snpinfo))
     # remove SNPs not in z_snp
-    snpinfo$keep[!(snpinfo$id %in% z_snp$id)] <- 0
+    snpinfo <- snpinfo[snpinfo$id %in% z_snp$id, , drop=FALSE]
 
-    # downsampling for SNPs
-    snpinfo$thin_tag <- rep(0, nrow(snpinfo))
-    nkept <- round(nrow(snpinfo) * thin)
-    set.seed(seed)
-    snpinfo$thin_tag[sample(1:nrow(snpinfo), nkept)] <- 1
-
-    if (nrow(geneinfo)!=0){
-      # select genes
-      geneinfo$keep <- 1
-      # remove genes not in z_gene
-      geneinfo[!(geneinfo$id %in% z_gene$id), "keep"] <- 0
-    }
+    # remove genes not in z_gene
+    geneinfo <- geneinfo[geneinfo$id %in% z_gene$id, , drop=FALSE]
 
     # get regionlist for the chromosome
-    regionlist_chr <- assign_region_ids(regioninfo,geneinfo,snpinfo)
+    regionlist_chr <- assign_region_ids(regioninfo, geneinfo, snpinfo, thin = thin)
     loginfo("No. regions with at least one SNP/gene for chr%s: %d", b, length(regionlist_chr))
     regionlist <- c(regionlist, regionlist_chr)
   }
@@ -126,8 +114,17 @@ get_regionlist <- function(region_info,
 assign_region_ids <- function(regioninfo,
                               geneinfo,
                               snpinfo,
+                              thin = 1,
                               minvar = 1,
-                              mingene = 0) {
+                              mingene = 0,
+                              seed = 99) {
+
+  # downsampling for SNPs
+  set.seed(seed)
+  snpinfo$thin_tag <- rep(0, nrow(snpinfo))
+  n_kept <- round(nrow(snpinfo) * thin)
+  idx_thin <- sample(1:nrow(snpinfo), n_kept)
+  snpinfo$thin_tag[idx_thin] <- 1
 
   regionlist <- list()
 
@@ -141,11 +138,9 @@ assign_region_ids <- function(regioninfo,
 
     # assign genes to regions based gene p0 positions
     # for genes across region boundaries, assign to the first region, and adjust later
-    gidx <- which(geneinfo$chrom == region_chrom & geneinfo$p0 >= region_start & geneinfo$p0 < region_stop
-                  & geneinfo$keep == 1)
+    gidx <- which(geneinfo$chrom == region_chrom & geneinfo$p0 >= region_start & geneinfo$p0 < region_stop)
 
-    sidx <- which(snpinfo$chrom == region_chrom & snpinfo$pos >= region_start & snpinfo$pos < region_stop
-                  & snpinfo$keep == 1 & snpinfo$thin_tag == 1)
+    sidx <- which(snpinfo$chrom == region_chrom & snpinfo$pos >= region_start & snpinfo$pos < region_stop & snpinfo$thin_tag == 1)
 
     if (length(gidx) + length(sidx) < minvar) {next}
 
@@ -164,7 +159,8 @@ assign_region_ids <- function(regioninfo,
                                      "minpos" = minpos,
                                      "maxpos" = maxpos,
                                      "gid" = gid,
-                                     "sid" = sid)
+                                     "sid" = sid,
+                                     "thin" = thin)
   }
 
   return(regionlist)
@@ -314,27 +310,26 @@ expand_regionlist <- function(regionlist,
 
   region_tags <- names(regionlist)
   loginfo("Update regionlist for %d regions with full SNPs", length(region_tags))
+
   pb <- txtProgressBar(min = 0, max = length(region_tags), initial = 0, style = 3)
 
   # update SNP IDs for each region
   for (i in 1:length(region_tags)){
     region_tag <- region_tags[i]
 
+    if (regionlist[[region_tag]][["thin"]] == 1){
+      next
+    }
+
     # load all SNPs in the region
     snpinfo <- read_LD_SNP_files(region_info[region_info$region_tag == region_tag, "SNP_info"])
-
-    # update sid in the region
-    snpinfo$keep <- rep(1, nrow(snpinfo))
     # remove SNPs not in z_snp
-    snpinfo$keep[!(snpinfo$id %in% z_snp$id)] <- 0
-
-    sid <- snpinfo$id[snpinfo$keep == 1]
-    sidx <- match(sid, snpinfo$id)
-    regionlist[[region_tag]][["sid"]] <- sid
+    snpinfo <- snpinfo[snpinfo$id %in% z_snp$id, , drop=FALSE]
+    regionlist[[region_tag]][["sid"]] <- snpinfo$id
 
     # update minpos and maxpos in the region
-    regionlist[[region_tag]][["minpos"]] <- min(c(regionlist[[region_tag]][["minpos"]], snpinfo$pos[sidx]))
-    regionlist[[region_tag]][["maxpos"]] <- max(c(regionlist[[region_tag]][["maxpos"]], snpinfo$pos[sidx]))
+    regionlist[[region_tag]][["minpos"]] <- min(c(regionlist[[region_tag]][["minpos"]], snpinfo$pos))
+    regionlist[[region_tag]][["maxpos"]] <- max(c(regionlist[[region_tag]][["maxpos"]], snpinfo$pos))
 
     setTxtProgressBar(pb, i)
   }

@@ -284,7 +284,7 @@ finemap_regions <- function(regionlist,
 
   loginfo('Finemapping %d regions ...', length(regionlist))
 
-  cl <- parallel::makeCluster(ncore, outfile = "", type = "FORK")
+  cl <- parallel::makeCluster(ncore, outfile = "")
   doParallel::registerDoParallel(cl)
 
   corelist <- region2core(regionlist, ncore)
