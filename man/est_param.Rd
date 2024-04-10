@@ -9,7 +9,6 @@ est_param(
   init_group_prior = NULL,
   init_group_prior_var = NULL,
   group_prior_var_structure = c("independent", "shared_all", "shared_type"),
-  thin = 1,
   niter1 = 3,
   niter2 = 30,
   p_single_effect = 0.8,
@@ -29,11 +28,6 @@ est_param(
 "independent" is the default and allows all groups to have their own separate variance parameters.
 "shared_all" allows all groups to share the same variance parameter.
 "shared_type" allows all groups in one molecular QTL type to share the same variance parameter.}
-
-\item{thin}{The proportion of SNPs to be used for the parameter estimation and
-initial screening region steps.
-Smaller \code{thin} parameters reduce runtime at the expense of accuracy.
-The fine mapping step is rerun using full SNPs for regions with strong gene signals.}
 
 \item{niter1}{the number of iterations of the E-M algorithm to perform during the initial parameter estimation step}
 

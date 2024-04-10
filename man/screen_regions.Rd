@@ -8,7 +8,6 @@ screen_regions(
   regionlist,
   region_info,
   weights,
-  thin = 1,
   group_prior = NULL,
   group_prior_var = NULL,
   L = 5,
@@ -28,9 +27,6 @@ screen_regions(
 
 \item{weights}{a list of weights}
 
-\item{thin}{The proportion of SNPs to be used for parameter estimation and initial screening regions.
-Smaller \code{thin} parameters reduce runtime at the expense of accuracy.}
-
 \item{group_prior}{a vector of two prior inclusion probabilities for SNPs and genes.}
 
 \item{group_prior_var}{a vector of two prior variances for SNPs and gene effects.}
@@ -47,15 +43,6 @@ will be selected to run finemapping using full SNPs.}
 \item{ncore}{The number of cores used to parallelize susie over regions}
 
 \item{logfile}{the log file, if NULL will print log info on screen}
-
-\item{use_null_weight}{TRUE/FALSE. If TRUE, allow for a probability of no effect in susie}
-
-\item{coverage}{A number between 0 and 1 specifying the \dQuote{coverage} of the estimated confidence sets}
-
-\item{min_abs_corr}{Minimum absolute correlation allowed in a
-credible set. The default, 0.5, corresponds to a squared
-correlation of 0.25, which is a commonly used threshold for
-genotype data in genetic studies.}
 }
 \value{
 a vector of screened region tags

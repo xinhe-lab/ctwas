@@ -2,33 +2,35 @@
 % Please edit documentation in R/ctwas_preprocess_weights.R
 \name{preprocess_weights}
 \alias{preprocess_weights}
-\title{Preprocess PredictDB weights and harmonize with LD reference}
+\title{Preprocess PredictDB/Fusion weights and harmonize with LD reference}
 \usage{
 preprocess_weights(
   weight_file,
   region_info,
   z_snp,
-  weight_type = NULL,
-  weight_context = NULL,
-  ncore = 1,
+  type = NULL,
+  context = NULL,
   weight_format = c("PredictDB", "Fusion"),
+  ncore = 1,
   drop_strand_ambig = TRUE,
   filter_protein_coding_genes = FALSE,
   load_predictdb_LD = FALSE,
-  scale_by_ld_variance = TRUE
+  method_Fusion = "enet"
 )
 }
 \arguments{
-\item{weight_file}{a string, pointing to a directory with the fusion/twas format of weights, or a .db file in predictdb format.
-A vector of multiple sets of weights in PredictDB format can also be specified; genes will have their filename appended
-to their gene name to ensure IDs are unique.}
+\item{weight_file}{a string or a vector, pointing path to one or multiple sets of weights in PredictDB or Fusion format.}
 
 \item{region_info}{a data frame of region definition and associated file names.}
 
 \item{z_snp}{A data frame with columns: "id", "A1", "A2", "z". giving the z scores for
 snps. "A1" is effect allele. "A2" is the other allele. For harmonized data, A1 and A2 are not required.}
 
-\item{weight_format}{weight format: PredictDB, or Fusion}
+\item{type}{a string or a vector, specifying QTL type of each weight file, e.g. eQTL, sQTL, pQTL.}
+
+\item{context}{a string or a vector, specifying tissue/cell type/condition of each weight file, e.g. Liver, Lung, Brain.}
+
+\item{weight_format}{a string or a vector, specifying format of each weight file, e.g. PredictDB, Fusion.}
 
 \item{drop_strand_ambig}{TRUE/FALSE, if TRUE remove strand ambiguous variants (A/T, G/C).}
 
@@ -36,12 +38,11 @@ snps. "A1" is effect allele. "A2" is the other allele. For harmonized data, A1 a
 
 \item{load_predictdb_LD}{TRUE/FALSE. If TRUE, load pre-computed LD among weight SNPs. This option is only for PredictDB weights}
 
-\item{scale_by_ld_variance}{TRUE/FALSE. If TRUE, PredictDB weights are scaled by genotype variance, which is the default
-behavior for PredictDB}
+\item{method_Fusion}{a string, specifying the method to choose in Fusion models}
 }
 \value{
 a list of processed weights
 }
 \description{
-Preprocess PredictDB weights and harmonize with LD reference
+Preprocess PredictDB/Fusion weights and harmonize with LD reference
 }

@@ -2,15 +2,18 @@
 % Please edit documentation in R/ctwas_utils.R
 \name{load_weights}
 \alias{load_weights}
-\title{Load weight}
+\title{Load PredictDB or Fusion weights}
 \usage{
 load_weights(
   weight_file,
   weight_format = c("PredictDB", "Fusion"),
+  ld_snpinfo,
   filter_protein_coding_genes = FALSE,
-  load_predictdb_LD = FALSE
+  load_predictdb_LD = FALSE,
+  method_Fusion = "lasso",
+  ncore = 1
 )
 }
 \description{
-Load weight
+Load PredictDB or Fusion weights
 }

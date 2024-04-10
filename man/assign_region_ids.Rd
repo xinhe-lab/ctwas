@@ -4,7 +4,15 @@
 \alias{assign_region_ids}
 \title{assign gene and SNP IDs for regions in the regioninfo}
 \usage{
-assign_region_ids(regioninfo, geneinfo, snpinfo, minvar = 1, mingene = 0)
+assign_region_ids(
+  regioninfo,
+  geneinfo,
+  snpinfo,
+  thin = 1,
+  minvar = 1,
+  mingene = 0,
+  seed = 99
+)
 }
 \description{
 assign gene and SNP IDs for regions in the regioninfo
