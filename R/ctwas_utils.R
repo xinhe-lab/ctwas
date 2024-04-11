@@ -39,13 +39,30 @@ read_LD_SNP_file <- function(file){
 }
 
 #' Load PredictDB or Fusion weights
+#'
+#' @param weight_file a string or a vector, pointing path to one or multiple sets of weights in PredictDB or Fusion format.
+#'
+#' @param weight_format a string or a vector, specifying format of each weight file, e.g. PredictDB, Fusion.
+#'
+#' @param filter_protein_coding_genes TRUE/FALSE. If TRUE, keep protein coding genes only. This option is only for PredictDB weights
+#'
+#' @param load_predictdb_LD TRUE/FALSE. If TRUE, load pre-computed LD among weight SNPs. This option is only for PredictDB weights
+#'
+#' @param method_Fusion a string, specifying the method to choose in Fusion models
+#'
+#' @param ncore integer, number of cores for parallel computing.
+#'
+#' @importFrom tidyverse %>% as_tibble left_join
+#'
+#' @export
+#'
 load_weights <- function(weight_file,
                          weight_format = c("PredictDB", "Fusion"),
                          filter_protein_coding_genes = FALSE,
                          load_predictdb_LD = FALSE,
                          method_Fusion = c("lasso","enet","top1","blup"),
                          ncore = 1){
-  library(tidyverse)
+  #library(tidyverse)
   weight_format <- match.arg(weight_format)
   method_Fusion <- match.arg(method_Fusion)
   if(weight_format == "PredictDB"){
