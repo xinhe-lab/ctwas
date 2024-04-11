@@ -63,11 +63,13 @@ get_regionlist <- function(region_info,
   region_info <- region_info[order(region_info$chrom, region_info$start),]
 
   # get gene info from weights
-  gene_info <- get_gene_info(weights, region_info)
+  loginfo("Get gene info from weights")
+  gene_info <- get_gene_info(weights)
 
   regionlist <- list()
   # get regionlist for each chromosome
   for (b in unique(region_info$chrom)){
+
     # select regions in the chromosome
     regioninfo <- region_info[region_info$chrom == b, ]
 
@@ -84,17 +86,21 @@ get_regionlist <- function(region_info,
     geneinfo <- geneinfo[geneinfo$id %in% z_gene$id, , drop=FALSE]
 
     # get regionlist for the chromosome
-    regionlist_chr <- assign_region_ids(regioninfo, geneinfo, snpinfo, thin = thin)
-    loginfo("No. regions with at least one SNP/gene for chr%s: %d", b, length(regionlist_chr))
+    regionlist_chr <- assign_region_ids(regioninfo, geneinfo, snpinfo,
+                                        thin = thin, seed = seed,
+                                        minvar = minvar, mingene = mingene)
+    loginfo("No. regions in chr%s: %d", b, length(regionlist_chr))
     regionlist <- c(regionlist, regionlist_chr)
   }
 
   # adjust regionlist for boundary genes
   if (isTRUE(adjust_boundary_genes)){
     loginfo("Adjust regionlist for across boundary genes...")
+    gene_info <- get_gene_regions(gene_info, region_info)
     boundary_genes <- gene_info[gene_info$n_regions > 1, ]
     boundary_genes <- boundary_genes[with(boundary_genes, order(chrom, p0)), ]
     rownames(boundary_genes) <- NULL
+    loginfo("No. boundary genes: %d", nrow(boundary_genes))
     if (nrow(boundary_genes) > 0) {
       regionlist <- adjust_boundary_genes(boundary_genes, region_info, weights, regionlist)
     }
@@ -120,11 +126,12 @@ assign_region_ids <- function(regioninfo,
                               seed = 99) {
 
   # downsampling for SNPs
-  set.seed(seed)
-  snpinfo$thin_id <- rep(0, nrow(snpinfo))
-  n_kept <- round(nrow(snpinfo) * thin)
-  idx_thin <- sample(1:nrow(snpinfo), n_kept)
-  snpinfo$thin_id[idx_thin] <- 1
+  if (thin < 1) {
+    set.seed(seed)
+    n_kept <- round(nrow(snpinfo) * thin)
+    idx_kept <- sample(1:nrow(snpinfo), n_kept)
+    snpinfo <- snpinfo[idx_kept, , drop = FALSE]
+  }
 
   regionlist <- list()
 
@@ -140,7 +147,7 @@ assign_region_ids <- function(regioninfo,
     # for genes across region boundaries, assign to the first region, and adjust later
     gidx <- which(geneinfo$chrom == region_chrom & geneinfo$p0 >= region_start & geneinfo$p0 < region_stop)
 
-    sidx <- which(snpinfo$chrom == region_chrom & snpinfo$pos >= region_start & snpinfo$pos < region_stop & snpinfo$thin_id == 1)
+    sidx <- which(snpinfo$chrom == region_chrom & snpinfo$pos >= region_start & snpinfo$pos < region_stop)
 
     if (length(gidx) + length(sidx) < minvar) {next}
 
@@ -253,8 +260,8 @@ adjust_boundary_genes <- function(boundary_genes, region_info, weights, regionli
     region_ids <- unlist(strsplit(boundary_genes[i, "region_id"], split = ";"))
     wgt <- weights[[gname]][["wgt"]]
 
-    region_r2 <- sapply(region_ids, function(region_id){
-      ld_snpinfo <- read_LD_SNP_files(region_info[region_info$region_id == region_id, "SNP_info"])
+    region_r2 <- sapply(region_ids, function(x){
+      ld_snpinfo <- read_LD_SNP_files(region_info[region_info$region_id == x, "SNP_info"])
       sum(wgt[which(rownames(wgt) %in% ld_snpinfo$id)]^2)})
 
     # assign boundary gene to the region with max r2, and remove it from other regions

@@ -44,8 +44,8 @@ compute_gene_z <- function (z_snp, weights, ncore = 1, logfile = NULL){
   return(z_gene)
 }
 
-#' get gene info and regions for each gene
-get_gene_info <- function(weights, region_info=NULL){
+#' get gene info from weights
+get_gene_info <- function(weights){
 
   gene_info <- lapply(names(weights), function(x){
     as.data.frame(weights[[x]][c("chrom", "p0","p1", "gene_name", "weight_name")])})
@@ -56,18 +56,19 @@ get_gene_info <- function(weights, region_info=NULL){
   # gene_info <- gene_info[with(gene_info, order(chrom, p0)), ]
   rownames(gene_info) <- NULL
 
-  # find the regions overlapping with each gene
-  if (!is.null(region_info)) {
-    for (i in 1:nrow(gene_info)) {
-      chrom <- gene_info[i, "chrom"]
-      p0 <- gene_info[i, "p0"]
-      p1 <- gene_info[i, "p1"]
-      region_idx <- which(region_info$chrom == chrom & region_info$start <= p1 & region_info$stop > p0)
-      gene_info[i, "region_tag"] <- paste(sort(region_info[region_idx, "region_tag"]), collapse = ";")
-      gene_info[i, "n_regions"] <- length(region_idx)
-    }
-  }
+  return(gene_info)
+}
 
+#' get regions for each gene
+get_gene_regions <- function(gene_info, region_info){
+  for (i in 1:nrow(gene_info)) {
+    chrom <- gene_info[i, "chrom"]
+    p0 <- gene_info[i, "p0"]
+    p1 <- gene_info[i, "p1"]
+    region_idx <- which(region_info$chrom == chrom & region_info$start <= p1 & region_info$stop > p0)
+    gene_info[i, "region_id"] <- paste(sort(region_info[region_idx, "region_id"]), collapse = ";")
+    gene_info[i, "n_regions"] <- length(region_idx)
+  }
   return(gene_info)
 }
 

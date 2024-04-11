@@ -159,9 +159,6 @@ if( file.exists(gene_z_file) ){
   cat(sprintf("Imputing gene z-scores took %0.2f minutes\n",runtime["elapsed"]/60))
 }
 
-z_gene$type2 <- sapply(z_gene$id, function(x){paste(unlist(strsplit(unlist(strsplit(x, "[|]"))[2],"_")), collapse="_") })
-z_gene$QTLtype2 <- sapply(z_gene$id, function(x){paste(unlist(strsplit(unlist(strsplit(x, "[|]"))[2],"_"))[2], collapse="_") })
-
 ##### Get regionlist #####
 regionlist_thin_file <- file.path(outputdir, paste0(outname, ".regionlist.thin", thin, ".RDS"))
 if (file.exists(regionlist_thin_file)) {
