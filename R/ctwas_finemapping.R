@@ -2,7 +2,7 @@
 #'
 #' @param regionlist a list object indexing regions, variants and genes.
 #'
-#' @param region_tag a character string of region tags to be finemapped
+#' @param region_id a character string of region ids to be finemapped
 #'
 #' @param region_info a data frame of region definition and associated LD file names
 #'
@@ -43,7 +43,7 @@
 #' @export
 #'
 finemap_region <- function(regionlist,
-                           region_tag,
+                           region_id,
                            region_info,
                            weights,
                            L = 5,
@@ -61,19 +61,19 @@ finemap_region <- function(regionlist,
                            ...){
 
   if (verbose){
-    loginfo("Finemapping region %s with L = %d", region_tag, L)
+    loginfo("Finemapping region %s with L = %d", region_id, L)
   }
 
-  regioninfo <- region_info[region_info$region_tag == region_tag, ]
+  regioninfo <- region_info[region_info$region_id == region_id, ]
 
   # get susie input data
-  sid <- regionlist[[region_tag]][["sid"]]
-  gid <- regionlist[[region_tag]][["gid"]]
-  z <- regionlist[[region_tag]][["z"]]
-  gs_group <- regionlist[[region_tag]][["gs_group"]]
-  g_type <- regionlist[[region_tag]][["g_type"]]
-  g_context <- regionlist[[region_tag]][["g_context"]]
-  g_group <- regionlist[[region_tag]][["g_group"]]
+  sid <- regionlist[[region_id]][["sid"]]
+  gid <- regionlist[[region_id]][["gid"]]
+  z <- regionlist[[region_id]][["z"]]
+  gs_group <- regionlist[[region_id]][["gs_group"]]
+  g_type <- regionlist[[region_id]][["g_type"]]
+  g_context <- regionlist[[region_id]][["g_context"]]
+  g_group <- regionlist[[region_id]][["g_group"]]
 
   # set pi_prior and V_prior based on group_prior and group_prior_var
   groups <- unique(gs_group)
@@ -90,12 +90,12 @@ finemap_region <- function(regionlist,
   rm(res)
 
   # compute correlation matrices
-  if (length(region_tag) > 1){
-    region_tag <- paste(region_tag, collapse = "_")
+  if (length(region_id) > 1){
+    region_id <- paste(region_id, collapse = "_")
   }
-  R_sg_file <- file.path(cor_dir, paste0("region.", region_tag, ".R_snp_gene.RDS"))
-  R_g_file <- file.path(cor_dir, paste0("region.", region_tag,  ".R_gene.RDS"))
-  R_s_file <- file.path(cor_dir, paste0("region.", region_tag, ".R_snp.RDS"))
+  R_sg_file <- file.path(cor_dir, paste0("region.", region_id, ".R_snp_gene.RDS"))
+  R_g_file <- file.path(cor_dir, paste0("region.", region_id,  ".R_gene.RDS"))
+  R_s_file <- file.path(cor_dir, paste0("region.", region_id, ".R_snp.RDS"))
 
   if (isTRUE(force_compute_cor)) {
     # force compute correlation matrix
@@ -190,10 +190,10 @@ finemap_region <- function(regionlist,
     susie_res_df <- anno_susie(susie_res,
                                gid = gid,
                                sid = sid,
+                               region_id = region_id,
                                g_type = g_type,
                                g_context = g_context,
                                g_group = g_group,
-                               region_tag = region_tag,
                                geneinfo = gene_info,
                                snpinfo = ld_snpinfo,
                                include_cs_index = TRUE)
@@ -202,10 +202,10 @@ finemap_region <- function(regionlist,
     susie_res_df <- anno_susie(susie_res,
                                gid = gid,
                                sid = sid,
+                               region_id = region_id,
                                g_type = g_type,
                                g_context = g_context,
                                g_group = g_group,
-                               region_tag = region_tag,
                                geneinfo = NULL,
                                snpinfo = NULL,
                                include_cs_index = FALSE)
@@ -293,10 +293,10 @@ finemap_regions <- function(regionlist,
 
     finemap_res.core.list <- list()
     # run finemapping for each region
-    region_tags.core <- corelist[[core]]
-    for (region_tag in region_tags.core) {
-      finemap_res.core.list[[region_tag]] <- finemap_region(regionlist = regionlist,
-                                                            region_tag = region_tag,
+    region_ids.core <- corelist[[core]]
+    for (region_id in region_ids.core) {
+      finemap_res.core.list[[region_id]] <- finemap_region(regionlist = regionlist,
+                                                            region_id = region_id,
                                                             region_info = region_info,
                                                             weights = weights,
                                                             L = L,

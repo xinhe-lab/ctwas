@@ -8,10 +8,10 @@ anno_susie(
   susie_res,
   gid,
   sid,
+  region_id,
   g_type = "gene",
   g_context = "gene",
   g_group = "gene",
-  region_tag,
   geneinfo = NULL,
   snpinfo = NULL,
   include_cs_index = TRUE

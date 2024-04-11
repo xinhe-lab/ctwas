@@ -132,7 +132,7 @@ ctwas_sumstats <- function(
   #. fine-map all regions with thinned SNPs
   #. select regions with strong non-SNP signals
   loginfo("Screening regions ...")
-  screened_region_tags <- screen_regions(regionlist,
+  screened_region_ids <- screen_regions(regionlist,
                                          region_info,
                                          weights,
                                          group_prior = group_prior,
@@ -144,7 +144,7 @@ ctwas_sumstats <- function(
                                          ncore = ncore)
 
   # Expand screened regionlist with all SNPs in the regions
-  screened_regionlist <- regionlist[screened_region_tags]
+  screened_regionlist <- regionlist[screened_region_ids]
   if (thin < 1){
     loginfo("Update regionlist with full SNPs for screened regions")
     screened_regionlist <- expand_regionlist(screened_regionlist,

@@ -9,7 +9,7 @@ finemap_regions_L1(
   z_gene,
   gene_info,
   regionlist,
-  region_tags,
+  region_ids,
   weight_list = NULL,
   group_prior = NULL,
   group_prior_var = NULL,
@@ -40,7 +40,7 @@ Optionally, a "type" column can also be supplied; this is for using multiple set
 
 \item{max_iter}{Maximum number of IBSS iterations to perform.}
 
-\item{region_tag}{a character string of region tag to be finemapped}
+\item{region_id}{a character string of region id to be finemapped}
 }
 \value{
 finemapping results.

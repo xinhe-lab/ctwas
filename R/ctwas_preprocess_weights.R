@@ -167,7 +167,7 @@ preprocess_weights <- function(weight_file,
       p0 <- weight_info[k, "p0"]
       p1 <- weight_info[k, "p1"]
       idx <- which(region_info$chrom == chrom & region_info$start <= p1 & region_info$stop > p0)
-      weight_info[k, "region_tag"] <- paste(sort(region_info[idx, "region_tag"]), collapse = ";")
+      weight_info[k, "region_id"] <- paste(sort(region_info[idx, "region_id"]), collapse = ";")
     }
     # impute LD for weights for each chromosome
     cl <- parallel::makeCluster(ncore, outfile = "")
@@ -178,7 +178,7 @@ preprocess_weights <- function(weight_file,
       weightinfo <- weight_info[weight_info$chrom == b, ]
 
       if (nrow(weightinfo) > 0) {
-        batches <- names(sort(-table(weightinfo$region_tag)))
+        batches <- names(sort(-table(weightinfo$region_id)))
         corelist <- lapply(1:ncore, function(core){
           batches_core <- batches[0:ceiling(length(batches)/ncore-1)*ncore+core];
           batches_core[!is.na(batches_core)]})
@@ -190,8 +190,8 @@ preprocess_weights <- function(weight_file,
 
           for (batch in batches) {
           # load the R_snp and SNP info for the region
-            region_tags <- strsplit(batch, ";")[[1]]
-            reg_idx <- match(region_tags, region_info$region_tag)
+            region_ids <- strsplit(batch, ";")[[1]]
+            reg_idx <- match(region_ids, region_info$region_id)
             if (length(reg_idx) > 1){
               R_snp <- lapply(region_info$LD_matrix[reg_idx], load_LD)
               R_snp <- suppressWarnings({as.matrix(Matrix::bdiag(R_snp))})
@@ -200,7 +200,7 @@ preprocess_weights <- function(weight_file,
               R_snp <- load_LD(region_info$LD_matrix[reg_idx])
             }
             R_snpinfo <- read_LD_SNP_files(region_info$SNP_info[reg_idx])
-            weight_ids <- weightinfo[weightinfo$region_tag == batch, "weight_id"]
+            weight_ids <- weightinfo[weightinfo$region_id == batch, "weight_id"]
             for(weight_id in weight_ids){
               snpnames <- rownames(weights[[weight_id]]$wgt)
               ld.idx <- match(snpnames, R_snpinfo$id)

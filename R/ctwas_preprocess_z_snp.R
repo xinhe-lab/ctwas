@@ -81,10 +81,10 @@ detect_ld_mismatch_susie <- function(z_snp,
                                      ncore = 1,
                                      p_diff_thresh = 5e-8){
 
-  region_tags <- region_info$region_tag
-  loginfo("Run LD mismatch diagnosis in %d regions", length(region_tags))
+  region_ids <- region_info$region_id
+  loginfo("Run LD mismatch diagnosis in %d regions", length(region_ids))
 
-  nregions <- length(region_tags)
+  nregions <- length(region_ids)
   corelist <- lapply(1:ncore, function(core){
     njobs <- ceiling(nregions/ncore);
     jobs <- ((core-1)*njobs+1):(core*njobs);
@@ -97,14 +97,14 @@ detect_ld_mismatch_susie <- function(z_snp,
 
   outlist <- foreach(core = 1:ncore, .combine = "c", .packages = c("ctwas", "stats")) %dopar% {
 
-    region_tags_core <- region_tags[corelist[[core]]]
+    region_ids_core <- region_ids[corelist[[core]]]
 
     outlist_core <- list()
-    for(region_tag in region_tags_core) {
+    for(region_id in region_ids_core) {
 
       # Load reference LD matrix and SNP info in the region
-      R_snp <- load_LD(region_info$LD_matrix[region_info$region_tag == region_tag])
-      ld_snpinfo <- read_LD_SNP_files(region_info$SNP_info[region_info$region_tag == region_tag])
+      R_snp <- load_LD(region_info$LD_matrix[region_info$region_id == region_id])
+      ld_snpinfo <- read_LD_SNP_files(region_info$SNP_info[region_info$region_id == region_id])
 
       # Match GWAS sumstats with LD reference files. Only keep variants included in LD reference.
       z_snp.region <- z_snp[z_snp$id %in% ld_snpinfo$id,]
@@ -122,15 +122,15 @@ detect_ld_mismatch_susie <- function(z_snp,
       # compute p-values for the significance of z-score difference between observed and estimated values
       condz_dist$p_diff <- pchisq(condz_dist$z_std_diff^2, df = 1, lower.tail=F)
 
-      outlist_core[[as.character(region_tag)]] <- condz_dist
+      outlist_core[[as.character(region_id)]] <- condz_dist
     }
     outlist_core
   }
   parallel::stopCluster(cl)
-  stopifnot(length(outlist) == length(region_tags))
+  stopifnot(length(outlist) == length(region_ids))
 
   # return problematic variants and flipped variants
-  condz_dist <- data.table::rbindlist(outlist, idcol = "region_tag")
+  condz_dist <- data.table::rbindlist(outlist, idcol = "region_id")
   problematic_snps <- condz_dist$id[which(condz_dist$p_diff < p_diff_thresh)]
   flipped_snps <- condz_dist$id[which(condz_dist$logLR > 2 & abs(condz_dist$z) > 2)]
 

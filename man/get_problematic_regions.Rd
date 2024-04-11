@@ -16,7 +16,7 @@ get_problematic_regions(ctwas_res, weight, problematic_snps, pip_thresh = 0.5)
 \item{pip_thresh}{Minimum PIP value to select regions}
 }
 \value{
-a character vector of region tags with problematic high PIP SNPs or genes
+a character vector of region ids with problematic high PIP SNPs or genes
 }
 \description{
 Get regions with problematic high PIP SNPs or genes

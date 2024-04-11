@@ -42,10 +42,10 @@ ctwas_susie_rss <- function(z,
 anno_susie <- function(susie_res,
                        gid,
                        sid,
+                       region_id,
                        g_type = "gene",
                        g_context = "gene",
                        g_group = "gene",
-                       region_tag,
                        geneinfo = NULL,
                        snpinfo = NULL,
                        include_cs_index = TRUE) {
@@ -67,7 +67,7 @@ anno_susie <- function(susie_res,
   }
 
   anno <- as.data.frame(rbind(gene_anno, snp_anno))
-  susie_res_df <- cbind(anno, region_tag = region_tag, susie_pip = susie_res$pip)
+  susie_res_df <- cbind(anno, region_id = region_id, susie_pip = susie_res$pip)
 
   p <- length(gid) + length(sid)
   susie_res_df$mu2 <- colSums(susie_res$mu2[, seq(1, p)[1:p!=susie_res$null_index], drop = F]) #WARN: not sure for L>1

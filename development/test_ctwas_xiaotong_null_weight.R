@@ -25,7 +25,7 @@ if (file.exists(region_info_file)){
   region_info <- read.table(region_file, header = TRUE)
   colnames(region_info)[1:3] <- c("chrom", "start", "stop")
   region_info$chrom <- as.numeric(gsub("chr", "", region_info$chrom))
-  region_info$region_tag <- paste0(region_info$chr, ":", region_info$start, "-", region_info$stop)
+  region_info$region_id <- paste0(region_info$chr, ":", region_info$start, "-", region_info$stop)
 
   filestem <- paste0("ukb_", genome_version, "_0.1")
   ld_filestem <- sprintf("%s_chr%s.R_snp.%s_%s", filestem, region_info$chrom, region_info$start, region_info$stop)
@@ -162,7 +162,7 @@ if (file.exists(screen_regions_file)) {
   screened_regionlist <- readRDS(screen_regions_file)
 } else{
   runtime <- system.time({
-    screened_region_tags <- screen_regions(regionlist,
+    screened_region_ids <- screen_regions(regionlist,
                                            region_info,
                                            weights,
                                            L = 5,
@@ -174,10 +174,10 @@ if (file.exists(screen_regions_file)) {
                                            logfile = file.path(outputdir, paste0(outname, ".screen_regions.L5.log")))
   })
   cat(sprintf("Screen regions took %0.2f minutes\n",runtime["elapsed"]/60))
-  loginfo("%d regions left after screening regions", length(screened_region_tags))
+  loginfo("%d regions left after screening regions", length(screened_region_ids))
 
   # Expand screened regionlist with all SNPs in the regions
-  screened_regionlist <- regionlist[screened_region_tags]
+  screened_regionlist <- regionlist[screened_region_ids]
   if (thin < 1){
     loginfo("Expand regionlist with full SNPs for %d screened regions", length(screened_regionlist))
     screened_regionlist <- expand_regionlist(screened_regionlist,

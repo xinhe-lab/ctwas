@@ -28,7 +28,7 @@ if (file.exists(region_info_file)){
   region_info <- read.table(region_file, header = TRUE)
   colnames(region_info)[1:3] <- c("chrom", "start", "stop")
   region_info$chrom <- as.numeric(gsub("chr", "", region_info$chrom))
-  region_info$region_tag <- paste0(region_info$chr, ":", region_info$start, "-", region_info$stop)
+  region_info$region_id <- paste0(region_info$chr, ":", region_info$start, "-", region_info$stop)
   filestem <- paste0("ukb_", genome_version, "_0.1")
   ld_filestem <- sprintf("%s_chr%s.R_snp.%s_%s", filestem, region_info$chrom, region_info$start, region_info$stop)
   region_info$LD_matrix <- file.path(ld_R_dir, paste0(ld_filestem, ".RDS"))
@@ -75,8 +75,8 @@ if (file.exists(processed_z_snp_file)){
                               gwas_n,
                               drop_multiallelic = TRUE,
                               drop_strand_ambig = TRUE)
-    save(z_snp, file = file.path(outputdir, paste0(outname, ".preprocessed.z_snp.Rd")))
   })
+  save(z_snp, file = file.path(outputdir, paste0(outname, ".preprocessed.z_snp.Rd")))
   cat(sprintf("Preprocessing GWAS z-scores took %0.2f minutes\n",runtime["elapsed"]/60))
 }
 
@@ -95,10 +95,9 @@ if (file.exists(processed_weight_file)){
                                   ncore = ncore,
                                   drop_strand_ambig = TRUE,
                                   load_predictdb_LD = TRUE,
-                                  filter_protein_coding_genes = TRUE,
-                                  scale_by_ld_variance = TRUE)
-    save(weights, file = processed_weight_file)
+                                  filter_protein_coding_genes = TRUE)
   })
+  save(weights, file = processed_weight_file)
   cat(sprintf("Preprocessing weights took %0.2f minutes\n",runtime["elapsed"]/60))
 }
 
@@ -110,11 +109,10 @@ if( file.exists(gene_z_file) ){
   load(gene_z_file)
 }else{
   runtime <- system.time({
-    z_gene <- compute_gene_z(z_snp, weights, ncore=ncore,
-                             logfile = file.path(outputdir, paste0(outname, ".compute_gene_z.log")))
-    save(z_gene, file = gene_z_file)
+    z_gene <- compute_gene_z(z_snp, weights, ncore=ncore)
   })
   cat(sprintf("Imputing gene z-scores took %0.2f minutes\n",runtime["elapsed"]/60))
+  save(z_gene, file = gene_z_file)
 }
 
 ##### Get regionlist #####
@@ -174,7 +172,7 @@ if (file.exists(screen_regions_file)) {
   screened_regionlist <- readRDS(screen_regions_file)
 } else{
   runtime <- system.time({
-    screened_region_tags <- screen_regions(regionlist,
+    screened_region_ids <- screen_regions(regionlist,
                                            region_info,
                                            weights,
                                            L = 5,
@@ -186,10 +184,10 @@ if (file.exists(screen_regions_file)) {
                                            logfile = file.path(outputdir, paste0(outname, ".screen_regions.log")))
   })
   cat(sprintf("Screen regions took %0.2f minutes\n",runtime["elapsed"]/60))
-  loginfo("%d regions left after screening regions", length(screened_region_tags))
+  loginfo("%d regions left after screening regions", length(screened_region_ids))
 
   # Expand screened regionlist with all SNPs in the regions
-  screened_regionlist <- regionlist[screened_region_tags]
+  screened_regionlist <- regionlist[screened_region_ids]
   if (thin < 1){
     loginfo("Expand regionlist with full SNPs for %d screened regions", length(screened_regionlist))
     screened_regionlist <- expand_regionlist(screened_regionlist,

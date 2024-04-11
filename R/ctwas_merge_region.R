@@ -12,7 +12,7 @@ merge_region <- function(regionlist, boundary_genes){
 
     for (i in unique(regions$label)){
       merged_region <- regions[regions$label==i,]
-      region_tag_new <- paste0(min(merged_region$start),"_",max(merged_region$stop))
+      region_id_new <- paste0(min(merged_region$start),"_",max(merged_region$stop))
       gid <- c()
       sid <- c()
       minpos <- c()
@@ -20,8 +20,8 @@ merge_region <- function(regionlist, boundary_genes){
       LD_matrix <- c()
       SNP_info <- c()
       for(rn in 1:nrow(merged_region)){
-        region_tag <- paste0(merged_region$start[rn],"_",merged_region$stop[rn])
-        region <- regionlist[[as.character(b)]][[region_tag]]
+        region_id <- paste0(merged_region$start[rn],"_",merged_region$stop[rn])
+        region <- regionlist[[as.character(b)]][[region_id]]
         gid <- unique(c(gid, region[["gid"]]))
         sid <-  unique(c(sid, region[["sid"]]))
         minpos <- unique(c(minpos, region[["minpos"]]))
@@ -29,7 +29,7 @@ merge_region <- function(regionlist, boundary_genes){
         LD_matrix <- unique(c(LD_matrix, region[["LD_matrix"]]))
         SNP_info <-  unique(c(SNP_info, region[["SNP_info"]]))
       }
-      regionlist_merged[[as.character(b)]][[region_tag_new]] <- list("gid"  = gid,
+      regionlist_merged[[as.character(b)]][[region_id_new]] <- list("gid"  = gid,
                                                 "sid"  = sid,
                                                 "start" = min(merged_region$start),
                                                 "stop" = max(merged_region$stop),

@@ -10,7 +10,7 @@
 #'
 #' @param regionlist a list object indexing regions, variants and genes.
 #'
-#' @param region_tag a character string of region tag to be finemapped
+#' @param region_id a character string of region id to be finemapped
 #'
 #' @param weight_list a list of weights for each gene
 #'
@@ -32,7 +32,7 @@ finemap_regions_L1 <- function(z_snp,
                                z_gene,
                                gene_info,
                                regionlist,
-                               region_tags,
+                               region_ids,
                                weight_list = NULL,
                                group_prior = NULL,
                                group_prior_var = NULL,
@@ -45,21 +45,21 @@ finemap_regions_L1 <- function(z_snp,
     addHandler(writeToFile, file= logfile, level='DEBUG')
   }
 
-  if (length(region_tags) == 0) {
+  if (length(region_ids) == 0) {
     loginfo("No regions included!")
     finemap_res <- NULL
   }else{
     # select and assemble regionlist for rerunning finemapping
-    loginfo('Finemmapping with L = 1 for %d regions...', length(region_tags))
+    loginfo('Finemmapping with L = 1 for %d regions...', length(region_ids))
 
     # Rerun finemapping with L = 1
     finemap_res <- list()
-    for (region_tag in region_tags) {
-      finemap_res[[region_tag]] <- finemap_region(z_snp = z_snp,
+    for (region_id in region_ids) {
+      finemap_res[[region_id]] <- finemap_region(z_snp = z_snp,
                                                   z_gene = z_gene,
                                                   gene_info = gene_info,
                                                   regionlist = regionlist,
-                                                  region_tag = region_tag,
+                                                  region_id = region_id,
                                                   weight_list = weight_list,
                                                   L = 1,
                                                   group_prior = group_prior,
@@ -80,7 +80,7 @@ finemap_regions_L1 <- function(z_snp,
 #' @param problematic_snps a character vector of problematic SNP rsIDs
 #' @param pip_thresh Minimum PIP value to select regions
 #'
-#' @return a character vector of region tags with problematic high PIP SNPs or genes
+#' @return a character vector of region ids with problematic high PIP SNPs or genes
 #'
 #' @importFrom logging loginfo
 #'
@@ -89,7 +89,7 @@ get_problematic_regions <- function(ctwas_res, weight, problematic_snps, pip_thr
 
   if (length(problematic_snps) == 0) {
     loginfo('No problematic SNPs')
-    problematic_region_tags <- NULL
+    problematic_region_ids <- NULL
   }else{
     loginfo('Number of problematic SNPs: %d', length(problematic_snps))
 
@@ -120,14 +120,14 @@ get_problematic_regions <- function(ctwas_res, weight, problematic_snps, pip_thr
     # get problematic high PIP regions
     problematic_ids <- c(problematic_highpip_snps, problematic_highpip_genes)
     if (length(problematic_ids) > 0) {
-      problematic_region_tags <- unique(ctwas_res[ctwas_res$id %in% problematic_ids,"region_tag"])
-      loginfo('Number of problematic regions: %d', length(problematic_region_tags))
+      problematic_region_ids <- unique(ctwas_res[ctwas_res$id %in% problematic_ids,"region_id"])
+      loginfo('Number of problematic regions: %d', length(problematic_region_ids))
     }else{
       loginfo('No problematic regions found')
     }
   }
 
-  # return problematic region tags
-  return(problematic_region_tags)
+  # return problematic region ids
+  return(problematic_region_ids)
 }
 

@@ -121,17 +121,17 @@ assign_region_ids <- function(regioninfo,
 
   # downsampling for SNPs
   set.seed(seed)
-  snpinfo$thin_tag <- rep(0, nrow(snpinfo))
+  snpinfo$thin_id <- rep(0, nrow(snpinfo))
   n_kept <- round(nrow(snpinfo) * thin)
   idx_thin <- sample(1:nrow(snpinfo), n_kept)
-  snpinfo$thin_tag[idx_thin] <- 1
+  snpinfo$thin_id[idx_thin] <- 1
 
   regionlist <- list()
 
   # assign genes and SNPs to the region
   for (i in 1:nrow(regioninfo)){
 
-    region_tag <- regioninfo$region_tag[i]
+    region_id <- regioninfo$region_id[i]
     region_chrom <- regioninfo$chrom[i]
     region_start <- regioninfo$start[i]
     region_stop <- regioninfo$stop[i]
@@ -140,7 +140,7 @@ assign_region_ids <- function(regioninfo,
     # for genes across region boundaries, assign to the first region, and adjust later
     gidx <- which(geneinfo$chrom == region_chrom & geneinfo$p0 >= region_start & geneinfo$p0 < region_stop)
 
-    sidx <- which(snpinfo$chrom == region_chrom & snpinfo$pos >= region_start & snpinfo$pos < region_stop & snpinfo$thin_tag == 1)
+    sidx <- which(snpinfo$chrom == region_chrom & snpinfo$pos >= region_start & snpinfo$pos < region_stop & snpinfo$thin_id == 1)
 
     if (length(gidx) + length(sidx) < minvar) {next}
 
@@ -152,7 +152,7 @@ assign_region_ids <- function(regioninfo,
     minpos <- min(c(geneinfo$p0[gidx], snpinfo$pos[sidx]))
     maxpos <- max(c(geneinfo$p1[gidx], snpinfo$pos[sidx]))
 
-    regionlist[[region_tag]] <- list("region_tag" = region_tag,
+    regionlist[[region_id]] <- list("region_id" = region_id,
                                      "chrom" = region_chrom,
                                      "start" = region_start,
                                      "stop" = region_stop,
@@ -176,25 +176,25 @@ trim_regionlist <- function(regionlist, z_snp, trim_by = c("random", "z"), maxSN
   if (maxSNP < Inf){
     if (trim_by == "z") {
       # trim SNPs with lower |z|
-      for (region_tag in names(regionlist)){
-        if (length(regionlist[[region_tag]][["sid"]]) > maxSNP){
-          loginfo("Trim region %s with SNPs more than %s", region_tag, maxSNP)
-          idx <- match(regionlist[[region_tag]][["sid"]], z_snp$id)
+      for (region_id in names(regionlist)){
+        if (length(regionlist[[region_id]][["sid"]]) > maxSNP){
+          loginfo("Trim region %s with SNPs more than %s", region_id, maxSNP)
+          idx <- match(regionlist[[region_id]][["sid"]], z_snp$id)
           z.abs <- abs(z_snp[idx, "z"])
           ifkeep <- rank(-z.abs) <= maxSNP
-          regionlist[[region_tag]][["sid"]] <- regionlist[[region_tag]][["sid"]][ifkeep]
+          regionlist[[region_id]][["sid"]] <- regionlist[[region_id]][["sid"]][ifkeep]
         }
       }
     } else {
       # randomly trim snps
-      for (region_tag in names(regionlist)){
-        if (length(regionlist[[region_tag]][["sid"]]) > maxSNP){
-          loginfo("Trim region %s with SNPs more than %s", region_tag, maxSNP)
-          n.snps <- length(regionlist[[region_tag]][["sid"]])
+      for (region_id in names(regionlist)){
+        if (length(regionlist[[region_id]][["sid"]]) > maxSNP){
+          loginfo("Trim region %s with SNPs more than %s", region_id, maxSNP)
+          n.snps <- length(regionlist[[region_id]][["sid"]])
           ifkeep <- rep(FALSE, n.snps)
           set.seed(seed)
           ifkeep[sample.int(n.snps, size = maxSNP)] <- TRUE
-          regionlist[[region_tag]][["sid"]] <-  regionlist[[region_tag]][["sid"]][ifkeep]
+          regionlist[[region_id]][["sid"]] <-  regionlist[[region_id]][["sid"]][ifkeep]
         }
       }
     }
@@ -216,26 +216,26 @@ add_z_to_regionlist <- function(regionlist,
   doParallel::registerDoParallel(cl)
   corelist <- region2core(regionlist, ncore)
 
-  region_tags <- names(regionlist)
+  region_ids <- names(regionlist)
   regionlist2 <- foreach (core = 1:length(corelist), .combine = "c") %dopar% {
     regionlist2.core <- list()
-    region_tags.core <- corelist[[core]]
-    for (region_tag in region_tags.core) {
+    region_ids.core <- corelist[[core]]
+    for (region_id in region_ids.core) {
       # add z-scores and types of the region to the regionlist
-      regionlist2.core[[region_tag]] <- regionlist[[region_tag]]
-      sid <- regionlist[[region_tag]][["sid"]]
-      gid <- regionlist[[region_tag]][["gid"]]
+      regionlist2.core[[region_id]] <- regionlist[[region_id]]
+      sid <- regionlist[[region_id]][["sid"]]
+      gid <- regionlist[[region_id]][["gid"]]
       g_idx <- match(gid, zdf$id)
       s_idx <- match(sid, zdf$id)
       gs_idx <- c(g_idx, s_idx)
-      # regionlist2.core[[region_tag]][["zdf"]] <- zdf[gs_idx,]
-      regionlist2.core[[region_tag]][["z"]] <- zdf$z[gs_idx]
-      regionlist2.core[[region_tag]][["gs_type"]] <- zdf$type[gs_idx]
-      regionlist2.core[[region_tag]][["gs_context"]] <- zdf$context[gs_idx]
-      regionlist2.core[[region_tag]][["gs_group"]] <- zdf$group[gs_idx]
-      regionlist2.core[[region_tag]][["g_type"]] <- zdf$type[g_idx]
-      regionlist2.core[[region_tag]][["g_context"]] <- zdf$context[g_idx]
-      regionlist2.core[[region_tag]][["g_group"]] <- zdf$group[g_idx]
+      # regionlist2.core[[region_id]][["zdf"]] <- zdf[gs_idx,]
+      regionlist2.core[[region_id]][["z"]] <- zdf$z[gs_idx]
+      regionlist2.core[[region_id]][["gs_type"]] <- zdf$type[gs_idx]
+      regionlist2.core[[region_id]][["gs_context"]] <- zdf$context[gs_idx]
+      regionlist2.core[[region_id]][["gs_group"]] <- zdf$group[gs_idx]
+      regionlist2.core[[region_id]][["g_type"]] <- zdf$type[g_idx]
+      regionlist2.core[[region_id]][["g_context"]] <- zdf$context[g_idx]
+      regionlist2.core[[region_id]][["g_group"]] <- zdf$group[g_idx]
     }
     regionlist2.core
   }
@@ -250,19 +250,19 @@ adjust_boundary_genes <- function(boundary_genes, region_info, weights, regionli
 
   for (i in 1:nrow(boundary_genes)){
     gname <- boundary_genes[i, "id"]
-    region_tags <- unlist(strsplit(boundary_genes[i, "region_tag"], split = ";"))
+    region_ids <- unlist(strsplit(boundary_genes[i, "region_id"], split = ";"))
     wgt <- weights[[gname]][["wgt"]]
 
-    region_r2 <- sapply(region_tags, function(region_tag){
-      ld_snpinfo <- read_LD_SNP_files(region_info[region_info$region_tag == region_tag, "SNP_info"])
+    region_r2 <- sapply(region_ids, function(region_id){
+      ld_snpinfo <- read_LD_SNP_files(region_info[region_info$region_id == region_id, "SNP_info"])
       sum(wgt[which(rownames(wgt) %in% ld_snpinfo$id)]^2)})
 
     # assign boundary gene to the region with max r2, and remove it from other regions
-    selected_region_tag <- region_tags[which.max(region_r2)]
-    unselected_region_tags <- setdiff(region_tags, selected_region_tag)
-    regionlist[[selected_region_tag]][["gid"]] <- unique(c(regionlist[[selected_region_tag]][["gid"]],gname))
-    for(unselected_region_tag in unselected_region_tags){
-      regionlist[[unselected_region_tag]][["gid"]] <- regionlist[[unselected_region_tag]][["gid"]][regionlist[[unselected_region_tag]][["gid"]]!=gname]
+    selected_region_id <- region_ids[which.max(region_r2)]
+    unselected_region_ids <- setdiff(region_ids, selected_region_id)
+    regionlist[[selected_region_id]][["gid"]] <- unique(c(regionlist[[selected_region_id]][["gid"]],gname))
+    for(unselected_region_id in unselected_region_ids){
+      regionlist[[unselected_region_id]][["gid"]] <- regionlist[[unselected_region_id]][["gid"]][regionlist[[unselected_region_id]][["gid"]]!=gname]
     }
   }
 
@@ -308,28 +308,28 @@ expand_regionlist <- function(regionlist,
 
   trim_by <- match.arg(trim_by)
 
-  region_tags <- names(regionlist)
-  loginfo("Update regionlist for %d regions with full SNPs", length(region_tags))
+  region_ids <- names(regionlist)
+  loginfo("Update regionlist for %d regions with full SNPs", length(region_ids))
 
-  pb <- txtProgressBar(min = 0, max = length(region_tags), initial = 0, style = 3)
+  pb <- txtProgressBar(min = 0, max = length(region_ids), initial = 0, style = 3)
 
   # update SNP IDs for each region
-  for (i in 1:length(region_tags)){
-    region_tag <- region_tags[i]
+  for (i in 1:length(region_ids)){
+    region_id <- region_ids[i]
 
-    if (regionlist[[region_tag]][["thin"]] == 1){
+    if (regionlist[[region_id]][["thin"]] == 1){
       next
     }
 
     # load all SNPs in the region
-    snpinfo <- read_LD_SNP_files(region_info[region_info$region_tag == region_tag, "SNP_info"])
+    snpinfo <- read_LD_SNP_files(region_info[region_info$region_id == region_id, "SNP_info"])
     # remove SNPs not in z_snp
     snpinfo <- snpinfo[snpinfo$id %in% z_snp$id, , drop=FALSE]
-    regionlist[[region_tag]][["sid"]] <- snpinfo$id
+    regionlist[[region_id]][["sid"]] <- snpinfo$id
 
     # update minpos and maxpos in the region
-    regionlist[[region_tag]][["minpos"]] <- min(c(regionlist[[region_tag]][["minpos"]], snpinfo$pos))
-    regionlist[[region_tag]][["maxpos"]] <- max(c(regionlist[[region_tag]][["maxpos"]], snpinfo$pos))
+    regionlist[[region_id]][["minpos"]] <- min(c(regionlist[[region_id]][["minpos"]], snpinfo$pos))
+    regionlist[[region_id]][["maxpos"]] <- max(c(regionlist[[region_id]][["maxpos"]], snpinfo$pos))
 
     setTxtProgressBar(pb, i)
   }

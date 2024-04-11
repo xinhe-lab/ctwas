@@ -75,22 +75,22 @@ EM <- function(regionlist,
     EM_susie_res <- foreach (core = 1:length(corelist), .combine = "rbind", .packages = "ctwas") %dopar% {
       susie_res.core.list <- list()
       # run susie for each region
-      region_tags.core <- corelist[[core]]
-      for (region_tag in region_tags.core) {
+      region_ids.core <- corelist[[core]]
+      for (region_id in region_ids.core) {
         # load susie input data
         if (verbose)
-          loginfo("load susie input data for region %s", region_tag)
-        sid <- regionlist[[region_tag]][["sid"]]
-        gid <- regionlist[[region_tag]][["gid"]]
-        z <- regionlist[[region_tag]][["z"]]
-        gs_group <- regionlist[[region_tag]][["gs_group"]]
-        g_type <- regionlist[[region_tag]][["g_type"]]
-        g_context <- regionlist[[region_tag]][["g_context"]]
-        g_group <- regionlist[[region_tag]][["g_group"]]
+          loginfo("load susie input data for region %s", region_id)
+        sid <- regionlist[[region_id]][["sid"]]
+        gid <- regionlist[[region_id]][["gid"]]
+        z <- regionlist[[region_id]][["z"]]
+        gs_group <- regionlist[[region_id]][["gs_group"]]
+        g_type <- regionlist[[region_id]][["g_type"]]
+        g_context <- regionlist[[region_id]][["g_context"]]
+        g_group <- regionlist[[region_id]][["g_group"]]
 
         # update priors, prior variances and null_weight based on the estimated group_prior and group_prior_var from the previous iteration
         if (verbose)
-          loginfo("update priors, prior variances for region %s", region_tag)
+          loginfo("update priors, prior variances for region %s", region_id)
         res <- set_region_susie_priors(pi_prior, V_prior, gs_group, L = 1, use_null_weight = use_null_weight)
         prior <- res$prior
         V <- res$V
@@ -102,7 +102,7 @@ EM <- function(regionlist,
 
         # in susie, prior_variance is under standardized scale (if performed)
         if (verbose)
-          loginfo("run susie for region %s", region_tag)
+          loginfo("run susie for region %s", region_id)
         susie_res <- ctwas_susie_rss(z = z,
                                      R = R,
                                      prior_weights = prior,
@@ -112,7 +112,7 @@ EM <- function(regionlist,
                                      max_iter = max_iter,
                                      ...)
         if (verbose)
-          loginfo("annotate susie result for region %s", region_tag)
+          loginfo("annotate susie result for region %s", region_id)
         # annotate susie result
         susie_res_df <- anno_susie(susie_res,
                                    gid = gid,
@@ -120,10 +120,10 @@ EM <- function(regionlist,
                                    g_type = g_type,
                                    g_context = g_context,
                                    g_group = g_group,
-                                   region_tag = region_tag,
+                                   region_id = region_id,
                                    include_cs_index = FALSE)
 
-        susie_res.core.list[[region_tag]] <- susie_res_df
+        susie_res.core.list[[region_id]] <- susie_res_df
       }
 
       susie_res.core <- do.call(rbind, susie_res.core.list)

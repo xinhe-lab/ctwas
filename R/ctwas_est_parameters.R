@@ -77,9 +77,9 @@ est_param <- function(
   loginfo("Roughly estimated group_prior_var {%s}: {%s}", names(EM1_res$group_prior_var), EM1_res$group_prior_var)
 
   # Select regions with single effect
-  selected_region_tags <- select_single_effect_regions(regionlist, EM1_res$group_prior, p_single_effect)
-  loginfo("Selected %d regions with P(single effect) >= %s", length(selected_region_tags), p_single_effect)
-  selected_regionlist <- regionlist[selected_region_tags]
+  selected_region_ids <- select_single_effect_regions(regionlist, EM1_res$group_prior, p_single_effect)
+  loginfo("Selected %d regions with P(single effect) >= %s", length(selected_region_ids), p_single_effect)
+  selected_regionlist <- regionlist[selected_region_ids]
 
   # Run EM for more (niter2) iterations, getting rough estimates
   loginfo("Run EM for %d iterations on %d regions, getting accurate estimates ...",

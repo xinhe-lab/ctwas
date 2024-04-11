@@ -6,7 +6,7 @@
 \usage{
 finemap_region(
   regionlist,
-  region_tag,
+  region_id,
   region_info,
   weights,
   L = 5,
@@ -27,7 +27,7 @@ finemap_region(
 \arguments{
 \item{regionlist}{a list object indexing regions, variants and genes.}
 
-\item{region_tag}{a character string of region tags to be finemapped}
+\item{region_id}{a character string of region ids to be finemapped}
 
 \item{region_info}{a data frame of region definition and associated LD file names}
 

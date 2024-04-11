@@ -11,37 +11,16 @@
 #' @importFrom logging addHandler loginfo writeToFile
 #'
 #' @export
-#compute_gene_z <- function (z_snp, weights, logfile = NULL){
-#
-#  if (!is.null(logfile)) {
-#    addHandler(writeToFile, file = logfile, level = "DEBUG")
-#  }
-
-#  z_snp <- z_snp[,c("id", "z")]
-
-  # compute gene z-scores
-  # return a data frame with gene ids, and imputed gene z-scores
-#  z_gene <- data.frame()
-#  for (id in names(weights)) {
-#    wgt <- weights[[id]][["wgt"]]
-#    snpnames <- rownames(wgt)
-#    R.s <- weights[[id]][["R_wgt"]]
-#    z.idx <- match(snpnames, z_snp$id)
-#    z.s <- as.matrix(z_snp$z[z.idx])
-#    z.g <- as.matrix(crossprod(wgt, z.s)/sqrt(t(wgt)%*%R.s%*% wgt))
-#    dimnames(z.g) <- NULL
-#    z_gene <- rbind(z_gene, data.frame(id = id, z = z.g))
-#  }
-#  rownames(z_gene) <- NULL
-#
-#  return(z_gene)
-#}
-
 compute_gene_z <- function (z_snp, weights, ncore = 1, logfile = NULL){
+
+  if (!is.null(logfile)) {
+    addHandler(writeToFile, file = logfile, level = "DEBUG")
+  }
+  loginfo("computing z-scores for %d genes ...", length(weights))
+
   z_snp <- z_snp[,c("id", "z")]
-  # compute gene z-scores
-  # return a data frame with gene ids, and imputed gene z-scores
-  cl <- parallel::makeCluster(ncore, outfile = "", type = "FORK")
+
+  cl <- parallel::makeCluster(ncore, outfile = "")
   doParallel::registerDoParallel(cl)
   z_gene <- foreach(id = names(weights), .combine = "rbind") %dopar% {
     wgt <- weights[[id]][["wgt"]]
