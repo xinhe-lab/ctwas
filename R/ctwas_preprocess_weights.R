@@ -34,12 +34,15 @@ preprocess_weights <- function(weight_file,
                                weight_format = c("PredictDB", "Fusion"),
                                ncore = 1,
                                drop_strand_ambig = TRUE,
+                               scale_by_ld_variance = FALSE,
                                filter_protein_coding_genes = FALSE,
                                load_predictdb_LD = FALSE,
-                               method_Fusion = "enet"){
+                               method_Fusion = c("lasso","enet","top1","blup")){
 
   # check input arguments
   weight_format <- match.arg(weight_format)
+  method_Fusion <- match.arg(method_Fusion)
+  
   if (length(weight_file) > 1) {
     stop("Please provide only one weight file in weight_file.")
   }
@@ -61,7 +64,6 @@ preprocess_weights <- function(weight_file,
   weights <- list()
   loaded_weight <- load_weights(weight_file,
                                 weight_format,
-                                ld_snpinfo,
                                 filter_protein_coding_genes = filter_protein_coding_genes,
                                 load_predictdb_LD = load_predictdb_LD,
                                 method_Fusion = method_Fusion,
@@ -128,10 +130,10 @@ preprocess_weights <- function(weight_file,
     snps.idx <- match(snpnames, snps$id)
     snps <- snps[snps.idx,]
 
-    #if (isTRUE(scale_by_ld_variance)){
-    #  ld_snpinfo_wgt.idx <- match(snpnames, ld_snpinfo_wgt$id)
-    #  wgt <- wgt*sqrt(ld_snpinfo_wgt$variance[ld_snpinfo_wgt.idx])
-    #}
+    if (isTRUE(scale_by_ld_variance)){
+      ld_snpinfo_wgt.idx <- match(snpnames, ld_snpinfo_wgt$id)
+      wgt <- wgt*sqrt(ld_snpinfo_wgt$variance[ld_snpinfo_wgt.idx])
+    }
 
     n_wgt <- nrow(wgt.matrix)
 
