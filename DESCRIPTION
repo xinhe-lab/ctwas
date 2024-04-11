@@ -34,10 +34,13 @@ Imports:
     RSQLite,
     ggplot2,
     cowplot,
-    mixsqp
+    mixsqp,
+    magrittr,
+    tibble,
+    dplyr,
+    pgenlibr
 Suggests: 
     Rfast,
-    pgenlibr,
     knitr,
     rmarkdown
 VignetteBuilder: knitr

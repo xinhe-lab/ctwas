@@ -52,7 +52,9 @@ read_LD_SNP_file <- function(file){
 #'
 #' @param ncore integer, number of cores for parallel computing.
 #'
-#' @importFrom tidyverse %>% as_tibble left_join
+#' @importFrom magrittr %>%
+#' @importFrom tibble as_tibble
+#' @importFrom dplyr left_join mutate select
 #'
 #' @export
 #'
@@ -125,7 +127,9 @@ load_weights <- function(weight_file,
         wgt.matrix <- wgt.matrix[abs(wgt.matrix[, g.method]) > 0, , drop = F]
         wgt.matrix <- wgt.matrix[complete.cases(wgt.matrix), , drop = F]
         if (nrow(wgt.matrix) > 0){
-          out_table <- as_tibble(wgt.matrix[,g.method]) %>% mutate(rsid = rownames(wgt.matrix)) %>% left_join(as_tibble(snps) %>% select(-cm), by = "rsid")
+          out_table <- as_tibble(wgt.matrix[,g.method]) %>%
+            mutate(rsid = rownames(wgt.matrix)) %>%
+            left_join(tibble::as_tibble(snps) %>% select(-cm), by = "rsid")
           out_table$gene <- gname
           out_table <- out_table[,c("gene","rsid","varID","ref","alt","value")]
           colnames(out_table) <- c("gene","rsid","varID","ref_allele","eff_allele","weight")

@@ -13,9 +13,10 @@ preprocess_weights(
   weight_format = c("PredictDB", "Fusion"),
   ncore = 1,
   drop_strand_ambig = TRUE,
+  scale_by_ld_variance = FALSE,
   filter_protein_coding_genes = FALSE,
   load_predictdb_LD = FALSE,
-  method_Fusion = "enet"
+  method_Fusion = c("lasso", "enet", "top1", "blup")
 )
 }
 \arguments{

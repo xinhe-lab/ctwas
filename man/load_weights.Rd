@@ -7,12 +7,24 @@
 load_weights(
   weight_file,
   weight_format = c("PredictDB", "Fusion"),
-  ld_snpinfo,
   filter_protein_coding_genes = FALSE,
   load_predictdb_LD = FALSE,
-  method_Fusion = "lasso",
+  method_Fusion = c("lasso", "enet", "top1", "blup"),
   ncore = 1
 )
+}
+\arguments{
+\item{weight_file}{a string or a vector, pointing path to one or multiple sets of weights in PredictDB or Fusion format.}
+
+\item{weight_format}{a string or a vector, specifying format of each weight file, e.g. PredictDB, Fusion.}
+
+\item{filter_protein_coding_genes}{TRUE/FALSE. If TRUE, keep protein coding genes only. This option is only for PredictDB weights}
+
+\item{load_predictdb_LD}{TRUE/FALSE. If TRUE, load pre-computed LD among weight SNPs. This option is only for PredictDB weights}
+
+\item{method_Fusion}{a string, specifying the method to choose in Fusion models}
+
+\item{ncore}{integer, number of cores for parallel computing.}
 }
 \description{
 Load PredictDB or Fusion weights
