@@ -41,12 +41,12 @@ read_LD_SNP_file <- function(file){
 #' Load PredictDB or Fusion weights
 load_weights <- function(weight_file,
                          weight_format = c("PredictDB", "Fusion"),
-                         ld_snpinfo,
                          filter_protein_coding_genes = FALSE,
                          load_predictdb_LD = FALSE,
-                         method_Fusion = "lasso",
+                         method_Fusion = c("lasso","enet","top1","blup"),
                          ncore = 1){
   weight_format <- match.arg(weight_format)
+  method_Fusion <- match.arg(method_Fusion)
   if(weight_format == "PredictDB"){
     weight_name <- tools::file_path_sans_ext(basename(weight_file))
     # read the PredictDB weights
@@ -65,10 +65,6 @@ load_weights <- function(weight_file,
         weight_table <- weight_table[weight_table$gene %in% extra_table$gene,]
       }
     }
-
-    # scale predictdb weights by variance
-    ld_snpinfo.idx <- match(weight_table$rsid, ld_snpinfo$id)
-    weight_table$weight <- weight_table$weight*sqrt(ld_snpinfo$variance[ld_snpinfo.idx])
 
     if (isTRUE(load_predictdb_LD)){
       R_wgt <- read.table(gzfile(paste0(tools::file_path_sans_ext(weight_file), ".txt.gz")), header=T)
