@@ -78,8 +78,8 @@ if (file.exists(processed_z_snp_file)){
                               gwas_n,
                               drop_multiallelic = TRUE,
                               drop_strand_ambig = TRUE)
-    save(z_snp, file = file.path(outputdir, paste0(outname, ".preprocessed.z_snp.Rd")))
   })
+  save(z_snp, file = file.path(outputdir, paste0(outname, ".preprocessed.z_snp.Rd")))
   cat(sprintf("Preprocessing GWAS z-scores took %0.2f minutes\n",runtime["elapsed"]/60))
 }
 
@@ -98,6 +98,7 @@ if (file.exists(processed_weight_file)){
                                                    weight_format = "PredictDB",
                                                    ncore = ncore,
                                                    drop_strand_ambig = TRUE,
+                                                   scale_by_ld_variance = TRUE,
                                                    load_predictdb_LD = TRUE,
                                                    filter_protein_coding_genes = TRUE)
 
@@ -109,6 +110,7 @@ if (file.exists(processed_weight_file)){
                                                   weight_format = "PredictDB",
                                                   ncore = ncore,
                                                   drop_strand_ambig = TRUE,
+                                                  scale_by_ld_variance = TRUE,
                                                   load_predictdb_LD = TRUE,
                                                   filter_protein_coding_genes = TRUE)
 
@@ -120,6 +122,7 @@ if (file.exists(processed_weight_file)){
                                                  weight_format = "PredictDB",
                                                  ncore = ncore,
                                                  drop_strand_ambig = TRUE,
+                                                 scale_by_ld_variance = TRUE,
                                                  load_predictdb_LD = TRUE,
                                                  filter_protein_coding_genes = FALSE)
 
@@ -131,12 +134,13 @@ if (file.exists(processed_weight_file)){
                                                 weight_format = "PredictDB",
                                                 ncore = ncore,
                                                 drop_strand_ambig = TRUE,
+                                                scale_by_ld_variance = TRUE,
                                                 load_predictdb_LD = TRUE,
                                                 filter_protein_coding_genes = FALSE)
 
     weights <- c(weights_liver_expression, weights_lung_expression, weights_liver_splicing, weights_lung_splicing)
-    save(weights, file = processed_weight_file)
   })
+  save(weights, file = processed_weight_file)
   cat(sprintf("Preprocessing weights took %0.2f minutes\n",runtime["elapsed"]/60))
 }
 
@@ -150,13 +154,13 @@ if( file.exists(gene_z_file) ){
   runtime <- system.time({
     z_gene <- compute_gene_z(z_snp, weights, ncore=ncore,
                              logfile = file.path(outputdir, paste0(outname, ".compute_gene_z.log")))
-    save(z_gene, file = gene_z_file)
   })
+  save(z_gene, file = gene_z_file)
   cat(sprintf("Imputing gene z-scores took %0.2f minutes\n",runtime["elapsed"]/60))
 }
 
-#z_gene$type <- sapply(z_gene$id, function(x){paste(unlist(strsplit(unlist(strsplit(x, "[|]"))[2],"_")), collapse="_") })
-#z_gene$QTLtype <- sapply(z_gene$id, function(x){paste(unlist(strsplit(unlist(strsplit(x, "[|]"))[2],"_"))[2], collapse="_") })
+z_gene$type2 <- sapply(z_gene$id, function(x){paste(unlist(strsplit(unlist(strsplit(x, "[|]"))[2],"_")), collapse="_") })
+z_gene$QTLtype2 <- sapply(z_gene$id, function(x){paste(unlist(strsplit(unlist(strsplit(x, "[|]"))[2],"_"))[2], collapse="_") })
 
 ##### Get regionlist #####
 regionlist_thin_file <- file.path(outputdir, paste0(outname, ".regionlist.thin", thin, ".RDS"))
@@ -176,8 +180,8 @@ if (file.exists(regionlist_thin_file)) {
                           adjust_boundary_genes = TRUE,
                           ncore = ncore)
   })
-  cat(sprintf("Get regionlist took %0.2f minutes\n",runtime["elapsed"]/60))
   saveRDS(res, regionlist_thin_file)
+  cat(sprintf("Get regionlist took %0.2f minutes\n",runtime["elapsed"]/60))
 }
 regionlist <- res$regionlist
 boundary_genes <- res$boundary_genes
@@ -198,8 +202,8 @@ if (file.exists(param_file)) {
                        logfile = file.path(outputdir, paste0(outname, ".est_param.log")),
                        ncore = ncore)
   })
-  cat(sprintf("Parameter estimation took %0.2f minutes\n",runtime["elapsed"]/60))
   saveRDS(param, param_file)
+  cat(sprintf("Parameter estimation took %0.2f minutes\n",runtime["elapsed"]/60))
 }
 group_prior <- param$group_prior
 group_prior_var <- param$group_prior_var
@@ -261,5 +265,5 @@ runtime <- system.time({
                                  ncore = ncore,
                                  verbose = TRUE)
 })
-cat(sprintf("Finemapping took %0.2f minutes\n",runtime["elapsed"]/60))
 saveRDS(finemap_res, file.path(outputdir, paste0(outname, ".finemap_regions.res.RDS")))
+cat(sprintf("Finemapping took %0.2f minutes\n",runtime["elapsed"]/60))

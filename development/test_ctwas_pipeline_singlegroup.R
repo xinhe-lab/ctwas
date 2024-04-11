@@ -89,9 +89,9 @@ if (file.exists(processed_weight_file)){
                                   z_snp,
                                   ncore = ncore,
                                   drop_strand_ambig = TRUE,
+                                  scale_by_ld_variance = TRUE,
                                   load_predictdb_LD = TRUE,
-                                  filter_protein_coding_genes = TRUE,
-                                  scale_by_ld_variance = TRUE)
+                                  filter_protein_coding_genes = TRUE)
     save(weights, file = processed_weight_file)
   })
   cat(sprintf("Preprocessing weights took %0.2f minutes\n",runtime["elapsed"]/60))

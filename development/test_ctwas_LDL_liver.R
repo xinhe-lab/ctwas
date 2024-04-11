@@ -94,6 +94,7 @@ if (file.exists(processed_weight_file)){
                                   context = "liver",
                                   ncore = ncore,
                                   drop_strand_ambig = TRUE,
+                                  scale_by_ld_variance = TRUE,
                                   load_predictdb_LD = TRUE,
                                   filter_protein_coding_genes = TRUE)
   })
@@ -111,8 +112,8 @@ if( file.exists(gene_z_file) ){
   runtime <- system.time({
     z_gene <- compute_gene_z(z_snp, weights, ncore=ncore)
   })
-  cat(sprintf("Imputing gene z-scores took %0.2f minutes\n",runtime["elapsed"]/60))
   save(z_gene, file = gene_z_file)
+  cat(sprintf("Imputing gene z-scores took %0.2f minutes\n",runtime["elapsed"]/60))
 }
 
 ##### Get regionlist #####
@@ -133,8 +134,8 @@ if (file.exists(regionlist_thin_file)) {
                           adjust_boundary_genes = TRUE,
                           ncore = ncore)
   })
-  cat(sprintf("Get regionlist took %0.2f minutes\n",runtime["elapsed"]/60))
   saveRDS(res, regionlist_thin_file)
+  cat(sprintf("Get regionlist took %0.2f minutes\n",runtime["elapsed"]/60))
 }
 regionlist <- res$regionlist
 boundary_genes <- res$boundary_genes
@@ -155,8 +156,8 @@ if (file.exists(param_file)) {
                        logfile = file.path(outputdir, paste0(outname, ".est_param.log")),
                        ncore = ncore)
   })
-  cat(sprintf("Parameter estimation took %0.2f minutes\n",runtime["elapsed"]/60))
   saveRDS(param, param_file)
+  cat(sprintf("Parameter estimation took %0.2f minutes\n",runtime["elapsed"]/60))
 }
 group_prior <- param$group_prior
 group_prior_var <- param$group_prior_var
