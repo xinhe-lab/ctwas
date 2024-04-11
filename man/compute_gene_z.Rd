@@ -11,6 +11,8 @@ compute_gene_z(z_snp, weights, ncore = 1, logfile = NULL)
 
 \item{weights}{a list of weights}
 
+\item{ncore}{The number of cores used to parallelize computation over weights}
+
 \item{logfile}{the log file, if NULL will print log info on screen}
 }
 \value{

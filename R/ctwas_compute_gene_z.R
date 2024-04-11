@@ -4,6 +4,8 @@
 #'
 #' @param weights a list of weights
 #'
+#' @param ncore The number of cores used to parallelize computation over weights
+#'
 #' @param logfile the log file, if NULL will print log info on screen
 #'
 #' @return a data frame of gene z-scores
@@ -16,9 +18,11 @@ compute_gene_z <- function (z_snp, weights, ncore = 1, logfile = NULL){
   if (!is.null(logfile)) {
     addHandler(writeToFile, file = logfile, level = "DEBUG")
   }
-  loginfo("computing z-scores for %d genes ...", length(weights))
-
-  z_snp <- z_snp[,c("id", "z")]
+  loginfo("Computing z-scores for %d weights ...", length(weights))
+  loginfo("%d SNPs in z_snp", nrow(z_snp))
+  weight_snpnames <- unique(unlist(lapply(weights, function(x){rownames(x[["wgt"]])})))
+  z_snp <- z_snp[z_snp$id %in% weight_snpnames, c("id", "z")]
+  loginfo("%d SNPs with weights", nrow(z_snp))
 
   cl <- parallel::makeCluster(ncore, outfile = "")
   doParallel::registerDoParallel(cl)
