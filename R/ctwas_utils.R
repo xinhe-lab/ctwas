@@ -45,6 +45,7 @@ load_weights <- function(weight_file,
                          load_predictdb_LD = FALSE,
                          method_Fusion = c("lasso","enet","top1","blup"),
                          ncore = 1){
+  library(tidyverse)
   weight_format <- match.arg(weight_format)
   method_Fusion <- match.arg(method_Fusion)
   if(weight_format == "PredictDB"){
@@ -81,7 +82,8 @@ load_weights <- function(weight_file,
     wgtpos <- read.table(wgtposfile, header = T, stringsAsFactors = F)
     wgtpos <- transform(wgtpos, ID = ifelse(duplicated(ID) | duplicated(ID, fromLast = TRUE),
                                             paste(ID, ave(ID, ID, FUN = seq_along), sep = "_ID"), ID))
-
+    wgtpos <- wgtpos[wgtpos$ID!="NA_IDNA",] #filter NA genes
+    loginfo("Loading FUSION weights ...")
     cl <- parallel::makeCluster(ncore, outfile = "", type = "FORK")
     doParallel::registerDoParallel(cl)
     weight_table <- NULL
