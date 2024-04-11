@@ -37,3 +37,25 @@ The estimated s gives information about the
   pseudolikelihood \eqn{L(s) = \prod_{j=1}^{p} p(z_j | z_{-j}, s,
   R)}, \eqn{0 < s < 1}.
 }
+\examples{
+set.seed(1)
+n = 500
+p = 1000
+beta = rep(0,p)
+beta[1:4] = 0.01
+X = matrix(rnorm(n*p),nrow = n,ncol = p)
+X = scale(X,center = TRUE,scale = TRUE)
+y = drop(X \%*\% beta + rnorm(n))
+input_ss = compute_suff_stat(X,y,standardize = TRUE)
+ss = univariate_regression(X,y)
+R = cor(X)
+attr(R,"eigen") = eigen(R,symmetric = TRUE)
+zhat = with(ss,betahat/sebetahat)
+
+# Estimate s using the unadjusted z-scores.
+s0 = estimate_s_rss(zhat,R)
+
+# Estimate s using the adjusted z-scores.
+s1 = estimate_s_rss(zhat,R,n)
+
+}
