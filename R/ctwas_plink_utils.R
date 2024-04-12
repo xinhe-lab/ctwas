@@ -58,22 +58,6 @@ prep_pvar <- function(pgenf, outputdir = getwd()){
   return(pvarfout)
 }
 
-#' Read .pvar file into R
-#' @param pvarf .pvar file or .bim file with have proper
-#'  .pvar file format: https://www.cog-genomics.org/plink/2.0/formats#pvar
-#'
-#' @return A data.table. variant info
-#'
-read_pvar <- function(pvarf){
-
-  pvardt <- data.table::fread(pvarf, skip = "#CHROM")
-  pvardt <- dplyr::rename(pvardt, "chrom" = "#CHROM", "pos" = "POS",
-                          "alt" = "ALT", "ref" = "REF", "id" = "ID")
-  pvardt <- pvardt[, c("chrom", "id", "pos", "alt", "ref")]
-  return(pvardt)
-}
-
-
 #' Read .pgen file into R
 #'
 #' @param pgenf .pgen file or .bed file
@@ -128,4 +112,47 @@ read_pgen <- function(pgen, variantidx = NULL, meanimpute = F ){
   pgenlibr::ReadList(pgen,
                      variant_subset = variantidx,
                      meanimpute = meanimpute)
+}
+
+
+#' Read .pvar file into R
+#' @param pvarf .pvar file with proper format: https://www.cog-genomics.org/plink/2.0/formats#pvar
+#'
+#' @return A data.table. variant info
+#'
+read_pvar <- function(pvarf){
+  pvar <- data.table::fread(pvarf, skip = "#CHROM")
+  pvar <- dplyr::rename(pvar, "chrom" = "#CHROM", "pos" = "POS",
+                        "alt" = "ALT", "ref" = "REF", "id" = "ID")
+  pvar <- pvar[, c("chrom", "id", "pos", "alt", "ref")]
+  return(pvar)
+}
+
+#' Read .bim file into R
+#' @param bimf .bim file with proper format: https://www.cog-genomics.org/plink/2.0/formats#bim
+#'
+#' @return A data.table. variant info
+#'
+read_bim <- function(bimf) {
+  bim <- data.table::fread(bimf)
+  colnames(bim) <- c("chr", "id", "cm", "pos", "alt", "ref")
+  return(bim)
+}
+
+#' Read variant information from .pvar or .bim file into R
+#' @param var_info_file .pvar or .bim file with proper format:
+#' .pvar: https://www.cog-genomics.org/plink/2.0/formats#pvar
+#' .bim: https://www.cog-genomics.org/plink/2.0/formats#bim
+#'
+#' @return A data.table. variant info
+#'
+read_var_info <- function(var_info_file){
+  if (file_ext(var_info_file) == "pvar"){
+    var_info <- read_pvar(var_info_file)
+  } else if (file_ext(var_info_file) == "bim"){
+    var_info <- read_bim(var_info_file)
+  } else{
+    stop("unrecognized input")
+  }
+  return(var_info)
 }
