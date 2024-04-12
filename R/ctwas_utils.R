@@ -10,6 +10,30 @@ label_merged_regions <- function(df) {
   return(df)
 }
 
+
+label_overlapping_regions <- function(df) {
+  # Sort the dataframe by 'start' and then by 'stop'
+  df <- df[order(df$start, df$stop),]
+  
+  # Initialize the label counter and assign the first label
+  current_label <- 1
+  df$label <- current_label
+  
+  # Loop through the rows of the dataframe starting from the second row
+  for (i in 2:nrow(df)) {
+    # Check if the current row overlaps with the previous row
+    if (df$start[i] <= df$stop[i-1]) {
+      df$label[i] <- current_label
+    } else {
+      current_label <- current_label + 1
+      df$label[i] <- current_label
+    }
+  }
+  
+  return(df)
+}
+
+
 #' read all LD SNP info files as a data frame
 read_LD_SNP_files <- function(files){
   if (length(files)>0){
