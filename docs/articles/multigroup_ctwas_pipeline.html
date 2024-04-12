@@ -360,7 +360,7 @@ The <code>get_regionlist</code> function will assign genes, SNPs and their z-sco
 <div class="section level2">
 <h2 id="screening-regions">Screening regions<a class="anchor" aria-label="anchor" href="#screening-regions"></a>
 </h2>
-<p>This step will run a screening process to fine-map all regions with down-sampled SNPs, and select regions with strong gene signals (<code>min_gene_PIP = 0.5</code> by default). After selecting regions with strong signals, we expand the screened regions with full sets of SNPs to as input regionlist for finemapping.</p>
+<p>This step will run a screening process to fine-map all regions with down-sampled SNPs, and select regions with strong signals (<code>min_nonSNP_PIP = 0.5</code> by default). After selecting regions with strong signals, we expand the screened regions with full sets of SNPs to as input regionlist for finemapping.</p>
 <div class="sourceCode" id="cb13"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">screened_region_ids</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/screen_regions.html">screen_regions</a></span><span class="op">(</span><span class="va">regionlist</span>,</span>
 <span>                                      <span class="va">region_info</span>,</span>
@@ -368,8 +368,7 @@ The <code>get_regionlist</code> function will assign genes, SNPs and their z-sco
 <span>                                      L <span class="op">=</span> <span class="fl">5</span>,</span>
 <span>                                      group_prior <span class="op">=</span> <span class="va">group_prior</span>,</span>
 <span>                                      group_prior_var <span class="op">=</span> <span class="va">group_prior_var</span>,</span>
-<span>                                      max_snp_region <span class="op">=</span> <span class="va">max_snp_region</span>,</span>
-<span>                                      min_gene_PIP <span class="op">=</span> <span class="fl">0.5</span>,</span>
+<span>                                      min_nonSNP_PIP <span class="op">=</span> <span class="fl">0.5</span>,</span>
 <span>                                      ncore <span class="op">=</span> <span class="va">ncore</span>,</span>
 <span>                                      verbose <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span>
 <span><span class="co"># Expand screened regionlist with all SNPs in the regions</span></span>

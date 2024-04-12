@@ -222,7 +222,6 @@ if (file.exists(screen_regions_file)) {
                                            L = 5,
                                            group_prior = group_prior,
                                            group_prior_var = group_prior_var,
-                                           max_snp_region = max_snp_region,
                                            ncore = ncore,
                                            verbose = TRUE,
                                            logfile = file.path(outputdir, paste0(outname, ".screen_regions.log")))

@@ -354,7 +354,7 @@ saveRDS(ctwas_parameters, paste0(outputdir, "/", outname, ".ctwas_parameters.RDS
 ## Screening regions
 
 This step will run a screening process to fine-map all regions with down-sampled SNPs,
-and select regions with strong gene signals (`min_gene_PIP = 0.5` by default). 
+and select regions with strong signals (`min_nonSNP_PIP = 0.5` by default). 
 After selecting regions with strong signals, we expand the screened regions with 
 full sets of SNPs to as input regionlist for finemapping.
 ```{r screen_regions, eval=FALSE}
@@ -364,8 +364,7 @@ screened_region_ids <- screen_regions(regionlist,
                                       L = 5,
                                       group_prior = group_prior,
                                       group_prior_var = group_prior_var,
-                                      max_snp_region = max_snp_region,
-                                      min_gene_PIP = 0.5,
+                                      min_nonSNP_PIP = 0.5,
                                       ncore = ncore,
                                       verbose = TRUE)
 # Expand screened regionlist with all SNPs in the regions
