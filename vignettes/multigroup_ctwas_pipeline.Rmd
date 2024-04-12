@@ -27,12 +27,12 @@ which extends our earlier cTWAS method (single group version) to integrate multi
 Install the `multigroup` branch of `cTWAS` package
 
 ```{r install_package, eval=FALSE}
-remotes::install_github("xinhe-lab/ctwas", ref = "multigroup")
+remotes::install_github("xinhe-lab/ctwas", ref = "multigroup_test")
 ```
 
 Load the package
 
-```{r load_package, eval=FALSE}
+```{r load_package}
 library(ctwas)
 ```
 
@@ -42,160 +42,381 @@ In this version of `cTWAS` package, we require first running the data preprocess
 before running parameter estimation and finemapping steps of cTWAS analysis. 
 
 The inputs for the summary statistics version of cTWAS include GWAS summary statistics, 
-prediction models for genes in PredictDB format, and LD reference. 
+prediction models in PredictDB format or FUSION format, and LD reference. 
 
 ### GWAS z-scores
 
 We read the GWAS summary statistics as a data frame `z_snp`, with columns "id", "A1", "A2", "z", and each row is a variant. 
 `A1` is the alternate allele, and `A2` is the reference allele. 
 
-We also need to specify the GWAS sample size.
+For this analysis, we will use summary statistics from a GWAS of LDL cholesterol in the UK Biobank. We will download the VCF from the IEU Open GWAS Project. 
+```{r, eval=FALSE}
+# set the working directory, download the summary statistics, and unzip the file.
+dir.create("gwas_summary_stats")
+
+system("wget https://gwas.mrcieu.ac.uk/files/ukb-d-30780_irnt/ukb-d-30780_irnt.vcf.gz -P gwas_summary_stats")
+R.utils::gunzip("gwas_summary_stats/ukb-d-30780_irnt.vcf.gz")
+```
+
+Next, we will read the summary statistics. Then, we will compute the z-scores and format the input data. We will also collect the sample size, which will be useful later. We will save this output for convenience.
+
+```{r, eval=FALSE}
+# read the data using the VariantAnnotation package
+z_snp <- VariantAnnotation::readVcf("gwas_summary_stats/ukb-d-30780_irnt.vcf")
+z_snp <- as.data.frame(gwasvcf::vcf_to_tibble(z_snp))
+
+# compute the z-scores
+z_snp$Z <- z_snp$ES/z_snp$SE
+
+# collect sample size (most frequent sample size for all variants)
+gwas_n <- as.numeric(names(sort(table(z_snp$SS),decreasing=TRUE)[1]))
+cat("gwas_n=", gwas_n, "\n")
+
+# subset the columns and format the column names
+z_snp <- z_snp[,c("rsid", "ALT", "REF", "Z")]
+colnames(z_snp) <- c("id", "A1", "A2", "z")
+
+# save the formatted z-scores and GWAS sample size
+outputdir <- "/project2/xinhe/shared_data/multigroup_ctwas/LDL_multigroup_tutorial/"
+dir.create(outputdir, showWarnings=F, recursive=T)
+outname <- "example"
+
+gwas_name <- "ukb-d-30780_irnt"
+z_snp_outfile <- file.path(outputdir, paste0(gwas_name, ".z_snp.Rd"))
+save(z_snp, gwas_n, file=z_snp_outfile)
+```
+
 
 ### Prediction models
 
-The `multigroup` version of cTWAS only accepts multiple sets of prediction models in PredictDB format. 
-We provide functions to convert weights from FUSION format to PredictDB format.
+The `multigroup` version of cTWAS accepts multiple sets of prediction models in PredictDB or FUSION format. 
 
-To specify weights in PredictDB format, provide the path to the `.db` file. Multiple prediction models can be specified by providing multiple paths as a vector.
+Please check [PredictDB](http://predictdb.org/) for the format of PredictDB weights. To specify weights in PredictDB format, provide the path to the `.db` file. 
+
+Please check [Fusion/TWAS](http://gusevlab.org/projects/fusion/#compute-your-own-predictive-models) for the format of FUSION weights. 
 
 ### LD reference and region info
 
 LD reference information can be provided as genetic correlation matrices (termed "R matrices") 
 for regions that are approximately LD-independent. 
 
-It is critical that the genome build (e.g. hg38) of the LD reference matches the genome build used to train the prediction models. 
+cTWAS performs its analysis region-by-region. The preferred way to run cTWAS is to provide pre-computed LD matrices for each region. 
+
+__It is critical that the genome build (e.g. hg38) of the LD reference matches the genome build used to train the prediction models.__
 The genome build of the GWAS summary statistics does not matter because variant positions are determined by the LD reference.
 
+The choice of LD reference population is important for fine-mapping. Best practice for fine-mapping is to use in-sample LD reference (LD computed using the subjects in the GWAS sample). If in-sample LD reference is not an option, the LD reference should be as representative of the population in the GWAS sample as possible. Given that cTWAS is an extended fine-mapping algorithm, and that gene z-scores are computed using the observed GWAS z-scores, which reflect patterns of LD in the GWAS population, our recommendation is to match the LD reference to the GWAS population, not the population used to build the prediction models. 
+
+#### Defining regions
+
 cTWAS includes pre-defined regions based on European (EUR), Asian (ASN), or African (AFR) populations, 
-using either genome build b38 or b37.
+using either genome build b38 or b37. 
 These regions were previously generated using [LDetect](https://github.com/endrebak/ldetect). 
 
+#### LD matrices
+
+To use LD matrices for the LD reference, provide a directory containing all of the `.RDS` matrix files and matching `.Rvar` variant information files. 
+
+We have precomputed reference LD matrices and the variant information tables accompanying the LD matrices for both UKB and 1000G European Phase3 references.
+The complete LD matrices of European individuals from UK Biobank can be downloaded [here](https://uchicago.box.com/s/jqocacd2fulskmhoqnasrknbt59x3xkn). On the University of Chicago RCC cluster, the b38 reference is available at `/project2/mstephens/wcrouse/UKB_LDR_0.1/` and the b37 reference is available at `/project2/mstephens/wcrouse/UKB_LDR_0.1_b37/`.
+
+#### region info
+
 In this version of the package, we also require a data frame `region_info` containing the following columns: 
-"chrom", "start", "end", "region_name", "LD_matrix", "SNP_info".
+"chrom", "start", "stop", "region_id", "LD_matrix", "SNP_info".
 
-"chrom", "start", "end" are the genomic coordinates of the regions, 
-"LD_matrix" stores the paths to the precomputed LD (R) matrices (`.RDS` files in our UK Biobank reference),
-"SNP_info" stores the paths to the variant information corresponding to the LD matrices (`.Rvar` files in our UK Biobank reference). 
+"chrom", "start", "stop" are the genomic coordinates of the regions, 
+"region_id" contains the IDs of the region, and we use "chr:start-stop" format in region IDs by default.
+"LD_matrix" stores the paths to the precomputed LD (R) matrices (`.RDS` files in our precomputed reference LD files),
+"SNP_info" stores the paths to the variant information corresponding to the LD matrices (`.Rvar` files in our precomputed reference LD files). 
 
-```{r region_info}
-region_file <- system.file("extdata/ldetect", "EUR.b38.bed", package = "ctwas")
+The `.RDS` file is [R .RDS format](https://www.rdocumentation.org/packages/base/versions/3.3.2/topics/readRDS?tap_a=5644-dce66f&tap_s=10907-287229). It stores the LD correlation matrix for a region (a $p \times p$ matrix, $p$ is the number of variants in the region). We require that for each `.RDS` file, in the same directory, there is a corresponding file with the same stem but ending with the suffix `.Rvar`. This `.Rvar` files includes variant information for the region, and the order of its rows must match the order of rows and columns in the `.RDS` file.
+
+Here we use b38 European region file, which is included in the package.
+
+```{r region_info, eval=FALSE}
+genome_version <- "b38"
+ld_R_dir <- "/project2/mstephens/wcrouse/UKB_LDR_0.1/"
+
+region_file <- system.file("extdata/ldetect", paste0("EUR.", genome_version, ".bed"), package = "ctwas")
 region_info <- read.table(region_file, header = TRUE)
 colnames(region_info)[1:3] <- c("chrom", "start", "stop")
 region_info$chrom <- as.numeric(gsub("chr", "", region_info$chrom))
-region_info$region_tag <- paste0(region_info$chr, ":", region_info$start, "-", region_info$stop)
+region_info$region_id <- paste0(region_info$chr, ":", region_info$start, "-", region_info$stop)
 
-ld_R_dir <- "/project2/mstephens/wcrouse/UKB_LDR_0.1"
-filestem <- "ukb_b38_0.1"
+filestem <- paste0("ukb_", genome_version, "_0.1")
 ld_filestem <- sprintf("%s_chr%s.R_snp.%s_%s", filestem, region_info$chrom, region_info$start, region_info$stop)
 region_info$LD_matrix <- file.path(ld_R_dir, paste0(ld_filestem, ".RDS"))
 region_info$SNP_info <- file.path(ld_R_dir, paste0(ld_filestem, ".Rvar"))
+stopifnot(all(file.exists(region_info$LD_matrix)))
+stopifnot(all(file.exists(region_info$SNP_info)))
+write.table(region_info, file = file.path(outputdir, "region_info.txt"), sep = "\t", col.names = T, row.names = F, quote = F)
+```
 
-region_info[1:3,]
+The columns of the `.Rvar` file include information on chromosome, variant name, position in base pairs, and the alternative and reference alleles. The `variance` column is the variance of each variant prior to standardization; this is required for PredictDB weights but not FUSION weights. PredictDB weights should be scaled by the variance before imputing gene expression. This is because PredictDB weights assume that variant genotypes are not standardized before imputation, but our implementation assumes standardized variant genotypes. If variance information is missing, or if weights are in PredictDB format but are already on the standardized scale (e.g. if they were converted from FUSION to PredictDB format), this scaling can be turned off using the option `scale_by_ld_variance=FALSE` using the multigroup version of cTWAS. We've also include information on allele frequency in the variant info, but this is optional.
+
+The naming convention for the LD matrices is `[filestem]_chr[#].R_snp.[start]_[end].RDS`. cTWAS expects that all `.RDS` and `.Rvar` files in the directory contain LD information, so no other files with these suffixes should be in the directory. Each variant should be uniquely assigned to a region, and the regions should be left closed and right open, i.e. [start, stop). The positions of the LD matrices must match exactly the positions specified by the region file. Do not include invariant or multiallelic variants in the LD reference. 
+
+#### Convert reference genotype data to LD matrices
+
+We could genotype data in PLINK format to LD matrices (.RDS) and variance information (.Rvar) files, using the `convert_geno_to_LD_matrix` function.
+Below is an example of generating LD matrices using 1000G EUR Phase3 PLINK genotype data.
+
+```{r convert_geno_to_LD_matrix, eval=FALSE}
+# specify LD reference
+ldref_dir <- "/project2/xinhe/shared_data/ldsc/sldsc/1000G_EUR_Phase3_plink"
+# genotype files in PLINK .bed or .pgen format
+genotype_files <- file.path(ldref_dir, paste0("1000G.EUR.QC.", 1:22, ".bed"))
+
+# variance information files in PLINK .bim or .pvar format
+# the output .Rvar files will use the positions and allele information in varinfo_files
+varinfo_files <- file.path(ldref_dir, paste0("1000G.EUR.QC.", 1:22,".bim"))
+
+# prepare a data frame region_info for LD regions with columns "chr", "start", and "stop,
+# the positions should match those in snpinfo_files
+genome_version = "b37"
+region_file <- system.file("extdata/ldetect", paste0("EUR.", genome_version, ".bed"), package = "ctwas")
+region_info <- read.table(region_file, header = T, stringsAsFactors = F)
+
+# specify output
+LD_outputdir <- "/project2/xinhe/shared_data/multigroup_ctwas/ref_LD_R/1000G_EUR_Phase3_b37/"
+LD_outname <- "1000G_EUR_Phase3_b37"
+region_info <- convert_geno_to_LD_matrix(region_info, genotype_files, varinfo_files, outputdir = LD_outputdir, outname = LD_outname)
 ```
 
 ### Data harmonization
 
-These inputs should be harmonized prior to cTWAS analysis (i.e. the reference and alternative alleles for each variant should match across all three data sources). 
+These inputs should be harmonized prior to cTWAS analysis (i.e. the reference and alternative alleles for each variant 
+should match across all three data sources). 
 
-#### Harmonizing GWAS z-scores and LD reference and detect LD mismatches
+#### Harmonizing GWAS z-scores and LD reference
 
-The `preprocess_z()` function first harmonizes GWAS z-scores and LD reference based on the included allele information, 
-then performs LD mismatch diagnosis using the `kriging_rss()` function from SuSiE RSS, 
-and flips signs for variants detected with allele flipping issues. 
-Note, the LD mismatch diagnosis procedure can be time consuming.
+The `preprocess_z_snp()` function harmonizes GWAS z-scores and LD reference based on the included allele information.
+If `drop_multiallelic = TRUE`, it will drop multiallelic variants. 
+If `drop_strand_ambig = TRUE`, it will drop strand ambiguous variants.
+
+```{r preprocess_z_snp, eval=FALSE}
+# load the GWAS sumstats data
+z_snp_outfile <- file.path(outputdir, paste0(gwas_name, ".z_snp.Rd"))
+load(z_snp_outfile)
+
+z_snp <- preprocess_z_snp(z_snp, region_info, gwas_n, drop_multiallelic = TRUE, drop_strand_ambig = TRUE)
+save(z_snp, file = file.path(outputdir, paste0(outname, ".preprocessed.z_snp.Rd")))
+```
 
 #### Harmonizing prediction models and LD reference
 
 The `preprocess_weight()` function harmonizes the PredictDB prediction models and LD reference. 
 This only needs to be done once per combination of prediction models and LD reference. 
 
+In this example, we use four weights, two eQTL models and two sQTLs models from liver and lung.
+We preprocess each weight file separately and combine them in the end. 
+We specify the `type` as the molecular QTL types, and `context` as the tissues, cell types, or conditions. 
+For the expression models, we limit to protein coding genes, by setting `filter_protein_coding_genes = TRUE`.
+We set `scale_by_ld_variance=TRUE` for PredictDB weights.
+
+We use 6 cores to parallelize the computation over the weights.
+
+```{r preprocess_weights, eval=FALSE}
+weight_files <- c("/project/xinhe/shengqian/cTWAS_analysis/data/Liver_Expression.db",
+                  "/project/xinhe/shengqian/cTWAS_analysis/data/Lung_Expression.db",
+                  "/project/xinhe/shengqian/cTWAS_analysis/data/Liver_Splicing.db",
+                  "/project/xinhe/shengqian/cTWAS_analysis/data/Lung_Splicing.db")
+
+ncore <- 6
+
+weights_liver_expression <- preprocess_weights(weight_file = weight_files[1],
+                                               region_info,
+                                               z_snp,
+                                               type = "expression",
+                                               context = "liver",
+                                               weight_format = "PredictDB",
+                                               ncore = ncore,
+                                               drop_strand_ambig = TRUE,
+                                               scale_by_ld_variance = TRUE,
+                                               load_predictdb_LD = TRUE,
+                                               filter_protein_coding_genes = TRUE)
+
+weights_lung_expression <- preprocess_weights(weight_file = weight_files[2],
+                                              region_info,
+                                              z_snp,
+                                              type = "expression",
+                                              context = "lung",
+                                              weight_format = "PredictDB",
+                                              ncore = ncore,
+                                              drop_strand_ambig = TRUE,
+                                              scale_by_ld_variance = TRUE,
+                                              load_predictdb_LD = TRUE,
+                                              filter_protein_coding_genes = TRUE)
+
+weights_liver_splicing <- preprocess_weights(weight_file = weight_files[3],
+                                             region_info,
+                                             z_snp,
+                                             type = "splicing",
+                                             context = "liver",
+                                             weight_format = "PredictDB",
+                                             ncore = ncore,
+                                             drop_strand_ambig = TRUE,
+                                             scale_by_ld_variance = TRUE,
+                                             load_predictdb_LD = TRUE,
+                                             filter_protein_coding_genes = FALSE)
+
+weights_lung_splicing <- preprocess_weights(weight_file = weight_files[4],
+                                            region_info,
+                                            z_snp,
+                                            type = "splicing",
+                                            context = "lung",
+                                            weight_format = "PredictDB",
+                                            ncore = ncore,
+                                            drop_strand_ambig = TRUE,
+                                            scale_by_ld_variance = TRUE,
+                                            load_predictdb_LD = TRUE,
+                                            filter_protein_coding_genes = FALSE)
+
+weights <- c(weights_liver_expression, weights_lung_expression, weights_liver_splicing, weights_lung_splicing)
+
+processed_weight_file <- file.path(outputdir, paste0(outname, ".preprocessed.weights.Rd"))
+save(weights, file = processed_weight_file)
+```
+
 ## Imputing gene z-scores
 
-After we have done data harmonization, we compute gene z-scores genome-wide using `compute_gene_z()`. 
+After we have done data preprocessing, we compute gene z-scores using `compute_gene_z()`. 
 
-This function computes gene z-scores using GWAS summary statistics (`z_snp`), the PredictDB weights, 
-and the LD matrix information included in `region_info`.
-It returns computed gene z-scores (`z_gene`), a data frame about the imputed genes (`gene_info`), 
-and the weights of imputed genes (`wgtlist`).
-```{r, eval=FALSE}
-compute_gene_z(z_snp, weights, region_info, ncore, ...)
+This function computes gene z-scores using preprocessed SNP z-scores (`z_snp`), 
+the preprocessed weights.
+It returns imputed a data frame containing gene z-scores (`z_gene`).
+```{r compute_gene_z, eval=FALSE}
+z_gene <- compute_gene_z(z_snp, weights, ncore=ncore)
+gene_z_file <- file.path(outputdir, paste0(outname, ".gene_z.Rd"))
+save(z_gene, file = gene_z_file)
+```
+
+## Assemble input data for the regions
+
+After we have done data preprocessing and imputed gene z-scores, we assemble the input data for all the regions.  
+The `get_regionlist` function will assign genes, SNPs and their z-score data for each region.
+It will identify the genes that cross region boundaries, and reassign to the region with the highest r^2. 
+It will down-sample the SNPs by the value of `thin` to reduce running time of parameter estimation and region screening. 
+and trim (randomly by default) the SNPs if the number of SNPs in a region is more than `max_snp_region`.
+This functions returns a list with `regionlist`, a list of regions with assembled input data, 
+as well as a data frame of cross-boundary genes.
+```{r get_regionlist, eval=FALSE}
+thin <- 0.1
+max_snp_region <- 20000
+res <- get_regionlist(region_info, z_snp, z_gene, weights,
+                      maxSNP = max_snp_region,
+                      trim_by = "random",
+                      thin = thin,
+                      minvar = 2,
+                      adjust_boundary_genes = TRUE,
+                      ncore = ncore)
+regionlist <- res$regionlist
+boundary_genes <- res$boundary_genes
+
+regionlist_file <- file.path(outputdir, paste0(outname, ".regionlist.RDS"))
+saveRDS(res, regionlist_file)
 ```
 
 ## Estimating parameters
 
-We need to specify the GWAS summary statistics (`z_snp`), results from computing gene z-scores (including `z_gene`, `gene_info`), 
-and `region_info`. 
-We also specify `thin`, the proportion of SNPs to be used for parameter estimation and screening regions.
+We use `est_param` function to estimate parameters. It will take the assembled `regionlist` as input. 
 
-In the `multigroup` branch, to specify that our gene z-scores come from multiple groups, 
-we simply add a `type` column specifying the types of tissue groups, 
-and we and also add a `QTLtype` column for the types of molecular traits.
-
-There are several options for how to handle the effect size prior by specifying the `group_prior_var_stucture`:
+There are several options for how to handle the group prior variance parameters by specifying the `group_prior_var_stucture`:
 
 - "independent" is the default and allows all groups to have their own separate variance parameters. 
-- "shared" allows all groups to share the same variance parameter.
-- "shared+snps" allows all groups to share the same variance parameter, and this variance parameter is also shared with SNPs.
+- "shared_all" allows all groups to share the same variance parameter.
 - "shared_type" allows all groups in one molecular QTL type to share the same variance parameter.
 
-This step will run EM algorithm to estimate parameters. 
-
-It will first get downsampled SNPs (with `thin`) for each region, 
-then iteratively run `susie_rss` with L = 1 (first on all regions to get rough estimates and then on filtered regions to get accurate estimates),
-and then estimate parameters (`group_prior` and `group_prior_var`).
-
-```{r, eval=FALSE}
-est_param(z_snp, z_gene, region_info, gene_info, thin, group_prior_var_structure, ...)
+This step will run EM algorithm to estimate parameters and return estimate parameters (`group_prior`, `group_prior_var`, etc.).
+It will run two rounds of EM algorithm, first round uses fewer iterations (3 iterations by default) to get rough parameter estimates, 
+and using the estimated priors in the first round, we select regions with single effect to run the second round.
+We use more iterations in the second round (30 iterations by default) to get accurate parameter estimates. 
+```{r est_param, eval=FALSE}
+param <- est_param(regionlist, 
+                   group_prior_var_structure = "independent", 
+                   niter1 = 3, niter2 = 30, 
+                   ncore = ncore)
+group_prior <- param$group_prior
+group_prior_var <- param$group_prior_var
+param_file <- file.path(outputdir, paste0(outname, ".param.RDS"))
+saveRDS(param, param_file)
 ```
 
 We could use `summarize_param()` to assess the convergence of the estimated parameters and 
 to compute the proportion of variance explained (PVE) by variants and genes. 
+```{r summarize_param, eval=FALSE}
+ctwas_parameters <- summarize_param(param, gwas_n)
+saveRDS(ctwas_parameters, paste0(outputdir, "/", outname, ".ctwas_parameters.RDS"))
+```
 
 ## Screening regions
 
-This step will run a screening process to fine-map all regions with downsampled SNPs,
-(we set `L = 1` as default in this version to shorten running time, instead of `L = 5` as in the earlier version), 
+This step will run a screening process to fine-map all regions with down-sampled SNPs,
 and select regions with strong gene signals (`min_gene_PIP = 0.5` by default). 
-
-```{r, eval=FALSE}
-screen_regions(z_snp, z_gene, region_info, gene_info, wgtlist, regionlist, 
-               group_prior, group_prior_var, min_gene_PIP = 0.5, ...)
+After selecting regions with strong signals, we expand the screened regions with 
+full sets of SNPs to as input regionlist for finemapping.
+```{r screen_regions, eval=FALSE}
+screened_region_ids <- screen_regions(regionlist,
+                                      region_info,
+                                      weights,
+                                      L = 5,
+                                      group_prior = group_prior,
+                                      group_prior_var = group_prior_var,
+                                      max_snp_region = max_snp_region,
+                                      min_gene_PIP = 0.5,
+                                      ncore = ncore,
+                                      verbose = TRUE)
+# Expand screened regionlist with all SNPs in the regions
+screened_regionlist <- regionlist[screened_region_ids]
+if (thin < 1){
+  screened_regionlist <- expand_regionlist(screened_regionlist,
+                                           region_info,
+                                           z_snp,
+                                           z_gene,
+                                           trim_by = "z",
+                                           maxSNP = max_snp_region,
+                                           ncore = ncore)
+}
+saveRDS(screened_regionlist, screen_regions_file)
 ```
 
 ## Fine-mapping
 
 We now perform the fine-mapping step with the estimated parameters for each of screened regions.
 
-The `finemap_region` function performs finemapping for a single region, as specified by `region_tag`. 
-We could run this function through each of selected regions or any region of interest.
+The `finemap_regions` function performs finemapping for the screened regions in `screened_regionlist`.
 
-It first computes correlation matrices (SNP-SNP, SNP-gene, and gene-gene correlation matrices) using all SNPs in the region, 
+It first computes correlation matrices (SNP-SNP, SNP-gene, and gene-gene correlation matrices), 
 and then runs fine-mapping with L = 5 with estimated parameters (`group_prior` and `group_prior_var`),
-and returns a data frame with annotated finemapping results for the region.
+and returns a data frame with annotated finemapping results for the regions.
 
-If `save_LD_R = TRUE`, it will save the computed correlation matrices to `outputdir` for future access.
+If `save_cor = TRUE`, it will save the computed correlation matrices to `cor_dir` for future access.
 
-```{r, eval=FALSE}
-finemap_region(z_snp, z_gene, region_info, gene_info, wgtlist, regionlist, region_tag, 
-               L = 5, group_prior, group_prior_var, save_cor, cor_dir, ...)
+```{r finemap_regions, eval=FALSE}
+finemap_res <- finemap_regions(screened_regionlist,
+                               region_info,
+                               weights,
+                               group_prior = group_prior,
+                               group_prior_var = group_prior_var,
+                               L = 5,
+                               save_cor = TRUE,
+                               cor_dir = paste0(outputdir, "/cor_matrix/"),
+                               ncore = ncore,
+                               verbose = TRUE)
+
+saveRDS(finemap_res, file.path(outputdir, paste0(outname, ".finemap_regions.res.RDS")))
 ```
 
 ## Postprocessing
 
 ### Region merging
 
-
 ### Rerun finemapping with L = 1 for regions with problematic SNPs 
 
 We will rerun the fine-mapping with L = 1 for the regions containing high PIP (>0.5) SNPs 
-detected with LD-mismatch issue in the preprocessing step, 
-or high PIP genes with problematic SNPs in their weights. 
-
-```{r, eval=FALSE}
-rerun_region_tags <- get_problematic_regions(ctwas_res, weight, problematic_snps, pip_thresh = 0.5)
-finemap_regions_L1(z_snp, z_gene, gene_info, regionlist, rerun_region_tags, weight_list, group_prior, group_prior_var, ...)
-```
+detected with LD mismatches, or high PIP genes with problematic SNPs in their weights. 
 
 ## Visualzing cTWAS results
 
-We could use `ctwas_locus_plot()` function to make locus plot for a region of interest.
+We could make locus plot for regions of interest.
