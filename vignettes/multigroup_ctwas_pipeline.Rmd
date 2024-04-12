@@ -1,10 +1,10 @@
 ---
-title: "Pipepline of using multigroup cTWAS with summary statistics"
+title: "Using multigroup cTWAS with summary statistics"
 author: "Kaixuan Luo, Sheng Qian"
 date: "`r Sys.Date()`"
 output: rmarkdown::html_vignette
 vignette: >
-  %\VignetteIndexEntry{Pipepline of using multigroup cTWAS with summary statistics}
+  %\VignetteIndexEntry{Using multigroup cTWAS with summary statistics}
   %\VignetteEngine{knitr::rmarkdown}
   %\VignetteEncoding{UTF-8}
 ---
@@ -102,7 +102,8 @@ for regions that are approximately LD-independent.
 
 cTWAS performs its analysis region-by-region. The preferred way to run cTWAS is to provide pre-computed LD matrices for each region. 
 
-__It is critical that the genome build (e.g. hg38) of the LD reference matches the genome build used to train the prediction models.__
+*It is critical that the genome build (e.g. hg38) of the LD reference matches the genome build used to train the prediction models.*
+
 The genome build of the GWAS summary statistics does not matter because variant positions are determined by the LD reference.
 
 The choice of LD reference population is important for fine-mapping. Best practice for fine-mapping is to use in-sample LD reference (LD computed using the subjects in the GWAS sample). If in-sample LD reference is not an option, the LD reference should be as representative of the population in the GWAS sample as possible. Given that cTWAS is an extended fine-mapping algorithm, and that gene z-scores are computed using the observed GWAS z-scores, which reflect patterns of LD in the GWAS population, our recommendation is to match the LD reference to the GWAS population, not the population used to build the prediction models. 

@@ -11,7 +11,7 @@ navbar:
     tutorial:
       text: Tutorial
       menu:
-      - text: Pipepline of using multigroup cTWAS with summary statistics
+      - text: Using multigroup cTWAS with summary statistics
         href: articles/multigroup_ctwas_pipeline.html
     source:
       text: Source
