@@ -1,7 +1,5 @@
 ## Libraries
 library(ctwas)
-library(ggplot2)
-library(tools)
 library(logging)
 
 ##### Settings #####
@@ -12,9 +10,9 @@ gwas_n <- 343621
 genome_version <- "b38"
 ld_R_dir <- "/project2/mstephens/wcrouse/UKB_LDR_0.1/"
 weight_files <- c("/project/xinhe/shengqian/cTWAS_analysis/data/Liver_Expression.db",
-                 "/project/xinhe/shengqian/cTWAS_analysis/data/Lung_Expression.db",
-                 "/project/xinhe/shengqian/cTWAS_analysis/data/Liver_Splicing.db",
-                 "/project/xinhe/shengqian/cTWAS_analysis/data/Lung_Splicing.db")
+                  "/project/xinhe/shengqian/cTWAS_analysis/data/Lung_Expression.db",
+                  "/project/xinhe/shengqian/cTWAS_analysis/data/Liver_Splicing.db",
+                  "/project/xinhe/shengqian/cTWAS_analysis/data/Lung_Splicing.db")
 thin <- 0.1
 max_snp_region <- 20000
 ncore <- 6
@@ -38,7 +36,7 @@ if (file.exists(region_info_file)){
   region_info$SNP_info <- file.path(ld_R_dir, paste0(ld_filestem, ".Rvar"))
   stopifnot(all(file.exists(region_info$LD_matrix)))
   stopifnot(all(file.exists(region_info$SNP_info)))
-  write.table(region_info, file = file.path(outputdir, "region_info.txt"), quote = F, col.names = T, row.names = F, sep = "\t")
+  write.table(region_info, file = file.path(outputdir, "region_info.txt"), sep = "\t", col.names = T, row.names = F, quote = F)
 }
 
 ##### Preprocess GWAS z-scores #####
@@ -80,19 +78,19 @@ if (file.exists(processed_z_snp_file)){
                               drop_strand_ambig = TRUE)
   })
   save(z_snp, file = file.path(outputdir, paste0(outname, ".preprocessed.z_snp.Rd")))
-  cat(sprintf("Preprocessing GWAS z-scores took %0.2f minutes\n",runtime["elapsed"]/60))
+  loginfo("Preprocessing GWAS z-scores took %0.2f minutes\n",runtime["elapsed"]/60)
 }
 
 ##### Preprocess weights #####
 processed_weight_file <- file.path(outputdir, paste0(outname, ".preprocessed.weights.Rd"))
 if (file.exists(processed_weight_file)){
-  cat(sprintf("Load preprocessed weight: %s\n", processed_weight_file))
+  loginfo("Load preprocessed weight: %s\n", processed_weight_file)
   load(processed_weight_file)
 }else{
   runtime <- system.time({
     weights_liver_expression <- preprocess_weights(weight_file = weight_files[1],
                                                    region_info,
-                                                   z_snp,
+                                                   z_snp$id,
                                                    type = "expression",
                                                    context = "liver",
                                                    weight_format = "PredictDB",
@@ -104,7 +102,7 @@ if (file.exists(processed_weight_file)){
 
     weights_lung_expression <- preprocess_weights(weight_file = weight_files[2],
                                                   region_info,
-                                                  z_snp,
+                                                  z_snp$id,
                                                   type = "expression",
                                                   context = "lung",
                                                   weight_format = "PredictDB",
@@ -116,7 +114,7 @@ if (file.exists(processed_weight_file)){
 
     weights_liver_splicing <- preprocess_weights(weight_file = weight_files[3],
                                                  region_info,
-                                                 z_snp,
+                                                 z_snp$id,
                                                  type = "splicing",
                                                  context = "liver",
                                                  weight_format = "PredictDB",
@@ -128,7 +126,7 @@ if (file.exists(processed_weight_file)){
 
     weights_lung_splicing <- preprocess_weights(weight_file = weight_files[4],
                                                 region_info,
-                                                z_snp,
+                                                z_snp$id,
                                                 type = "splicing",
                                                 context = "lung",
                                                 weight_format = "PredictDB",
@@ -141,14 +139,14 @@ if (file.exists(processed_weight_file)){
     weights <- c(weights_liver_expression, weights_lung_expression, weights_liver_splicing, weights_lung_splicing)
   })
   save(weights, file = processed_weight_file)
-  cat(sprintf("Preprocessing weights took %0.2f minutes\n",runtime["elapsed"]/60))
+  loginfo("Preprocessing weights took %0.2f minutes\n",runtime["elapsed"]/60)
 }
 
 ##### Impute gene z-scores #####
 cat("##### Imputing gene z-scores ##### \n")
 gene_z_file <- file.path(outputdir, paste0(outname, ".gene_z.Rd"))
 if( file.exists(gene_z_file) ){
-  cat(sprintf("Load gene z-scores from %s \n", gene_z_file))
+  loginfo("Load gene z-scores from %s \n", gene_z_file)
   load(gene_z_file)
 }else{
   runtime <- system.time({
@@ -156,7 +154,7 @@ if( file.exists(gene_z_file) ){
                              logfile = file.path(outputdir, paste0(outname, ".compute_gene_z.log")))
   })
   save(z_gene, file = gene_z_file)
-  cat(sprintf("Imputing gene z-scores took %0.2f minutes\n",runtime["elapsed"]/60))
+  loginfo("Imputing gene z-scores took %0.2f minutes\n",runtime["elapsed"]/60)
 }
 
 ##### Get regionlist #####
@@ -178,7 +176,7 @@ if (file.exists(regionlist_thin_file)) {
                           ncore = ncore)
   })
   saveRDS(res, regionlist_thin_file)
-  cat(sprintf("Get regionlist took %0.2f minutes\n",runtime["elapsed"]/60))
+  loginfo("Get regionlist took %0.2f minutes\n",runtime["elapsed"]/60)
 }
 regionlist <- res$regionlist
 boundary_genes <- res$boundary_genes
@@ -200,11 +198,10 @@ if (file.exists(param_file)) {
                        ncore = ncore)
   })
   saveRDS(param, param_file)
-  cat(sprintf("Parameter estimation took %0.2f minutes\n",runtime["elapsed"]/60))
+  loginfo("Parameter estimation took %0.2f minutes\n",runtime["elapsed"]/60)
 }
 group_prior <- param$group_prior
 group_prior_var <- param$group_prior_var
-
 
 ##### Assess parameter estimates #####
 ctwas_parameters <- summarize_param(param, gwas_n)
@@ -216,7 +213,7 @@ if (file.exists(screen_regions_file)) {
   screened_regionlist <- readRDS(screen_regions_file)
 } else{
   runtime <- system.time({
-    screened_region_ids <- screen_regions(regionlist,
+    region_nonSNP_PIP_df <- screen_regions(regionlist,
                                            region_info,
                                            weights,
                                            L = 5,
@@ -226,11 +223,12 @@ if (file.exists(screen_regions_file)) {
                                            verbose = TRUE,
                                            logfile = file.path(outputdir, paste0(outname, ".screen_regions.log")))
   })
-  cat(sprintf("Screen regions took %0.2f minutes\n",runtime["elapsed"]/60))
+  loginfo("Screen regions took %0.2f minutes\n",runtime["elapsed"]/60)
+  screened_region_ids <- region_nonSNP_PIP_df$region_id
+  screened_regionlist <- regionlist[screened_region_ids]
   loginfo("%d regions left after screening regions", length(screened_region_ids))
 
   # Expand screened regionlist with all SNPs in the regions
-  screened_regionlist <- regionlist[screened_region_ids]
   if (thin < 1){
     loginfo("Expand regionlist with full SNPs for %d screened regions", length(screened_regionlist))
     screened_regionlist <- expand_regionlist(screened_regionlist,
@@ -255,11 +253,10 @@ runtime <- system.time({
                                  group_prior = group_prior,
                                  group_prior_var = group_prior_var,
                                  L = 5,
-                                 force_compute_cor = TRUE,
                                  save_cor = TRUE,
                                  cor_dir = paste0(outputdir, "/cor_matrix/"),
                                  ncore = ncore,
                                  verbose = TRUE)
 })
 saveRDS(finemap_res, file.path(outputdir, paste0(outname, ".finemap_regions.res.RDS")))
-cat(sprintf("Finemapping took %0.2f minutes\n",runtime["elapsed"]/60))
+loginfo("Finemapping took %0.2f minutes\n",runtime["elapsed"]/60)

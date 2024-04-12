@@ -20,7 +20,8 @@ knitr::opts_chunk$set(message = FALSE,
 ```
 
 This document shows the updated pipeline for running cTWAS with summary statistics using the `multi-group` version of the R package, 
-which extends our earlier cTWAS method (single group version) to integrate multiple groups of prediction models. 
+which extends our earlier cTWAS method (single group version) to integrate multiple groups of prediction models, 
+e.g. multiple tissues, cell types or conditions, or multiple molecular traits.
 
 ## Installation
 
@@ -149,6 +150,7 @@ filestem <- paste0("ukb_", genome_version, "_0.1")
 ld_filestem <- sprintf("%s_chr%s.R_snp.%s_%s", filestem, region_info$chrom, region_info$start, region_info$stop)
 region_info$LD_matrix <- file.path(ld_R_dir, paste0(ld_filestem, ".RDS"))
 region_info$SNP_info <- file.path(ld_R_dir, paste0(ld_filestem, ".Rvar"))
+# Check to make sure all the LD matrices and SNP info files are available.
 stopifnot(all(file.exists(region_info$LD_matrix)))
 stopifnot(all(file.exists(region_info$SNP_info)))
 write.table(region_info, file = file.path(outputdir, "region_info.txt"), sep = "\t", col.names = T, row.names = F, quote = F)
@@ -202,7 +204,6 @@ z_snp_outfile <- file.path(outputdir, paste0(gwas_name, ".z_snp.Rd"))
 load(z_snp_outfile)
 
 z_snp <- preprocess_z_snp(z_snp, region_info, gwas_n, drop_multiallelic = TRUE, drop_strand_ambig = TRUE)
-save(z_snp, file = file.path(outputdir, paste0(outname, ".preprocessed.z_snp.Rd")))
 ```
 
 #### Harmonizing prediction models and LD reference
@@ -223,12 +224,11 @@ weight_files <- c("/project/xinhe/shengqian/cTWAS_analysis/data/Liver_Expression
                   "/project/xinhe/shengqian/cTWAS_analysis/data/Lung_Expression.db",
                   "/project/xinhe/shengqian/cTWAS_analysis/data/Liver_Splicing.db",
                   "/project/xinhe/shengqian/cTWAS_analysis/data/Lung_Splicing.db")
-
 ncore <- 6
 
 weights_liver_expression <- preprocess_weights(weight_file = weight_files[1],
                                                region_info,
-                                               z_snp,
+                                               z_snp$id,
                                                type = "expression",
                                                context = "liver",
                                                weight_format = "PredictDB",
@@ -240,7 +240,7 @@ weights_liver_expression <- preprocess_weights(weight_file = weight_files[1],
 
 weights_lung_expression <- preprocess_weights(weight_file = weight_files[2],
                                               region_info,
-                                              z_snp,
+                                              z_snp$id,
                                               type = "expression",
                                               context = "lung",
                                               weight_format = "PredictDB",
@@ -252,7 +252,7 @@ weights_lung_expression <- preprocess_weights(weight_file = weight_files[2],
 
 weights_liver_splicing <- preprocess_weights(weight_file = weight_files[3],
                                              region_info,
-                                             z_snp,
+                                             z_snp$id,
                                              type = "splicing",
                                              context = "liver",
                                              weight_format = "PredictDB",
@@ -264,7 +264,7 @@ weights_liver_splicing <- preprocess_weights(weight_file = weight_files[3],
 
 weights_lung_splicing <- preprocess_weights(weight_file = weight_files[4],
                                             region_info,
-                                            z_snp,
+                                            z_snp$id,
                                             type = "splicing",
                                             context = "lung",
                                             weight_format = "PredictDB",
@@ -275,31 +275,27 @@ weights_lung_splicing <- preprocess_weights(weight_file = weight_files[4],
                                             filter_protein_coding_genes = FALSE)
 
 weights <- c(weights_liver_expression, weights_lung_expression, weights_liver_splicing, weights_lung_splicing)
-
-processed_weight_file <- file.path(outputdir, paste0(outname, ".preprocessed.weights.Rd"))
-save(weights, file = processed_weight_file)
 ```
 
-## Imputing gene z-scores
+## Computing gene z-scores
 
 After we have done data preprocessing, we compute gene z-scores using `compute_gene_z()`. 
 
-This function computes gene z-scores using preprocessed SNP z-scores (`z_snp`), 
+This function computes z-scores for the molecular traits using preprocessed SNP z-scores (`z_snp`) and 
 the preprocessed weights.
-It returns imputed a data frame containing gene z-scores (`z_gene`).
+It returns a data frame containing z-scores for the molecular traits.
 ```{r compute_gene_z, eval=FALSE}
 z_gene <- compute_gene_z(z_snp, weights, ncore=ncore)
-gene_z_file <- file.path(outputdir, paste0(outname, ".gene_z.Rd"))
-save(z_gene, file = gene_z_file)
 ```
 
 ## Assemble input data for the regions
 
 After we have done data preprocessing and imputed gene z-scores, we assemble the input data for all the regions.  
 The `get_regionlist` function will assign genes, SNPs and their z-score data for each region.
-It will identify the genes that cross region boundaries, and reassign to the region with the highest r^2. 
+It will identify the genes that cross region boundaries, and reassign to the region with the highest r2. 
 It will down-sample the SNPs by the value of `thin` to reduce running time of parameter estimation and region screening. 
-and trim (randomly by default) the SNPs if the number of SNPs in a region is more than `max_snp_region`.
+If `thin = 1`, it will use all the SNPs. 
+It will trim (randomly by default) the SNPs if the number of SNPs in a region is more than `max_snp_region`.
 This functions returns a list with `regionlist`, a list of regions with assembled input data, 
 as well as a data frame of cross-boundary genes.
 ```{r get_regionlist, eval=FALSE}
@@ -314,9 +310,7 @@ res <- get_regionlist(region_info, z_snp, z_gene, weights,
                       ncore = ncore)
 regionlist <- res$regionlist
 boundary_genes <- res$boundary_genes
-
-regionlist_file <- file.path(outputdir, paste0(outname, ".regionlist.RDS"))
-saveRDS(res, regionlist_file)
+rm(res)
 ```
 
 ## Estimating parameters
@@ -340,25 +334,22 @@ param <- est_param(regionlist,
                    ncore = ncore)
 group_prior <- param$group_prior
 group_prior_var <- param$group_prior_var
-param_file <- file.path(outputdir, paste0(outname, ".param.RDS"))
-saveRDS(param, param_file)
 ```
 
 We could use `summarize_param()` to assess the convergence of the estimated parameters and 
 to compute the proportion of variance explained (PVE) by variants and genes. 
 ```{r summarize_param, eval=FALSE}
 ctwas_parameters <- summarize_param(param, gwas_n)
-saveRDS(ctwas_parameters, paste0(outputdir, "/", outname, ".ctwas_parameters.RDS"))
 ```
 
 ## Screening regions
 
 This step will run a screening process to fine-map all regions with down-sampled SNPs,
 and select regions with strong signals (`min_nonSNP_PIP = 0.5` by default). 
-After selecting regions with strong signals, we expand the screened regions with 
-full sets of SNPs to as input regionlist for finemapping.
+It returns a data frame with region IDs and nonSNP PIPs for each region. 
+We could further narrow down the list of regions by using more stringent cutoffs on the nonSNP PIPs.
 ```{r screen_regions, eval=FALSE}
-screened_region_ids <- screen_regions(regionlist,
+region_nonSNP_PIP_df <- screen_regions(regionlist,
                                       region_info,
                                       weights,
                                       L = 5,
@@ -367,8 +358,14 @@ screened_region_ids <- screen_regions(regionlist,
                                       min_nonSNP_PIP = 0.5,
                                       ncore = ncore,
                                       verbose = TRUE)
-# Expand screened regionlist with all SNPs in the regions
+screened_region_ids <- region_nonSNP_PIP_df$region_id
 screened_regionlist <- regionlist[screened_region_ids]
+```
+
+After selecting regions with strong signals, we expand the screened regions with 
+full sets of SNPs for finemapping. This step is not needed if `thin = 1`.
+```{r expand_regionlist, eval=FALSE}
+# Expand screened regionlist with all SNPs in the regions
 if (thin < 1){
   screened_regionlist <- expand_regionlist(screened_regionlist,
                                            region_info,
@@ -378,7 +375,6 @@ if (thin < 1){
                                            maxSNP = max_snp_region,
                                            ncore = ncore)
 }
-saveRDS(screened_regionlist, screen_regions_file)
 ```
 
 ## Fine-mapping
@@ -405,7 +401,8 @@ finemap_res <- finemap_regions(screened_regionlist,
                                ncore = ncore,
                                verbose = TRUE)
 
-saveRDS(finemap_res, file.path(outputdir, paste0(outname, ".finemap_regions.res.RDS")))
+finemap_regions_file <- file.path(outputdir, paste0(outname, ".ctwas.res.RDS"))
+saveRDS(finemap_res, finemap_regions_file)
 ```
 
 ## Postprocessing
@@ -417,6 +414,18 @@ saveRDS(finemap_res, file.path(outputdir, paste0(outname, ".finemap_regions.res.
 We will rerun the fine-mapping with L = 1 for the regions containing high PIP (>0.5) SNPs 
 detected with LD mismatches, or high PIP genes with problematic SNPs in their weights. 
 
+## Summarizing and interpreting cTWAS output
+
 ## Visualzing cTWAS results
 
 We could make locus plot for regions of interest.
+
+## FAQ
+
+  * Installation
+  
+  * Memory and Parallelization
+  
+  * LD reference
+  
+
