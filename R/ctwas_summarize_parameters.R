@@ -17,28 +17,26 @@ summarize_param <- function(param,
                             gwas_n = NA,
                             plot = TRUE){
 
+  group_prior <- param$group_prior
   # estimated group prior (all iterations)
-  estimated_group_prior_all <- param[["group_prior_rec"]]
-  # estimated_group_prior_all["SNP",] <- estimated_group_prior_all["SNP",]*thin # adjust parameter to account for thin argument
-  group_prior <- estimated_group_prior_all[,ncol(estimated_group_prior_all)]
+  group_prior_iters <- param$group_prior_iters
 
+  group_prior_var <- param$group_prior_var
   # estimated group prior variance (all iterations)
-  estimated_group_prior_var_all <- param[["group_prior_var_rec"]]
-  group_prior_var <- estimated_group_prior_var_all[,ncol(estimated_group_prior_var_all)]
+  group_prior_var_iters <- param$group_prior_var_iters
 
   # set group size
-  group_size <- param[["group_size"]]
-  # group_size["SNP"] <- group_size["SNP"]/thin # adjust to account for thin argument
-  group_size <- group_size[rownames(estimated_group_prior_all)]
+  group_size <- param$group_size
+  group_size <- group_size[rownames(group_prior_iters)]
 
   # estimated group PVE (all iterations)
-  estimated_group_pve_all <- estimated_group_prior_var_all*estimated_group_prior_all*group_size/gwas_n
-  group_pve <- estimated_group_pve_all[,ncol(estimated_group_pve_all)]
+  group_pve_iters <- group_prior_var_iters*group_prior_iters*group_size/gwas_n
+  group_pve <- group_pve_iters[,ncol(group_pve_iters)]
 
   # estimated enrichment of genes (all iterations)
-  estimated_enrichment_all <- t(sapply(rownames(estimated_group_prior_all)[rownames(estimated_group_prior_all)!="SNP"], function(x){
-    estimated_group_prior_all[rownames(estimated_group_prior_all)==x,]/estimated_group_prior_all[rownames(estimated_group_prior_all)=="SNP"]}))
-  enrichment <- estimated_enrichment_all[,ncol(estimated_enrichment_all)]
+  enrichment_iters <- t(sapply(rownames(group_prior_iters)[rownames(group_prior_iters)!="SNP"], function(x){
+    group_prior_iters[rownames(group_prior_iters)==x,]/group_prior_iters[rownames(group_prior_iters)=="SNP"]}))
+  enrichment <- enrichment_iters[,ncol(enrichment_iters)]
 
   outlist <- list(group_size = group_size,
                   group_prior = group_prior,
@@ -52,9 +50,9 @@ summarize_param <- function(param,
     title_size <- 12
 
     # inclusion plot
-    df <- data.frame(niter = rep(1:ncol(estimated_group_prior_all), nrow(estimated_group_prior_all)),
-                     value = unlist(lapply(1:nrow(estimated_group_prior_all), function(x){estimated_group_prior_all[x,]})),
-                     group = rep(rownames(estimated_group_prior_all), each=ncol(estimated_group_prior_all)))
+    df <- data.frame(niter = rep(1:ncol(group_prior_iters), nrow(group_prior_iters)),
+                     value = unlist(lapply(1:nrow(group_prior_iters), function(x){group_prior_iters[x,]})),
+                     group = rep(rownames(group_prior_iters), each=ncol(group_prior_iters)))
     df$group <- as.factor(df$group)
     factor_levels <- levels(df$group)
 
@@ -67,12 +65,13 @@ summarize_param <- function(param,
 
     p_pi <- p_pi + theme(plot.title=element_text(size=title_size)) +
       expand_limits(y=0) +
-      guides(color = guide_legend(title = "Group")) + theme (legend.title = element_text(size=12, face="bold"))
+      guides(color = guide_legend(title = "Group")) +
+      theme (legend.title = element_text(size=12, face="bold"))
 
     # effect size plot
-    df <- data.frame(niter = rep(1:ncol(estimated_group_prior_var_all), nrow(estimated_group_prior_var_all)),
-                     value = unlist(lapply(1:nrow(estimated_group_prior_var_all), function(x){estimated_group_prior_var_all[x,]})),
-                     group = rep(rownames(estimated_group_prior_var_all), each=ncol(estimated_group_prior_var_all)))
+    df <- data.frame(niter = rep(1:ncol(group_prior_var_iters), nrow(group_prior_var_iters)),
+                     value = unlist(lapply(1:nrow(group_prior_var_iters), function(x){group_prior_var_iters[x,]})),
+                     group = rep(rownames(group_prior_var_iters), each=ncol(group_prior_var_iters)))
     df$group <- as.factor(df$group)
 
     p_sigma2 <- ggplot(df, aes(x=niter, y=value, group=group)) +
@@ -84,12 +83,13 @@ summarize_param <- function(param,
 
     p_sigma2 <- p_sigma2 + theme(plot.title=element_text(size=title_size)) +
       expand_limits(y=0) +
-      guides(color = guide_legend(title = "Group")) + theme (legend.title = element_text(size=12, face="bold"))
+      guides(color = guide_legend(title = "Group")) +
+      theme (legend.title = element_text(size=12, face="bold"))
 
     # PVE plot
-    df <- data.frame(niter = rep(1:ncol(estimated_group_pve_all), nrow(estimated_group_pve_all)),
-                     value = unlist(lapply(1:nrow(estimated_group_pve_all), function(x){estimated_group_pve_all[x,]})),
-                     group = rep(rownames(estimated_group_pve_all), each=ncol(estimated_group_pve_all)))
+    df <- data.frame(niter = rep(1:ncol(group_pve_iters), nrow(group_pve_iters)),
+                     value = unlist(lapply(1:nrow(group_pve_iters), function(x){group_pve_iters[x,]})),
+                     group = rep(rownames(group_pve_iters), each=ncol(group_pve_iters)))
     df$group <- as.factor(df$group)
 
     p_pve <- ggplot(df, aes(x=niter, y=value, group=group)) +
@@ -101,12 +101,13 @@ summarize_param <- function(param,
 
     p_pve <- p_pve + theme(plot.title=element_text(size=title_size)) +
       expand_limits(y=0) +
-      guides(color = guide_legend(title = "Group")) + theme (legend.title = element_text(size=12, face="bold"))
+      guides(color = guide_legend(title = "Group")) +
+      theme (legend.title = element_text(size=12, face="bold"))
 
     # enrichment plot
-    df <- data.frame(niter = rep(1:ncol(estimated_enrichment_all), nrow(estimated_enrichment_all)),
-                     value = unlist(lapply(1:nrow(estimated_enrichment_all), function(x){estimated_enrichment_all[x,]})),
-                     group = rep(rownames(estimated_enrichment_all), each=ncol(estimated_enrichment_all)))
+    df <- data.frame(niter = rep(1:ncol(enrichment_iters), nrow(enrichment_iters)),
+                     value = unlist(lapply(1:nrow(enrichment_iters), function(x){enrichment_iters[x,]})),
+                     group = rep(rownames(enrichment_iters), each=ncol(enrichment_iters)))
     df$group <- as.factor(df$group)
     #levels(df$group) <- factor_levels
 
@@ -117,7 +118,8 @@ summarize_param <- function(param,
       ggtitle("Enrichment") +
       theme_cowplot()
 
-    p_enrich <- p_enrich + theme(plot.title=element_text(size=title_size)) +
+    p_enrich <- p_enrich +
+      theme(plot.title=element_text(size=title_size)) +
       expand_limits(y=0) +
       guides(color = guide_legend(title = "Group")) +
       theme (legend.title = element_text(size=12, face="bold")) +

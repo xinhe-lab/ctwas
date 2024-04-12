@@ -58,11 +58,14 @@ EM <- function(regionlist,
   V_prior <- res$V_prior
   rm(res)
 
-  # store estimated group priors from each iteration
-  group_prior_rec <- matrix(NA, nrow = length(groups), ncol = niter)
-  rownames(group_prior_rec) <- groups
-  group_prior_var_rec <- matrix(NA, nrow = length(groups), ncol = niter)
-  rownames(group_prior_var_rec) <- groups
+  # store estimated group priors from all iterations
+  group_prior_iters <- matrix(NA, nrow = length(groups), ncol = niter)
+  rownames(group_prior_iters) <- groups
+  colnames(group_prior_iters) <- paste0("iter", 1:ncol(group_prior_iters))
+
+  group_prior_var_iters <- matrix(NA, nrow = length(groups), ncol = niter)
+  rownames(group_prior_var_iters) <- groups
+  colnames(group_prior_var_iters) <- paste0("iter", 1:ncol(group_prior_var_iters))
 
   # start running EM iterations
   cl <- parallel::makeCluster(ncore, outfile = "")
@@ -132,7 +135,7 @@ EM <- function(regionlist,
 
     # update estimated group_prior from the current iteration
     pi_prior <- sapply(names(pi_prior), function(x){mean(EM_susie_res$susie_pip[EM_susie_res$group==x])})
-    group_prior_rec[names(pi_prior),iter] <- pi_prior
+    group_prior_iters[names(pi_prior),iter] <- pi_prior
 
     loginfo("After iteration %d, priors {%s}: {%s}", iter, names(pi_prior), pi_prior)
 
@@ -167,7 +170,7 @@ EM <- function(regionlist,
         }
       }
     }
-    group_prior_var_rec[names(V_prior), iter] <- V_prior
+    group_prior_var_iters[names(V_prior), iter] <- V_prior
   }
   parallel::stopCluster(cl)
 
@@ -175,8 +178,8 @@ EM <- function(regionlist,
 
   return(list("group_prior"= pi_prior,
               "group_prior_var" = V_prior,
-              "group_prior_rec" = group_prior_rec,
-              "group_prior_var_rec" = group_prior_var_rec,
+              "group_prior_iters" = group_prior_iters,
+              "group_prior_var_iters" = group_prior_var_iters,
               "group_prior_var_structure" = group_prior_var_structure,
               "group_size" = group_size))
 }

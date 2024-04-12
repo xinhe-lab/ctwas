@@ -99,23 +99,21 @@ est_param <- function(
   loginfo("Estimated group_prior {%s}: {%s}", names(group_prior), group_prior)
   loginfo("Estimated group_prior_var {%s}: {%s}", names(group_prior_var), group_prior_var)
 
-  # estimated prior records (all iterations)
-  group_prior_rec <- cbind(EM1_res$group_prior_rec, EM2_res$group_prior_rec)
-  colnames(group_prior_rec) <- c(paste0("EM1_iter", 1:ncol(EM1_res$group_prior_rec)), paste0("EM2_iter", 1:ncol(EM2_res$group_prior_rec)))
-
-  group_prior_var_rec <- cbind(EM1_res$group_prior_var_rec, EM2_res$group_prior_var_rec)
-  colnames(group_prior_var_rec) <- c(paste0("EM1_iter", 1:ncol(EM1_res$group_prior_var_rec)), paste0("EM2_iter", 1:ncol(EM2_res$group_prior_var_rec)))
+  # estimated parameters from all iterations
+  group_prior_iters <- EM2_res$group_prior_iters
+  group_prior_var_iters <- EM2_res$group_prior_var_iters
 
   # adjust parameters to account for thin argument
   group_prior["SNP"] <- group_prior["SNP"] * thin
-  group_prior_rec["SNP",] <- group_prior_rec["SNP",] * thin
+  group_prior_iters["SNP",] <- group_prior_iters["SNP",] * thin
+
   group_size <- EM1_res$group_size
   group_size["SNP"] <- group_size["SNP"]/thin
 
   param <- list("group_prior" = group_prior,
                 "group_prior_var" = group_prior_var,
-                "group_prior_rec" = group_prior_rec,
-                "group_prior_var_rec" = group_prior_var_rec,
+                "group_prior_iters" = group_prior_iters,
+                "group_prior_var_iters" = group_prior_var_iters,
                 "group_prior_var_structure" = group_prior_var_structure,
                 "group_size" = group_size)
 
