@@ -17,7 +17,7 @@
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">ctwas</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">0.1.36</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">0.2.0</span>
       </span>
     </div>
 
@@ -58,75 +58,34 @@
 
     <div id="ref-usage">
     <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="fu">screen_regions</span><span class="op">(</span></span>
-<span>  <span class="va">z_snp</span>,</span>
-<span>  <span class="va">z_gene</span>,</span>
+<span>  <span class="va">regionlist</span>,</span>
 <span>  <span class="va">region_info</span>,</span>
-<span>  gene_info <span class="op">=</span> <span class="cn">NULL</span>,</span>
-<span>  wgtlist <span class="op">=</span> <span class="cn">NULL</span>,</span>
-<span>  regionlist <span class="op">=</span> <span class="cn">NULL</span>,</span>
-<span>  thin <span class="op">=</span> <span class="fl">1</span>,</span>
-<span>  max_snp_region <span class="op">=</span> <span class="cn">Inf</span>,</span>
-<span>  min_gene_PIP <span class="op">=</span> <span class="fl">0.5</span>,</span>
-<span>  L <span class="op">=</span> <span class="fl">1</span>,</span>
+<span>  <span class="va">weights</span>,</span>
 <span>  group_prior <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  group_prior_var <span class="op">=</span> <span class="cn">NULL</span>,</span>
-<span>  use_null_weight <span class="op">=</span> <span class="cn">TRUE</span>,</span>
-<span>  coverage <span class="op">=</span> <span class="fl">0.95</span>,</span>
-<span>  min_abs_corr <span class="op">=</span> <span class="fl">0.5</span>,</span>
+<span>  L <span class="op">=</span> <span class="fl">5</span>,</span>
+<span>  mingene <span class="op">=</span> <span class="fl">1</span>,</span>
+<span>  min_nonSNP_PIP <span class="op">=</span> <span class="fl">0.5</span>,</span>
+<span>  max_iter <span class="op">=</span> <span class="fl">100</span>,</span>
 <span>  ncore <span class="op">=</span> <span class="fl">1</span>,</span>
-<span>  logfile <span class="op">=</span> <span class="cn">NULL</span></span>
+<span>  logfile <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  verbose <span class="op">=</span> <span class="cn">FALSE</span>,</span>
+<span>  <span class="va">...</span></span>
 <span><span class="op">)</span></span></code></pre></div>
     </div>
 
     <div id="arguments">
     <h2>Arguments</h2>
-    <dl><dt>z_snp</dt>
-<dd><p>A data frame with four columns: "id", "A1", "A2", "z".
-giving the z scores for snps. "A1" is effect allele. "A2" is the other allele.</p></dd>
-
-
-<dt>z_gene</dt>
-<dd><p>A data frame with two columns: "id", "z". giving the z scores for genes.
-Optionally, a "type" column can also be supplied; this is for using multiple sets of weight_list</p></dd>
-
-
-<dt>region_info</dt>
-<dd><p>a data frame of region definition and associated file names</p></dd>
-
-
-<dt>gene_info</dt>
-<dd><p>a data frame of gene information obtained from <code>compute_gene_z</code></p></dd>
-
-
-<dt>wgtlist</dt>
-<dd></dd>
-
-
-<dt>regionlist</dt>
+    <dl><dt>regionlist</dt>
 <dd><p>a list object indexing regions, variants and genes.</p></dd>
 
 
-<dt>thin</dt>
-<dd><p>The proportion of SNPs to be used for parameter estimation and initial screening regions.
-Smaller <code>thin</code> parameters reduce runtime at the expense of accuracy.
-The fine mapping step is rerun using full SNPs
-for regions with strong gene signals; see <code>min_gene_PIP</code>.</p></dd>
+<dt>region_info</dt>
+<dd><p>a data frame of region definition and associated LD file names</p></dd>
 
 
-<dt>max_snp_region</dt>
-<dd><p>Inf or integer. Maximum number of SNPs in a region. Default is
-Inf, no limit. This can be useful if there are many SNPs in a region and you don't
-have enough memory to run the program. This applies to the last rerun step
-(using full SNPs and rerun susie for regions with strong gene signals) only.</p></dd>
-
-
-<dt>min_gene_PIP</dt>
-<dd><p>Regions with non-SNP PIP &gt;= <code>min_gene_PIP</code>
-will be selected to run finemapping using full SNPs.</p></dd>
-
-
-<dt>L</dt>
-<dd><p>the number of effects for susie</p></dd>
+<dt>weights</dt>
+<dd><p>a list of weights</p></dd>
 
 
 <dt>group_prior</dt>
@@ -137,19 +96,21 @@ will be selected to run finemapping using full SNPs.</p></dd>
 <dd><p>a vector of two prior variances for SNPs and gene effects.</p></dd>
 
 
-<dt>use_null_weight</dt>
-<dd><p>TRUE/FALSE. If TRUE, allow for a probability of no effect in susie</p></dd>
+<dt>L</dt>
+<dd><p>the number of effects for susie</p></dd>
 
 
-<dt>coverage</dt>
-<dd><p>A number between 0 and 1 specifying the “coverage” of the estimated confidence sets</p></dd>
+<dt>mingene</dt>
+<dd><p>minimum number of genes in a region</p></dd>
 
 
-<dt>min_abs_corr</dt>
-<dd><p>Minimum absolute correlation allowed in a
-credible set. The default, 0.5, corresponds to a squared
-correlation of 0.25, which is a commonly used threshold for
-genotype data in genetic studies.</p></dd>
+<dt>min_nonSNP_PIP</dt>
+<dd><p>Regions with non-SNP PIP &gt;= <code>min_nonSNP_PIP</code>
+will be selected to run finemapping using full SNPs.</p></dd>
+
+
+<dt>max_iter</dt>
+<dd><p>Maximum number of IBSS iterations to perform.</p></dd>
 
 
 <dt>ncore</dt>
@@ -164,7 +125,7 @@ genotype data in genetic studies.</p></dd>
     <h2>Value</h2>
     
 
-<p>a list of regionlist, screened region tags, fine mapping result for regions with weak signal</p>
+<p>a vector of screened region ids</p>
     </div>
 
   </div>

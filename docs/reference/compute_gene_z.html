@@ -17,7 +17,7 @@
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">ctwas</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">0.1.36</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">0.2.0</span>
       </span>
     </div>
 
@@ -57,37 +57,21 @@
     </div>
 
     <div id="ref-usage">
-    <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="fu">compute_gene_z</span><span class="op">(</span></span>
-<span>  <span class="va">z_snp</span>,</span>
-<span>  <span class="va">weights</span>,</span>
-<span>  <span class="va">region_info</span>,</span>
-<span>  ncore <span class="op">=</span> <span class="fl">1</span>,</span>
-<span>  chr <span class="op">=</span> <span class="fl">1</span><span class="op">:</span><span class="fl">22</span>,</span>
-<span>  logfile <span class="op">=</span> <span class="cn">NULL</span></span>
-<span><span class="op">)</span></span></code></pre></div>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="fu">compute_gene_z</span><span class="op">(</span><span class="va">z_snp</span>, <span class="va">weights</span>, ncore <span class="op">=</span> <span class="fl">1</span>, logfile <span class="op">=</span> <span class="cn">NULL</span><span class="op">)</span></span></code></pre></div>
     </div>
 
     <div id="arguments">
     <h2>Arguments</h2>
     <dl><dt>z_snp</dt>
-<dd><p>A data frame with columns: "id", "A1", "A2", "z". giving the z scores for
-snps. "A1" is effect allele. "A2" is the other allele. For harmonized data, A1 and A2 are not required.</p></dd>
+<dd><p>A data frame with columns: "id", "z", giving the z-scores for SNPs.</p></dd>
 
 
 <dt>weights</dt>
-<dd><p>a list of wgt list and weight info</p></dd>
-
-
-<dt>region_info</dt>
-<dd><p>a data frame of region definition and associated file names.</p></dd>
+<dd><p>a list of weights</p></dd>
 
 
 <dt>ncore</dt>
-<dd><p>The number of cores used to parallelize imputation over weights</p></dd>
-
-
-<dt>chr</dt>
-<dd><p>a numeric vector of chromosomes to perform z score imputation over. Useful for large jobs requiring batches</p></dd>
+<dd><p>The number of cores used to parallelize computation over weights</p></dd>
 
 
 <dt>logfile</dt>
@@ -98,7 +82,7 @@ snps. "A1" is effect allele. "A2" is the other allele. For harmonized data, A1 a
     <h2>Value</h2>
     
 
-<p>a list of gene z-scores and SNP z-scores</p>
+<p>a data frame of gene z-scores</p>
     </div>
 
   </div>

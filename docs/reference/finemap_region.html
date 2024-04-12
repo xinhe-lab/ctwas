@@ -17,7 +17,7 @@
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">ctwas</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">0.1.36</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">0.2.0</span>
       </span>
     </div>
 
@@ -58,65 +58,42 @@
 
     <div id="ref-usage">
     <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="fu">finemap_region</span><span class="op">(</span></span>
-<span>  <span class="va">z_snp</span>,</span>
-<span>  <span class="va">z_gene</span>,</span>
-<span>  <span class="va">gene_info</span>,</span>
-<span>  <span class="va">region_info</span>,</span>
 <span>  <span class="va">regionlist</span>,</span>
-<span>  <span class="va">region_tag</span>,</span>
-<span>  wgtlist <span class="op">=</span> <span class="cn">NULL</span>,</span>
-<span>  R_snp <span class="op">=</span> <span class="cn">NULL</span>,</span>
-<span>  ld_snpinfo <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  <span class="va">region_id</span>,</span>
+<span>  <span class="va">region_info</span>,</span>
+<span>  <span class="va">weights</span>,</span>
 <span>  L <span class="op">=</span> <span class="fl">5</span>,</span>
 <span>  group_prior <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  group_prior_var <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  use_null_weight <span class="op">=</span> <span class="cn">TRUE</span>,</span>
 <span>  coverage <span class="op">=</span> <span class="fl">0.95</span>,</span>
 <span>  min_abs_corr <span class="op">=</span> <span class="fl">0.5</span>,</span>
-<span>  save_LD_R <span class="op">=</span> <span class="cn">FALSE</span>,</span>
-<span>  outputdir <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/getwd.html" class="external-link">getwd</a></span><span class="op">(</span><span class="op">)</span>,</span>
-<span>  outname <span class="op">=</span> <span class="cn">NULL</span></span>
+<span>  max_iter <span class="op">=</span> <span class="fl">100</span>,</span>
+<span>  force_compute_cor <span class="op">=</span> <span class="cn">FALSE</span>,</span>
+<span>  save_cor <span class="op">=</span> <span class="cn">FALSE</span>,</span>
+<span>  cor_dir <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/getwd.html" class="external-link">getwd</a></span><span class="op">(</span><span class="op">)</span>,</span>
+<span>  annotate_susie_result <span class="op">=</span> <span class="cn">TRUE</span>,</span>
+<span>  verbose <span class="op">=</span> <span class="cn">FALSE</span>,</span>
+<span>  <span class="va">...</span></span>
 <span><span class="op">)</span></span></code></pre></div>
     </div>
 
     <div id="arguments">
     <h2>Arguments</h2>
-    <dl><dt>z_snp</dt>
-<dd><p>A data frame with four columns: "id", "A1", "A2", "z".
-giving the z scores for snps. "A1" is effect allele. "A2" is the other allele.</p></dd>
+    <dl><dt>regionlist</dt>
+<dd><p>a list object indexing regions, variants and genes.</p></dd>
 
 
-<dt>z_gene</dt>
-<dd><p>A data frame with two columns: "id", "z". giving the z scores for genes.
-Optionally, a "type" column can also be supplied; this is for using multiple sets of weights</p></dd>
-
-
-<dt>gene_info</dt>
-<dd><p>a data frame of gene information obtained from <code>compute_gene_z</code></p></dd>
+<dt>region_id</dt>
+<dd><p>a character string of region ids to be finemapped</p></dd>
 
 
 <dt>region_info</dt>
 <dd><p>a data frame of region definition and associated LD file names</p></dd>
 
 
-<dt>regionlist</dt>
-<dd><p>a list object indexing regions, variants and genes.</p></dd>
-
-
-<dt>region_tag</dt>
-<dd><p>a character string of region tag to be finemapped</p></dd>
-
-
-<dt>wgtlist</dt>
+<dt>weights</dt>
 <dd><p>a list of weights for each gene</p></dd>
-
-
-<dt>R_snp</dt>
-<dd><p>Reference LD matrix</p></dd>
-
-
-<dt>ld_snpinfo</dt>
-<dd><p>SNP information of the SNPs in <code>R_snp</code> matrix</p></dd>
 
 
 <dt>L</dt>
@@ -146,23 +123,36 @@ correlation of 0.25, which is a commonly used threshold for
 genotype data in genetic studies.</p></dd>
 
 
-<dt>save_LD_R</dt>
+<dt>max_iter</dt>
+<dd><p>Maximum number of IBSS iterations to perform.</p></dd>
+
+
+<dt>force_compute_cor</dt>
+<dd><p>TRUE/FALSE. If TRUE, force computing correlation (R) matrices</p></dd>
+
+
+<dt>save_cor</dt>
 <dd><p>TRUE/FALSE. If TRUE, save correlation (R) matrices</p></dd>
 
 
-<dt>outputdir</dt>
-<dd><p>a string, the directory to store output</p></dd>
+<dt>cor_dir</dt>
+<dd><p>a string, the directory to store correlation (R) matrices</p></dd>
 
 
-<dt>outname</dt>
-<dd><p>a string, the output name</p></dd>
+<dt>annotate_susie_result</dt>
+<dd><p>TRUE/FALSE. If TRUE, add gene and SNP information and cs_index to
+the data frame of finemapping results.</p></dd>
+
+
+<dt>verbose</dt>
+<dd><p>TRUE/FALSE. If TRUE, print detail messages</p></dd>
 
 </dl></div>
     <div id="value">
     <h2>Value</h2>
     
 
-<p>finemapping results.</p>
+<p>a data frame of finemapping results.</p>
     </div>
 
   </div>

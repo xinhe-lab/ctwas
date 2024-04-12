@@ -17,7 +17,7 @@
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">ctwas</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">0.1.36</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">0.2.0</span>
       </span>
     </div>
 
@@ -57,58 +57,9 @@
     </div>
 
     <div id="ref-usage">
-    <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="fu">compute_region_cor</span><span class="op">(</span></span>
-<span>  <span class="va">R_snp</span>,</span>
-<span>  <span class="va">ld_snpinfo</span>,</span>
-<span>  <span class="va">region_idx</span>,</span>
-<span>  <span class="va">wgtlist</span>,</span>
-<span>  save <span class="op">=</span> <span class="cn">FALSE</span>,</span>
-<span>  outputdir <span class="op">=</span> <span class="cn">NULL</span>,</span>
-<span>  outname <span class="op">=</span> <span class="cn">NULL</span>,</span>
-<span>  verbose <span class="op">=</span> <span class="cn">FALSE</span></span>
-<span><span class="op">)</span></span></code></pre></div>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="fu">compute_region_cor</span><span class="op">(</span><span class="va">sids</span>, <span class="va">gids</span>, <span class="va">R_snp</span>, <span class="va">weights</span>, <span class="va">snpinfo</span><span class="op">)</span></span></code></pre></div>
     </div>
 
-    <div id="arguments">
-    <h2>Arguments</h2>
-    <dl><dt>R_snp</dt>
-<dd><p>Reference LD matrix</p></dd>
-
-
-<dt>ld_snpinfo</dt>
-<dd><p>SNP information of the SNPs in <code>R_snp</code> matrix</p></dd>
-
-
-<dt>region_idx</dt>
-<dd><p>region indices of the region from regionlist</p></dd>
-
-
-<dt>wgtlist</dt>
-<dd><p>a list of weights for genes in the region</p></dd>
-
-
-<dt>save</dt>
-<dd><p>TRUE/FALSE, if TRUE, save correlation matrices in <code>outputdir</code></p></dd>
-
-
-<dt>outputdir</dt>
-<dd><p>directory of correlation matrix result</p></dd>
-
-
-<dt>outname</dt>
-<dd><p>filename of correlation result</p></dd>
-
-
-<dt>verbose</dt>
-<dd><p>TRUE/FALSE, if TRUE,</p></dd>
-
-</dl></div>
-    <div id="value">
-    <h2>Value</h2>
-    
-
-<p>a list of correlation matrices (R_snp, R_snp_gene, R_gene), SNP indices and gene id</p>
-    </div>
 
   </div>
   <div class="col-md-3 hidden-xs hidden-sm" id="pkgdown-sidebar">

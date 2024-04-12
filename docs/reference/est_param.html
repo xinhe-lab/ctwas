@@ -17,7 +17,7 @@
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">ctwas</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">0.1.36</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">0.2.0</span>
       </span>
     </div>
 
@@ -58,62 +58,38 @@
 
     <div id="ref-usage">
     <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="fu">est_param</span><span class="op">(</span></span>
-<span>  <span class="va">z_snp</span>,</span>
-<span>  <span class="va">region_info</span>,</span>
-<span>  regionlist <span class="op">=</span> <span class="cn">NULL</span>,</span>
-<span>  z_gene <span class="op">=</span> <span class="cn">NULL</span>,</span>
-<span>  gene_info <span class="op">=</span> <span class="cn">NULL</span>,</span>
-<span>  weights <span class="op">=</span> <span class="cn">NULL</span>,</span>
-<span>  thin <span class="op">=</span> <span class="fl">1</span>,</span>
-<span>  prob_single <span class="op">=</span> <span class="fl">0.8</span>,</span>
+<span>  <span class="va">regionlist</span>,</span>
+<span>  init_group_prior <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  init_group_prior_var <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  group_prior_var_structure <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"independent"</span>, <span class="st">"shared_all"</span>, <span class="st">"shared_type"</span><span class="op">)</span>,</span>
 <span>  niter1 <span class="op">=</span> <span class="fl">3</span>,</span>
 <span>  niter2 <span class="op">=</span> <span class="fl">30</span>,</span>
-<span>  group_prior <span class="op">=</span> <span class="cn">NULL</span>,</span>
-<span>  group_prior_var <span class="op">=</span> <span class="cn">NULL</span>,</span>
-<span>  group_prior_var_structure <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"independent"</span>, <span class="st">"shared_all"</span>, <span class="st">"shared+snps"</span>,</span>
-<span>    <span class="st">"shared_QTLtype"</span><span class="op">)</span>,</span>
-<span>  use_null_weight <span class="op">=</span> <span class="cn">TRUE</span>,</span>
-<span>  coverage <span class="op">=</span> <span class="fl">0.95</span>,</span>
-<span>  min_abs_corr <span class="op">=</span> <span class="fl">0.5</span>,</span>
+<span>  p_single_effect <span class="op">=</span> <span class="fl">0.8</span>,</span>
 <span>  ncore <span class="op">=</span> <span class="fl">1</span>,</span>
-<span>  logfile <span class="op">=</span> <span class="cn">NULL</span></span>
+<span>  logfile <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  verbose <span class="op">=</span> <span class="cn">FALSE</span></span>
 <span><span class="op">)</span></span></code></pre></div>
     </div>
 
     <div id="arguments">
     <h2>Arguments</h2>
-    <dl><dt>z_snp</dt>
-<dd><p>a data frame with four columns: "id", "A1", "A2", "z".
-giving the z scores for SNPs. "A1" is effect allele. "A2" is the other allele.</p></dd>
-
-
-<dt>region_info</dt>
-<dd><p>a data frame of region definition and associated file names</p></dd>
-
-
-<dt>regionlist</dt>
+    <dl><dt>regionlist</dt>
 <dd><p>a list object indexing regions, variants and genes.</p></dd>
 
 
-<dt>z_gene</dt>
-<dd><p>a data frame with two columns: "id", "z". giving the z scores for genes.
-Optionally, a "type" column can also be supplied; this is for using multiple sets of weights</p></dd>
+<dt>init_group_prior</dt>
+<dd><p>a vector of initial values of prior inclusion probabilities for SNPs and genes.</p></dd>
 
 
-<dt>gene_info</dt>
-<dd><p>a data frame of gene information obtained from <code>compute_gene_z</code></p></dd>
+<dt>init_group_prior_var</dt>
+<dd><p>a vector of initial values of prior variances for SNPs and gene effects.</p></dd>
 
 
-<dt>thin</dt>
-<dd><p>The proportion of SNPs to be used for the parameter estimation and
-initial screening region steps.
-Smaller <code>thin</code> parameters reduce runtime at the expense of accuracy.
-The fine mapping step is rerun using full SNPs for regions with strong gene signals.</p></dd>
-
-
-<dt>prob_single</dt>
-<dd><p>Blocks with probability greater than <code>prob_single</code> of
-having 1 or fewer effects will be used for parameter estimation</p></dd>
+<dt>group_prior_var_structure</dt>
+<dd><p>a string indicating the structure to put on the prior variance parameters.
+"independent" is the default and allows all groups to have their own separate variance parameters.
+"shared_all" allows all groups to share the same variance parameter.
+"shared_type" allows all groups in one molecular QTL type to share the same variance parameter.</p></dd>
 
 
 <dt>niter1</dt>
@@ -124,35 +100,9 @@ having 1 or fewer effects will be used for parameter estimation</p></dd>
 <dd><p>the number of iterations of the E-M algorithm to perform during the complete parameter estimation step</p></dd>
 
 
-<dt>group_prior</dt>
-<dd><p>a vector of two prior inclusion probabilities for SNPs and genes.</p></dd>
-
-
-<dt>group_prior_var</dt>
-<dd><p>a vector of two prior variances for SNPs and gene effects.</p></dd>
-
-
-<dt>group_prior_var_structure</dt>
-<dd><p>a string indicating the structure to put on the prior variance parameters.
-"independent" is the default and allows all groups to have their own separate variance parameters.
-"shared" allows all groups to share the same variance parameter.
-"shared+snps" allows all groups to share the same variance parameter, and this variance parameter is also shared with SNPs.
-"shared_type" allows all groups in one molecular QTL type to share the same variance parameter.</p></dd>
-
-
-<dt>use_null_weight</dt>
-<dd><p>TRUE/FALSE. If TRUE, allow for a probability of no effect in susie</p></dd>
-
-
-<dt>coverage</dt>
-<dd><p>A number between 0 and 1 specifying the “coverage” of the estimated confidence sets</p></dd>
-
-
-<dt>min_abs_corr</dt>
-<dd><p>Minimum absolute correlation allowed in a
-credible set. The default, 0.5, corresponds to a squared
-correlation of 0.25, which is a commonly used threshold for
-genotype data in genetic studies.</p></dd>
+<dt>p_single_effect</dt>
+<dd><p>Regions with probability greater than <code>p_single_effect</code> of
+having at most one causal effect will be used selected for the complete parameter estimation step</p></dd>
 
 
 <dt>ncore</dt>
@@ -163,15 +113,15 @@ genotype data in genetic studies.</p></dd>
 <dd><p>the log file, if NULL will print log info on screen</p></dd>
 
 
-<dt>weight_list</dt>
-<dd><p>a list of weights by chromosome</p></dd>
+<dt>verbose</dt>
+<dd><p>TRUE/FALSE. If TRUE, print detail messages</p></dd>
 
 </dl></div>
     <div id="value">
     <h2>Value</h2>
     
 
-<p>a list with estimated parameters, and updated region_info with correlation file names for each region.</p>
+<p>a list with estimated parameters</p>
     </div>
 
   </div>

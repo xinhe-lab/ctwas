@@ -33,7 +33,7 @@
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">ctwas</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">0.1.36</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">0.2.0</span>
       </span>
     </div>
 
@@ -69,15 +69,13 @@
 
       
 
-      </header><div class="row">
+      </header><script src="multigroup_ctwas_pipeline_files/accessible-code-block-0.0.1/empty-anchor.js"></script><div class="row">
   <div class="col-md-9 contents">
     <div class="page-header toc-ignore">
-      <h1 data-toc-skip>Pipepline of using multigroup cTWAS with summary
-statistics</h1>
-                        <h4 data-toc-skip class="author">Kaixuan Luo,
-Sheng Qian</h4>
+      <h1 data-toc-skip>Pipepline of using multigroup cTWAS with summary statistics</h1>
+                        <h4 data-toc-skip class="author">Kaixuan Luo, Sheng Qian</h4>
             
-            <h4 data-toc-skip class="date">2024-03-08</h4>
+            <h4 data-toc-skip class="date">2024-04-12</h4>
       
       <small class="dont-index">Source: <a href="https://github.com/xinhe-lab/ctwas/blob/multigroup_test/vignettes/multigroup_ctwas_pipeline.Rmd" class="external-link"><code>vignettes/multigroup_ctwas_pipeline.Rmd</code></a></small>
       <div class="hidden name"><code>multigroup_ctwas_pipeline.Rmd</code></div>
@@ -86,17 +84,13 @@ Sheng Qian</h4>
 
     
     
-<p>This document shows the updated pipeline for running cTWAS with
-summary statistics using the <code>multi-group</code> version of the R
-package, which extends our earlier cTWAS method (single group version)
-to integrate multiple groups of prediction models.</p>
+<p>This document shows the updated pipeline for running cTWAS with summary statistics using the <code>multi-group</code> version of the R package, which extends our earlier cTWAS method (single group version) to integrate multiple groups of prediction models.</p>
 <div class="section level2">
 <h2 id="installation">Installation<a class="anchor" aria-label="anchor" href="#installation"></a>
 </h2>
-<p>Install the <code>multigroup</code> branch of <code>cTWAS</code>
-package</p>
+<p>Install the <code>multigroup</code> branch of <code>cTWAS</code> package</p>
 <div class="sourceCode" id="cb1"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="fu">remotes</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/remotes/man/install_github.html" class="external-link">install_github</a></span><span class="op">(</span><span class="st">"xinhe-lab/ctwas"</span>, ref <span class="op">=</span> <span class="st">"multigroup"</span><span class="op">)</span></span></code></pre></div>
+<code class="sourceCode R"><span><span class="fu">remotes</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/remotes/man/install_github.html" class="external-link">install_github</a></span><span class="op">(</span><span class="st">"xinhe-lab/ctwas"</span>, ref <span class="op">=</span> <span class="st">"multigroup_test"</span><span class="op">)</span></span></code></pre></div>
 <p>Load the package</p>
 <div class="sourceCode" id="cb2"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://github.com/xinhe-lab/ctwas" class="external-link">ctwas</a></span><span class="op">)</span></span></code></pre></div>
@@ -104,210 +98,330 @@ package</p>
 <div class="section level2">
 <h2 id="preparing-input-data">Preparing input data<a class="anchor" aria-label="anchor" href="#preparing-input-data"></a>
 </h2>
-<p>In this version of <code>cTWAS</code> package, we require first
-running the data preprocessing and harmonization steps before running
-parameter estimation and finemapping steps of cTWAS analysis.</p>
-<p>The inputs for the summary statistics version of cTWAS include GWAS
-summary statistics, prediction models for genes in PredictDB format, and
-LD reference.</p>
+<p>In this version of <code>cTWAS</code> package, we require first running the data preprocessing and harmonization steps before running parameter estimation and finemapping steps of cTWAS analysis.</p>
+<p>The inputs for the summary statistics version of cTWAS include GWAS summary statistics, prediction models in PredictDB format or FUSION format, and LD reference.</p>
 <div class="section level3">
 <h3 id="gwas-z-scores">GWAS z-scores<a class="anchor" aria-label="anchor" href="#gwas-z-scores"></a>
 </h3>
-<p>We read the GWAS summary statistics as a data frame
-<code>z_snp</code>, with columns “id”, “A1”, “A2”, “z”, and each row is
-a variant. <code>A1</code> is the alternate allele, and <code>A2</code>
-is the reference allele.</p>
-<p>We also need to specify the GWAS sample size.</p>
+<p>We read the GWAS summary statistics as a data frame <code>z_snp</code>, with columns “id”, “A1”, “A2”, “z”, and each row is a variant. <code>A1</code> is the alternate allele, and <code>A2</code> is the reference allele.</p>
+<p>For this analysis, we will use summary statistics from a GWAS of LDL cholesterol in the UK Biobank. We will download the VCF from the IEU Open GWAS Project.</p>
+<div class="sourceCode" id="cb3"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="co"># set the working directory, download the summary statistics, and unzip the file.</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/base/files2.html" class="external-link">dir.create</a></span><span class="op">(</span><span class="st">"gwas_summary_stats"</span><span class="op">)</span></span>
+<span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/base/system.html" class="external-link">system</a></span><span class="op">(</span><span class="st">"wget https://gwas.mrcieu.ac.uk/files/ukb-d-30780_irnt/ukb-d-30780_irnt.vcf.gz -P gwas_summary_stats"</span><span class="op">)</span></span>
+<span><span class="fu">R.utils</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/R.utils/man/compressFile.html" class="external-link">gunzip</a></span><span class="op">(</span><span class="st">"gwas_summary_stats/ukb-d-30780_irnt.vcf.gz"</span><span class="op">)</span></span></code></pre></div>
+<p>Next, we will read the summary statistics. Then, we will compute the z-scores and format the input data. We will also collect the sample size, which will be useful later. We will save this output for convenience.</p>
+<div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="co"># read the data using the VariantAnnotation package</span></span>
+<span><span class="va">z_snp</span> <span class="op">&lt;-</span> <span class="fu">VariantAnnotation</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/VariantAnnotation/man/readVcf-methods.html" class="external-link">readVcf</a></span><span class="op">(</span><span class="st">"gwas_summary_stats/ukb-d-30780_irnt.vcf"</span><span class="op">)</span></span>
+<span><span class="va">z_snp</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/as.data.frame.html" class="external-link">as.data.frame</a></span><span class="op">(</span><span class="fu">gwasvcf</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/gwasvcf/man/vcf_to_tibble.html" class="external-link">vcf_to_tibble</a></span><span class="op">(</span><span class="va">z_snp</span><span class="op">)</span><span class="op">)</span></span>
+<span></span>
+<span><span class="co"># compute the z-scores</span></span>
+<span><span class="va">z_snp</span><span class="op">$</span><span class="va">Z</span> <span class="op">&lt;-</span> <span class="va">z_snp</span><span class="op">$</span><span class="va">ES</span><span class="op">/</span><span class="va">z_snp</span><span class="op">$</span><span class="va">SE</span></span>
+<span></span>
+<span><span class="co"># collect sample size (most frequent sample size for all variants)</span></span>
+<span><span class="va">gwas_n</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/numeric.html" class="external-link">as.numeric</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/names.html" class="external-link">names</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/sort.html" class="external-link">sort</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/table.html" class="external-link">table</a></span><span class="op">(</span><span class="va">z_snp</span><span class="op">$</span><span class="va">SS</span><span class="op">)</span>,decreasing<span class="op">=</span><span class="cn">TRUE</span><span class="op">)</span><span class="op">[</span><span class="fl">1</span><span class="op">]</span><span class="op">)</span><span class="op">)</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/base/cat.html" class="external-link">cat</a></span><span class="op">(</span><span class="st">"gwas_n="</span>, <span class="va">gwas_n</span>, <span class="st">"\n"</span><span class="op">)</span></span>
+<span></span>
+<span><span class="co"># subset the columns and format the column names</span></span>
+<span><span class="va">z_snp</span> <span class="op">&lt;-</span> <span class="va">z_snp</span><span class="op">[</span>,<span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"rsid"</span>, <span class="st">"ALT"</span>, <span class="st">"REF"</span>, <span class="st">"Z"</span><span class="op">)</span><span class="op">]</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/base/colnames.html" class="external-link">colnames</a></span><span class="op">(</span><span class="va">z_snp</span><span class="op">)</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"id"</span>, <span class="st">"A1"</span>, <span class="st">"A2"</span>, <span class="st">"z"</span><span class="op">)</span></span>
+<span></span>
+<span><span class="co"># save the formatted z-scores and GWAS sample size</span></span>
+<span><span class="va">outputdir</span> <span class="op">&lt;-</span> <span class="st">"/project2/xinhe/shared_data/multigroup_ctwas/LDL_multigroup_tutorial/"</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/base/files2.html" class="external-link">dir.create</a></span><span class="op">(</span><span class="va">outputdir</span>, showWarnings<span class="op">=</span><span class="cn">F</span>, recursive<span class="op">=</span><span class="cn">T</span><span class="op">)</span></span>
+<span><span class="va">outname</span> <span class="op">&lt;-</span> <span class="st">"example"</span></span>
+<span></span>
+<span><span class="va">gwas_name</span> <span class="op">&lt;-</span> <span class="st">"ukb-d-30780_irnt"</span></span>
+<span><span class="va">z_snp_outfile</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/file.path.html" class="external-link">file.path</a></span><span class="op">(</span><span class="va">outputdir</span>, <span class="fu"><a href="https://rdrr.io/r/base/paste.html" class="external-link">paste0</a></span><span class="op">(</span><span class="va">gwas_name</span>, <span class="st">".z_snp.Rd"</span><span class="op">)</span><span class="op">)</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/base/save.html" class="external-link">save</a></span><span class="op">(</span><span class="va">z_snp</span>, <span class="va">gwas_n</span>, file<span class="op">=</span><span class="va">z_snp_outfile</span><span class="op">)</span></span></code></pre></div>
 </div>
 <div class="section level3">
 <h3 id="prediction-models">Prediction models<a class="anchor" aria-label="anchor" href="#prediction-models"></a>
 </h3>
-<p>The <code>multigroup</code> version of cTWAS only accepts multiple
-sets of prediction models in PredictDB format. We provide functions to
-convert weights from FUSION format to PredictDB format.</p>
-<p>To specify weights in PredictDB format, provide the path to the
-<code>.db</code> file. Multiple prediction models can be specified by
-providing multiple paths as a vector.</p>
+<p>The <code>multigroup</code> version of cTWAS accepts multiple sets of prediction models in PredictDB or FUSION format.</p>
+<p>Please check <a href="http://predictdb.org/" class="external-link">PredictDB</a> for the format of PredictDB weights. To specify weights in PredictDB format, provide the path to the <code>.db</code> file.</p>
+<p>Please check <a href="http://gusevlab.org/projects/fusion/#compute-your-own-predictive-models" class="external-link">Fusion/TWAS</a> for the format of FUSION weights.</p>
 </div>
 <div class="section level3">
 <h3 id="ld-reference-and-region-info">LD reference and region info<a class="anchor" aria-label="anchor" href="#ld-reference-and-region-info"></a>
 </h3>
-<p>LD reference information can be provided as genetic correlation
-matrices (termed “R matrices”) for regions that are approximately
-LD-independent.</p>
-<p>It is critical that the genome build (e.g. hg38) of the LD reference
-matches the genome build used to train the prediction models. The genome
-build of the GWAS summary statistics does not matter because variant
-positions are determined by the LD reference.</p>
-<p>cTWAS includes pre-defined regions based on European (EUR), Asian
-(ASN), or African (AFR) populations, using either genome build b38 or
-b37. These regions were previously generated using <a href="https://github.com/endrebak/ldetect" class="external-link">LDetect</a>.</p>
-<p>In this version of the package, we also require a data frame
-<code>region_info</code> containing the following columns: “chrom”,
-“start”, “end”, “region_name”, “LD_matrix”, “SNP_info”.</p>
-<p>“chrom”, “start”, “end” are the genomic coordinates of the regions,
-“LD_matrix” stores the paths to the precomputed LD (R) matrices
-(<code>.RDS</code> files in our UK Biobank reference), “SNP_info” stores
-the paths to the variant information corresponding to the LD matrices
-(<code>.Rvar</code> files in our UK Biobank reference).</p>
-<div class="sourceCode" id="cb3"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">region_file</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/system.file.html" class="external-link">system.file</a></span><span class="op">(</span><span class="st">"extdata/ldetect"</span>, <span class="st">"EUR.b38.bed"</span>, package <span class="op">=</span> <span class="st">"ctwas"</span><span class="op">)</span></span>
+<p>LD reference information can be provided as genetic correlation matrices (termed “R matrices”) for regions that are approximately LD-independent.</p>
+<p>cTWAS performs its analysis region-by-region. The preferred way to run cTWAS is to provide pre-computed LD matrices for each region.</p>
+<p><strong>It is critical that the genome build (e.g. hg38) of the LD reference matches the genome build used to train the prediction models.</strong> The genome build of the GWAS summary statistics does not matter because variant positions are determined by the LD reference.</p>
+<p>The choice of LD reference population is important for fine-mapping. Best practice for fine-mapping is to use in-sample LD reference (LD computed using the subjects in the GWAS sample). If in-sample LD reference is not an option, the LD reference should be as representative of the population in the GWAS sample as possible. Given that cTWAS is an extended fine-mapping algorithm, and that gene z-scores are computed using the observed GWAS z-scores, which reflect patterns of LD in the GWAS population, our recommendation is to match the LD reference to the GWAS population, not the population used to build the prediction models.</p>
+<div class="section level4">
+<h4 id="defining-regions">Defining regions<a class="anchor" aria-label="anchor" href="#defining-regions"></a>
+</h4>
+<p>cTWAS includes pre-defined regions based on European (EUR), Asian (ASN), or African (AFR) populations, using either genome build b38 or b37. These regions were previously generated using <a href="https://github.com/endrebak/ldetect" class="external-link">LDetect</a>.</p>
+</div>
+<div class="section level4">
+<h4 id="ld-matrices">LD matrices<a class="anchor" aria-label="anchor" href="#ld-matrices"></a>
+</h4>
+<p>To use LD matrices for the LD reference, provide a directory containing all of the <code>.RDS</code> matrix files and matching <code>.Rvar</code> variant information files.</p>
+<p>We have precomputed reference LD matrices and the variant information tables accompanying the LD matrices for both UKB and 1000G European Phase3 references. The complete LD matrices of European individuals from UK Biobank can be downloaded <a href="https://uchicago.box.com/s/jqocacd2fulskmhoqnasrknbt59x3xkn" class="external-link">here</a>. On the University of Chicago RCC cluster, the b38 reference is available at <code>/project2/mstephens/wcrouse/UKB_LDR_0.1/</code> and the b37 reference is available at <code>/project2/mstephens/wcrouse/UKB_LDR_0.1_b37/</code>.</p>
+</div>
+<div class="section level4">
+<h4 id="region-info">region info<a class="anchor" aria-label="anchor" href="#region-info"></a>
+</h4>
+<p>In this version of the package, we also require a data frame <code>region_info</code> containing the following columns: “chrom”, “start”, “stop”, “region_id”, “LD_matrix”, “SNP_info”.</p>
+<p>“chrom”, “start”, “stop” are the genomic coordinates of the regions, “region_id” contains the IDs of the region, and we use “chr:start-stop” format in region IDs by default. “LD_matrix” stores the paths to the precomputed LD (R) matrices (<code>.RDS</code> files in our precomputed reference LD files), “SNP_info” stores the paths to the variant information corresponding to the LD matrices (<code>.Rvar</code> files in our precomputed reference LD files).</p>
+<p>The <code>.RDS</code> file is <a href="https://www.rdocumentation.org/packages/base/versions/3.3.2/topics/readRDS?tap_a=5644-dce66f&amp;tap_s=10907-287229" class="external-link">R .RDS format</a>. It stores the LD correlation matrix for a region (a <span class="math inline">\(p \times p\)</span> matrix, <span class="math inline">\(p\)</span> is the number of variants in the region). We require that for each <code>.RDS</code> file, in the same directory, there is a corresponding file with the same stem but ending with the suffix <code>.Rvar</code>. This <code>.Rvar</code> files includes variant information for the region, and the order of its rows must match the order of rows and columns in the <code>.RDS</code> file.</p>
+<p>Here we use b38 European region file, which is included in the package.</p>
+<div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">genome_version</span> <span class="op">&lt;-</span> <span class="st">"b38"</span></span>
+<span><span class="va">ld_R_dir</span> <span class="op">&lt;-</span> <span class="st">"/project2/mstephens/wcrouse/UKB_LDR_0.1/"</span></span>
+<span></span>
+<span><span class="va">region_file</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/system.file.html" class="external-link">system.file</a></span><span class="op">(</span><span class="st">"extdata/ldetect"</span>, <span class="fu"><a href="https://rdrr.io/r/base/paste.html" class="external-link">paste0</a></span><span class="op">(</span><span class="st">"EUR."</span>, <span class="va">genome_version</span>, <span class="st">".bed"</span><span class="op">)</span>, package <span class="op">=</span> <span class="st">"ctwas"</span><span class="op">)</span></span>
 <span><span class="va">region_info</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/utils/read.table.html" class="external-link">read.table</a></span><span class="op">(</span><span class="va">region_file</span>, header <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/colnames.html" class="external-link">colnames</a></span><span class="op">(</span><span class="va">region_info</span><span class="op">)</span><span class="op">[</span><span class="fl">1</span><span class="op">:</span><span class="fl">3</span><span class="op">]</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"chrom"</span>, <span class="st">"start"</span>, <span class="st">"stop"</span><span class="op">)</span></span>
 <span><span class="va">region_info</span><span class="op">$</span><span class="va">chrom</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/numeric.html" class="external-link">as.numeric</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/grep.html" class="external-link">gsub</a></span><span class="op">(</span><span class="st">"chr"</span>, <span class="st">""</span>, <span class="va">region_info</span><span class="op">$</span><span class="va">chrom</span><span class="op">)</span><span class="op">)</span></span>
-<span><span class="va">region_info</span><span class="op">$</span><span class="va">region_tag</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/paste.html" class="external-link">paste0</a></span><span class="op">(</span><span class="va">region_info</span><span class="op">$</span><span class="va">chr</span>, <span class="st">":"</span>, <span class="va">region_info</span><span class="op">$</span><span class="va">start</span>, <span class="st">"-"</span>, <span class="va">region_info</span><span class="op">$</span><span class="va">stop</span><span class="op">)</span></span>
+<span><span class="va">region_info</span><span class="op">$</span><span class="va">region_id</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/paste.html" class="external-link">paste0</a></span><span class="op">(</span><span class="va">region_info</span><span class="op">$</span><span class="va">chr</span>, <span class="st">":"</span>, <span class="va">region_info</span><span class="op">$</span><span class="va">start</span>, <span class="st">"-"</span>, <span class="va">region_info</span><span class="op">$</span><span class="va">stop</span><span class="op">)</span></span>
 <span></span>
-<span><span class="va">ld_R_dir</span> <span class="op">&lt;-</span> <span class="st">"/project2/mstephens/wcrouse/UKB_LDR_0.1"</span></span>
-<span><span class="va">filestem</span> <span class="op">&lt;-</span> <span class="st">"ukb_b38_0.1"</span></span>
+<span><span class="va">filestem</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/paste.html" class="external-link">paste0</a></span><span class="op">(</span><span class="st">"ukb_"</span>, <span class="va">genome_version</span>, <span class="st">"_0.1"</span><span class="op">)</span></span>
 <span><span class="va">ld_filestem</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/sprintf.html" class="external-link">sprintf</a></span><span class="op">(</span><span class="st">"%s_chr%s.R_snp.%s_%s"</span>, <span class="va">filestem</span>, <span class="va">region_info</span><span class="op">$</span><span class="va">chrom</span>, <span class="va">region_info</span><span class="op">$</span><span class="va">start</span>, <span class="va">region_info</span><span class="op">$</span><span class="va">stop</span><span class="op">)</span></span>
 <span><span class="va">region_info</span><span class="op">$</span><span class="va">LD_matrix</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/file.path.html" class="external-link">file.path</a></span><span class="op">(</span><span class="va">ld_R_dir</span>, <span class="fu"><a href="https://rdrr.io/r/base/paste.html" class="external-link">paste0</a></span><span class="op">(</span><span class="va">ld_filestem</span>, <span class="st">".RDS"</span><span class="op">)</span><span class="op">)</span></span>
 <span><span class="va">region_info</span><span class="op">$</span><span class="va">SNP_info</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/file.path.html" class="external-link">file.path</a></span><span class="op">(</span><span class="va">ld_R_dir</span>, <span class="fu"><a href="https://rdrr.io/r/base/paste.html" class="external-link">paste0</a></span><span class="op">(</span><span class="va">ld_filestem</span>, <span class="st">".Rvar"</span><span class="op">)</span><span class="op">)</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/base/stopifnot.html" class="external-link">stopifnot</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/all.html" class="external-link">all</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/files.html" class="external-link">file.exists</a></span><span class="op">(</span><span class="va">region_info</span><span class="op">$</span><span class="va">LD_matrix</span><span class="op">)</span><span class="op">)</span><span class="op">)</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/base/stopifnot.html" class="external-link">stopifnot</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/all.html" class="external-link">all</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/files.html" class="external-link">file.exists</a></span><span class="op">(</span><span class="va">region_info</span><span class="op">$</span><span class="va">SNP_info</span><span class="op">)</span><span class="op">)</span><span class="op">)</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/utils/write.table.html" class="external-link">write.table</a></span><span class="op">(</span><span class="va">region_info</span>, file <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/file.path.html" class="external-link">file.path</a></span><span class="op">(</span><span class="va">outputdir</span>, <span class="st">"region_info.txt"</span><span class="op">)</span>, sep <span class="op">=</span> <span class="st">"\t"</span>, col.names <span class="op">=</span> <span class="cn">T</span>, row.names <span class="op">=</span> <span class="cn">F</span>, quote <span class="op">=</span> <span class="cn">F</span><span class="op">)</span></span></code></pre></div>
+<p>The columns of the <code>.Rvar</code> file include information on chromosome, variant name, position in base pairs, and the alternative and reference alleles. The <code>variance</code> column is the variance of each variant prior to standardization; this is required for PredictDB weights but not FUSION weights. PredictDB weights should be scaled by the variance before imputing gene expression. This is because PredictDB weights assume that variant genotypes are not standardized before imputation, but our implementation assumes standardized variant genotypes. If variance information is missing, or if weights are in PredictDB format but are already on the standardized scale (e.g. if they were converted from FUSION to PredictDB format), this scaling can be turned off using the option <code>scale_by_ld_variance=FALSE</code> using the multigroup version of cTWAS. We’ve also include information on allele frequency in the variant info, but this is optional.</p>
+<p>The naming convention for the LD matrices is <code>[filestem]_chr[#].R_snp.[start]_[end].RDS</code>. cTWAS expects that all <code>.RDS</code> and <code>.Rvar</code> files in the directory contain LD information, so no other files with these suffixes should be in the directory. Each variant should be uniquely assigned to a region, and the regions should be left closed and right open, i.e. [start, stop). The positions of the LD matrices must match exactly the positions specified by the region file. Do not include invariant or multiallelic variants in the LD reference.</p>
+</div>
+<div class="section level4">
+<h4 id="convert-reference-genotype-data-to-ld-matrices">Convert reference genotype data to LD matrices<a class="anchor" aria-label="anchor" href="#convert-reference-genotype-data-to-ld-matrices"></a>
+</h4>
+<p>We could genotype data in PLINK format to LD matrices (.RDS) and variance information (.Rvar) files, using the <code>convert_geno_to_LD_matrix</code> function. Below is an example of generating LD matrices using 1000G EUR Phase3 PLINK genotype data.</p>
+<div class="sourceCode" id="cb6"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="co"># specify LD reference</span></span>
+<span><span class="va">ldref_dir</span> <span class="op">&lt;-</span> <span class="st">"/project2/xinhe/shared_data/ldsc/sldsc/1000G_EUR_Phase3_plink"</span></span>
+<span><span class="co"># genotype files in PLINK .bed or .pgen format</span></span>
+<span><span class="va">genotype_files</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/file.path.html" class="external-link">file.path</a></span><span class="op">(</span><span class="va">ldref_dir</span>, <span class="fu"><a href="https://rdrr.io/r/base/paste.html" class="external-link">paste0</a></span><span class="op">(</span><span class="st">"1000G.EUR.QC."</span>, <span class="fl">1</span><span class="op">:</span><span class="fl">22</span>, <span class="st">".bed"</span><span class="op">)</span><span class="op">)</span></span>
 <span></span>
-<span><span class="va">region_info</span><span class="op">[</span><span class="fl">1</span><span class="op">:</span><span class="fl">3</span>,<span class="op">]</span></span></code></pre></div>
-<pre><code><span><span class="co">##   chrom   start    stop        region_tag</span></span>
-<span><span class="co">## 1     1   10583 1961168   1:10583-1961168</span></span>
-<span><span class="co">## 2     1 1961168 3666172 1:1961168-3666172</span></span>
-<span><span class="co">## 3     1 3666172 4320751 1:3666172-4320751</span></span>
-<span><span class="co">##                                                                            LD_matrix</span></span>
-<span><span class="co">## 1   /project2/mstephens/wcrouse/UKB_LDR_0.1/ukb_b38_0.1_chr1.R_snp.10583_1961168.RDS</span></span>
-<span><span class="co">## 2 /project2/mstephens/wcrouse/UKB_LDR_0.1/ukb_b38_0.1_chr1.R_snp.1961168_3666172.RDS</span></span>
-<span><span class="co">## 3 /project2/mstephens/wcrouse/UKB_LDR_0.1/ukb_b38_0.1_chr1.R_snp.3666172_4320751.RDS</span></span>
-<span><span class="co">##                                                                              SNP_info</span></span>
-<span><span class="co">## 1   /project2/mstephens/wcrouse/UKB_LDR_0.1/ukb_b38_0.1_chr1.R_snp.10583_1961168.Rvar</span></span>
-<span><span class="co">## 2 /project2/mstephens/wcrouse/UKB_LDR_0.1/ukb_b38_0.1_chr1.R_snp.1961168_3666172.Rvar</span></span>
-<span><span class="co">## 3 /project2/mstephens/wcrouse/UKB_LDR_0.1/ukb_b38_0.1_chr1.R_snp.3666172_4320751.Rvar</span></span></code></pre>
+<span><span class="co"># variance information files in PLINK .bim or .pvar format</span></span>
+<span><span class="co"># the output .Rvar files will use the positions and allele information in varinfo_files</span></span>
+<span><span class="va">varinfo_files</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/file.path.html" class="external-link">file.path</a></span><span class="op">(</span><span class="va">ldref_dir</span>, <span class="fu"><a href="https://rdrr.io/r/base/paste.html" class="external-link">paste0</a></span><span class="op">(</span><span class="st">"1000G.EUR.QC."</span>, <span class="fl">1</span><span class="op">:</span><span class="fl">22</span>,<span class="st">".bim"</span><span class="op">)</span><span class="op">)</span></span>
+<span></span>
+<span><span class="co"># prepare a data frame region_info for LD regions with columns "chr", "start", and "stop,</span></span>
+<span><span class="co"># the positions should match those in snpinfo_files</span></span>
+<span><span class="va">genome_version</span> <span class="op">=</span> <span class="st">"b37"</span></span>
+<span><span class="va">region_file</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/system.file.html" class="external-link">system.file</a></span><span class="op">(</span><span class="st">"extdata/ldetect"</span>, <span class="fu"><a href="https://rdrr.io/r/base/paste.html" class="external-link">paste0</a></span><span class="op">(</span><span class="st">"EUR."</span>, <span class="va">genome_version</span>, <span class="st">".bed"</span><span class="op">)</span>, package <span class="op">=</span> <span class="st">"ctwas"</span><span class="op">)</span></span>
+<span><span class="va">region_info</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/utils/read.table.html" class="external-link">read.table</a></span><span class="op">(</span><span class="va">region_file</span>, header <span class="op">=</span> <span class="cn">T</span>, stringsAsFactors <span class="op">=</span> <span class="cn">F</span><span class="op">)</span></span>
+<span></span>
+<span><span class="co"># specify output</span></span>
+<span><span class="va">LD_outputdir</span> <span class="op">&lt;-</span> <span class="st">"/project2/xinhe/shared_data/multigroup_ctwas/ref_LD_R/1000G_EUR_Phase3_b37/"</span></span>
+<span><span class="va">LD_outname</span> <span class="op">&lt;-</span> <span class="st">"1000G_EUR_Phase3_b37"</span></span>
+<span><span class="va">region_info</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/convert_geno_to_LD_matrix.html">convert_geno_to_LD_matrix</a></span><span class="op">(</span><span class="va">region_info</span>, <span class="va">genotype_files</span>, <span class="va">varinfo_files</span>, outputdir <span class="op">=</span> <span class="va">LD_outputdir</span>, outname <span class="op">=</span> <span class="va">LD_outname</span><span class="op">)</span></span></code></pre></div>
+</div>
 </div>
 <div class="section level3">
 <h3 id="data-harmonization">Data harmonization<a class="anchor" aria-label="anchor" href="#data-harmonization"></a>
 </h3>
-<p>These inputs should be harmonized prior to cTWAS analysis (i.e. the
-reference and alternative alleles for each variant should match across
-all three data sources).</p>
+<p>These inputs should be harmonized prior to cTWAS analysis (i.e. the reference and alternative alleles for each variant should match across all three data sources).</p>
 <div class="section level4">
-<h4 id="harmonizing-gwas-z-scores-and-ld-reference-and-detect-ld-mismatches">Harmonizing GWAS z-scores and LD reference and detect LD
-mismatches<a class="anchor" aria-label="anchor" href="#harmonizing-gwas-z-scores-and-ld-reference-and-detect-ld-mismatches"></a>
+<h4 id="harmonizing-gwas-z-scores-and-ld-reference">Harmonizing GWAS z-scores and LD reference<a class="anchor" aria-label="anchor" href="#harmonizing-gwas-z-scores-and-ld-reference"></a>
 </h4>
-<p>The <code><a href="../reference/preprocess_z_ld.html">preprocess_z_ld()</a></code> function first harmonizes GWAS
-z-scores and LD reference based on the included allele information, then
-performs LD mismatch diagnosis using the <code><a href="../reference/kriging_rss.html">kriging_rss()</a></code>
-function from SuSiE RSS, and flips signs for variants detected with
-allele flipping issues. Note, the LD mismatch diagnosis procedure can be
-time consuming.</p>
+<p>The <code><a href="../reference/preprocess_z_snp.html">preprocess_z_snp()</a></code> function harmonizes GWAS z-scores and LD reference based on the included allele information. If <code>drop_multiallelic = TRUE</code>, it will drop multiallelic variants. If <code>drop_strand_ambig = TRUE</code>, it will drop strand ambiguous variants.</p>
+<div class="sourceCode" id="cb7"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="co"># load the GWAS sumstats data</span></span>
+<span><span class="va">z_snp_outfile</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/file.path.html" class="external-link">file.path</a></span><span class="op">(</span><span class="va">outputdir</span>, <span class="fu"><a href="https://rdrr.io/r/base/paste.html" class="external-link">paste0</a></span><span class="op">(</span><span class="va">gwas_name</span>, <span class="st">".z_snp.Rd"</span><span class="op">)</span><span class="op">)</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/base/load.html" class="external-link">load</a></span><span class="op">(</span><span class="va">z_snp_outfile</span><span class="op">)</span></span>
+<span></span>
+<span><span class="va">z_snp</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/preprocess_z_snp.html">preprocess_z_snp</a></span><span class="op">(</span><span class="va">z_snp</span>, <span class="va">region_info</span>, <span class="va">gwas_n</span>, drop_multiallelic <span class="op">=</span> <span class="cn">TRUE</span>, drop_strand_ambig <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/base/save.html" class="external-link">save</a></span><span class="op">(</span><span class="va">z_snp</span>, file <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/file.path.html" class="external-link">file.path</a></span><span class="op">(</span><span class="va">outputdir</span>, <span class="fu"><a href="https://rdrr.io/r/base/paste.html" class="external-link">paste0</a></span><span class="op">(</span><span class="va">outname</span>, <span class="st">".preprocessed.z_snp.Rd"</span><span class="op">)</span><span class="op">)</span><span class="op">)</span></span></code></pre></div>
 </div>
 <div class="section level4">
 <h4 id="harmonizing-prediction-models-and-ld-reference">Harmonizing prediction models and LD reference<a class="anchor" aria-label="anchor" href="#harmonizing-prediction-models-and-ld-reference"></a>
 </h4>
-<p>The <code><a href="../reference/preprocess_wgt_ld.html">preprocess_wgt_ld()</a></code> function harmonizes the
-PredictDB prediction models and LD reference. This only needs to be done
-once per combination of prediction models and LD reference.</p>
+<p>The <code>preprocess_weight()</code> function harmonizes the PredictDB prediction models and LD reference. This only needs to be done once per combination of prediction models and LD reference.</p>
+<p>In this example, we use four weights, two eQTL models and two sQTLs models from liver and lung. We preprocess each weight file separately and combine them in the end. We specify the <code>type</code> as the molecular QTL types, and <code>context</code> as the tissues, cell types, or conditions. For the expression models, we limit to protein coding genes, by setting <code>filter_protein_coding_genes = TRUE</code>. We set <code>scale_by_ld_variance=TRUE</code> for PredictDB weights.</p>
+<p>We use 6 cores to parallelize the computation over the weights.</p>
+<div class="sourceCode" id="cb8"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">weight_files</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"/project/xinhe/shengqian/cTWAS_analysis/data/Liver_Expression.db"</span>,</span>
+<span>                  <span class="st">"/project/xinhe/shengqian/cTWAS_analysis/data/Lung_Expression.db"</span>,</span>
+<span>                  <span class="st">"/project/xinhe/shengqian/cTWAS_analysis/data/Liver_Splicing.db"</span>,</span>
+<span>                  <span class="st">"/project/xinhe/shengqian/cTWAS_analysis/data/Lung_Splicing.db"</span><span class="op">)</span></span>
+<span></span>
+<span><span class="va">ncore</span> <span class="op">&lt;-</span> <span class="fl">6</span></span>
+<span></span>
+<span><span class="va">weights_liver_expression</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/preprocess_weights.html">preprocess_weights</a></span><span class="op">(</span>weight_file <span class="op">=</span> <span class="va">weight_files</span><span class="op">[</span><span class="fl">1</span><span class="op">]</span>,</span>
+<span>                                               <span class="va">region_info</span>,</span>
+<span>                                               <span class="va">z_snp</span>,</span>
+<span>                                               type <span class="op">=</span> <span class="st">"expression"</span>,</span>
+<span>                                               context <span class="op">=</span> <span class="st">"liver"</span>,</span>
+<span>                                               weight_format <span class="op">=</span> <span class="st">"PredictDB"</span>,</span>
+<span>                                               ncore <span class="op">=</span> <span class="va">ncore</span>,</span>
+<span>                                               drop_strand_ambig <span class="op">=</span> <span class="cn">TRUE</span>,</span>
+<span>                                               scale_by_ld_variance <span class="op">=</span> <span class="cn">TRUE</span>,</span>
+<span>                                               load_predictdb_LD <span class="op">=</span> <span class="cn">TRUE</span>,</span>
+<span>                                               filter_protein_coding_genes <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span>
+<span></span>
+<span><span class="va">weights_lung_expression</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/preprocess_weights.html">preprocess_weights</a></span><span class="op">(</span>weight_file <span class="op">=</span> <span class="va">weight_files</span><span class="op">[</span><span class="fl">2</span><span class="op">]</span>,</span>
+<span>                                              <span class="va">region_info</span>,</span>
+<span>                                              <span class="va">z_snp</span>,</span>
+<span>                                              type <span class="op">=</span> <span class="st">"expression"</span>,</span>
+<span>                                              context <span class="op">=</span> <span class="st">"lung"</span>,</span>
+<span>                                              weight_format <span class="op">=</span> <span class="st">"PredictDB"</span>,</span>
+<span>                                              ncore <span class="op">=</span> <span class="va">ncore</span>,</span>
+<span>                                              drop_strand_ambig <span class="op">=</span> <span class="cn">TRUE</span>,</span>
+<span>                                              scale_by_ld_variance <span class="op">=</span> <span class="cn">TRUE</span>,</span>
+<span>                                              load_predictdb_LD <span class="op">=</span> <span class="cn">TRUE</span>,</span>
+<span>                                              filter_protein_coding_genes <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span>
+<span></span>
+<span><span class="va">weights_liver_splicing</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/preprocess_weights.html">preprocess_weights</a></span><span class="op">(</span>weight_file <span class="op">=</span> <span class="va">weight_files</span><span class="op">[</span><span class="fl">3</span><span class="op">]</span>,</span>
+<span>                                             <span class="va">region_info</span>,</span>
+<span>                                             <span class="va">z_snp</span>,</span>
+<span>                                             type <span class="op">=</span> <span class="st">"splicing"</span>,</span>
+<span>                                             context <span class="op">=</span> <span class="st">"liver"</span>,</span>
+<span>                                             weight_format <span class="op">=</span> <span class="st">"PredictDB"</span>,</span>
+<span>                                             ncore <span class="op">=</span> <span class="va">ncore</span>,</span>
+<span>                                             drop_strand_ambig <span class="op">=</span> <span class="cn">TRUE</span>,</span>
+<span>                                             scale_by_ld_variance <span class="op">=</span> <span class="cn">TRUE</span>,</span>
+<span>                                             load_predictdb_LD <span class="op">=</span> <span class="cn">TRUE</span>,</span>
+<span>                                             filter_protein_coding_genes <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span></span>
+<span></span>
+<span><span class="va">weights_lung_splicing</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/preprocess_weights.html">preprocess_weights</a></span><span class="op">(</span>weight_file <span class="op">=</span> <span class="va">weight_files</span><span class="op">[</span><span class="fl">4</span><span class="op">]</span>,</span>
+<span>                                            <span class="va">region_info</span>,</span>
+<span>                                            <span class="va">z_snp</span>,</span>
+<span>                                            type <span class="op">=</span> <span class="st">"splicing"</span>,</span>
+<span>                                            context <span class="op">=</span> <span class="st">"lung"</span>,</span>
+<span>                                            weight_format <span class="op">=</span> <span class="st">"PredictDB"</span>,</span>
+<span>                                            ncore <span class="op">=</span> <span class="va">ncore</span>,</span>
+<span>                                            drop_strand_ambig <span class="op">=</span> <span class="cn">TRUE</span>,</span>
+<span>                                            scale_by_ld_variance <span class="op">=</span> <span class="cn">TRUE</span>,</span>
+<span>                                            load_predictdb_LD <span class="op">=</span> <span class="cn">TRUE</span>,</span>
+<span>                                            filter_protein_coding_genes <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span></span>
+<span></span>
+<span><span class="va">weights</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="va">weights_liver_expression</span>, <span class="va">weights_lung_expression</span>, <span class="va">weights_liver_splicing</span>, <span class="va">weights_lung_splicing</span><span class="op">)</span></span>
+<span></span>
+<span><span class="va">processed_weight_file</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/file.path.html" class="external-link">file.path</a></span><span class="op">(</span><span class="va">outputdir</span>, <span class="fu"><a href="https://rdrr.io/r/base/paste.html" class="external-link">paste0</a></span><span class="op">(</span><span class="va">outname</span>, <span class="st">".preprocessed.weights.Rd"</span><span class="op">)</span><span class="op">)</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/base/save.html" class="external-link">save</a></span><span class="op">(</span><span class="va">weights</span>, file <span class="op">=</span> <span class="va">processed_weight_file</span><span class="op">)</span></span></code></pre></div>
 </div>
 </div>
 </div>
 <div class="section level2">
 <h2 id="imputing-gene-z-scores">Imputing gene z-scores<a class="anchor" aria-label="anchor" href="#imputing-gene-z-scores"></a>
 </h2>
-<p>After we have done data harmonization, we compute gene z-scores
-genome-wide using <code><a href="../reference/compute_gene_z.html">compute_gene_z()</a></code>.</p>
-<p>This function computes gene z-scores using GWAS summary statistics
-(<code>z_snp</code>), the PredictDB weights, and the LD matrix
-information included in <code>region_info</code>. It returns computed
-gene z-scores (<code>z_gene</code>), a data frame about the imputed
-genes (<code>gene_info</code>), and the weights of imputed genes
-(<code>wgtlist</code>).</p>
-<div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="fu"><a href="../reference/compute_gene_z.html">compute_gene_z</a></span><span class="op">(</span><span class="va">z_snp</span>, <span class="va">weights</span>, <span class="va">region_info</span>, <span class="va">ncore</span>, <span class="va">...</span><span class="op">)</span></span></code></pre></div>
+<p>After we have done data preprocessing, we compute gene z-scores using <code><a href="../reference/compute_gene_z.html">compute_gene_z()</a></code>.</p>
+<p>This function computes gene z-scores using preprocessed SNP z-scores (<code>z_snp</code>), the preprocessed weights. It returns imputed a data frame containing gene z-scores (<code>z_gene</code>).</p>
+<div class="sourceCode" id="cb9"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">z_gene</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/compute_gene_z.html">compute_gene_z</a></span><span class="op">(</span><span class="va">z_snp</span>, <span class="va">weights</span>, ncore<span class="op">=</span><span class="va">ncore</span><span class="op">)</span></span>
+<span><span class="va">gene_z_file</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/file.path.html" class="external-link">file.path</a></span><span class="op">(</span><span class="va">outputdir</span>, <span class="fu"><a href="https://rdrr.io/r/base/paste.html" class="external-link">paste0</a></span><span class="op">(</span><span class="va">outname</span>, <span class="st">".gene_z.Rd"</span><span class="op">)</span><span class="op">)</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/base/save.html" class="external-link">save</a></span><span class="op">(</span><span class="va">z_gene</span>, file <span class="op">=</span> <span class="va">gene_z_file</span><span class="op">)</span></span></code></pre></div>
+</div>
+<div class="section level2">
+<h2 id="assemble-input-data-for-the-regions">Assemble input data for the regions<a class="anchor" aria-label="anchor" href="#assemble-input-data-for-the-regions"></a>
+</h2>
+<p>After we have done data preprocessing and imputed gene z-scores, we assemble the input data for all the regions.<br>
+The <code>get_regionlist</code> function will assign genes, SNPs and their z-score data for each region. It will identify the genes that cross region boundaries, and reassign to the region with the highest r^2. It will down-sample the SNPs by the value of <code>thin</code> to reduce running time of parameter estimation and region screening. and trim (randomly by default) the SNPs if the number of SNPs in a region is more than <code>max_snp_region</code>. This functions returns a list with <code>regionlist</code>, a list of regions with assembled input data, as well as a data frame of cross-boundary genes.</p>
+<div class="sourceCode" id="cb10"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">thin</span> <span class="op">&lt;-</span> <span class="fl">0.1</span></span>
+<span><span class="va">max_snp_region</span> <span class="op">&lt;-</span> <span class="fl">20000</span></span>
+<span><span class="va">res</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/get_regionlist.html">get_regionlist</a></span><span class="op">(</span><span class="va">region_info</span>, <span class="va">z_snp</span>, <span class="va">z_gene</span>, <span class="va">weights</span>,</span>
+<span>                      maxSNP <span class="op">=</span> <span class="va">max_snp_region</span>,</span>
+<span>                      trim_by <span class="op">=</span> <span class="st">"random"</span>,</span>
+<span>                      thin <span class="op">=</span> <span class="va">thin</span>,</span>
+<span>                      minvar <span class="op">=</span> <span class="fl">2</span>,</span>
+<span>                      adjust_boundary_genes <span class="op">=</span> <span class="cn">TRUE</span>,</span>
+<span>                      ncore <span class="op">=</span> <span class="va">ncore</span><span class="op">)</span></span>
+<span><span class="va">regionlist</span> <span class="op">&lt;-</span> <span class="va">res</span><span class="op">$</span><span class="va">regionlist</span></span>
+<span><span class="va">boundary_genes</span> <span class="op">&lt;-</span> <span class="va">res</span><span class="op">$</span><span class="va">boundary_genes</span></span>
+<span></span>
+<span><span class="va">regionlist_file</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/file.path.html" class="external-link">file.path</a></span><span class="op">(</span><span class="va">outputdir</span>, <span class="fu"><a href="https://rdrr.io/r/base/paste.html" class="external-link">paste0</a></span><span class="op">(</span><span class="va">outname</span>, <span class="st">".regionlist.RDS"</span><span class="op">)</span><span class="op">)</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/base/readRDS.html" class="external-link">saveRDS</a></span><span class="op">(</span><span class="va">res</span>, <span class="va">regionlist_file</span><span class="op">)</span></span></code></pre></div>
 </div>
 <div class="section level2">
 <h2 id="estimating-parameters">Estimating parameters<a class="anchor" aria-label="anchor" href="#estimating-parameters"></a>
 </h2>
-<p>We need to specify the GWAS summary statistics (<code>z_snp</code>),
-results from computing gene z-scores (including <code>z_gene</code>,
-<code>gene_info</code>), and <code>region_info</code>. We also specify
-<code>thin</code>, the proportion of SNPs to be used for parameter
-estimation and screening regions.</p>
-<p>In the <code>multigroup</code> branch, to specify that our gene
-z-scores come from multiple groups, we simply add a <code>type</code>
-column specifying the types of tissue groups, and we and also add a
-<code>QTLtype</code> column for the types of molecular traits.</p>
-<p>There are several options for how to handle the effect size prior by
-specifying the <code>group_prior_var_stucture</code>:</p>
+<p>We use <code>est_param</code> function to estimate parameters. It will take the assembled <code>regionlist</code> as input.</p>
+<p>There are several options for how to handle the group prior variance parameters by specifying the <code>group_prior_var_stucture</code>:</p>
 <ul>
-<li>“independent” is the default and allows all groups to have their own
-separate variance parameters.</li>
-<li>“shared” allows all groups to share the same variance
-parameter.</li>
-<li>“shared+snps” allows all groups to share the same variance
-parameter, and this variance parameter is also shared with SNPs.</li>
-<li>“shared_type” allows all groups in one molecular QTL type to share
-the same variance parameter.</li>
+<li>“independent” is the default and allows all groups to have their own separate variance parameters.</li>
+<li>“shared_all” allows all groups to share the same variance parameter.</li>
+<li>“shared_type” allows all groups in one molecular QTL type to share the same variance parameter.</li>
 </ul>
-<p>This step will run EM algorithm to estimate parameters.</p>
-<p>It will first get downsampled SNPs (with <code>thin</code>) for each
-region, then iteratively run <code>susie_rss</code> with L = 1 (first on
-all regions to get rough estimates and then on filtered regions to get
-accurate estimates), and then estimate parameters
-(<code>group_prior</code> and <code>group_prior_var</code>).</p>
-<div class="sourceCode" id="cb6"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="fu"><a href="../reference/est_param.html">est_param</a></span><span class="op">(</span><span class="va">z_snp</span>, <span class="va">z_gene</span>, <span class="va">region_info</span>, <span class="va">gene_info</span>, <span class="va">thin</span>, <span class="va">group_prior_var_structure</span>, <span class="va">...</span><span class="op">)</span></span></code></pre></div>
-<p>We could use <code><a href="../reference/ctwas_summarize_parameters.html">ctwas_summarize_parameters()</a></code> to assess the
-convergence of the estimated parameters and to compute the proportion of
-variance explained (PVE) by variants and genes.</p>
+<p>This step will run EM algorithm to estimate parameters and return estimate parameters (<code>group_prior</code>, <code>group_prior_var</code>, etc.). It will run two rounds of EM algorithm, first round uses fewer iterations (3 iterations by default) to get rough parameter estimates, and using the estimated priors in the first round, we select regions with single effect to run the second round. We use more iterations in the second round (30 iterations by default) to get accurate parameter estimates.</p>
+<div class="sourceCode" id="cb11"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">param</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/est_param.html">est_param</a></span><span class="op">(</span><span class="va">regionlist</span>, </span>
+<span>                   group_prior_var_structure <span class="op">=</span> <span class="st">"independent"</span>, </span>
+<span>                   niter1 <span class="op">=</span> <span class="fl">3</span>, niter2 <span class="op">=</span> <span class="fl">30</span>, </span>
+<span>                   ncore <span class="op">=</span> <span class="va">ncore</span><span class="op">)</span></span>
+<span><span class="va">group_prior</span> <span class="op">&lt;-</span> <span class="va">param</span><span class="op">$</span><span class="va">group_prior</span></span>
+<span><span class="va">group_prior_var</span> <span class="op">&lt;-</span> <span class="va">param</span><span class="op">$</span><span class="va">group_prior_var</span></span>
+<span><span class="va">param_file</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/file.path.html" class="external-link">file.path</a></span><span class="op">(</span><span class="va">outputdir</span>, <span class="fu"><a href="https://rdrr.io/r/base/paste.html" class="external-link">paste0</a></span><span class="op">(</span><span class="va">outname</span>, <span class="st">".param.RDS"</span><span class="op">)</span><span class="op">)</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/base/readRDS.html" class="external-link">saveRDS</a></span><span class="op">(</span><span class="va">param</span>, <span class="va">param_file</span><span class="op">)</span></span></code></pre></div>
+<p>We could use <code><a href="../reference/summarize_param.html">summarize_param()</a></code> to assess the convergence of the estimated parameters and to compute the proportion of variance explained (PVE) by variants and genes.</p>
+<div class="sourceCode" id="cb12"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">ctwas_parameters</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/summarize_param.html">summarize_param</a></span><span class="op">(</span><span class="va">param</span>, <span class="va">gwas_n</span><span class="op">)</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/base/readRDS.html" class="external-link">saveRDS</a></span><span class="op">(</span><span class="va">ctwas_parameters</span>, <span class="fu"><a href="https://rdrr.io/r/base/paste.html" class="external-link">paste0</a></span><span class="op">(</span><span class="va">outputdir</span>, <span class="st">"/"</span>, <span class="va">outname</span>, <span class="st">".ctwas_parameters.RDS"</span><span class="op">)</span><span class="op">)</span></span></code></pre></div>
 </div>
 <div class="section level2">
 <h2 id="screening-regions">Screening regions<a class="anchor" aria-label="anchor" href="#screening-regions"></a>
 </h2>
-<p>This step will run a screening process to fine-map all regions with
-downsampled SNPs, (we set <code>L = 1</code> as default in this version
-to shorten running time, instead of <code>L = 5</code> as in the earlier
-version), and select regions with strong gene signals
-(<code>min_gene_PIP = 0.5</code> by default).</p>
-<div class="sourceCode" id="cb7"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="fu"><a href="../reference/screen_regions.html">screen_regions</a></span><span class="op">(</span><span class="va">z_snp</span>, <span class="va">z_gene</span>, <span class="va">region_info</span>, <span class="va">gene_info</span>, <span class="va">wgtlist</span>, <span class="va">regionlist</span>, </span>
-<span>               <span class="va">group_prior</span>, <span class="va">group_prior_var</span>, min_gene_PIP <span class="op">=</span> <span class="fl">0.5</span>, <span class="va">...</span><span class="op">)</span></span></code></pre></div>
+<p>This step will run a screening process to fine-map all regions with down-sampled SNPs, and select regions with strong gene signals (<code>min_gene_PIP = 0.5</code> by default). After selecting regions with strong signals, we expand the screened regions with full sets of SNPs to as input regionlist for finemapping.</p>
+<div class="sourceCode" id="cb13"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">screened_region_ids</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/screen_regions.html">screen_regions</a></span><span class="op">(</span><span class="va">regionlist</span>,</span>
+<span>                                      <span class="va">region_info</span>,</span>
+<span>                                      <span class="va">weights</span>,</span>
+<span>                                      L <span class="op">=</span> <span class="fl">5</span>,</span>
+<span>                                      group_prior <span class="op">=</span> <span class="va">group_prior</span>,</span>
+<span>                                      group_prior_var <span class="op">=</span> <span class="va">group_prior_var</span>,</span>
+<span>                                      max_snp_region <span class="op">=</span> <span class="va">max_snp_region</span>,</span>
+<span>                                      min_gene_PIP <span class="op">=</span> <span class="fl">0.5</span>,</span>
+<span>                                      ncore <span class="op">=</span> <span class="va">ncore</span>,</span>
+<span>                                      verbose <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span>
+<span><span class="co"># Expand screened regionlist with all SNPs in the regions</span></span>
+<span><span class="va">screened_regionlist</span> <span class="op">&lt;-</span> <span class="va">regionlist</span><span class="op">[</span><span class="va">screened_region_ids</span><span class="op">]</span></span>
+<span><span class="kw">if</span> <span class="op">(</span><span class="va">thin</span> <span class="op">&lt;</span> <span class="fl">1</span><span class="op">)</span><span class="op">{</span></span>
+<span>  <span class="va">screened_regionlist</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/expand_regionlist.html">expand_regionlist</a></span><span class="op">(</span><span class="va">screened_regionlist</span>,</span>
+<span>                                           <span class="va">region_info</span>,</span>
+<span>                                           <span class="va">z_snp</span>,</span>
+<span>                                           <span class="va">z_gene</span>,</span>
+<span>                                           trim_by <span class="op">=</span> <span class="st">"z"</span>,</span>
+<span>                                           maxSNP <span class="op">=</span> <span class="va">max_snp_region</span>,</span>
+<span>                                           ncore <span class="op">=</span> <span class="va">ncore</span><span class="op">)</span></span>
+<span><span class="op">}</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/base/readRDS.html" class="external-link">saveRDS</a></span><span class="op">(</span><span class="va">screened_regionlist</span>, <span class="va">screen_regions_file</span><span class="op">)</span></span></code></pre></div>
 </div>
 <div class="section level2">
 <h2 id="fine-mapping">Fine-mapping<a class="anchor" aria-label="anchor" href="#fine-mapping"></a>
 </h2>
-<p>We now perform the fine-mapping step with the estimated parameters
-for each of screened regions.</p>
-<p>The <code>finemap_region</code> function performs finemapping for a
-single region, as specified by <code>region_tag</code>. We could run
-this function through each of selected regions or any region of
-interest.</p>
-<p>It first computes correlation matrices (SNP-SNP, SNP-gene, and
-gene-gene correlation matrices) using all SNPs in the region, and then
-runs fine-mapping with L = 5 with estimated parameters
-(<code>group_prior</code> and <code>group_prior_var</code>), and returns
-a data frame with annotated finemapping results for the region.</p>
-<p>If <code>save_LD_R = TRUE</code>, it will save the computed
-correlation matrices to <code>outputdir</code> for future access.</p>
-<div class="sourceCode" id="cb8"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="fu"><a href="../reference/finemap_region.html">finemap_region</a></span><span class="op">(</span><span class="va">z_snp</span>, <span class="va">z_gene</span>, <span class="va">region_info</span>, <span class="va">gene_info</span>, <span class="va">wgtlist</span>, <span class="va">regionlist</span>, <span class="va">region_tag</span>, </span>
-<span>               L <span class="op">=</span> <span class="fl">5</span>, <span class="va">group_prior</span>, <span class="va">group_prior_var</span>, <span class="va">save_LD_R</span>, <span class="va">outputdir</span>, <span class="va">outname</span>, <span class="va">...</span><span class="op">)</span></span></code></pre></div>
+<p>We now perform the fine-mapping step with the estimated parameters for each of screened regions.</p>
+<p>The <code>finemap_regions</code> function performs finemapping for the screened regions in <code>screened_regionlist</code>.</p>
+<p>It first computes correlation matrices (SNP-SNP, SNP-gene, and gene-gene correlation matrices), and then runs fine-mapping with L = 5 with estimated parameters (<code>group_prior</code> and <code>group_prior_var</code>), and returns a data frame with annotated finemapping results for the regions.</p>
+<p>If <code>save_cor = TRUE</code>, it will save the computed correlation matrices to <code>cor_dir</code> for future access.</p>
+<div class="sourceCode" id="cb14"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">finemap_res</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/finemap_regions.html">finemap_regions</a></span><span class="op">(</span><span class="va">screened_regionlist</span>,</span>
+<span>                               <span class="va">region_info</span>,</span>
+<span>                               <span class="va">weights</span>,</span>
+<span>                               group_prior <span class="op">=</span> <span class="va">group_prior</span>,</span>
+<span>                               group_prior_var <span class="op">=</span> <span class="va">group_prior_var</span>,</span>
+<span>                               L <span class="op">=</span> <span class="fl">5</span>,</span>
+<span>                               save_cor <span class="op">=</span> <span class="cn">TRUE</span>,</span>
+<span>                               cor_dir <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/paste.html" class="external-link">paste0</a></span><span class="op">(</span><span class="va">outputdir</span>, <span class="st">"/cor_matrix/"</span><span class="op">)</span>,</span>
+<span>                               ncore <span class="op">=</span> <span class="va">ncore</span>,</span>
+<span>                               verbose <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span>
+<span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/base/readRDS.html" class="external-link">saveRDS</a></span><span class="op">(</span><span class="va">finemap_res</span>, <span class="fu"><a href="https://rdrr.io/r/base/file.path.html" class="external-link">file.path</a></span><span class="op">(</span><span class="va">outputdir</span>, <span class="fu"><a href="https://rdrr.io/r/base/paste.html" class="external-link">paste0</a></span><span class="op">(</span><span class="va">outname</span>, <span class="st">".finemap_regions.res.RDS"</span><span class="op">)</span><span class="op">)</span><span class="op">)</span></span></code></pre></div>
 </div>
 <div class="section level2">
 <h2 id="postprocessing">Postprocessing<a class="anchor" aria-label="anchor" href="#postprocessing"></a>
 </h2>
 <div class="section level3">
-<h3 id="rerun-finemapping-with-l-1-for-regions-with-problematic-snps">Rerun finemapping with L = 1 for regions with problematic SNPs<a class="anchor" aria-label="anchor" href="#rerun-finemapping-with-l-1-for-regions-with-problematic-snps"></a>
-</h3>
-<p>We will rerun the fine-mapping with L = 1 for the regions containing
-high PIP (&gt;0.5) SNPs detected with LD-mismatch issue in the
-preprocessing step, or high PIP genes with problematic SNPs in their
-weights.</p>
-<div class="sourceCode" id="cb9"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="fu"><a href="../reference/rerun_finemap_regions_L1.html">rerun_finemap_regions_L1</a></span><span class="op">(</span><span class="va">z_snp</span>, <span class="va">z_gene</span>, <span class="va">problematic_snps</span>, <span class="va">wgtlist</span>, pip_thresh <span class="op">=</span> <span class="fl">0.5</span>, <span class="va">...</span><span class="op">)</span></span></code></pre></div>
-</div>
-<div class="section level3">
 <h3 id="region-merging">Region merging<a class="anchor" aria-label="anchor" href="#region-merging"></a>
 </h3>
+</div>
+<div class="section level3">
+<h3 id="rerun-finemapping-with-l-1-for-regions-with-problematic-snps">Rerun finemapping with L = 1 for regions with problematic SNPs<a class="anchor" aria-label="anchor" href="#rerun-finemapping-with-l-1-for-regions-with-problematic-snps"></a>
+</h3>
+<p>We will rerun the fine-mapping with L = 1 for the regions containing high PIP (&gt;0.5) SNPs detected with LD mismatches, or high PIP genes with problematic SNPs in their weights.</p>
 </div>
 </div>
 <div class="section level2">
 <h2 id="visualzing-ctwas-results">Visualzing cTWAS results<a class="anchor" aria-label="anchor" href="#visualzing-ctwas-results"></a>
 </h2>
-<p>We could use <code><a href="../reference/ctwas_locus_plot.html">ctwas_locus_plot()</a></code> function to make locus
-plot for a region of interest.</p>
+<p>We could make locus plot for regions of interest.</p>
 </div>
   </div>
 

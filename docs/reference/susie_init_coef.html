@@ -17,7 +17,7 @@
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">ctwas</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">0.1.36</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">0.2.0</span>
       </span>
     </div>
 
@@ -99,9 +99,8 @@ estimates.</p></dd>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="co"># Initialize susie to ground-truth coefficients.</span></span></span>
 <span class="r-in"><span><span class="va">s</span> <span class="op">=</span> <span class="fu">susie_init_coef</span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/which.html" class="external-link">which</a></span><span class="op">(</span><span class="va">beta</span> <span class="op">!=</span> <span class="fl">0</span><span class="op">)</span>,<span class="va">beta</span><span class="op">[</span><span class="va">beta</span> <span class="op">!=</span> <span class="fl">0</span><span class="op">]</span>,<span class="fu"><a href="https://rdrr.io/r/base/length.html" class="external-link">length</a></span><span class="op">(</span><span class="va">beta</span><span class="op">)</span><span class="op">)</span></span></span>
-<span class="r-err co"><span class="r-pr">#&gt;</span> <span class="error">Error in susie_init_coef(which(beta != 0), beta[beta != 0], length(beta)):</span> could not find function "susie_init_coef"</span>
 <span class="r-in"><span><span class="va">res</span> <span class="op">=</span> <span class="fu"><a href="susie.html">susie</a></span><span class="op">(</span><span class="va">X</span>,<span class="va">y</span>,L <span class="op">=</span> <span class="fl">10</span>,s_init<span class="op">=</span><span class="va">s</span><span class="op">)</span></span></span>
-<span class="r-err co"><span class="r-pr">#&gt;</span> <span class="error">Error in susie(X, y, L = 10, s_init = s):</span> could not find function "susie"</span>
+<span class="r-err co"><span class="r-pr">#&gt;</span> <span class="error">Error in s$V[l, ]:</span> incorrect number of dimensions</span>
 <span class="r-in"><span></span></span>
 </code></pre></div>
     </div>
