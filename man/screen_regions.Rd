@@ -45,7 +45,7 @@ will be selected to run finemapping using full SNPs.}
 \item{logfile}{the log file, if NULL will print log info on screen}
 }
 \value{
-a vector of screened region ids
+a data frame of screened region ids and non-SNP PIPs
 }
 \description{
 Screen regions

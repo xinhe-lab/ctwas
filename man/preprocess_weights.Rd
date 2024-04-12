@@ -7,7 +7,7 @@
 preprocess_weights(
   weight_file,
   region_info,
-  z_snp,
+  snp_ids,
   type = NULL,
   context = NULL,
   weight_format = c("PredictDB", "Fusion"),
@@ -24,14 +24,13 @@ preprocess_weights(
 
 \item{region_info}{a data frame of region definition and associated file names.}
 
-\item{z_snp}{A data frame with columns: "id", "A1", "A2", "z". giving the z scores for
-snps. "A1" is effect allele. "A2" is the other allele. For harmonized data, A1 and A2 are not required.}
+\item{snp_ids}{a vector of SNP IDs in GWAS summary statistics (z_snp$id).}
 
-\item{type}{a string or a vector, specifying QTL type of each weight file, e.g. eQTL, sQTL, pQTL.}
+\item{type}{a string, specifying QTL type of each weight file, e.g. eQTL, sQTL, pQTL.}
 
-\item{context}{a string or a vector, specifying tissue/cell type/condition of each weight file, e.g. Liver, Lung, Brain.}
+\item{context}{a string, specifying tissue/cell type/condition of each weight file, e.g. Liver, Lung, Brain.}
 
-\item{weight_format}{a string or a vector, specifying format of each weight file, e.g. PredictDB, Fusion.}
+\item{weight_format}{a string, specifying format of each weight file, e.g. PredictDB, Fusion.}
 
 \item{drop_strand_ambig}{TRUE/FALSE, if TRUE remove strand ambiguous variants (A/T, G/C).}
 

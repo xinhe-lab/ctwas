@@ -5,14 +5,13 @@
 #'
 #' @param region_info a data frame of region definition and associated file names.
 #'
-#' @param z_snp A data frame with columns: "id", "A1", "A2", "z". giving the z scores for
-#' snps. "A1" is effect allele. "A2" is the other allele. For harmonized data, A1 and A2 are not required.
+#' @param snp_ids a vector of SNP IDs in GWAS summary statistics (z_snp$id).
 #'
-#' @param type a string or a vector, specifying QTL type of each weight file, e.g. eQTL, sQTL, pQTL.
+#' @param type a string, specifying QTL type of each weight file, e.g. eQTL, sQTL, pQTL.
 #'
-#' @param context a string or a vector, specifying tissue/cell type/condition of each weight file, e.g. Liver, Lung, Brain.
+#' @param context a string, specifying tissue/cell type/condition of each weight file, e.g. Liver, Lung, Brain.
 #'
-#' @param weight_format a string or a vector, specifying format of each weight file, e.g. PredictDB, Fusion.
+#' @param weight_format a string, specifying format of each weight file, e.g. PredictDB, Fusion.
 #'
 #' @param filter_protein_coding_genes TRUE/FALSE. If TRUE, keep protein coding genes only. This option is only for PredictDB weights
 #'
@@ -28,7 +27,7 @@
 #'
 preprocess_weights <- function(weight_file,
                                region_info,
-                               z_snp,
+                               snp_ids,
                                type = NULL,
                                context = NULL,
                                weight_format = c("PredictDB", "Fusion"),
@@ -42,7 +41,7 @@ preprocess_weights <- function(weight_file,
   # check input arguments
   weight_format <- match.arg(weight_format)
   method_Fusion <- match.arg(method_Fusion)
-  
+
   if (length(weight_file) > 1) {
     stop("Please provide only one weight file in weight_file.")
   }
@@ -75,8 +74,8 @@ preprocess_weights <- function(weight_file,
   loginfo("Number of genes with weights provided: %d in %s", length(gnames), weight_name)
   # remove variants in weight table, but not in LD reference and GWAS
   loginfo("Number of variants in weights: %d", length(unique(weight_table$rsid)))
-  # take the intersect of SNPs in weights, LD reference and z_snp
-  snpnames <- Reduce(intersect, list(weight_table$rsid, ld_snpinfo$id, z_snp$id))
+  # take the intersect of SNPs in weights, LD reference and SNPs in z_snp
+  snpnames <- Reduce(intersect, list(weight_table$rsid, ld_snpinfo$id, snp_ids))
   # loginfo("Remove %d variants after intersecting with LD reference and GWAS", length(setdiff(weight_table$rsid, snpnames)))
   weight_table <- weight_table[weight_table$rsid %in% snpnames, ]
   # loginfo("Remove %s genes after intersecting with LD reference and GWAS", length(setdiff(gnames, weight_table$gene)))

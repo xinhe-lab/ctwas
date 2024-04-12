@@ -316,7 +316,7 @@ expand_regionlist <- function(regionlist,
   trim_by <- match.arg(trim_by)
 
   region_ids <- names(regionlist)
-  loginfo("Update regionlist for %d regions with full SNPs", length(region_ids))
+  loginfo("Expand regionlist for %d regions with full SNPs", length(region_ids))
 
   pb <- txtProgressBar(min = 0, max = length(region_ids), initial = 0, style = 3)
 

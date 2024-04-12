@@ -25,7 +25,7 @@
 #'
 #' @importFrom logging addHandler loginfo writeToFile
 #'
-#' @return a vector of screened region ids
+#' @return a data frame of screened region ids and non-SNP PIPs
 #'
 #' @export
 #'
@@ -89,10 +89,12 @@ screen_regions <- function(
                                  verbose = verbose)
 
   # select regions based on total non-SNP PIP of the region
+  loginfo("Compute non-SNP PIPs")
+  region_nonSNP_PIP_df <- compute_region_nonSNP_PIPs(finemap_res)
   loginfo("Select regions with non-SNP PIP >= %s", min_nonSNP_PIP)
-  screened_region_ids <- select_highPIP_regions(finemap_res, min_nonSNP_PIP)
-  loginfo("Number of regions selected: %d", length(screened_region_ids))
+  region_nonSNP_PIP_df <- region_nonSNP_PIP_df[region_nonSNP_PIP_df$nonSNP_PIP >= min_nonSNP_PIP, , drop=FALSE]
+  loginfo("Number of regions selected: %d", nrow(region_nonSNP_PIP_df))
 
-  return(screened_region_ids)
+  return(region_nonSNP_PIP_df)
 }
 

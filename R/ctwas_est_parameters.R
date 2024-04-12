@@ -77,7 +77,8 @@ est_param <- function(
   loginfo("Roughly estimated group_prior_var {%s}: {%s}", names(EM1_res$group_prior_var), EM1_res$group_prior_var)
 
   # Select regions with single effect
-  selected_region_ids <- select_single_effect_regions(regionlist, EM1_res$group_prior, p_single_effect)
+  region_p1_df <- compute_region_p_single_effect(regionlist, EM1_res$group_prior)
+  selected_region_ids <- region_p1_df[region_p1_df$p1 >= p_single_effect, "region_id"]
   loginfo("Selected %d regions with P(single effect) >= %s", length(selected_region_ids), p_single_effect)
   selected_regionlist <- regionlist[selected_region_ids]
 
