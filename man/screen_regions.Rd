@@ -5,7 +5,7 @@
 \title{Screen regions}
 \usage{
 screen_regions(
-  regionlist,
+  region_data,
   region_info,
   weights,
   group_prior = NULL,
@@ -21,7 +21,7 @@ screen_regions(
 )
 }
 \arguments{
-\item{regionlist}{a list object indexing regions, variants and genes.}
+\item{region_data}{a list object indexing regions, variants and genes.}
 
 \item{region_info}{a data frame of region definition and associated LD file names}
 

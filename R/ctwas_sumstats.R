@@ -95,29 +95,29 @@ ctwas_sumstats <- function(
   loginfo("Compute gene z-scores ...")
   z_gene <- compute_gene_z(z_snp, weights)
 
-  # Get regionlist, which contains SNPs and genes assigned to each region
+  # Get region_data, which contains SNPs and genes assigned to each region
   #. downsample SNPs if thin < 1
   #. assign SNP and gene IDs, and z-scores to each region
-  #. find boundary genes and adjust regionlist for boundary genes
-  loginfo("Get regionlist ...")
-  res <- get_regionlist(region_info,
-                        z_snp,
-                        z_gene,
-                        weights,
-                        maxSNP = max_snp_region,
-                        trim_by = "random",
-                        thin = thin,
-                        minvar = 2,
-                        adjust_boundary_genes = TRUE,
-                        ncore = ncore)
-  regionlist <- res$regionlist
+  #. find boundary genes and adjust region_data for boundary genes
+  loginfo("Get region_data ...")
+  res <- assemble_region_data(region_info,
+                              z_snp,
+                              z_gene,
+                              weights,
+                              maxSNP = max_snp_region,
+                              trim_by = "random",
+                              thin = thin,
+                              minvar = 2,
+                              adjust_boundary_genes = TRUE,
+                              ncore = ncore)
+  region_data <- res$region_data
   boundary_genes <- res$boundary_genes
 
   # Estimate parameters
-  #. get regionlist for all the regions
+  #. get region_data for all the regions
   #. run EM for two rounds with thinned SNPs using L = 1
   loginfo("Estimating parameters...")
-  param <- est_param(regionlist,
+  param <- est_param(region_data,
                      init_group_prior = init_group_prior,
                      init_group_prior_var = init_group_prior_var,
                      group_prior_var_structure = group_prior_var_structure,
@@ -132,34 +132,34 @@ ctwas_sumstats <- function(
   #. fine-map all regions with thinned SNPs
   #. select regions with strong non-SNP signals
   loginfo("Screening regions ...")
-  screened_region_ids <- screen_regions(regionlist,
-                                         region_info,
-                                         weights,
-                                         group_prior = group_prior,
-                                         group_prior_var = group_prior_var,
-                                         L = L,
-                                         max_snp_region = max_snp_region,
-                                         min_nonSNP_PIP = min_nonSNP_PIP,
-                                         use_null_weight = use_null_weight,
-                                         ncore = ncore)
+  screened_region_ids <- screen_regions(region_data,
+                                        region_info,
+                                        weights,
+                                        group_prior = group_prior,
+                                        group_prior_var = group_prior_var,
+                                        L = L,
+                                        max_snp_region = max_snp_region,
+                                        min_nonSNP_PIP = min_nonSNP_PIP,
+                                        use_null_weight = use_null_weight,
+                                        ncore = ncore)
 
-  # Expand screened regionlist with all SNPs in the regions
-  screened_regionlist <- regionlist[screened_region_ids]
+  # Expand screened region_data with all SNPs in the regions
+  screened_region_data <- region_data[screened_region_ids]
   if (thin < 1){
-    loginfo("Update regionlist with full SNPs for screened regions")
-    screened_regionlist <- expand_regionlist(screened_regionlist,
-                                             region_info,
-                                             z_snp,
-                                             z_gene,
-                                             trim_by = "z",
-                                             maxSNP = max_snp_region,
-                                             ncore = ncore)
+    loginfo("Update region_data with full SNPs for screened regions")
+    screened_region_data <- expand_region_data(screened_region_data,
+                                               region_info,
+                                               z_snp,
+                                               z_gene,
+                                               trim_by = "z",
+                                               maxSNP = max_snp_region,
+                                               ncore = ncore)
   }
 
   # Run fine-mapping for regions with strong gene signals using all SNPs
   #. save correlation matrices if save_cor is TRUE
   loginfo("Fine-mapping regions ...")
-  finemap_res <- finemap_regions(screened_regionlist,
+  finemap_res <- finemap_regions(screened_region_data,
                                  region_info,
                                  weights,
                                  group_prior = group_prior,

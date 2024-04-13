@@ -1,6 +1,6 @@
 #' Screen regions
 #'
-#' @param regionlist a list object indexing regions, variants and genes.
+#' @param region_data a list object indexing regions, variants and genes.
 #'
 #' @param region_info a data frame of region definition and associated LD file names
 #'
@@ -30,7 +30,7 @@
 #' @export
 #'
 screen_regions <- function(
-    regionlist,
+    region_data,
     region_info,
     weights,
     group_prior = NULL,
@@ -50,11 +50,11 @@ screen_regions <- function(
 
   loginfo("Screen regions ...")
 
-  # extract thin value from regionlist
-  thin <- unique(sapply(regionlist, "[[", "thin"))
+  # extract thin value from region_data
+  thin <- unique(sapply(region_data, "[[", "thin"))
   if (length(thin) > 1) {
     thin <- min(thin)
-    loginfo("thin has more than one value in regionlist, use the minimum thin value.")
+    loginfo("thin has more than one value in region_data, use the minimum thin value.")
   }
   loginfo("thin = %s", thin)
 
@@ -69,15 +69,15 @@ screen_regions <- function(
 
   # remove regions with fewer than mingene genes
   if (mingene > 0) {
-    n.gid <- sapply(regionlist, function(x){length(x[["gid"]])})
+    n.gid <- sapply(region_data, function(x){length(x[["gid"]])})
     drop.idx <- which(n.gid < mingene)
     loginfo("Remove %d regions with number of genes < %d.", length(drop.idx), mingene)
-    regionlist[drop.idx] <- NULL
+    region_data[drop.idx] <- NULL
   }
 
   # run finemapping for all regions containing thinned SNPs
-  loginfo("Run initial screening for %d regions ...", length(regionlist))
-  finemap_res <- finemap_regions(regionlist,
+  loginfo("Run initial screening for %d regions ...", length(region_data))
+  finemap_res <- finemap_regions(region_data,
                                  region_info,
                                  weights,
                                  L = L,

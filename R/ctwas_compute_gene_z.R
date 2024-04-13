@@ -1,4 +1,4 @@
-#' Compute gene z-scores
+#' Compute z-scores of molecular traits
 #'
 #' @param z_snp A data frame with columns: "id", "z", giving the z-scores for SNPs.
 #'
@@ -8,7 +8,7 @@
 #'
 #' @param logfile the log file, if NULL will print log info on screen
 #'
-#' @return a data frame of gene z-scores
+#' @return a data frame of z-scores of molecular traits
 #'
 #' @importFrom logging addHandler loginfo writeToFile
 #'
@@ -66,8 +66,8 @@ get_gene_regions <- function(gene_info, region_info){
     p0 <- gene_info[i, "p0"]
     p1 <- gene_info[i, "p1"]
     region_idx <- which(region_info$chrom == chrom & region_info$start <= p1 & region_info$stop > p0)
-    gene_info[i, "start"] <- min(region_info[region_idx,"start"])
-    gene_info[i, "stop"] <- max(region_info[region_idx,"stop"])
+    gene_info[i, "region_start"] <- min(region_info[region_idx,"start"])
+    gene_info[i, "region_stop"] <- max(region_info[region_idx,"stop"])
     gene_info[i, "region_id"] <- paste(sort(region_info[region_idx, "region_id"]), collapse = ";")
     gene_info[i, "n_regions"] <- length(region_idx)
   }

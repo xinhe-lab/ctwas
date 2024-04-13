@@ -5,7 +5,7 @@
 \title{run cTWAS finemapping for multiple regions}
 \usage{
 finemap_regions(
-  regionlist,
+  region_data,
   region_info,
   weights,
   L = 5,
@@ -26,7 +26,7 @@ finemap_regions(
 )
 }
 \arguments{
-\item{regionlist}{regionlist to be finemapped}
+\item{region_data}{region_data to be finemapped}
 
 \item{region_info}{a data frame of region definition and associated LD file names}
 

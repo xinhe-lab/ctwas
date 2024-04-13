@@ -1,6 +1,6 @@
 #' Estimate cTWAS parameters
 #'
-#' @param regionlist a list object indexing regions, variants and genes.
+#' @param region_data a list object indexing regions, variants and genes.
 #'
 #' @param init_group_prior a vector of initial values of prior inclusion probabilities for SNPs and genes.
 #'
@@ -31,7 +31,7 @@
 #' @export
 #'
 est_param <- function(
-    regionlist,
+    region_data,
     init_group_prior = NULL,
     init_group_prior_var = NULL,
     group_prior_var_structure = c("independent","shared_all","shared_type"),
@@ -50,11 +50,11 @@ est_param <- function(
 
   group_prior_var_structure <- match.arg(group_prior_var_structure)
 
-  # extract thin value from regionlist
-  thin <- unique(sapply(regionlist, "[[", "thin"))
+  # extract thin value from region_data
+  thin <- unique(sapply(region_data, "[[", "thin"))
   if (length(thin) > 1) {
     thin <- min(thin)
-    loginfo("thin has more than one value in regionlist, use the minimum thin value.")
+    loginfo("thin has more than one value in region_data, use the minimum thin value.")
   }
   loginfo("thin = %s", thin)
 
@@ -65,8 +65,8 @@ est_param <- function(
 
   # Run EM for a few (niter1) iterations, getting rough estimates
   loginfo("Run EM for %d iterations on %d regions, getting rough estimates ...",
-          niter1, length(regionlist))
-  EM1_res <- EM(regionlist,
+          niter1, length(region_data))
+  EM1_res <- EM(region_data,
                 niter = niter1,
                 init_group_prior = init_group_prior,
                 init_group_prior_var = init_group_prior_var,
@@ -77,16 +77,16 @@ est_param <- function(
   loginfo("Roughly estimated group_prior_var {%s}: {%s}", names(EM1_res$group_prior_var), EM1_res$group_prior_var)
 
   # Select regions with single effect
-  region_p1_df <- compute_region_p_single_effect(regionlist, EM1_res$group_prior)
+  region_p1_df <- compute_region_p_single_effect(region_data, EM1_res$group_prior)
   selected_region_ids <- region_p1_df[region_p1_df$p1 >= p_single_effect, "region_id"]
   loginfo("Selected %d regions with P(single effect) >= %s", length(selected_region_ids), p_single_effect)
-  selected_regionlist <- regionlist[selected_region_ids]
+  selected_region_data <- region_data[selected_region_ids]
 
   # Run EM for more (niter2) iterations, getting rough estimates
   loginfo("Run EM for %d iterations on %d regions, getting accurate estimates ...",
-          niter2, length(selected_regionlist))
+          niter2, length(selected_region_data))
 
-  EM2_res <- EM(selected_regionlist,
+  EM2_res <- EM(selected_region_data,
                 niter = niter2,
                 init_group_prior = EM1_res$group_prior,
                 init_group_prior_var = EM1_res$group_prior_var,

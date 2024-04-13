@@ -13,6 +13,10 @@ navbar:
       menu:
       - text: Using multigroup cTWAS with summary statistics
         href: articles/multigroup_ctwas_pipeline.html
+      - text: Running cTWAS modules separately
+        href: articles/multigroup_ctwas_modules.html
+      - text: FAQ
+        href: articles/FAQ.html
     source:
       text: Source
       href: https://github.com/xinhe-lab/ctwas/tree/multigroup_test

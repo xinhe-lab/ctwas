@@ -2,7 +2,7 @@
 % Please edit documentation in R/ctwas_compute_gene_z.R
 \name{compute_gene_z}
 \alias{compute_gene_z}
-\title{Compute gene z-scores}
+\title{Compute z-scores of molecular traits}
 \usage{
 compute_gene_z(z_snp, weights, ncore = 1, logfile = NULL)
 }
@@ -16,8 +16,8 @@ compute_gene_z(z_snp, weights, ncore = 1, logfile = NULL)
 \item{logfile}{the log file, if NULL will print log info on screen}
 }
 \value{
-a data frame of gene z-scores
+a data frame of z-scores of molecular traits
 }
 \description{
-Compute gene z-scores
+Compute z-scores of molecular traits
 }

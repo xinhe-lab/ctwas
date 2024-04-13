@@ -5,7 +5,7 @@
 #'
 #' @param region_info a data frame of region definition and associated file names.
 #'
-#' @param snp_ids a vector of SNP IDs in GWAS summary statistics (z_snp$id).
+#' @param gwas_snp_ids a vector of SNP IDs in GWAS summary statistics (z_snp$id).
 #'
 #' @param type a string, specifying QTL type of each weight file, e.g. eQTL, sQTL, pQTL.
 #'
@@ -27,7 +27,7 @@
 #'
 preprocess_weights <- function(weight_file,
                                region_info,
-                               snp_ids,
+                               gwas_snp_ids,
                                type = NULL,
                                context = NULL,
                                weight_format = c("PredictDB", "Fusion"),

@@ -5,7 +5,7 @@
 \title{run cTWAS finemapping for a single region}
 \usage{
 finemap_region(
-  regionlist,
+  region_data,
   region_id,
   region_info,
   weights,
@@ -25,7 +25,7 @@ finemap_region(
 )
 }
 \arguments{
-\item{regionlist}{a list object indexing regions, variants and genes.}
+\item{region_data}{a list object indexing regions, variants and genes.}
 
 \item{region_id}{a character string of region ids to be finemapped}
 

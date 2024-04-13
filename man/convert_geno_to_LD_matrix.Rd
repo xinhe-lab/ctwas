@@ -22,6 +22,7 @@ convert_geno_to_LD_matrix(
 \item{genotype_files}{Reference genotype files in PLINK binary genotype data in .pgen or .bed format}
 
 \item{varinfo_files}{Reference variant information files in PLINK .pvar or .bim format.
+
 The output will use the genome positions in \code{varinfo_files}.}
 
 \item{chrom}{a vector of chromosomes to process genotype data}

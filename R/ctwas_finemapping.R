@@ -1,6 +1,6 @@
 #' run cTWAS finemapping for a single region
 #'
-#' @param regionlist a list object indexing regions, variants and genes.
+#' @param region_data a list object indexing regions, variants and genes.
 #'
 #' @param region_id a character string of region ids to be finemapped
 #'
@@ -42,7 +42,7 @@
 #'
 #' @export
 #'
-finemap_region <- function(regionlist,
+finemap_region <- function(region_data,
                            region_id,
                            region_info,
                            weights,
@@ -67,13 +67,13 @@ finemap_region <- function(regionlist,
   regioninfo <- region_info[region_info$region_id == region_id, ]
 
   # get susie input data
-  sid <- regionlist[[region_id]][["sid"]]
-  gid <- regionlist[[region_id]][["gid"]]
-  z <- regionlist[[region_id]][["z"]]
-  gs_group <- regionlist[[region_id]][["gs_group"]]
-  g_type <- regionlist[[region_id]][["g_type"]]
-  g_context <- regionlist[[region_id]][["g_context"]]
-  g_group <- regionlist[[region_id]][["g_group"]]
+  sid <- region_data[[region_id]][["sid"]]
+  gid <- region_data[[region_id]][["gid"]]
+  z <- region_data[[region_id]][["z"]]
+  gs_group <- region_data[[region_id]][["gs_group"]]
+  g_type <- region_data[[region_id]][["g_type"]]
+  g_context <- region_data[[region_id]][["g_context"]]
+  g_group <- region_data[[region_id]][["g_group"]]
 
   # set pi_prior and V_prior based on group_prior and group_prior_var
   groups <- unique(gs_group)
@@ -217,7 +217,7 @@ finemap_region <- function(regionlist,
 
 #' run cTWAS finemapping for multiple regions
 #'
-#' @param regionlist regionlist to be finemapped
+#' @param region_data region_data to be finemapped
 #'
 #' @param region_info a data frame of region definition and associated LD file names
 #'
@@ -259,7 +259,7 @@ finemap_region <- function(regionlist,
 #'
 #' @export
 #'
-finemap_regions <- function(regionlist,
+finemap_regions <- function(region_data,
                             region_info,
                             weights,
                             L = 5,
@@ -282,12 +282,12 @@ finemap_regions <- function(regionlist,
     addHandler(writeToFile, file= logfile, level='DEBUG')
   }
 
-  loginfo('Finemapping %d regions ...', length(regionlist))
+  loginfo('Finemapping %d regions ...', length(region_data))
 
   cl <- parallel::makeCluster(ncore, outfile = "")
   doParallel::registerDoParallel(cl)
 
-  corelist <- region2core(regionlist, ncore)
+  corelist <- region2core(region_data, ncore)
 
   finemap_res <- foreach (core = 1:length(corelist), .combine = "rbind", .packages = "ctwas") %dopar% {
 
@@ -295,23 +295,23 @@ finemap_regions <- function(regionlist,
     # run finemapping for each region
     region_ids.core <- corelist[[core]]
     for (region_id in region_ids.core) {
-      finemap_res.core.list[[region_id]] <- finemap_region(regionlist = regionlist,
-                                                            region_id = region_id,
-                                                            region_info = region_info,
-                                                            weights = weights,
-                                                            L = L,
-                                                            group_prior = group_prior,
-                                                            group_prior_var = group_prior_var,
-                                                            use_null_weight = use_null_weight,
-                                                            coverage = coverage,
-                                                            min_abs_corr = min_abs_corr,
-                                                            max_iter = max_iter,
-                                                            force_compute_cor = force_compute_cor,
-                                                            save_cor = save_cor,
-                                                            cor_dir = cor_dir,
-                                                            annotate_susie_result = annotate_susie_result,
-                                                            verbose = verbose,
-                                                            ...)
+      finemap_res.core.list[[region_id]] <- finemap_region(region_data = region_data,
+                                                           region_id = region_id,
+                                                           region_info = region_info,
+                                                           weights = weights,
+                                                           L = L,
+                                                           group_prior = group_prior,
+                                                           group_prior_var = group_prior_var,
+                                                           use_null_weight = use_null_weight,
+                                                           coverage = coverage,
+                                                           min_abs_corr = min_abs_corr,
+                                                           max_iter = max_iter,
+                                                           force_compute_cor = force_compute_cor,
+                                                           save_cor = save_cor,
+                                                           cor_dir = cor_dir,
+                                                           annotate_susie_result = annotate_susie_result,
+                                                           verbose = verbose,
+                                                           ...)
     }
     finemap_res.core <- do.call(rbind, finemap_res.core.list)
     finemap_res.core

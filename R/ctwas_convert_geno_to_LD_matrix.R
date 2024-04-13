@@ -3,13 +3,21 @@
 #' save LD matrices as .RDS files and SNP info as .Rvar files
 #'
 #' @param region_info a data frame of region information, with columns: chr, start, stop positions
+#'
 #' @param genotype_files Reference genotype files in PLINK binary genotype data in .pgen or .bed format
+#'
 #' @param varinfo_files Reference variant information files in PLINK .pvar or .bim format.
+#'
 #' The output will use the genome positions in \code{varinfo_files}.
+#'
 #' @param chrom a vector of chromosomes to process genotype data
+#'
 #' @param outputdir Output directory
+#'
 #' @param outname Output filestem
+#'
 #' @param include_variance TRUE/FALSE, if TRUE, include variance in .Rvar output
+#'
 #' @param include_allele_freq TRUE/FALSE, if TRUE, include allele frequency in .Rvar output
 #'
 #' @importFrom logging loginfo

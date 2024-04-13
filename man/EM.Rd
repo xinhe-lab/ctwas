@@ -6,7 +6,7 @@
 Iteratively run susie and estimate parameters - RSS version}
 \usage{
 EM(
-  regionlist,
+  region_data,
   niter = 20,
   init_group_prior = NULL,
   init_group_prior_var = NULL,
@@ -19,7 +19,7 @@ EM(
 )
 }
 \arguments{
-\item{regionlist}{a list object with the susie input data for each region}
+\item{region_data}{a list object with the susie input data for each region}
 
 \item{niter}{the number of iterations of the E-M algorithm to perform}
 

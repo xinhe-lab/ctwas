@@ -5,7 +5,7 @@
 \title{Estimate cTWAS parameters}
 \usage{
 est_param(
-  regionlist,
+  region_data,
   init_group_prior = NULL,
   init_group_prior_var = NULL,
   group_prior_var_structure = c("independent", "shared_all", "shared_type"),
@@ -18,7 +18,7 @@ est_param(
 )
 }
 \arguments{
-\item{regionlist}{a list object indexing regions, variants and genes.}
+\item{region_data}{a list object indexing regions, variants and genes.}
 
 \item{init_group_prior}{a vector of initial values of prior inclusion probabilities for SNPs and genes.}
 

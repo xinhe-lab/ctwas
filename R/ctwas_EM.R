@@ -1,7 +1,7 @@
 #' Run EM to estimate parameters.
 #' Iteratively run susie and estimate parameters - RSS version
 #'
-#' @param regionlist a list object with the susie input data for each region
+#' @param region_data a list object with the susie input data for each region
 #'
 #' @param niter the number of iterations of the E-M algorithm to perform
 #'
@@ -36,7 +36,7 @@
 #'
 #' @return a list of parameters
 #'
-EM <- function(regionlist,
+EM <- function(region_data,
                niter = 20,
                init_group_prior = NULL,
                init_group_prior_var = NULL,
@@ -47,10 +47,10 @@ EM <- function(regionlist,
                verbose = FALSE,
                ...){
 
-  # get groups and types from regionlist
-  groups <- unique(unlist(lapply(regionlist, "[[", "gs_group")))
-  types <- unique(unlist(lapply(regionlist, "[[", "gs_type")))
-  contexts <- unique(unlist(lapply(regionlist, "[[", "gs_context")))
+  # get groups and types from region_data
+  groups <- unique(unlist(lapply(region_data, "[[", "gs_group")))
+  types <- unique(unlist(lapply(region_data, "[[", "gs_type")))
+  contexts <- unique(unlist(lapply(region_data, "[[", "gs_context")))
 
   # set pi_prior and V_prior based on init_group_prior and init_group_prior_var
   res <- initiate_group_priors(init_group_prior, init_group_prior_var, groups)
@@ -71,7 +71,7 @@ EM <- function(regionlist,
   cl <- parallel::makeCluster(ncore, outfile = "")
   doParallel::registerDoParallel(cl)
 
-  corelist <- region2core(regionlist, ncore)
+  corelist <- region2core(region_data, ncore)
 
   for (iter in 1:niter){
     loginfo("Start EM iteration %d", iter)
@@ -83,13 +83,13 @@ EM <- function(regionlist,
         # load susie input data
         if (verbose)
           loginfo("load susie input data for region %s", region_id)
-        sid <- regionlist[[region_id]][["sid"]]
-        gid <- regionlist[[region_id]][["gid"]]
-        z <- regionlist[[region_id]][["z"]]
-        gs_group <- regionlist[[region_id]][["gs_group"]]
-        g_type <- regionlist[[region_id]][["g_type"]]
-        g_context <- regionlist[[region_id]][["g_context"]]
-        g_group <- regionlist[[region_id]][["g_group"]]
+        sid <- region_data[[region_id]][["sid"]]
+        gid <- region_data[[region_id]][["gid"]]
+        z <- region_data[[region_id]][["z"]]
+        gs_group <- region_data[[region_id]][["gs_group"]]
+        g_type <- region_data[[region_id]][["g_type"]]
+        g_context <- region_data[[region_id]][["g_context"]]
+        g_group <- region_data[[region_id]][["g_group"]]
 
         # update priors, prior variances and null_weight based on the estimated group_prior and group_prior_var from the previous iteration
         if (verbose)
