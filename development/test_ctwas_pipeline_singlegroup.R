@@ -111,28 +111,28 @@ if( file.exists(gene_z_file) ){
   cat(sprintf("Imputing gene z-scores took %0.2f minutes\n",runtime["elapsed"]/60))
 }
 
-##### Get regionlist #####
-regionlist_thin_file <- file.path(outputdir, paste0(outname, ".regionlist.thin", thin, ".RDS"))
-if (file.exists(regionlist_thin_file)) {
-  res <- readRDS(regionlist_thin_file)
+##### Assemble region_data #####
+region_data_thin_file <- file.path(outputdir, paste0(outname, ".region_data.thin", thin, ".RDS"))
+if (file.exists(region_data_thin_file)) {
+  res <- readRDS(region_data_thin_file)
 } else{
   runtime <- system.time({
-    loginfo("Get regionlist with thin = %.2f", thin)
-    res <- get_regionlist(region_info,
-                          z_snp,
-                          z_gene,
-                          weights,
-                          maxSNP = max_snp_region,
-                          trim_by = "random",
-                          thin = thin,
-                          minvar = 2,
-                          adjust_boundary_genes = TRUE,
-                          ncore = ncore)
+    loginfo("Assemble region_data with thin = %.2f", thin)
+    res <- assemble_region_data(region_info,
+                                z_snp,
+                                z_gene,
+                                weights,
+                                maxSNP = max_snp_region,
+                                trim_by = "random",
+                                thin = thin,
+                                minvar = 2,
+                                adjust_boundary_genes = TRUE,
+                                ncore = ncore)
   })
-  cat(sprintf("Get regionlist took %0.2f minutes\n",runtime["elapsed"]/60))
-  saveRDS(res, regionlist_thin_file)
+  cat(sprintf("Assemble region_data took %0.2f minutes\n",runtime["elapsed"]/60))
+  saveRDS(res, region_data_thin_file)
 }
-regionlist <- res$regionlist
+region_data <- res$region_data
 boundary_genes <- res$boundary_genes
 rm(res)
 
@@ -144,7 +144,7 @@ if (file.exists(param_file)) {
   param <- readRDS(param_file)
 } else{
   runtime <- system.time({
-    param <- est_param(regionlist,
+    param <- est_param(region_data,
                        thin = thin,
                        niter1 = 3,
                        niter2 = 30,
@@ -163,39 +163,39 @@ ctwas_parameters <- summarize_param(param, gwas_n)
 saveRDS(ctwas_parameters, paste0(outputdir, "/", outname, ".ctwas_parameters.RDS"))
 
 ##### Screen regions #####
-screen_regions_file <- file.path(outputdir, paste0(outname, ".screened_regionlist.RDS"))
+screen_regions_file <- file.path(outputdir, paste0(outname, ".screened_region_data.RDS"))
 if (file.exists(screen_regions_file)) {
-  screened_regionlist <- readRDS(screen_regions_file)
+  screened_region_data <- readRDS(screen_regions_file)
 } else{
   runtime <- system.time({
-    screened_region_ids <- screen_regions(regionlist,
-                                           region_info,
-                                           weights,
-                                           thin = thin,
-                                           L = 5,
-                                           group_prior = group_prior,
-                                           group_prior_var = group_prior_var,
-                                           max_snp_region = max_snp_region,
-                                           ncore = ncore,
-                                           logfile = file.path(outputdir, paste0(outname, ".screen_regions.L5.log")),
-                                           verbose = TRUE)
+    screened_region_ids <- screen_regions(region_data,
+                                          region_info,
+                                          weights,
+                                          thin = thin,
+                                          L = 5,
+                                          group_prior = group_prior,
+                                          group_prior_var = group_prior_var,
+                                          max_snp_region = max_snp_region,
+                                          ncore = ncore,
+                                          logfile = file.path(outputdir, paste0(outname, ".screen_regions.L5.log")),
+                                          verbose = TRUE)
   })
   cat(sprintf("Screen regions took %0.2f minutes\n",runtime["elapsed"]/60))
   loginfo("%d regions left after screening regions", length(screened_region_ids))
 
-  # Expand screened regionlist with all SNPs in the regions
-  screened_regionlist <- regionlist[screened_region_ids]
+  # Expand screened region_data with all SNPs in the regions
+  screened_region_data <- region_data[screened_region_ids]
   if (thin < 1){
-    loginfo("Expand regionlist with full SNPs for %d screened regions", length(screened_regionlist))
-    screened_regionlist <- expand_regionlist(screened_regionlist,
-                                             region_info,
-                                             z_snp,
-                                             z_gene,
-                                             trim_by = "z",
-                                             maxSNP = max_snp_region,
-                                             ncore = ncore)
+    loginfo("Expand region_data with full SNPs for %d screened regions", length(screened_region_data))
+    screened_region_data <- expand_region_data(screened_region_data,
+                                               region_info,
+                                               z_snp,
+                                               z_gene,
+                                               trim_by = "z",
+                                               maxSNP = max_snp_region,
+                                               ncore = ncore)
   }
-  saveRDS(screened_regionlist, screen_regions_file)
+  saveRDS(screened_region_data, screen_regions_file)
 }
 
 ##### Finemapping #####
@@ -203,7 +203,7 @@ if (file.exists(screen_regions_file)) {
 ## Finemapping screened regions
 cat("##### Finemapping screened regions ##### \n")
 runtime <- system.time({
-  finemap_res <- finemap_regions(screened_regionlist,
+  finemap_res <- finemap_regions(screened_region_data,
                                  region_info,
                                  weights,
                                  group_prior = group_prior,
