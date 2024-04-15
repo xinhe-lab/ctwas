@@ -75,7 +75,7 @@ preprocess_weights <- function(weight_file,
   # remove variants in weight table, but not in LD reference and GWAS
   loginfo("Number of variants in weights: %d", length(unique(weight_table$rsid)))
   # take the intersect of SNPs in weights, LD reference and SNPs in z_snp
-  snpnames <- Reduce(intersect, list(weight_table$rsid, ld_snpinfo$id, snp_ids))
+  snpnames <- Reduce(intersect, list(weight_table$rsid, ld_snpinfo$id, gwas_snp_ids))
   # loginfo("Remove %d variants after intersecting with LD reference and GWAS", length(setdiff(weight_table$rsid, snpnames)))
   weight_table <- weight_table[weight_table$rsid %in% snpnames, ]
   # loginfo("Remove %s genes after intersecting with LD reference and GWAS", length(setdiff(gnames, weight_table$gene)))

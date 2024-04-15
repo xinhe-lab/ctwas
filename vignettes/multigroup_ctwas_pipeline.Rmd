@@ -53,17 +53,18 @@ We read the GWAS summary statistics as a data frame `z_snp`, with columns "id", 
 For this analysis, we will use summary statistics from a GWAS of LDL cholesterol in the UK Biobank. We will download the VCF from the IEU Open GWAS Project. 
 ```{r, eval=FALSE}
 # set the working directory, download the summary statistics, and unzip the file.
+setwd("/project2/xinhe/shared_data/multigroup_ctwas/LDL_multigroup_tutorial/")
 dir.create("gwas_summary_stats")
 
 system("wget https://gwas.mrcieu.ac.uk/files/ukb-d-30780_irnt/ukb-d-30780_irnt.vcf.gz -P gwas_summary_stats")
-R.utils::gunzip("gwas_summary_stats/ukb-d-30780_irnt.vcf.gz")
+#R.utils::gunzip("gwas_summary_stats/ukb-d-30780_irnt.vcf.gz")
 ```
 
 Next, we will read the summary statistics. Then, we will compute the z-scores and format the input data. We will also collect the sample size, which will be useful later. We will save this output for convenience.
 
 ```{r, eval=FALSE}
 # read the data using the VariantAnnotation package
-z_snp <- VariantAnnotation::readVcf("gwas_summary_stats/ukb-d-30780_irnt.vcf")
+z_snp <- VariantAnnotation::readVcf("gwas_summary_stats/ukb-d-30780_irnt.vcf.gz")
 z_snp <- as.data.frame(gwasvcf::vcf_to_tibble(z_snp))
 
 # compute the z-scores
@@ -78,9 +79,9 @@ z_snp <- z_snp[,c("rsid", "ALT", "REF", "Z")]
 colnames(z_snp) <- c("id", "A1", "A2", "z")
 
 # save the formatted z-scores and GWAS sample size
-outputdir <- "/project2/xinhe/shared_data/multigroup_ctwas/LDL_multigroup_tutorial/"
+outputdir <- "/project2/xinhe/shared_data/multigroup_ctwas/LDL_multigroup_tutorial/output"
+outname <- "LDL_Multiomics"
 dir.create(outputdir, showWarnings=F, recursive=T)
-outname <- "example"
 
 gwas_name <- "ukb-d-30780_irnt"
 z_snp_outfile <- file.path(outputdir, paste0(gwas_name, ".z_snp.Rd"))
@@ -94,7 +95,7 @@ The `multigroup` version of cTWAS accepts multiple sets of prediction models in 
 
 Please check [PredictDB](http://predictdb.org/) for the format of PredictDB weights. To specify weights in PredictDB format, provide the path to the `.db` file. 
 
-Please check [Fusion/TWAS](http://gusevlab.org/projects/fusion/#compute-your-own-predictive-models) for the format of FUSION weights. 
+Please check [Fusion/TWAS](http://gusevlab.org/projects/fusion/#compute-your-own-predictive-models) for the format of FUSION weights. To specify weights in FUSION format, provide the path to the folder that contains the `.wgt.RDat` files. The `.pos` file which points to the individual *.RDat weight files is assumed to be outside the folder. For more format details, check the FUSION website. 
 
 ### LD reference and region info
 
@@ -208,28 +209,30 @@ z_snp <- preprocess_z_snp(z_snp, region_info, gwas_n, drop_multiallelic = TRUE, 
 
 #### Harmonizing prediction models and LD reference
 
-The `preprocess_weight()` function harmonizes the PredictDB prediction models and LD reference. 
+The `preprocess_weight()` function harmonizes the PredictDB/FUSION prediction models and LD reference. 
 This only needs to be done once per combination of prediction models and LD reference. 
 
-In this example, we use four weights, two eQTL models and two sQTLs models from liver and lung.
+In this example, we use three weights, one eQTL model, one sQTL model and one 3‘aQTL model from liver. eQTL and sQTL model are downloaded from [PredictDB website](https://predictdb.org/post/2021/07/21/gtex-v8-models-on-eqtl-and-sqtl/). 3‘aQTL model (Alternative polyadenylation) is in FUSION format and downloaded from [TCGD database](http://bioinfo.szbl.ac.cn/TCGD/download.php). 
 We preprocess each weight file separately and combine them in the end. 
+We specify PredictDB or FUSION format in `weight_format` and the specific method in FUSION by `method_Fusion`. 
 We specify the `type` as the molecular QTL types, and `context` as the tissues, cell types, or conditions. 
 For the expression models, we limit to protein coding genes, by setting `filter_protein_coding_genes = TRUE`.
-We set `scale_by_ld_variance=TRUE` for PredictDB weights.
+We set `scale_by_ld_variance=TRUE` for PredictDB weights because PredictDB assumes the unstandardized genotypes. 
+For PredictDB models, we set `load_predictdb_LD=TRUE` to load pre-computed correlations (`.txt.gz` file) between weight variants. 
+For FUSION models, we set `load_predictdb_LD=FALSE` to calculate correlations between weight variants with LD reference.
 
 We use 6 cores to parallelize the computation over the weights.
 
 ```{r preprocess_weights, eval=FALSE}
-weight_files <- c("/project/xinhe/shengqian/cTWAS_analysis/data/Liver_Expression.db",
-                  "/project/xinhe/shengqian/cTWAS_analysis/data/Lung_Expression.db",
-                  "/project/xinhe/shengqian/cTWAS_analysis/data/Liver_Splicing.db",
-                  "/project/xinhe/shengqian/cTWAS_analysis/data/Lung_Splicing.db")
+weight_files <- c("/project2/xinhe/shared_data/multigroup_ctwas/weights/expression_models/mashr_Liver.db",
+                  "/project2/xinhe/shared_data/multigroup_ctwas/weights/splicing_models/mashr_Liver.db",
+                  "/project2/xinhe/shared_data/multigroup_ctwas/weights/apa_models/Liver/Liver/")
 ncore <- 6
 
 weights_liver_expression <- preprocess_weights(weight_file = weight_files[1],
                                                region_info,
                                                z_snp$id,
-                                               type = "expression",
+                                               type = "eQTL",
                                                context = "liver",
                                                weight_format = "PredictDB",
                                                ncore = ncore,
@@ -238,11 +241,11 @@ weights_liver_expression <- preprocess_weights(weight_file = weight_files[1],
                                                load_predictdb_LD = TRUE,
                                                filter_protein_coding_genes = TRUE)
 
-weights_lung_expression <- preprocess_weights(weight_file = weight_files[2],
+weights_liver_splicing <- preprocess_weights(weight_file = weight_files[2],
                                               region_info,
                                               z_snp$id,
-                                              type = "expression",
-                                              context = "lung",
+                                              type = "sQTL",
+                                              context = "liver",
                                               weight_format = "PredictDB",
                                               ncore = ncore,
                                               drop_strand_ambig = TRUE,
@@ -250,31 +253,20 @@ weights_lung_expression <- preprocess_weights(weight_file = weight_files[2],
                                               load_predictdb_LD = TRUE,
                                               filter_protein_coding_genes = TRUE)
 
-weights_liver_splicing <- preprocess_weights(weight_file = weight_files[3],
-                                             region_info,
-                                             z_snp$id,
-                                             type = "splicing",
-                                             context = "liver",
-                                             weight_format = "PredictDB",
-                                             ncore = ncore,
-                                             drop_strand_ambig = TRUE,
-                                             scale_by_ld_variance = TRUE,
-                                             load_predictdb_LD = TRUE,
-                                             filter_protein_coding_genes = FALSE)
+weights_liver_apa <- preprocess_weights(weight_file = weight_files[3],
+                                                   region_info,
+                                                   z_snp$id,
+                                                   type = "aQTL",
+                                                   context = "Liver",
+                                                   weight_format = "Fusion",
+                                                   ncore = ncore,
+                                                   scale_by_ld_variance = FALSE,
+                                                   drop_strand_ambig = TRUE,
+                                                   load_predictdb_LD = FALSE,
+                                                   filter_protein_coding_genes = FALSE,
+                                                   method_Fusion = "enet")
 
-weights_lung_splicing <- preprocess_weights(weight_file = weight_files[4],
-                                            region_info,
-                                            z_snp$id,
-                                            type = "splicing",
-                                            context = "lung",
-                                            weight_format = "PredictDB",
-                                            ncore = ncore,
-                                            drop_strand_ambig = TRUE,
-                                            scale_by_ld_variance = TRUE,
-                                            load_predictdb_LD = TRUE,
-                                            filter_protein_coding_genes = FALSE)
-
-weights <- c(weights_liver_expression, weights_lung_expression, weights_liver_splicing, weights_lung_splicing)
+weights <- c(weights_liver_expression, weights_liver_splicing, weights_liver_apa)
 ```
 
 ## Running cTWAS analysis
