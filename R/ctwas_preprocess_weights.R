@@ -6,7 +6,6 @@
 #' @param region_info a data frame of region definition and associated file names.
 #'
 #' @param gwas_snp_ids a vector of SNP IDs in GWAS summary statistics (z_snp$id).
-#' It will take the intersect of SNPs in weights, LD reference and SNPs in z_snp.
 #'
 #' @param type a string, specifying QTL type of each weight file, e.g. eQTL, sQTL, pQTL.
 #'
@@ -73,10 +72,13 @@ preprocess_weights <- function(weight_file,
   R_wgt_all <- loaded_weight$R_wgt
   gnames <- unique(weight_table$gene)
   loginfo("Number of genes with weights provided: %d in %s", length(gnames), weight_name)
+  # remove variants in weight table, but not in LD reference and GWAS
   loginfo("Number of variants in weights: %d", length(unique(weight_table$rsid)))
   # take the intersect of SNPs in weights, LD reference and SNPs in z_snp
   snpnames <- Reduce(intersect, list(weight_table$rsid, ld_snpinfo$id, gwas_snp_ids))
+  # loginfo("Remove %d variants after intersecting with LD reference and GWAS", length(setdiff(weight_table$rsid, snpnames)))
   weight_table <- weight_table[weight_table$rsid %in% snpnames, ]
+  # loginfo("Remove %s genes after intersecting with LD reference and GWAS", length(setdiff(gnames, weight_table$gene)))
   gnames <- unique(weight_table$gene)
   loginfo("%d variants and %d genes left after intersecting with LD reference and GWAS z_snp", length(snpnames), length(gnames))
   # subset to variants in weight table
@@ -188,7 +190,7 @@ preprocess_weights <- function(weight_file,
           outlist_core <- list()
 
           for (batch in batches) {
-          # load the R_snp and SNP info for the region
+            # load the R_snp and SNP info for the region
             region_ids <- strsplit(batch, ";")[[1]]
             reg_idx <- match(region_ids, region_info$region_id)
             if (length(reg_idx) > 1){
