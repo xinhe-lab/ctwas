@@ -4,7 +4,7 @@
 \alias{compute_region_p_single_effect}
 \title{Select single effect regions}
 \usage{
-compute_region_p_single_effect(regionlist, group_prior)
+compute_region_p_single_effect(region_data, group_prior)
 }
 \description{
 Select single effect regions

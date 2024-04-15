@@ -1,8 +1,8 @@
 #' run cTWAS finemapping for a single region
 #'
-#' @param region_data a list object indexing regions, variants and genes.
+#' @param region_data a list object with data for the regions
 #'
-#' @param region_id a character string of region ids to be finemapped
+#' @param region_id a character string of region id to be finemapped
 #'
 #' @param region_info a data frame of region definition and associated LD file names
 #'
@@ -64,16 +64,18 @@ finemap_region <- function(region_data,
     loginfo("Finemapping region %s with L = %d", region_id, L)
   }
 
-  regioninfo <- region_info[region_info$region_id == region_id, ]
+  # load input data for the region
+  regiondata <- region_data[[region_id]]
+  sid <- regiondata[["sid"]]
+  gid <- regiondata[["gid"]]
+  z <- regiondata[["z"]]
+  gs_group <- regiondata[["gs_group"]]
+  g_type <- regiondata[["g_type"]]
+  g_context <- regiondata[["g_context"]]
+  g_group <- regiondata[["g_group"]]
 
-  # get susie input data
-  sid <- region_data[[region_id]][["sid"]]
-  gid <- region_data[[region_id]][["gid"]]
-  z <- region_data[[region_id]][["z"]]
-  gs_group <- region_data[[region_id]][["gs_group"]]
-  g_type <- region_data[[region_id]][["g_type"]]
-  g_context <- region_data[[region_id]][["g_context"]]
-  g_group <- region_data[[region_id]][["g_group"]]
+  # select region info for the region ids to finemap
+  regioninfo <- region_info[region_info$region_id %in% regiondata[["region_id"]], ]
 
   # set pi_prior and V_prior based on group_prior and group_prior_var
   groups <- unique(gs_group)
@@ -89,10 +91,10 @@ finemap_region <- function(region_data,
   null_weight <- res$null_weight
   rm(res)
 
+  # load SNP info for the region
+  ld_snpinfo <- read_LD_SNP_files(regioninfo$SNP_info)
+
   # compute correlation matrices
-  if (length(region_id) > 1){
-    region_id <- paste(region_id, collapse = "_")
-  }
   R_sg_file <- file.path(cor_dir, paste0("region.", region_id, ".R_snp_gene.RDS"))
   R_g_file <- file.path(cor_dir, paste0("region.", region_id,  ".R_gene.RDS"))
   R_s_file <- file.path(cor_dir, paste0("region.", region_id, ".R_snp.RDS"))
@@ -105,7 +107,6 @@ finemap_region <- function(region_data,
       R_snp <- lapply(regioninfo$LD_matrix, load_LD)
       R_snp <- suppressWarnings(as.matrix(Matrix::bdiag(R_snp)))
     }
-    ld_snpinfo <- read_LD_SNP_files(regioninfo$SNP_info)
     res <- compute_region_cor(sid, gid, R_snp, weights, ld_snpinfo)
     R_snp <- res$R_snp
     R_snp_gene <- res$R_snp_gene
@@ -144,7 +145,6 @@ finemap_region <- function(region_data,
         R_snp <- lapply(regioninfo$LD_matrix, load_LD)
         R_snp <- suppressWarnings(as.matrix(Matrix::bdiag(R_snp)))
       }
-      ld_snpinfo <- read_LD_SNP_files(regioninfo$SNP_info)
       res <- compute_region_cor(sid, gid, R_snp, weights, ld_snpinfo)
       R_snp <- res$R_snp
       R_snp_gene <- res$R_snp_gene
@@ -185,8 +185,9 @@ finemap_region <- function(region_data,
 
   # annotate susie result
   if (isTRUE(annotate_susie_result)) {
-    gene_info <- get_gene_info(weights)
-    ld_snpinfo <- read_LD_SNP_files(regioninfo$SNP_info)
+
+    geneinfo <- get_gene_info(weights[gid])
+
     susie_res_df <- anno_susie(susie_res,
                                gid = gid,
                                sid = sid,
@@ -194,7 +195,7 @@ finemap_region <- function(region_data,
                                g_type = g_type,
                                g_context = g_context,
                                g_group = g_group,
-                               geneinfo = gene_info,
+                               geneinfo = geneinfo,
                                snpinfo = ld_snpinfo,
                                include_cs_index = TRUE)
   } else {

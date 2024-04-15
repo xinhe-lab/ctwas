@@ -230,8 +230,8 @@ add_z_to_region_data <- function(region_data,
     for (region_id in region_ids.core) {
       # add z-scores and types of the region to the region_data
       region_data2.core[[region_id]] <- region_data[[region_id]]
-      sid <- region_data[[region_id]][["sid"]]
       gid <- region_data[[region_id]][["gid"]]
+      sid <- region_data[[region_id]][["sid"]]
       g_idx <- match(gid, zdf$id)
       s_idx <- match(sid, zdf$id)
       gs_idx <- c(g_idx, s_idx)
@@ -315,28 +315,27 @@ expand_region_data <- function(region_data,
 
   trim_by <- match.arg(trim_by)
 
-  region_ids <- names(region_data)
-  loginfo("Expand region_data for %d regions with full SNPs", length(region_ids))
+  loginfo("Expand region_data for %d regions with full SNPs", length(region_data))
 
-  pb <- txtProgressBar(min = 0, max = length(region_ids), initial = 0, style = 3)
+  pb <- txtProgressBar(min = 0, max = length(region_data), initial = 0, style = 3)
 
   # update SNP IDs for each region
-  for (i in 1:length(region_ids)){
-    region_id <- region_ids[i]
+  for (i in 1:length(region_data)){
 
-    if (region_data[[region_id]][["thin"]] == 1){
+    if (region_data[[i]][["thin"]] == 1){
       next
     }
 
     # load all SNPs in the region
-    snpinfo <- read_LD_SNP_files(region_info[region_info$region_id == region_id, "SNP_info"])
+    regioninfo <- region_info[region_info$region_id %in% region_data[[i]][["region_id"]], ]
+    snpinfo <- read_LD_SNP_files(regioninfo$SNP_info)
     # remove SNPs not in z_snp
     snpinfo <- snpinfo[snpinfo$id %in% z_snp$id, , drop=FALSE]
-    region_data[[region_id]][["sid"]] <- snpinfo$id
+    region_data[[i]][["sid"]] <- snpinfo$id
 
     # update minpos and maxpos in the region
-    region_data[[region_id]][["minpos"]] <- min(c(region_data[[region_id]][["minpos"]], snpinfo$pos))
-    region_data[[region_id]][["maxpos"]] <- max(c(region_data[[region_id]][["maxpos"]], snpinfo$pos))
+    region_data[[i]][["minpos"]] <- min(c(region_data[[i]][["minpos"]], snpinfo$pos))
+    region_data[[i]][["maxpos"]] <- max(c(region_data[[i]][["maxpos"]], snpinfo$pos))
 
     setTxtProgressBar(pb, i)
   }

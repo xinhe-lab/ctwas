@@ -4,7 +4,7 @@
 \alias{region2core}
 \title{assign regions to cores}
 \usage{
-region2core(regionlist, ncore = 1)
+region2core(region_data, ncore = 1)
 }
 \description{
 assign regions to cores

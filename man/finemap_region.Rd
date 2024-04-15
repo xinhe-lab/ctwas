@@ -25,9 +25,9 @@ finemap_region(
 )
 }
 \arguments{
-\item{region_data}{a list object indexing regions, variants and genes.}
+\item{region_data}{a list object with data for the regions}
 
-\item{region_id}{a character string of region ids to be finemapped}
+\item{region_id}{a character string of region id to be finemapped}
 
 \item{region_info}{a data frame of region definition and associated LD file names}
 

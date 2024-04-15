@@ -1,5 +1,6 @@
 ## Libraries
 library(ctwas)
+library(ggplot2)
 library(logging)
 
 ##### Settings #####
@@ -260,3 +261,46 @@ runtime <- system.time({
 })
 saveRDS(finemap_res, file.path(outputdir, paste0(outname, ".finemap_regions.res.RDS")))
 loginfo("Finemapping took %0.2f minutes\n",runtime["elapsed"]/60)
+
+##### Region merging #####
+region_data_thin_file <- file.path(outputdir, paste0(outname, ".region_data.thin", thin, ".RDS"))
+res <- readRDS(region_data_thin_file)
+region_data <- res$region_data
+boundary_genes <- res$boundary_genes
+
+merged_region_data_file <- file.path(outputdir, paste0(outname, ".merged_region_data.RDS"))
+if (file.exists(merged_region_data_file)) {
+  res <- readRDS(merged_region_data_file)
+} else{
+  runtime <- system.time({
+    res <- merge_region_data(region_data,
+                             boundary_genes,
+                             region_info,
+                             z_snp,
+                             z_gene,
+                             expand = TRUE,
+                             maxSNP = max_snp_region)
+  })
+  saveRDS(res, merged_region_data_file)
+  cat(sprintf("Merge region_data took %0.2f minutes\n",runtime["elapsed"]/60))
+}
+merged_region_data <- res$merged_region_data
+merged_region_info <- res$merged_region_info
+rm(res)
+
+## Finemapping merged regions
+cat("##### Finemapping merged regions ##### \n")
+runtime <- system.time({
+  finemap_merged_regions_res <- finemap_regions(merged_region_data,
+                                                region_info,
+                                                weights,
+                                                group_prior = group_prior,
+                                                group_prior_var = group_prior_var,
+                                                L = 5,
+                                                save_cor = TRUE,
+                                                cor_dir = paste0(outputdir, "/merged_cor_matrix/"),
+                                                ncore = ncore,
+                                                verbose = TRUE)
+})
+cat(sprintf("Finemapping took %0.2f minutes\n",runtime["elapsed"]/60))
+saveRDS(finemap_merged_regions_res, file.path(outputdir, paste0(outname, ".finemap_merged_regions.res.RDS")))

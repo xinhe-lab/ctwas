@@ -24,7 +24,8 @@ preprocess_weights(
 
 \item{region_info}{a data frame of region definition and associated file names.}
 
-\item{gwas_snp_ids}{a vector of SNP IDs in GWAS summary statistics (z_snp$id).}
+\item{gwas_snp_ids}{a vector of SNP IDs in GWAS summary statistics (z_snp$id).
+It will take the intersect of SNPs in weights, LD reference and SNPs in z_snp.}
 
 \item{type}{a string, specifying QTL type of each weight file, e.g. eQTL, sQTL, pQTL.}
 

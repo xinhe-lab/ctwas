@@ -1,7 +1,6 @@
 ## Libraries
 library(ctwas)
 library(ggplot2)
-library(tools)
 library(logging)
 
 ##### Settings #####
@@ -14,7 +13,7 @@ ld_R_dir <- "/project2/mstephens/wcrouse/UKB_LDR_0.1/"
 weight_file <- "/project2/xinhe/shared_data/multigroup_ctwas/test_data/mashr_Liver.db"
 thin <- 0.1
 max_snp_region <- 20000
-ncore <- 6
+ncore <- 4
 outputdir <- "/project2/xinhe/shared_data/multigroup_ctwas/test_data/output/LDL_Liver_Kevin/"
 outname <- paste0(trait, ".", tissue)
 dir.create(outputdir, showWarnings=F, recursive=T)
@@ -89,7 +88,7 @@ if (file.exists(processed_weight_file)){
   runtime <- system.time({
     weights <- preprocess_weights(weight_file,
                                   region_info,
-                                  z_snp,
+                                  z_snp$id,
                                   type = "expression",
                                   context = "liver",
                                   ncore = ncore,
@@ -124,15 +123,15 @@ if (file.exists(region_data_thin_file)) {
   runtime <- system.time({
     loginfo("Assemble region_data with thin = %.2f", thin)
     res <- assemble_region_data(region_info,
-                           z_snp,
-                           z_gene,
-                           weights,
-                           maxSNP = max_snp_region,
-                           trim_by = "random",
-                           thin = thin,
-                           minvar = 2,
-                           adjust_boundary_genes = TRUE,
-                           ncore = ncore)
+                                z_snp,
+                                z_gene,
+                                weights,
+                                maxSNP = max_snp_region,
+                                trim_by = "random",
+                                thin = thin,
+                                minvar = 2,
+                                adjust_boundary_genes = TRUE,
+                                ncore = ncore)
   })
   saveRDS(res, region_data_thin_file)
   cat(sprintf("Assemble region_data took %0.2f minutes\n",runtime["elapsed"]/60))
@@ -220,3 +219,47 @@ runtime <- system.time({
 })
 cat(sprintf("Finemapping took %0.2f minutes\n",runtime["elapsed"]/60))
 saveRDS(finemap_res, file.path(outputdir, paste0(outname, ".finemap_regions.res.RDS")))
+
+
+##### Region merging #####
+region_data_thin_file <- file.path(outputdir, paste0(outname, ".region_data.thin", thin, ".RDS"))
+res <- readRDS(region_data_thin_file)
+region_data <- res$region_data
+boundary_genes <- res$boundary_genes
+
+merged_region_data_file <- file.path(outputdir, paste0(outname, ".merged_region_data.RDS"))
+if (file.exists(merged_region_data_file)) {
+  res <- readRDS(merged_region_data_file)
+} else{
+  runtime <- system.time({
+    res <- merge_region_data(region_data,
+                             boundary_genes,
+                             region_info,
+                             z_snp,
+                             z_gene,
+                             expand = TRUE,
+                             maxSNP = max_snp_region)
+  })
+  saveRDS(res, merged_region_data_file)
+  cat(sprintf("Merge region_data took %0.2f minutes\n",runtime["elapsed"]/60))
+}
+merged_region_data <- res$merged_region_data
+merged_region_info <- res$merged_region_info
+rm(res)
+
+## Finemapping merged regions
+cat("##### Finemapping merged regions ##### \n")
+runtime <- system.time({
+  finemap_merged_regions_res <- finemap_regions(merged_region_data,
+                                                region_info,
+                                                weights,
+                                                group_prior = group_prior,
+                                                group_prior_var = group_prior_var,
+                                                L = 5,
+                                                save_cor = TRUE,
+                                                cor_dir = paste0(outputdir, "/merged_cor_matrix/"),
+                                                ncore = ncore,
+                                                verbose = TRUE)
+})
+cat(sprintf("Finemapping took %0.2f minutes\n",runtime["elapsed"]/60))
+saveRDS(finemap_merged_regions_res, file.path(outputdir, paste0(outname, ".finemap_merged_regions.res.RDS")))
