@@ -172,18 +172,19 @@ if (file.exists(screen_regions_file)) {
   screened_region_data <- readRDS(screen_regions_file)
 } else{
   runtime <- system.time({
-    screened_region_ids <- screen_regions(region_data,
-                                          region_info,
-                                          weights,
-                                          L = 5,
-                                          group_prior = group_prior,
-                                          group_prior_var = group_prior_var,
-                                          max_snp_region = max_snp_region,
-                                          ncore = ncore,
-                                          verbose = TRUE,
-                                          logfile = file.path(outputdir, paste0(outname, ".screen_regions.log")))
+    region_nonSNP_PIP_df <- screen_regions(region_data,
+                                           region_info,
+                                           weights,
+                                           L = 5,
+                                           group_prior = group_prior,
+                                           group_prior_var = group_prior_var,
+                                           ncore = ncore,
+                                           verbose = TRUE,
+                                           logfile = file.path(outputdir, paste0(outname, ".screen_regions.log")))
   })
   cat(sprintf("Screen regions took %0.2f minutes\n",runtime["elapsed"]/60))
+  screened_region_ids <- region_nonSNP_PIP_df$region_id
+  screened_region_data <- region_data[screened_region_ids]
   loginfo("%d regions left after screening regions", length(screened_region_ids))
 
   # Expand screened region_data with all SNPs in the regions
@@ -205,21 +206,26 @@ if (file.exists(screen_regions_file)) {
 
 ## Finemapping screened regions
 cat("##### Finemapping screened regions ##### \n")
-runtime <- system.time({
-  finemap_res <- finemap_regions(screened_region_data,
-                                 region_info,
-                                 weights,
-                                 group_prior = group_prior,
-                                 group_prior_var = group_prior_var,
-                                 L = 5,
-                                 save_cor = TRUE,
-                                 cor_dir = paste0(outputdir, "/cor_matrix/"),
-                                 ncore = ncore,
-                                 verbose = TRUE)
-})
-cat(sprintf("Finemapping took %0.2f minutes\n",runtime["elapsed"]/60))
-saveRDS(finemap_res, file.path(outputdir, paste0(outname, ".finemap_regions.res.RDS")))
 
+finemap_regions_file <- file.path(outputdir, paste0(outname, ".finemap_regions.res.RDS"))
+if (file.exists(finemap_regions_file)) {
+  res <- readRDS(finemap_regions_file)
+} else {
+  runtime <- system.time({
+    finemap_res <- finemap_regions(screened_region_data,
+                                   region_info,
+                                   weights,
+                                   group_prior = group_prior,
+                                   group_prior_var = group_prior_var,
+                                   L = 5,
+                                   save_cor = TRUE,
+                                   cor_dir = paste0(outputdir, "/cor_matrix/"),
+                                   ncore = ncore,
+                                   verbose = TRUE)
+  })
+  cat(sprintf("Finemapping took %0.2f minutes\n",runtime["elapsed"]/60))
+  saveRDS(finemap_res, finemap_regions_file)
+}
 
 ##### Region merging #####
 region_data_thin_file <- file.path(outputdir, paste0(outname, ".region_data.thin", thin, ".RDS"))

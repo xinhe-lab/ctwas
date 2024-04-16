@@ -94,6 +94,7 @@ screen_regions <- function(
   loginfo("Select regions with non-SNP PIP >= %s", min_nonSNP_PIP)
   region_nonSNP_PIP_df <- region_nonSNP_PIP_df[region_nonSNP_PIP_df$nonSNP_PIP >= min_nonSNP_PIP, , drop=FALSE]
   loginfo("Number of regions selected: %d", nrow(region_nonSNP_PIP_df))
+  rownames(region_nonSNP_PIP_df) <- NULL
 
   return(region_nonSNP_PIP_df)
 }
