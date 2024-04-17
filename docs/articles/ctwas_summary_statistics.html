@@ -33,7 +33,7 @@
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">ctwas</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">0.1.36</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">0.1.37</span>
       </span>
     </div>
 
@@ -81,7 +81,7 @@
       <h1 data-toc-skip>Using cTWAS with summary statistics</h1>
                         <h4 data-toc-skip class="author">Wesley Crouse, Sheng Qian, Kaixuan Luo, Xin He</h4>
             
-            <h4 data-toc-skip class="date">2024-02-16</h4>
+            <h4 data-toc-skip class="date">2024-04-17</h4>
       
       <small class="dont-index">Source: <a href="https://github.com/xinhe-lab/ctwas/blob/main/vignettes/ctwas_summary_statistics.Rmd" class="external-link"><code>vignettes/ctwas_summary_statistics.Rmd</code></a></small>
       <div class="hidden name"><code>ctwas_summary_statistics.Rmd</code></div>
@@ -320,13 +320,44 @@
 <span><span class="co">## 5    16 rs11647909 71029403   T   C 0.49039131   0.5220587</span></span></code></pre>
 <p>The columns of the <code>.Rvar</code> file include information on chromosome, variant name, position in base pairs, and the alternative and reference alleles. The <code>variance</code> column is the variance of each variant prior to standardization; this is required for PredictDB weights but not FUSION weights. PredictDB weights should be scaled by the variance before imputing gene expression. This is because PredictDB weights assume that variant genotypes are not standardized before imputation, but our implementation assumes standardized variant genotypes. If variance information is missing, or if weights are in PredictDB format but are already on the standardized scale (e.g. if they were converted from FUSION to PredictDB format), this scaling can be turned off using the option <code>scale_by_ld_variance=F</code> using the multigroup version of cTWAS (this option hasn’t been based forward to the main branch yet). We’ve also include information on allele frequency in the variant info, but this is optional and not used by cTWAS.</p>
 <p>The naming convention for the LD matrices is <code>[filestem]_chr[#].R_snp.[start]_[end].RDS</code>. cTWAS expects that all <code>.RDS</code> and <code>.Rvar</code> files in the directory contain LD information, so no other files with these suffixes should be in the directory. Each variant should be uniquely assigned to a region, and the regions should be left closed and right open, i.e. [start, stop). The positions of the LD matrices must match exactly the positions specified by the region file. Do not include invariant or multiallelic variants in the LD reference.</p>
-<p>We have provided the scripts used to generate the b38 LD reference in the package, as well a b37 LD reference, in the same directory. These scripts take <code>.pgen</code> files and regions as input and output the LD matrices and corresponding information.</p>
+</div>
+<div class="section level4">
+<h4 id="convert-genotype-data-to-ld-matrices">Convert genotype data to LD matrices<a class="anchor" aria-label="anchor" href="#convert-genotype-data-to-ld-matrices"></a>
+</h4>
+<p>We could use the <code>convert_geno_to_LD_matrix</code> function to convert genotype files (and LD regions) to the LD matrices and corresponding variant information.</p>
 <div class="sourceCode" id="cb26"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="co"># path to b38 script</span></span>
-<span><span class="fu"><a href="https://rdrr.io/r/base/system.file.html" class="external-link">system.file</a></span><span class="op">(</span><span class="st">"extdata/scripts"</span>, <span class="st">"convert_geno_to_LDR_chr.R"</span>, package <span class="op">=</span> <span class="st">"ctwas"</span><span class="op">)</span></span>
+<code class="sourceCode R"><span><span class="co"># specify LD reference</span></span>
+<span><span class="va">ldref_dir</span> <span class="op">&lt;-</span> <span class="st">"/gpfs/data/xhe-lab/ukb_LDR/genotype_data_0.1"</span></span>
+<span><span class="va">genotype_files</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/file.path.html" class="external-link">file.path</a></span><span class="op">(</span><span class="va">ldref_dir</span>, <span class="fu"><a href="https://rdrr.io/r/base/paste.html" class="external-link">paste0</a></span><span class="op">(</span><span class="st">"ukb_chr"</span>, <span class="fl">1</span><span class="op">:</span><span class="fl">22</span>, <span class="st">".pgen"</span><span class="op">)</span><span class="op">)</span></span>
+<span><span class="co"># the output Rvar files use the positions and allele information in varinfo_files</span></span>
+<span><span class="va">varinfo_files</span> <span class="op">&lt;-</span> <span class="st">"/gpfs/data/xhe-lab/ukb_LDR/neale_lab/neale_variants_hg38.bim"</span></span>
+<span><span class="co"># prepare a data frame region_info for LD regions with columns "chr", "start", and "stop"</span></span>
+<span><span class="co"># the positions should match those in varinfo_files</span></span>
+<span><span class="va">region_file</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/system.file.html" class="external-link">system.file</a></span><span class="op">(</span><span class="st">"extdata/ldetect"</span>, <span class="st">"EUR.b38.bed"</span>, package <span class="op">=</span> <span class="st">"ctwas"</span><span class="op">)</span></span>
+<span><span class="va">region_info</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/utils/read.table.html" class="external-link">read.table</a></span><span class="op">(</span><span class="va">region_file</span>, header <span class="op">=</span> <span class="cn">TRUE</span>, stringsAsFactors <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span></span>
+<span><span class="co"># specify output</span></span>
+<span><span class="va">outputdir</span> <span class="op">&lt;-</span> <span class="st">"/gpfs/data/xhe-lab/ctwas/LDR/UKB_b38/"</span></span>
+<span><span class="va">outname</span> <span class="op">&lt;-</span> <span class="st">"ukb_b38_0.1"</span></span>
 <span></span>
-<span><span class="co"># path to b37 script</span></span>
-<span><span class="fu"><a href="https://rdrr.io/r/base/system.file.html" class="external-link">system.file</a></span><span class="op">(</span><span class="st">"extdata/scripts"</span>, <span class="st">"convert_geno_to_LDR_chr_b37.R"</span>, package <span class="op">=</span> <span class="st">"ctwas"</span><span class="op">)</span></span></code></pre></div>
+<span><span class="co"># generate LD matrices (.RDS) and variant info (.Rvar)</span></span>
+<span><span class="co"># update region info with paths of LD matrices and variant info files</span></span>
+<span><span class="co"># we could run this for one chromosome or multiple chromosomes</span></span>
+<span><span class="va">updated_region_info</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/convert_geno_to_LD_matrix.html">convert_geno_to_LD_matrix</a></span><span class="op">(</span><span class="va">region_info</span>, </span>
+<span>                                                 <span class="va">genotype_files</span>, </span>
+<span>                                                 <span class="va">varinfo_files</span>,</span>
+<span>                                                 chrom <span class="op">=</span> <span class="fl">1</span><span class="op">:</span><span class="fl">22</span>,</span>
+<span>                                                 outputdir <span class="op">=</span> <span class="va">outputdir</span>, </span>
+<span>                                                 outname <span class="op">=</span> <span class="va">outname</span><span class="op">)</span></span></code></pre></div>
+<p>We provide example R scripts to generate the LD matrices for UKB or 1KG European genotype files.</p>
+<div class="sourceCode" id="cb27"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="co"># path to UKB b38 script</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/base/system.file.html" class="external-link">system.file</a></span><span class="op">(</span><span class="st">"extdata/scripts"</span>, <span class="st">"convert_geno_to_LD_matrix_UKB_b38.R"</span>, package <span class="op">=</span> <span class="st">"ctwas"</span><span class="op">)</span></span>
+<span></span>
+<span><span class="co"># path to UKB b37 script</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/base/system.file.html" class="external-link">system.file</a></span><span class="op">(</span><span class="st">"extdata/scripts"</span>, <span class="st">"convert_geno_to_LD_matrix_UKB_b37.R"</span>, package <span class="op">=</span> <span class="st">"ctwas"</span><span class="op">)</span></span>
+<span></span>
+<span><span class="co"># path to 1KG European b37 script</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/base/system.file.html" class="external-link">system.file</a></span><span class="op">(</span><span class="st">"extdata/scripts"</span>, <span class="st">"convert_geno_to_LD_matrix_1KG_EUR_b37.R"</span>, package <span class="op">=</span> <span class="st">"ctwas"</span><span class="op">)</span></span></code></pre></div>
 </div>
 </div>
 </div>
@@ -334,7 +365,7 @@
 <h2 id="running-ctwas-at-a-single-locus">Running cTWAS at a single locus<a class="anchor" aria-label="anchor" href="#running-ctwas-at-a-single-locus"></a>
 </h2>
 <p>To speed computation in our single locus example, we will subset the prediction models to only the genes at the HPR locus that we analyzed in the paper. Subsetting the prediction models is not strictly necessary (simply specifying a single region for the fine-mapping step will yield the same output), but subsetting the weights lets us avoid imputing all the genes during the imputation step.</p>
-<div class="sourceCode" id="cb27"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb28"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># specify the genes to subset to:</span></span>
 <span><span class="va">gene_subset</span> <span class="op">&lt;-</span>  <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"CMTR2"</span>, <span class="st">"ZNF23"</span>, <span class="st">"CHST4"</span>, <span class="st">"ZNF19"</span>, <span class="st">"TAT"</span>, <span class="st">"MARVELD3"</span>, <span class="st">"PHLPP2"</span>, <span class="st">"ATXN1L"</span>, <span class="st">"ZNF821"</span>, <span class="st">"PKD1L3"</span>, <span class="st">"HPR"</span> <span class="op">)</span></span>
 <span></span>
@@ -360,25 +391,25 @@
 <span><span class="co"># specify the weight for the analysis</span></span>
 <span><span class="va">weight_subset</span> <span class="op">&lt;-</span> <span class="st">"/project2/xinhe/shared_data/ctwas_tutorial/weights_nolnc/mashr_Liver_nolnc_subset.db"</span></span></code></pre></div>
 <p>We also included this final subset of liver prediction models in the cTWAS package.</p>
-<div class="sourceCode" id="cb28"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb29"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">weight_subset</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/system.file.html" class="external-link">system.file</a></span><span class="op">(</span><span class="st">"extdata/weights_nolnc"</span>, <span class="st">"mashr_Liver_nolnc_subset.db"</span>, package <span class="op">=</span> <span class="st">"ctwas"</span><span class="op">)</span></span></code></pre></div>
 <p>We will also subset the GWAS z-scores to only the variants in this region:</p>
-<div class="sourceCode" id="cb29"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb30"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">z_snp_subset</span> <span class="op">&lt;-</span> <span class="va">z_snp</span><span class="op">[</span><span class="va">z_snp</span><span class="op">$</span><span class="va">id</span> <span class="op"><a href="https://rdrr.io/r/base/match.html" class="external-link">%in%</a></span> <span class="va">R_snp_info</span><span class="op">$</span><span class="va">id</span>,<span class="op">]</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/readRDS.html" class="external-link">saveRDS</a></span><span class="op">(</span><span class="va">z_snp_subset</span>, file<span class="op">=</span><span class="st">"/project2/xinhe/shared_data/ctwas_tutorial/gwas_summary_stats/ukb-d-30780_irnt_subset.RDS"</span><span class="op">)</span></span></code></pre></div>
 <p>We’ve also included this file as part of the package:</p>
-<div class="sourceCode" id="cb30"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb31"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">z_snp_subset</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/readRDS.html" class="external-link">readRDS</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/system.file.html" class="external-link">system.file</a></span><span class="op">(</span><span class="st">"extdata/summary_stats"</span>, <span class="st">"ukb-d-30780_irnt_subset.RDS"</span>, package <span class="op">=</span> <span class="st">"ctwas"</span><span class="op">)</span><span class="op">)</span></span></code></pre></div>
 <div class="section level3">
 <h3 id="imputing-gene-z-scores">Imputing gene z-scores<a class="anchor" aria-label="anchor" href="#imputing-gene-z-scores"></a>
 </h3>
 <p>Now that the input data is prepared, we are ready to impute gene z-scores using cTWAS. This step basically performs Transcriptome-wide association studies (TWAS) on each gene with a prediction model. The underlying calculation is based on <a href="https://www.nature.com/articles/s41467-018-03621-1" class="external-link">S-PrediXcan</a>. To impute gene z-scores at this locus, we use the <code>impute_expr_z</code> function. Here, we use the option <code>harmonize_z = T</code> and <code>harmonize_wgt = T</code> to harmonize both the z-scores and the weights to the LD reference. Because the z-scores and the LD reference are from the same source (UK Biobank), we expect that the strand is consistent between the GWAS and LD reference, so we use the option <code>strand_ambig_action_z = "none"</code> to treat strand ambiguous variants as unambiguous. The prediction models are from a different population (GTEx), so we use the option <code>recover_strand_ambig_wgt</code> to recover strand ambiguous variants in the prediction models. The detailed procedure is described in the paper.</p>
-<div class="sourceCode" id="cb31"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb32"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">outputdir</span> <span class="op">&lt;-</span> <span class="st">"/project2/xinhe/shared_data/ctwas_tutorial/results/single_locus/"</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/files2.html" class="external-link">dir.create</a></span><span class="op">(</span><span class="va">outputdir</span>, showWarnings<span class="op">=</span><span class="cn">F</span>, recursive<span class="op">=</span><span class="cn">T</span><span class="op">)</span></span>
 <span></span>
 <span><span class="va">outname</span> <span class="op">&lt;-</span> <span class="st">"example_locus"</span></span></code></pre></div>
-<div class="sourceCode" id="cb32"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb33"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># impute gene z-scores</span></span>
 <span><span class="va">res</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/impute_expr_z.html">impute_expr_z</a></span><span class="op">(</span>z_snp <span class="op">=</span> <span class="va">z_snp_subset</span>,</span>
 <span>                     weight <span class="op">=</span> <span class="va">weight_subset</span>,</span>
@@ -391,7 +422,7 @@
 <span>                     recover_strand_ambig_wgt <span class="op">=</span> <span class="cn">T</span><span class="op">)</span></span></code></pre></div>
 <p>The log tells us that there is only chromosome information for chromosome 16, as expected. For each chromosome, it also tells us that we’ve harmonized (flipped) the GWAS z-scores and weights, and that we’ve harmonized strand ambiguous variants for the weights. Chromsome 16 has 11 prediction models and all of them are successfully imputed. The warnings tell us that 21 of the chromosomes did not have any imputed genes.</p>
 <p>We’ve now successfully harmonized the data and imputed the gene z-scores. The function has returned a list containing the imputed gene z-scores, the harmonized GWAS z-scores. We will store them for use in the next step. Make sure to store the harmonized GWAS z-scores or this will introduce inconsistencies during the fine-mapping step.</p>
-<div class="sourceCode" id="cb33"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb34"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">z_gene_subset</span> <span class="op">&lt;-</span> <span class="va">res</span><span class="op">$</span><span class="va">z_gene</span> <span class="co"># imputed gene z-scores</span></span>
 <span><span class="va">z_snp_subset</span> <span class="op">&lt;-</span> <span class="va">res</span><span class="op">$</span><span class="va">z_snp</span> <span class="co"># harmonized GWAS z-scores</span></span>
 <span><span class="va">ld_exprvarfs</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/paste.html" class="external-link">paste0</a></span><span class="op">(</span><span class="va">outputdir</span>, <span class="st">"/"</span>, <span class="va">outname</span>, <span class="st">"_chr"</span>, <span class="fl">1</span><span class="op">:</span><span class="fl">22</span>, <span class="st">".exprvar"</span><span class="op">)</span> <span class="co"># position information for imputed genes</span></span>
@@ -399,7 +430,7 @@
 <span><span class="fu"><a href="https://rdrr.io/r/base/save.html" class="external-link">save</a></span><span class="op">(</span><span class="va">z_gene_subset</span>, file <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/paste.html" class="external-link">paste0</a></span><span class="op">(</span><span class="va">outputdir</span>, <span class="st">"/"</span>, <span class="va">outname</span>, <span class="st">"_z_gene.Rd"</span><span class="op">)</span><span class="op">)</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/save.html" class="external-link">save</a></span><span class="op">(</span><span class="va">z_snp_subset</span>, file <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/paste.html" class="external-link">paste0</a></span><span class="op">(</span><span class="va">outputdir</span>, <span class="st">"/"</span>, <span class="va">outname</span>, <span class="st">"_z_snp.Rd"</span><span class="op">)</span><span class="op">)</span></span></code></pre></div>
 <p>In the directory, we have generated 3 files per chromosome during gene imputation. The <code>exprqc.Rd</code> files contain QC information about imputation for each gene. The <code>.exprvar</code> file contains position information for each imputed gene, including start positions and end positions; these positions are determined by the first and last variant positions for each gene prediction model. The <code>_ld_R_*.txt</code> file contains information about the LD regions and matrices used.</p>
-<div class="sourceCode" id="cb34"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb35"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/list.files.html" class="external-link">list.files</a></span><span class="op">(</span><span class="va">outputdir</span>, pattern<span class="op">=</span><span class="st">"chr16"</span><span class="op">)</span></span></code></pre></div>
 <pre><code><span><span class="co">## [1] "example_locus_chr16.expr.gz"   "example_locus_chr16.exprqc.Rd"</span></span>
 <span><span class="co">## [3] "example_locus_chr16.exprvar"   "example_locus_ld_R_chr16.txt"</span></span></code></pre>
@@ -408,13 +439,13 @@
 <h3 id="fine-mapping-with-fixed-parameters">Fine-mapping with fixed parameters<a class="anchor" aria-label="anchor" href="#fine-mapping-with-fixed-parameters"></a>
 </h3>
 <p>After imputing gene z-scores, we are ready to run the cTWAS analysis. The full analysis involves first estimating parameters from the data, and then fine-mapping the genes and variants using these estimated parameters. This can be computationally intensive, so for this example, we will only run the fine-mapping step at the HPR locus, using the parameters we estimated in the paper.</p>
-<div class="sourceCode" id="cb36"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb37"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># load imputed gene z-scores, the harmonized GWAS z-scores</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/load.html" class="external-link">load</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/paste.html" class="external-link">paste0</a></span><span class="op">(</span><span class="va">outputdir</span>, <span class="st">"/"</span>, <span class="va">outname</span>, <span class="st">"_z_gene.Rd"</span><span class="op">)</span><span class="op">)</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/load.html" class="external-link">load</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/paste.html" class="external-link">paste0</a></span><span class="op">(</span><span class="va">outputdir</span>, <span class="st">"/"</span>, <span class="va">outname</span>, <span class="st">"_z_snp.Rd"</span><span class="op">)</span><span class="op">)</span></span></code></pre></div>
 <p>Note that cTWAS expects the output of <code>impute_expr_z</code>. Currently, it is not possible to specify gene z-scores obtained using other software. This is because we cannot ensure that the LD reference used for imputation with other software is the same as the LD reference used for fine-mapping. This scenario would be fine for parameter estimation, which does not depend on LD, but it would be problematic for fine-mapping.</p>
 <p>Let’s run the cTWAS fine-mapping step at the HPR locus using the estimated parameters:</p>
-<div class="sourceCode" id="cb37"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb38"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># the estimated prior inclusion probabilities for genes and variants from the paper</span></span>
 <span><span class="va">group_prior</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">0.0107220302</span>, <span class="fl">0.0001715896</span><span class="op">)</span></span>
 <span></span>
@@ -442,7 +473,7 @@
 <h3 id="viewing-the-results">Viewing the results<a class="anchor" aria-label="anchor" href="#viewing-the-results"></a>
 </h3>
 <p>We will add the gene names to the results (the PredictDB weights use Ensembl IDs as the primary identifier), as well as the z-scores for each SNP and gene, and sort the result by the PIP:</p>
-<div class="sourceCode" id="cb38"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb39"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># load cTWAS results</span></span>
 <span><span class="va">ctwas_res</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/utils/read.table.html" class="external-link">read.table</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/paste.html" class="external-link">paste0</a></span><span class="op">(</span><span class="va">outputdir</span>, <span class="st">"/"</span>, <span class="va">outname</span>, <span class="st">".susieIrss.txt"</span><span class="op">)</span>, header<span class="op">=</span><span class="cn">T</span><span class="op">)</span></span>
 <span></span>
@@ -486,7 +517,7 @@
 <span><span class="co">## 1366 0.06519302 125.58267     &lt;NA&gt;  -2.493077</span></span>
 <span><span class="co">## 1516 0.06451556  67.92297     &lt;NA&gt;   8.067235</span></span></code></pre>
 <p>To plot the results, we also want to update the gene positions. cTWAS assigns gene positions based on the first variant in the gene’s prediction model, but we want to visualize gene locations using their transcription start site. First, we get gene information for all genes on chromosome 16 and subset to protein coding genes.</p>
-<div class="sourceCode" id="cb40"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb41"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va">biomaRt</span><span class="op">)</span></span>
 <span></span>
 <span><span class="co"># download all entries for ensembl on chromosome 16</span></span>
@@ -502,7 +533,7 @@
 <span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/save.html" class="external-link">save</a></span><span class="op">(</span><span class="va">G_list</span>, file<span class="op">=</span><span class="fu"><a href="https://rdrr.io/r/base/paste.html" class="external-link">paste0</a></span><span class="op">(</span><span class="va">outputdir</span>, <span class="st">"G_list.RData"</span><span class="op">)</span><span class="op">)</span></span></code></pre></div>
 <p>Now we update the position for each gene to the TSS.</p>
-<div class="sourceCode" id="cb41"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb42"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/load.html" class="external-link">load</a></span><span class="op">(</span>file<span class="op">=</span><span class="fu"><a href="https://rdrr.io/r/base/paste.html" class="external-link">paste0</a></span><span class="op">(</span><span class="va">outputdir</span>, <span class="st">"G_list.RData"</span><span class="op">)</span><span class="op">)</span></span>
 <span></span>
 <span><span class="co"># remove the version number from the ensembl IDs</span></span>
@@ -512,7 +543,7 @@
 <span><span class="co"># update the gene positions to TSS</span></span>
 <span><span class="va">ctwas_res</span><span class="op">$</span><span class="va">pos</span><span class="op">[</span><span class="va">ctwas_res</span><span class="op">$</span><span class="va">type</span><span class="op">==</span><span class="st">"gene"</span><span class="op">]</span> <span class="op">&lt;-</span> <span class="va">G_list</span><span class="op">$</span><span class="va">tss</span><span class="op">[</span><span class="fu"><a href="https://rdrr.io/r/base/match.html" class="external-link">match</a></span><span class="op">(</span><span class="va">ctwas_res</span><span class="op">$</span><span class="va">ensembl</span><span class="op">[</span><span class="va">ctwas_res</span><span class="op">$</span><span class="va">type</span><span class="op">==</span><span class="st">"gene"</span><span class="op">]</span>, <span class="va">G_list</span><span class="op">$</span><span class="va">ensembl_gene_id</span><span class="op">)</span><span class="op">]</span></span></code></pre></div>
 <p>And we are now ready to plot the results at the HPR locus. There are some limited options to control the location of legends and labels, but making a publication-ready plot will probably require manual adjustment of these features. Note that the plot does not exactly match the figure in the paper because we are only using a subset of the variants in our example LD reference.</p>
-<div class="sourceCode" id="cb42"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb43"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># genome-wide Bonferroni threshold used for TWAS</span></span>
 <span><span class="va">twas_sig_thresh</span> <span class="op">&lt;-</span> <span class="fl">0.05</span><span class="op">/</span><span class="fl">9881</span></span>
 <span></span>
@@ -541,7 +572,7 @@
 <h3 id="imputing-gene-z-scores-1">Imputing gene z-scores<a class="anchor" aria-label="anchor" href="#imputing-gene-z-scores-1"></a>
 </h3>
 <p>To impute gene z-scores genome-wide, we specify the full set of GWAS summary statistics, the full PredictDB liver weights, and the full set of LD reference matrices. This step can be slow, especially with both of the advanced harmonization options turned on. There is a parallelized version of this function in the <code>multigroup</code> branch of cTWAS, currently under development. As specified here, imputation took approximately 6 hours, using a single core (the only option using the <code>main</code> branch).</p>
-<div class="sourceCode" id="cb43"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb44"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">outputdir</span> <span class="op">&lt;-</span> <span class="st">"/project2/xinhe/shared_data/ctwas_tutorial/results/whole_genome/"</span></span>
 <span><span class="va">outname</span> <span class="op">&lt;-</span> <span class="st">"example_genome"</span></span>
 <span></span>
@@ -578,12 +609,12 @@
 </h3>
 <p>Now that we’ve imputed gene z-scores for the full genome, we are ready to run the full cTWAS analysis. The full analysis involves first estimating parameters from the data, and then fine-mapping the genes and variants using these estimated parameters.</p>
 <p>As mentioned previously, the full cTWAS analysis can computationally expensive, so we will specify several options to make the analysis faster. The <code>thin</code> argument randomly selects 10% of variants to use during the parameter estimation and initial fine-mapping steps, reducing computation. The <code>max_snp_region</code> sets a maximum on the number of variants that can be in a single (merged) region to prevent memory issues during fine-mapping. The <code>ncore</code> argument specifies the number of cores to use when parallelizing over regions.</p>
-<div class="sourceCode" id="cb44"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb45"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">thin</span> <span class="op">&lt;-</span> <span class="fl">0.1</span></span>
 <span><span class="va">max_snp_region</span> <span class="op">&lt;-</span> <span class="fl">20000</span></span>
 <span><span class="va">ncore</span> <span class="op">&lt;-</span> <span class="fl">6</span></span></code></pre></div>
 <p>We pass these arguments the <code>ctwas_rss</code> and run the full analysis. As specified, using 6 cores and with 56GB of RAM available, this step took approximately 7 hours.</p>
-<div class="sourceCode" id="cb45"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb46"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># estimating parameters</span></span>
 <span><span class="fu"><a href="../reference/ctwas_rss.html">ctwas_rss</a></span><span class="op">(</span>z_gene <span class="op">=</span> <span class="va">z_gene</span>,</span>
 <span>          z_snp <span class="op">=</span> <span class="va">z_snp</span>,</span>
@@ -603,7 +634,7 @@
 <h3 id="assessing-parameter-estimates">Assessing parameter estimates<a class="anchor" aria-label="anchor" href="#assessing-parameter-estimates"></a>
 </h3>
 <p>We provide code to assess the convergence of the estimated parameters and to compute the proportion of variance explained (PVE) by variants and genes.</p>
-<div class="sourceCode" id="cb46"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb47"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">ctwas_parameters</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/ctwas_summarize_parameters.html">ctwas_summarize_parameters</a></span><span class="op">(</span>outputdir <span class="op">=</span> <span class="va">outputdir</span>,</span>
 <span>                                               outname <span class="op">=</span> <span class="va">outname</span>,</span>
 <span>                                               gwas_n <span class="op">=</span> <span class="va">gwas_n</span>,</span>
@@ -612,39 +643,39 @@
 <span><span class="co"># number of variants in the analysis</span></span>
 <span><span class="va">ctwas_parameters</span><span class="op">$</span><span class="va">n_snps</span></span></code></pre></div>
 <pre><code><span><span class="co">## [1] 8696600</span></span></code></pre>
-<div class="sourceCode" id="cb48"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb49"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># number of genes in the analysis</span></span>
 <span><span class="va">ctwas_parameters</span><span class="op">$</span><span class="va">n_genes</span></span></code></pre></div>
 <pre><code><span><span class="co">## [1] 9881</span></span></code></pre>
-<div class="sourceCode" id="cb50"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb51"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># estimated prior inclusion probability</span></span>
 <span><span class="va">ctwas_parameters</span><span class="op">$</span><span class="va">group_prior</span></span></code></pre></div>
 <pre><code><span><span class="co">##         gene          SNP </span></span>
 <span><span class="co">## 0.0107220302 0.0001715896</span></span></code></pre>
-<div class="sourceCode" id="cb52"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb53"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># estimated prior effect size</span></span>
 <span><span class="va">ctwas_parameters</span><span class="op">$</span><span class="va">group_prior_var</span></span></code></pre></div>
 <pre><code><span><span class="co">##      gene       SNP </span></span>
 <span><span class="co">## 41.327666  9.977841</span></span></code></pre>
-<div class="sourceCode" id="cb54"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb55"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># estimated enrichment of genes over variants</span></span>
 <span><span class="va">ctwas_parameters</span><span class="op">$</span><span class="va">enrichment</span></span></code></pre></div>
 <pre><code><span><span class="co">## [1] 62.48649</span></span></code></pre>
-<div class="sourceCode" id="cb56"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb57"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># PVE explained by genes and variants</span></span>
 <span><span class="va">ctwas_parameters</span><span class="op">$</span><span class="va">group_pve</span></span></code></pre></div>
 <pre><code><span><span class="co">##       gene        SNP </span></span>
 <span><span class="co">## 0.01274204 0.04333086</span></span></code></pre>
-<div class="sourceCode" id="cb58"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb59"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># total heritability (sum of PVE)</span></span>
 <span><span class="va">ctwas_parameters</span><span class="op">$</span><span class="va">total_pve</span></span></code></pre></div>
 <pre><code><span><span class="co">## [1] 0.0560729</span></span></code></pre>
-<div class="sourceCode" id="cb60"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb61"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># attributable heritability</span></span>
 <span><span class="va">ctwas_parameters</span><span class="op">$</span><span class="va">attributable_pve</span></span></code></pre></div>
 <pre><code><span><span class="co">##      gene       SNP </span></span>
 <span><span class="co">## 0.2272407 0.7727593</span></span></code></pre>
-<div class="sourceCode" id="cb62"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb63"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># plot convergence</span></span>
 <span><span class="va">ctwas_parameters</span><span class="op">$</span><span class="va">convergence_plot</span></span></code></pre></div>
 <div class="figure" style="text-align: center">
@@ -657,7 +688,7 @@
 <h3 id="viewing-the-results-1">Viewing the results<a class="anchor" aria-label="anchor" href="#viewing-the-results-1"></a>
 </h3>
 <p>As before, we will add the gene names to the results (the PredictDB weights use Ensembl IDs as the primary identifier), as well as the z-scores for each SNP and gene. We then show all genes with PIP greater than 0.8, which is the threshold we used in the paper.</p>
-<div class="sourceCode" id="cb63"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb64"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># load cTWAS results</span></span>
 <span><span class="va">ctwas_res</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/utils/read.table.html" class="external-link">read.table</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/paste.html" class="external-link">paste0</a></span><span class="op">(</span><span class="va">outputdir</span>, <span class="va">outname</span>, <span class="st">".susieIrss.txt"</span><span class="op">)</span>, header<span class="op">=</span><span class="cn">T</span><span class="op">)</span></span>
 <span></span>
@@ -751,7 +782,7 @@
 <span><span class="co">## 901554         1 0.8133753   28.04053     ALLC   4.919066</span></span>
 <span><span class="co">## 1042437        0 0.8041948   22.63603    CCND2  -4.065830</span></span></code></pre>
 <p>We will also visualize the POLK locus that we highlighted in the paper. As mentioned previously, the cTWAS output includes results for all genes, but it only includes a fraction of variants if the <code>thin</code> parameter is specified. There are complete variant results in regions with gene PIP greater than <code>rerun_gene_PIP</code>, but there are incomplete variant results in regions with weaker gene signals. The POLK locus is a “null” result; after running cTWAS, there is no strong gene signal. Thus, in order to plot the full set of variants at this locus, we must specify <code>rerun_ctwas=T</code> to run cTWAS again at this locus using all variants. This calls <code>ctwas_rss</code> and logs its progress; it also create a temporary folder within the output directory to store the results. After doing this the first time, you can set <code>rerun_load_only=T</code> to make changes to the plot without calling cTWAS again.</p>
-<div class="sourceCode" id="cb65"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb66"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># genome-wide bonferroni threshold used for TWAS</span></span>
 <span><span class="va">twas_sig_thresh</span> <span class="op">&lt;-</span> <span class="fl">0.05</span><span class="op">/</span><span class="fu"><a href="https://rdrr.io/r/base/sum.html" class="external-link">sum</a></span><span class="op">(</span><span class="va">ctwas_res</span><span class="op">$</span><span class="va">type</span><span class="op">==</span><span class="st">"gene"</span><span class="op">)</span></span>
 <span></span>
@@ -778,7 +809,7 @@
 <h2 id="cleaning-up">Cleaning up<a class="anchor" aria-label="anchor" href="#cleaning-up"></a>
 </h2>
 <p>The summary statistics version of cTWAS generates a lot of files. cTWAS added variant-by-gene and gene-by-gene correlation information (“R matrix info”) for all regions in a directory called <code>[outname]_LDR</code>, and it also stored thinned version of the LD matrices in the same directory. We store all these files to speed computation, and we leave them unzipped at the end of the analysis so that they can be used with <code>ctwas_locus_plot</code>. However, once you are done with an analysis, we recommend zipping the contents of the <code>[outname]_LDR</code> folder.</p>
-<div class="sourceCode" id="cb66"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb67"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/system.html" class="external-link">system</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/paste.html" class="external-link">paste0</a></span><span class="op">(</span><span class="st">"tar -zcvf "</span>, <span class="va">outputdir</span>, <span class="va">outname</span>, <span class="st">"_LDR.tar.gz "</span>, <span class="va">outputdir</span>, <span class="va">outname</span>, <span class="st">"_LDR"</span><span class="op">)</span><span class="op">)</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/system.html" class="external-link">system</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/paste.html" class="external-link">paste0</a></span><span class="op">(</span><span class="st">"rm -r "</span>, <span class="va">outputdir</span>, <span class="va">outname</span>, <span class="st">"_LDR"</span><span class="op">)</span><span class="op">)</span></span></code></pre></div>
 </div>
@@ -786,7 +817,7 @@
 <h2 id="session-information">Session information<a class="anchor" aria-label="anchor" href="#session-information"></a>
 </h2>
 <p>Here are some details about the computing environment, including the versions of R, and the R packages, used to generate these results.</p>
-<div class="sourceCode" id="cb67"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb68"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/utils/sessionInfo.html" class="external-link">sessionInfo</a></span><span class="op">(</span><span class="op">)</span></span></code></pre></div>
 <pre><code><span><span class="co">## R version 4.2.0 (2022-04-22)</span></span>
 <span><span class="co">## Platform: x86_64-pc-linux-gnu (64-bit)</span></span>
@@ -807,24 +838,24 @@
 <span><span class="co">## [1] stats     graphics  grDevices utils     datasets  methods   base     </span></span>
 <span><span class="co">## </span></span>
 <span><span class="co">## other attached packages:</span></span>
-<span><span class="co">## [1] cowplot_1.1.1  ggplot2_3.4.1  RSQLite_2.2.20 ctwas_0.1.36  </span></span>
+<span><span class="co">## [1] cowplot_1.1.3 ggplot2_3.5.0 RSQLite_2.3.6 ctwas_0.1.37 </span></span>
 <span><span class="co">## </span></span>
 <span><span class="co">## loaded via a namespace (and not attached):</span></span>
-<span><span class="co">##  [1] tidyselect_1.2.0  xfun_0.37         bslib_0.4.2       purrr_1.0.1      </span></span>
-<span><span class="co">##  [5] lattice_0.20-45   pgenlibr_0.3.3    colorspace_2.1-0  vctrs_0.5.2      </span></span>
-<span><span class="co">##  [9] generics_0.1.3    htmltools_0.5.4   yaml_2.3.7        utf8_1.2.3       </span></span>
-<span><span class="co">## [13] blob_1.2.3        rlang_1.1.3       pkgdown_2.0.7     jquerylib_0.1.4  </span></span>
-<span><span class="co">## [17] pillar_1.8.1      withr_2.5.0       glue_1.6.2        DBI_1.1.3        </span></span>
-<span><span class="co">## [21] bit64_4.0.5       foreach_1.5.2     lifecycle_1.0.3   stringr_1.5.0    </span></span>
-<span><span class="co">## [25] munsell_0.5.0     gtable_0.3.1      ragg_1.2.5        codetools_0.2-18 </span></span>
-<span><span class="co">## [29] memoise_2.0.1     evaluate_0.20     labeling_0.4.2    knitr_1.42       </span></span>
-<span><span class="co">## [33] fastmap_1.1.0     fansi_1.0.4       highr_0.10        logging_0.10-108 </span></span>
-<span><span class="co">## [37] Rcpp_1.0.10       scales_1.2.1      cachem_1.0.6      desc_1.4.3       </span></span>
+<span><span class="co">##  [1] tidyselect_1.2.1  xfun_0.37         bslib_0.4.2       purrr_1.0.1      </span></span>
+<span><span class="co">##  [5] lattice_0.20-45   pgenlibr_0.3.3    colorspace_2.1-0  vctrs_0.6.5      </span></span>
+<span><span class="co">##  [9] generics_0.1.3    htmltools_0.5.4   yaml_2.3.7        utf8_1.2.4       </span></span>
+<span><span class="co">## [13] blob_1.2.4        rlang_1.1.3       pkgdown_2.0.7     jquerylib_0.1.4  </span></span>
+<span><span class="co">## [17] pillar_1.9.0      withr_3.0.0       glue_1.7.0        DBI_1.2.2        </span></span>
+<span><span class="co">## [21] bit64_4.0.5       foreach_1.5.2     lifecycle_1.0.4   stringr_1.5.0    </span></span>
+<span><span class="co">## [25] munsell_0.5.1     gtable_0.3.4      ragg_1.2.5        codetools_0.2-18 </span></span>
+<span><span class="co">## [29] memoise_2.0.1     evaluate_0.20     labeling_0.4.3    knitr_1.42       </span></span>
+<span><span class="co">## [33] fastmap_1.1.1     fansi_1.0.6       highr_0.10        logging_0.10-108 </span></span>
+<span><span class="co">## [37] Rcpp_1.0.12       scales_1.3.0      cachem_1.0.8      desc_1.4.3       </span></span>
 <span><span class="co">## [41] jsonlite_1.8.4    farver_2.1.1      systemfonts_1.0.4 fs_1.6.1         </span></span>
 <span><span class="co">## [45] bit_4.0.5         textshaping_0.3.6 digest_0.6.31     stringi_1.7.12   </span></span>
-<span><span class="co">## [49] dplyr_1.1.0       grid_4.2.0        cli_3.6.0         tools_4.2.0      </span></span>
-<span><span class="co">## [53] magrittr_2.0.3    sass_0.4.5        tibble_3.1.8      pkgconfig_2.0.3  </span></span>
-<span><span class="co">## [57] Matrix_1.5-3      data.table_1.14.6 rmarkdown_2.20    iterators_1.0.14 </span></span>
+<span><span class="co">## [49] dplyr_1.1.0       grid_4.2.0        cli_3.6.2         tools_4.2.0      </span></span>
+<span><span class="co">## [53] magrittr_2.0.3    sass_0.4.5        tibble_3.2.1      pkgconfig_2.0.3  </span></span>
+<span><span class="co">## [57] Matrix_1.5-3      data.table_1.15.4 rmarkdown_2.20    iterators_1.0.14 </span></span>
 <span><span class="co">## [61] R6_2.5.1          compiler_4.2.0</span></span></code></pre>
 </div>
   </div>

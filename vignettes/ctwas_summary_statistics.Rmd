@@ -278,14 +278,46 @@ The columns of the `.Rvar` file include information on chromosome, variant name,
 
 The naming convention for the LD matrices is `[filestem]_chr[#].R_snp.[start]_[end].RDS`. cTWAS expects that all `.RDS` and `.Rvar` files in the directory contain LD information, so no other files with these suffixes should be in the directory. Each variant should be uniquely assigned to a region, and the regions should be left closed and right open, i.e. [start, stop). The positions of the LD matrices must match exactly the positions specified by the region file. Do not include invariant or multiallelic variants in the LD reference. 
 
-We have provided the scripts used to generate the b38 LD reference in the package, as well a b37 LD reference, in the same directory. These scripts take `.pgen` files and regions as input and output the LD matrices and corresponding information.
+#### Convert genotype data to LD matrices
+
+We could use the `convert_geno_to_LD_matrix` function to convert genotype files (and LD regions) to the LD matrices and corresponding variant information. 
+
+```{r convert_geno_to_LD_matrix, eval=FALSE}
+# specify LD reference
+ldref_dir <- "/gpfs/data/xhe-lab/ukb_LDR/genotype_data_0.1"
+genotype_files <- file.path(ldref_dir, paste0("ukb_chr", 1:22, ".pgen"))
+# the output Rvar files use the positions and allele information in varinfo_files
+varinfo_files <- "/gpfs/data/xhe-lab/ukb_LDR/neale_lab/neale_variants_hg38.bim"
+# prepare a data frame region_info for LD regions with columns "chr", "start", and "stop"
+# the positions should match those in varinfo_files
+region_file <- system.file("extdata/ldetect", "EUR.b38.bed", package = "ctwas")
+region_info <- read.table(region_file, header = TRUE, stringsAsFactors = FALSE)
+# specify output
+outputdir <- "/gpfs/data/xhe-lab/ctwas/LDR/UKB_b38/"
+outname <- "ukb_b38_0.1"
+
+# generate LD matrices (.RDS) and variant info (.Rvar)
+# update region info with paths of LD matrices and variant info files
+# we could run this for one chromosome or multiple chromosomes
+updated_region_info <- convert_geno_to_LD_matrix(region_info, 
+                                                 genotype_files, 
+                                                 varinfo_files,
+                                                 chrom = 1:22,
+                                                 outputdir = outputdir, 
+                                                 outname = outname)
+```
+
+We provide example R scripts to generate the LD matrices for UKB or 1KG European genotype files. 
 
 ```{r, eval=FALSE}
-# path to b38 script
-system.file("extdata/scripts", "convert_geno_to_LDR_chr.R", package = "ctwas")
+# path to UKB b38 script
+system.file("extdata/scripts", "convert_geno_to_LD_matrix_UKB_b38.R", package = "ctwas")
 
-# path to b37 script
-system.file("extdata/scripts", "convert_geno_to_LDR_chr_b37.R", package = "ctwas")
+# path to UKB b37 script
+system.file("extdata/scripts", "convert_geno_to_LD_matrix_UKB_b37.R", package = "ctwas")
+
+# path to 1KG European b37 script
+system.file("extdata/scripts", "convert_geno_to_LD_matrix_1KG_EUR_b37.R", package = "ctwas")
 ```
 
 

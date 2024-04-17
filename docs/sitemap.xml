@@ -40,6 +40,9 @@
     <loc>/reference/compute_ss.html</loc>
   </url>
   <url>
+    <loc>/reference/convert_geno_to_LD_matrix.html</loc>
+  </url>
+  <url>
     <loc>/reference/ctwas.html</loc>
   </url>
   <url>
@@ -106,6 +109,9 @@
     <loc>/reference/prep_pvar.html</loc>
   </url>
   <url>
+    <loc>/reference/read_bim.html</loc>
+  </url>
+  <url>
     <loc>/reference/read_expr.html</loc>
   </url>
   <url>
@@ -122,6 +128,9 @@
   </url>
   <url>
     <loc>/reference/read_pvar.html</loc>
+  </url>
+  <url>
+    <loc>/reference/read_var_info.html</loc>
   </url>
   <url>
     <loc>/reference/region2core.html</loc>
