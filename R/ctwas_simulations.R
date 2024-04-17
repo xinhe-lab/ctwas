@@ -1,43 +1,3 @@
-#' Impute expression
-#' 
-#' @param pgenfs A character vector of .pgen or .bed files. One file for one
-#' chromosome, in the order of 1 to 22. Therefore, the length of this vector
-#' needs to be 22. If .pgen files are given, then .pvar and .psam are assumed
-#' to present in the same directory. If .bed files are given, then .bim and
-#' .fam files are assumed to present in the same directory.
-#' 
-#' @param weight a string, pointing to a directory with the fusion/twas format of weights, 
-#' or a vector of one or more .db files in PredictDB format.
-#' 
-#' @param method a string, blup/bslmm/lasso/top1/enet/best. This option is only used for fusion weights. 
-#' "best" means the method giving the best cross #' validation R^2. Note that top1 uses only the weight 
-#' with largest effect. 
-#'   
-#' @param outputdir a string, the directory to store output
-#' 
-#' @param outname a string, the output name
-#' 
-#' @param logfile the log file, if NULL will print log info on screen
-#' 
-#' @param compress TRUE/FALSE. If TRUE, the imputed expression files are compressed
-#' 
-#' @param harmonize_wgt TRUE/FALSE. If TRUE, GWAS and eQTL genotype alleles are harmonized
-#' 
-#' @param strand_ambig_action_wgt the action to take to harmonize strand ambiguous variants (A/T, G/C) between 
-#' the weights and LD reference. "drop" removes the ambiguous variant from the prediction models. "none" treats the variant 
-#' as unambiguous, flipping the weights to match the LD reference and then taking no additional action. "recover" uses a procedure
-#' to recover strand ambiguous variants. This procedure compares correlations between variants in the 
-#' LD reference and prediction models, and it can only be used with PredictDB format prediction models, which include this
-#' information.
-#' 
-#' @param ncore The number of cores used to parallelize imputation over weights
-#' 
-#' @param scale_by_ld_variance TRUE/FALSE. If TRUE, PredictDB weights are scaled by genotype variance, which is the default 
-#' behavior for PredictDB
-#' 
-#' @importFrom logging addHandler loginfo
-#'
-#' @export
 impute_expr <- function(pgenfs,
                         weight,
                         method = "lasso",
@@ -457,4 +417,13 @@ read_exprvar <- function(exprvarf){
                          c("chrom", "id", "p0", "p1"))
   }
   exprvar
+}
+
+read_expr <- function(exprf, variantidx = NULL){
+  if (!is.null(variantidx) & length(variantidx)==0){
+    return(NULL)
+  } else{
+    return(as.matrix(data.table::fread(exprf, header = F,
+                                       select = variantidx)))
+  }
 }
