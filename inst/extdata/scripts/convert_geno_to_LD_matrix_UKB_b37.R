@@ -18,7 +18,7 @@ region_file <- system.file("extdata/ldetect", paste0(ldref_population, ".", geno
 region_info <- read.table(region_file, header = T, stringsAsFactors = F)
 
 # specify output
-outputdir <- "/gpfs/data/xhe-lab/ctwas/LDR/UKB_b37/"
+outputdir <- "/gpfs/data/xhe-lab/shared_data/ctwas/LDR/UKB_b37/"
 outname <- "ukb_b37_0.1"
 
 ##### start #####
