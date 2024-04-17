@@ -47,11 +47,13 @@ convert_geno_to_LD_matrix <- function(region_info,
   region_info <- region_info[order(region_info$chr, region_info$start), ]
   region_info$region_id <- paste0(region_info$chr, ":", region_info$start, "-", region_info$stop)
 
-  # load SNP positions from varinfo_files
-  ld_snpinfo_all <- do.call(rbind, lapply(varinfo_files, read_var_info))
-
   # read genotype files and prepare pvar files accompanying the genotype table
+  loginfo("Load genotype data ...")
   pvar_files <- sapply(genotype_files, prep_pvar, outputdir = outputdir)
+
+  # load variant positions from varinfo_files
+  loginfo("Load variant information ...")
+  ld_snpinfo_all <- do.call(rbind, lapply(varinfo_files, read_var_info))
 
   for (b in chrom){
     region_info_chr <- region_info[region_info$chr == b, ]
@@ -86,10 +88,11 @@ convert_geno_to_LD_matrix <- function(region_info,
 
         file.create(outfile_temp)
 
-        # use the position and allele information from LD reference SNP info
+        # use the snp positions and allele information in the region from the LD reference
         sidx_ldref <- which(ld_snpinfo_chr$pos >= region_start & ld_snpinfo_chr$pos < region_stop)
         sid_ldref <- ld_snpinfo_chr$id[sidx_ldref]
 
+        # select snp ids available in LD reference
         sidx <- which(snpinfo$id %in% sid_ldref)
         sid <- snpinfo[sidx, "id"]
 
@@ -97,6 +100,8 @@ convert_geno_to_LD_matrix <- function(region_info,
         R_snp <- Rfast::cora(X.g)
         rownames(R_snp) <- sid
         colnames(R_snp) <- sid
+
+        # convert to the idx in LD reference
         R_snp <- R_snp[sid_ldref, sid_ldref]
         rownames(R_snp) <- NULL
         colnames(R_snp) <- NULL
@@ -133,10 +138,7 @@ convert_geno_to_LD_matrix <- function(region_info,
     }
 
     close(pb)
-
   }
-
-  file.remove(pvar_files)
 
   return(region_info)
 }

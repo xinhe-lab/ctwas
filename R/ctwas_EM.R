@@ -137,7 +137,7 @@ EM <- function(region_data,
     pi_prior <- sapply(names(pi_prior), function(x){mean(EM_susie_res$susie_pip[EM_susie_res$group==x])})
     group_prior_iters[names(pi_prior),iter] <- pi_prior
 
-    loginfo("After iteration %d, priors {%s}: {%s}", iter, names(pi_prior), pi_prior)
+    loginfo("After iteration %d, priors {%s}: {%s}", iter, names(pi_prior), format(pi_prior, digits = 4))
 
     # update estimated group_prior_var from the current iteration
     # in susie, mu2 is under standardized scale (if performed)
@@ -175,6 +175,7 @@ EM <- function(region_data,
   parallel::stopCluster(cl)
 
   group_size <- table(EM_susie_res$group)
+  group_size <- group_size[rownames(group_prior_iters)]
 
   return(list("group_prior"= pi_prior,
               "group_prior_var" = V_prior,
