@@ -8,6 +8,7 @@ ctwas_rss(
   z_gene,
   z_snp,
   ld_exprvarfs,
+  ld_exprfs = NULL,
   ld_pgenfs = NULL,
   ld_R_dir = NULL,
   ld_regions = c("EUR", "ASN", "AFR"),

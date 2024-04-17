@@ -8,6 +8,7 @@ susieI_rss(
   zdf,
   regionlist,
   ld_exprvarfs,
+  ld_exprfs = NULL,
   ld_pgenfs = NULL,
   ld_Rfs = NULL,
   niter = 20,

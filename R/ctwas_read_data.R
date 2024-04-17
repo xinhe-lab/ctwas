@@ -1,14 +1,14 @@
 #' Prepare .pvar file
-#' 
+#'
 #' @param pgenf pgen file
 #' .pvar file format: https://www.cog-genomics.org/plink/2.0/formats#pvar
-#'  
+#'
 #' @param outputdir a string, the directory to store output
-#'  
+#'
 #' @return corresponding pvar file
 #'
 #' @importFrom tools file_ext file_path_sans_ext
-#' 
+#'
 prep_pvar <- function(pgenf, outputdir = getwd()){
 
   if (file_ext(pgenf) == "pgen"){
@@ -62,7 +62,7 @@ prep_pvar <- function(pgenf, outputdir = getwd()){
 #'  .pvar file format: https://www.cog-genomics.org/plink/2.0/formats#pvar
 #'
 #' @return A data.table. variant info
-#' 
+#'
 read_pvar <- function(pvarf){
 
   pvardt <- data.table::fread(pvarf, skip = "#CHROM")
@@ -72,13 +72,45 @@ read_pvar <- function(pvarf){
   pvardt
 }
 
+
+#' Read .bim file into R
+#' @param bimf .bim file with proper format: https://www.cog-genomics.org/plink/2.0/formats#bim
+#'
+#' @return A data.table. variant info
+#'
+read_bim <- function(bimf) {
+  bim <- data.table::fread(bimf)
+  colnames(bim) <- c("chr", "id", "cm", "pos", "alt", "ref")
+  return(bim)
+}
+
+#' Read variant information from .pvar or .bim file into R
+#' @param var_info_file .pvar or .bim file with proper format:
+#' .pvar: https://www.cog-genomics.org/plink/2.0/formats#pvar
+#' .bim: https://www.cog-genomics.org/plink/2.0/formats#bim
+#'
+#' @return A data.table. variant info
+#' @importFrom tools file_ext
+#'
+read_var_info <- function(var_info_file){
+  if (file_ext(var_info_file) == "pvar"){
+    var_info <- read_pvar(var_info_file)
+  } else if (file_ext(var_info_file) == "bim"){
+    var_info <- read_bim(var_info_file)
+  } else{
+    stop("unrecognized input")
+  }
+  return(var_info)
+}
+
+
 #' Read .pgen file into R
-#' 
+#'
 #' @param pgenf .pgen file or .bed file
-#' 
+#'
 #' @param pvarf .pvar file or .bim file with have proper
 #'  header.  Matching `pgenf`.
-#'  
+#'
 #' @return  A matrix of allele count for each variant (columns) in each sample
 #'  (rows). ALT allele in pvar file is counted (A1 allele in .bim file is the ALT
 #'   allele).
@@ -108,17 +140,17 @@ prep_pgen <- function(pgenf, pvarf){
 }
 
 #' Read pgen file into R
-#' 
+#'
 #' @param pgen .pgen file or .bed file
-#' 
+#'
 #' @param variantidx variant index. If NULL, all variants will be extracted.
-#' 
+#'
 #' @return A matrix, columns are allele count for each SNP, rows are
 #'  for each sample.
-#'  
+#'
 #' @importFrom pgenlibr GetVariantCt
 #' @importFrom pgenlibr ReadList
-#' 
+#'
 read_pgen <- function(pgen, variantidx = NULL, meanimpute = F ){
   if (is.null(variantidx)){
     variantidx <- 1: pgenlibr::GetVariantCt(pgen)}
@@ -130,13 +162,13 @@ read_pgen <- function(pgen, variantidx = NULL, meanimpute = F ){
 
 
 #' Prepare .exprvar file
-#' 
+#'
 #' @param exprf expression variable info files, the output of \code{impute_expr}
-#' 
+#'
 #' @return corresponding exprvar file
 #'
 #' @importFrom tools file_ext file_path_sans_ext
-#' 
+#'
 prep_exprvar <- function(exprf){
   if (file_ext(exprf) == "gz"){
     exprf <- file_path_sans_ext(exprf)
@@ -146,11 +178,11 @@ prep_exprvar <- function(exprf){
 }
 
 #' Read .exprvar file into R
-#' 
+#'
 #' @param exprvarf expression variable info files, prepared by the \code{prep_exprvar} function
-#' 
+#'
 #' @return A data.table. variant info
-#' 
+#'
 read_exprvar <- function(exprvarf){
 
   exprvar <- try(data.table::fread(exprvarf, header = T))
@@ -163,14 +195,14 @@ read_exprvar <- function(exprvarf){
 }
 
 #' Read .expr file into R
-#' 
+#'
 #' @param exprf expression variable info files, the output of \code{impute_expr}
-#' 
+#'
 #' @param variantidx variant index. If NULL, all variants will be extracted.
-#' 
+#'
 #' @return A matrix, columns are imputed expression for each gene, rows are
 #'  for each sample.
-#'  
+#'
 read_expr <- function(exprf, variantidx = NULL){
   if (!is.null(variantidx) & length(variantidx)==0){
     return(NULL)
@@ -182,14 +214,14 @@ read_expr <- function(exprf, variantidx = NULL){
 
 
 #' read variant information associated with a LD R matrix .RDS file.
-#' 
+#'
 #' @param ld_RDSf files containing the variant information for the LD matrices
 #'
 #' @return a data frame with columns: "chrom", "id", "pos", "alt", "ref". "alt" is
 #' the coded allele
 #'
 #' @importFrom tools file_ext file_path_sans_ext
-#' 
+#'
 read_ld_Rvar_RDS <- function(ld_RDSf){
   ld_Rvarf <- paste0(file_path_sans_ext(ld_RDSf), ".Rvar")
   ld_Rvar <- data.table::fread(ld_Rvarf, header = T)
@@ -203,18 +235,18 @@ read_ld_Rvar_RDS <- function(ld_RDSf){
 }
 
 #' combine variant information associated with a LD R matrix .RDS file.
-#' 
+#'
 #' @param ld_R_dir The directory that contains all ld R matrices.
 #' the ld R matrices should not have overlapping positions.
-#' 
+#'
 #' @param outputdir a string, the directory to store output
-#' 
+#'
 #' @param outname a string, the output name
 #'
 #' @return A vector of the `ld_Rf` file names. The function will write one `ld_Rf` file
 #' for each chromosome, so the vector has length 22. The `ld_Rf` file has the following
 #' columns: chr region_name start stop RDS_file.
-#' 
+#'
 write_ld_Rf <- function(ld_R_dir, outname = outname , outputdir = getwd()){
   ld_RDSfs <- list.files(path = ld_R_dir, pattern = "\\.RDS$", full.names = T)
   ldinfolist <- list()
@@ -241,17 +273,17 @@ write_ld_Rf <- function(ld_R_dir, outname = outname , outputdir = getwd()){
   for (b in 1:22) {
     ldinfo.b <- ldinfo[ldinfo$chrom == b, , drop = F]
     ldinfo.b <- ldinfo.b[order(ldinfo.b$start), ]
-    
+
     if (nrow(ldinfo.b) == 0) {
       loginfo(paste0("no region on chromosome ", b))
       ldinfo.b <- cbind(ldinfo.b, data.frame(region_name=as.character()))
     } else {
       ldinfo.b$region_name <- 1:nrow(ldinfo.b)
     }
-    
-    ld_Rf <- file.path(outputdir, paste0(outname, "_ld_R_chr", 
+
+    ld_Rf <- file.path(outputdir, paste0(outname, "_ld_R_chr",
                                          b, ".txt"))
-    write.table(ldinfo.b, file = ld_Rf, row.names = F, col.names = T, 
+    write.table(ldinfo.b, file = ld_Rf, row.names = F, col.names = T,
                 sep = "\t", quote = F)
     ld_Rfs[b] <- ld_Rf
   }
@@ -259,11 +291,11 @@ write_ld_Rf <- function(ld_R_dir, outname = outname , outputdir = getwd()){
 }
 
 #' read variant information for all ld matrices in `ld_Rf`.
-#' 
+#'
 #' @param ld_Rf a vector of paths to the LD matrices
-#' 
+#'
 #' @return a data frame with columns: "chrom", "id", "pos", "alt", "ref"
-#' 
+#'
 read_ld_Rvar <- function(ld_Rf){
   Rinfo <- data.table::fread(ld_Rf, header = T)
   if (nrow(Rinfo)>0){
@@ -274,14 +306,15 @@ read_ld_Rvar <- function(ld_Rf){
   ld_Rvar
 }
 
+
 read_weight_fusion <- function (weight, chrom, ld_snpinfo, z_snp = NULL, method = "lasso", harmonize_wgt = T){
   exprlist <- list()
   qclist <- list()
   wgtdir <- dirname(weight)
-  wgtposfile <- file.path(wgtdir, paste0(basename(weight), 
+  wgtposfile <- file.path(wgtdir, paste0(basename(weight),
                                          ".pos"))
   wgtpos <- read.table(wgtposfile, header = T, stringsAsFactors = F)
-  wgtpos <- transform(wgtpos, ID = ifelse(duplicated(ID) | duplicated(ID, fromLast = TRUE), 
+  wgtpos <- transform(wgtpos, ID = ifelse(duplicated(ID) | duplicated(ID, fromLast = TRUE),
                                           paste(ID, ave(ID, ID, FUN = seq_along), sep = "_ID"), ID))
   loginfo("number of genes with weights provided: %s", nrow(wgtpos))
   wgtpos <- wgtpos[wgtpos$CHR == chrom, ]
@@ -312,36 +345,36 @@ read_weight_fusion <- function (weight, chrom, ld_snpinfo, z_snp = NULL, method 
         wgt.matrix[,"top1"][-which.max(wgt.matrix[,"top1"]^2)] <- 0
       }
 
-      wgt.matrix <- wgt.matrix[abs(wgt.matrix[, g.method]) > 
+      wgt.matrix <- wgt.matrix[abs(wgt.matrix[, g.method]) >
                                  0, , drop = F]
-      wgt.matrix <- wgt.matrix[complete.cases(wgt.matrix), 
+      wgt.matrix <- wgt.matrix[complete.cases(wgt.matrix),
                                , drop = F]
-      if (nrow(wgt.matrix) == 0) 
+      if (nrow(wgt.matrix) == 0)
         next
       if (is.null(z_snp)) {
         snpnames <- intersect(rownames(wgt.matrix), ld_snpinfo$id)
       } else {
-        snpnames <- Reduce(intersect, list(rownames(wgt.matrix), 
+        snpnames <- Reduce(intersect, list(rownames(wgt.matrix),
                                            ld_snpinfo$id, z_snp$id))
       }
-      if (length(snpnames) == 0) 
+      if (length(snpnames) == 0)
         next
       wgt.idx <- match(snpnames, rownames(wgt.matrix))
       wgt <- wgt.matrix[wgt.idx, g.method, drop = F]
       p0 <- min(snps[snps[, "id"] %in% snpnames, "pos"])
       p1 <- max(snps[snps[, "id"] %in% snpnames, "pos"])
-      exprlist[[gname]] <- list(chrom = chrom, p0 = p0, 
+      exprlist[[gname]] <- list(chrom = chrom, p0 = p0,
                                 p1 = p1, wgt = wgt)
       nwgt <- nrow(wgt.matrix)
       nmiss <- nrow(wgt.matrix) - length(snpnames)
-      qclist[[gname]] <- list(n = nwgt, nmiss = nmiss, 
+      qclist[[gname]] <- list(n = nwgt, nmiss = nmiss,
                               missrate = nwgt/nmiss)
     }
   }
   return(list(exprlist = exprlist, qclist = qclist))
 }
 
-read_weight_predictdb <- function (weight, chrom, ld_snpinfo, z_snp = NULL, harmonize_wgt = T, 
+read_weight_predictdb <- function (weight, chrom, ld_snpinfo, z_snp = NULL, harmonize_wgt = T,
                                    recover_strand_ambig=T, ld_pgenfs=NULL, ld_Rinfo=NULL){
   exprlist <- list()
   qclist <- list()
@@ -359,43 +392,43 @@ read_weight_predictdb <- function (weight, chrom, ld_snpinfo, z_snp = NULL, harm
     }
   }
   for (gname in gnames) {
-    wgt <- query("select * from weights where gene = ?", 
+    wgt <- query("select * from weights where gene = ?",
                  params = list(gname))
     wgt.matrix <- as.matrix(wgt[, "weight", drop = F])
     rownames(wgt.matrix) <- wgt$rsid
     chrpos <- do.call(rbind, strsplit(wgt$varID, "_"))
-    snps <- data.frame(gsub("chr", "", chrpos[, 1]), wgt$rsid, 
-                       "0", chrpos[, 2], wgt$eff_allele, wgt$ref_allele, 
+    snps <- data.frame(gsub("chr", "", chrpos[, 1]), wgt$rsid,
+                       "0", chrpos[, 2], wgt$eff_allele, wgt$ref_allele,
                        stringsAsFactors = F)
-    colnames(snps) <- c("chrom", "id", "cm", "pos", "alt", 
+    colnames(snps) <- c("chrom", "id", "cm", "pos", "alt",
                         "ref")
     snps$chrom <- as.integer(snps$chrom)
     snps$pos <- as.integer(snps$pos)
-    
+
     if (!any(snps$chrom==chrom)){
       next
     }
-    
+
     if (isTRUE(harmonize_wgt)) {
       if (recover_strand_ambig){
         #subset R_wgt_all to current weight
         R_wgt <- R_wgt_all[R_wgt_all$GENE == gname,]
-        
+
         #convert covariance to correlation
         R_wgt_stdev <- R_wgt[R_wgt$RSID1==R_wgt$RSID2,]
         R_wgt_stdev <- setNames(sqrt(R_wgt_stdev$VALUE), R_wgt_stdev$RSID1)
         R_wgt$VALUE <- R_wgt$VALUE/(R_wgt_stdev[R_wgt$RSID1]*R_wgt_stdev[R_wgt$RSID2])
-        
+
         #discard variances
         R_wgt <- R_wgt[R_wgt$RSID1!=R_wgt$RSID2,]
-        
+
         #fix edge case where variance=0; treat correlations with these variants as uninformative (=0) for harmonization
         R_wgt$VALUE[is.nan(R_wgt$VALUE)] <- 0
       } else {
         R_wgt <- NULL
       }
-      w <- harmonize_wgt_ld(wgt.matrix, snps, ld_snpinfo, 
-                            recover_strand_ambig=recover_strand_ambig, 
+      w <- harmonize_wgt_ld(wgt.matrix, snps, ld_snpinfo,
+                            recover_strand_ambig=recover_strand_ambig,
                             ld_Rinfo=ld_Rinfo, R_wgt=R_wgt, wgt=wgt, )
       wgt.matrix <- w[["wgt"]]
       snps <- w[["snps"]]
@@ -403,22 +436,22 @@ read_weight_predictdb <- function (weight, chrom, ld_snpinfo, z_snp = NULL, harm
     g.method = "weight"
     wgt.matrix <- wgt.matrix[abs(wgt.matrix[, g.method]) > 0, , drop = F]
     wgt.matrix <- wgt.matrix[complete.cases(wgt.matrix),, drop = F]
-    if (nrow(wgt.matrix) == 0) 
+    if (nrow(wgt.matrix) == 0)
       next
     if (is.null(z_snp)) {
       snpnames <- intersect(rownames(wgt.matrix), ld_snpinfo$id)
     } else {
       snpnames <- Reduce(intersect, list(rownames(wgt.matrix), ld_snpinfo$id, z_snp$id))
     }
-    if (length(snpnames) == 0) 
+    if (length(snpnames) == 0)
       next
     wgt.idx <- match(snpnames, rownames(wgt.matrix))
     wgt <- wgt.matrix[wgt.idx, g.method, drop = F]
-    
+
     #scale weights by standard deviation of variant in LD reference
     ld_snpinfo.idx <- match(snpnames, ld_snpinfo$id)
     wgt <- wgt*sqrt(ld_snpinfo$variance[ld_snpinfo.idx])
-    
+
     p0 <- min(snps[snps[, "id"] %in% snpnames, "pos"])
     p1 <- max(snps[snps[, "id"] %in% snpnames, "pos"])
     exprlist[[gname]] <- list(chrom = chrom, p0 = p0, p1 = p1, wgt = wgt)
@@ -429,3 +462,4 @@ read_weight_predictdb <- function (weight, chrom, ld_snpinfo, z_snp = NULL, harm
   RSQLite::dbDisconnect(db)
   return(list(exprlist = exprlist, qclist = qclist))
 }
+
