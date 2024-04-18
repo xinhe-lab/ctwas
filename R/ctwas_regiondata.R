@@ -326,9 +326,10 @@ expand_region_data <- function(region_data,
       next
     }
 
-    # load all SNPs in the region
+    # expand to all SNPs in the region
     regioninfo <- region_info[region_info$region_id %in% region_data[[i]][["region_id"]], ]
     snpinfo <- read_LD_SNP_files(regioninfo$SNP_info)
+
     # remove SNPs not in z_snp
     snpinfo <- snpinfo[snpinfo$id %in% z_snp$id, , drop=FALSE]
     region_data[[i]][["sid"]] <- snpinfo$id
@@ -336,6 +337,9 @@ expand_region_data <- function(region_data,
     # update minpos and maxpos in the region
     region_data[[i]][["minpos"]] <- min(c(region_data[[i]][["minpos"]], snpinfo$pos))
     region_data[[i]][["maxpos"]] <- max(c(region_data[[i]][["maxpos"]], snpinfo$pos))
+
+    # set thin to 1 after expanding SNPs
+    region_data[[i]][["thin"]] <- 1
 
     setTxtProgressBar(pb, i)
   }

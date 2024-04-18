@@ -316,7 +316,7 @@ region_data <- res$region_data
 We can also run each of the cTWAS modules separately. 
 This would allow more flexible controls of the cTWAS modules with different settings 
 (memory, parallelization, etc.)
-See [this tutorial][] for more details.
+See [the tutorial "Running cTWAS modules separately"](https://xinhe-lab.github.io/multigroup_ctwas/articles/multigroup_ctwas_modules.html) for more details.
 
 ## Postprocessing
 
@@ -338,19 +338,8 @@ if (nrow(high_PIP_boundary_genes) > 0){
 }
 ```
 
-For those merged regions, we will expand those regions with full SNPs. 
-We rerun finemapping for the merged regions,
-and then update the finemapping results for those merged regions. 
+We rerun finemapping for the merged regions
 ```{r, eval=FALSE}
-# Expand those merged regions with full SNPs
-merged_region_data <- expand_region_data(merged_region_data,
-                                         region_info,
-                                         z_snp,
-                                         z_gene,
-                                         trim_by = "z",
-                                         maxSNP = max_snp_region,
-                                         ncore = ncore)
-
 finemap_merged_regions_res <- finemap_regions(merged_region_data,
                                               region_info,
                                               weights,
@@ -361,6 +350,11 @@ finemap_merged_regions_res <- finemap_regions(merged_region_data,
                                               cor_dir = paste0(outputdir, "/merged_cor_matrix/"),
                                               ncore = ncore,
                                               verbose = TRUE)
+```
+
+Update the finemapping results for those merged regions
+```{r, eval=FALSE}
+# finemap_res <- update_merged_regions_finemap_res(finemap_res, finemap_merged_regions_res, merged_region_data)
 ```
 
 ### Rerun finemapping with L = 1 for regions with problematic SNPs 
