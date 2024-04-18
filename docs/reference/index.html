@@ -17,7 +17,7 @@
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">ctwas</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">0.2.0</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">0.2.0.9000</span>
       </span>
     </div>
 
@@ -33,6 +33,12 @@
   </a>
   <ul class="dropdown-menu" role="menu"><li>
       <a href="../articles/multigroup_ctwas_pipeline.html">Using multigroup cTWAS with summary statistics</a>
+    </li>
+    <li>
+      <a href="../articles/multigroup_ctwas_modules.html">Running cTWAS modules separately</a>
+    </li>
+    <li>
+      <a href="../articles/FAQ.html">FAQ</a>
     </li>
   </ul></li>
       </ul><ul class="nav navbar-nav navbar-right"><li>
@@ -60,17 +66,21 @@
         <td><p>Run EM to estimate parameters.
 Iteratively run susie and estimate parameters - RSS version</p></td>
       </tr><tr><td>
-          <p><code><a href="add_z_to_regionlist.html">add_z_to_regionlist()</a></code> </p>
+          <p><code><a href="add_z_to_region_data.html">add_z_to_region_data()</a></code> </p>
         </td>
-        <td><p>add z-scores from z_snp and z_gene to regionlist</p></td>
+        <td><p>add z-scores from z_snp and z_gene to region_data</p></td>
       </tr><tr><td>
           <p><code><a href="adjust_boundary_genes.html">adjust_boundary_genes()</a></code> </p>
         </td>
-        <td><p>adjust regionlist for boundary genes</p></td>
+        <td><p>adjust region_data for boundary genes</p></td>
       </tr><tr><td>
           <p><code><a href="anno_susie.html">anno_susie()</a></code> </p>
         </td>
         <td><p>annotate susie results with SNP and gene information</p></td>
+      </tr><tr><td>
+          <p><code><a href="assemble_region_data.html">assemble_region_data()</a></code> </p>
+        </td>
+        <td><p>Assemble data for all the regions</p></td>
       </tr><tr><td>
           <p><code><a href="assign_region_ids.html">assign_region_ids()</a></code> </p>
         </td>
@@ -86,7 +96,7 @@ Iteratively run susie and estimate parameters - RSS version</p></td>
       </tr><tr><td>
           <p><code><a href="compute_gene_z.html">compute_gene_z()</a></code> </p>
         </td>
-        <td><p>Compute gene z-scores</p></td>
+        <td><p>Compute z-scores of molecular traits</p></td>
       </tr><tr><td>
           <p><code><a href="compute_region_cor.html">compute_region_cor()</a></code> </p>
         </td>
@@ -137,9 +147,9 @@ save LD matrices as .RDS files and SNP info as .Rvar files</p></td>
         </td>
         <td><p>Estimate s in <code>susie_rss</code> Model Using Regularized LD</p></td>
       </tr><tr><td>
-          <p><code><a href="expand_regionlist.html">expand_regionlist()</a></code> </p>
+          <p><code><a href="expand_region_data.html">expand_region_data()</a></code> </p>
         </td>
-        <td><p>Expand regionlist with full SNPs</p></td>
+        <td><p>Expand region_data with full SNPs</p></td>
       </tr><tr><td>
           <p><code><a href="finemap_region.html">finemap_region()</a></code> </p>
         </td>
@@ -149,10 +159,6 @@ save LD matrices as .RDS files and SNP info as .Rvar files</p></td>
         </td>
         <td><p>run cTWAS finemapping for multiple regions</p></td>
       </tr><tr><td>
-          <p><code><a href="finemap_regions_L1.html">finemap_regions_L1()</a></code> </p>
-        </td>
-        <td><p>run cTWAS finemapping for multiple regions with L = 1</p></td>
-      </tr><tr><td>
           <p><code><a href="get_gene_info.html">get_gene_info()</a></code> </p>
         </td>
         <td><p>get gene info from weights</p></td>
@@ -161,13 +167,9 @@ save LD matrices as .RDS files and SNP info as .Rvar files</p></td>
         </td>
         <td><p>get regions for each gene</p></td>
       </tr><tr><td>
-          <p><code><a href="get_problematic_regions.html">get_problematic_regions()</a></code> </p>
+          <p><code><a href="get_merged_regions.html">get_merged_regions()</a></code> </p>
         </td>
-        <td><p>Get regions with problematic high PIP SNPs or genes</p></td>
-      </tr><tr><td>
-          <p><code><a href="get_regionlist.html">get_regionlist()</a></code> </p>
-        </td>
-        <td><p>Get regionlist for each region in region_info</p></td>
+        <td><p>get a list of regions to be merged</p></td>
       </tr><tr><td>
           <p><code><a href="harmonize_wgt_ld.html">harmonize_wgt_ld()</a></code> </p>
         </td>
@@ -187,9 +189,9 @@ Flip signs when reverse complement matches, remove strand ambiguous SNPs</p></td
         </td>
         <td><p>Compute Distribution of z-scores of Variant j Given Other z-scores, and Detect Possible Allele Switch Issue</p></td>
       </tr><tr><td>
-          <p><code><a href="label_merged_regions.html">label_merged_regions()</a></code> </p>
+          <p><code><a href="label_overlapping_regions.html">label_overlapping_regions()</a></code> </p>
         </td>
-        <td><p>Function to identify consecutive regions and label them</p></td>
+        <td><p>Identify overlapping regions</p></td>
       </tr><tr><td>
           <p><code><a href="load_LD.html">load_LD()</a></code> </p>
         </td>
@@ -198,6 +200,10 @@ Flip signs when reverse complement matches, remove strand ambiguous SNPs</p></td
           <p><code><a href="load_weights.html">load_weights()</a></code> </p>
         </td>
         <td><p>Load PredictDB or Fusion weights</p></td>
+      </tr><tr><td>
+          <p><code><a href="merge_region_data.html">merge_region_data()</a></code> </p>
+        </td>
+        <td><p>Merge region data for cross-boundary genes</p></td>
       </tr><tr><td>
           <p><code><a href="predict.susie.html">predict(<i>&lt;susie&gt;</i>)</a></code> </p>
         </td>
@@ -231,6 +237,10 @@ Flip signs when reverse complement matches, remove strand ambiguous SNPs</p></td
         </td>
         <td><p>Read .bim file into R</p></td>
       </tr><tr><td>
+          <p><code><a href="read_exprvar.html">read_exprvar()</a></code> </p>
+        </td>
+        <td><p>Read .exprvar file into R</p></td>
+      </tr><tr><td>
           <p><code><a href="read_pgen.html">read_pgen()</a></code> </p>
         </td>
         <td><p>Read pgen file into R</p></td>
@@ -250,6 +260,10 @@ Flip signs when reverse complement matches, remove strand ambiguous SNPs</p></td
           <p><code><a href="screen_regions.html">screen_regions()</a></code> </p>
         </td>
         <td><p>Screen regions</p></td>
+      </tr><tr><td>
+          <p><code><a href="select_problematic_regions.html">select_problematic_regions()</a></code> </p>
+        </td>
+        <td><p>Get regions with problematic high PIP SNPs or genes</p></td>
       </tr><tr><td>
           <p><code><a href="summarize_param.html">summarize_param()</a></code> </p>
         </td>
@@ -271,9 +285,9 @@ Flip signs when reverse complement matches, remove strand ambiguous SNPs</p></td
         </td>
         <td><p>Sum of Single Effects (SuSiE) Regression using summary statistics</p></td>
       </tr><tr><td>
-          <p><code><a href="trim_regionlist.html">trim_regionlist()</a></code> </p>
+          <p><code><a href="trim_region_data.html">trim_region_data()</a></code> </p>
         </td>
-        <td><p>Remove SNPs from regionlist if the total number of SNPs exceeds limit</p></td>
+        <td><p>Remove SNPs from region_data if the total number of SNPs exceeds limit</p></td>
       </tr><tr><td>
           <p><code><a href="univariate_regression.html">univariate_regression()</a></code> </p>
         </td>

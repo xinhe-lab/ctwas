@@ -7,10 +7,16 @@
     <loc>/LICENSE-text.html</loc>
   </url>
   <url>
+    <loc>/articles/FAQ.html</loc>
+  </url>
+  <url>
     <loc>/articles/ctwas_sumstats_genomewide.html</loc>
   </url>
   <url>
     <loc>/articles/index.html</loc>
+  </url>
+  <url>
+    <loc>/articles/multigroup_ctwas_modules.html</loc>
   </url>
   <url>
     <loc>/articles/multigroup_ctwas_pipeline.html</loc>
@@ -25,6 +31,9 @@
     <loc>/reference/EM.html</loc>
   </url>
   <url>
+    <loc>/reference/add_z_to_region_data.html</loc>
+  </url>
+  <url>
     <loc>/reference/add_z_to_regionlist.html</loc>
   </url>
   <url>
@@ -35,6 +44,9 @@
   </url>
   <url>
     <loc>/reference/anno_susie.html</loc>
+  </url>
+  <url>
+    <loc>/reference/assemble_region_data.html</loc>
   </url>
   <url>
     <loc>/reference/assign_region_ids.html</loc>
@@ -97,6 +109,9 @@
     <loc>/reference/estimate_s_rss.html</loc>
   </url>
   <url>
+    <loc>/reference/expand_region_data.html</loc>
+  </url>
+  <url>
     <loc>/reference/expand_regionlist.html</loc>
   </url>
   <url>
@@ -119,6 +134,9 @@
   </url>
   <url>
     <loc>/reference/get_gene_regions.html</loc>
+  </url>
+  <url>
+    <loc>/reference/get_merged_regions.html</loc>
   </url>
   <url>
     <loc>/reference/get_problematic_regions.html</loc>
@@ -151,10 +169,16 @@
     <loc>/reference/label_merged_regions.html</loc>
   </url>
   <url>
+    <loc>/reference/label_overlapping_regions.html</loc>
+  </url>
+  <url>
     <loc>/reference/load_LD.html</loc>
   </url>
   <url>
     <loc>/reference/load_weights.html</loc>
+  </url>
+  <url>
+    <loc>/reference/merge_region_data.html</loc>
   </url>
   <url>
     <loc>/reference/predict.susie.html</loc>
@@ -190,6 +214,9 @@
     <loc>/reference/read_bim.html</loc>
   </url>
   <url>
+    <loc>/reference/read_exprvar.html</loc>
+  </url>
+  <url>
     <loc>/reference/read_pgen.html</loc>
   </url>
   <url>
@@ -214,6 +241,9 @@
     <loc>/reference/select_highPIP_regions.html</loc>
   </url>
   <url>
+    <loc>/reference/select_problematic_regions.html</loc>
+  </url>
+  <url>
     <loc>/reference/select_single_effect_regions.html</loc>
   </url>
   <url>
@@ -233,6 +263,9 @@
   </url>
   <url>
     <loc>/reference/susie_rss.html</loc>
+  </url>
+  <url>
+    <loc>/reference/trim_region_data.html</loc>
   </url>
   <url>
     <loc>/reference/trim_regionlist.html</loc>

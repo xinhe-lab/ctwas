@@ -2,6 +2,8 @@ pandoc: 2.7.3
 pkgdown: 2.0.7
 pkgdown_sha: ~
 articles:
+  FAQ: FAQ.html
+  multigroup_ctwas_modules: multigroup_ctwas_modules.html
   multigroup_ctwas_pipeline: multigroup_ctwas_pipeline.html
-last_built: 2024-04-12T19:13Z
+last_built: 2024-04-18T17:50Z
 

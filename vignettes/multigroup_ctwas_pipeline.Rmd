@@ -45,7 +45,7 @@ before running parameter estimation and finemapping steps of cTWAS analysis.
 The inputs for the summary statistics version of cTWAS include GWAS summary statistics, 
 prediction models in PredictDB format or FUSION format, and LD reference. 
 
-```{r}
+```{r, eval=FALSE}
 # set output directory and output name
 setwd("/project2/xinhe/shared_data/multigroup_ctwas/LDL_multigroup_tutorial/")
 outputdir <- "/project2/xinhe/shared_data/multigroup_ctwas/LDL_multigroup_tutorial/output"
@@ -323,7 +323,7 @@ See [this tutorial][] for more details.
 ### Merging regions
 
 For cross-boundary genes, we will merge the regions for high PIP (>0.5) genes. 
-```{r}
+```{r merge_regions, eval=FALSE}
 high_PIP_genes <- unique(finemap_res[finemap_res$type != "SNP" & finemap_res$susie_pip >= 0.5, "id"])
 high_PIP_boundary_genes <- boundary_genes[boundary_genes$id %in% high_PIP_genes, , drop=FALSE]
 if (nrow(high_PIP_boundary_genes) > 0){
@@ -341,7 +341,7 @@ if (nrow(high_PIP_boundary_genes) > 0){
 For those merged regions, we will expand those regions with full SNPs. 
 We rerun finemapping for the merged regions,
 and then update the finemapping results for those merged regions. 
-```{r}
+```{r, eval=FALSE}
 # Expand those merged regions with full SNPs
 merged_region_data <- expand_region_data(merged_region_data,
                                          region_info,
@@ -366,13 +366,13 @@ finemap_merged_regions_res <- finemap_regions(merged_region_data,
 ### Rerun finemapping with L = 1 for regions with problematic SNPs 
 
 Select regions with high PIP (>0.5) SNPs and molecular traits.
-```{r}
+```{r, eval=FALSE}
 highPIP_finemap_res <- finemap_res[finemap_res$susie_pip > 0.5, ]
 highPIP_region_ids <- unique(highPIP_finemap_res$region_id)
 ```
 
 We use SuSiE RSS to perform LD mismatch diagnosis for these high PIP regions.
-```{r}
+```{r, eval=FALSE}
 high_PIP_region_info <- region_info[region_info$region_id %in% highPIP_region_ids, , drop=FALSE]
 res <- detect_ld_mismatch_susie(z_snp, high_PIP_region_info, gwas_n, ncore = ncore, p_diff_thresh = 5e-8)
 problematic_snps <- res$problematic_snps
@@ -380,7 +380,7 @@ problematic_snps <- res$problematic_snps
 
 We will rerun the fine-mapping with L = 1 for the regions containing high PIP (>0.5) SNPs 
 detected with LD mismatches, or high PIP molecular traits with problematic SNPs in their weights. 
-```{r}
+```{r, eval=FALSE}
 # select regions containing high PIP (>0.5) SNPs detected with LD mismatches, 
 # or high PIP molecular traits with problematic SNPs in their weights
 problematic_region_ids <- select_problematic_regions(problematic_snps, highPIP_finemap_res, weights)
@@ -410,7 +410,7 @@ finemap_merged_regions_res <- finemap_regions(rerun_region_data,
 We will add the gene names to the results (the PredictDB weights use Ensembl IDs as the primary identifier), 
 as well as the z-scores for each SNP and gene. 
 We then show all molecular traits with PIP > 0.8, which is the threshold we used in the paper.
-```{r}
+```{r, eval=FALSE}
 # load information for all genes
 gene_info <- get_gene_info(weights)
 

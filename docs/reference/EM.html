@@ -20,7 +20,7 @@ Iteratively run susie and estimate parameters - RSS version"><!-- mathjax --><sc
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">ctwas</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">0.2.0</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">0.2.0.9000</span>
       </span>
     </div>
 
@@ -35,7 +35,13 @@ Iteratively run susie and estimate parameters - RSS version"><!-- mathjax --><sc
     <span class="caret"></span>
   </a>
   <ul class="dropdown-menu" role="menu"><li>
-      <a href="../articles/multigroup_ctwas_pipeline.html">Pipepline of using multigroup cTWAS with summary statistics</a>
+      <a href="../articles/multigroup_ctwas_pipeline.html">Using multigroup cTWAS with summary statistics</a>
+    </li>
+    <li>
+      <a href="../articles/multigroup_ctwas_modules.html">Running cTWAS modules separately</a>
+    </li>
+    <li>
+      <a href="../articles/FAQ.html">FAQ</a>
     </li>
   </ul></li>
       </ul><ul class="nav navbar-nav navbar-right"><li>
@@ -63,7 +69,7 @@ Iteratively run susie and estimate parameters - RSS version</p>
 
     <div id="ref-usage">
     <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="fu">EM</span><span class="op">(</span></span>
-<span>  <span class="va">regionlist</span>,</span>
+<span>  <span class="va">region_data</span>,</span>
 <span>  niter <span class="op">=</span> <span class="fl">20</span>,</span>
 <span>  init_group_prior <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  init_group_prior_var <span class="op">=</span> <span class="cn">NULL</span>,</span>
@@ -78,7 +84,7 @@ Iteratively run susie and estimate parameters - RSS version</p>
 
     <div id="arguments">
     <h2>Arguments</h2>
-    <dl><dt>regionlist</dt>
+    <dl><dt>region_data</dt>
 <dd><p>a list object with the susie input data for each region</p></dd>
 
 
