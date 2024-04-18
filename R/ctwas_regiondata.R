@@ -79,11 +79,18 @@ assemble_region_data <- function(region_info,
     # get SNP info in LD in the chromosome
     snpinfo <- read_LD_SNP_files(regioninfo$SNP_info)
 
+    # select SNPs
+    snpinfo$keep <- rep(1, nrow(snpinfo))
     # remove SNPs not in z_snp
-    snpinfo <- snpinfo[snpinfo$id %in% z_snp$id, , drop=FALSE]
+    snpinfo$keep[!(snpinfo$id %in% z_snp$id)] <- 0
 
     # remove genes not in z_gene
-    geneinfo <- geneinfo[geneinfo$id %in% z_gene$id, , drop=FALSE]
+    if (nrow(geneinfo)!=0){
+      # select genes
+      geneinfo$keep <- 1
+      # remove genes not in z_gene
+      geneinfo[!(geneinfo$id %in% z_gene$id), "keep"] <- 0
+    }
 
     # get region_data for the chromosome
     region_data_chr <- assign_region_ids(regioninfo, geneinfo, snpinfo,
@@ -125,12 +132,12 @@ assign_region_ids <- function(regioninfo,
                               mingene = 0,
                               seed = 99) {
 
-  # downsampling for SNPs
+  # downsampling for SNPs if thin < 1
   if (thin < 1) {
     set.seed(seed)
-    n_kept <- round(nrow(snpinfo) * thin)
-    idx_kept <- sample(1:nrow(snpinfo), n_kept)
-    snpinfo <- snpinfo[idx_kept, , drop = FALSE]
+    snpinfo$thin_tag <- rep(0, nrow(snpinfo))
+    nkept <- round(nrow(snpinfo) * thin)
+    snpinfo$thin_tag[sample(1:nrow(snpinfo), nkept)] <- 1
   }
 
   region_data <- list()
@@ -145,9 +152,11 @@ assign_region_ids <- function(regioninfo,
 
     # assign genes to regions based gene p0 positions
     # for genes across region boundaries, assign to the first region, and adjust later
-    gidx <- which(geneinfo$chrom == region_chrom & geneinfo$p0 >= region_start & geneinfo$p0 < region_stop)
+    gidx <- which(geneinfo$chrom == region_chrom & geneinfo$p0 >= region_start & geneinfo$p0 < region_stop
+                  & geneinfo$keep == 1)
 
-    sidx <- which(snpinfo$chrom == region_chrom & snpinfo$pos >= region_start & snpinfo$pos < region_stop)
+    sidx <- which(snpinfo$chrom == region_chrom & snpinfo$pos >= region_start & snpinfo$pos < region_stop
+                  & snpinfo$keep == 1 & snpinfo$thin_tag == 1)
 
     if (length(gidx) + length(sidx) < minvar) {next}
 
@@ -329,13 +338,19 @@ expand_region_data <- function(region_data,
     # load all SNPs in the region
     regioninfo <- region_info[region_info$region_id %in% region_data[[i]][["region_id"]], ]
     snpinfo <- read_LD_SNP_files(regioninfo$SNP_info)
+
+    # update sid in the region
+    snpinfo$keep <- rep(1, nrow(snpinfo))
     # remove SNPs not in z_snp
-    snpinfo <- snpinfo[snpinfo$id %in% z_snp$id, , drop=FALSE]
-    region_data[[i]][["sid"]] <- snpinfo$id
+    snpinfo$keep[!(snpinfo$id %in% z_snp$id)] <- 0
+
+    sid <- snpinfo$id[snpinfo$keep == 1]
+    sidx <- match(sid, snpinfo$id)
+    region_data[[i]][["sid"]] <- sid
 
     # update minpos and maxpos in the region
-    region_data[[i]][["minpos"]] <- min(c(region_data[[i]][["minpos"]], snpinfo$pos))
-    region_data[[i]][["maxpos"]] <- max(c(region_data[[i]][["maxpos"]], snpinfo$pos))
+    region_data[[i]][["minpos"]] <- min(c(region_data[[i]][["minpos"]], snpinfo$pos[sidx]))
+    region_data[[i]][["maxpos"]] <- max(c(region_data[[i]][["maxpos"]], snpinfo$pos[sidx]))
 
     setTxtProgressBar(pb, i)
   }
