@@ -45,15 +45,16 @@ convert_geno_to_LD_matrix <- function(region_info,
     region_info$chr <- readr::parse_number(region_info$chr)
   }
   region_info <- region_info[order(region_info$chr, region_info$start), ]
-  region_info$region_id <- paste0(region_info$chr, ":", region_info$start, "-", region_info$stop)
-
-  # read genotype files and prepare pvar files accompanying the genotype table
-  loginfo("Load genotype data ...")
-  pvar_files <- sapply(genotype_files, prep_pvar, outputdir = outputdir)
+  region_info[, "region_id"] <- paste0(region_info$chr, ":", region_info$start, "-", region_info$stop)
+  region_info[, "LD_matrix"] <- NA
+  region_info[, "SNP_info"] <- NA
 
   # load variant positions from varinfo_files
   loginfo("Load variant information ...")
   ld_snpinfo_all <- do.call(rbind, lapply(varinfo_files, read_var_info))
+
+  # read genotype files and prepare pvar files accompanying the genotype table
+  pvar_files <- sapply(genotype_files, prep_pvar, outputdir = outputdir)
 
   for (b in chrom){
     region_info_chr <- region_info[region_info$chr == b, ]

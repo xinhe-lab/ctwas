@@ -170,3 +170,49 @@ get_merged_regions <- function(boundary_genes){
 
   return(merged_regions)
 }
+
+merge_finemap_regions <- function(region_data,
+                                  region_info,
+                                  boundary_genes,
+                                  finemap_res,
+                                  z_snp,
+                                  z_gene,
+                                  weights,
+                                  maxSNP = Inf,
+                                  expand = TRUE,
+                                  group_prior = NULL,
+                                  group_prior_var = NULL,
+                                  L = 5,
+                                  force_compute_cor = FALSE,
+                                  save_cor = FALSE,
+                                  cor_dir = getwd(),
+                                  ncore = 1,
+                                  verbose = FALSE){
+
+  high_PIP_genes <- unique(finemap_res[finemap_res$type != "SNP" & finemap_res$susie_pip >= 0.5, "id"])
+  high_PIP_boundary_genes <- boundary_genes[boundary_genes$id %in% high_PIP_genes, , drop=FALSE]
+  if (nrow(high_PIP_boundary_genes) > 0){
+    res <- merge_region_data(region_data,
+                             high_PIP_boundary_genes,
+                             region_info,
+                             z_snp,
+                             z_gene,
+                             expand = expand,
+                             maxSNP = maxSNP)
+    merged_region_data <- res$merged_region_data
+  }
+
+  finemap_merged_regions_res <- finemap_regions(merged_region_data,
+                                                region_info,
+                                                weights,
+                                                group_prior = group_prior,
+                                                group_prior_var = group_prior_var,
+                                                L = 5,
+                                                force_compute_cor = force_compute_cor,
+                                                save_cor = save_cor,
+                                                cor_dir = cor_dir,
+                                                ncore = ncore,
+                                                verbose = verbose)
+
+  return(finemap_merged_regions_res)
+}

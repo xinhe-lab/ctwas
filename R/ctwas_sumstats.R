@@ -157,6 +157,8 @@ ctwas_sumstats <- function(
                                                trim_by = "z",
                                                maxSNP = max_snp_region,
                                                ncore = ncore)
+    # replace data in screened regions with screened_region_data
+    region_data[names(screened_region_data)] <- screened_region_data
   }
 
   # Run fine-mapping for regions with strong gene signals using all SNPs
@@ -178,8 +180,8 @@ ctwas_sumstats <- function(
 
   ctwas_res <- list("param" = param,
                     "finemap_res" = finemap_res,
-                    "boundary_genes" = boundary_genes)
-
+                    "boundary_genes" = boundary_genes,
+                    "region_data" = region_data)
   return(ctwas_res)
 
 }

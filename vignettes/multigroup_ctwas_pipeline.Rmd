@@ -45,6 +45,16 @@ before running parameter estimation and finemapping steps of cTWAS analysis.
 The inputs for the summary statistics version of cTWAS include GWAS summary statistics, 
 prediction models in PredictDB format or FUSION format, and LD reference. 
 
+```{r}
+# set output directory and output name
+setwd("/project2/xinhe/shared_data/multigroup_ctwas/LDL_multigroup_tutorial/")
+outputdir <- "/project2/xinhe/shared_data/multigroup_ctwas/LDL_multigroup_tutorial/output"
+dir.create(outputdir, showWarnings=F, recursive=T)
+
+outname <- "LDL_Multiomics"
+gwas_name <- "ukb-d-30780_irnt"
+```
+
 ### GWAS z-scores
 
 We read the GWAS summary statistics as a data frame `z_snp`, with columns "id", "A1", "A2", "z", and each row is a variant. 
@@ -52,10 +62,8 @@ We read the GWAS summary statistics as a data frame `z_snp`, with columns "id", 
 
 For this analysis, we will use summary statistics from a GWAS of LDL cholesterol in the UK Biobank. We will download the VCF from the IEU Open GWAS Project. 
 ```{r, eval=FALSE}
-# set the working directory, download the summary statistics, and unzip the file.
-setwd("/project2/xinhe/shared_data/multigroup_ctwas/LDL_multigroup_tutorial/")
+# download the summary statistics, and unzip the file.
 dir.create("gwas_summary_stats")
-
 system("wget https://gwas.mrcieu.ac.uk/files/ukb-d-30780_irnt/ukb-d-30780_irnt.vcf.gz -P gwas_summary_stats")
 #R.utils::gunzip("gwas_summary_stats/ukb-d-30780_irnt.vcf.gz")
 ```
@@ -78,16 +86,9 @@ cat("gwas_n=", gwas_n, "\n")
 z_snp <- z_snp[,c("rsid", "ALT", "REF", "Z")]
 colnames(z_snp) <- c("id", "A1", "A2", "z")
 
-# save the formatted z-scores and GWAS sample size
-outputdir <- "/project2/xinhe/shared_data/multigroup_ctwas/LDL_multigroup_tutorial/output"
-outname <- "LDL_Multiomics"
-dir.create(outputdir, showWarnings=F, recursive=T)
-
-gwas_name <- "ukb-d-30780_irnt"
 z_snp_outfile <- file.path(outputdir, paste0(gwas_name, ".z_snp.Rd"))
 save(z_snp, gwas_n, file=z_snp_outfile)
 ```
-
 
 ### Prediction models
 
@@ -161,32 +162,50 @@ The columns of the `.Rvar` file include information on chromosome, variant name,
 
 The naming convention for the LD matrices is `[filestem]_chr[#].R_snp.[start]_[end].RDS`. cTWAS expects that all `.RDS` and `.Rvar` files in the directory contain LD information, so no other files with these suffixes should be in the directory. Each variant should be uniquely assigned to a region, and the regions should be left closed and right open, i.e. [start, stop). The positions of the LD matrices must match exactly the positions specified by the region file. Do not include invariant or multiallelic variants in the LD reference. 
 
-#### Convert reference genotype data to LD matrices
+#### Convert genotype data to LD matrices
 
-We could genotype data in PLINK format to LD matrices (.RDS) and variance information (.Rvar) files, using the `convert_geno_to_LD_matrix` function.
-Below is an example of generating LD matrices using 1000G EUR Phase3 PLINK genotype data.
+We could use the `convert_geno_to_LD_matrix` function to convert genotype files (and LD regions) to the LD matrices and corresponding variant information. 
+
+Below is an example of generating LD matrices in hg38 using UKB genotype data.
 
 ```{r convert_geno_to_LD_matrix, eval=FALSE}
 # specify LD reference
-ldref_dir <- "/project2/xinhe/shared_data/ldsc/sldsc/1000G_EUR_Phase3_plink"
-# genotype files in PLINK .bed or .pgen format
-genotype_files <- file.path(ldref_dir, paste0("1000G.EUR.QC.", 1:22, ".bed"))
-
-# variance information files in PLINK .bim or .pvar format
-# the output .Rvar files will use the positions and allele information in varinfo_files
-varinfo_files <- file.path(ldref_dir, paste0("1000G.EUR.QC.", 1:22,".bim"))
-
-# prepare a data frame region_info for LD regions with columns "chr", "start", and "stop",
-# the positions should match those in snpinfo_files
-genome_version = "b37"
-region_file <- system.file("extdata/ldetect", paste0("EUR.", genome_version, ".bed"), package = "ctwas")
-region_info <- read.table(region_file, header = T, stringsAsFactors = F)
-
+ldref_dir <- "/gpfs/data/xhe-lab/ukb_LDR/genotype_data_0.1"
+genotype_files <- file.path(ldref_dir, paste0("ukb_chr", 1:22, ".pgen"))
+# the output Rvar files use the positions and allele information in varinfo_files
+varinfo_files <- "/gpfs/data/xhe-lab/ukb_LDR/neale_lab/neale_variants_hg38.bim"
+# prepare a data frame region_info for LD regions with columns "chr", "start", and "stop"
+# the positions should match those in varinfo_files
+region_file <- system.file("extdata/ldetect", "EUR.b38.bed", package = "ctwas")
+region_info <- read.table(region_file, header = TRUE, stringsAsFactors = FALSE)
 # specify output
-LD_outputdir <- "/project2/xinhe/shared_data/multigroup_ctwas/ref_LD_R/1000G_EUR_Phase3_b37/"
-LD_outname <- "1000G_EUR_Phase3_b37"
-region_info <- convert_geno_to_LD_matrix(region_info, genotype_files, varinfo_files, outputdir = LD_outputdir, outname = LD_outname)
+outputdir <- "/gpfs/data/xhe-lab/ctwas/LDR/UKB_b38/"
+outname <- "ukb_b38_0.1"
+
+# generate LD matrices (.RDS) and variant info (.Rvar)
+# update region info with paths of LD matrices and variant info files
+# we could run this for one chromosome or multiple chromosomes
+updated_region_info <- convert_geno_to_LD_matrix(region_info, 
+                                                 genotype_files, 
+                                                 varinfo_files,
+                                                 chrom = 1:22,
+                                                 outputdir = outputdir, 
+                                                 outname = outname)
 ```
+
+We provide example R scripts to generate the LD matrices for UKB or 1KG European genotype files. 
+
+```{r, eval=FALSE}
+# path to UKB b38 script
+system.file("extdata/scripts", "convert_geno_to_LD_matrix_UKB_b38.R", package = "ctwas")
+
+# path to UKB b37 script
+system.file("extdata/scripts", "convert_geno_to_LD_matrix_UKB_b37.R", package = "ctwas")
+
+# path to 1KG European b37 script
+system.file("extdata/scripts", "convert_geno_to_LD_matrix_1KG_EUR_b37.R", package = "ctwas")
+```
+
 
 ### Data harmonization
 
@@ -242,29 +261,29 @@ weights_liver_expression <- preprocess_weights(weight_file = weight_files[1],
                                                filter_protein_coding_genes = TRUE)
 
 weights_liver_splicing <- preprocess_weights(weight_file = weight_files[2],
-                                              region_info,
-                                              z_snp$id,
-                                              type = "sQTL",
-                                              context = "liver",
-                                              weight_format = "PredictDB",
-                                              ncore = ncore,
-                                              drop_strand_ambig = TRUE,
-                                              scale_by_ld_variance = TRUE,
-                                              load_predictdb_LD = TRUE,
-                                              filter_protein_coding_genes = TRUE)
+                                             region_info,
+                                             z_snp$id,
+                                             type = "sQTL",
+                                             context = "liver",
+                                             weight_format = "PredictDB",
+                                             ncore = ncore,
+                                             drop_strand_ambig = TRUE,
+                                             scale_by_ld_variance = TRUE,
+                                             load_predictdb_LD = TRUE,
+                                             filter_protein_coding_genes = TRUE)
 
 weights_liver_apa <- preprocess_weights(weight_file = weight_files[3],
-                                                   region_info,
-                                                   z_snp$id,
-                                                   type = "aQTL",
-                                                   context = "Liver",
-                                                   weight_format = "Fusion",
-                                                   ncore = ncore,
-                                                   scale_by_ld_variance = FALSE,
-                                                   drop_strand_ambig = TRUE,
-                                                   load_predictdb_LD = FALSE,
-                                                   filter_protein_coding_genes = FALSE,
-                                                   method_Fusion = "enet")
+                                        region_info,
+                                        z_snp$id,
+                                        type = "aQTL",
+                                        context = "Liver",
+                                        weight_format = "Fusion",
+                                        ncore = ncore,
+                                        scale_by_ld_variance = FALSE,
+                                        drop_strand_ambig = TRUE,
+                                        load_predictdb_LD = FALSE,
+                                        filter_protein_coding_genes = FALSE,
+                                        method_Fusion = "enet")
 
 weights <- c(weights_liver_expression, weights_liver_splicing, weights_liver_apa)
 ```
@@ -283,36 +302,135 @@ res <- ctwas_sumstats(z_snp, weights, region_info,
                       max_snp_region = 20000, 
                       min_nonSNP_PIP = 0.5,
                       ncore = ncore, 
-                      save_cor = FALSE,
-                      cor_dir = getwd(), 
-                      logfile = NULL,
+                      save_cor = TRUE, 
+                      cor_dir = file.path(outputdir, "cor_matrix"),
+                      logfile = file.path(outputdir, paste0(outname, ".ctwas_sumstats.log")),
                       verbose = FALSE)
 
 param <- res$param
 finemap_res <- res$finemap_res
 boundary_genes <- res$boundary_genes
-
+region_data <- res$region_data
 ```
 
 We can also run each of the cTWAS modules separately. 
 This would allow more flexible controls of the cTWAS modules with different settings 
-(memory, parallelization, etc.). 
+(memory, parallelization, etc.)
 See [this tutorial][] for more details.
 
 ## Postprocessing
 
-### Region merging
+### Merging regions
+
+For cross-boundary genes, we will merge the regions for high PIP (>0.5) genes. 
+```{r}
+high_PIP_genes <- unique(finemap_res[finemap_res$type != "SNP" & finemap_res$susie_pip >= 0.5, "id"])
+high_PIP_boundary_genes <- boundary_genes[boundary_genes$id %in% high_PIP_genes, , drop=FALSE]
+if (nrow(high_PIP_boundary_genes) > 0){
+  res <- merge_region_data(region_data,
+                           high_PIP_boundary_genes,
+                           region_info,
+                           z_snp,
+                           z_gene,
+                           expand = TRUE,
+                           maxSNP = max_snp_region)
+  merged_region_data <- res$merged_region_data
+}
+```
+
+For those merged regions, we will expand those regions with full SNPs. 
+We rerun finemapping for the merged regions,
+and then update the finemapping results for those merged regions. 
+```{r}
+# Expand those merged regions with full SNPs
+merged_region_data <- expand_region_data(merged_region_data,
+                                         region_info,
+                                         z_snp,
+                                         z_gene,
+                                         trim_by = "z",
+                                         maxSNP = max_snp_region,
+                                         ncore = ncore)
+
+finemap_merged_regions_res <- finemap_regions(merged_region_data,
+                                              region_info,
+                                              weights,
+                                              group_prior = group_prior,
+                                              group_prior_var = group_prior_var,
+                                              L = 5,
+                                              save_cor = TRUE,
+                                              cor_dir = paste0(outputdir, "/merged_cor_matrix/"),
+                                              ncore = ncore,
+                                              verbose = TRUE)
+```
 
 ### Rerun finemapping with L = 1 for regions with problematic SNPs 
 
+Select regions with high PIP (>0.5) SNPs and molecular traits.
+```{r}
+highPIP_finemap_res <- finemap_res[finemap_res$susie_pip > 0.5, ]
+highPIP_region_ids <- unique(highPIP_finemap_res$region_id)
+```
+
+We use SuSiE RSS to perform LD mismatch diagnosis for these high PIP regions.
+```{r}
+high_PIP_region_info <- region_info[region_info$region_id %in% highPIP_region_ids, , drop=FALSE]
+res <- detect_ld_mismatch_susie(z_snp, high_PIP_region_info, gwas_n, ncore = ncore, p_diff_thresh = 5e-8)
+problematic_snps <- res$problematic_snps
+```
+
 We will rerun the fine-mapping with L = 1 for the regions containing high PIP (>0.5) SNPs 
-detected with LD mismatches, or high PIP genes with problematic SNPs in their weights. 
+detected with LD mismatches, or high PIP molecular traits with problematic SNPs in their weights. 
+```{r}
+# select regions containing high PIP (>0.5) SNPs detected with LD mismatches, 
+# or high PIP molecular traits with problematic SNPs in their weights
+problematic_region_ids <- select_problematic_regions(problematic_snps, highPIP_finemap_res, weights)
+rerun_region_data <- expand_region_data(region_data[problematic_region_ids],
+                                        region_info,
+                                        z_snp,
+                                        z_gene,
+                                        trim_by = "z",
+                                        maxSNP = max_snp_region,
+                                        ncore = ncore)
+
+finemap_merged_regions_res <- finemap_regions(rerun_region_data,
+                                              region_info,
+                                              weights,
+                                              group_prior = group_prior,
+                                              group_prior_var = group_prior_var,
+                                              L = 1,
+                                              cor_dir = paste0(outputdir, "/cor_matrix/"),
+                                              ncore = ncore,
+                                              verbose = TRUE)
+```
 
 ## cTWAS output
 
-* Interpreting cTWAS output
+### Interpreting cTWAS output
 
-* Summary of gene PIP
+We will add the gene names to the results (the PredictDB weights use Ensembl IDs as the primary identifier), 
+as well as the z-scores for each SNP and gene. 
+We then show all molecular traits with PIP > 0.8, which is the threshold we used in the paper.
+```{r}
+# load information for all genes
+gene_info <- get_gene_info(weights)
+
+# add gene names to cTWAS results
+gene_idx <- match(finemap_res$id[finemap_res$type!="SNP"], gene_info$id)
+finemap_res$genename[finemap_res$type!="SNP"] <- gene_info$genename[gene_idx]
+
+# add z-scores to cTWAS results
+s_idx <- match(finemap_res$id[finemap_res$type=="SNP"], z_snp$id)
+finemap_res$z[finemap_res$type=="SNP"] <- z_snp$z[s_idx]
+
+g_idx <- match(finemap_res$id[finemap_res$type!="SNP"], z_gene$id)
+finemap_res$z[finemap_res$type!="SNP"] <- z_gene$z[g_idx]
+
+# select PIP > 0.8
+finemap_res <- finemap_res[order(-finemap_res$susie_pip),]
+ctwas_res <- finemap_res[finemap_res$type!="SNP" & finemap_res$susie_pip > 0.8,]
+```
+
+### Combining PIPs across tissues or molecular traits
 
 ## Visualzing cTWAS results
 

@@ -145,6 +145,7 @@ read_bim <- function(bimf) {
 #' .bim: https://www.cog-genomics.org/plink/2.0/formats#bim
 #'
 #' @return A data.table. variant info
+#' @importFrom tools file_ext
 #'
 read_var_info <- function(var_info_file){
   if (file_ext(var_info_file) == "pvar"){
