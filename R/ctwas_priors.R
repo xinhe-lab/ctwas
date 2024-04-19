@@ -5,8 +5,13 @@ initiate_group_priors <- function(group_prior = NULL, group_prior_var = NULL, gr
   if (is.null(group_prior)){
     group_prior <- structure(as.numeric(rep(NA,length(groups))), names=groups)
   }
+
   if (is.null(group_prior_var)){
     group_prior_var <- structure(as.numeric(rep(NA,length(groups))), names=groups)
+  }
+
+  if ( !setequal(names(group_prior), groups) || !setequal(names(group_prior_var), groups) ) {
+    stop("names of group_prior or group_prior_var do not match with groups")
   }
 
   pi_prior <- list()

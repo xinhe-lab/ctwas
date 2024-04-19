@@ -6,8 +6,6 @@
 #'
 #' @param region_info a data frame of region definition and associated file names.
 #'
-#' @param gwas_n integer, GWAS sample size
-#'
 #' @param drop_multiallelic TRUE/FALSE. If TRUE, multiallelic variants will be dropped from the summary statistics.
 #'
 #' @param drop_strand_ambig TRUE/FALSE, if TRUE remove strand ambiguous variants (A/T, G/C).
@@ -22,7 +20,6 @@
 #'
 preprocess_z_snp <- function(z_snp,
                              region_info,
-                             gwas_n = NULL,
                              drop_multiallelic = TRUE,
                              drop_strand_ambig = TRUE,
                              logfile = NULL){
@@ -35,7 +32,7 @@ preprocess_z_snp <- function(z_snp,
   loginfo("z_snp has %d variants in total", length(z_snp$id))
 
   # remove SNPs not in LD reference
-  ld_snpinfo <- do.call(rbind, lapply(region_info$SNP_info, read_LD_SNP_files))
+  snpinfo <- read_LD_SNP_files(region_info$SNP_info)
   z_snp <- z_snp[z_snp$id %in% ld_snpinfo$id,]
 
   # drop multiallelic variants (id not unique)

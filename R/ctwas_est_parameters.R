@@ -73,8 +73,8 @@ est_param <- function(
                 group_prior_var_structure = group_prior_var_structure,
                 ncore = ncore,
                 verbose = verbose)
-  loginfo("Roughly estimated group_prior {%s}: {%s}", names(EM1_res$group_prior), EM1_res$group_prior)
-  loginfo("Roughly estimated group_prior_var {%s}: {%s}", names(EM1_res$group_prior_var), EM1_res$group_prior_var)
+  loginfo("Roughly estimated group_prior {%s}: {%s}", names(EM1_res$group_prior), format(EM1_res$group_prior, digits = 4))
+  loginfo("Roughly estimated group_prior_var {%s}: {%s}", names(EM1_res$group_prior_var), format(EM1_res$group_prior_var, digits = 4))
 
   # Select regions with single effect
   region_p1_df <- compute_region_p_single_effect(region_data, EM1_res$group_prior)
@@ -96,8 +96,8 @@ est_param <- function(
   group_prior <- EM2_res$group_prior
   group_prior_var <- EM2_res$group_prior_var
   group_prior_var_structure <- EM2_res$group_prior_var_structure
-  loginfo("Estimated group_prior {%s}: {%s}", names(group_prior), group_prior)
-  loginfo("Estimated group_prior_var {%s}: {%s}", names(group_prior_var), group_prior_var)
+  loginfo("Estimated group_prior {%s}: {%s}", names(group_prior), format(group_prior, digits = 4))
+  loginfo("Estimated group_prior_var {%s}: {%s}", names(group_prior_var), format(group_prior_var, digits = 4))
 
   # estimated parameters from all iterations
   group_prior_iters <- EM2_res$group_prior_iters

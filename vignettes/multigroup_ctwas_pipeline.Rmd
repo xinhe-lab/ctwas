@@ -193,19 +193,7 @@ updated_region_info <- convert_geno_to_LD_matrix(region_info,
                                                  outname = outname)
 ```
 
-We provide example R scripts to generate the LD matrices for UKB or 1KG European genotype files. 
-
-```{r, eval=FALSE}
-# path to UKB b38 script
-system.file("extdata/scripts", "convert_geno_to_LD_matrix_UKB_b38.R", package = "ctwas")
-
-# path to UKB b37 script
-system.file("extdata/scripts", "convert_geno_to_LD_matrix_UKB_b37.R", package = "ctwas")
-
-# path to 1KG European b37 script
-system.file("extdata/scripts", "convert_geno_to_LD_matrix_1KG_EUR_b37.R", package = "ctwas")
-```
-
+We provide example R scripts to generate the LD matrices for UKB or 1KG European genotype files [here](https://github.com/xinhe-lab/ctwas/tree/multigroup_test/inst/extdata/scripts)
 
 ### Data harmonization
 
@@ -223,7 +211,7 @@ If `drop_strand_ambig = TRUE`, it will drop strand ambiguous variants.
 z_snp_outfile <- file.path(outputdir, paste0(gwas_name, ".z_snp.Rd"))
 load(z_snp_outfile)
 
-z_snp <- preprocess_z_snp(z_snp, region_info, gwas_n, drop_multiallelic = TRUE, drop_strand_ambig = TRUE)
+z_snp <- preprocess_z_snp(z_snp, region_info, drop_multiallelic = TRUE, drop_strand_ambig = TRUE)
 ```
 
 #### Harmonizing prediction models and LD reference
@@ -288,7 +276,7 @@ weights_liver_apa <- preprocess_weights(weight_file = weight_files[3],
 weights <- c(weights_liver_expression, weights_liver_splicing, weights_liver_apa)
 ```
 
-## Running cTWAS analysis
+## Running cTWAS main function
 
 We can run the entire process of cTWAS analysis from computing z-scores of molecular traits, 
 estimating parameters to finemapping using the main `ctwas_sumstats` function.
@@ -318,6 +306,7 @@ This would allow more flexible controls of the cTWAS modules with different sett
 (memory, parallelization, etc.)
 See [the tutorial "Running cTWAS modules separately"](https://xinhe-lab.github.io/multigroup_ctwas/articles/multigroup_ctwas_modules.html) for more details.
 
+
 ## Postprocessing
 
 ### Merging regions
@@ -338,6 +327,7 @@ if (nrow(high_PIP_boundary_genes) > 0){
 }
 ```
 
+
 We rerun finemapping for the merged regions
 ```{r, eval=FALSE}
 finemap_merged_regions_res <- finemap_regions(merged_region_data,
@@ -352,12 +342,14 @@ finemap_merged_regions_res <- finemap_regions(merged_region_data,
                                               verbose = TRUE)
 ```
 
+
 Update the finemapping results for those merged regions
 ```{r, eval=FALSE}
 # finemap_res <- update_merged_regions_finemap_res(finemap_res, finemap_merged_regions_res, merged_region_data)
 ```
 
-### Rerun finemapping with L = 1 for regions with problematic SNPs 
+
+### Rerun finemapping with L = 1 for regions with LD mismatches
 
 Select regions with high PIP (>0.5) SNPs and molecular traits.
 ```{r, eval=FALSE}
@@ -365,12 +357,14 @@ highPIP_finemap_res <- finemap_res[finemap_res$susie_pip > 0.5, ]
 highPIP_region_ids <- unique(highPIP_finemap_res$region_id)
 ```
 
+
 We use SuSiE RSS to perform LD mismatch diagnosis for these high PIP regions.
 ```{r, eval=FALSE}
 high_PIP_region_info <- region_info[region_info$region_id %in% highPIP_region_ids, , drop=FALSE]
 res <- detect_ld_mismatch_susie(z_snp, high_PIP_region_info, gwas_n, ncore = ncore, p_diff_thresh = 5e-8)
 problematic_snps <- res$problematic_snps
 ```
+
 
 We will rerun the fine-mapping with L = 1 for the regions containing high PIP (>0.5) SNPs 
 detected with LD mismatches, or high PIP molecular traits with problematic SNPs in their weights. 
@@ -397,12 +391,13 @@ finemap_merged_regions_res <- finemap_regions(rerun_region_data,
                                               verbose = TRUE)
 ```
 
+
 ## cTWAS output
 
 ### Interpreting cTWAS output
 
-We will add the gene names to the results (the PredictDB weights use Ensembl IDs as the primary identifier), 
-as well as the z-scores for each SNP and gene. 
+We will add the gene names to the results (the PredictDB weights use Ensembl IDs as the primary identifier). 
+
 We then show all molecular traits with PIP > 0.8, which is the threshold we used in the paper.
 ```{r, eval=FALSE}
 # load information for all genes
@@ -424,10 +419,9 @@ finemap_res <- finemap_res[order(-finemap_res$susie_pip),]
 ctwas_res <- finemap_res[finemap_res$type!="SNP" & finemap_res$susie_pip > 0.8,]
 ```
 
+
 ### Combining PIPs across tissues or molecular traits
 
-## Visualzing cTWAS results
+## Visualizing cTWAS results
 
-We could make locus plot for regions of interest.
-
-
+We could make locus plots for regions of interest.

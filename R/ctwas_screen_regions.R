@@ -77,20 +77,20 @@ screen_regions <- function(
 
   # run finemapping for all regions containing thinned SNPs
   loginfo("Run initial screening for %d regions ...", length(region_data))
-  finemap_res <- finemap_regions(region_data,
-                                 region_info,
-                                 weights,
-                                 L = L,
-                                 group_prior = group_prior,
-                                 group_prior_var = group_prior_var,
-                                 max_iter = max_iter,
-                                 annotate_susie_result = FALSE,
-                                 ncore = ncore,
-                                 verbose = verbose)
+  finemap_thin_res <- finemap_regions(region_data,
+                                      region_info,
+                                      weights,
+                                      L = L,
+                                      group_prior = group_prior,
+                                      group_prior_var = group_prior_var,
+                                      max_iter = max_iter,
+                                      annotate_susie_result = FALSE,
+                                      ncore = ncore,
+                                      verbose = verbose)
 
   # select regions based on total non-SNP PIP of the region
-  loginfo("Compute non-SNP PIPs")
-  region_nonSNP_PIP_df <- compute_region_nonSNP_PIPs(finemap_res)
+  loginfo("Compute non-SNP PIPs...")
+  region_nonSNP_PIP_df <- compute_region_nonSNP_PIPs(finemap_thin_res)
   loginfo("Select regions with non-SNP PIP >= %s", min_nonSNP_PIP)
   region_nonSNP_PIP_df <- region_nonSNP_PIP_df[region_nonSNP_PIP_df$nonSNP_PIP >= min_nonSNP_PIP, , drop=FALSE]
   loginfo("Number of regions selected: %d", nrow(region_nonSNP_PIP_df))
