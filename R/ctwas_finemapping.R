@@ -96,7 +96,7 @@ finemap_region <- function(region_data,
 
   # compute correlation matrices
   R_sg_file <- file.path(cor_dir, paste0("region.", region_id, ".R_snp_gene.RDS"))
-  R_g_file <- file.path(cor_dir, paste0("region.", region_id,  ".R_gene.RDS"))
+  R_g_file <- file.path(cor_dir, paste0("region.", region_id, ".R_gene.RDS"))
   R_s_file <- file.path(cor_dir, paste0("region.", region_id, ".R_snp.RDS"))
 
   if (isTRUE(force_compute_cor)) {
@@ -198,6 +198,9 @@ finemap_region <- function(region_data,
                                geneinfo = geneinfo,
                                snpinfo = ld_snpinfo,
                                include_cs_index = TRUE)
+    # add z-scores to finemapping result
+    susie_res_df$z <- z
+
   } else {
     # skip annotating gene and SNP info, and cs_index
     susie_res_df <- anno_susie(susie_res,

@@ -39,13 +39,6 @@ EM(
 \item{ncore}{The number of cores used to parallelize susie over regions}
 
 \item{verbose}{TRUE/FALSE. If TRUE, print detail messages}
-
-\item{coverage}{A number between 0 and 1 specifying the \dQuote{coverage} of the estimated confidence sets}
-
-\item{min_abs_corr}{Minimum absolute correlation allowed in a
-credible set. The default, 0.5, corresponds to a squared
-correlation of 0.25, which is a commonly used threshold for
-genotype data in genetic studies.}
 }
 \value{
 a list of parameters

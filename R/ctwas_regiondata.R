@@ -60,6 +60,8 @@ assemble_region_data <- function(region_info,
     stop("thin needs to be in (0,1]")
   }
 
+  # browser()
+
   region_info <- region_info[order(region_info$chrom, region_info$start),]
 
   # get gene info from weights
@@ -101,8 +103,8 @@ assemble_region_data <- function(region_info,
   }
 
   # adjust region_data for boundary genes
-  if (isTRUE(adjust_boundary_genes)){
-    loginfo("Adjust region_data for across boundary genes...")
+  if (isTRUE(adjust_boundary_genes) && nrow(region_info) > 1){
+    loginfo("Adjust region_data for cross-boundary genes...")
     gene_info <- get_gene_regions(gene_info, region_info)
     boundary_genes <- gene_info[gene_info$n_regions > 1, ]
     boundary_genes <- boundary_genes[with(boundary_genes, order(chrom, p0)), ]
@@ -111,6 +113,8 @@ assemble_region_data <- function(region_info,
     if (nrow(boundary_genes) > 0) {
       region_data <- adjust_boundary_genes(boundary_genes, region_info, weights, region_data)
     }
+  }else{
+    boundary_genes <- NULL
   }
 
   # trim regions with SNPs more than maxSNP
@@ -138,6 +142,8 @@ assign_region_ids <- function(regioninfo,
     snpinfo$thin_tag <- rep(0, nrow(snpinfo))
     nkept <- round(nrow(snpinfo) * thin)
     snpinfo$thin_tag[sample(1:nrow(snpinfo), nkept)] <- 1
+  } else {
+    snpinfo$thin_tag <- 1
   }
 
   region_data <- list()
@@ -351,6 +357,9 @@ expand_region_data <- function(region_data,
     # update minpos and maxpos in the region
     region_data[[i]][["minpos"]] <- min(c(region_data[[i]][["minpos"]], snpinfo$pos[sidx]))
     region_data[[i]][["maxpos"]] <- max(c(region_data[[i]][["maxpos"]], snpinfo$pos[sidx]))
+
+    # set thin to 1 after expanding SNPs
+    region_data[[i]][["thin"]] <- 1
 
     setTxtProgressBar(pb, i)
   }

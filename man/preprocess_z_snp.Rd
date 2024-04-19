@@ -7,7 +7,6 @@
 preprocess_z_snp(
   z_snp,
   region_info,
-  gwas_n = NULL,
   drop_multiallelic = TRUE,
   drop_strand_ambig = TRUE,
   logfile = NULL
@@ -18,8 +17,6 @@ preprocess_z_snp(
 snps. "A1" is effect allele. "A2" is the other allele.}
 
 \item{region_info}{a data frame of region definition and associated file names.}
-
-\item{gwas_n}{integer, GWAS sample size}
 
 \item{drop_multiallelic}{TRUE/FALSE. If TRUE, multiallelic variants will be dropped from the summary statistics.}
 
