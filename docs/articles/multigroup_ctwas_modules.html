@@ -81,7 +81,7 @@
       <h1 data-toc-skip>Running cTWAS modules separately</h1>
                         <h4 data-toc-skip class="author">Kaixuan Luo, Sheng Qian</h4>
             
-            <h4 data-toc-skip class="date">2024-04-18</h4>
+            <h4 data-toc-skip class="date">2024-04-19</h4>
       
       <small class="dont-index">Source: <a href="https://github.com/xinhe-lab/ctwas/blob/multigroup_test/vignettes/multigroup_ctwas_modules.Rmd" class="external-link"><code>vignettes/multigroup_ctwas_modules.Rmd</code></a></small>
       <div class="hidden name"><code>multigroup_ctwas_modules.Rmd</code></div>
@@ -198,6 +198,40 @@ The <code>assemble_region_data</code> function will assign genes, SNPs and their
 <span>                               ncore <span class="op">=</span> <span class="va">ncore</span>,</span>
 <span>                               verbose <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/readRDS.html" class="external-link">saveRDS</a></span><span class="op">(</span><span class="va">finemap_res</span>, <span class="fu"><a href="https://rdrr.io/r/base/file.path.html" class="external-link">file.path</a></span><span class="op">(</span><span class="va">outputdir</span>, <span class="fu"><a href="https://rdrr.io/r/base/paste.html" class="external-link">paste0</a></span><span class="op">(</span><span class="va">outname</span>, <span class="st">".ctwas.res.RDS"</span><span class="op">)</span><span class="op">)</span><span class="op">)</span></span></code></pre></div>
+</div>
+<div class="section level3">
+<h3 id="fine-mapping-a-single-region">Fine-mapping a single region<a class="anchor" aria-label="anchor" href="#fine-mapping-a-single-region"></a>
+</h3>
+<p>If we already have assembled <code>region_data</code> for all the regions, we can expand the region of interest with full SNPs.</p>
+<div class="sourceCode" id="cb8"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">region_id</span> <span class="op">&lt;-</span> <span class="st">"16:71020125-72901251"</span></span>
+<span><span class="va">selected_region_data</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/expand_region_data.html">expand_region_data</a></span><span class="op">(</span><span class="va">region_data</span><span class="op">[</span><span class="va">region_id</span><span class="op">]</span>,</span>
+<span>                                           <span class="va">region_info</span>,</span>
+<span>                                           <span class="va">z_snp</span>,</span>
+<span>                                           <span class="va">z_gene</span>,</span>
+<span>                                           trim_by <span class="op">=</span> <span class="st">"z"</span><span class="op">)</span></span></code></pre></div>
+<p>Otherwise, we can assemble <code>region_data</code> for this region with <code>thin=1</code>. But note, because we only have one region, this would not adjust boundary genes.</p>
+<div class="sourceCode" id="cb9"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">regioninfo</span> <span class="op">&lt;-</span> <span class="va">region_info</span><span class="op">[</span><span class="va">region_info</span><span class="op">$</span><span class="va">region_id</span> <span class="op">==</span> <span class="va">region_id</span>, <span class="op">]</span></span>
+<span><span class="va">res</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/assemble_region_data.html">assemble_region_data</a></span><span class="op">(</span><span class="va">regioninfo</span>,</span>
+<span>                            <span class="va">z_snp</span>,</span>
+<span>                            <span class="va">z_gene</span>,</span>
+<span>                            <span class="va">weights</span>,</span>
+<span>                            trim_by <span class="op">=</span> <span class="st">"z"</span>,</span>
+<span>                            thin <span class="op">=</span> <span class="fl">1</span>,</span>
+<span>                            adjust_boundary_genes <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span></span>
+<span><span class="va">selected_region_data</span> <span class="op">&lt;-</span> <span class="va">res</span><span class="op">$</span><span class="va">region_data</span></span></code></pre></div>
+<p>We can perform finemapping for this region of interest:</p>
+<div class="sourceCode" id="cb10"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">finemap_region_res</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/finemap_regions.html">finemap_regions</a></span><span class="op">(</span><span class="va">selected_region_data</span>,</span>
+<span>                                      <span class="va">region_info</span>,</span>
+<span>                                      <span class="va">weights</span>,</span>
+<span>                                      group_prior <span class="op">=</span> <span class="va">group_prior</span>,</span>
+<span>                                      group_prior_var <span class="op">=</span> <span class="va">group_prior_var</span>,</span>
+<span>                                      L <span class="op">=</span> <span class="fl">5</span>,</span>
+<span>                                      save_cor <span class="op">=</span> <span class="cn">TRUE</span>,</span>
+<span>                                      cor_dir <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/file.path.html" class="external-link">file.path</a></span><span class="op">(</span><span class="va">outputdir</span>, <span class="st">"cor_matrix"</span><span class="op">)</span>,</span>
+<span>                                      verbose <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span></code></pre></div>
 </div>
 </div>
   </div>

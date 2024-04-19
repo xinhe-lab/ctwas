@@ -81,7 +81,7 @@
       <h1 data-toc-skip>Using multigroup cTWAS with summary statistics</h1>
                         <h4 data-toc-skip class="author">Kaixuan Luo, Sheng Qian</h4>
             
-            <h4 data-toc-skip class="date">2024-04-18</h4>
+            <h4 data-toc-skip class="date">2024-04-19</h4>
       
       <small class="dont-index">Source: <a href="https://github.com/xinhe-lab/ctwas/blob/multigroup_test/vignettes/multigroup_ctwas_pipeline.Rmd" class="external-link"><code>vignettes/multigroup_ctwas_pipeline.Rmd</code></a></small>
       <div class="hidden name"><code>multigroup_ctwas_pipeline.Rmd</code></div>
@@ -226,16 +226,7 @@
 <span>                                                 chrom <span class="op">=</span> <span class="fl">1</span><span class="op">:</span><span class="fl">22</span>,</span>
 <span>                                                 outputdir <span class="op">=</span> <span class="va">outputdir</span>, </span>
 <span>                                                 outname <span class="op">=</span> <span class="va">outname</span><span class="op">)</span></span></code></pre></div>
-<p>We provide example R scripts to generate the LD matrices for UKB or 1KG European genotype files.</p>
-<div class="sourceCode" id="cb8"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="co"># path to UKB b38 script</span></span>
-<span><span class="fu"><a href="https://rdrr.io/r/base/system.file.html" class="external-link">system.file</a></span><span class="op">(</span><span class="st">"extdata/scripts"</span>, <span class="st">"convert_geno_to_LD_matrix_UKB_b38.R"</span>, package <span class="op">=</span> <span class="st">"ctwas"</span><span class="op">)</span></span>
-<span></span>
-<span><span class="co"># path to UKB b37 script</span></span>
-<span><span class="fu"><a href="https://rdrr.io/r/base/system.file.html" class="external-link">system.file</a></span><span class="op">(</span><span class="st">"extdata/scripts"</span>, <span class="st">"convert_geno_to_LD_matrix_UKB_b37.R"</span>, package <span class="op">=</span> <span class="st">"ctwas"</span><span class="op">)</span></span>
-<span></span>
-<span><span class="co"># path to 1KG European b37 script</span></span>
-<span><span class="fu"><a href="https://rdrr.io/r/base/system.file.html" class="external-link">system.file</a></span><span class="op">(</span><span class="st">"extdata/scripts"</span>, <span class="st">"convert_geno_to_LD_matrix_1KG_EUR_b37.R"</span>, package <span class="op">=</span> <span class="st">"ctwas"</span><span class="op">)</span></span></code></pre></div>
+<p>We provide example R scripts to generate the LD matrices for UKB or 1KG European genotype files <a href="https://github.com/xinhe-lab/ctwas/tree/multigroup_test/inst/extdata/scripts" class="external-link">here</a></p>
 </div>
 </div>
 <div class="section level3">
@@ -246,12 +237,12 @@
 <h4 id="harmonizing-gwas-z-scores-and-ld-reference">Harmonizing GWAS z-scores and LD reference<a class="anchor" aria-label="anchor" href="#harmonizing-gwas-z-scores-and-ld-reference"></a>
 </h4>
 <p>The <code><a href="../reference/preprocess_z_snp.html">preprocess_z_snp()</a></code> function harmonizes GWAS z-scores and LD reference based on the included allele information. If <code>drop_multiallelic = TRUE</code>, it will drop multiallelic variants. If <code>drop_strand_ambig = TRUE</code>, it will drop strand ambiguous variants.</p>
-<div class="sourceCode" id="cb9"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb8"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># load the GWAS sumstats data</span></span>
 <span><span class="va">z_snp_outfile</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/file.path.html" class="external-link">file.path</a></span><span class="op">(</span><span class="va">outputdir</span>, <span class="fu"><a href="https://rdrr.io/r/base/paste.html" class="external-link">paste0</a></span><span class="op">(</span><span class="va">gwas_name</span>, <span class="st">".z_snp.Rd"</span><span class="op">)</span><span class="op">)</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/load.html" class="external-link">load</a></span><span class="op">(</span><span class="va">z_snp_outfile</span><span class="op">)</span></span>
 <span></span>
-<span><span class="va">z_snp</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/preprocess_z_snp.html">preprocess_z_snp</a></span><span class="op">(</span><span class="va">z_snp</span>, <span class="va">region_info</span>, <span class="va">gwas_n</span>, drop_multiallelic <span class="op">=</span> <span class="cn">TRUE</span>, drop_strand_ambig <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span></code></pre></div>
+<span><span class="va">z_snp</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/preprocess_z_snp.html">preprocess_z_snp</a></span><span class="op">(</span><span class="va">z_snp</span>, <span class="va">region_info</span>, drop_multiallelic <span class="op">=</span> <span class="cn">TRUE</span>, drop_strand_ambig <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span></code></pre></div>
 </div>
 <div class="section level4">
 <h4 id="harmonizing-prediction-models-and-ld-reference">Harmonizing prediction models and LD reference<a class="anchor" aria-label="anchor" href="#harmonizing-prediction-models-and-ld-reference"></a>
@@ -259,7 +250,7 @@
 <p>The <code>preprocess_weight()</code> function harmonizes the PredictDB/FUSION prediction models and LD reference. This only needs to be done once per combination of prediction models and LD reference.</p>
 <p>In this example, we use three weights, one eQTL model, one sQTL model and one 3‘aQTL model from liver. eQTL and sQTL model are downloaded from <a href="https://predictdb.org/post/2021/07/21/gtex-v8-models-on-eqtl-and-sqtl/" class="external-link">PredictDB website</a>. 3‘aQTL model (Alternative polyadenylation) is in FUSION format and downloaded from <a href="http://bioinfo.szbl.ac.cn/TCGD/download.php" class="external-link">TCGD database</a>. We preprocess each weight file separately and combine them in the end. We specify PredictDB or FUSION format in <code>weight_format</code> and the specific method in FUSION by <code>method_Fusion</code>. We specify the <code>type</code> as the molecular QTL types, and <code>context</code> as the tissues, cell types, or conditions. For the expression models, we limit to protein coding genes, by setting <code>filter_protein_coding_genes = TRUE</code>. We set <code>scale_by_ld_variance=TRUE</code> for PredictDB weights because PredictDB assumes the unstandardized genotypes. For PredictDB models, we set <code>load_predictdb_LD=TRUE</code> to load pre-computed correlations (<code>.txt.gz</code> file) between weight variants. For FUSION models, we set <code>load_predictdb_LD=FALSE</code> to calculate correlations between weight variants with LD reference.</p>
 <p>We use 6 cores to parallelize the computation over the weights.</p>
-<div class="sourceCode" id="cb10"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb9"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">weight_files</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"/project2/xinhe/shared_data/multigroup_ctwas/weights/expression_models/mashr_Liver.db"</span>,</span>
 <span>                  <span class="st">"/project2/xinhe/shared_data/multigroup_ctwas/weights/splicing_models/mashr_Liver.db"</span>,</span>
 <span>                  <span class="st">"/project2/xinhe/shared_data/multigroup_ctwas/weights/apa_models/Liver/Liver/"</span><span class="op">)</span></span>
@@ -307,10 +298,10 @@
 </div>
 </div>
 <div class="section level2">
-<h2 id="running-ctwas-analysis">Running cTWAS analysis<a class="anchor" aria-label="anchor" href="#running-ctwas-analysis"></a>
+<h2 id="running-ctwas-main-function">Running cTWAS main function<a class="anchor" aria-label="anchor" href="#running-ctwas-main-function"></a>
 </h2>
 <p>We can run the entire process of cTWAS analysis from computing z-scores of molecular traits, estimating parameters to finemapping using the main <code>ctwas_sumstats</code> function.</p>
-<div class="sourceCode" id="cb11"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb10"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">res</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/ctwas_sumstats.html">ctwas_sumstats</a></span><span class="op">(</span><span class="va">z_snp</span>, <span class="va">weights</span>, <span class="va">region_info</span>, </span>
 <span>                      thin <span class="op">=</span> <span class="fl">0.1</span>,</span>
 <span>                      niter1 <span class="op">=</span> <span class="fl">3</span>, niter2 <span class="op">=</span> <span class="fl">30</span>, </span>
@@ -328,7 +319,7 @@
 <span><span class="va">finemap_res</span> <span class="op">&lt;-</span> <span class="va">res</span><span class="op">$</span><span class="va">finemap_res</span></span>
 <span><span class="va">boundary_genes</span> <span class="op">&lt;-</span> <span class="va">res</span><span class="op">$</span><span class="va">boundary_genes</span></span>
 <span><span class="va">region_data</span> <span class="op">&lt;-</span> <span class="va">res</span><span class="op">$</span><span class="va">region_data</span></span></code></pre></div>
-<p>We can also run each of the cTWAS modules separately. This would allow more flexible controls of the cTWAS modules with different settings (memory, parallelization, etc.) See [this tutorial][] for more details.</p>
+<p>We can also run each of the cTWAS modules separately. This would allow more flexible controls of the cTWAS modules with different settings (memory, parallelization, etc.) See <a href="https://xinhe-lab.github.io/multigroup_ctwas/articles/multigroup_ctwas_modules.html" class="external-link">the tutorial “Running cTWAS modules separately”</a> for more details.</p>
 </div>
 <div class="section level2">
 <h2 id="postprocessing">Postprocessing<a class="anchor" aria-label="anchor" href="#postprocessing"></a>
@@ -337,7 +328,7 @@
 <h3 id="merging-regions">Merging regions<a class="anchor" aria-label="anchor" href="#merging-regions"></a>
 </h3>
 <p>For cross-boundary genes, we will merge the regions for high PIP (&gt;0.5) genes.</p>
-<div class="sourceCode" id="cb12"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb11"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">high_PIP_genes</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/unique.html" class="external-link">unique</a></span><span class="op">(</span><span class="va">finemap_res</span><span class="op">[</span><span class="va">finemap_res</span><span class="op">$</span><span class="va">type</span> <span class="op">!=</span> <span class="st">"SNP"</span> <span class="op">&amp;</span> <span class="va">finemap_res</span><span class="op">$</span><span class="va">susie_pip</span> <span class="op">&gt;=</span> <span class="fl">0.5</span>, <span class="st">"id"</span><span class="op">]</span><span class="op">)</span></span>
 <span><span class="va">high_PIP_boundary_genes</span> <span class="op">&lt;-</span> <span class="va">boundary_genes</span><span class="op">[</span><span class="va">boundary_genes</span><span class="op">$</span><span class="va">id</span> <span class="op"><a href="https://rdrr.io/r/base/match.html" class="external-link">%in%</a></span> <span class="va">high_PIP_genes</span>, , drop<span class="op">=</span><span class="cn">FALSE</span><span class="op">]</span></span>
 <span><span class="kw">if</span> <span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/nrow.html" class="external-link">nrow</a></span><span class="op">(</span><span class="va">high_PIP_boundary_genes</span><span class="op">)</span> <span class="op">&gt;</span> <span class="fl">0</span><span class="op">)</span><span class="op">{</span></span>
@@ -350,18 +341,9 @@
 <span>                           maxSNP <span class="op">=</span> <span class="va">max_snp_region</span><span class="op">)</span></span>
 <span>  <span class="va">merged_region_data</span> <span class="op">&lt;-</span> <span class="va">res</span><span class="op">$</span><span class="va">merged_region_data</span></span>
 <span><span class="op">}</span></span></code></pre></div>
-<p>For those merged regions, we will expand those regions with full SNPs. We rerun finemapping for the merged regions, and then update the finemapping results for those merged regions.</p>
-<div class="sourceCode" id="cb13"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="co"># Expand those merged regions with full SNPs</span></span>
-<span><span class="va">merged_region_data</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/expand_region_data.html">expand_region_data</a></span><span class="op">(</span><span class="va">merged_region_data</span>,</span>
-<span>                                         <span class="va">region_info</span>,</span>
-<span>                                         <span class="va">z_snp</span>,</span>
-<span>                                         <span class="va">z_gene</span>,</span>
-<span>                                         trim_by <span class="op">=</span> <span class="st">"z"</span>,</span>
-<span>                                         maxSNP <span class="op">=</span> <span class="va">max_snp_region</span>,</span>
-<span>                                         ncore <span class="op">=</span> <span class="va">ncore</span><span class="op">)</span></span>
-<span></span>
-<span><span class="va">finemap_merged_regions_res</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/finemap_regions.html">finemap_regions</a></span><span class="op">(</span><span class="va">merged_region_data</span>,</span>
+<p>We rerun finemapping for the merged regions</p>
+<div class="sourceCode" id="cb12"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">finemap_merged_regions_res</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/finemap_regions.html">finemap_regions</a></span><span class="op">(</span><span class="va">merged_region_data</span>,</span>
 <span>                                              <span class="va">region_info</span>,</span>
 <span>                                              <span class="va">weights</span>,</span>
 <span>                                              group_prior <span class="op">=</span> <span class="va">group_prior</span>,</span>
@@ -371,9 +353,12 @@
 <span>                                              cor_dir <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/paste.html" class="external-link">paste0</a></span><span class="op">(</span><span class="va">outputdir</span>, <span class="st">"/merged_cor_matrix/"</span><span class="op">)</span>,</span>
 <span>                                              ncore <span class="op">=</span> <span class="va">ncore</span>,</span>
 <span>                                              verbose <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span></code></pre></div>
+<p>Update the finemapping results for those merged regions</p>
+<div class="sourceCode" id="cb13"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="co"># finemap_res &lt;- update_merged_regions_finemap_res(finemap_res, finemap_merged_regions_res, merged_region_data)</span></span></code></pre></div>
 </div>
 <div class="section level3">
-<h3 id="rerun-finemapping-with-l-1-for-regions-with-problematic-snps">Rerun finemapping with L = 1 for regions with problematic SNPs<a class="anchor" aria-label="anchor" href="#rerun-finemapping-with-l-1-for-regions-with-problematic-snps"></a>
+<h3 id="rerun-finemapping-with-l-1-for-regions-with-ld-mismatches">Rerun finemapping with L = 1 for regions with LD mismatches<a class="anchor" aria-label="anchor" href="#rerun-finemapping-with-l-1-for-regions-with-ld-mismatches"></a>
 </h3>
 <p>Select regions with high PIP (&gt;0.5) SNPs and molecular traits.</p>
 <div class="sourceCode" id="cb14"><pre class="downlit sourceCode r">
@@ -414,7 +399,8 @@
 <div class="section level3">
 <h3 id="interpreting-ctwas-output">Interpreting cTWAS output<a class="anchor" aria-label="anchor" href="#interpreting-ctwas-output"></a>
 </h3>
-<p>We will add the gene names to the results (the PredictDB weights use Ensembl IDs as the primary identifier), as well as the z-scores for each SNP and gene. We then show all molecular traits with PIP &gt; 0.8, which is the threshold we used in the paper.</p>
+<p>We will add the gene names to the results (the PredictDB weights use Ensembl IDs as the primary identifier).</p>
+<p>We then show all molecular traits with PIP &gt; 0.8, which is the threshold we used in the paper.</p>
 <div class="sourceCode" id="cb17"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># load information for all genes</span></span>
 <span><span class="va">gene_info</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/get_gene_info.html">get_gene_info</a></span><span class="op">(</span><span class="va">weights</span><span class="op">)</span></span>
@@ -440,9 +426,9 @@
 </div>
 </div>
 <div class="section level2">
-<h2 id="visualzing-ctwas-results">Visualzing cTWAS results<a class="anchor" aria-label="anchor" href="#visualzing-ctwas-results"></a>
+<h2 id="visualizing-ctwas-results">Visualizing cTWAS results<a class="anchor" aria-label="anchor" href="#visualizing-ctwas-results"></a>
 </h2>
-<p>We could make locus plot for regions of interest.</p>
+<p>We could make locus plots for regions of interest.</p>
 </div>
   </div>
 

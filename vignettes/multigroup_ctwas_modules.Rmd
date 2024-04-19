@@ -160,3 +160,47 @@ finemap_res <- finemap_regions(screened_region_data,
                                verbose = TRUE)
 saveRDS(finemap_res, file.path(outputdir, paste0(outname, ".ctwas.res.RDS")))
 ```
+
+### Fine-mapping a single region
+
+If we already have assembled `region_data` for all the regions, we can expand the region of interest with full SNPs. 
+```{r finemap_1_region, eval=FALSE}
+region_id <- "16:71020125-72901251"
+selected_region_data <- expand_region_data(region_data[region_id],
+                                           region_info,
+                                           z_snp,
+                                           z_gene,
+                                           trim_by = "z")
+```
+
+
+Otherwise, we can assemble `region_data` for this region with `thin=1`.
+But note, because we only have one region, this would not adjust boundary genes. 
+```{r finemap_1_region_2, eval=FALSE}
+regioninfo <- region_info[region_info$region_id == region_id, ]
+res <- assemble_region_data(regioninfo,
+                            z_snp,
+                            z_gene,
+                            weights,
+                            trim_by = "z",
+                            thin = 1,
+                            adjust_boundary_genes = FALSE)
+selected_region_data <- res$region_data
+```
+
+
+We can perform finemapping for this region of interest:
+```{r finemap_1_region_3, eval=FALSE}
+finemap_region_res <- finemap_regions(selected_region_data,
+                                      region_info,
+                                      weights,
+                                      group_prior = group_prior,
+                                      group_prior_var = group_prior_var,
+                                      L = 5,
+                                      save_cor = TRUE,
+                                      cor_dir = file.path(outputdir, "cor_matrix"),
+                                      verbose = TRUE)
+```
+
+
+
