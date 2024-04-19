@@ -197,12 +197,7 @@ read_weight_predictdb <- function (weight,
       
       for (gname in gnames_core_weight) {
         
-        if (length(weights)>1){
-          gname_weight <- paste0(gname, "|", weight_name)
-        } else {
-          gname_weight <- gname
-        }
-        
+        gname_weight <- paste0(gname, "|", weight_name)
         wgt <- query("select * from weights where gene = ?", params = list(gname))
         wgt.matrix <- as.matrix(wgt[, "weight", drop = F])
         
