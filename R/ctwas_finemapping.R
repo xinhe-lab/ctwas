@@ -49,6 +49,7 @@ finemap_region <- function(region_data,
                            L = 5,
                            group_prior = NULL,
                            group_prior_var = NULL,
+                           groups = NULL,
                            use_null_weight = TRUE,
                            coverage = 0.95,
                            min_abs_corr = 0.5,
@@ -78,7 +79,14 @@ finemap_region <- function(region_data,
   regioninfo <- region_info[region_info$region_id %in% regiondata[["region_id"]], ]
 
   # set pi_prior and V_prior based on group_prior and group_prior_var
-  groups <- unique(unlist(lapply(region_data, "[[", "gs_group")))
+  if (is.null(groups)){
+    if(!is.null(group_prior)){
+      groups <- names(group_prior)
+    }else{
+      groups <- unique(unlist(lapply(region_data, "[[", "gs_group")))
+    }
+  }
+
   res <- initiate_group_priors(group_prior, group_prior_var, groups)
   pi_prior <- res$pi_prior
   V_prior <- res$V_prior
@@ -269,6 +277,7 @@ finemap_regions <- function(region_data,
                             L = 5,
                             group_prior = NULL,
                             group_prior_var = NULL,
+                            groups = NULL,
                             use_null_weight = TRUE,
                             coverage = 0.95,
                             min_abs_corr = 0.5,
@@ -287,6 +296,14 @@ finemap_regions <- function(region_data,
   }
 
   loginfo('Finemapping %d regions ...', length(region_data))
+
+  if (is.null(groups)){
+    if(!is.null(group_prior)){
+      groups <- names(group_prior)
+    }else{
+      groups <- unique(unlist(lapply(region_data, "[[", "gs_group")))
+    }
+  }
 
   cl <- parallel::makeCluster(ncore, outfile = "")
   doParallel::registerDoParallel(cl)
