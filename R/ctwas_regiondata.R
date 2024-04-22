@@ -29,6 +29,8 @@
 #'
 #' @param adjust_boundary_genes identify cross-boundary genes, adjust region_data and update weighs
 #'
+#' @param thin_gwas_snps TRUE/FALSE, if TRUE, only apply thin to GWAS SNPs, Otherwise, apply thins to all SNPs.
+#'
 #' @param ncore The number of cores used to parallelize susie over regions
 #'
 #' @param seed seed for random sampling
@@ -49,6 +51,7 @@ assemble_region_data <- function(region_info,
                                  minvar = 1,
                                  mingene = 0,
                                  adjust_boundary_genes = TRUE,
+                                 thin_gwas_snps = TRUE,
                                  ncore = 1,
                                  seed = 99) {
 
@@ -59,8 +62,6 @@ assemble_region_data <- function(region_info,
   if (thin > 1 | thin <= 0){
     stop("thin needs to be in (0,1]")
   }
-
-  # browser()
 
   region_info <- region_info[order(region_info$chrom, region_info$start),]
 
@@ -96,8 +97,11 @@ assemble_region_data <- function(region_info,
 
     # get region_data for the chromosome
     region_data_chr <- assign_region_ids(regioninfo, geneinfo, snpinfo,
-                                         thin = thin, seed = seed,
-                                         minvar = minvar, mingene = mingene)
+                                         thin = thin,
+                                         thin_gwas_snps = thin_gwas_snps,
+                                         minvar = minvar,
+                                         mingene = mingene,
+                                         seed = seed)
     loginfo("No. regions in chr%s: %d", b, length(region_data_chr))
     region_data <- c(region_data, region_data_chr)
   }
@@ -132,6 +136,7 @@ assign_region_ids <- function(regioninfo,
                               geneinfo,
                               snpinfo,
                               thin = 1,
+                              thin_gwas_snps = TRUE,
                               minvar = 1,
                               mingene = 0,
                               seed = 99) {
@@ -139,9 +144,15 @@ assign_region_ids <- function(regioninfo,
   # downsampling for SNPs if thin < 1
   if (thin < 1) {
     set.seed(seed)
+    if (isTRUE(thin_gwas_snps)){
+      # only thin GWAS snps with keep label = 1
+      thin_idx <- which(snpinfo$keep == 1)
+    } else {
+      thin_idx <- 1:nrow(snpinfo)
+    }
     snpinfo$thin_tag <- rep(0, nrow(snpinfo))
-    nkept <- round(nrow(snpinfo) * thin)
-    snpinfo$thin_tag[sample(1:nrow(snpinfo), nkept)] <- 1
+    nkept <- round(length(thin_idx) * thin)
+    snpinfo$thin_tag[sample(thin_idx, nkept)] <- 1
   } else {
     snpinfo$thin_tag <- 1
   }
