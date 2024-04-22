@@ -78,7 +78,7 @@ finemap_region <- function(region_data,
   regioninfo <- region_info[region_info$region_id %in% regiondata[["region_id"]], ]
 
   # set pi_prior and V_prior based on group_prior and group_prior_var
-  groups <- unique(gs_group)
+  groups <- unique(unlist(lapply(region_data, "[[", "gs_group")))
   res <- initiate_group_priors(group_prior, group_prior_var, groups)
   pi_prior <- res$pi_prior
   V_prior <- res$V_prior
