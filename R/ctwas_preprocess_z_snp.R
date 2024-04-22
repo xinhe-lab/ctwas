@@ -32,7 +32,7 @@ preprocess_z_snp <- function(z_snp,
   loginfo("z_snp has %d variants in total", length(z_snp$id))
 
   # remove SNPs not in LD reference
-  snpinfo <- read_LD_SNP_files(region_info$SNP_info)
+  ld_snpinfo <- read_LD_SNP_files(region_info$SNP_info)
   z_snp <- z_snp[z_snp$id %in% ld_snpinfo$id,]
 
   # drop multiallelic variants (id not unique)
