@@ -5,13 +5,13 @@
 \title{run cTWAS finemapping for a single region}
 \usage{
 finemap_region(
-  region_data,
-  region_id,
+  regiondata,
   region_info,
   weights,
   L = 5,
   group_prior = NULL,
   group_prior_var = NULL,
+  groups = NULL,
   use_null_weight = TRUE,
   coverage = 0.95,
   min_abs_corr = 0.5,
@@ -25,10 +25,6 @@ finemap_region(
 )
 }
 \arguments{
-\item{region_data}{a list object with data for the regions}
-
-\item{region_id}{a character string of region id to be finemapped}
-
 \item{region_info}{a data frame of region definition and associated LD file names}
 
 \item{weights}{a list of weights for each gene}
@@ -38,6 +34,8 @@ finemap_region(
 \item{group_prior}{a vector of two prior inclusion probabilities for SNPs and genes.}
 
 \item{group_prior_var}{a vector of two prior variances for SNPs and gene effects.}
+
+\item{groups}{a vector of group names for group_prior and group_prior_var.}
 
 \item{use_null_weight}{TRUE/FALSE. If TRUE, allow for a probability of no effect in susie}
 
@@ -60,6 +58,8 @@ genotype data in genetic studies.}
 the data frame of finemapping results.}
 
 \item{verbose}{TRUE/FALSE. If TRUE, print detail messages}
+
+\item{region_data}{a list object with data for the region to be finemapped}
 }
 \value{
 a data frame of finemapping results.

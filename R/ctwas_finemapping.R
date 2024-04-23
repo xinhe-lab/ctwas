@@ -1,8 +1,6 @@
 #' run cTWAS finemapping for a single region
 #'
-#' @param region_data a list object with data for the regions
-#'
-#' @param region_id a character string of region id to be finemapped
+#' @param region_data a list object with data for the region to be finemapped
 #'
 #' @param region_info a data frame of region definition and associated LD file names
 #'
@@ -13,6 +11,8 @@
 #' @param group_prior a vector of two prior inclusion probabilities for SNPs and genes.
 #'
 #' @param group_prior_var a vector of two prior variances for SNPs and gene effects.
+#'
+#' @param groups a vector of group names for group_prior and group_prior_var.
 #'
 #' @param use_null_weight TRUE/FALSE. If TRUE, allow for a probability of no effect in susie
 #'
@@ -42,13 +42,13 @@
 #'
 #' @export
 #'
-finemap_region <- function(region_data,
-                           region_id,
+finemap_region <- function(regiondata,
                            region_info,
                            weights,
                            L = 5,
                            group_prior = NULL,
                            group_prior_var = NULL,
+                           groups = NULL,
                            use_null_weight = TRUE,
                            coverage = 0.95,
                            min_abs_corr = 0.5,
@@ -60,12 +60,8 @@ finemap_region <- function(region_data,
                            verbose = FALSE,
                            ...){
 
-  if (verbose){
-    loginfo("Finemapping region %s with L = %d", region_id, L)
-  }
-
   # load input data for the region
-  regiondata <- region_data[[region_id]]
+  region_id <- regiondata[["region_id"]]
   sid <- regiondata[["sid"]]
   gid <- regiondata[["gid"]]
   z <- regiondata[["z"]]
@@ -74,11 +70,22 @@ finemap_region <- function(region_data,
   g_context <- regiondata[["g_context"]]
   g_group <- regiondata[["g_group"]]
 
+  if (verbose){
+    loginfo("Finemapping region %s with L = %d", region_id, L)
+  }
+
   # select region info for the region ids to finemap
-  regioninfo <- region_info[region_info$region_id %in% regiondata[["region_id"]], ]
+  regioninfo <- region_info[region_info$region_id %in% region_id, ]
 
   # set pi_prior and V_prior based on group_prior and group_prior_var
-  groups <- unique(gs_group)
+  if (is.null(groups)){
+    if(!is.null(group_prior)){
+      groups <- names(group_prior)
+    }else{
+      stop("'groups' is required when group_prior is null")
+    }
+  }
+
   res <- initiate_group_priors(group_prior, group_prior_var, groups)
   pi_prior <- res$pi_prior
   V_prior <- res$V_prior
@@ -96,7 +103,7 @@ finemap_region <- function(region_data,
 
   # compute correlation matrices
   R_sg_file <- file.path(cor_dir, paste0("region.", region_id, ".R_snp_gene.RDS"))
-  R_g_file <- file.path(cor_dir, paste0("region.", region_id,  ".R_gene.RDS"))
+  R_g_file <- file.path(cor_dir, paste0("region.", region_id, ".R_gene.RDS"))
   R_s_file <- file.path(cor_dir, paste0("region.", region_id, ".R_snp.RDS"))
 
   if (isTRUE(force_compute_cor)) {
@@ -198,7 +205,6 @@ finemap_region <- function(region_data,
                                geneinfo = geneinfo,
                                snpinfo = ld_snpinfo,
                                include_cs_index = TRUE)
-
     # add z-scores to finemapping result
     susie_res_df$z <- z
 
@@ -233,6 +239,8 @@ finemap_region <- function(region_data,
 #' @param group_prior a vector of two prior inclusion probabilities for SNPs and genes.
 #'
 #' @param group_prior_var a vector of two prior variances for SNPs and gene effects.
+#'
+#' @param groups a vector of group names for group_prior and group_prior_var.
 #'
 #' @param use_null_weight TRUE/FALSE. If TRUE, allow for a probability of no effect in susie
 #'
@@ -270,6 +278,7 @@ finemap_regions <- function(region_data,
                             L = 5,
                             group_prior = NULL,
                             group_prior_var = NULL,
+                            groups = NULL,
                             use_null_weight = TRUE,
                             coverage = 0.95,
                             min_abs_corr = 0.5,
@@ -289,6 +298,14 @@ finemap_regions <- function(region_data,
 
   loginfo('Finemapping %d regions ...', length(region_data))
 
+  if (is.null(groups)){
+    if(!is.null(group_prior)){
+      groups <- names(group_prior)
+    }else{
+      groups <- unique(unlist(lapply(region_data, "[[", "gs_group")))
+    }
+  }
+
   cl <- parallel::makeCluster(ncore, outfile = "")
   doParallel::registerDoParallel(cl)
 
@@ -300,13 +317,13 @@ finemap_regions <- function(region_data,
     # run finemapping for each region
     region_ids.core <- corelist[[core]]
     for (region_id in region_ids.core) {
-      finemap_res.core.list[[region_id]] <- finemap_region(region_data = region_data,
-                                                           region_id = region_id,
+      finemap_res.core.list[[region_id]] <- finemap_region(region_data[[region_id]],
                                                            region_info = region_info,
                                                            weights = weights,
                                                            L = L,
                                                            group_prior = group_prior,
                                                            group_prior_var = group_prior_var,
+                                                           groups = groups,
                                                            use_null_weight = use_null_weight,
                                                            coverage = coverage,
                                                            min_abs_corr = min_abs_corr,

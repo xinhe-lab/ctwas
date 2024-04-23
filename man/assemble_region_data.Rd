@@ -15,6 +15,7 @@ assemble_region_data(
   minvar = 1,
   mingene = 0,
   adjust_boundary_genes = TRUE,
+  thin_gwas_snps = TRUE,
   ncore = 1,
   seed = 99
 )
@@ -46,6 +47,8 @@ or "z" (trim SNPs with lower |z|) See parameter `maxSNP` for more information.}
 \item{mingene}{minimum number of genes in a region}
 
 \item{adjust_boundary_genes}{identify cross-boundary genes, adjust region_data and update weighs}
+
+\item{thin_gwas_snps}{TRUE/FALSE, if TRUE, only apply thin to GWAS SNPs, Otherwise, apply thins to all SNPs.}
 
 \item{ncore}{The number of cores used to parallelize susie over regions}
 
