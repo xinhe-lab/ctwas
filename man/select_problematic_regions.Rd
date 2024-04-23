@@ -9,7 +9,7 @@ select_problematic_regions(problematic_snps, highPIP_finemap_res, weights)
 \arguments{
 \item{problematic_snps}{a character vector of problematic SNP rsIDs}
 
-\item{highPIP_finemap_res}{a data frame of cTWAS finemapping result}
+\item{highPIP_finemap_res}{a data frame of the cTWAS finemapping result with high PIP SNPs and genes}
 
 \item{weights}{weights}
 }

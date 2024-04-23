@@ -82,7 +82,7 @@ detect_ld_mismatch_susie <- function(z_snp,
 #' Get regions with problematic high PIP SNPs or genes
 #'
 #' @param problematic_snps a character vector of problematic SNP rsIDs
-#' @param highPIP_finemap_res a data frame of cTWAS finemapping result
+#' @param highPIP_finemap_res a data frame of the cTWAS finemapping result with high PIP SNPs and genes
 #' @param weights weights
 #'
 #' @return a character vector of region ids with problematic high PIP SNPs or genes
@@ -94,42 +94,47 @@ select_problematic_regions <- function(problematic_snps, highPIP_finemap_res, we
 
   if (length(problematic_snps) == 0) {
     loginfo('No problematic SNPs')
+    problematic_ids <- NULL
     problematic_region_ids <- NULL
   }else{
     loginfo('Number of problematic SNPs: %d', length(problematic_snps))
 
-    # read the PredictDB weight_files
-    stopifnot(file.exists(weight_file))
-    sqlite <- RSQLite::dbDriver("SQLite")
-    db <- RSQLite::dbConnect(sqlite, weight_file)
-    query <- function(...) RSQLite::dbGetQuery(db, ...)
-    weight_table <- query("select * from weights")
-    # load gene information from PredictDB weights
-    gene_info <- query("select gene, genename, gene_type from extra")
-    RSQLite::dbDisconnect(db)
-
-    # find regions with high PIP SNPs that are problematic
+    # find high PIP SNPs that are problematic
     ctwas_highpip_snp_res <- highPIP_finemap_res[highPIP_finemap_res$type == "SNP", ]
     problematic_highpip_snps <- intersect(ctwas_highpip_snp_res$id, problematic_snps)
-    loginfo('Number of problematic high PIP SNPs: %d', length(problematic_highpip_snps))
+    loginfo('Number of high PIP SNPs that are problematic: %d', length(problematic_highpip_snps))
+    problematic_highpip_snp_region_ids <- unique(highPIP_finemap_res[highPIP_finemap_res$id %in% problematic_highpip_snps,"region_id"])
+    loginfo('Number of regions with high PIP SNPs that are problematic: %d', length(problematic_highpip_snp_region_ids))
 
     # find high PIP genes with problematic SNPs in its weights
     ctwas_highpip_gene_res <- highPIP_finemap_res[highPIP_finemap_res$type != "SNP", ]
-    ctwas_highpip_gene_weight_table <- weight_table[weight_table$gene %in% ctwas_highpip_gene_res$id, ]
-    problematic_highpip_genes <- ctwas_highpip_gene_weight_table$gene[which(ctwas_highpip_gene_weight_table$rsid %in% problematic_snps)]
-    loginfo('Number of problematic high PIP genes: %d', length(problematic_highpip_genes))
+    highpip_gids <- ctwas_highpip_gene_res$id
+    # subset weights to high PIP genes
+    weights_highpip_genes <- weights[highpip_gids]
+    # extract snp ids in weights
+    problematic_highpip_genes <- c()
+    if (length(weights_highpip_genes) > 0){
+      for (i in 1:length(weights_highpip_genes)){
+        gid <- names(weights_highpip_genes)[i]
+        wgt <- weights_highpip_genes[[i]]$wgt
+        wgt_snpnames <- rownames(wgt)
+        if (any(wgt_snpnames %in% problematic_snps)){
+          problematic_highpip_genes <- c(problematic_highpip_genes, gid)
+        }
+      }
+    }
+    loginfo('Number of high PIP genes with problematic SNPs in its weights: %d', length(problematic_highpip_genes))
+    problematic_highpip_gene_region_ids <- unique(highPIP_finemap_res[highPIP_finemap_res$id %in% problematic_highpip_genes,"region_id"])
+    loginfo('Number of regions with high PIP SNPs that are problematic: %d', length(problematic_highpip_gene_region_ids))
+
+    problematic_ids <- unique(c(problematic_highpip_snps, problematic_highpip_genes))
 
     # get problematic high PIP regions
-    problematic_ids <- c(problematic_highpip_snps, problematic_highpip_genes)
-    if (length(problematic_ids) > 0) {
-      problematic_region_ids <- unique(finemap_res[finemap_res$id %in% problematic_ids,"region_id"])
-      loginfo('Number of problematic regions: %d', length(problematic_region_ids))
-    }else{
-      loginfo('No problematic regions found')
-    }
+    problematic_region_ids <- unique(c(problematic_highpip_snp_region_ids, problematic_highpip_gene_region_ids))
+    loginfo('Number of problematic regions: %d', length(problematic_region_ids))
   }
 
   # return problematic region ids
-  return(problematic_region_ids)
+  return(problematic_region_ids = problematic_region_ids)
 }
 
