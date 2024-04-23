@@ -392,15 +392,15 @@ rerun_region_data <- expand_region_data(region_data[problematic_region_ids],
                                         maxSNP = max_snp_region,
                                         ncore = ncore)
 
-finemap_merged_regions_res <- finemap_regions(rerun_region_data,
-                                              region_info,
-                                              weights,
-                                              group_prior = group_prior,
-                                              group_prior_var = group_prior_var,
-                                              L = 1,
-                                              cor_dir = paste0(outputdir, "/cor_matrix/"),
-                                              ncore = ncore,
-                                              verbose = TRUE)
+finemap_problematic_regions_res <- finemap_regions(rerun_region_data,
+                                                   region_info,
+                                                   weights,
+                                                   group_prior = group_prior,
+                                                   group_prior_var = group_prior_var,
+                                                   L = 1,
+                                                   cor_dir = paste0(outputdir, "/cor_matrix/"),
+                                                   ncore = ncore,
+                                                   verbose = TRUE)
 ```
 
 ## cTWAS output
