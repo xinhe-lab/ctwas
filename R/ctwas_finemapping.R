@@ -1,6 +1,8 @@
 #' run cTWAS finemapping for a single region
 #'
-#' @param region_data a list object with data for the region to be finemapped
+#' @param region_data a list object with data for the regions
+#'
+#' @param region_id a character string of region id to be finemapped
 #'
 #' @param region_info a data frame of region definition and associated LD file names
 #'
@@ -42,7 +44,8 @@
 #'
 #' @export
 #'
-finemap_region <- function(regiondata,
+finemap_region <- function(region_data,
+                           region_id,
                            region_info,
                            weights,
                            L = 5,
@@ -61,7 +64,7 @@ finemap_region <- function(regiondata,
                            ...){
 
   # load input data for the region
-  region_id <- regiondata[["region_id"]]
+  regiondata <- region_data[[region_id]]
   sid <- regiondata[["sid"]]
   gid <- regiondata[["gid"]]
   z <- regiondata[["z"]]
@@ -75,7 +78,7 @@ finemap_region <- function(regiondata,
   }
 
   # select region info for the region ids to finemap
-  regioninfo <- region_info[region_info$region_id %in% region_id, ]
+  regioninfo <- region_info[region_info$region_id %in% regiondata[["region_id"]], ]
 
   # set pi_prior and V_prior based on group_prior and group_prior_var
   if (is.null(groups)){
@@ -317,7 +320,8 @@ finemap_regions <- function(region_data,
     # run finemapping for each region
     region_ids.core <- corelist[[core]]
     for (region_id in region_ids.core) {
-      finemap_res.core.list[[region_id]] <- finemap_region(region_data[[region_id]],
+      finemap_res.core.list[[region_id]] <- finemap_region(region_data = region_data,
+                                                           region_id = region_id,
                                                            region_info = region_info,
                                                            weights = weights,
                                                            L = L,

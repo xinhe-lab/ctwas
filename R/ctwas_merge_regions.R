@@ -30,8 +30,8 @@
 #'
 #' @export
 #'
-merge_region_data <- function(region_data,
-                              boundary_genes,
+merge_region_data <- function(merged_region_list,
+                              region_data,
                               region_info,
                               z_snp,
                               z_gene,
@@ -40,23 +40,6 @@ merge_region_data <- function(region_data,
                               trim_by = c("random", "z"),
                               ncore = 1,
                               seed = 99) {
-
-  # Identify overlapping regions and get a list of regions to be merged
-  loginfo("Identify overlapping regions")
-  merged_region_list <- get_merged_regions(boundary_genes)
-
-  merged_region_info <- data.frame(chrom = sapply(merged_region_list, "[[", "chrom"),
-                                    start = sapply(merged_region_list, "[[", "start"),
-                                    stop = sapply(merged_region_list, "[[", "stop"),
-                                    region_id = names(merged_region_list))
-  for(i in 1:nrow(merged_region_info)){
-    merged_region_info[i, "n_merged_regions"] <- length(merged_region_list[[i]]$region_ids)
-    merged_region_info[i, "merged_region_ids"] <- paste(merged_region_list[[i]]$region_ids, collapse = ";")
-    region_idx <- match(merged_region_list[[i]]$region_ids, region_info$region_id)
-    merged_region_info[i, "LD_matrix"] <- paste(region_info[region_idx, "LD_matrix"], collapse = ";")
-    merged_region_info[i, "SNP_info"] <- paste(region_info[region_idx, "SNP_info"], collapse = ";")
-  }
-  rownames(merged_region_info) <- NULL
 
   # Merge region data
   loginfo("Merge region_data for %d merged regions", length(merged_region_list))
@@ -101,8 +84,7 @@ merge_region_data <- function(region_data,
     merged_region_data <- add_z_to_region_data(merged_region_data, z_snp, z_gene, ncore = ncore)
   }
 
-
-  return(list(merged_region_data = merged_region_data, merged_region_info = merged_region_info))
+  return(merged_region_data)
 
 }
 
@@ -148,12 +130,14 @@ label_overlapping_regions <- function(boundary_genes) {
 
 #' get a list of regions to be merged
 get_merged_regions <- function(boundary_genes){
+  # Identify overlapping regions and get a list of regions to be merged
+  loginfo("Identify overlapping regions and get a list of regions to be merged.")
 
   # Identify overlapping regions
   boundary_genes <- label_overlapping_regions(boundary_genes)
 
   # For each new region, get the region IDs for the regions to be merged
-  merged_regions <- list()
+  merged_region_list <- list()
   merge_labels <- unique(boundary_genes$merge_label)
   for( label in merge_labels){
     df <- boundary_genes[boundary_genes$merge_label == label,,drop=F]
@@ -162,13 +146,28 @@ get_merged_regions <- function(boundary_genes){
     new_region_stop <- max(df$region_stop)
     merged_region_ids <- unique(unlist(strsplit(df[df$merge_label == label, "region_id"], split = ";")))
     new_region_id <- paste0(new_region_chrom, ":", new_region_start, "-", new_region_stop)
-    merged_regions[[new_region_id]] <- list(chrom = new_region_chrom,
+    merged_region_list[[new_region_id]] <- list(chrom = new_region_chrom,
                                             start = new_region_start,
                                             stop = new_region_stop,
                                             region_ids = merged_region_ids)
   }
 
-  return(merged_regions)
+  merged_region_info <- data.frame(chrom = sapply(merged_region_list, "[[", "chrom"),
+                                   start = sapply(merged_region_list, "[[", "start"),
+                                   stop = sapply(merged_region_list, "[[", "stop"),
+                                   region_id = names(merged_region_list))
+
+  for(i in 1:nrow(merged_region_info)){
+    merged_region_info[i, "n_merged_regions"] <- length(merged_region_list[[i]]$region_ids)
+    merged_region_info[i, "merged_region_ids"] <- paste(merged_region_list[[i]]$region_ids, collapse = ";")
+    region_idx <- match(merged_region_list[[i]]$region_ids, region_info$region_id)
+    merged_region_info[i, "LD_matrix"] <- paste(region_info[region_idx, "LD_matrix"], collapse = ";")
+    merged_region_info[i, "SNP_info"] <- paste(region_info[region_idx, "SNP_info"], collapse = ";")
+  }
+  rownames(merged_region_info) <- NULL
+
+  return(list(merged_region_list = merged_region_list,
+              merged_region_info = merged_region_info))
 }
 
 merge_finemap_regions <- function(region_data,

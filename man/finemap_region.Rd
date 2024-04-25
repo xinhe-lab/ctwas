@@ -5,7 +5,8 @@
 \title{run cTWAS finemapping for a single region}
 \usage{
 finemap_region(
-  regiondata,
+  region_data,
+  region_id,
   region_info,
   weights,
   L = 5,
@@ -25,6 +26,10 @@ finemap_region(
 )
 }
 \arguments{
+\item{region_data}{a list object with data for the regions}
+
+\item{region_id}{a character string of region id to be finemapped}
+
 \item{region_info}{a data frame of region definition and associated LD file names}
 
 \item{weights}{a list of weights for each gene}
@@ -58,8 +63,6 @@ genotype data in genetic studies.}
 the data frame of finemapping results.}
 
 \item{verbose}{TRUE/FALSE. If TRUE, print detail messages}
-
-\item{region_data}{a list object with data for the region to be finemapped}
 }
 \value{
 a data frame of finemapping results.

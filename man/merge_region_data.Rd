@@ -5,8 +5,8 @@
 \title{Merge region data for cross-boundary genes}
 \usage{
 merge_region_data(
+  merged_region_list,
   region_data,
-  boundary_genes,
   region_info,
   z_snp,
   z_gene,
@@ -19,8 +19,6 @@ merge_region_data(
 }
 \arguments{
 \item{region_data}{a list of region gene IDs and SNP IDs and associated file names}
-
-\item{boundary_genes}{a data frame of boundary gene info}
 
 \item{region_info}{a data frame of region definition and associated LD file names}
 
@@ -40,6 +38,8 @@ or "z" (trim SNPs with lower |z|) See parameter `maxSNP` for more information.}
 \item{ncore}{The number of cores used to parallelize susie over regions}
 
 \item{seed}{seed for random sampling}
+
+\item{boundary_genes}{a data frame of boundary gene info}
 }
 \value{
 a list of merged region_data, and a data frame of merged region info
