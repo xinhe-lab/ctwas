@@ -63,6 +63,23 @@ finemap_region <- function(region_data,
                            verbose = FALSE,
                            ...){
 
+  # check input data
+  if (!is.list(region_data)){
+    stop("'region_data' should be a list.")
+  }
+
+  if (!is.data.frame(region_info)){
+    stop("'region_info' should be a data frame.")
+  }
+
+  if (!is.list(weights)){
+    stop("'weights' should be a list.")
+  }
+
+  if (verbose){
+    loginfo("Finemapping region %s with L = %d", region_id, L)
+  }
+
   # load input data for the region
   regiondata <- region_data[[region_id]]
   sid <- regiondata[["sid"]]
@@ -72,10 +89,6 @@ finemap_region <- function(region_data,
   g_type <- regiondata[["g_type"]]
   g_context <- regiondata[["g_context"]]
   g_group <- regiondata[["g_group"]]
-
-  if (verbose){
-    loginfo("Finemapping region %s with L = %d", region_id, L)
-  }
 
   # select region info for the region ids to finemap
   regioninfo <- region_info[region_info$region_id %in% regiondata[["region_id"]], ]
@@ -297,6 +310,19 @@ finemap_regions <- function(region_data,
 
   if (!is.null(logfile)){
     addHandler(writeToFile, file= logfile, level='DEBUG')
+  }
+
+  # check input data
+  if (!is.list(region_data)){
+    stop("'region_data' should be a list.")
+  }
+
+  if (!is.data.frame(region_info)){
+    stop("'region_info' should be a data frame.")
+  }
+
+  if (!is.list(weights)){
+    stop("'weights' should be a list.")
   }
 
   loginfo('Finemapping %d regions ...', length(region_data))
