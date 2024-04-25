@@ -36,6 +36,7 @@ screen_regions <- function(
     group_prior = NULL,
     group_prior_var = NULL,
     L = 5,
+    minvar = 2,
     mingene = 1,
     min_nonSNP_PIP = 0.5,
     max_iter = 100,
@@ -65,6 +66,15 @@ screen_regions <- function(
   # adjust to account for thin argument
   if (!is.null(group_prior)){
     group_prior["SNP"] <- group_prior["SNP"]/thin
+  }
+
+  # remove regions with fewer than mingene genes
+  if (minvar > 0) {
+    n.var <- sapply(region_data, function(x){
+      length(x[["gid"]]) + length(x[["sid"]])})
+    drop.idx <- which(n.var < minvar)
+    loginfo("Remove %d regions with number of variables < %d.", length(drop.idx), minvar)
+    region_data[drop.idx] <- NULL
   }
 
   # remove regions with fewer than mingene genes

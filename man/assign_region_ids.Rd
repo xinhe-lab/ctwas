@@ -10,8 +10,6 @@ assign_region_ids(
   snpinfo,
   thin = 1,
   thin_gwas_snps = TRUE,
-  minvar = 1,
-  mingene = 0,
   seed = 99
 )
 }

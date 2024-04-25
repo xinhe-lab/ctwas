@@ -11,6 +11,7 @@ screen_regions(
   group_prior = NULL,
   group_prior_var = NULL,
   L = 5,
+  minvar = 2,
   mingene = 1,
   min_nonSNP_PIP = 0.5,
   max_iter = 100,

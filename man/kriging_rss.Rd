@@ -11,14 +11,6 @@ kriging_rss(
   r_tol = 1e-08,
   s = estimate_s_rss(z, R, n, r_tol, method = "null-mle")
 )
-
-kriging_rss(
-  z,
-  R,
-  n,
-  r_tol = 1e-08,
-  s = estimate_s_rss(z, R, n, r_tol, method = "null-mle")
-)
 }
 \arguments{
 \item{z}{A p-vector of z scores.}
@@ -42,27 +34,8 @@ a list containing a ggplot2 plot object and a table. The plot
   the observed z scores, the conditional expectation, the conditional
   variance, the standardized differences between the observed z score
   and expected value, the log likelihood ratio statistics.
-
-a list containing a ggplot2 plot object and a table. The plot
-  compares observed z score vs the expected value. The possible allele
-  switched variants are labeled as red points (log LR > 2 and abs(z) > 2).
-  The table summarizes the conditional distribution for each variant
-  and the likelihood ratio test. The table has the following columns:
-  the observed z scores, the conditional expectation, the conditional
-  variance, the standardized differences between the observed z score
-  and expected value, the log likelihood ratio statistics.
 }
 \description{
-Under the null, the rss model with regularized LD
-  matrix is \eqn{z|R,s ~ N(0, (1-s)R + s I))}. We use a mixture of
-  normals to model the conditional distribution of z_j given other z
-  scores, \eqn{z_j | z_{-j}, R, s ~ \sum_{k=1}^{K} \pi_k
-  N(-\Omega_{j,-j} z_{-j}/\Omega_{jj}, \sigma_{k}^2/\Omega_{jj})},
-  \eqn{\Omega = ((1-s)R + sI)^{-1}}, \eqn{\sigma_1, ..., \sigma_k}
-  is a grid of fixed positive numbers. We estimate the mixture
-  weights \eqn{\pi}  We detect the possible allele switch issue
-  using likelihood ratio for each variant.
-
 Under the null, the rss model with regularized LD
   matrix is \eqn{z|R,s ~ N(0, (1-s)R + s I))}. We use a mixture of
   normals to model the conditional distribution of z_j given other z

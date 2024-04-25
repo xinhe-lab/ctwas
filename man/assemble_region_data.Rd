@@ -12,8 +12,6 @@ assemble_region_data(
   thin = 1,
   maxSNP = Inf,
   trim_by = c("random", "z"),
-  minvar = 1,
-  mingene = 0,
   adjust_boundary_genes = TRUE,
   thin_gwas_snps = TRUE,
   ncore = 1,
@@ -41,10 +39,6 @@ have enough memory to run the program. This applies to the last rerun step
 
 \item{trim_by}{remove SNPs if the total number of SNPs exceeds limit, options: "random",
 or "z" (trim SNPs with lower |z|) See parameter `maxSNP` for more information.}
-
-\item{minvar}{minimum number of SNPs (and genes) in a region}
-
-\item{mingene}{minimum number of genes in a region}
 
 \item{adjust_boundary_genes}{identify cross-boundary genes, adjust region_data and update weighs}
 

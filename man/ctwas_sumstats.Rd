@@ -9,12 +9,13 @@ ctwas_sumstats(
   weights,
   region_info,
   thin = 1,
-  niter1 = 3,
-  niter2 = 30,
+  niter_prefit = 3,
+  niter = 30,
   L = 5,
   init_group_prior = NULL,
   init_group_prior_var = NULL,
-  group_prior_var_structure = c("independent", "shared_all", "shared_QTLtype"),
+  group_prior_var_structure = c("independent", "shared_nonSNP", "shared_all",
+    "shared_type", "shared_context"),
   max_snp_region = Inf,
   min_nonSNP_PIP = 0.5,
   p_single_effect = 0.8,
@@ -42,9 +43,9 @@ Smaller \code{thin} parameters reduce runtime at the expense of accuracy.
 The fine mapping step is rerun using full SNPs
 for regions with strong gene signals; see \code{min_nonSNP_PIP}.}
 
-\item{niter1}{the number of iterations of the E-M algorithm to perform during the initial parameter estimation step}
+\item{niter_prefit}{the number of iterations of the E-M algorithm to perform during the initial parameter estimation step}
 
-\item{niter2}{the number of iterations of the E-M algorithm to perform during the complete parameter estimation step}
+\item{niter}{the number of iterations of the E-M algorithm to perform during the complete parameter estimation step}
 
 \item{L}{the number of effects for susie during the fine mapping steps}
 
@@ -54,8 +55,10 @@ for regions with strong gene signals; see \code{min_nonSNP_PIP}.}
 
 \item{group_prior_var_structure}{a string indicating the structure to put on the prior variance parameters.
 "independent" is the default and allows all groups to have their own separate variance parameters.
+"shared_nonSNP" allows all non-SNP groups to share the same variance parameter.
 "shared_all" allows all groups to share the same variance parameter.
-"shared_QTLtype" allows all groups in one molecular QTL type to share the same variance parameter.}
+"shared_type" allows all groups in one molecular QTL type to share the same variance parameter.
+"shared_context" allows all groups in one molecular QTL type to share the same variance parameter.}
 
 \item{max_snp_region}{Inf or integer. Maximum number of SNPs in a region. Default is
 Inf, no limit. This can be useful if there are many SNPs in a region and you don't
@@ -88,7 +91,7 @@ having 1 or fewer effects will be used for parameter estimation}
 \item{verbose}{TRUE/FALSE. If TRUE, print detail messages}
 }
 \value{
-a list of estimated parameters, fine-mapping results, and boundary genes
+a list of estimated parameters, fine-mapping results, boundary genes, and region_data
 }
 \description{
 Causal inference for TWAS using summary statistics

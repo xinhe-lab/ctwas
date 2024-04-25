@@ -23,10 +23,6 @@
 #' @param trim_by remove SNPs if the total number of SNPs exceeds limit, options: "random",
 #' or "z" (trim SNPs with lower |z|) See parameter `maxSNP` for more information.
 #'
-#' @param minvar minimum number of SNPs (and genes) in a region
-#'
-#' @param mingene minimum number of genes in a region
-#'
 #' @param adjust_boundary_genes identify cross-boundary genes, adjust region_data and update weighs
 #'
 #' @param thin_gwas_snps TRUE/FALSE, if TRUE, only apply thin to GWAS SNPs, Otherwise, apply thins to all SNPs.
@@ -48,8 +44,6 @@ assemble_region_data <- function(region_info,
                                  thin = 1,
                                  maxSNP = Inf,
                                  trim_by = c("random", "z"),
-                                 minvar = 1,
-                                 mingene = 0,
                                  adjust_boundary_genes = TRUE,
                                  thin_gwas_snps = TRUE,
                                  ncore = 1,
@@ -99,8 +93,6 @@ assemble_region_data <- function(region_info,
     region_data_chr <- assign_region_ids(regioninfo, geneinfo, snpinfo,
                                          thin = thin,
                                          thin_gwas_snps = thin_gwas_snps,
-                                         minvar = minvar,
-                                         mingene = mingene,
                                          seed = seed)
     loginfo("No. regions in chr%s: %d", b, length(region_data_chr))
     region_data <- c(region_data, region_data_chr)
@@ -137,8 +129,6 @@ assign_region_ids <- function(regioninfo,
                               snpinfo,
                               thin = 1,
                               thin_gwas_snps = TRUE,
-                              minvar = 1,
-                              mingene = 0,
                               seed = 99) {
 
   # downsampling for SNPs if thin < 1
@@ -175,15 +165,17 @@ assign_region_ids <- function(regioninfo,
     sidx <- which(snpinfo$chrom == region_chrom & snpinfo$pos >= region_start & snpinfo$pos < region_stop
                   & snpinfo$keep == 1 & snpinfo$thin_tag == 1)
 
-    if (length(gidx) + length(sidx) < minvar) {next}
-
-    if (length(gidx) < mingene) {next}
-
-    gid <- geneinfo$id[gidx]
-    sid <- snpinfo$id[sidx]
-
-    minpos <- min(c(geneinfo$p0[gidx], snpinfo$pos[sidx]))
-    maxpos <- max(c(geneinfo$p1[gidx], snpinfo$pos[sidx]))
+    if (length(gidx) + length(sidx) < 1) {
+      gid <- NULL
+      sid <- NULL
+      minpos <- NULL
+      maxpos <- NULL
+    }else{
+      gid <- geneinfo$id[gidx]
+      sid <- snpinfo$id[sidx]
+      minpos <- min(c(geneinfo$p0[gidx], snpinfo$pos[sidx]))
+      maxpos <- max(c(geneinfo$p1[gidx], snpinfo$pos[sidx]))
+    }
 
     region_data[[region_id]] <- list("region_id" = region_id,
                                      "chrom" = region_chrom,

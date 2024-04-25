@@ -8,9 +8,10 @@ est_param(
   region_data,
   init_group_prior = NULL,
   init_group_prior_var = NULL,
-  group_prior_var_structure = c("independent", "shared_all", "shared_type"),
-  niter1 = 3,
-  niter2 = 30,
+  group_prior_var_structure = c("independent", "shared_nonSNP", "shared_all",
+    "shared_type", "shared_context"),
+  niter_prefit = 3,
+  niter = 30,
   p_single_effect = 0.8,
   ncore = 1,
   logfile = NULL,
@@ -26,12 +27,14 @@ est_param(
 
 \item{group_prior_var_structure}{a string indicating the structure to put on the prior variance parameters.
 "independent" is the default and allows all groups to have their own separate variance parameters.
+"shared_nonSNP" allows all non-SNP groups to share the same variance parameter.
 "shared_all" allows all groups to share the same variance parameter.
-"shared_type" allows all groups in one molecular QTL type to share the same variance parameter.}
+"shared_type" allows all groups in one molecular QTL type to share the same variance parameter.
+"shared_context" allows all groups in one molecular QTL type to share the same variance parameter.}
 
-\item{niter1}{the number of iterations of the E-M algorithm to perform during the initial parameter estimation step}
+\item{niter_prefit}{the number of iterations of the E-M algorithm to perform during the initial parameter estimation step}
 
-\item{niter2}{the number of iterations of the E-M algorithm to perform during the complete parameter estimation step}
+\item{niter}{the number of iterations of the E-M algorithm to perform during the complete parameter estimation step}
 
 \item{p_single_effect}{Regions with probability greater than \code{p_single_effect} of
 having at most one causal effect will be used selected for the complete parameter estimation step}
