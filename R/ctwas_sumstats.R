@@ -57,7 +57,7 @@
 #'
 #' @param logfile the log file, if NULL will print log info on screen
 #'
-#' @param verbose TRUE/FALSE. If TRUE, print detail messages
+#' @param verbose TRUE/FALSE. If TRUE, print detailed messages
 #'
 #' @importFrom logging addHandler loginfo writeToFile
 #'

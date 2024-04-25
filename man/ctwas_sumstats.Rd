@@ -88,7 +88,7 @@ having 1 or fewer effects will be used for parameter estimation}
 
 \item{logfile}{the log file, if NULL will print log info on screen}
 
-\item{verbose}{TRUE/FALSE. If TRUE, print detail messages}
+\item{verbose}{TRUE/FALSE. If TRUE, print detailed messages}
 }
 \value{
 a list of estimated parameters, fine-mapping results, boundary genes, and region_data

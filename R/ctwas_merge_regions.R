@@ -128,7 +128,16 @@ label_overlapping_regions <- function(boundary_genes) {
   return(boundary_genes)
 }
 
-#' get a list of regions to be merged
+#' Get a list of regions to be merged
+#'
+#' @param boundary_genes a data frame of boundary gene info
+#'
+#' @importFrom logging loginfo
+#'
+#' @return a list of merged_region_list, and a data frame of merged region info
+#'
+#' @export
+#'
 get_merged_regions <- function(boundary_genes){
   # Identify overlapping regions and get a list of regions to be merged
   loginfo("Identify overlapping regions and get a list of regions to be merged.")

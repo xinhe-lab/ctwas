@@ -2,10 +2,16 @@
 % Please edit documentation in R/ctwas_merge_regions.R
 \name{get_merged_regions}
 \alias{get_merged_regions}
-\title{get a list of regions to be merged}
+\title{Get a list of regions to be merged}
 \usage{
 get_merged_regions(boundary_genes)
 }
+\arguments{
+\item{boundary_genes}{a data frame of boundary gene info}
+}
+\value{
+a list of merged_region_list, and a data frame of merged region info
+}
 \description{
-get a list of regions to be merged
+Get a list of regions to be merged
 }
