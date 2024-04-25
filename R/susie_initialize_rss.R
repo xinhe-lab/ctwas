@@ -1,10 +1,9 @@
 # Set default susie initialization.
 init_setup_rss = function(p, L, prior_variance, residual_variance,
                           prior_weights, null_weight) {
-  if (!is.numeric(prior_variance) || prior_variance < 0)
+  if (!is.numeric(prior_variance) || any(prior_variance < 0))
     stop("Prior variance should be positive number.")
-  if(!is.null(residual_variance) &&
-     (residual_variance > 1 | residual_variance < 0))
+  if (!is.null(residual_variance) && (any(residual_variance > 1 | residual_variance < 0)))
     stop("Residual variance should be a scaler between 0 and 1")
   if (is.null(residual_variance))
     residual_variance = 1
