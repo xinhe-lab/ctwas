@@ -11,8 +11,10 @@
 #'
 #' @param group_prior_var_structure a string indicating the structure to put on the prior variance parameters.
 #' "independent" is the default and allows all groups to have their own separate variance parameters.
+#' "shared_nonSNP" allows all non-SNP groups to share the same variance parameter.
 #' "shared_all" allows all groups to share the same variance parameter.
 #' "shared_type" allows all groups in one molecular QTL type to share the same variance parameter.
+#' "shared_context" allows all groups in one molecular QTL type to share the same variance parameter.
 #'
 #' @param use_null_weight TRUE/FALSE. If TRUE, allow for a probability of no effect in susie
 #'
@@ -27,16 +29,16 @@
 #'
 #' @return a list of parameters
 #'
-EM <- function(region_data,
-               niter = 20,
-               init_group_prior = NULL,
-               init_group_prior_var = NULL,
-               group_prior_var_structure = c("independent","shared_all","shared_type"),
-               use_null_weight = TRUE,
-               max_iter = 1,
-               ncore = 1,
-               verbose = FALSE,
-               ...){
+EM_est_param <- function(region_data,
+                         niter = 20,
+                         init_group_prior = NULL,
+                         init_group_prior_var = NULL,
+                         group_prior_var_structure = c("independent","shared_nonSNP","shared_all","shared_type","shared_context"),
+                         use_null_weight = TRUE,
+                         max_iter = 1,
+                         ncore = 1,
+                         verbose = FALSE,
+                         ...){
 
   # get groups and types from region_data
   groups <- unique(unlist(lapply(region_data, "[[", "gs_group")))
@@ -139,28 +141,40 @@ EM <- function(region_data,
     # res2 = susie(X2,y,L=10)
     # res$mu2 is identical to res2$mu2 but coefficients are on diff scale.
 
-    if (group_prior_var_structure=="independent"){
+    if (group_prior_var_structure=="independent") {
       V_prior <- sapply(names(V_prior),
                         function(x){
                           tmp_EM_susie_res <- EM_susie_res[EM_susie_res$group==x,];
                           sum(tmp_EM_susie_res$susie_pip*tmp_EM_susie_res$mu2)/sum(tmp_EM_susie_res$susie_pip)})
-    } else if (group_prior_var_structure=="shared_all"){
+    } else if (group_prior_var_structure=="shared_nonSNP") {
       tmp_EM_susie_res <- EM_susie_res[EM_susie_res$group=="SNP",]
       V_prior["SNP"] <- sum(tmp_EM_susie_res$susie_pip*tmp_EM_susie_res$mu2)/sum(tmp_EM_susie_res$susie_pip)
       tmp_EM_susie_res <- EM_susie_res[EM_susie_res$group!="SNP",]
       V_prior[names(V_prior)!="SNP"] <- sum(tmp_EM_susie_res$susie_pip*tmp_EM_susie_res$mu2)/sum(tmp_EM_susie_res$susie_pip)
-    } else if (group_prior_var_structure=="shared_type"){
+    } else if (group_prior_var_structure=="shared_all") {
+      V_prior[names(V_prior)] <- sum(tmp_EM_susie_res$susie_pip*tmp_EM_susie_res$mu2)/sum(tmp_EM_susie_res$susie_pip)
+    } else if (group_prior_var_structure=="shared_type") {
       tmp_EM_susie_res <- EM_susie_res[EM_susie_res$group=="SNP",]
       V_prior["SNP"] <- sum(tmp_EM_susie_res$susie_pip*tmp_EM_susie_res$mu2)/sum(tmp_EM_susie_res$susie_pip)
-      for(i in types){
-        if (i != "SNP"){
-          tmp_EM_susie_res <- EM_susie_res[EM_susie_res$type==i,]
-          V_prior[sapply(names(V_prior), function(x){
-            unlist(strsplit(x, "[|]"))[1]})==i] <-
-            sum(tmp_EM_susie_res$susie_pip*tmp_EM_susie_res$mu2)/sum(tmp_EM_susie_res$susie_pip)
-        }
+      nonSNP_types <- setdiff(types, "SNP")
+      for(type in nonSNP_types){
+        tmp_EM_susie_res <- EM_susie_res[EM_susie_res$type==type,]
+        V_prior[sapply(names(V_prior), function(x){
+          unlist(strsplit(x, "[|]"))[1]})==type] <-
+          sum(tmp_EM_susie_res$susie_pip*tmp_EM_susie_res$mu2)/sum(tmp_EM_susie_res$susie_pip)
+      }
+    } else if (group_prior_var_structure=="shared_context") {
+      tmp_EM_susie_res <- EM_susie_res[EM_susie_res$group=="SNP",]
+      V_prior["SNP"] <- sum(tmp_EM_susie_res$susie_pip*tmp_EM_susie_res$mu2)/sum(tmp_EM_susie_res$susie_pip)
+      nonSNP_contexts <- setdiff(contexts, "SNP")
+      for(context in nonSNP_contexts){
+        tmp_EM_susie_res <- EM_susie_res[EM_susie_res$context==context,]
+        V_prior[sapply(names(V_prior), function(x){
+          unlist(strsplit(x, "[|]"))[2]})==context] <-
+          sum(tmp_EM_susie_res$susie_pip*tmp_EM_susie_res$mu2)/sum(tmp_EM_susie_res$susie_pip)
       }
     }
+
     group_prior_var_iters[names(V_prior), iter] <- V_prior
   }
   parallel::stopCluster(cl)
