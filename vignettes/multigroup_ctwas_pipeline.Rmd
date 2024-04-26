@@ -579,7 +579,7 @@ finemap_merged_regions_res <- finemap_regions(merged_region_data,
 
 Update the finemapping results for those merged regions.
 ```{r, eval=FALSE}
-finemap_res <- update_finemap_res(finemap_res, finemap_merged_regions_res, merged_region_data)
+finemap_res <- update_finemap_res(finemap_res, finemap_merged_regions_res, merged_region_info)
 ```
 
 
