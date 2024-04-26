@@ -224,3 +224,13 @@ merge_finemap_regions <- function(region_data,
 
   return(finemap_merged_regions_res)
 }
+
+
+update_finemap_res <- function(finemap_res, finemap_merged_regions_res, merged_region_info){
+  for(i in 1:nrow(merged_region_info)){
+    region_id <- merged_region_info$region_id[i]
+    merged_region_ids <- unlist(strsplit(merged_region_info$merged_region_ids[i],";"))
+    finemap_res[finemap_res$region_id %in% merged_region_ids, ] <- finemap_merged_regions_res[finemap_merged_regions_res$region_id==region_id, ]
+  }
+  return(finemap_res)
+}
