@@ -237,7 +237,7 @@ There are a few potential problems when preparing the input data. First, the var
 The second potential problem is that the effect alleles in the prediction model, GWAS and LD reference may not agree with each other, thus we need to ``harmonize'' the data to ensure that the effect alleles match. If the data are not already harmonized, we provide some options for harmonization. 
 
 These inputs should be harmonized prior to cTWAS analysis (i.e. the reference and alternative alleles for each variant should match across all three data sources). 
-    
+
 Another potential problem is the LD of the GWAS data (in-sample LD) do not match the reference LD. This can lead to false positives in fine-mapping tools. Diagnostic tools including [SuSiE-RSS][susierss_diagnostic], and [DENTIST][DENTIST], have been developed to check possible LD mismatch. Because it is very time consuming to run the LD mismatch diagnosis for all the regions across the genome, we will perform LD mismatch diagnosis and adjustment only for selected regions with high PIP signals in the post-processing section. 
 
 
@@ -321,7 +321,7 @@ The `L` argument sets the number of effects for SuSiE during the screening regio
 If the `save_cor` argument is TRUE, it will save the correlation matrices (SNP-SNP, SNP-gene, and gene-gene correlation matrices) in the `cor_dir` directory for future access. 
 If the `logfile` argument is specified, it will write log messages to the log file. 
 If the `verbose` argument is TRUE, it will print more detailed messages. 
- 
+
 
 
 ```{r ctwas_sumstats, eval=FALSE}
@@ -337,7 +337,7 @@ res <- ctwas_sumstats(z_snp, weights, region_info,
                       save_cor = TRUE, 
                       cor_dir = file.path(outputdir, "cor_matrix"),
                       logfile = file.path(outputdir, 
-                                paste0(outname, ".ctwas_sumstats.log")),
+                                          paste0(outname, ".ctwas_sumstats.log")),
                       verbose = FALSE)
 
 param <- res$param
@@ -464,7 +464,7 @@ if (thin < 1){
                                              trim_by = "z",
                                              maxSNP = max_snp_region,
                                              ncore = ncore)
-
+  
   # update data in screened regions with screened_region_data
   region_data[names(screened_region_data)] <- screened_region_data
   saveRDS(region_data, file.path(outputdir, paste0(outname, ".region_data.RDS")))
@@ -579,7 +579,9 @@ finemap_merged_regions_res <- finemap_regions(merged_region_data,
 
 Update the finemapping results for those merged regions.
 ```{r, eval=FALSE}
-finemap_res <- update_finemap_res(finemap_res, finemap_merged_regions_res, merged_region_info)
+finemap_res <- update_merged_regions_finemap_res(finemap_res, 
+                                                 finemap_merged_regions_res, 
+                                                 merged_region_info)
 ```
 
 
@@ -615,14 +617,16 @@ rerun_region_data <- expand_region_data(region_data[problematic_region_ids],
                                         ncore = ncore)
 
 finemap_problematic_regions_res <- finemap_regions(rerun_region_data,
-                                              region_info,
-                                              weights,
-                                              group_prior = group_prior,
-                                              group_prior_var = group_prior_var,
-                                              L = 1,
-                                              cor_dir = paste0(outputdir, "/cor_matrix/"),
-                                              ncore = ncore,
-                                              verbose = TRUE)
+                                                   region_info,
+                                                   weights,
+                                                   group_prior = group_prior,
+                                                   group_prior_var = group_prior_var,
+                                                   L = 1,
+                                                   cor_dir = paste0(outputdir, "/cor_matrix/"),
+                                                   ncore = ncore,
+                                                   verbose = TRUE)
+
+finemap_res <- update_finemap_res(finemap_res, finemap_problematic_regions_res)
 ```
 
 

@@ -186,7 +186,7 @@ merge_finemap_regions <- function(region_data,
                                   z_snp,
                                   z_gene,
                                   weights,
-                                  maxSNP = Inf,
+                                  max_snp_region = Inf,
                                   expand = TRUE,
                                   group_prior = NULL,
                                   group_prior_var = NULL,
@@ -199,14 +199,20 @@ merge_finemap_regions <- function(region_data,
 
   high_PIP_genes <- unique(finemap_res[finemap_res$type != "SNP" & finemap_res$susie_pip >= 0.5, "id"])
   high_PIP_boundary_genes <- boundary_genes[boundary_genes$id %in% high_PIP_genes, , drop=FALSE]
+  loginfo("%d boundary genes with PIP >= 0.5", nrow(high_PIP_boundary_genes))
   if (nrow(high_PIP_boundary_genes) > 0){
-    res <- merge_region_data(region_data,
-                             high_PIP_boundary_genes,
+    # Identify overlapping regions and get a list of regions to be merged
+    res <- get_merged_regions(high_PIP_boundary_genes)
+    merged_region_list <- res$merged_region_list
+    merged_region_info <- res$merged_region_info
+
+    res <- merge_region_data(merged_region_list,
+                             region_data,
                              region_info,
                              z_snp,
                              z_gene,
                              expand = expand,
-                             maxSNP = maxSNP)
+                             maxSNP = max_snp_region)
     merged_region_data <- res$merged_region_data
   }
 
@@ -222,15 +228,26 @@ merge_finemap_regions <- function(region_data,
                                                 ncore = ncore,
                                                 verbose = verbose)
 
-  return(finemap_merged_regions_res)
+  updated_finemap_res <- update_finemap_res(finemap_res, finemap_merged_regions_res, merged_region_info)
+
+  return(updated_finemap_res)
 }
 
 
-update_finemap_res <- function(finemap_res, finemap_merged_regions_res, merged_region_info){
+#' Update finemapping result for merged regions
+#'
+#' @param finemap_res a data frame of finemapping result
+#' @param finemap_merged_regions_res a data frame of finemapping result for merged regions
+#' @param merged_region_info a data frame of merged region info
+#'
+#' @export
+#'
+update_merged_regions_finemap_res <- function(finemap_res, finemap_merged_regions_res, merged_region_info){
   for(i in 1:nrow(merged_region_info)){
     region_id <- merged_region_info$region_id[i]
     merged_region_ids <- unlist(strsplit(merged_region_info$merged_region_ids[i],";"))
-    finemap_res[finemap_res$region_id %in% merged_region_ids, ] <- finemap_merged_regions_res[finemap_merged_regions_res$region_id==region_id, ]
+    finemap_res[finemap_res$region_id %in% merged_region_ids, ] <-
+      finemap_merged_regions_res[finemap_merged_regions_res$region_id==region_id, ]
   }
   return(finemap_res)
 }

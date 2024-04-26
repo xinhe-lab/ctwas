@@ -138,3 +138,22 @@ select_problematic_regions <- function(problematic_snps, highPIP_finemap_res, we
   return(problematic_region_ids = problematic_region_ids)
 }
 
+#' Update finemapping result for problematic regions
+#'
+#' @param old_finemap_res a data frame of old finemapping result
+#' @param new_finemap_res a data frame of new finemapping result
+#'
+#' @export
+#'
+update_finemap_res <- function(old_finemap_res, new_finemap_res){
+
+  if (!all(colnames(finemap_res) != colnames(new_finemap_res))) {
+    stop("columns of finemap_res and new_finemap_res do not match!")
+  }
+
+  updated_region_ids <- unique(new_finemap_res$region_id)
+  kept_finemap_res <- finemap_res[!finemap_res$region_id %in% updated_region_ids, ]
+  updated_finemap_res <- rbind(kept_finemap_res, new_finemap_res)
+
+  return(updated_finemap_res)
+}
