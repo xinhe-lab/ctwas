@@ -76,6 +76,14 @@ finemap_region <- function(region_data,
     stop("'weights' should be a list.")
   }
 
+  if (!region_id %in% names(region_data)){
+    stop("'region_data' does not contain 'region_id'.")
+  }
+
+  if (!region_id %in% region_info$region_id){
+    stop("'region_info' does not contain 'region_id'.")
+  }
+
   if (verbose){
     loginfo("Finemapping region %s with L = %d", region_id, L)
   }
@@ -91,7 +99,7 @@ finemap_region <- function(region_data,
   g_group <- regiondata[["g_group"]]
 
   # select region info for the region ids to finemap
-  regioninfo <- region_info[region_info$region_id %in% regiondata[["region_id"]], ]
+  regioninfo <- region_info[region_info$region_id %in% region_id, ]
 
   # set pi_prior and V_prior based on group_prior and group_prior_var
   if (is.null(groups)){
@@ -114,8 +122,15 @@ finemap_region <- function(region_data,
   null_weight <- res$null_weight
   rm(res)
 
+  # get LD matrix files and SNP info files
+  LD_matrix_files <- unlist(strsplit(regioninfo$LD_matrix, split = ";"))
+  stopifnot(all(file.exists(LD_matrix_files)))
+
+  SNP_info_files <- unlist(strsplit(regioninfo$SNP_info, split = ";"))
+  stopifnot(all(file.exists(SNP_info_files)))
+
   # load SNP info for the region
-  ld_snpinfo <- read_LD_SNP_files(regioninfo$SNP_info)
+  ld_snpinfo <- read_LD_SNP_files(SNP_info_files)
 
   # compute correlation matrices
   R_sg_file <- file.path(cor_dir, paste0("region.", region_id, ".R_snp_gene.RDS"))
@@ -124,10 +139,10 @@ finemap_region <- function(region_data,
 
   if (isTRUE(force_compute_cor)) {
     # force compute correlation matrix
-    if (length(regioninfo$LD_matrix)==1){
-      R_snp <- load_LD(regioninfo$LD_matrix)
+    if (length(LD_matrix_files) == 1){
+      R_snp <- load_LD(LD_matrix_files)
     } else {
-      R_snp <- lapply(regioninfo$LD_matrix, load_LD)
+      R_snp <- lapply(LD_matrix_files, load_LD)
       R_snp <- suppressWarnings(as.matrix(Matrix::bdiag(R_snp)))
     }
     res <- compute_region_cor(sid, gid, R_snp, weights, ld_snpinfo)
@@ -162,10 +177,10 @@ finemap_region <- function(region_data,
       R <- diag(length(z))
     } else {
       # compute correlation matrix if L > 1
-      if (length(regioninfo$LD_matrix)==1){
-        R_snp <- load_LD(regioninfo$LD_matrix)
+      if (length(LD_matrix_files)==1){
+        R_snp <- load_LD(LD_matrix_files)
       } else {
-        R_snp <- lapply(regioninfo$LD_matrix, load_LD)
+        R_snp <- lapply(LD_matrix_files, load_LD)
         R_snp <- suppressWarnings(as.matrix(Matrix::bdiag(R_snp)))
       }
       res <- compute_region_cor(sid, gid, R_snp, weights, ld_snpinfo)
@@ -282,7 +297,6 @@ finemap_region <- function(region_data,
 #' @param logfile the log file, if NULL will print log info on screen
 #'
 #' @importFrom logging addHandler loginfo writeToFile
-#' @importFrom logging loginfo
 #'
 #' @return finemapping results.
 #'
@@ -323,6 +337,10 @@ finemap_regions <- function(region_data,
 
   if (!is.list(weights)){
     stop("'weights' should be a list.")
+  }
+
+  if (!all(names(region_data) %in% region_info$region_id)){
+    stop("Some 'region_id' in 'region_data' were missed in 'region_info'.")
   }
 
   loginfo('Finemapping %d regions ...', length(region_data))

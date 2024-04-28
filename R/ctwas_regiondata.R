@@ -74,7 +74,9 @@ assemble_region_data <- function(region_info,
     geneinfo <- gene_info[gene_info$chrom == b, ]
 
     # get SNP info in LD in the chromosome
-    snpinfo <- read_LD_SNP_files(regioninfo$SNP_info)
+    SNP_info_files <- unlist(strsplit(regioninfo$SNP_info, split = ";"))
+    stopifnot(all(file.exists(SNP_info_files)))
+    snpinfo <- read_LD_SNP_files(SNP_info_files)
 
     # select SNPs
     snpinfo$keep <- rep(1, nrow(snpinfo))
@@ -333,6 +335,10 @@ expand_region_data <- function(region_data,
 
   trim_by <- match.arg(trim_by)
 
+  if (!all(names(region_data) %in% region_info$region_id)){
+    stop("Some 'region_id' in 'region_data' were missed in 'region_info'.")
+  }
+
   loginfo("Expand region_data for %d regions with full SNPs", length(region_data))
 
   pb <- txtProgressBar(min = 0, max = length(region_data), initial = 0, style = 3)
@@ -346,7 +352,9 @@ expand_region_data <- function(region_data,
 
     # load all SNPs in the region
     regioninfo <- region_info[region_info$region_id %in% region_data[[i]][["region_id"]], ]
-    snpinfo <- read_LD_SNP_files(regioninfo$SNP_info)
+    SNP_info_files <- unlist(strsplit(regioninfo$SNP_info, split = ";"))
+    stopifnot(all(file.exists(SNP_info_files)))
+    snpinfo <- read_LD_SNP_files(SNP_info_files)
 
     # update sid in the region
     snpinfo$keep <- rep(1, nrow(snpinfo))
