@@ -237,7 +237,7 @@ There are a few potential problems when preparing the input data. First, the var
 The second potential problem is that the effect alleles in the prediction model, GWAS and LD reference may not agree with each other, thus we need to ``harmonize'' the data to ensure that the effect alleles match. If the data are not already harmonized, we provide some options for harmonization. 
 
 These inputs should be harmonized prior to cTWAS analysis (i.e. the reference and alternative alleles for each variant should match across all three data sources). 
-
+    
 Another potential problem is the LD of the GWAS data (in-sample LD) do not match the reference LD. This can lead to false positives in fine-mapping tools. Diagnostic tools including [SuSiE-RSS][susierss_diagnostic], and [DENTIST][DENTIST], have been developed to check possible LD mismatch. Because it is very time consuming to run the LD mismatch diagnosis for all the regions across the genome, we will perform LD mismatch diagnosis and adjustment only for selected regions with high PIP signals in the post-processing section. 
 
 
@@ -321,7 +321,7 @@ The `L` argument sets the number of effects for SuSiE during the screening regio
 If the `save_cor` argument is TRUE, it will save the correlation matrices (SNP-SNP, SNP-gene, and gene-gene correlation matrices) in the `cor_dir` directory for future access. 
 If the `logfile` argument is specified, it will write log messages to the log file. 
 If the `verbose` argument is TRUE, it will print more detailed messages. 
-
+ 
 
 
 ```{r ctwas_sumstats, eval=FALSE}
@@ -337,7 +337,7 @@ res <- ctwas_sumstats(z_snp, weights, region_info,
                       save_cor = TRUE, 
                       cor_dir = file.path(outputdir, "cor_matrix"),
                       logfile = file.path(outputdir, 
-                                          paste0(outname, ".ctwas_sumstats.log")),
+                                paste0(outname, ".ctwas_sumstats.log")),
                       verbose = FALSE)
 
 param <- res$param
@@ -464,7 +464,7 @@ if (thin < 1){
                                              trim_by = "z",
                                              maxSNP = max_snp_region,
                                              ncore = ncore)
-  
+
   # update data in screened regions with screened_region_data
   region_data[names(screened_region_data)] <- screened_region_data
   saveRDS(region_data, file.path(outputdir, paste0(outname, ".region_data.RDS")))
@@ -537,64 +537,55 @@ finemap_region_res <- finemap_regions(selected_region_data,
 
 ### Merging regions
 
-We select cross-boundary genes with PIP >= 0.5, then identify overlapping regions from these high PIP cross-boundary genes, and merge the region_data for these regions. 
+We first select cross-boundary genes to merge, 
+We then identify overlapping regions from these cross-boundary genes, 
+and create `merged_region_data` and `merged_region_info` for these merged regions. 
+
+We rerun finemapping for the merged regions, and update the finemapping results.
+
 ```{r merge_regions, eval=FALSE}
 high_PIP_genes <- unique(finemap_res[finemap_res$type != "SNP" & finemap_res$susie_pip >= 0.5, "id"])
-high_PIP_boundary_genes <- boundary_genes[boundary_genes$id %in% high_PIP_genes, , drop=FALSE]
-loginfo("%d boundary genes with PIP >= 0.5", nrow(high_PIP_boundary_genes))
+selected_boundary_genes <- boundary_genes[boundary_genes$id %in% high_PIP_genes, , drop=FALSE]
 
-if (nrow(high_PIP_boundary_genes) > 0){
-  # Identify overlapping regions and get a list of regions to be merged
-  res <- get_merged_regions(high_PIP_boundary_genes)
-  merged_region_list <- res$merged_region_list
+if (nrow(selected_boundary_genes) > 0){
+  res <- merge_finemap_regions(selected_boundary_genes,
+                               region_data,
+                               region_info,
+                               finemap_res,
+                               z_snp,
+                               z_gene,
+                               weights,
+                               expand = TRUE,
+                               group_prior = group_prior,
+                               group_prior_var = group_prior_var,
+                               L = 5,
+                               save_cor = TRUE,
+                               cor_dir = paste0(outputdir, "/cor_matrix/"),
+                               ncore = 1,
+                               verbose = TRUE)
+  merged_region_data <- res$merged_region_data
   merged_region_info <- res$merged_region_info
-  rm(res)
-  # Merge region_data for the overlapping regions
-  merged_region_data <- merge_region_data(merged_region_list,
-                                          region_data,
-                                          region_info,
-                                          z_snp,
-                                          z_gene,
-                                          expand = TRUE,
-                                          maxSNP = max_snp_region)
+  finemap_res <- res$finemap_res
 }
-```
 
-
-The returned `merged_region_data` object only contains data for merged regions.
-We then rerun finemapping for the merged regions.
-```{r, eval=FALSE}
-finemap_merged_regions_res <- finemap_regions(merged_region_data,
-                                              region_info,
-                                              weights,
-                                              group_prior = group_prior,
-                                              group_prior_var = group_prior_var,
-                                              L = 5,
-                                              save_cor = TRUE,
-                                              cor_dir = paste0(outputdir, "/merged_cor_matrix/"),
-                                              ncore = ncore,
-                                              verbose = TRUE)
-```
-
-
-Update the finemapping results for those merged regions.
-```{r, eval=FALSE}
-finemap_res <- update_merged_regions_finemap_res(finemap_res, 
-                                                 finemap_merged_regions_res, 
-                                                 merged_region_info)
 ```
 
 
 ### Rerun finemapping with L = 1 for regions with LD mismatches
 
-Select regions with high PIP (>0.5) SNPs and molecular traits.
+LD mismatches between GWAS data and the reference LD could lead to false positives in fine-mapping. Diagnostic tools including [SuSiE-RSS][susierss_diagnostic], and [DENTIST][DENTIST], have been developed to check possible LD mismatch. 
+
+Here, we perform the LD mismatch diagnosis using [SuSiE-RSS][susierss_diagnostic] for selected regions with high PIP signals. 
+
+We first select regions with total non-SNP PIP > 0.5. 
 ```{r, eval=FALSE}
+# Select regions with high PIP (>0.5) SNPs and molecular traits
 highPIP_finemap_res <- finemap_res[finemap_res$susie_pip > 0.5, ]
 highPIP_region_ids <- unique(highPIP_finemap_res$region_id)
 ```
 
 
-We use SuSiE RSS to perform LD mismatch diagnosis for these high PIP regions.
+We perform LD mismatch diagnosis for these regions using SuSiE RSS.
 ```{r, eval=FALSE}
 highPIP_region_info <- region_info[region_info$region_id %in% highPIP_region_ids,]
 res <- detect_ld_mismatch_susie(z_snp, highPIP_region_info, gwas_n, ncore = ncore, p_diff_thresh = 5e-8)
@@ -602,30 +593,25 @@ problematic_snps <- res$problematic_snps
 ```
 
 
-We will rerun the fine-mapping with L = 1 for the regions containing high PIP SNPs 
+We then rerun the fine-mapping with L = 1 for the regions containing high PIP SNPs 
 detected with LD mismatches, or high PIP molecular traits with problematic SNPs in their weights. 
 ```{r, eval=FALSE}
-# select regions containing high PIP (>0.5) SNPs detected with LD mismatches, 
-# or high PIP molecular traits with problematic SNPs in their weights
-problematic_region_ids <- select_problematic_regions(problematic_snps, highPIP_finemap_res, weights)
-rerun_region_data <- expand_region_data(region_data[problematic_region_ids],
-                                        region_info,
-                                        z_snp,
-                                        z_gene,
-                                        trim_by = "z",
-                                        maxSNP = max_snp_region,
-                                        ncore = ncore)
+# select regions containing molecular traits with problematic SNPs in their weights
+problematic_region_ids <- select_problematic_regions(problematic_snps, weights, z_gene, z_cutoff)
+rerun_region_data <- screened_region_data[problematic_region_ids]
 
 finemap_problematic_regions_res <- finemap_regions(rerun_region_data,
-                                                   region_info,
-                                                   weights,
-                                                   group_prior = group_prior,
-                                                   group_prior_var = group_prior_var,
-                                                   L = 1,
-                                                   cor_dir = paste0(outputdir, "/cor_matrix/"),
-                                                   ncore = ncore,
-                                                   verbose = TRUE)
+                                              region_info,
+                                              weights,
+                                              group_prior = group_prior,
+                                              group_prior_var = group_prior_var,
+                                              L = 1,
+                                              cor_dir = 
+                                                paste0(outputdir, "/cor_matrix/"),
+                                              ncore = ncore,
+                                              verbose = TRUE)
 
+# update finemapping results for problematic regions
 finemap_res <- update_finemap_res(finemap_res, finemap_problematic_regions_res)
 ```
 
