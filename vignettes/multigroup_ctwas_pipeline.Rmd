@@ -102,8 +102,11 @@ cat("gwas_n=", gwas_n, "\n")
 z_snp <- z_snp[,c("rsid", "ALT", "REF", "Z")]
 colnames(z_snp) <- c("id", "A1", "A2", "z")
 
-z_snp_outfile <- file.path(outputdir, paste0(gwas_name, ".z_snp.Rd"))
-save(z_snp, gwas_n, file=z_snp_outfile)
+z_snp_outfile <- file.path(outputdir, paste0(gwas_name, ".z_snp.RDS"))
+gwas_n_outfile <- file.path(outputdir, paste0(gwas_name, ".gwas_n.RDS"))
+saveRDS(z_snp, file=z_snp_outfile)
+saveRDS(gwas_n, file=gwas_n_outfile)
+
 ```
 
 
@@ -188,7 +191,7 @@ region_info$SNP_info <- file.path(ld_R_dir, paste0(ld_filestem, ".Rvar"))
 # Check to make sure all the LD matrices and SNP info files are available.
 stopifnot(all(file.exists(region_info$LD_matrix)))
 stopifnot(all(file.exists(region_info$SNP_info)))
-write.table(region_info, file = file.path(outputdir, "region_info.txt"), sep = "\t", col.names = T, row.names = F, quote = F)
+saveRDS(region_info, file.path(outputdir, "region_info.RDS"))
 ```
 
 
@@ -249,10 +252,11 @@ If `drop_strand_ambig = TRUE`, it will drop strand ambiguous variants.
 
 ```{r preprocess_z_snp, eval=FALSE}
 # load the GWAS sumstats data
-z_snp_outfile <- file.path(outputdir, paste0(gwas_name, ".z_snp.Rd"))
-load(z_snp_outfile)
+z_snp_outfile <- file.path(outputdir, paste0(gwas_name, ".z_snp.RDS"))
+z_snp <- readRDS(z_snp_outfile)
 
 z_snp <- preprocess_z_snp(z_snp, region_info, drop_multiallelic = TRUE, drop_strand_ambig = TRUE)
+saveRDS(z_snp, file.path(outputdir, paste0(outname, ".preprocessed.z_snp.RDS")))
 ```
 
 
@@ -301,6 +305,7 @@ weights_adipose <- preprocess_weights(weight_file = weight_files[2],
                                       filter_protein_coding_genes = TRUE)
 
 weights <- c(weights_liver, weights_adipose)
+saveRDS(weights, file.path(outputdir, paste0(outname, ".preprocessed.weights.RDS")))
 ```
 
 
@@ -314,7 +319,7 @@ The `ctwas_sumstats` function takes preprocessed GWAS z-scores (`z_snp`), `weigh
 
 Some main parameter settings: 
 The `thin` argument randomly selects a subset of variants (10% when thin = 0.1) to use during the parameter estimation and screening regions, reducing computation. 
-The `max_snp_region` sets a maximum on the number of variants that can be in a single region to prevent memory issues during fine-mapping. 
+The `maxSNP` sets a maximum on the number of variants that can be in a single region to prevent memory issues during fine-mapping. 
 The `ncore` argument specifies the number of cores to use when parallelizing over regions.
 The `niter_prefit` argument and `niter` argument sets the number of EM iterations for estimating parameters. There are several options for how to handle the prior effect size parameters by specifying the `group_prior_var_stucture`. See the section "Estimating parameters" for more details about these settings. 
 The `L` argument sets the number of effects for SuSiE during the screening regions and fine mapping steps.
@@ -322,8 +327,6 @@ If the `save_cor` argument is TRUE, it will save the correlation matrices (SNP-S
 If the `logfile` argument is specified, it will write log messages to the log file. 
 If the `verbose` argument is TRUE, it will print more detailed messages. 
  
-
-
 ```{r ctwas_sumstats, eval=FALSE}
 res <- ctwas_sumstats(z_snp, weights, region_info, 
                       thin = 0.1,
@@ -331,7 +334,7 @@ res <- ctwas_sumstats(z_snp, weights, region_info,
                       niter = 30, 
                       L = 5, 
                       group_prior_var_structure = "shared_type", 
-                      max_snp_region = 20000, 
+                      maxSNP = 20000, 
                       min_nonSNP_PIP = 0.5,
                       ncore = ncore, 
                       save_cor = TRUE, 
@@ -367,7 +370,7 @@ The `compute_gene_z` function computes z-scores for the molecular traits using p
 
 ```{r compute_gene_z, eval=FALSE}
 z_gene <- compute_gene_z(z_snp, weights, ncore=ncore)
-save(z_gene, file = file.path(outputdir, paste0(outname, ".gene_z.Rd")))
+saveRDS(z_gene, file = file.path(outputdir, paste0(outname, ".z_gene.RDS")))
 ```
 
 
@@ -377,7 +380,7 @@ After we have done data preprocessing and imputed gene z-scores, we assemble the
 The `assemble_region_data` function will assign genes, SNPs and their z-score data for each region.
 It will identify the genes that cross region boundaries, and reassign them to the region with the highest r2. 
 It will down-sample the SNPs by the value of `thin` to reduce running time of parameter estimation and region screening. If `thin = 1`, it will use all the SNPs. 
-It will trim (randomly by default) the SNPs if the number of SNPs in a region is more than `max_snp_region`.
+It will trim (randomly by default) the SNPs if the number of SNPs in a region is more than `maxSNP`.
 
 ```{r assemble_region_data, eval=FALSE}
 thin <- 0.1
@@ -404,16 +407,16 @@ We use the `est_param` function to estimate two sets of parameters: the prior in
 
 There are several options for how to handle the prior effect size parameters by specifying the `group_prior_var_stucture`:
 
-- "independent" is the default and allows all groups to have their own separate variance parameters.
+- "shared_type" (default option) allows all groups in one molecular QTL type to share the same variance parameter.
+- "shared_context" allows all groups in one molecular QTL type to share the same variance parameter.
 - "shared_nonSNP" allows all non-SNP groups to share the same variance parameter.
 - "shared_all" allows all groups to share the same variance parameter.
-- "shared_type" allows all groups in one molecular QTL type to share the same variance parameter.
-- "shared_context" allows all groups in one molecular QTL type to share the same variance parameter.
+- "independent" allows all groups to have their own separate variance parameters.
 
 This step will run the EM algorithm to estimate parameters and return estimate parameters (`group_prior`, `group_prior_var`, etc.).
-It will run two rounds of EM algorithm, first round uses fewer iterations (niter_prefit=3 by default) to get rough parameter estimates, 
+It will run two rounds of EM algorithm, first round uses fewer iterations (`niter_prefit=3` by default) to get rough parameter estimates, 
 and using the estimated priors in the first round, we select regions with single effect to run the second round.
-We use more iterations in the second round (niter=30 by default) to get accurate parameter estimates. 
+We use more iterations in the second round (`niter=30` by default) to get accurate parameter estimates. 
 
 ```{r est_param, eval=FALSE}
 param <- est_param(region_data, 
@@ -575,45 +578,60 @@ if (nrow(selected_boundary_genes) > 0){
 
 LD mismatches between GWAS data and the reference LD could lead to false positives in fine-mapping. Diagnostic tools including [SuSiE-RSS][susierss_diagnostic], and [DENTIST][DENTIST], have been developed to check possible LD mismatch. 
 
-Here, we perform the LD mismatch diagnosis using [SuSiE-RSS][susierss_diagnostic] for selected regions with high PIP signals. 
+Here, we perform the LD mismatch diagnosis using [SuSiE-RSS][susierss_diagnostic] for selected regions. It is an optional step that users could run after finishing the main cTWAS analysis. Users could choose regions of interest, to be confident of the results.
 
-We first select regions with total non-SNP PIP > 0.5. 
+Here we check the top 10 regions with highest total non-SNP PIPs:
 ```{r, eval=FALSE}
-# Select regions with high PIP (>0.5) SNPs and molecular traits
-highPIP_finemap_res <- finemap_res[finemap_res$susie_pip > 0.5, ]
-highPIP_region_ids <- unique(highPIP_finemap_res$region_id)
+nonSNP_PIP_df <- compute_region_nonSNP_PIPs(finemap_res)
+selected_nonSNP_PIP_df <- nonSNP_PIP_df[order(nonSNP_PIP_df$nonSNP_PIP, decreasing = TRUE),]
+selected_region_ids <- selected_nonSNP_PIP_df$region_id[1:10]
+loginfo("Number of selected regions: %d", length(selected_region_ids))
 ```
 
 
-We perform LD mismatch diagnosis for these regions using SuSiE RSS.
+We perform LD mismatch diagnosis for these regions using SuSiE RSS to detect problematic SNPs. This returns a list of problematic SNPs, flipped SNPs, and the test statistics of `kriging_rss` function from SuSiE-RSS. 
 ```{r, eval=FALSE}
-highPIP_region_info <- region_info[region_info$region_id %in% highPIP_region_ids,]
-res <- detect_ld_mismatch_susie(z_snp, highPIP_region_info, gwas_n, ncore = ncore, p_diff_thresh = 5e-8)
+selected_region_info <- region_info[region_info$region_id %in% selected_region_ids, ]
+# We use SuSiE RSS to perform LD mismatch diagnosis for these high PIP regions.
+res <- detect_ld_mismatch_susie(z_snp, selected_region_info, gwas_n, ncore = ncore, p_diff_thresh = 5e-8)
 problematic_snps <- res$problematic_snps
+flipped_snps <- res$flipped_snps
+condz_stats <- res$condz_stats
+
+detect_ld_mismatch_file <- file.path(outputdir, paste0(outname, ".detect_ld_mismatch_res.RDS"))
+loginfo("%d problematic SNPs", length(problematic_snps))
+saveRDS(res, detect_ld_mismatch_file)
 ```
 
 
-We then rerun the fine-mapping with L = 1 for the regions containing high PIP SNPs 
-detected with LD mismatches, or high PIP molecular traits with problematic SNPs in their weights. 
+We get large effect genes (molecular traits) (abs(z) > 3) with problematic SNPs in their weights, and then select regions containing the problematic genes (molecular traits).
+```{r}
+problematic_genes <- get_problematic_genes(problematic_snps, weights, z_gene, z_thresh = 3)
+loginfo("%d problematic genes", length(problematic_genes))
+
+problematic_region_ids <- unique(finemap_res[finemap_res$id %in% problematic_genes, "region_id"])
+loginfo("%d problematic regions", length(problematic_region_ids))
+```
+
+We then rerun the fine-mapping with L = 1 for the problematic regions, and update finemapping results. 
 ```{r, eval=FALSE}
-# select regions containing molecular traits with problematic SNPs in their weights
-problematic_region_ids <- select_problematic_regions(problematic_snps, weights, z_gene, z_cutoff)
-rerun_region_data <- screened_region_data[problematic_region_ids]
-
-finemap_problematic_regions_res <- finemap_regions(rerun_region_data,
-                                              region_info,
-                                              weights,
-                                              group_prior = group_prior,
-                                              group_prior_var = group_prior_var,
-                                              L = 1,
-                                              cor_dir = 
-                                                paste0(outputdir, "/cor_matrix/"),
-                                              ncore = ncore,
-                                              verbose = TRUE)
-
-# update finemapping results for problematic regions
-finemap_res <- update_finemap_res(finemap_res, finemap_problematic_regions_res)
+if (length(problematic_region_ids) > 1){
+  # rerun the fine-mapping with L = 1 for the problematic regions
+  rerun_region_data <- screened_region_data[problematic_region_ids]
+  finemap_problematic_regions_res <- finemap_regions(rerun_region_data,
+                                                     region_info,
+                                                     weights,
+                                                     group_prior = group_prior,
+                                                     group_prior_var = group_prior_var,
+                                                     L = 1,
+                                                     cor_dir = paste0(outputdir, "/cor_matrix/"),
+                                                     ncore = ncore,
+                                                     verbose = TRUE)
+  # update finemapping results for problematic regions
+  updated_finemap_res <- update_finemap_res(finemap_res, finemap_problematic_regions_res)
+}
 ```
+
 
 
 ## cTWAS output

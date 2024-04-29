@@ -14,9 +14,9 @@ ctwas_sumstats(
   L = 5,
   init_group_prior = NULL,
   init_group_prior_var = NULL,
-  group_prior_var_structure = c("independent", "shared_nonSNP", "shared_all",
-    "shared_type", "shared_context"),
-  max_snp_region = Inf,
+  group_prior_var_structure = c("shared_type", "shared_context", "shared_nonSNP",
+    "shared_all", "independent"),
+  maxSNP = Inf,
   min_nonSNP_PIP = 0.5,
   p_single_effect = 0.8,
   use_null_weight = TRUE,
@@ -54,16 +54,15 @@ for regions with strong gene signals; see \code{min_nonSNP_PIP}.}
 \item{init_group_prior_var}{a vector of initial values of prior variances for SNPs and gene effects.}
 
 \item{group_prior_var_structure}{a string indicating the structure to put on the prior variance parameters.
-"independent" is the default and allows all groups to have their own separate variance parameters.
+"shared_type" allows all groups in one molecular QTL type to share the same variance parameter.
+"shared_context" allows all groups in one molecular QTL type to share the same variance parameter.
 "shared_nonSNP" allows all non-SNP groups to share the same variance parameter.
 "shared_all" allows all groups to share the same variance parameter.
-"shared_type" allows all groups in one molecular QTL type to share the same variance parameter.
-"shared_context" allows all groups in one molecular QTL type to share the same variance parameter.}
+"independent" allows all groups to have their own separate variance parameters.}
 
-\item{max_snp_region}{Inf or integer. Maximum number of SNPs in a region. Default is
+\item{maxSNP}{Inf or integer. Maximum number of SNPs in a region. Default is
 Inf, no limit. This can be useful if there are many SNPs in a region and you don't
-have enough memory to run the program. This applies to the last rerun step
-(using full SNPs and rerun susie for regions with strong gene signals) only.}
+have enough memory to run the program. This applies to the finemapping step only.}
 
 \item{min_nonSNP_PIP}{Regions with non-SNP PIP >= \code{min_nonSNP_PIP}
 will be selected to run finemapping using full SNPs.}

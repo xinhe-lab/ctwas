@@ -49,7 +49,7 @@ screen_regions <- function(
     addHandler(writeToFile, file=logfile, level='DEBUG')
   }
 
-  loginfo("Screen regions ...")
+  loginfo("Screening regions ...")
 
   # extract thin value from region_data
   thin <- unique(sapply(region_data, "[[", "thin"))
@@ -99,7 +99,7 @@ screen_regions <- function(
                                       verbose = verbose)
 
   # select regions based on total non-SNP PIP of the region
-  loginfo("Compute non-SNP PIPs...")
+  loginfo("Computing non-SNP PIPs ...")
   region_nonSNP_PIP_df <- compute_region_nonSNP_PIPs(finemap_thin_res)
   loginfo("Select regions with non-SNP PIP >= %s", min_nonSNP_PIP)
   region_nonSNP_PIP_df <- region_nonSNP_PIP_df[region_nonSNP_PIP_df$nonSNP_PIP >= min_nonSNP_PIP, , drop=FALSE]

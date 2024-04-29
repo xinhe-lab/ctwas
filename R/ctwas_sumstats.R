@@ -23,16 +23,15 @@
 #' @param init_group_prior_var a vector of initial values of prior variances for SNPs and gene effects.
 #'
 #' @param group_prior_var_structure a string indicating the structure to put on the prior variance parameters.
-#' "independent" is the default and allows all groups to have their own separate variance parameters.
-#' "shared_nonSNP" allows all non-SNP groups to share the same variance parameter.
-#' "shared_all" allows all groups to share the same variance parameter.
 #' "shared_type" allows all groups in one molecular QTL type to share the same variance parameter.
 #' "shared_context" allows all groups in one molecular QTL type to share the same variance parameter.
+#' "shared_nonSNP" allows all non-SNP groups to share the same variance parameter.
+#' "shared_all" allows all groups to share the same variance parameter.
+#' "independent" allows all groups to have their own separate variance parameters.
 #'
-#' @param max_snp_region Inf or integer. Maximum number of SNPs in a region. Default is
+#' @param maxSNP Inf or integer. Maximum number of SNPs in a region. Default is
 #' Inf, no limit. This can be useful if there are many SNPs in a region and you don't
-#' have enough memory to run the program. This applies to the last rerun step
-#' (using full SNPs and rerun susie for regions with strong gene signals) only.
+#' have enough memory to run the program. This applies to the finemapping step only.
 #'
 #' @param min_nonSNP_PIP Regions with non-SNP PIP >= \code{min_nonSNP_PIP}
 #' will be selected to run finemapping using full SNPs.
@@ -75,8 +74,8 @@ ctwas_sumstats <- function(
     L = 5,
     init_group_prior = NULL,
     init_group_prior_var = NULL,
-    group_prior_var_structure = c("independent","shared_nonSNP","shared_all","shared_type","shared_context"),
-    max_snp_region = Inf,
+    group_prior_var_structure = c("shared_type", "shared_context", "shared_nonSNP", "shared_all", "independent"),
+    maxSNP = Inf,
     min_nonSNP_PIP = 0.5,
     p_single_effect = 0.8,
     use_null_weight = TRUE,
@@ -94,19 +93,17 @@ ctwas_sumstats <- function(
   }
 
   # Compute gene z-scores
-  loginfo("Computing gene z-scores ...")
   z_gene <- compute_gene_z(z_snp, weights)
 
   # Get region_data, which contains SNPs and genes assigned to each region
   #. downsample SNPs if thin < 1
   #. assign SNP and gene IDs, and z-scores to each region
   #. find boundary genes and adjust region_data for boundary genes
-  loginfo("Assembling region_data ...")
   res <- assemble_region_data(region_info,
                               z_snp,
                               z_gene,
                               weights,
-                              maxSNP = max_snp_region,
+                              maxSNP = maxSNP,
                               trim_by = "random",
                               thin = thin,
                               adjust_boundary_genes = TRUE,
@@ -117,7 +114,6 @@ ctwas_sumstats <- function(
   # Estimate parameters
   #. get region_data for all the regions
   #. run EM for two rounds with thinned SNPs using L = 1
-  loginfo("Estimating parameters...")
   param <- est_param(region_data,
                      init_group_prior = init_group_prior,
                      init_group_prior_var = init_group_prior_var,
@@ -132,7 +128,6 @@ ctwas_sumstats <- function(
   # Screen regions
   #. fine-map all regions with thinned SNPs
   #. select regions with strong non-SNP signals
-  loginfo("Screening regions ...")
   region_nonSNP_PIP_df <- screen_regions(region_data,
                                          region_info,
                                          weights,
@@ -141,24 +136,20 @@ ctwas_sumstats <- function(
                                          L = L,
                                          minvar = 2,
                                          mingene = 1,
-                                         max_snp_region = max_snp_region,
                                          min_nonSNP_PIP = min_nonSNP_PIP,
-                                         use_null_weight = use_null_weight,
-                                         ncore = ncore)
-
+                                         ncore = ncore,
+                                         verbose = verbose)
   screened_region_ids <- region_nonSNP_PIP_df$region_id
   screened_region_data <- region_data[screened_region_ids]
-  loginfo("%d regions left after screening regions", length(screened_region_ids))
 
   # Expand screened region_data with all SNPs in the regions
   if (thin < 1){
-    loginfo("Updating region_data with full SNPs for screened regions")
     screened_region_data <- expand_region_data(screened_region_data,
                                                region_info,
                                                z_snp,
                                                z_gene,
                                                trim_by = "z",
-                                               maxSNP = max_snp_region,
+                                               maxSNP = maxSNP,
                                                ncore = ncore)
     # update data in screened regions with screened_region_data (full SNPs)
     region_data[names(screened_region_data)] <- screened_region_data
@@ -166,7 +157,6 @@ ctwas_sumstats <- function(
 
   # Run fine-mapping for regions with strong gene signals using full SNPs
   #. save correlation matrices if save_cor is TRUE
-  loginfo("Fine-mapping screened regions ...")
   finemap_res <- finemap_regions(screened_region_data,
                                  region_info,
                                  weights,
@@ -181,11 +171,10 @@ ctwas_sumstats <- function(
                                  ncore = ncore,
                                  verbose = verbose)
 
-  ctwas_res <- list("param" = param,
-                    "finemap_res" = finemap_res,
-                    "boundary_genes" = boundary_genes,
-                    "region_data" = region_data)
-  return(ctwas_res)
+  return(list("param" = param,
+              "finemap_res" = finemap_res,
+              "boundary_genes" = boundary_genes,
+              "region_data" = region_data))
 
 }
 

@@ -51,6 +51,7 @@ assemble_region_data <- function(region_info,
 
   trim_by <- match.arg(trim_by)
 
+  loginfo("Assembling region_data ...")
   loginfo("No. regions in total: %d", nrow(region_info))
 
   if (thin > 1 | thin <= 0){
@@ -60,7 +61,6 @@ assemble_region_data <- function(region_info,
   region_info <- region_info[order(region_info$chrom, region_info$start),]
 
   # get gene info from weights
-  loginfo("Get gene info from weights")
   gene_info <- get_gene_info(weights)
 
   region_data <- list()
@@ -102,7 +102,7 @@ assemble_region_data <- function(region_info,
 
   # adjust region_data for boundary genes
   if (isTRUE(adjust_boundary_genes) && nrow(region_info) > 1){
-    loginfo("Adjust region_data for cross-boundary genes...")
+    loginfo("Adjusting region_data for cross-boundary genes ...")
     gene_info <- get_gene_regions(gene_info, region_info)
     boundary_genes <- gene_info[gene_info$n_regions > 1, ]
     boundary_genes <- boundary_genes[with(boundary_genes, order(chrom, p0)), ]
@@ -119,7 +119,7 @@ assemble_region_data <- function(region_info,
   region_data <- trim_region_data(region_data, z_snp, trim_by = trim_by, maxSNP = maxSNP, seed = seed)
 
   # add z-scores to region_data
-  loginfo("Add z-scores to region_data...")
+  loginfo("Adding z-scores to region_data...")
   region_data <- add_z_to_region_data(region_data, z_snp, z_gene, ncore = ncore)
 
   return(list(region_data=region_data, boundary_genes=boundary_genes))
@@ -339,7 +339,7 @@ expand_region_data <- function(region_data,
     stop("Some 'region_id' in 'region_data' were missed in 'region_info'.")
   }
 
-  loginfo("Expand region_data for %d regions with full SNPs", length(region_data))
+  loginfo("Expanding region_data for %d regions with full SNPs ...", length(region_data))
 
   pb <- txtProgressBar(min = 0, max = length(region_data), initial = 0, style = 3)
 
@@ -380,7 +380,7 @@ expand_region_data <- function(region_data,
   # Trim regions with SNPs more than maxSNP
   region_data <- trim_region_data(region_data, z_snp, trim_by = trim_by, maxSNP = maxSNP, seed = seed)
 
-  loginfo("Add z-scores to region_data ...")
+  loginfo("Adding z-scores to region_data ...")
   region_data <- add_z_to_region_data(region_data, z_snp, z_gene, ncore = ncore)
 
   return(region_data)
