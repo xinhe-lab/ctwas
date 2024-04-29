@@ -60,7 +60,7 @@
 #'
 #' @importFrom logging addHandler loginfo writeToFile
 #'
-#' @return a list of estimated parameters, fine-mapping results, boundary genes, and region_data
+#' @return a list of estimated parameters, fine-mapping results, boundary genes, z_gene, and region_data
 #'
 #' @export
 #'
@@ -93,7 +93,7 @@ ctwas_sumstats <- function(
   }
 
   # Compute gene z-scores
-  z_gene <- compute_gene_z(z_snp, weights)
+  z_gene <- compute_gene_z(z_snp, weights, ncore = ncore)
 
   # Get region_data, which contains SNPs and genes assigned to each region
   #. downsample SNPs if thin < 1
@@ -174,6 +174,7 @@ ctwas_sumstats <- function(
   return(list("param" = param,
               "finemap_res" = finemap_res,
               "boundary_genes" = boundary_genes,
+              "z_gene" = z_gene,
               "region_data" = region_data))
 
 }
