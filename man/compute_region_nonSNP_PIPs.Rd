@@ -2,10 +2,13 @@
 % Please edit documentation in R/ctwas_process_regions.R
 \name{compute_region_nonSNP_PIPs}
 \alias{compute_region_nonSNP_PIPs}
-\title{Select regions with high non-SNP PIPs}
+\title{Compute non-SNP PIPs for regions}
 \usage{
 compute_region_nonSNP_PIPs(finemap_res)
 }
+\arguments{
+\item{finemap_res}{a data frame of finemapping result}
+}
 \description{
-Select regions with high non-SNP PIPs
+Compute non-SNP PIPs for regions
 }

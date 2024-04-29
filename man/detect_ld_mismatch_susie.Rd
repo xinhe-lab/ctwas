@@ -25,6 +25,10 @@ with significant difference between observed z-scores and estimated values}
 
 \item{ld_Rinfo}{a vector of paths to the variant information for all LD matrices}
 }
+\value{
+a list of problematic SNPs, flipped SNPs,
+and test statistics from susie's `kriging_rss` function
+}
 \description{
 Detect LD mismatches using SuSiE RSS
 }

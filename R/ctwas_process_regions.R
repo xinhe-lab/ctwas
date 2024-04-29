@@ -12,7 +12,11 @@ compute_region_p_single_effect <- function(region_data, group_prior){
 
 }
 
-#' Select regions with high non-SNP PIPs
+#' Compute non-SNP PIPs for regions
+#'
+#' @param finemap_res a data frame of finemapping result
+#'
+#' @export
 compute_region_nonSNP_PIPs <- function(finemap_res){
   region_ids <- unique(finemap_res$region_id)
   nonSNP_PIPs <- sapply(region_ids, function(x){
