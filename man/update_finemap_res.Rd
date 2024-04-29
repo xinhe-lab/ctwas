@@ -2,15 +2,15 @@
 % Please edit documentation in R/ctwas_postprocess.R
 \name{update_finemap_res}
 \alias{update_finemap_res}
-\title{Update finemapping result for problematic regions}
+\title{Update finemapping result}
 \usage{
-update_finemap_res(old_finemap_res, new_finemap_res)
+update_finemap_res(finemap_res, new_finemap_res)
 }
 \arguments{
-\item{old_finemap_res}{a data frame of old finemapping result}
+\item{finemap_res}{a data frame of original finemapping result}
 
 \item{new_finemap_res}{a data frame of new finemapping result}
 }
 \description{
-Update finemapping result for problematic regions
+Update finemapping result
 }
