@@ -188,6 +188,7 @@ finemap_region <- function(region_data,
       R_snp_gene <- res$R_snp_gene
       R_gene <- res$R_gene
       rm(res)
+      # save correlation matrices
       if (isTRUE(save_cor)) {
         if (!dir.exists(cor_dir))
           dir.create(cor_dir, recursive = TRUE)
@@ -230,14 +231,13 @@ finemap_region <- function(region_data,
                                gid = gid,
                                sid = sid,
                                region_id = region_id,
+                               z = z,
                                g_type = g_type,
                                g_context = g_context,
                                g_group = g_group,
                                geneinfo = geneinfo,
                                snpinfo = ld_snpinfo,
                                include_cs_index = TRUE)
-    # add z-scores to finemapping result
-    susie_res_df$z <- z
 
   } else {
     # skip annotating gene and SNP info, and cs_index
@@ -248,8 +248,6 @@ finemap_region <- function(region_data,
                                g_type = g_type,
                                g_context = g_context,
                                g_group = g_group,
-                               geneinfo = NULL,
-                               snpinfo = NULL,
                                include_cs_index = FALSE)
   }
 

@@ -9,6 +9,7 @@ anno_susie(
   gid,
   sid,
   region_id,
+  z = NULL,
   g_type = "gene",
   g_context = "gene",
   g_group = "gene",

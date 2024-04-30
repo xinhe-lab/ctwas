@@ -90,7 +90,7 @@ having 1 or fewer effects will be used for parameter estimation}
 \item{verbose}{TRUE/FALSE. If TRUE, print detailed messages}
 }
 \value{
-a list of estimated parameters, fine-mapping results, boundary genes, and region_data
+a list of estimated parameters, fine-mapping results, boundary genes, z_gene, and region_data
 }
 \description{
 Causal inference for TWAS using summary statistics

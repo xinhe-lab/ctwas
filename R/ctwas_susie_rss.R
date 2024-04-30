@@ -43,6 +43,7 @@ anno_susie <- function(susie_res,
                        gid,
                        sid,
                        region_id,
+                       z = NULL,
                        g_type = "gene",
                        g_context = "gene",
                        g_group = "gene",
@@ -52,22 +53,31 @@ anno_susie <- function(susie_res,
 
   if (!is.null(geneinfo)) {
     gidx <- match(gid, geneinfo$id)
-    gene_anno <- data.frame(geneinfo[gidx,  c("chrom", "id", "p0")], type = g_type, context = g_context, group = g_group)
-    colnames(gene_anno) <-  c("chrom", "id", "pos", "type", "context", "group")
+    gene_anno <- data.frame(geneinfo[gidx,  c("chrom", "p0", "id")],
+                            type = g_type, context = g_context, group = g_group)
+    colnames(gene_anno) <-  c("chrom", "pos", "id", "type", "context", "group")
   } else {
     gene_anno <- data.frame(id = gid, type = g_type, context = g_context, group = g_group)
   }
 
   if (!is.null(snpinfo)) {
     sidx <- match(sid, snpinfo$id)
-    snp_anno <- data.frame(snpinfo[sidx, c("chrom", "id", "pos")], type = "SNP", context = "SNP", group = "SNP")
-    colnames(snp_anno) <-  c("chrom", "id", "pos", "type", "context", "group")
+    snp_anno <- data.frame(snpinfo[sidx, c("chrom", "pos", "id")],
+                           type = "SNP", context = "SNP", group = "SNP")
+    colnames(snp_anno) <-  c("chrom", "pos", "id", "type", "context", "group")
   } else {
     snp_anno <- data.frame(id = sid, type = "SNP", context = "SNP", group = "SNP")
   }
 
-  anno <- as.data.frame(rbind(gene_anno, snp_anno))
-  susie_res_df <- cbind(anno, region_id = region_id, susie_pip = susie_res$pip)
+  susie_res_df <- as.data.frame(rbind(gene_anno, snp_anno))
+
+  if (!is.null(z)) {
+    susie_res_df <- cbind(susie_res_df, z = z)
+  }
+
+  susie_res_df$region_id <- susie_res$region_id
+
+  susie_res_df$susie_pip <- susie_res$pip
 
   p <- length(gid) + length(sid)
   susie_res_df$mu2 <- colSums(susie_res$mu2[, seq(1, p)[1:p!=susie_res$null_index], drop = F]) #WARN: not sure for L>1
