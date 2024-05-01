@@ -49,7 +49,8 @@
 #'
 #' @importFrom logging addHandler loginfo writeToFile
 #'
-#' @return a list of merged region data, merged region info, and updated finemapping results.
+#' @return a list of merged region data, merged region info,
+#'   merged region IDs,and finemapping results for merged regions.
 #'
 #' @export
 #'
@@ -75,9 +76,10 @@ merge_finemap_regions <- function(boundary_genes,
                                   verbose = FALSE,
                                   ...){
 
-  loginfo("%d boundary genes to merge", nrow(boundary_genes))
-
-  if (nrow(boundary_genes) > 0){
+  if (nrow(boundary_genes) == 0){
+    loginfo("No regions to merge")
+  else{
+    loginfo("%d boundary genes to merge", nrow(boundary_genes))
     res <- merge_region_data(boundary_genes,
                              region_data,
                              region_info,
@@ -87,6 +89,7 @@ merge_finemap_regions <- function(boundary_genes,
                              maxSNP = maxSNP)
     merged_region_data <- res$merged_region_data
     merged_region_info <- res$merged_region_info
+    merge_region_id_list <- res$merge_region_id_list
 
     finemap_merged_regions_res <- finemap_regions(merged_region_data,
                                                   merged_region_info,
@@ -101,17 +104,12 @@ merge_finemap_regions <- function(boundary_genes,
                                                   verbose = verbose,
                                                   ...)
 
-    finemap_res <- update_merged_regions_finemap_res(finemap_res,
-                                                     finemap_merged_regions_res,
-                                                     merged_region_info)
-  } else{
-    merged_region_data <- NULL
-    merged_region_info <- NULL
+    return(list(finemap_merged_regions_res = finemap_merged_regions_res,
+                merged_region_data = merged_region_data,
+                merged_region_info = merged_region_info
+                merge_region_id_list = merge_region_id_list))
   }
 
-  return(list(finemap_res = finemap_res,
-              merged_region_data = merged_region_data,
-              merged_region_info = merged_region_info))
 }
 
 
@@ -176,6 +174,7 @@ get_merged_region_info <- function(boundary_genes, region_info){
   merge_labels <- unique(boundary_genes$merge_label)
 
   merged_region_info <- data.frame()
+  merge_region_id_list <- list()
   for( merge_label in merge_labels){
     df <- boundary_genes[boundary_genes$merge_label == merge_label,,drop=F]
     new_region_chrom <- df$chrom[1]
@@ -187,20 +186,24 @@ get_merged_region_info <- function(boundary_genes, region_info){
     merged_region_idx <- match(merged_region_ids, region_info$region_id)
     new_LD_matrix <- paste(region_info[merged_region_idx, "LD_matrix"], collapse = ";")
     new_SNP_info <- paste(region_info[merged_region_idx, "SNP_info"], collapse = ";")
-    merged_region_ids <- paste(merged_region_ids, collapse = ";")
+
     merged_region_info <- rbind(merged_region_info,
                                 data.frame(chrom = new_region_chrom,
                                            start = new_region_start,
                                            stop = new_region_stop,
                                            region_id = new_region_id,
                                            LD_matrix = new_LD_matrix,
-                                           SNP_info = new_SNP_info,
-                                           merged_region_ids = merged_region_ids))
+                                           SNP_info = new_SNP_info))
+
+    merge_region_id_list[[new_region_id]] <- list(region_id = new_region_id,
+                                                  merged_region_ids = merged_region_ids)
+
   }
 
   loginfo("Merged %d boundary genes into %d regions", nrow(boundary_genes), nrow(merged_region_info))
 
-  return(merged_region_info)
+  return(list(merged_region_info = merged_region_info,
+              merge_region_id_list = merge_region_id_list))
 }
 
 #' Merge region data for cross-boundary genes
@@ -247,7 +250,9 @@ merge_region_data <- function(boundary_genes,
 
   # Identify overlapping regions and get a list of regions to be merged
   loginfo("Identify overlapping regions and get region_info for merged regions.")
-  merged_region_info <- get_merged_region_info(boundary_genes, region_info)
+  res <- get_merged_region_info(boundary_genes, region_info)
+  merged_region_info <- res$merged_region_info
+  merge_region_id_list <- res$merge_region_id_list
 
   # Merge region data
   loginfo("Merging region_data ...")
@@ -259,7 +264,8 @@ merge_region_data <- function(boundary_genes,
     chrom <- merged_regioninfo$chrom
     start <- merged_regioninfo$start
     stop <- merged_regioninfo$stop
-    merged_region_ids <- unlist(strsplit(merged_regioninfo$merged_region_ids, split = ";"))
+    # merged_region_ids <- unlist(strsplit(merged_regioninfo$merged_region_ids, split = ";"))
+    merged_region_ids <- merge_region_id_list[[region_id]][["merged_region_ids"]]
     # merge gids and sids from the old region_data
     gid <- unique(unlist(lapply(region_data[merged_region_ids], "[[", "gid")))
     sid <- unique(unlist(lapply(region_data[merged_region_ids], "[[", "sid")))
@@ -296,7 +302,9 @@ merge_region_data <- function(boundary_genes,
     merged_region_data <- add_z_to_region_data(merged_region_data, z_snp, z_gene, ncore = ncore)
   }
 
-  return(list(merged_region_data = merged_region_data, merged_region_info = merged_region_info))
+  return(list(merged_region_data = merged_region_data,
+              merged_region_info = merged_region_info,
+              merge_region_id_list = merge_region_id_list))
 
 }
 
@@ -304,14 +312,13 @@ merge_region_data <- function(boundary_genes,
 #'
 #' @param finemap_res a data frame of finemapping result
 #' @param finemap_merged_regions_res a data frame of finemapping result for merged regions
-#' @param merged_region_info a data frame of merged region info
+#' @param merge_region_id_list a list with new region IDs and merged region IDs
 #'
 #' @export
 #'
-update_merged_regions_finemap_res <- function(finemap_res, finemap_merged_regions_res, merged_region_info){
-  for(i in 1:nrow(merged_region_info)){
-    region_id <- merged_region_info$region_id[i]
-    merged_region_ids <- unlist(strsplit(merged_region_info$merged_region_ids[i],";"))
+update_merged_regions_finemap_res <- function(finemap_res, finemap_merged_regions_res, merge_region_id_list){
+  for(region_id in names(merge_region_id_list)){
+    merged_region_ids <- merge_region_id_list[[region_id]][["merged_region_ids"]]
     finemap_res[finemap_res$region_id %in% merged_region_ids, ] <-
       finemap_merged_regions_res[finemap_merged_regions_res$region_id==region_id, ]
   }
