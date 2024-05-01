@@ -20,6 +20,12 @@
 #' @param p_single_effect Regions with probability greater than \code{p_single_effect} of
 #' having at most one causal effect will be used selected for the complete parameter estimation step
 #'
+#' @param use_null_weight TRUE/FALSE. If TRUE, allow for a probability of no effect in susie
+#'
+#' @param max_IBSS_iter Maximum number of IBSS iterations to perform.
+#'
+#' @param minvar minimum number of variables (snps and genes) in a region
+#'
 #' @param ncore The number of cores used to parallelize computation over regions
 #'
 #' @param logfile the log file, if NULL will print log info on screen
@@ -40,6 +46,9 @@ est_param <- function(
     niter_prefit = 3,
     niter = 30,
     p_single_effect = 0.8,
+    use_null_weight = TRUE,
+    max_IBSS_iter = 1,
+    minvar = 2,
     ncore = 1,
     logfile = NULL,
     verbose = FALSE){
@@ -66,13 +75,16 @@ est_param <- function(
   }
 
   # Run EM for a few (niter_prefit) iterations, getting rough estimates
-  loginfo("Run EM for %d iterations on %d regions, getting rough estimates ...",
+  loginfo("Run EM (prefit) for %d iterations on %d regions, getting rough estimates ...",
           niter_prefit, length(region_data))
   EM_prefit_res <- EM_est_param(region_data,
                                 niter = niter_prefit,
                                 init_group_prior = init_group_prior,
                                 init_group_prior_var = init_group_prior_var,
                                 group_prior_var_structure = group_prior_var_structure,
+                                use_null_weight = use_null_weight,
+                                max_IBSS_iter = max_IBSS_iter,
+                                minvar = minvar,
                                 ncore = ncore,
                                 verbose = verbose)
   loginfo("Roughly estimated group_prior {%s}: {%s} (thin = %s)", names(EM_prefit_res$group_prior), format(EM_prefit_res$group_prior, digits = 4), thin)
@@ -94,6 +106,9 @@ est_param <- function(
                          init_group_prior = EM_prefit_res$group_prior,
                          init_group_prior_var = EM_prefit_res$group_prior_var,
                          group_prior_var_structure = group_prior_var_structure,
+                         use_null_weight = use_null_weight,
+                         max_IBSS_iter = max_IBSS_iter,
+                         minvar = minvar,
                          ncore = ncore,
                          verbose = verbose)
   group_prior <- EM_res$group_prior

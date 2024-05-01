@@ -12,6 +12,8 @@
 #'
 #' @param L the number of effects for susie
 #'
+#' @param minvar minimum number of variables (snps and genes) in a region
+#'
 #' @param mingene minimum number of genes in a region
 #'
 #' @param min_nonSNP_PIP Regions with non-SNP PIP >= \code{min_nonSNP_PIP}
@@ -68,10 +70,9 @@ screen_regions <- function(
     group_prior["SNP"] <- group_prior["SNP"]/thin
   }
 
-  # remove regions with fewer than mingene genes
+  # remove regions with fewer than minvar variables
   if (minvar > 0) {
-    n.var <- sapply(region_data, function(x){
-      length(x[["gid"]]) + length(x[["sid"]])})
+    n.var <- sapply(region_data, function(x){length(x[["z"]])})
     drop.idx <- which(n.var < minvar)
     loginfo("Remove %d regions with number of variables < %d.", length(drop.idx), minvar)
     region_data[drop.idx] <- NULL

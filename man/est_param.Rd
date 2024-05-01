@@ -13,6 +13,9 @@ est_param(
   niter_prefit = 3,
   niter = 30,
   p_single_effect = 0.8,
+  use_null_weight = TRUE,
+  max_IBSS_iter = 1,
+  minvar = 2,
   ncore = 1,
   logfile = NULL,
   verbose = FALSE
@@ -38,6 +41,12 @@ est_param(
 
 \item{p_single_effect}{Regions with probability greater than \code{p_single_effect} of
 having at most one causal effect will be used selected for the complete parameter estimation step}
+
+\item{use_null_weight}{TRUE/FALSE. If TRUE, allow for a probability of no effect in susie}
+
+\item{max_IBSS_iter}{Maximum number of IBSS iterations to perform.}
+
+\item{minvar}{minimum number of variables (snps and genes) in a region}
 
 \item{ncore}{The number of cores used to parallelize computation over regions}
 

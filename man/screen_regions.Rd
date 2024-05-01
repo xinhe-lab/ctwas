@@ -34,6 +34,8 @@ screen_regions(
 
 \item{L}{the number of effects for susie}
 
+\item{minvar}{minimum number of variables (snps and genes) in a region}
+
 \item{mingene}{minimum number of genes in a region}
 
 \item{min_nonSNP_PIP}{Regions with non-SNP PIP >= \code{min_nonSNP_PIP}

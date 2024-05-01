@@ -31,6 +31,10 @@ initiate_group_priors <- function(group_prior = NULL, group_prior_var = NULL, gr
 # set prior and prior variance values for the region
 set_region_susie_priors <- function(pi_prior, V_prior, gs_group, L, use_null_weight = TRUE){
 
+  if (length(gs_group) < 2) {
+    stop(paste(length(gs_group), "variables in the region. At least two variables in a region are needed to run susie"))
+  }
+
   p <- length(gs_group)
 
   if (any(is.na(pi_prior))){

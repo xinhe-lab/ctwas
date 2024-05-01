@@ -13,7 +13,8 @@ EM_est_param(
   group_prior_var_structure = c("independent", "shared_nonSNP", "shared_all",
     "shared_type", "shared_context"),
   use_null_weight = TRUE,
-  max_iter = 1,
+  max_IBSS_iter = 1,
+  minvar = 2,
   ncore = 1,
   verbose = FALSE,
   ...
@@ -37,7 +38,9 @@ EM_est_param(
 
 \item{use_null_weight}{TRUE/FALSE. If TRUE, allow for a probability of no effect in susie}
 
-\item{max_iter}{Maximum number of IBSS iterations to perform.}
+\item{max_IBSS_iter}{Maximum number of IBSS iterations to perform.}
+
+\item{minvar}{minimum number of variables (snps and genes) in a region}
 
 \item{ncore}{The number of cores used to parallelize susie over regions}
 

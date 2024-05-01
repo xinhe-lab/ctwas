@@ -18,7 +18,9 @@
 #'
 #' @param use_null_weight TRUE/FALSE. If TRUE, allow for a probability of no effect in susie
 #'
-#' @param max_iter Maximum number of IBSS iterations to perform.
+#' @param max_IBSS_iter Maximum number of IBSS iterations to perform.
+#'
+#' @param minvar minimum number of variables (snps and genes) in a region
 #'
 #' @param ncore The number of cores used to parallelize susie over regions
 #'
@@ -35,10 +37,19 @@ EM_est_param <- function(region_data,
                          init_group_prior_var = NULL,
                          group_prior_var_structure = c("independent","shared_nonSNP","shared_all","shared_type","shared_context"),
                          use_null_weight = TRUE,
-                         max_iter = 1,
+                         max_IBSS_iter = 1,
+                         minvar = 2,
                          ncore = 1,
                          verbose = FALSE,
                          ...){
+
+  # remove regions with fewer than minvar variables
+  if (minvar > 0) {
+    n.var <- sapply(region_data, function(x){length(x[["z"]])})
+    drop.idx <- which(n.var < minvar)
+    loginfo("Remove %d regions with number of variables < %d.", length(drop.idx), minvar)
+    region_data[drop.idx] <- NULL
+  }
 
   # get groups and types from region_data
   groups <- unique(unlist(lapply(region_data, "[[", "gs_group")))
@@ -74,8 +85,6 @@ EM_est_param <- function(region_data,
       region_ids.core <- corelist[[core]]
       for (region_id in region_ids.core) {
         # load susie input data
-        if (verbose)
-          loginfo("load susie input data for region %s", region_id)
         sid <- region_data[[region_id]][["sid"]]
         gid <- region_data[[region_id]][["gid"]]
         z <- region_data[[region_id]][["z"]]
@@ -84,9 +93,18 @@ EM_est_param <- function(region_data,
         g_context <- region_data[[region_id]][["g_context"]]
         g_group <- region_data[[region_id]][["g_group"]]
 
+        if (verbose){
+          loginfo("Load input data for region %s", region_id)
+          loginfo("%d SNPs in the region.", length(sid))
+          loginfo("%d genes in the region.", length(gid))
+          loginfo("groups in the region: %s", unique(gs_group))
+        }
+
+        if (length(z) < 2) {
+          stop(paste(length(z), "variables in the region. At least two variables in a region are needed to run susie"))
+        }
+
         # update priors, prior variances and null_weight based on the estimated group_prior and group_prior_var from the previous iteration
-        if (verbose)
-          loginfo("update priors, prior variances for region %s", region_id)
         res <- set_region_susie_priors(pi_prior, V_prior, gs_group, L = 1, use_null_weight = use_null_weight)
         prior <- res$prior
         V <- res$V
@@ -99,16 +117,18 @@ EM_est_param <- function(region_data,
         # in susie, prior_variance is under standardized scale (if performed)
         if (verbose)
           loginfo("run susie for region %s", region_id)
+
         susie_res <- ctwas_susie_rss(z = z,
                                      R = R,
                                      prior_weights = prior,
                                      prior_variance = V,
                                      L = 1,
                                      null_weight = null_weight,
-                                     max_iter = max_iter,
+                                     max_iter = max_IBSS_iter,
                                      ...)
         if (verbose)
           loginfo("annotate susie result for region %s", region_id)
+
         # annotate susie result
         susie_res_df <- anno_susie(susie_res,
                                    gid = gid,
@@ -127,10 +147,13 @@ EM_est_param <- function(region_data,
     }
 
     # update estimated group_prior from the current iteration
+    if (verbose)
+      loginfo("Update estimated group_prior after iteration %d", iter)
+
     pi_prior <- sapply(names(pi_prior), function(x){mean(EM_susie_res$susie_pip[EM_susie_res$group==x])})
     group_prior_iters[names(pi_prior),iter] <- pi_prior
 
-    loginfo("After iteration %d, priors {%s}: {%s}", iter, names(pi_prior), format(pi_prior, digits = 4))
+    loginfo("After iteration %d, group_prior {%s}: {%s}", iter, names(pi_prior), format(pi_prior, digits = 4))
 
     # update estimated group_prior_var from the current iteration
     # in susie, mu2 is under standardized scale (if performed)
@@ -140,6 +163,8 @@ EM_est_param <- function(region_data,
     # X2 = 5*X
     # res2 = susie(X2,y,L=10)
     # res$mu2 is identical to res2$mu2 but coefficients are on diff scale.
+    if (verbose)
+      loginfo("Update estimated group_prior_var after iteration %d", iter)
 
     if (group_prior_var_structure=="independent") {
       V_prior <- sapply(names(V_prior),
@@ -174,9 +199,12 @@ EM_est_param <- function(region_data,
           sum(tmp_EM_susie_res$susie_pip*tmp_EM_susie_res$mu2)/sum(tmp_EM_susie_res$susie_pip)
       }
     }
-
     group_prior_var_iters[names(V_prior), iter] <- V_prior
+
+    loginfo("After iteration %d, group_prior_var {%s}: {%s}", iter, names(V_prior), format(V_prior, digits = 4))
+
   }
+
   parallel::stopCluster(cl)
 
   group_size <- table(EM_susie_res$group)
