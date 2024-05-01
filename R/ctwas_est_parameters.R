@@ -26,6 +26,8 @@
 #'
 #' @param minvar minimum number of variables (snps and genes) in a region
 #'
+#' @param mingene minimum number of genes in a region
+#'
 #' @param ncore The number of cores used to parallelize computation over regions
 #'
 #' @param logfile the log file, if NULL will print log info on screen
@@ -49,6 +51,7 @@ est_param <- function(
     use_null_weight = TRUE,
     max_IBSS_iter = 1,
     minvar = 2,
+    mingene = 1,
     ncore = 1,
     logfile = NULL,
     verbose = FALSE){
@@ -85,6 +88,7 @@ est_param <- function(
                                 use_null_weight = use_null_weight,
                                 max_IBSS_iter = max_IBSS_iter,
                                 minvar = minvar,
+                                mingene = mingene,
                                 ncore = ncore,
                                 verbose = verbose)
   loginfo("Roughly estimated group_prior {%s}: {%s} (thin = %s)", names(EM_prefit_res$group_prior), format(EM_prefit_res$group_prior, digits = 4), thin)
@@ -92,8 +96,9 @@ est_param <- function(
   group_size <- EM_prefit_res$group_size
 
   # Select regions with single effect
-  region_p1_df <- compute_region_p_single_effect(region_data, EM_prefit_res$group_prior)
-  selected_region_ids <- region_p1_df[region_p1_df$p1 >= p_single_effect, "region_id"]
+  region_single_effect_df <- compute_region_p_single_effect(region_data, EM_prefit_res$group_prior)
+  region_single_effect_df <- region_single_effect_df[region_single_effect_df$p_single_effect >= p_single_effect, ]
+  selected_region_ids <- region_single_effect_df$region_id
   loginfo("Selected %d regions with P(single effect) >= %s", length(selected_region_ids), p_single_effect)
   selected_region_data <- region_data[selected_region_ids]
 
@@ -109,6 +114,7 @@ est_param <- function(
                          use_null_weight = use_null_weight,
                          max_IBSS_iter = max_IBSS_iter,
                          minvar = minvar,
+                         mingene = mingene,
                          ncore = ncore,
                          verbose = verbose)
   group_prior <- EM_res$group_prior

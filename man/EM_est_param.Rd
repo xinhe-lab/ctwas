@@ -15,6 +15,7 @@ EM_est_param(
   use_null_weight = TRUE,
   max_IBSS_iter = 1,
   minvar = 2,
+  mingene = 1,
   ncore = 1,
   verbose = FALSE,
   ...
@@ -41,6 +42,8 @@ EM_est_param(
 \item{max_IBSS_iter}{Maximum number of IBSS iterations to perform.}
 
 \item{minvar}{minimum number of variables (snps and genes) in a region}
+
+\item{mingene}{minimum number of genes in a region}
 
 \item{ncore}{The number of cores used to parallelize susie over regions}
 

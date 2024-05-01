@@ -22,6 +22,8 @@
 #'
 #' @param minvar minimum number of variables (snps and genes) in a region
 #'
+#' @param mingene minimum number of genes in a region
+#'
 #' @param ncore The number of cores used to parallelize susie over regions
 #'
 #' @param verbose TRUE/FALSE. If TRUE, print detail messages
@@ -39,6 +41,7 @@ EM_est_param <- function(region_data,
                          use_null_weight = TRUE,
                          max_IBSS_iter = 1,
                          minvar = 2,
+                         mingene = 1,
                          ncore = 1,
                          verbose = FALSE,
                          ...){
@@ -48,6 +51,14 @@ EM_est_param <- function(region_data,
     n.var <- sapply(region_data, function(x){length(x[["z"]])})
     drop.idx <- which(n.var < minvar)
     loginfo("Remove %d regions with number of variables < %d.", length(drop.idx), minvar)
+    region_data[drop.idx] <- NULL
+  }
+
+  # remove regions with fewer than mingene genes
+  if (mingene > 0) {
+    n.gid <- sapply(region_data, function(x){length(x[["gid"]])})
+    drop.idx <- which(n.gid < mingene)
+    loginfo("Remove %d regions with number of genes < %d.", length(drop.idx), mingene)
     region_data[drop.idx] <- NULL
   }
 
