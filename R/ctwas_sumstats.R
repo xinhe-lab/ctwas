@@ -11,10 +11,7 @@
 #'
 #' @param niter the number of iterations of the E-M algorithm to perform during the complete parameter estimation step
 #'
-#' @param thin The proportion of SNPs to be used for parameter estimation and initial screening regions.
-#' Smaller \code{thin} parameters reduce runtime at the expense of accuracy.
-#' The fine mapping step is rerun using full SNPs
-#' for regions with strong gene signals; see \code{min_nonSNP_PIP}.
+#' @param thin The proportion of SNPs to be used for estimating parameters and screening regions.
 #'
 #' @param L the number of effects for susie during the fine mapping steps
 #'
@@ -68,14 +65,14 @@ ctwas_sumstats <- function(
     z_snp,
     weights,
     region_info,
-    thin = 1,
+    thin = 0.1,
     niter_prefit = 3,
     niter = 30,
     L = 5,
     init_group_prior = NULL,
     init_group_prior_var = NULL,
     group_prior_var_structure = c("shared_type", "shared_context", "shared_nonSNP", "shared_all", "independent"),
-    maxSNP = Inf,
+    maxSNP = 20000,
     min_nonSNP_PIP = 0.5,
     p_single_effect = 0.8,
     use_null_weight = TRUE,
@@ -103,9 +100,9 @@ ctwas_sumstats <- function(
                               z_snp,
                               z_gene,
                               weights,
+                              thin = thin,
                               maxSNP = maxSNP,
                               trim_by = "random",
-                              thin = thin,
                               adjust_boundary_genes = TRUE,
                               ncore = ncore)
   region_data <- res$region_data
@@ -157,19 +154,23 @@ ctwas_sumstats <- function(
 
   # Run fine-mapping for regions with strong gene signals using full SNPs
   #. save correlation matrices if save_cor is TRUE
-  finemap_res <- finemap_regions(screened_region_data,
-                                 region_info,
-                                 weights,
-                                 group_prior = group_prior,
-                                 group_prior_var = group_prior_var,
-                                 L = L,
-                                 use_null_weight = use_null_weight,
-                                 coverage = coverage,
-                                 min_abs_corr = min_abs_corr,
-                                 save_cor = save_cor,
-                                 cor_dir = cor_dir,
-                                 ncore = ncore,
-                                 verbose = verbose)
+  if (length(screened_region_data) > 0){
+    finemap_res <- finemap_regions(screened_region_data,
+                                   region_info,
+                                   weights,
+                                   group_prior = group_prior,
+                                   group_prior_var = group_prior_var,
+                                   L = L,
+                                   use_null_weight = use_null_weight,
+                                   coverage = coverage,
+                                   min_abs_corr = min_abs_corr,
+                                   save_cor = save_cor,
+                                   cor_dir = cor_dir,
+                                   ncore = ncore,
+                                   verbose = verbose)
+  } else {
+    finemap_res <- NULL
+  }
 
   return(list("param" = param,
               "finemap_res" = finemap_res,

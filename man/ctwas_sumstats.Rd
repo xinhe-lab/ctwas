@@ -8,7 +8,7 @@ ctwas_sumstats(
   z_snp,
   weights,
   region_info,
-  thin = 1,
+  thin = 0.1,
   niter_prefit = 3,
   niter = 30,
   L = 5,
@@ -16,7 +16,7 @@ ctwas_sumstats(
   init_group_prior_var = NULL,
   group_prior_var_structure = c("shared_type", "shared_context", "shared_nonSNP",
     "shared_all", "independent"),
-  maxSNP = Inf,
+  maxSNP = 20000,
   min_nonSNP_PIP = 0.5,
   p_single_effect = 0.8,
   use_null_weight = TRUE,
@@ -38,10 +38,7 @@ giving the z scores for snps. "A1" is effect allele. "A2" is the other allele.}
 
 \item{region_info}{a data frame of region definition and associated LD file names}
 
-\item{thin}{The proportion of SNPs to be used for parameter estimation and initial screening regions.
-Smaller \code{thin} parameters reduce runtime at the expense of accuracy.
-The fine mapping step is rerun using full SNPs
-for regions with strong gene signals; see \code{min_nonSNP_PIP}.}
+\item{thin}{The proportion of SNPs to be used for estimating parameters and screening regions.}
 
 \item{niter_prefit}{the number of iterations of the E-M algorithm to perform during the initial parameter estimation step}
 

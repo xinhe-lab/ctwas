@@ -72,10 +72,10 @@ anno_susie <- function(susie_res,
   susie_res_df <- as.data.frame(rbind(gene_anno, snp_anno))
 
   if (!is.null(z)) {
-    susie_res_df <- cbind(susie_res_df, z = z)
+    susie_res_df$z <- z
   }
 
-  susie_res_df$region_id <- susie_res$region_id
+  susie_res_df$region_id <- region_id
 
   susie_res_df$susie_pip <- susie_res$pip
 

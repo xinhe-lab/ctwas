@@ -1,6 +1,9 @@
 #' Select single effect regions
 compute_region_p_single_effect <- function(region_data, group_prior){
   region_ids <- names(region_data)
+  if (length(region_ids) == 0) {
+    stop("no region_ids in region_data!")
+  }
   p1 <- sapply(region_ids, function(x){
     group_size <- table(region_data[[x]][["gs_group"]])
     group_size <- group_size[names(group_prior)]
@@ -19,6 +22,9 @@ compute_region_p_single_effect <- function(region_data, group_prior){
 #' @export
 compute_region_nonSNP_PIPs <- function(finemap_res){
   region_ids <- unique(finemap_res$region_id)
+  if (length(region_ids) == 0) {
+    stop("no region_ids in finemap_res!")
+  }
   nonSNP_PIPs <- sapply(region_ids, function(x){
     finemap_region_res <- finemap_res[finemap_res$region_id == x,]
     nonSNP_PIP <- sum(finemap_region_res$susie_pip[finemap_region_res$type != "SNP"])
