@@ -77,7 +77,8 @@ genotype data in genetic studies.}
 \item{logfile}{the log file, if NULL will print log info on screen}
 }
 \value{
-a list of merged region data, merged region info, and updated finemapping results.
+a list of merged region data, merged region info,
+  merged region IDs,and finemapping results for merged regions.
 }
 \description{
 Title

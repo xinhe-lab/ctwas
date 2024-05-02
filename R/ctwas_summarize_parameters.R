@@ -7,9 +7,8 @@
 #' @param plot if TRUE, return a plot of the estimated parameters
 #'
 #' @importFrom logging loginfo
-#'
 #' @import ggplot2
-#' @import cowplot
+#' @importFrom cowplot theme_cowplot
 #'
 #' @export
 #'
@@ -66,7 +65,7 @@ summarize_param <- function(param,
     p_pi <- p_pi + theme(plot.title=element_text(size=title_size)) +
       expand_limits(y=0) +
       guides(color = guide_legend(title = "Group")) +
-      theme (legend.title = element_text(size=12, face="bold"))
+      theme(legend.title = element_text(size=12, face="bold"))
 
     # effect size plot
     df <- data.frame(niter = rep(1:ncol(group_prior_var_iters), nrow(group_prior_var_iters)),
@@ -84,7 +83,7 @@ summarize_param <- function(param,
     p_sigma2 <- p_sigma2 + theme(plot.title=element_text(size=title_size)) +
       expand_limits(y=0) +
       guides(color = guide_legend(title = "Group")) +
-      theme (legend.title = element_text(size=12, face="bold"))
+      theme(legend.title = element_text(size=12, face="bold"))
 
     # PVE plot
     df <- data.frame(niter = rep(1:ncol(group_pve_iters), nrow(group_pve_iters)),
@@ -102,7 +101,7 @@ summarize_param <- function(param,
     p_pve <- p_pve + theme(plot.title=element_text(size=title_size)) +
       expand_limits(y=0) +
       guides(color = guide_legend(title = "Group")) +
-      theme (legend.title = element_text(size=12, face="bold"))
+      theme(legend.title = element_text(size=12, face="bold"))
 
     # enrichment plot
     df <- data.frame(niter = rep(1:ncol(enrichment_iters), nrow(enrichment_iters)),

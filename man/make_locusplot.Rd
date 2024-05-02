@@ -6,23 +6,25 @@
 \usage{
 make_locusplot(
   finemap_res,
-  screened_region_data,
   region_id,
-  cor_matrix_path = getwd(),
+  weights,
+  cor_matrix_path,
+  screened_region_data,
+  ens_db,
   locus_range = NULL,
   focus_gene = NULL,
   gene_biotype = "protein_coding",
-  genome_build = "hg38"
+  use_cowplot = FALSE
 )
 }
 \arguments{
 \item{finemap_res}{a data frame of cTWAS finemapping result}
 
-\item{screened_region_data}{a list of screened region_data for regions with strong signals}
-
 \item{region_id}{region ID to be plotted}
 
 \item{cor_matrix_path}{path of correlation matrices}
+
+\item{screened_region_data}{a list of screened region_data for regions with strong signals}
 
 \item{locus_range}{a vector of start and end positions to define the locus region to be plotted
 If NULL, the entire region will be plotted.}

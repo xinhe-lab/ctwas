@@ -7,7 +7,7 @@
 update_merged_regions_finemap_res(
   finemap_res,
   finemap_merged_regions_res,
-  merged_region_info
+  merge_region_id_list
 )
 }
 \arguments{
@@ -15,7 +15,7 @@ update_merged_regions_finemap_res(
 
 \item{finemap_merged_regions_res}{a data frame of finemapping result for merged regions}
 
-\item{merged_region_info}{a data frame of merged region info}
+\item{merge_region_id_list}{a list with new region IDs and merged region IDs}
 }
 \description{
 Update finemapping result for merged regions
