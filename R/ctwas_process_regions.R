@@ -4,14 +4,14 @@ compute_region_p_single_effect <- function(region_data, group_prior){
   if (length(region_ids) == 0) {
     stop("no region_ids in region_data!")
   }
-  p1 <- sapply(region_ids, function(x){
+  p_single_effect <- sapply(region_ids, function(x){
     group_size <- table(region_data[[x]][["gs_group"]])
     group_size <- group_size[names(group_prior)]
     group_size[is.na(group_size)] <- 0
     p1 <- prod((1-group_prior)^group_size) * (1 + sum(group_size*(group_prior/(1-group_prior))))
     p1
   })
-  return(data.frame(region_id = region_ids, p1 = p1))
+  return(data.frame(region_id = region_ids, p_single_effect = p_single_effect))
 
 }
 

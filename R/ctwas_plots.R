@@ -1,16 +1,26 @@
 
-#' Plot the output of cTWAS at a single locus
+#' Plot the cTWAS result for a single locus
+#'
+#' @param finemap_res a data frame of cTWAS finemapping result
+#' @param screened_region_data a list of screened region_data for regions with strong signals
+#' @param region_id region ID to be plotted
+#' @param cor_matrix_path path of correlation matrices
+#' @param locus_range a vector of start and end positions to define the locus region to be plotted
+#' If NULL, the entire region will be plotted.
+#' @param focus_gene the gene to focus the plot. If NULL, use the lead TWAS feature
+#' @param gene_biotype specified biotypes to be displayed in gene tracks or NULL to display all possible ones
+#' @param genome_build genome build version: hg38 or hg19
 #'
 #' @export
-#' 
-ctwas_locusplot <- function(finemap_res,
-                            screened_region_data,
-                            region_id,
-                            cor_matrix_path = getwd(),
-                            locus_range = NULL,
-                            focus_gene = NULL,
-                            gene_biotype="protein_coding",
-                            genome_build = "hg38") {
+#'
+make_locusplot <- function(finemap_res,
+                           screened_region_data,
+                           region_id,
+                           cor_matrix_path = getwd(),
+                           locus_range = NULL,
+                           focus_gene = NULL,
+                           gene_biotype="protein_coding",
+                           genome_build = "hg38") {
 
   finemap_res <- finemap_res[finemap_res$region_id==region_id,] #select target region
   finemap_res$p <- (-log(2) - pnorm(abs(finemap_res$z), lower.tail=F, log.p=T))/log(10) #add pvalue
@@ -157,7 +167,7 @@ ctwas_locusplot <- function(finemap_res,
   g1 <- ggplotGrob(p1)
   g2 <- ggplotGrob(p2)
   g3 <- ggplotGrob(q1)
-  g<-rbind(g1, g2, size="max")
+  g <- rbind(g1, g2, size="max")
   panels_extent <- g %>% find_panel()
 
   pg <- g %>%
@@ -173,6 +183,6 @@ ctwas_locusplot <- function(finemap_res,
                     r=panels_extent$r+1, l=panels_extent$l)  ## modified: I always have null g4
 
   pg$widths <- unit.pmax(g2$widths, g1$widths)
-  grid.newpage() 
+  grid.newpage()
   grid.draw(pg)
 }

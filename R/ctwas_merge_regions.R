@@ -76,9 +76,9 @@ merge_finemap_regions <- function(boundary_genes,
                                   verbose = FALSE,
                                   ...){
 
-  if (nrow(boundary_genes) == 0){
+  if (nrow(boundary_genes) == 0) {
     loginfo("No regions to merge")
-  else{
+  } else {
     loginfo("%d boundary genes to merge", nrow(boundary_genes))
     res <- merge_region_data(boundary_genes,
                              region_data,
@@ -106,7 +106,7 @@ merge_finemap_regions <- function(boundary_genes,
 
     return(list(finemap_merged_regions_res = finemap_merged_regions_res,
                 merged_region_data = merged_region_data,
-                merged_region_info = merged_region_info
+                merged_region_info = merged_region_info,
                 merge_region_id_list = merge_region_id_list))
   }
 
