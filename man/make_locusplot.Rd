@@ -8,13 +8,17 @@ make_locusplot(
   finemap_res,
   region_id,
   weights,
-  cor_matrix_path,
   screened_region_data,
+  cor_matrix_path,
   ens_db,
   locus_range = NULL,
   focus_gene = NULL,
   gene_biotype = "protein_coding",
-  use_cowplot = FALSE
+  point.size = c(1, 3.5),
+  point.alpha = c(0.4, 0.6),
+  legend.position = "none",
+  panel.heights = c(4, 4, 0.3, 4),
+  check_alignment = FALSE
 )
 }
 \arguments{
@@ -22,18 +26,32 @@ make_locusplot(
 
 \item{region_id}{region ID to be plotted}
 
-\item{cor_matrix_path}{path of correlation matrices}
+\item{weights}{a list of weights}
 
 \item{screened_region_data}{a list of screened region_data for regions with strong signals}
 
+\item{cor_matrix_path}{path of correlation matrices}
+
+\item{ens_db}{Ensembl database}
+
 \item{locus_range}{a vector of start and end positions to define the locus region to be plotted
-If NULL, the entire region will be plotted.}
+
+If NULL, the entire region will be plotted (with 100 bp flanks on both sides).}
 
 \item{focus_gene}{the gene to focus the plot. If NULL, use the lead TWAS feature}
 
-\item{gene_biotype}{specified biotypes to be displayed in gene tracks or NULL to display all possible ones}
+\item{gene_biotype}{specified biotypes to be displayed in gene tracks or NULL to display all possible ones.
+By default, only show protein coding genes.}
 
-\item{genome_build}{genome build version: hg38 or hg19}
+\item{point.size}{size values for SNP and non-SNP data points in the scatter plots}
+
+\item{point.alpha}{alpha values for SNP and non-SNP data points in the scatter plots}
+
+\item{legend.position}{position to put legends. If "none", no legends will be shown.}
+
+\item{panel.heights}{Relative heights of the panels.}
+
+\item{check_alignment}{If TRUE, plots lines at QTL positions in all panels.}
 }
 \description{
 Plot the cTWAS result for a single locus
