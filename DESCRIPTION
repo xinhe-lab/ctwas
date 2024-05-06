@@ -43,8 +43,10 @@ Imports:
     ggrepel
 Suggests: 
     Rfast,
+    ensembldb,
     knitr,
     rmarkdown
+biocViews: Genetics, Software
 VignetteBuilder: knitr
 NeedsCompilation: no
 RoxygenNote: 7.3.0
