@@ -1,30 +1,29 @@
 
-#' read all LD SNP info files as a data frame
-read_LD_SNP_files <- function(files){
-  if (length(files)>0){
-    LD_SNP <- do.call(rbind, lapply(files, read_LD_SNP_file))
-  } else {
-    LD_SNP <- data.table::data.table(chrom=as.integer(), id=as.character(),
-                                     pos=as.integer(), alt=as.character(),
-                                     ref=as.character(), variance=as.numeric())
-  }
-  LD_SNP
-}
-
 #' read a single LD SNP info file as a data frame
 read_LD_SNP_file <- function(file){
-  LD_SNP <- data.table::fread(file, header = T)
+  ld_snpinfo <- data.table::fread(file, header = T)
   target_header <- c("chrom", "id", "pos", "alt", "ref")
 
-  if (!all(target_header %in% colnames(LD_SNP))){
+  if (!all(target_header %in% colnames(ld_snpinfo))){
     stop("The .Rvar file needs to contain the following columns: ",
          paste(target_header, collapse = " "))
   }
-  if (length(unique(LD_SNP$chrom)) != 1){
-    stop("LD region needs to be on only one chromosome.")
-  }
+  # if (length(unique(ld_snpinfo$chrom)) != 1){
+  #   stop("LD region needs to be on only one chromosome.")
+  # }
 
-  return(LD_SNP)
+  return(ld_snpinfo)
+}
+
+#' read all LD SNP info files as a data frame
+read_LD_SNP_files <- function(files){
+  if (length(files) > 0) {
+    files <- unique(files)
+    ld_snpinfo <- do.call(rbind, lapply(files, read_LD_SNP_file))
+  } else {
+    ld_snpinfo <- data.table::data.table()
+  }
+  return(ld_snpinfo)
 }
 
 #' Load PredictDB or Fusion weights

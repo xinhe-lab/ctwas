@@ -1,4 +1,4 @@
-#' Screen regions
+#' Screen regions with strong non-SNP PIPs to be used in finemapping step
 #'
 #' @param region_data a list object indexing regions, variants and genes.
 #'
@@ -19,15 +19,17 @@
 #' @param min_nonSNP_PIP Regions with non-SNP PIP >= \code{min_nonSNP_PIP}
 #' will be selected to run finemapping using full SNPs.
 #'
-#' @param max_iter Maximum number of IBSS iterations to perform.
-#'
 #' @param ncore The number of cores used to parallelize susie over regions
 #'
 #' @param logfile the log file, if NULL will print log info on screen
 #'
+#' @param verbose TRUE/FALSE. If TRUE, print detail messages
+#'
+#' @param ... Additional arguments of \code{susie_rss}.
+#'
 #' @importFrom logging addHandler loginfo writeToFile
 #'
-#' @return a data frame of screened region ids and non-SNP PIPs
+#' @return a list of screened_region_data, and a data frame of region ids and non-SNP PIPs
 #'
 #' @export
 #'
@@ -41,7 +43,6 @@ screen_regions <- function(
     minvar = 2,
     mingene = 1,
     min_nonSNP_PIP = 0.5,
-    max_iter = 100,
     ncore = 1,
     logfile = NULL,
     verbose = FALSE,
@@ -74,16 +75,20 @@ screen_regions <- function(
   if (minvar > 0) {
     n.var <- sapply(region_data, function(x){length(x[["z"]])})
     drop.idx <- which(n.var < minvar)
-    loginfo("Remove %d regions with number of variables < %d.", length(drop.idx), minvar)
-    region_data[drop.idx] <- NULL
+    if (length(drop.idx) > 0){
+      loginfo("Remove %d regions with number of variables < %d.", length(drop.idx), minvar)
+      region_data[drop.idx] <- NULL
+    }
   }
 
   # remove regions with fewer than mingene genes
   if (mingene > 0) {
     n.gid <- sapply(region_data, function(x){length(x[["gid"]])})
     drop.idx <- which(n.gid < mingene)
-    loginfo("Remove %d regions with number of genes < %d.", length(drop.idx), mingene)
-    region_data[drop.idx] <- NULL
+    if (length(drop.idx) > 0){
+      loginfo("Remove %d regions with number of genes < %d.", length(drop.idx), mingene)
+      region_data[drop.idx] <- NULL
+    }
   }
 
   # run finemapping for all regions containing thinned SNPs
@@ -94,19 +99,21 @@ screen_regions <- function(
                                       L = L,
                                       group_prior = group_prior,
                                       group_prior_var = group_prior_var,
-                                      max_iter = max_iter,
                                       annotate_susie_result = FALSE,
                                       ncore = ncore,
-                                      verbose = verbose)
+                                      verbose = verbose,
+                                      ...)
 
   # select regions based on total non-SNP PIP of the region
   loginfo("Computing non-SNP PIPs ...")
   region_nonSNP_PIP_df <- compute_region_nonSNP_PIPs(finemap_thin_res)
-  loginfo("Select regions with non-SNP PIP >= %s", min_nonSNP_PIP)
-  region_nonSNP_PIP_df <- region_nonSNP_PIP_df[region_nonSNP_PIP_df$nonSNP_PIP >= min_nonSNP_PIP, , drop=FALSE]
-  loginfo("Number of regions selected: %d", nrow(region_nonSNP_PIP_df))
-  rownames(region_nonSNP_PIP_df) <- NULL
 
-  return(region_nonSNP_PIP_df)
+  loginfo("Select regions with non-SNP PIP >= %s", min_nonSNP_PIP)
+  screened_region_ids <- region_nonSNP_PIP_df$region_id[region_nonSNP_PIP_df$nonSNP_PIP >= min_nonSNP_PIP]
+  screened_region_data <- region_data[screened_region_ids]
+  loginfo("Number of regions selected: %d", length(screened_region_data))
+
+  return(list(screened_region_data = screened_region_data,
+              region_nonSNP_PIP_df = region_nonSNP_PIP_df))
 }
 

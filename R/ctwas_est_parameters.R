@@ -22,8 +22,6 @@
 #'
 #' @param use_null_weight TRUE/FALSE. If TRUE, allow for a probability of no effect in susie
 #'
-#' @param max_IBSS_iter Maximum number of IBSS iterations to perform.
-#'
 #' @param minvar minimum number of variables (snps and genes) in a region
 #'
 #' @param mingene minimum number of genes in a region
@@ -33,6 +31,8 @@
 #' @param logfile the log file, if NULL will print log info on screen
 #'
 #' @param verbose TRUE/FALSE. If TRUE, print detail messages
+#'
+#' @param ... Additional arguments of \code{susie_rss}.
 #'
 #' @importFrom logging addHandler loginfo writeToFile
 #'
@@ -49,12 +49,12 @@ est_param <- function(
     niter = 30,
     p_single_effect = 0.8,
     use_null_weight = TRUE,
-    max_IBSS_iter = 1,
     minvar = 2,
     mingene = 1,
     ncore = 1,
     logfile = NULL,
-    verbose = FALSE){
+    verbose = FALSE,
+    ...){
 
   if (!is.null(logfile)){
     addHandler(writeToFile, file= logfile, level='DEBUG')
@@ -77,22 +77,39 @@ est_param <- function(
     init_group_prior["SNP"] <- init_group_prior["SNP"]/thin
   }
 
+  # remove regions with fewer than minvar variables
+  if (minvar > 0) {
+    n.var <- sapply(region_data, function(x){length(x[["z"]])})
+    drop.idx <- which(n.var < minvar)
+    if (length(drop.idx) > 0){
+      loginfo("Remove %d regions with number of variables < %d.", length(drop.idx), minvar)
+      region_data[drop.idx] <- NULL
+    }
+  }
+
+  # remove regions with fewer than mingene genes
+  if (mingene > 0) {
+    n.gid <- sapply(region_data, function(x){length(x[["gid"]])})
+    drop.idx <- which(n.gid < mingene)
+    if (length(drop.idx) > 0){
+      loginfo("Remove %d regions with number of genes < %d.", length(drop.idx), mingene)
+      region_data[drop.idx] <- NULL
+    }
+  }
+
   # Run EM for a few (niter_prefit) iterations, getting rough estimates
-  loginfo("Run EM (prefit) for %d iterations on %d regions, getting rough estimates ...",
-          niter_prefit, length(region_data))
+  loginfo("Run EM (prefit) for %d iterations, getting rough estimates ...", niter_prefit)
   EM_prefit_res <- EM_est_param(region_data,
                                 niter = niter_prefit,
                                 init_group_prior = init_group_prior,
                                 init_group_prior_var = init_group_prior_var,
                                 group_prior_var_structure = group_prior_var_structure,
                                 use_null_weight = use_null_weight,
-                                max_IBSS_iter = max_IBSS_iter,
-                                minvar = minvar,
-                                mingene = mingene,
                                 ncore = ncore,
-                                verbose = verbose)
+                                verbose = verbose,
+                                ...)
   loginfo("Roughly estimated group_prior {%s}: {%s} (thin = %s)", names(EM_prefit_res$group_prior), format(EM_prefit_res$group_prior, digits = 4), thin)
-  loginfo("Roughly estimated group_prior_var {%s}: {%s} (thin = %s)", names(EM_prefit_res$group_prior_var), format(EM_prefit_res$group_prior_var, digits = 4), thin)
+  loginfo("Roughly estimated group_prior_var {%s}: {%s}", names(EM_prefit_res$group_prior_var), format(EM_prefit_res$group_prior_var, digits = 4))
   group_size <- EM_prefit_res$group_size
 
   # Select regions with single effect
@@ -103,8 +120,7 @@ est_param <- function(
   selected_region_data <- region_data[selected_region_ids]
 
   # Run EM for more (niter) iterations, getting rough estimates
-  loginfo("Run EM for %d iterations on %d regions, getting accurate estimates ...",
-          niter, length(selected_region_data))
+  loginfo("Run EM for %d iterations, getting accurate estimates ...", niter)
 
   EM_res <- EM_est_param(selected_region_data,
                          niter = niter,
@@ -112,16 +128,14 @@ est_param <- function(
                          init_group_prior_var = EM_prefit_res$group_prior_var,
                          group_prior_var_structure = group_prior_var_structure,
                          use_null_weight = use_null_weight,
-                         max_IBSS_iter = max_IBSS_iter,
-                         minvar = minvar,
-                         mingene = mingene,
                          ncore = ncore,
-                         verbose = verbose)
+                         verbose = verbose,
+                         ...)
   group_prior <- EM_res$group_prior
   group_prior_var <- EM_res$group_prior_var
   group_prior_var_structure <- EM_res$group_prior_var_structure
   loginfo("Estimated group_prior {%s}: {%s} (thin = %s)", names(group_prior), format(group_prior, digits = 4), thin)
-  loginfo("Estimated group_prior_var {%s}: {%s} (thin = %s)", names(group_prior_var), format(group_prior_var, digits = 4), thin)
+  loginfo("Estimated group_prior_var {%s}: {%s}", names(group_prior_var), format(group_prior_var, digits = 4))
 
   # record estimated parameters from all iterations
   group_prior_iters <- EM_res$group_prior_iters
@@ -133,9 +147,9 @@ est_param <- function(
   group_prior_iters["SNP",] <- group_prior_iters["SNP",] * thin
   group_size["SNP"] <- group_size["SNP"]/thin
   group_size <- group_size[names(group_prior)]
-  loginfo("Estimated group_prior after adjustment {%s}: {%s}", names(group_prior), format(group_prior, digits = 4))
-  loginfo("Estimated group_prior_var after adjustment {%s}: {%s}", names(group_prior_var), format(group_prior_var, digits = 4))
-  loginfo("Estimated group_size after adjustment {%s}: {%s}", names(group_size), group_size)
+  loginfo("Estimated group_prior {%s}: {%s}", names(group_prior), format(group_prior, digits = 4))
+  loginfo("Estimated group_prior_var {%s}: {%s}", names(group_prior_var), format(group_prior_var, digits = 4))
+  loginfo("Estimated group_size {%s}: {%s}", names(group_size), group_size)
 
   param <- list("group_prior" = group_prior,
                 "group_prior_var" = group_prior_var,

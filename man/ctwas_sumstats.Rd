@@ -8,6 +8,7 @@ ctwas_sumstats(
   z_snp,
   weights,
   region_info,
+  z_gene = NULL,
   thin = 0.1,
   niter_prefit = 3,
   niter = 30,
@@ -24,7 +25,9 @@ ctwas_sumstats(
   min_abs_corr = 0.5,
   ncore = 1,
   save_cor = FALSE,
-  cor_dir = getwd(),
+  cor_dir = NULL,
+  outputdir = NULL,
+  outname = "ctwas",
   logfile = NULL,
   verbose = FALSE,
   ...
@@ -37,6 +40,8 @@ giving the z scores for snps. "A1" is effect allele. "A2" is the other allele.}
 \item{weights}{a list of weights}
 
 \item{region_info}{a data frame of region definition and associated LD file names}
+
+\item{z_gene}{A data frame with columns: "id", "z", giving the z-scores for genes.}
 
 \item{thin}{The proportion of SNPs to be used for estimating parameters and screening regions.}
 
@@ -80,11 +85,17 @@ having 1 or fewer effects will be used for parameter estimation}
 
 \item{save_cor}{TRUE/FALSE. If TRUE, save correlation (R) matrices to \code{outputdir}}
 
-\item{cor_dir}{a string, the directory to store correlation (R) matrices}
+\item{cor_dir}{The directory to store correlation (R) matrices}
 
-\item{logfile}{the log file, if NULL will print log info on screen}
+\item{outputdir}{The directory to store output. If specified, save outputs to the directory.}
+
+\item{outname}{The output name.}
+
+\item{logfile}{path to the log file, if NULL will print log info on screen.}
 
 \item{verbose}{TRUE/FALSE. If TRUE, print detailed messages}
+
+\item{...}{Additional arguments of \code{susie_rss}.}
 }
 \value{
 a list of estimated parameters, fine-mapping results, boundary genes, z_gene, and region_data

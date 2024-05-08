@@ -25,8 +25,6 @@
 #'   correlation of 0.25, which is a commonly used threshold for
 #'   genotype data in genetic studies.
 #'
-#' @param max_iter Maximum number of IBSS iterations to perform.
-#'
 #' @param force_compute_cor TRUE/FALSE. If TRUE, force computing correlation (R) matrices
 #'
 #' @param save_cor TRUE/FALSE. If TRUE, save correlation (R) matrices
@@ -37,6 +35,8 @@
 #' the data frame of finemapping results.
 #'
 #' @param verbose TRUE/FALSE. If TRUE, print detail messages
+#'
+#' @param ... Additional arguments of \code{susie_rss}.
 #'
 #' @importFrom logging loginfo
 #'
@@ -55,10 +55,9 @@ finemap_region <- function(region_data,
                            use_null_weight = TRUE,
                            coverage = 0.95,
                            min_abs_corr = 0.5,
-                           max_iter = 100,
                            force_compute_cor = FALSE,
                            save_cor = FALSE,
-                           cor_dir = getwd(),
+                           cor_dir = NULL,
                            annotate_susie_result = TRUE,
                            verbose = FALSE,
                            ...){
@@ -122,23 +121,25 @@ finemap_region <- function(region_data,
   null_weight <- res$null_weight
   rm(res)
 
-  # get LD matrix files and SNP info files
-  LD_matrix_files <- unlist(strsplit(regioninfo$LD_matrix, split = ";"))
-  stopifnot(all(file.exists(LD_matrix_files)))
-
+  # load SNP info for the region
   SNP_info_files <- unlist(strsplit(regioninfo$SNP_info, split = ";"))
   stopifnot(all(file.exists(SNP_info_files)))
-
-  # load SNP info for the region
   ld_snpinfo <- read_LD_SNP_files(SNP_info_files)
 
   # compute correlation matrices
-  R_sg_file <- file.path(cor_dir, paste0("region.", region_id, ".R_snp_gene.RDS"))
-  R_g_file <- file.path(cor_dir, paste0("region.", region_id, ".R_gene.RDS"))
-  R_s_file <- file.path(cor_dir, paste0("region.", region_id, ".R_snp.RDS"))
+  if (!is.null(cor_dir)) {
+    if (!dir.exists(cor_dir))
+      dir.create(cor_dir, recursive = TRUE)
+    R_sg_file <- file.path(cor_dir, paste0("region.", region_id, ".R_snp_gene.RDS"))
+    R_g_file <- file.path(cor_dir, paste0("region.", region_id, ".R_gene.RDS"))
+    R_s_file <- file.path(cor_dir, paste0("region.", region_id, ".R_snp.RDS"))
+  }
 
-  if (isTRUE(force_compute_cor)) {
+  if (force_compute_cor) {
     # force compute correlation matrix
+    stopifnot(is.character(regioninfo$LD_matrix))
+    LD_matrix_files <- unlist(strsplit(regioninfo$LD_matrix, split = ";"))
+    stopifnot(all(file.exists(LD_matrix_files)))
     if (length(LD_matrix_files) == 1){
       R_snp <- load_LD(LD_matrix_files)
     } else {
@@ -150,9 +151,7 @@ finemap_region <- function(region_data,
     R_snp_gene <- res$R_snp_gene
     R_gene <- res$R_gene
     rm(res)
-    if (isTRUE(save_cor)) {
-      if (!dir.exists(cor_dir))
-        dir.create(cor_dir, recursive = TRUE)
+    if (isTRUE(save_cor && !is.null(cor_dir))) {
       saveRDS(R_snp_gene, file=R_sg_file)
       saveRDS(R_gene, file=R_g_file)
       saveRDS(R_snp, file=R_s_file)
@@ -162,7 +161,7 @@ finemap_region <- function(region_data,
                cbind(R_snp_gene, R_snp))
     rm(R_gene, R_snp_gene, R_snp)
   } else {
-    if (all(file.exists(c(R_sg_file, R_g_file, R_s_file)))) {
+    if ( isTRUE(!is.null(cor_dir) && file.exists(R_sg_file) && file.exists(R_g_file) && file.exists(R_s_file)) ) {
       # load precomputed correlation matrices
       R_snp_gene <- load_LD(R_sg_file)
       R_gene <- load_LD(R_g_file)
@@ -171,13 +170,15 @@ finemap_region <- function(region_data,
       R <- rbind(cbind(R_gene, t(R_snp_gene)),
                  cbind(R_snp_gene, R_snp))
       rm(R_gene, R_snp_gene, R_snp)
-    } else if (L == 1){
-      # R does not matter for susie when L = 1
-      # loginfo("L = 1, skip computing correlation matrices")
+    } else if (L == 1) {
+      # if L = 1, do not need LD
       R <- diag(length(z))
     } else {
-      # compute correlation matrix if L > 1
-      if (length(LD_matrix_files)==1){
+      # if L > 1, compute correlation matrix
+      stopifnot(is.character(regioninfo$LD_matrix))
+      LD_matrix_files <- unlist(strsplit(regioninfo$LD_matrix, split = ";"))
+      stopifnot(all(file.exists(LD_matrix_files)))
+      if (length(LD_matrix_files)==1) {
         R_snp <- load_LD(LD_matrix_files)
       } else {
         R_snp <- lapply(LD_matrix_files, load_LD)
@@ -189,9 +190,7 @@ finemap_region <- function(region_data,
       R_gene <- res$R_gene
       rm(res)
       # save correlation matrices
-      if (isTRUE(save_cor)) {
-        if (!dir.exists(cor_dir))
-          dir.create(cor_dir, recursive = TRUE)
+      if (isTRUE(save_cor && !is.null(cor_dir))) {
         saveRDS(R_snp_gene, file=R_sg_file)
         saveRDS(R_gene, file=R_g_file)
         saveRDS(R_snp, file=R_s_file)
@@ -219,7 +218,6 @@ finemap_region <- function(region_data,
                                null_weight = null_weight,
                                coverage = coverage,
                                min_abs_corr = min_abs_corr,
-                               max_iter = max_iter,
                                ...)
 
   # annotate susie result
@@ -280,8 +278,6 @@ finemap_region <- function(region_data,
 #'   correlation of 0.25, which is a commonly used threshold for
 #'   genotype data in genetic studies.
 #'
-#' @param max_iter Maximum number of IBSS iterations to perform.
-#'
 #' @param ncore The number of cores used to parallelize computation over regions
 #'
 #' @param force_compute_cor TRUE/FALSE. If TRUE, force computing correlation (R) matrices
@@ -293,6 +289,8 @@ finemap_region <- function(region_data,
 #' @param verbose TRUE/FALSE. If TRUE, print detail messages
 #'
 #' @param logfile the log file, if NULL will print log info on screen
+#'
+#' @param ... Additional arguments of \code{susie_rss}.
 #'
 #' @importFrom logging addHandler loginfo writeToFile
 #'
@@ -310,7 +308,6 @@ finemap_regions <- function(region_data,
                             use_null_weight = TRUE,
                             coverage = 0.95,
                             min_abs_corr = 0.5,
-                            max_iter = 100,
                             ncore = 1,
                             force_compute_cor = FALSE,
                             save_cor = FALSE,
@@ -373,7 +370,6 @@ finemap_regions <- function(region_data,
                                                            use_null_weight = use_null_weight,
                                                            coverage = coverage,
                                                            min_abs_corr = min_abs_corr,
-                                                           max_iter = max_iter,
                                                            force_compute_cor = force_compute_cor,
                                                            save_cor = save_cor,
                                                            cor_dir = cor_dir,

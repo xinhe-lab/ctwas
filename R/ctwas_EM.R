@@ -18,12 +18,6 @@
 #'
 #' @param use_null_weight TRUE/FALSE. If TRUE, allow for a probability of no effect in susie
 #'
-#' @param max_IBSS_iter Maximum number of IBSS iterations to perform.
-#'
-#' @param minvar minimum number of variables (snps and genes) in a region
-#'
-#' @param mingene minimum number of genes in a region
-#'
 #' @param ncore The number of cores used to parallelize susie over regions
 #'
 #' @param verbose TRUE/FALSE. If TRUE, print detail messages
@@ -39,28 +33,9 @@ EM_est_param <- function(region_data,
                          init_group_prior_var = NULL,
                          group_prior_var_structure = c("independent","shared_nonSNP","shared_all","shared_type","shared_context"),
                          use_null_weight = TRUE,
-                         max_IBSS_iter = 1,
-                         minvar = 2,
-                         mingene = 1,
                          ncore = 1,
                          verbose = FALSE,
                          ...){
-
-  # remove regions with fewer than minvar variables
-  if (minvar > 0) {
-    n.var <- sapply(region_data, function(x){length(x[["z"]])})
-    drop.idx <- which(n.var < minvar)
-    loginfo("Remove %d regions with number of variables < %d.", length(drop.idx), minvar)
-    region_data[drop.idx] <- NULL
-  }
-
-  # remove regions with fewer than mingene genes
-  if (mingene > 0) {
-    n.gid <- sapply(region_data, function(x){length(x[["gid"]])})
-    drop.idx <- which(n.gid < mingene)
-    loginfo("Remove %d regions with number of genes < %d.", length(drop.idx), mingene)
-    region_data[drop.idx] <- NULL
-  }
 
   # get groups and types from region_data
   groups <- unique(unlist(lapply(region_data, "[[", "gs_group")))
@@ -135,7 +110,7 @@ EM_est_param <- function(region_data,
                                      prior_variance = V,
                                      L = 1,
                                      null_weight = null_weight,
-                                     max_iter = max_IBSS_iter,
+                                     max_iter = 1,
                                      ...)
         if (verbose)
           loginfo("annotate susie result for region %s", region_id)

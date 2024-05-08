@@ -53,6 +53,7 @@ assemble_region_data <- function(region_info,
 
   loginfo("Assembling region_data ...")
   loginfo("No. regions in total: %d", nrow(region_info))
+  loginfo("thin = %s", thin)
 
   if (thin > 1 | thin <= 0){
     stop("thin needs to be in (0,1]")
@@ -73,10 +74,11 @@ assemble_region_data <- function(region_info,
     # select genes in the chromosome
     geneinfo <- gene_info[gene_info$chrom == b, ]
 
-    # get SNP info in LD in the chromosome
+    # read SNP info in the chromosome
     SNP_info_files <- unlist(strsplit(regioninfo$SNP_info, split = ";"))
     stopifnot(all(file.exists(SNP_info_files)))
     snpinfo <- read_LD_SNP_files(SNP_info_files)
+    snpinfo <- snpinfo[snpinfo$chrom == b, ]
 
     # select SNPs
     snpinfo$keep <- rep(1, nrow(snpinfo))
@@ -282,7 +284,8 @@ adjust_boundary_genes <- function(boundary_genes, region_info, weights, region_d
 
     region_r2 <- sapply(region_ids, function(x){
       ld_snpinfo <- read_LD_SNP_files(region_info[region_info$region_id == x, "SNP_info"])
-      sum(wgt[which(rownames(wgt) %in% ld_snpinfo$id)]^2)})
+      sum(wgt[which(rownames(wgt) %in% ld_snpinfo$id)]^2)
+    })
 
     # assign boundary gene to the region with max r2, and remove it from other regions
     selected_region_id <- region_ids[which.max(region_r2)]

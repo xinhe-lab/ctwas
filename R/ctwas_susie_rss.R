@@ -9,7 +9,6 @@ ctwas_susie_rss <- function(z,
                             null_weight = NULL,
                             coverage = 0.95,
                             min_abs_corr = 0.5,
-                            max_iter = 100,
                             ...){
 
   if (missing(R)) {
@@ -26,13 +25,12 @@ ctwas_susie_rss <- function(z,
                          R,
                          prior_weights = prior_weights,
                          prior_variance = prior_variance,
-                         estimate_prior_variance = F,
+                         estimate_prior_variance = FALSE,
                          L = L,
                          z_ld_weight = z_ld_weight,
                          null_weight = null_weight,
                          coverage = coverage,
                          min_abs_corr = min_abs_corr,
-                         max_iter = max_iter,
                          ...)
 
   return(susie_res)

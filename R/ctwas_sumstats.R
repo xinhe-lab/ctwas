@@ -5,6 +5,8 @@
 #'
 #' @param weights a list of weights
 #'
+#' @param z_gene A data frame with columns: "id", "z", giving the z-scores for genes.
+#'
 #' @param region_info a data frame of region definition and associated LD file names
 #'
 #' @param niter_prefit the number of iterations of the E-M algorithm to perform during the initial parameter estimation step
@@ -49,11 +51,17 @@
 #'
 #' @param save_cor TRUE/FALSE. If TRUE, save correlation (R) matrices to \code{outputdir}
 #'
-#' @param cor_dir a string, the directory to store correlation (R) matrices
+#' @param cor_dir The directory to store correlation (R) matrices
 #'
-#' @param logfile the log file, if NULL will print log info on screen
+#' @param outputdir The directory to store output. If specified, save outputs to the directory.
+#'
+#' @param outname The output name.
+#'
+#' @param logfile path to the log file, if NULL will print log info on screen.
 #'
 #' @param verbose TRUE/FALSE. If TRUE, print detailed messages
+#'
+#' @param ... Additional arguments of \code{susie_rss}.
 #'
 #' @importFrom logging addHandler loginfo writeToFile
 #'
@@ -65,6 +73,7 @@ ctwas_sumstats <- function(
     z_snp,
     weights,
     region_info,
+    z_gene = NULL,
     thin = 0.1,
     niter_prefit = 3,
     niter = 30,
@@ -80,33 +89,48 @@ ctwas_sumstats <- function(
     min_abs_corr = 0.5,
     ncore = 1,
     save_cor = FALSE,
-    cor_dir = getwd(),
+    cor_dir = NULL,
+    outputdir = NULL,
+    outname = "ctwas",
     logfile = NULL,
     verbose = FALSE,
     ...){
 
-  if (!is.null(logfile)){
+  if (!is.null(logfile)) {
     addHandler(writeToFile, file=logfile, level='DEBUG')
   }
 
+  if (!is.null(outputdir)) {
+    dir.create(outputdir, showWarnings=FALSE, recursive=TRUE)
+  }
+
   # Compute gene z-scores
-  z_gene <- compute_gene_z(z_snp, weights, ncore = ncore)
+  if (is.null(z_gene)) {
+    z_gene <- compute_gene_z(z_snp, weights, ncore = ncore)
+    if (!is.null(outputdir)) {
+      saveRDS(z_gene, file.path(outputdir, paste0(outname, ".z_gene.RDS")))
+    }
+  }
 
   # Get region_data, which contains SNPs and genes assigned to each region
   #. downsample SNPs if thin < 1
   #. assign SNP and gene IDs, and z-scores to each region
   #. find boundary genes and adjust region_data for boundary genes
-  res <- assemble_region_data(region_info,
-                              z_snp,
-                              z_gene,
-                              weights,
-                              thin = thin,
-                              maxSNP = maxSNP,
-                              trim_by = "random",
-                              adjust_boundary_genes = TRUE,
-                              ncore = ncore)
-  region_data <- res$region_data
-  boundary_genes <- res$boundary_genes
+  region_data_res <- assemble_region_data(region_info,
+                                          z_snp,
+                                          z_gene,
+                                          weights,
+                                          thin = thin,
+                                          maxSNP = maxSNP,
+                                          trim_by = "random",
+                                          adjust_boundary_genes = TRUE,
+                                          ncore = ncore)
+  region_data <- region_data_res$region_data
+  boundary_genes <- region_data_res$boundary_genes
+  if (!is.null(outputdir)) {
+    saveRDS(region_data, file.path(outputdir, paste0(outname, ".region_data.thin", thin, ".RDS")))
+    saveRDS(boundary_genes, file.path(outputdir, paste0(outname, ".boundary_genes.RDS")))
+  }
 
   # Estimate parameters
   #. get region_data for all the regions
@@ -118,14 +142,18 @@ ctwas_sumstats <- function(
                      niter_prefit = niter_prefit,
                      niter = niter,
                      p_single_effect = p_single_effect,
-                     ncore = ncore)
+                     ncore = ncore,
+                     ...)
   group_prior <- param$group_prior
   group_prior_var <- param$group_prior_var
+  if (!is.null(outputdir)) {
+    saveRDS(param, file.path(outputdir, paste0(outname, ".param.RDS")))
+  }
 
   # Screen regions
   #. fine-map all regions with thinned SNPs
   #. select regions with strong non-SNP signals
-  region_nonSNP_PIP_df <- screen_regions(region_data,
+  screen_regions_res <- screen_regions(region_data,
                                          region_info,
                                          weights,
                                          group_prior = group_prior,
@@ -135,9 +163,10 @@ ctwas_sumstats <- function(
                                          mingene = 1,
                                          min_nonSNP_PIP = min_nonSNP_PIP,
                                          ncore = ncore,
-                                         verbose = verbose)
-  screened_region_ids <- region_nonSNP_PIP_df$region_id
-  screened_region_data <- region_data[screened_region_ids]
+                                         verbose = verbose,
+                                         ...)
+  screened_region_data <- screen_regions_res$screened_region_data
+  region_nonSNP_PIP_df <- screen_regions_res$region_nonSNP_PIP_df
 
   # Expand screened region_data with all SNPs in the regions
   if (thin < 1){
@@ -150,6 +179,12 @@ ctwas_sumstats <- function(
                                                ncore = ncore)
     # update data in screened regions with screened_region_data (full SNPs)
     region_data[names(screened_region_data)] <- screened_region_data
+    if (!is.null(outputdir)) {
+      saveRDS(region_data, file.path(outputdir, paste0(outname, ".region_data.RDS")))
+    }
+  }
+  if (!is.null(outputdir)) {
+    saveRDS(screened_region_data, file.path(outputdir, paste0(outname, ".screened_region_data.RDS")))
   }
 
   # Run fine-mapping for regions with strong gene signals using full SNPs
@@ -167,8 +202,13 @@ ctwas_sumstats <- function(
                                    save_cor = save_cor,
                                    cor_dir = cor_dir,
                                    ncore = ncore,
-                                   verbose = verbose)
+                                   verbose = verbose,
+                                   ...)
+    if (!is.null(outputdir)) {
+      saveRDS(finemap_res, file.path(outputdir, paste0(outname, ".finemap_res.RDS")))
+    }
   } else {
+    warning("No regions selected for finemapping.")
     finemap_res <- NULL
   }
 
@@ -176,7 +216,8 @@ ctwas_sumstats <- function(
               "finemap_res" = finemap_res,
               "boundary_genes" = boundary_genes,
               "z_gene" = z_gene,
-              "region_data" = region_data))
+              "region_data" = region_data,
+              "screened_region_data" = screened_region_data))
 
 }
 

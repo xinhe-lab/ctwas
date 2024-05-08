@@ -2,7 +2,7 @@
 % Please edit documentation in R/ctwas_screen_regions.R
 \name{screen_regions}
 \alias{screen_regions}
-\title{Screen regions}
+\title{Screen regions with strong non-SNP PIPs to be used in finemapping step}
 \usage{
 screen_regions(
   region_data,
@@ -14,7 +14,6 @@ screen_regions(
   minvar = 2,
   mingene = 1,
   min_nonSNP_PIP = 0.5,
-  max_iter = 100,
   ncore = 1,
   logfile = NULL,
   verbose = FALSE,
@@ -41,15 +40,17 @@ screen_regions(
 \item{min_nonSNP_PIP}{Regions with non-SNP PIP >= \code{min_nonSNP_PIP}
 will be selected to run finemapping using full SNPs.}
 
-\item{max_iter}{Maximum number of IBSS iterations to perform.}
-
 \item{ncore}{The number of cores used to parallelize susie over regions}
 
 \item{logfile}{the log file, if NULL will print log info on screen}
+
+\item{verbose}{TRUE/FALSE. If TRUE, print detail messages}
+
+\item{...}{Additional arguments of \code{susie_rss}.}
 }
 \value{
-a data frame of screened region ids and non-SNP PIPs
+a list of screened_region_data, and a data frame of region ids and non-SNP PIPs
 }
 \description{
-Screen regions
+Screen regions with strong non-SNP PIPs to be used in finemapping step
 }

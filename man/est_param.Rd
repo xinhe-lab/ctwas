@@ -14,12 +14,12 @@ est_param(
   niter = 30,
   p_single_effect = 0.8,
   use_null_weight = TRUE,
-  max_IBSS_iter = 1,
   minvar = 2,
   mingene = 1,
   ncore = 1,
   logfile = NULL,
-  verbose = FALSE
+  verbose = FALSE,
+  ...
 )
 }
 \arguments{
@@ -45,8 +45,6 @@ having at most one causal effect will be used selected for the complete paramete
 
 \item{use_null_weight}{TRUE/FALSE. If TRUE, allow for a probability of no effect in susie}
 
-\item{max_IBSS_iter}{Maximum number of IBSS iterations to perform.}
-
 \item{minvar}{minimum number of variables (snps and genes) in a region}
 
 \item{mingene}{minimum number of genes in a region}
@@ -56,6 +54,8 @@ having at most one causal effect will be used selected for the complete paramete
 \item{logfile}{the log file, if NULL will print log info on screen}
 
 \item{verbose}{TRUE/FALSE. If TRUE, print detail messages}
+
+\item{...}{Additional arguments of \code{susie_rss}.}
 }
 \value{
 a list with estimated parameters

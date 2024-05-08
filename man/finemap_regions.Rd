@@ -15,7 +15,6 @@ finemap_regions(
   use_null_weight = TRUE,
   coverage = 0.95,
   min_abs_corr = 0.5,
-  max_iter = 100,
   ncore = 1,
   force_compute_cor = FALSE,
   save_cor = FALSE,
@@ -50,8 +49,6 @@ credible set. The default, 0.5, corresponds to a squared
 correlation of 0.25, which is a commonly used threshold for
 genotype data in genetic studies.}
 
-\item{max_iter}{Maximum number of IBSS iterations to perform.}
-
 \item{ncore}{The number of cores used to parallelize computation over regions}
 
 \item{force_compute_cor}{TRUE/FALSE. If TRUE, force computing correlation (R) matrices}
@@ -63,6 +60,8 @@ genotype data in genetic studies.}
 \item{verbose}{TRUE/FALSE. If TRUE, print detail messages}
 
 \item{logfile}{the log file, if NULL will print log info on screen}
+
+\item{...}{Additional arguments of \code{susie_rss}.}
 }
 \value{
 finemapping results.

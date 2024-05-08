@@ -14,7 +14,6 @@ ctwas_susie_rss(
   null_weight = NULL,
   coverage = 0.95,
   min_abs_corr = 0.5,
-  max_iter = 100,
   ...
 )
 }
