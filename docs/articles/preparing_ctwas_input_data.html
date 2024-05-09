@@ -119,12 +119,8 @@
 <div class="section level3">
 <h3 id="gwas-z-scores">GWAS z-scores<a class="anchor" aria-label="anchor" href="#gwas-z-scores"></a>
 </h3>
-<p>We read the GWAS summary statistics as a data frame <code>z_snp</code>, with columns “id”, “A1”, “A2”, “z”, and each row is a variant. <code>A1</code> is the alternate allele, and <code>A2</code> is the reference allele.</p>
-<p>For this example, we will use summary statistics from a GWAS of LDL cholesterol in the UK Biobank. We will download the VCF from the IEU Open GWAS Project.</p>
-<div class="sourceCode" id="cb3"><pre class="sourceCode bash"><code class="sourceCode bash"><span id="cb3-1"><a href="#cb3-1"></a><span class="co"># download the summary statistics</span></span>
-<span id="cb3-2"><a href="#cb3-2"></a><span class="fu">wget</span> https://gwas.mrcieu.ac.uk/files/ukb-d-30780_irnt/ukb-d-30780_irnt.vcf.gz</span></code></pre></div>
-<p>Next, we will read the summary statistics. Then, we will compute the z-scores and format the input data. We will also collect the sample size, which will be useful later. We will save this output for convenience.</p>
-<div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
+<p>For this tutorial, we will use summary statistics from a GWAS of LDL cholesterol in the UK Biobank.</p>
+<div class="sourceCode" id="cb3"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># set output directory and output name</span></span>
 <span><span class="va">trait</span> <span class="op">&lt;-</span> <span class="st">"LDL"</span></span>
 <span><span class="va">tissue</span> <span class="op">&lt;-</span> <span class="st">"Liver_Adipose"</span></span>
@@ -132,9 +128,18 @@
 <span><span class="va">outputdir</span> <span class="op">&lt;-</span> <span class="st">"/project2/xinhe/shared_data/multigroup_ctwas/tutorial/LDL_multitissue_tutorial/output"</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/files2.html" class="external-link">dir.create</a></span><span class="op">(</span><span class="va">outputdir</span>, showWarnings<span class="op">=</span><span class="cn">F</span>, recursive<span class="op">=</span><span class="cn">T</span><span class="op">)</span></span>
 <span><span class="va">outname</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/paste.html" class="external-link">paste0</a></span><span class="op">(</span><span class="va">trait</span>, <span class="st">"."</span>, <span class="va">tissue</span><span class="op">)</span></span></code></pre></div>
+<p>We will download the VCF from the IEU Open GWAS Project.</p>
+<div class="sourceCode" id="cb4"><pre class="sourceCode bash"><code class="sourceCode bash"><span id="cb4-1"><a href="#cb4-1"></a><span class="co"># download the summary statistics</span></span>
+<span id="cb4-2"><a href="#cb4-2"></a><span class="bu">cd</span> /project2/xinhe/shared_data/multigroup_ctwas/tutorial/LDL_multitissue_tutorial</span>
+<span id="cb4-3"><a href="#cb4-3"></a></span>
+<span id="cb4-4"><a href="#cb4-4"></a><span class="fu">wget</span> https://gwas.mrcieu.ac.uk/files/ukb-d-30780_irnt/ukb-d-30780_irnt.vcf.gz</span></code></pre></div>
+<p>We read the GWAS summary statistics as a data frame <code>z_snp</code>, with columns “id”, “A1”, “A2”, “z”, and each row is a variant. <code>A1</code> is the alternate allele, and <code>A2</code> is the reference allele.</p>
+<p>Note: we use rsIDs as the variant IDs. The naming of variant IDs should be consistent between summary statistics, LD reference and weights.</p>
+<p>Then, we will compute the z-scores and format the input data. We will also collect the sample size, which will be used later.</p>
 <div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="co"># read the data using the VariantAnnotation package</span></span>
-<span><span class="va">z_snp</span> <span class="op">&lt;-</span> <span class="fu">VariantAnnotation</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/VariantAnnotation/man/readVcf-methods.html" class="external-link">readVcf</a></span><span class="op">(</span><span class="st">"ukb-d-30780_irnt.vcf.gz"</span><span class="op">)</span></span>
+<code class="sourceCode R"><span><span class="co"># read the VCF data using the VariantAnnotation and gwasvcf packages</span></span>
+<span><span class="va">z_snp</span> <span class="op">&lt;-</span> <span class="fu">VariantAnnotation</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/VariantAnnotation/man/readVcf-methods.html" class="external-link">readVcf</a></span><span class="op">(</span><span class="st">"/project2/xinhe/shared_data/multigroup_ctwas/tutorial/LDL_multitissue_tutorial/ukb-d-30780_irnt.vcf.gz"</span><span class="op">)</span></span>
+<span></span>
 <span><span class="va">z_snp</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/as.data.frame.html" class="external-link">as.data.frame</a></span><span class="op">(</span><span class="fu">gwasvcf</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/gwasvcf/man/vcf_to_tibble.html" class="external-link">vcf_to_tibble</a></span><span class="op">(</span><span class="va">z_snp</span><span class="op">)</span><span class="op">)</span></span>
 <span></span>
 <span><span class="co"># compute the z-scores</span></span>
@@ -148,8 +153,7 @@
 <span><span class="va">z_snp</span> <span class="op">&lt;-</span> <span class="va">z_snp</span><span class="op">[</span>,<span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"rsid"</span>, <span class="st">"ALT"</span>, <span class="st">"REF"</span>, <span class="st">"Z"</span><span class="op">)</span><span class="op">]</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/colnames.html" class="external-link">colnames</a></span><span class="op">(</span><span class="va">z_snp</span><span class="op">)</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"id"</span>, <span class="st">"A1"</span>, <span class="st">"A2"</span>, <span class="st">"z"</span><span class="op">)</span></span>
 <span></span>
-<span><span class="va">z_snp_outfile</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/file.path.html" class="external-link">file.path</a></span><span class="op">(</span><span class="va">outputdir</span>, <span class="fu"><a href="https://rdrr.io/r/base/paste.html" class="external-link">paste0</a></span><span class="op">(</span><span class="va">gwas_name</span>, <span class="st">".z_snp.RDS"</span><span class="op">)</span><span class="op">)</span></span>
-<span><span class="fu"><a href="https://rdrr.io/r/base/readRDS.html" class="external-link">saveRDS</a></span><span class="op">(</span><span class="va">z_snp</span>, file<span class="op">=</span><span class="va">z_snp_outfile</span><span class="op">)</span></span></code></pre></div>
+<span><span class="fu"><a href="https://rdrr.io/r/base/readRDS.html" class="external-link">saveRDS</a></span><span class="op">(</span><span class="va">z_snp</span>, <span class="fu"><a href="https://rdrr.io/r/base/file.path.html" class="external-link">file.path</a></span><span class="op">(</span><span class="va">outputdir</span>, <span class="fu"><a href="https://rdrr.io/r/base/paste.html" class="external-link">paste0</a></span><span class="op">(</span><span class="va">gwas_name</span>, <span class="st">".z_snp.RDS"</span><span class="op">)</span><span class="op">)</span><span class="op">)</span></span></code></pre></div>
 <p>If your GWAS summary statistics is of other formats, please extract relevant columns (rsid, alternative allele, reference allele, zscore) and convert it to the format shown above.</p>
 </div>
 <div class="section level3">
@@ -161,14 +165,11 @@
 <p>Please check <a href="http://predictdb.org/" class="external-link">PredictDB</a> for the format of PredictDB weights. To specify weights in PredictDB format, provide the path to the <code>.db</code> file.</p>
 <p>Please check <a href="http://gusevlab.org/projects/fusion/#compute-your-own-predictive-models" class="external-link">FUSION/TWAS</a> for the format of FUSION weights. To specify weights in FUSION format, provide the path to the folder that contains the <code>.wgt.RDat</code> files. The <code>.pos</code> file which points to the individual *.RDat weight files are assumed to be outside the folder. For more format details, check the FUSION website.</p>
 <p>For this analysis, we will use liver and subcutaneous adipose gene expression models trained on GTEx v8 in the PredictDB format. We will download both the prediction models (.db) and the covariances between variants in the prediction models (.txt.gz). The covariances can optionally be used for computing LD.</p>
-<div class="sourceCode" id="cb6"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="co"># download the files</span></span>
-<span><span class="fu"><a href="https://rdrr.io/r/base/system.html" class="external-link">system</a></span><span class="op">(</span><span class="st">"wget https://zenodo.org/record/3518299/files/mashr_eqtl.tar"</span><span class="op">)</span></span>
-<span></span>
-<span><span class="co"># extract to ./weights folder </span></span>
-<span><span class="fu"><a href="https://rdrr.io/r/base/system.html" class="external-link">system</a></span><span class="op">(</span><span class="st">"mkdir /project2/xinhe/shared_data/ctwas_tutorial/weights"</span><span class="op">)</span></span>
-<span><span class="fu"><a href="https://rdrr.io/r/base/system.html" class="external-link">system</a></span><span class="op">(</span><span class="st">"tar -xvf mashr_eqtl.tar -C /project2/xinhe/shared_data/ctwas_tutorial/weights"</span><span class="op">)</span></span>
-<span><span class="fu"><a href="https://rdrr.io/r/base/system.html" class="external-link">system</a></span><span class="op">(</span><span class="st">"rm mashr_eqtl.tar"</span><span class="op">)</span></span></code></pre></div>
+<div class="sourceCode" id="cb6"><pre class="sourceCode bash"><code class="sourceCode bash"><span id="cb6-1"><a href="#cb6-1"></a><span class="co"># download the weights files</span></span>
+<span id="cb6-2"><a href="#cb6-2"></a><span class="fu">mkdir</span> -p /project2/xinhe/shared_data/multigroup_ctwas/tutorial/LDL_multitissue_tutorial/weights/</span>
+<span id="cb6-3"><a href="#cb6-3"></a><span class="bu">cd</span> /project2/xinhe/shared_data/multigroup_ctwas/tutorial/LDL_multitissue_tutorial/weights/</span>
+<span id="cb6-4"><a href="#cb6-4"></a><span class="fu">wget</span> https://zenodo.org/record/3518299/files/mashr_eqtl.tar</span>
+<span id="cb6-5"><a href="#cb6-5"></a><span class="fu">tar</span> -xvf mashr_eqtl.tar</span></code></pre></div>
 </div>
 <div class="section level3">
 <h3 id="ld-reference-and-region-info">LD reference and region info<a class="anchor" aria-label="anchor" href="#ld-reference-and-region-info"></a>
@@ -260,9 +261,9 @@
 <p>The <code><a href="../reference/preprocess_z_snp.html">preprocess_z_snp()</a></code> function harmonizes GWAS z-scores and LD reference based on the included allele information. If <code>drop_multiallelic = TRUE</code>, it will drop multiallelic variants. If <code>drop_strand_ambig = TRUE</code>, it will drop strand ambiguous variants.</p>
 <div class="sourceCode" id="cb9"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># load the GWAS sumstats data</span></span>
-<span><span class="va">z_snp_outfile</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/file.path.html" class="external-link">file.path</a></span><span class="op">(</span><span class="va">outputdir</span>, <span class="fu"><a href="https://rdrr.io/r/base/paste.html" class="external-link">paste0</a></span><span class="op">(</span><span class="va">gwas_name</span>, <span class="st">".z_snp.RDS"</span><span class="op">)</span><span class="op">)</span></span>
-<span><span class="va">z_snp</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/readRDS.html" class="external-link">readRDS</a></span><span class="op">(</span><span class="va">z_snp_outfile</span><span class="op">)</span></span>
+<span><span class="va">z_snp</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/readRDS.html" class="external-link">readRDS</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/file.path.html" class="external-link">file.path</a></span><span class="op">(</span><span class="va">outputdir</span>, <span class="fu"><a href="https://rdrr.io/r/base/paste.html" class="external-link">paste0</a></span><span class="op">(</span><span class="va">gwas_name</span>, <span class="st">".z_snp.RDS"</span><span class="op">)</span><span class="op">)</span><span class="op">)</span></span>
 <span></span>
+<span><span class="co"># preprocessing z_snp</span></span>
 <span><span class="va">z_snp</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/preprocess_z_snp.html">preprocess_z_snp</a></span><span class="op">(</span><span class="va">z_snp</span>, </span>
 <span>                          <span class="va">region_info</span>, </span>
 <span>                          drop_multiallelic <span class="op">=</span> <span class="cn">TRUE</span>, </span>
@@ -273,17 +274,16 @@
 <h4 id="harmonizing-prediction-models-and-ld-reference">Harmonizing prediction models and LD reference<a class="anchor" aria-label="anchor" href="#harmonizing-prediction-models-and-ld-reference"></a>
 </h4>
 <p>The <code>preprocess_weight()</code> function harmonizes the PredictDB/FUSION prediction models and LD reference.</p>
-<p>In this example, we use liver and subcutaneous adipose gene expression models. We preprocess each weight file separately and combine them in the end. We specify PredictDB or FUSION format in <code>weight_format</code> and the specific method in FUSION by <code>method_FUSION</code>. We specify the <code>type</code> as the molecular QTL types, and <code>context</code> as the tissues, cell types, or conditions. For the expression models, we limit to protein coding genes, by setting <code>filter_protein_coding_genes = TRUE</code>. We set <code>scale_by_ld_variance=TRUE</code> for PredictDB weights because PredictDB assumes the unstandardized genotypes (see the discussion in “Region info” section) For PredictDB models, we set <code>load_predictdb_LD=TRUE</code> to load pre-computed correlations (<code>.txt.gz</code> file) between weight variants. For FUSION models, we set <code>load_predictdb_LD=FALSE</code> to calculate correlations between weight variants with LD reference.</p>
-<p>We use 6 cores to parallelize the computation over the weights.</p>
+<p>In this example, we use liver and subcutaneous adipose gene expression models. We preprocess each weight file separately and combine them in the end. We specify PredictDB or FUSION format in <code>weight_format</code> and the specific method in FUSION by <code>method_FUSION</code>. We specify the <code>type</code> as the molecular QTL types, and <code>context</code> as the tissues, cell types, or conditions. For the expression models, we limit to protein coding genes, by setting <code>filter_protein_coding_genes = TRUE</code>. We set <code>scale_by_ld_variance=TRUE</code> for PredictDB weights because PredictDB assumes the unstandardized genotypes (see the discussion in “Region info” section) For PredictDB models, we set <code>load_predictdb_LD=TRUE</code> to load pre-computed correlations (<code>.txt.gz</code> file) between weight variants. For FUSION models, we set <code>load_predictdb_LD=FALSE</code> to calculate correlations between weight variants with LD reference. It takes a while to calculate correlations using LD reference, and we could set <code>ncore</code> to parallelize the computation.</p>
 <div class="sourceCode" id="cb10"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">weight_files</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"/project2/xinhe/shared_data/multigroup_ctwas/weights/expression_models/mashr_Liver.db"</span>,       <span class="st">"/project2/xinhe/shared_data/multigroup_ctwas/weights/expression_models/mashr_Adipose_Subcutaneous.db"</span><span class="op">)</span></span>
+<code class="sourceCode R"><span><span class="va">weights_dir</span> <span class="op">&lt;-</span> <span class="st">"/project2/xinhe/shared_data/multigroup_ctwas/tutorial/LDL_multitissue_tutorial/weights/eqtl/mashr"</span></span>
 <span></span>
 <span><span class="va">ncore</span> <span class="op">&lt;-</span> <span class="fl">6</span></span>
 <span></span>
-<span><span class="va">weights_liver</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/preprocess_weights.html">preprocess_weights</a></span><span class="op">(</span>weight_file <span class="op">=</span> <span class="va">weight_files</span><span class="op">[</span><span class="fl">1</span><span class="op">]</span>,</span>
+<span><span class="va">weights_liver</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/preprocess_weights.html">preprocess_weights</a></span><span class="op">(</span>weight_file <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/file.path.html" class="external-link">file.path</a></span><span class="op">(</span><span class="va">weights_dir</span>, <span class="st">"mashr_Liver.db"</span><span class="op">)</span>,</span>
 <span>                                    <span class="va">region_info</span>,</span>
 <span>                                    <span class="va">z_snp</span><span class="op">$</span><span class="va">id</span>,</span>
-<span>                                    type <span class="op">=</span> <span class="st">"eQTL"</span>,</span>
+<span>                                    type <span class="op">=</span> <span class="st">"expression"</span>,</span>
 <span>                                    context <span class="op">=</span> <span class="st">"liver"</span>,</span>
 <span>                                    weight_format <span class="op">=</span> <span class="st">"PredictDB"</span>,</span>
 <span>                                    ncore <span class="op">=</span> <span class="va">ncore</span>,</span>
@@ -292,11 +292,11 @@
 <span>                                    load_predictdb_LD <span class="op">=</span> <span class="cn">TRUE</span>,</span>
 <span>                                    filter_protein_coding_genes <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span>
 <span></span>
-<span><span class="va">weights_adipose</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/preprocess_weights.html">preprocess_weights</a></span><span class="op">(</span>weight_file <span class="op">=</span> <span class="va">weight_files</span><span class="op">[</span><span class="fl">2</span><span class="op">]</span>,</span>
+<span><span class="va">weights_adipose</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/preprocess_weights.html">preprocess_weights</a></span><span class="op">(</span>weight_file <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/file.path.html" class="external-link">file.path</a></span><span class="op">(</span><span class="va">weights_dir</span>, <span class="st">"mashr_Adipose_Subcutaneous.db"</span><span class="op">)</span>,</span>
 <span>                                      <span class="va">region_info</span>,</span>
 <span>                                      <span class="va">z_snp</span><span class="op">$</span><span class="va">id</span>,</span>
-<span>                                      type <span class="op">=</span> <span class="st">"sQTL"</span>,</span>
-<span>                                      context <span class="op">=</span> <span class="st">"liver"</span>,</span>
+<span>                                      type <span class="op">=</span> <span class="st">"expression"</span>,</span>
+<span>                                      context <span class="op">=</span> <span class="st">"adipose"</span>,</span>
 <span>                                      weight_format <span class="op">=</span> <span class="st">"PredictDB"</span>,</span>
 <span>                                      ncore <span class="op">=</span> <span class="va">ncore</span>,</span>
 <span>                                      drop_strand_ambig <span class="op">=</span> <span class="cn">TRUE</span>,</span>
@@ -309,13 +309,13 @@
 </div>
 </div>
 <div class="section level3">
-<h3 id="computing-z-scores-of-molecular-traits-">Computing z-scores of molecular traits.<a class="anchor" aria-label="anchor" href="#computing-z-scores-of-molecular-traits-"></a>
+<h3 id="computing-z-scores-of-molecular-traits">Computing z-scores of molecular traits<a class="anchor" aria-label="anchor" href="#computing-z-scores-of-molecular-traits"></a>
 </h3>
 <p>After we have done data preprocessing, we compute z-scores of molecular traits. This step basically performs Transcriptome-wide association studies (TWAS) on each gene with a prediction model. The underlying calculation is based on <a href="https://www.nature.com/articles/s41467-018-03621-1" class="external-link">S-PrediXcan</a>.</p>
-<p>The <code>compute_gene_z</code> function computes z-scores for the molecular traits using preprocessed SNP z-scores (<code>z_snp</code>) and the preprocessed weights.</p>
+<p>The <code>compute_gene_z</code> function computes z-scores for the molecular traits using preprocessed SNP z-scores (<code>z_snp</code>) and the preprocessed weights. We could set <code>ncore</code> to parallelize the computation.</p>
 <p><em>Note: the software uses the term “gene”, but they could be any molecular trait.</em></p>
 <div class="sourceCode" id="cb11"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">z_gene</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/compute_gene_z.html">compute_gene_z</a></span><span class="op">(</span><span class="va">z_snp</span>, <span class="va">weights</span>, ncore<span class="op">=</span><span class="va">ncore</span><span class="op">)</span></span>
+<code class="sourceCode R"><span><span class="va">z_gene</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/compute_gene_z.html">compute_gene_z</a></span><span class="op">(</span><span class="va">z_snp</span>, <span class="va">weights</span>, ncore <span class="op">=</span> <span class="va">ncore</span><span class="op">)</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/readRDS.html" class="external-link">saveRDS</a></span><span class="op">(</span><span class="va">z_gene</span>, file <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/file.path.html" class="external-link">file.path</a></span><span class="op">(</span><span class="va">outputdir</span>, <span class="fu"><a href="https://rdrr.io/r/base/paste.html" class="external-link">paste0</a></span><span class="op">(</span><span class="va">outname</span>, <span class="st">".z_gene.RDS"</span><span class="op">)</span><span class="op">)</span><span class="op">)</span></span></code></pre></div>
 </div>
 </div>

@@ -49,17 +49,7 @@ In the tutorial, we used the directories and files on the University of Chicago 
 
 ### GWAS z-scores
 
-We read the GWAS summary statistics as a data frame `z_snp`, with columns "id", "A1", "A2", "z", and each row is a variant. 
-`A1` is the alternate allele, and `A2` is the reference allele. 
-
-For this example, we will use summary statistics from a GWAS of LDL cholesterol in the UK Biobank. We will download the VCF from the IEU Open GWAS Project. 
-```{bash, eval=FALSE}
-# download the summary statistics
-wget https://gwas.mrcieu.ac.uk/files/ukb-d-30780_irnt/ukb-d-30780_irnt.vcf.gz
-```
-
-
-Next, we will read the summary statistics. Then, we will compute the z-scores and format the input data. We will also collect the sample size, which will be useful later. We will save this output for convenience.
+For this tutorial, we will use summary statistics from a GWAS of LDL cholesterol in the UK Biobank. 
 
 ```{r settings, eval=FALSE}
 # set output directory and output name
@@ -72,9 +62,26 @@ outname <- paste0(trait, ".", tissue)
 ```
 
 
+We will download the VCF from the IEU Open GWAS Project. 
+```{bash, eval=FALSE}
+# download the summary statistics
+cd /project2/xinhe/shared_data/multigroup_ctwas/tutorial/LDL_multitissue_tutorial
+
+wget https://gwas.mrcieu.ac.uk/files/ukb-d-30780_irnt/ukb-d-30780_irnt.vcf.gz
+```
+
+
+We read the GWAS summary statistics as a data frame `z_snp`, with columns "id", "A1", "A2", "z", and each row is a variant. `A1` is the alternate allele, and `A2` is the reference allele. 
+
+Note: we use rsIDs as the variant IDs. The naming of variant IDs should be consistent between summary statistics, LD reference and weights. 
+
+Then, we will compute the z-scores and format the input data. 
+We will also collect the sample size, which will be used later. 
+
 ```{r read_sumstats, eval=FALSE}
-# read the data using the VariantAnnotation package
-z_snp <- VariantAnnotation::readVcf("ukb-d-30780_irnt.vcf.gz")
+# read the VCF data using the VariantAnnotation and gwasvcf packages
+z_snp <- VariantAnnotation::readVcf("/project2/xinhe/shared_data/multigroup_ctwas/tutorial/LDL_multitissue_tutorial/ukb-d-30780_irnt.vcf.gz")
+
 z_snp <- as.data.frame(gwasvcf::vcf_to_tibble(z_snp))
 
 # compute the z-scores
@@ -88,8 +95,7 @@ cat("gwas_n=", gwas_n, "\n")
 z_snp <- z_snp[,c("rsid", "ALT", "REF", "Z")]
 colnames(z_snp) <- c("id", "A1", "A2", "z")
 
-z_snp_outfile <- file.path(outputdir, paste0(gwas_name, ".z_snp.RDS"))
-saveRDS(z_snp, file=z_snp_outfile)
+saveRDS(z_snp, file.path(outputdir, paste0(gwas_name, ".z_snp.RDS")))
 ```
 
 
@@ -109,14 +115,12 @@ Please check [PredictDB](http://predictdb.org/) for the format of PredictDB weig
 Please check [FUSION/TWAS](http://gusevlab.org/projects/fusion/#compute-your-own-predictive-models) for the format of FUSION weights. To specify weights in FUSION format, provide the path to the folder that contains the `.wgt.RDat` files. The `.pos` file which points to the individual *.RDat weight files are assumed to be outside the folder. For more format details, check the FUSION website. 
 
 For this analysis, we will use liver and subcutaneous adipose gene expression models trained on GTEx v8 in the PredictDB format. We will download both the prediction models (.db) and the covariances between variants in the prediction models (.txt.gz). The covariances can optionally be used for computing LD.
-```{r, eval=FALSE}
-# download the files
-system("wget https://zenodo.org/record/3518299/files/mashr_eqtl.tar")
-
-# extract to ./weights folder 
-system("mkdir /project2/xinhe/shared_data/ctwas_tutorial/weights")
-system("tar -xvf mashr_eqtl.tar -C /project2/xinhe/shared_data/ctwas_tutorial/weights")
-system("rm mashr_eqtl.tar")
+```{bash, eval=FALSE}
+# download the weights files
+mkdir -p /project2/xinhe/shared_data/multigroup_ctwas/tutorial/LDL_multitissue_tutorial/weights/
+cd /project2/xinhe/shared_data/multigroup_ctwas/tutorial/LDL_multitissue_tutorial/weights/
+wget https://zenodo.org/record/3518299/files/mashr_eqtl.tar
+tar -xvf mashr_eqtl.tar
 ```
 
 
@@ -235,9 +239,9 @@ If `drop_strand_ambig = TRUE`, it will drop strand ambiguous variants.
 
 ```{r preprocess_z_snp, eval=FALSE}
 # load the GWAS sumstats data
-z_snp_outfile <- file.path(outputdir, paste0(gwas_name, ".z_snp.RDS"))
-z_snp <- readRDS(z_snp_outfile)
+z_snp <- readRDS(file.path(outputdir, paste0(gwas_name, ".z_snp.RDS")))
 
+# preprocessing z_snp
 z_snp <- preprocess_z_snp(z_snp, 
                           region_info, 
                           drop_multiallelic = TRUE, 
@@ -256,19 +260,17 @@ We specify the `type` as the molecular QTL types, and `context` as the tissues, 
 For the expression models, we limit to protein coding genes, by setting `filter_protein_coding_genes = TRUE`.
 We set `scale_by_ld_variance=TRUE` for PredictDB weights because PredictDB assumes the unstandardized genotypes (see the discussion in "Region info" section)
 For PredictDB models, we set `load_predictdb_LD=TRUE` to load pre-computed correlations (`.txt.gz` file) between weight variants. 
-For FUSION models, we set `load_predictdb_LD=FALSE` to calculate correlations between weight variants with LD reference.
-
-We use 6 cores to parallelize the computation over the weights.
+For FUSION models, we set `load_predictdb_LD=FALSE` to calculate correlations between weight variants with LD reference. It takes a while to calculate correlations using LD reference, and we could set `ncore` to parallelize the computation.
 
 ```{r preprocess_weights, eval=FALSE}
-weight_files <- c("/project2/xinhe/shared_data/multigroup_ctwas/weights/expression_models/mashr_Liver.db",       "/project2/xinhe/shared_data/multigroup_ctwas/weights/expression_models/mashr_Adipose_Subcutaneous.db")
+weights_dir <- "/project2/xinhe/shared_data/multigroup_ctwas/tutorial/LDL_multitissue_tutorial/weights/eqtl/mashr"
 
 ncore <- 6
 
-weights_liver <- preprocess_weights(weight_file = weight_files[1],
+weights_liver <- preprocess_weights(weight_file = file.path(weights_dir, "mashr_Liver.db"),
                                     region_info,
                                     z_snp$id,
-                                    type = "eQTL",
+                                    type = "expression",
                                     context = "liver",
                                     weight_format = "PredictDB",
                                     ncore = ncore,
@@ -277,11 +279,11 @@ weights_liver <- preprocess_weights(weight_file = weight_files[1],
                                     load_predictdb_LD = TRUE,
                                     filter_protein_coding_genes = TRUE)
 
-weights_adipose <- preprocess_weights(weight_file = weight_files[2],
+weights_adipose <- preprocess_weights(weight_file = file.path(weights_dir, "mashr_Adipose_Subcutaneous.db"),
                                       region_info,
                                       z_snp$id,
-                                      type = "sQTL",
-                                      context = "liver",
+                                      type = "expression",
+                                      context = "adipose",
                                       weight_format = "PredictDB",
                                       ncore = ncore,
                                       drop_strand_ambig = TRUE,
@@ -295,16 +297,16 @@ saveRDS(weights, file.path(outputdir, paste0(outname, ".preprocessed.weights.RDS
 
 
 
-### Computing z-scores of molecular traits.
+### Computing z-scores of molecular traits
 
 After we have done data preprocessing, we compute z-scores of molecular traits. This step basically performs Transcriptome-wide association studies (TWAS) on each gene with a prediction model. The underlying calculation is based on [S-PrediXcan][S-PrediXcan].
 
-The `compute_gene_z` function computes z-scores for the molecular traits using preprocessed SNP z-scores (`z_snp`) and the preprocessed weights. 
+The `compute_gene_z` function computes z-scores for the molecular traits using preprocessed SNP z-scores (`z_snp`) and the preprocessed weights. We could set `ncore` to parallelize the computation.
 
 *Note: the software uses the term “gene”, but they could be any molecular trait.*
 
 ```{r compute_gene_z, eval=FALSE}
-z_gene <- compute_gene_z(z_snp, weights, ncore=ncore)
+z_gene <- compute_gene_z(z_snp, weights, ncore = ncore)
 saveRDS(z_gene, file = file.path(outputdir, paste0(outname, ".z_gene.RDS")))
 ```
 
