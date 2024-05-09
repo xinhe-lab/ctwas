@@ -1,14 +1,14 @@
-# Multi-group version of cTWAS
+# cTWAS
 
-Running cTWAS involves four main steps: preparing input data, imputing gene z-scores, estimating parameters, and fine-mapping genes and variants. 
+Running cTWAS involves four main steps: preparing input data, computing gene z-scores, estimating parameters, and fine-mapping genes and variants. 
 
-We have included a [pipeline](https://xinhe-lab.github.io/multigroup_ctwas/articles/multigroup_ctwas_pipeline.html) of using multi-group version of cTWAS with summary statistics. 
+We have included [tutorials](https://xinhe-lab.github.io/multigroup_ctwas/articles/) for using cTWAS with summary statistics. 
 
 You can [browse source code](https://github.com/xinhe-lab/ctwas/tree/multigroup_test).
 
 ## Install
 
-Install `ctwas` (`multigroup_test` branch):
+Install `ctwas`:
 
 ```
 # install.packages("remotes")
