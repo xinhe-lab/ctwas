@@ -2,7 +2,7 @@
 % Please edit documentation in R/ctwas_preprocess_weights.R
 \name{preprocess_weights}
 \alias{preprocess_weights}
-\title{Preprocess PredictDB/Fusion weights and harmonize with LD reference}
+\title{Preprocess PredictDB/FUSION weights and harmonize with LD reference}
 \usage{
 preprocess_weights(
   weight_file,
@@ -10,17 +10,17 @@ preprocess_weights(
   gwas_snp_ids,
   type = NULL,
   context = NULL,
-  weight_format = c("PredictDB", "Fusion"),
+  weight_format = c("PredictDB", "FUSION"),
   ncore = 1,
   drop_strand_ambig = TRUE,
   scale_by_ld_variance = FALSE,
   filter_protein_coding_genes = FALSE,
   load_predictdb_LD = FALSE,
-  method_Fusion = c("lasso", "enet", "top1", "blup")
+  method_FUSION = c("lasso", "enet", "top1", "blup")
 )
 }
 \arguments{
-\item{weight_file}{a string or a vector, pointing path to one or multiple sets of weights in PredictDB or Fusion format.}
+\item{weight_file}{a string or a vector, pointing path to one or multiple sets of weights in PredictDB or FUSION format.}
 
 \item{region_info}{a data frame of region definition and associated file names.}
 
@@ -30,7 +30,7 @@ preprocess_weights(
 
 \item{context}{a string, specifying tissue/cell type/condition of each weight file, e.g. Liver, Lung, Brain.}
 
-\item{weight_format}{a string, specifying format of each weight file, e.g. PredictDB, Fusion.}
+\item{weight_format}{a string, specifying format of each weight file, e.g. PredictDB, FUSION.}
 
 \item{drop_strand_ambig}{TRUE/FALSE, if TRUE remove strand ambiguous variants (A/T, G/C).}
 
@@ -38,11 +38,11 @@ preprocess_weights(
 
 \item{load_predictdb_LD}{TRUE/FALSE. If TRUE, load pre-computed LD among weight SNPs. This option is only for PredictDB weights}
 
-\item{method_Fusion}{a string, specifying the method to choose in Fusion models}
+\item{method_FUSION}{a string, specifying the method to choose in FUSION models}
 }
 \value{
 a list of processed weights
 }
 \description{
-Preprocess PredictDB/Fusion weights and harmonize with LD reference
+Preprocess PredictDB/FUSION weights and harmonize with LD reference
 }

@@ -1,7 +1,7 @@
 
-#' Preprocess PredictDB/Fusion weights and harmonize with LD reference
+#' Preprocess PredictDB/FUSION weights and harmonize with LD reference
 #'
-#' @param weight_file a string or a vector, pointing path to one or multiple sets of weights in PredictDB or Fusion format.
+#' @param weight_file a string or a vector, pointing path to one or multiple sets of weights in PredictDB or FUSION format.
 #'
 #' @param region_info a data frame of region definition and associated file names.
 #'
@@ -11,7 +11,7 @@
 #'
 #' @param context a string, specifying tissue/cell type/condition of each weight file, e.g. Liver, Lung, Brain.
 #'
-#' @param weight_format a string, specifying format of each weight file, e.g. PredictDB, Fusion.
+#' @param weight_format a string, specifying format of each weight file, e.g. PredictDB, FUSION.
 #'
 #' @param filter_protein_coding_genes TRUE/FALSE. If TRUE, keep protein coding genes only. This option is only for PredictDB weights
 #'
@@ -19,7 +19,7 @@
 #'
 #' @param drop_strand_ambig TRUE/FALSE, if TRUE remove strand ambiguous variants (A/T, G/C).
 #'
-#' @param method_Fusion a string, specifying the method to choose in Fusion models
+#' @param method_FUSION a string, specifying the method to choose in FUSION models
 #'
 #' @return a list of processed weights
 #'
@@ -30,17 +30,17 @@ preprocess_weights <- function(weight_file,
                                gwas_snp_ids,
                                type = NULL,
                                context = NULL,
-                               weight_format = c("PredictDB", "Fusion"),
+                               weight_format = c("PredictDB", "FUSION"),
                                ncore = 1,
                                drop_strand_ambig = TRUE,
                                scale_by_ld_variance = FALSE,
                                filter_protein_coding_genes = FALSE,
                                load_predictdb_LD = FALSE,
-                               method_Fusion = c("lasso","enet","top1","blup")){
+                               method_FUSION = c("lasso","enet","top1","blup")){
 
   # check input arguments
   weight_format <- match.arg(weight_format)
-  method_Fusion <- match.arg(method_Fusion)
+  method_FUSION <- match.arg(method_FUSION)
 
   if (length(weight_file) > 1) {
     stop("Please provide only one weight file in weight_file.")
@@ -65,7 +65,7 @@ preprocess_weights <- function(weight_file,
                                 weight_format,
                                 filter_protein_coding_genes = filter_protein_coding_genes,
                                 load_predictdb_LD = load_predictdb_LD,
-                                method_Fusion = method_Fusion,
+                                method_FUSION = method_FUSION,
                                 ncore=ncore)
   weight_table <- loaded_weight$weight_table
   weight_name <- loaded_weight$weight_name

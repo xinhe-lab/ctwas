@@ -26,17 +26,17 @@ read_LD_SNP_files <- function(files){
   return(ld_snpinfo)
 }
 
-#' Load PredictDB or Fusion weights
+#' Load PredictDB or FUSION weights
 #'
-#' @param weight_file a string or a vector, pointing path to one or multiple sets of weights in PredictDB or Fusion format.
+#' @param weight_file a string or a vector, pointing path to one or multiple sets of weights in PredictDB or FUSION format.
 #'
-#' @param weight_format a string or a vector, specifying format of each weight file, e.g. PredictDB, Fusion.
+#' @param weight_format a string or a vector, specifying format of each weight file, e.g. PredictDB, FUSION.
 #'
 #' @param filter_protein_coding_genes TRUE/FALSE. If TRUE, keep protein coding genes only. This option is only for PredictDB weights
 #'
 #' @param load_predictdb_LD TRUE/FALSE. If TRUE, load pre-computed LD among weight SNPs. This option is only for PredictDB weights
 #'
-#' @param method_Fusion a string, specifying the method to choose in Fusion models
+#' @param method_FUSION a string, specifying the method to choose in FUSION models
 #'
 #' @param ncore integer, number of cores for parallel computing.
 #'
@@ -47,14 +47,14 @@ read_LD_SNP_files <- function(files){
 #' @export
 #'
 load_weights <- function(weight_file,
-                         weight_format = c("PredictDB", "Fusion"),
+                         weight_format = c("PredictDB", "FUSION"),
                          filter_protein_coding_genes = FALSE,
                          load_predictdb_LD = FALSE,
-                         method_Fusion = c("lasso","enet","top1","blup"),
+                         method_FUSION = c("lasso","enet","top1","blup"),
                          ncore = 1){
   #library(tidyverse)
   weight_format <- match.arg(weight_format)
-  method_Fusion <- match.arg(method_Fusion)
+  method_FUSION <- match.arg(method_FUSION)
   if(weight_format == "PredictDB"){
     weight_name <- tools::file_path_sans_ext(basename(weight_file))
     # read the PredictDB weights
@@ -82,7 +82,7 @@ load_weights <- function(weight_file,
     }
     RSQLite::dbDisconnect(db)
   }
-  else if (weight_format == "Fusion"){
+  else if (weight_format == "FUSION"){
     weight_name <- tools::file_path_sans_ext(basename(weight_file))
     wgtdir <- dirname(weight_file)
     wgtposfile <- file.path(wgtdir, paste0(basename(weight_file), ".pos"))
@@ -106,7 +106,7 @@ load_weights <- function(weight_file,
         snps[,"varID"] <- paste0("chr",snps[,"chrom"],"_",snps[,"pos"],"_",snps[,"ref"],"_",snps[,"alt"],"_","b38")
 
         rownames(wgt.matrix) <- snps$rsid
-        g.method = method_Fusion
+        g.method <- method_FUSION
         # Ensure only top magnitude snp weight in the top1 wgt.matrix column
         if (g.method == "top1"){
           wgt.matrix[,"top1"][-which.max(wgt.matrix[,"top1"]^2)] <- 0
