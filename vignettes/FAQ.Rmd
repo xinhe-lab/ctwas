@@ -11,22 +11,31 @@ vignette: >
 
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(message = FALSE,
-                      warning = FALSE,
-                      fig.width = 6,
-                      fig.height = 4,
-                      fig.align = "center",
-                      fig.cap = "&nbsp;",
-                      dpi = 120)
+                      warning = FALSE)
 ```
 
 ## FAQ
 
-* Installation
+### Installation
 
-* Memory and Parallelization
+Install `cTWAS` package
 
-* How to use a different LD reference
+```{r install_package, eval=FALSE}
+remotes::install_github("xinhe-lab/ctwas", ref = "multigroup_test")
+```
 
-* Running with LD matrices
+Load the package
+```{r load_package}
+library(ctwas)
+```
 
+### Memory and Parallelization
+
+### Running cTWAS without LD matrices
+
+In case you do not have LD matrices, it is possible to run cTWAS without LD matrices. 
+To do this, simply set `L = 1` and `cor_dir = NULL`. 
+Then it will run with `L = 1` without LD matrices. 
+
+### How to use a different LD reference
 

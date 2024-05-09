@@ -210,3 +210,10 @@ finemap_region_res <- finemap_regions(selected_region_data,
 ```
 
 
+
+## Running cTWAS without LD matrices
+
+In case you do not have LD matrices, it is possible to run cTWAS without LD matrices. 
+
+To do this, simply set `L = 1` in `screen_regions()` and `finemap_regions()` and also set `cor_dir = NULL` in  `finemap_regions()` . Then it will run these steps with `L = 1` without LD matrices. 
+

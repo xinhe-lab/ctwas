@@ -17,7 +17,7 @@
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">ctwas</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">0.2.0.9000</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">0.2.1</span>
       </span>
     </div>
 
@@ -32,10 +32,16 @@
     <span class="caret"></span>
   </a>
   <ul class="dropdown-menu" role="menu"><li>
-      <a href="../articles/multigroup_ctwas_pipeline.html">Using multigroup cTWAS with summary statistics</a>
+      <a href="../articles/preparing_ctwas_input_data.html">Preparing cTWAS input data</a>
     </li>
     <li>
-      <a href="../articles/multigroup_ctwas_modules.html">Running cTWAS modules separately</a>
+      <a href="../articles/ctwas_main_function.html">Using cTWAS main function</a>
+    </li>
+    <li>
+      <a href="../articles/ctwas_modules.html">Using cTWAS modules</a>
+    </li>
+    <li>
+      <a href="../articles/summarizing_postprocessing_results.html">Summarizing and post-processing cTWAS results</a>
     </li>
     <li>
       <a href="../articles/FAQ.html">FAQ</a>
@@ -64,8 +70,8 @@
 
     <div id="ref-usage">
     <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="fu">merge_region_data</span><span class="op">(</span></span>
-<span>  <span class="va">region_data</span>,</span>
 <span>  <span class="va">boundary_genes</span>,</span>
+<span>  <span class="va">region_data</span>,</span>
 <span>  <span class="va">region_info</span>,</span>
 <span>  <span class="va">z_snp</span>,</span>
 <span>  <span class="va">z_gene</span>,</span>
@@ -79,12 +85,12 @@
 
     <div id="arguments">
     <h2>Arguments</h2>
-    <dl><dt>region_data</dt>
-<dd><p>a list of region gene IDs and SNP IDs and associated file names</p></dd>
-
-
-<dt>boundary_genes</dt>
+    <dl><dt>boundary_genes</dt>
 <dd><p>a data frame of boundary gene info</p></dd>
+
+
+<dt>region_data</dt>
+<dd><p>a list of original region_data</p></dd>
 
 
 <dt>region_info</dt>

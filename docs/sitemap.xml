@@ -10,6 +10,12 @@
     <loc>/articles/FAQ.html</loc>
   </url>
   <url>
+    <loc>/articles/ctwas_main_function.html</loc>
+  </url>
+  <url>
+    <loc>/articles/ctwas_modules.html</loc>
+  </url>
+  <url>
     <loc>/articles/ctwas_sumstats_genomewide.html</loc>
   </url>
   <url>
@@ -22,6 +28,12 @@
     <loc>/articles/multigroup_ctwas_pipeline.html</loc>
   </url>
   <url>
+    <loc>/articles/preparing_ctwas_input_data.html</loc>
+  </url>
+  <url>
+    <loc>/articles/summarizing_postprocessing_results.html</loc>
+  </url>
+  <url>
     <loc>/authors.html</loc>
   </url>
   <url>
@@ -29,6 +41,9 @@
   </url>
   <url>
     <loc>/reference/EM.html</loc>
+  </url>
+  <url>
+    <loc>/reference/EM_est_param.html</loc>
   </url>
   <url>
     <loc>/reference/add_z_to_region_data.html</loc>
@@ -136,7 +151,13 @@
     <loc>/reference/get_gene_regions.html</loc>
   </url>
   <url>
+    <loc>/reference/get_merged_region_info.html</loc>
+  </url>
+  <url>
     <loc>/reference/get_merged_regions.html</loc>
+  </url>
+  <url>
+    <loc>/reference/get_problematic_genes.html</loc>
   </url>
   <url>
     <loc>/reference/get_problematic_regions.html</loc>
@@ -176,6 +197,12 @@
   </url>
   <url>
     <loc>/reference/load_weights.html</loc>
+  </url>
+  <url>
+    <loc>/reference/make_locusplot.html</loc>
+  </url>
+  <url>
+    <loc>/reference/merge_finemap_regions.html</loc>
   </url>
   <url>
     <loc>/reference/merge_region_data.html</loc>
@@ -272,5 +299,11 @@
   </url>
   <url>
     <loc>/reference/univariate_regression.html</loc>
+  </url>
+  <url>
+    <loc>/reference/update_finemap_res.html</loc>
+  </url>
+  <url>
+    <loc>/reference/update_merged_regions_finemap_res.html</loc>
   </url>
 </urlset>

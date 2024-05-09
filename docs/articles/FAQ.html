@@ -33,7 +33,7 @@
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">ctwas</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">0.2.0.9000</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">0.2.1</span>
       </span>
     </div>
 
@@ -50,10 +50,16 @@
   </a>
   <ul class="dropdown-menu" role="menu">
 <li>
-      <a href="../articles/multigroup_ctwas_pipeline.html">Using multigroup cTWAS with summary statistics</a>
+      <a href="../articles/preparing_ctwas_input_data.html">Preparing cTWAS input data</a>
     </li>
     <li>
-      <a href="../articles/multigroup_ctwas_modules.html">Running cTWAS modules separately</a>
+      <a href="../articles/ctwas_main_function.html">Using cTWAS main function</a>
+    </li>
+    <li>
+      <a href="../articles/ctwas_modules.html">Using cTWAS modules</a>
+    </li>
+    <li>
+      <a href="../articles/summarizing_postprocessing_results.html">Summarizing and post-processing cTWAS results</a>
     </li>
     <li>
       <a href="../articles/FAQ.html">FAQ</a>
@@ -81,7 +87,7 @@
       <h1 data-toc-skip>FAQ</h1>
                         <h4 data-toc-skip class="author">Kaixuan Luo, Sheng Qian</h4>
             
-            <h4 data-toc-skip class="date">2024-04-18</h4>
+            <h4 data-toc-skip class="date">2024-05-09</h4>
       
       <small class="dont-index">Source: <a href="https://github.com/xinhe-lab/ctwas/blob/multigroup_test/vignettes/FAQ.Rmd" class="external-link"><code>vignettes/FAQ.Rmd</code></a></small>
       <div class="hidden name"><code>FAQ.Rmd</code></div>
@@ -93,11 +99,29 @@
 <div class="section level2">
 <h2 id="faq">FAQ<a class="anchor" aria-label="anchor" href="#faq"></a>
 </h2>
-<ul>
-<li><p>Installation</p></li>
-<li><p>Memory and Parallelization</p></li>
-<li><p>How to use a different LD reference</p></li>
-</ul>
+<div class="section level3">
+<h3 id="installation">Installation<a class="anchor" aria-label="anchor" href="#installation"></a>
+</h3>
+<p>Install <code>cTWAS</code> package</p>
+<div class="sourceCode" id="cb1"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="fu">remotes</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/remotes/man/install_github.html" class="external-link">install_github</a></span><span class="op">(</span><span class="st">"xinhe-lab/ctwas"</span>, ref <span class="op">=</span> <span class="st">"multigroup_test"</span><span class="op">)</span></span></code></pre></div>
+<p>Load the package</p>
+<div class="sourceCode" id="cb2"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://github.com/xinhe-lab/ctwas" class="external-link">ctwas</a></span><span class="op">)</span></span></code></pre></div>
+</div>
+<div class="section level3">
+<h3 id="memory-and-parallelization">Memory and Parallelization<a class="anchor" aria-label="anchor" href="#memory-and-parallelization"></a>
+</h3>
+</div>
+<div class="section level3">
+<h3 id="running-ctwas-without-ld-matrices">Running cTWAS without LD matrices<a class="anchor" aria-label="anchor" href="#running-ctwas-without-ld-matrices"></a>
+</h3>
+<p>In case you do not have LD matrices, it is possible to run cTWAS without LD matrices. To do this, simply set <code>L = 1</code> and <code>cor_dir = NULL</code>. Then it will run with <code>L = 1</code> without LD matrices.</p>
+</div>
+<div class="section level3">
+<h3 id="how-to-use-a-different-ld-reference">How to use a different LD reference<a class="anchor" aria-label="anchor" href="#how-to-use-a-different-ld-reference"></a>
+</h3>
+</div>
 </div>
   </div>
 

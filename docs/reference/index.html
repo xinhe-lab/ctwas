@@ -17,7 +17,7 @@
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">ctwas</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">0.2.0.9000</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">0.2.1</span>
       </span>
     </div>
 
@@ -32,10 +32,16 @@
     <span class="caret"></span>
   </a>
   <ul class="dropdown-menu" role="menu"><li>
-      <a href="../articles/multigroup_ctwas_pipeline.html">Using multigroup cTWAS with summary statistics</a>
+      <a href="../articles/preparing_ctwas_input_data.html">Preparing cTWAS input data</a>
     </li>
     <li>
-      <a href="../articles/multigroup_ctwas_modules.html">Running cTWAS modules separately</a>
+      <a href="../articles/ctwas_main_function.html">Using cTWAS main function</a>
+    </li>
+    <li>
+      <a href="../articles/ctwas_modules.html">Using cTWAS modules</a>
+    </li>
+    <li>
+      <a href="../articles/summarizing_postprocessing_results.html">Summarizing and post-processing cTWAS results</a>
     </li>
     <li>
       <a href="../articles/FAQ.html">FAQ</a>
@@ -61,7 +67,7 @@
           <p class="section-desc"></p>
         </th>
       </tr></tbody><tbody><tr><td>
-          <p><code><a href="EM.html">EM()</a></code> </p>
+          <p><code><a href="EM_est_param.html">EM_est_param()</a></code> </p>
         </td>
         <td><p>Run EM to estimate parameters.
 Iteratively run susie and estimate parameters - RSS version</p></td>
@@ -104,7 +110,7 @@ Iteratively run susie and estimate parameters - RSS version</p></td>
       </tr><tr><td>
           <p><code><a href="compute_region_nonSNP_PIPs.html">compute_region_nonSNP_PIPs()</a></code> </p>
         </td>
-        <td><p>Select regions with high non-SNP PIPs</p></td>
+        <td><p>Compute non-SNP PIPs for regions</p></td>
       </tr><tr><td>
           <p><code><a href="compute_region_p_single_effect.html">compute_region_p_single_effect()</a></code> </p>
         </td>
@@ -118,14 +124,6 @@ Iteratively run susie and estimate parameters - RSS version</p></td>
         </td>
         <td><p>Convert PLINK genotype data to LD matrices and SNP info files,
 save LD matrices as .RDS files and SNP info as .Rvar files</p></td>
-      </tr><tr><td>
-          <p><code><a href="ctwas_locus_plot.html">ctwas_locus_plot()</a></code> </p>
-        </td>
-        <td><p>Plot the output of cTWAS at a single locus</p></td>
-      </tr><tr><td>
-          <p><code><a href="ctwas_locus_plot_genetrack.html">ctwas_locus_plot_genetrack()</a></code> </p>
-        </td>
-        <td><p>Create the gene track for the cTWAS locus plot</p></td>
       </tr><tr><td>
           <p><code><a href="ctwas_sumstats.html">ctwas_sumstats()</a></code> </p>
         </td>
@@ -167,9 +165,13 @@ save LD matrices as .RDS files and SNP info as .Rvar files</p></td>
         </td>
         <td><p>get regions for each gene</p></td>
       </tr><tr><td>
-          <p><code><a href="get_merged_regions.html">get_merged_regions()</a></code> </p>
+          <p><code><a href="get_merged_region_info.html">get_merged_region_info()</a></code> </p>
         </td>
-        <td><p>get a list of regions to be merged</p></td>
+        <td><p>Get merged region info</p></td>
+      </tr><tr><td>
+          <p><code><a href="get_problematic_genes.html">get_problematic_genes()</a></code> </p>
+        </td>
+        <td><p>Get problematic genes</p></td>
       </tr><tr><td>
           <p><code><a href="harmonize_wgt_ld.html">harmonize_wgt_ld()</a></code> </p>
         </td>
@@ -185,7 +187,7 @@ Flip signs when reverse complement matches, remove strand ambiguous SNPs</p></td
         </td>
         <td><p>set pi_prior and V_prior based on init_group_prior and init_group_prior_var</p></td>
       </tr><tr><td>
-          <p><code><a href="kriging_rss.html">kriging_rss()</a></code> <code><a href="kriging_rss.html">kriging_rss()</a></code> </p>
+          <p><code><a href="kriging_rss.html">kriging_rss()</a></code> </p>
         </td>
         <td><p>Compute Distribution of z-scores of Variant j Given Other z-scores, and Detect Possible Allele Switch Issue</p></td>
       </tr><tr><td>
@@ -199,7 +201,15 @@ Flip signs when reverse complement matches, remove strand ambiguous SNPs</p></td
       </tr><tr><td>
           <p><code><a href="load_weights.html">load_weights()</a></code> </p>
         </td>
-        <td><p>Load PredictDB or Fusion weights</p></td>
+        <td><p>Load PredictDB or FUSION weights</p></td>
+      </tr><tr><td>
+          <p><code><a href="make_locusplot.html">make_locusplot()</a></code> </p>
+        </td>
+        <td><p>Plot the cTWAS result for a single locus</p></td>
+      </tr><tr><td>
+          <p><code><a href="merge_finemap_regions.html">merge_finemap_regions()</a></code> </p>
+        </td>
+        <td><p>Title</p></td>
       </tr><tr><td>
           <p><code><a href="merge_region_data.html">merge_region_data()</a></code> </p>
         </td>
@@ -219,7 +229,7 @@ Flip signs when reverse complement matches, remove strand ambiguous SNPs</p></td
       </tr><tr><td>
           <p><code><a href="preprocess_weights.html">preprocess_weights()</a></code> </p>
         </td>
-        <td><p>Preprocess PredictDB/Fusion weights and harmonize with LD reference</p></td>
+        <td><p>Preprocess PredictDB/FUSION weights and harmonize with LD reference</p></td>
       </tr><tr><td>
           <p><code><a href="preprocess_z_snp.html">preprocess_z_snp()</a></code> </p>
         </td>
@@ -259,11 +269,7 @@ Flip signs when reverse complement matches, remove strand ambiguous SNPs</p></td
       </tr><tr><td>
           <p><code><a href="screen_regions.html">screen_regions()</a></code> </p>
         </td>
-        <td><p>Screen regions</p></td>
-      </tr><tr><td>
-          <p><code><a href="select_problematic_regions.html">select_problematic_regions()</a></code> </p>
-        </td>
-        <td><p>Get regions with problematic high PIP SNPs or genes</p></td>
+        <td><p>Screen regions with strong non-SNP PIPs to be used in finemapping step</p></td>
       </tr><tr><td>
           <p><code><a href="summarize_param.html">summarize_param()</a></code> </p>
         </td>
@@ -292,6 +298,14 @@ Flip signs when reverse complement matches, remove strand ambiguous SNPs</p></td
           <p><code><a href="univariate_regression.html">univariate_regression()</a></code> </p>
         </td>
         <td><p>Perform Univariate Linear Regression Separately for Columns of X</p></td>
+      </tr><tr><td>
+          <p><code><a href="update_finemap_res.html">update_finemap_res()</a></code> </p>
+        </td>
+        <td><p>Update finemapping result</p></td>
+      </tr><tr><td>
+          <p><code><a href="update_merged_regions_finemap_res.html">update_merged_regions_finemap_res()</a></code> </p>
+        </td>
+        <td><p>Update finemapping result for merged regions</p></td>
       </tr></tbody></table></div>
 
   <div class="col-md-3 hidden-xs hidden-sm" id="pkgdown-sidebar">

@@ -99,3 +99,9 @@ Major argument settings:
 
 The function returns a list including: 
 estimated parameters, fine-mapping results, boundary genes, z_scores of molecular traits, assembled region data for all the regions.
+
+## Running cTWAS without LD matrices
+
+In case you do not have LD matrices, it is possible to run cTWAS without LD matrices. 
+
+To do this, simply set `L = 1` and `cor_dir = NULL`. Then it will run the main function with `L = 1` throughout the steps without LD matrices. 

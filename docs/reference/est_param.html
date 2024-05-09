@@ -17,7 +17,7 @@
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">ctwas</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">0.2.0.9000</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">0.2.1</span>
       </span>
     </div>
 
@@ -32,10 +32,16 @@
     <span class="caret"></span>
   </a>
   <ul class="dropdown-menu" role="menu"><li>
-      <a href="../articles/multigroup_ctwas_pipeline.html">Using multigroup cTWAS with summary statistics</a>
+      <a href="../articles/preparing_ctwas_input_data.html">Preparing cTWAS input data</a>
     </li>
     <li>
-      <a href="../articles/multigroup_ctwas_modules.html">Running cTWAS modules separately</a>
+      <a href="../articles/ctwas_main_function.html">Using cTWAS main function</a>
+    </li>
+    <li>
+      <a href="../articles/ctwas_modules.html">Using cTWAS modules</a>
+    </li>
+    <li>
+      <a href="../articles/summarizing_postprocessing_results.html">Summarizing and post-processing cTWAS results</a>
     </li>
     <li>
       <a href="../articles/FAQ.html">FAQ</a>
@@ -67,13 +73,18 @@
 <span>  <span class="va">region_data</span>,</span>
 <span>  init_group_prior <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  init_group_prior_var <span class="op">=</span> <span class="cn">NULL</span>,</span>
-<span>  group_prior_var_structure <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"independent"</span>, <span class="st">"shared_all"</span>, <span class="st">"shared_type"</span><span class="op">)</span>,</span>
-<span>  niter1 <span class="op">=</span> <span class="fl">3</span>,</span>
-<span>  niter2 <span class="op">=</span> <span class="fl">30</span>,</span>
+<span>  group_prior_var_structure <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"shared_type"</span>, <span class="st">"shared_context"</span>, <span class="st">"shared_nonSNP"</span>,</span>
+<span>    <span class="st">"shared_all"</span>, <span class="st">"independent"</span><span class="op">)</span>,</span>
+<span>  niter_prefit <span class="op">=</span> <span class="fl">3</span>,</span>
+<span>  niter <span class="op">=</span> <span class="fl">30</span>,</span>
 <span>  p_single_effect <span class="op">=</span> <span class="fl">0.8</span>,</span>
+<span>  use_null_weight <span class="op">=</span> <span class="cn">TRUE</span>,</span>
+<span>  minvar <span class="op">=</span> <span class="fl">2</span>,</span>
+<span>  mingene <span class="op">=</span> <span class="fl">1</span>,</span>
 <span>  ncore <span class="op">=</span> <span class="fl">1</span>,</span>
 <span>  logfile <span class="op">=</span> <span class="cn">NULL</span>,</span>
-<span>  verbose <span class="op">=</span> <span class="cn">FALSE</span></span>
+<span>  verbose <span class="op">=</span> <span class="cn">FALSE</span>,</span>
+<span>  <span class="va">...</span></span>
 <span><span class="op">)</span></span></code></pre></div>
     </div>
 
@@ -93,22 +104,36 @@
 
 <dt>group_prior_var_structure</dt>
 <dd><p>a string indicating the structure to put on the prior variance parameters.
-"independent" is the default and allows all groups to have their own separate variance parameters.
+"shared_type" allows all groups in one molecular QTL type to share the same variance parameter.
+"shared_context" allows all groups in one molecular QTL type to share the same variance parameter.
+"shared_nonSNP" allows all non-SNP groups to share the same variance parameter.
 "shared_all" allows all groups to share the same variance parameter.
-"shared_type" allows all groups in one molecular QTL type to share the same variance parameter.</p></dd>
+"independent" allows all groups to have their own separate variance parameters.</p></dd>
 
 
-<dt>niter1</dt>
+<dt>niter_prefit</dt>
 <dd><p>the number of iterations of the E-M algorithm to perform during the initial parameter estimation step</p></dd>
 
 
-<dt>niter2</dt>
+<dt>niter</dt>
 <dd><p>the number of iterations of the E-M algorithm to perform during the complete parameter estimation step</p></dd>
 
 
 <dt>p_single_effect</dt>
 <dd><p>Regions with probability greater than <code>p_single_effect</code> of
 having at most one causal effect will be used selected for the complete parameter estimation step</p></dd>
+
+
+<dt>use_null_weight</dt>
+<dd><p>TRUE/FALSE. If TRUE, allow for a probability of no effect in susie</p></dd>
+
+
+<dt>minvar</dt>
+<dd><p>minimum number of variables (snps and genes) in a region</p></dd>
+
+
+<dt>mingene</dt>
+<dd><p>minimum number of genes in a region</p></dd>
 
 
 <dt>ncore</dt>
@@ -121,6 +146,10 @@ having at most one causal effect will be used selected for the complete paramete
 
 <dt>verbose</dt>
 <dd><p>TRUE/FALSE. If TRUE, print detail messages</p></dd>
+
+
+<dt>...</dt>
+<dd><p>Additional arguments of <code>susie_rss</code>.</p></dd>
 
 </dl></div>
     <div id="value">

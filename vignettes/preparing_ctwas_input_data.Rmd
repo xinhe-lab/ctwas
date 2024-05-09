@@ -260,7 +260,7 @@ For FUSION models, we set `load_predictdb_LD=FALSE` to calculate correlations be
 
 We use 6 cores to parallelize the computation over the weights.
 
-````{r preprocess_weights, eval=FALSE}
+```{r preprocess_weights, eval=FALSE}
 weight_files <- c("/project2/xinhe/shared_data/multigroup_ctwas/weights/expression_models/mashr_Liver.db",       "/project2/xinhe/shared_data/multigroup_ctwas/weights/expression_models/mashr_Adipose_Subcutaneous.db")
 
 ncore <- 6

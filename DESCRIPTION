@@ -6,8 +6,8 @@ Date: 2024-02-05
 Version: 0.2.1
 Authors@R: c(person("Siming","Zhao",role="aut",email="siming.zhao06@gmail.com"),
              person("Wesley","Crouse",role="aut"),
-             person("Sheng","Qian",role=c("aut", "cre"),email="shengqian@uchicago.edu"),
-             person("Kaixuan","Luo",role="aut",email="kevinlkx@gmail.com"),
+             person("Sheng","Qian",role="aut",email="shengqian@uchicago.edu"),
+             person("Kaixuan","Luo",role=c("aut", "cre"),email="kevinlkx@gmail.com"),
              person("Matthew","Stephens",role="aut"),
              person("Xin","He",role="aut"))
 Description: This package implements the causal-TWAS (cTWAS) method we developed to identify
