@@ -53,7 +53,7 @@ genotype data in genetic studies.}
 
 \item{force_compute_cor}{TRUE/FALSE. If TRUE, force computing correlation (R) matrices}
 
-\item{save_cor}{TRUE/FALSE. If TRUE, save correlation (R) matrices}
+\item{save_cor}{TRUE/FALSE. If TRUE, save correlation (R) matrices to \code{cor_dir}}
 
 \item{cor_dir}{a string, the directory to store correlation (R) matrices}
 

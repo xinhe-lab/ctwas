@@ -8,8 +8,10 @@ make_locusplot(
   finemap_res,
   region_id,
   weights,
-  cor_dir,
   ens_db,
+  save_cor = FALSE,
+  cor_dir = NULL,
+  region_info = NULL,
   region_data = NULL,
   locus_range = NULL,
   focus_gene = NULL,
@@ -19,8 +21,8 @@ make_locusplot(
   genelabel.size = 2.5,
   legend.text.size = 10,
   legend.position = "none",
-  panel.heights = c(4, 4, 0.3, 3),
-  check_alignment = FALSE
+  panel.heights = c(4, 4, 0.3, 4),
+  highlight_pos = NULL
 )
 }
 \arguments{
@@ -30,9 +32,13 @@ make_locusplot(
 
 \item{weights}{a list of weights}
 
+\item{ens_db}{Ensembl database}
+
+\item{save_cor}{TRUE/FALSE. If TRUE, save correlation (R) matrices to \code{cor_dir}}
+
 \item{cor_dir}{path of correlation matrices}
 
-\item{ens_db}{Ensembl database}
+\item{region_info}{a data frame of region definition and associated LD file names}
 
 \item{region_data}{a list of region_data used for finemapping}
 
@@ -57,7 +63,7 @@ By default, only show protein coding genes.}
 
 \item{panel.heights}{Relative heights of the panels.}
 
-\item{check_alignment}{If TRUE, plots lines at QTL positions in all panels.}
+\item{highlight_pos}{If not NULL, highlighst the position in all panels for the genomic position.}
 }
 \description{
 Plot the cTWAS result for a single locus

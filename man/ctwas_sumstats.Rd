@@ -83,7 +83,7 @@ having 1 or fewer effects will be used for parameter estimation}
 
 \item{ncore}{The number of cores used to parallelize susie over regions}
 
-\item{save_cor}{TRUE/FALSE. If TRUE, save correlation (R) matrices to \code{outputdir}}
+\item{save_cor}{TRUE/FALSE. If TRUE, save correlation (R) matrices to \code{cor_dir}}
 
 \item{cor_dir}{The directory to store correlation (R) matrices}
 

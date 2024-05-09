@@ -27,7 +27,7 @@
 #'
 #' @param force_compute_cor TRUE/FALSE. If TRUE, force computing correlation (R) matrices
 #'
-#' @param save_cor TRUE/FALSE. If TRUE, save correlation (R) matrices
+#' @param save_cor TRUE/FALSE. If TRUE, save correlation (R) matrices to \code{cor_dir}
 #'
 #' @param cor_dir a string, the directory to store correlation (R) matrices
 #'
@@ -282,7 +282,7 @@ finemap_region <- function(region_data,
 #'
 #' @param force_compute_cor TRUE/FALSE. If TRUE, force computing correlation (R) matrices
 #'
-#' @param save_cor TRUE/FALSE. If TRUE, save correlation (R) matrices
+#' @param save_cor TRUE/FALSE. If TRUE, save correlation (R) matrices to \code{cor_dir}
 #'
 #' @param cor_dir a string, the directory to store correlation (R) matrices
 #'

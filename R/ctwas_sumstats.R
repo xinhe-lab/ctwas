@@ -49,7 +49,7 @@
 #'
 #' @param ncore The number of cores used to parallelize susie over regions
 #'
-#' @param save_cor TRUE/FALSE. If TRUE, save correlation (R) matrices to \code{outputdir}
+#' @param save_cor TRUE/FALSE. If TRUE, save correlation (R) matrices to \code{cor_dir}
 #'
 #' @param cor_dir The directory to store correlation (R) matrices
 #'
@@ -216,8 +216,7 @@ ctwas_sumstats <- function(
               "finemap_res" = finemap_res,
               "boundary_genes" = boundary_genes,
               "z_gene" = z_gene,
-              "region_data" = region_data,
-              "screened_region_data" = screened_region_data))
+              "region_data" = region_data))
 
 }
 

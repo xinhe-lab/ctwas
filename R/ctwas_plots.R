@@ -7,11 +7,15 @@
 #'
 #' @param weights a list of weights
 #'
-#' @param cor_dir path of correlation matrices
-#'
 #' @param ens_db Ensembl database
 #'
+#' @param save_cor TRUE/FALSE. If TRUE, save correlation (R) matrices to \code{cor_dir}
+#'
+#' @param cor_dir path of correlation matrices
+#'
 #' @param region_data a list of region_data used for finemapping
+#'
+#' @param region_info a data frame of region definition and associated LD file names
 #'
 #' @param locus_range a vector of start and end positions to define the locus region to be plotted
 #'
@@ -34,8 +38,8 @@
 #'
 #' @param panel.heights Relative heights of the panels.
 #'
-#' @param check_alignment If TRUE, plots lines at QTL positions in all panels.
-
+#' @param highlight_pos If not NULL, highlighst the position in all panels for the genomic position.
+#'
 #' @importFrom magrittr %>%
 #' @import ggplot2
 #' @import ggrepel
@@ -47,8 +51,10 @@
 make_locusplot <- function(finemap_res,
                            region_id,
                            weights,
-                           cor_dir,
                            ens_db,
+                           save_cor = FALSE,
+                           cor_dir = NULL,
+                           region_info = NULL,
                            region_data = NULL,
                            locus_range = NULL,
                            focus_gene = NULL,
@@ -58,8 +64,12 @@ make_locusplot <- function(finemap_res,
                            genelabel.size = 2.5,
                            legend.text.size = 10,
                            legend.position = "none",
-                           panel.heights = c(4, 4, 0.3, 3),
-                           check_alignment = FALSE) {
+                           panel.heights = c(4, 4, 0.3, 4),
+                           highlight_pos = NULL) {
+
+  if (!is.list(weights)){
+    stop("'weights' should be a list.")
+  }
 
   # select finemapping result for the target region
   finemap_region_res <- finemap_res[which(finemap_res$region_id==region_id), ]
@@ -96,19 +106,79 @@ make_locusplot <- function(finemap_res,
   loginfo("locus_range: %s", locus_range)
 
   # add r2 with the focus gene
-  R_gene <- readRDS(file.path(cor_dir, paste0("region.", region_id, ".R_gene.RDS")))
-  R_snp_gene <- readRDS(file.path(cor_dir, paste0("region.", region_id, ".R_snp_gene.RDS")))
-  R_snp <-  readRDS(file.path(cor_dir, paste0("region.", region_id, ".R_snp.RDS")))
 
-  if (!is.null(region_data)) {
-    gids <- region_data[[region_id]]$gid
-    sids <- region_data[[region_id]]$sid
-    rownames(R_snp) <- sids
-    colnames(R_snp) <- sids
-    rownames(R_snp_gene) <- sids
-    colnames(R_snp_gene) <- gids
-    rownames(R_gene) <- gids
-    colnames(R_gene) <- gids
+  # load precomputed correlation matrices if available
+  if (!is.null(cor_dir)) {
+    if (!dir.exists(cor_dir))
+      dir.create(cor_dir, recursive = TRUE)
+    R_sg_file <- file.path(cor_dir, paste0("region.", region_id, ".R_snp_gene.RDS"))
+    R_g_file <- file.path(cor_dir, paste0("region.", region_id, ".R_gene.RDS"))
+    R_s_file <- file.path(cor_dir, paste0("region.", region_id, ".R_snp.RDS"))
+  }
+
+  if ( isTRUE(!is.null(cor_dir) && file.exists(R_sg_file) && file.exists(R_g_file) && file.exists(R_s_file)) ) {
+    # load precomputed correlation matrices
+    R_snp_gene <- load_LD(R_sg_file)
+    R_gene <- load_LD(R_g_file)
+    R_snp <- load_LD(R_s_file)
+    if (!is.null(region_data)) {
+      gids <- region_data[[region_id]]$gid
+      sids <- region_data[[region_id]]$sid
+      rownames(R_snp) <- sids
+      colnames(R_snp) <- sids
+      rownames(R_snp_gene) <- sids
+      colnames(R_snp_gene) <- gids
+      rownames(R_gene) <- gids
+      colnames(R_gene) <- gids
+    }
+  } else {
+    # compute correlations
+    loginfo("compute correlation matrices for region: %s", region_id)
+
+    # check input data
+    if (!is.data.frame(region_info)){
+      stop("'region_info' should be a data frame.")
+    }
+
+    if (!is.list(region_data)){
+      stop("'region_data' should be a list.")
+    }
+
+    if (region_data[[region_id]]$thin != 1){
+      stop("thin != 1 in the region_data, please expand the region to full SNPs")
+    }
+
+    # select region info for the region ids to finemap
+    regioninfo <- region_info[region_info$region_id %in% region_id, ]
+
+    # load LD matrix of the region
+    stopifnot(is.character(regioninfo$LD_matrix))
+    LD_matrix_files <- unlist(strsplit(regioninfo$LD_matrix, split = ";"))
+    stopifnot(all(file.exists(LD_matrix_files)))
+    if (length(LD_matrix_files)==1) {
+      R_snp <- load_LD(LD_matrix_files)
+    } else {
+      R_snp <- lapply(LD_matrix_files, load_LD)
+      R_snp <- suppressWarnings(as.matrix(Matrix::bdiag(R_snp)))
+    }
+
+    # load SNP info of the region
+    SNP_info_files <- unlist(strsplit(regioninfo$SNP_info, split = ";"))
+    stopifnot(all(file.exists(SNP_info_files)))
+    ld_snpinfo <- read_LD_SNP_files(SNP_info_files)
+
+    # compute correlation matrices
+    res <- compute_region_cor(region_data[[region_id]]$sid, region_data[[region_id]]$gid, R_snp, weights, ld_snpinfo)
+    R_snp <- res$R_snp
+    R_snp_gene <- res$R_snp_gene
+    R_gene <- res$R_gene
+    rm(res)
+    # save correlation matrices
+    if (isTRUE(save_cor && !is.null(cor_dir))) {
+      saveRDS(R_snp_gene, file=R_sg_file)
+      saveRDS(R_gene, file=R_g_file)
+      saveRDS(R_snp, file=R_s_file)
+    }
   }
 
   finemap_region_res$r2 <- NA
@@ -141,7 +211,7 @@ make_locusplot <- function(finemap_res,
   # get QTL info
   focus_gene_qtls <- rownames(weights[[focus_gid]]$wgt)
   finemap_qtl_res <- finemap_region_res[finemap_region_res$id %in% focus_gene_qtls, ]
-  # focus_gene_QTLs_res$qtl_name <- NULL
+  loginfo("QTL positions: %s", finemap_qtl_res$pos)
 
   # p-value panel
   p_pvalue <- ggplot(loc$data, aes(x = pos/1e6, y = p, label=label)) +
@@ -202,18 +272,22 @@ make_locusplot <- function(finemap_res,
   # gene track panel
   p_genes <- gg_genetracks(loc, xticks=FALSE, filter_gene_biotype = gene_biotype, text_pos="top")
 
-  if (check_alignment){
+  if (!is.null(highlight_pos)){
+    loginfo("highlight positions: %s", highlight_pos)
+
+    highlight_pos <- as.integer(highlight_pos)
+
     p_pvalue <- p_pvalue +
-      geom_vline(xintercept = finemap_qtl_res$pos/1e6, linetype="dotted", color = "blue", size=0.5)
+      geom_vline(xintercept = highlight_pos/1e6, linetype="dotted", color = "blue", size=0.5)
 
     p_pip <- p_pip +
-      geom_vline(xintercept = finemap_qtl_res$pos/1e6, linetype="dotted", color = "blue", size=0.5)
+      geom_vline(xintercept = highlight_pos/1e6, linetype="dotted", color = "blue", size=0.5)
 
     p_qtl <- p_qtl +
-      geom_vline(xintercept = finemap_qtl_res$pos/1e6, linetype="dotted", color = "blue", size=0.5)
+      geom_vline(xintercept = highlight_pos/1e6, linetype="dotted", color = "blue", size=0.5)
 
     p_genes <- p_genes +
-      geom_vline(xintercept = finemap_qtl_res$pos/1e6, linetype="dotted", color = "blue", size=0.5) +
+      geom_vline(xintercept = highlight_pos/1e6, linetype="dotted", color = "blue", size=0.5) +
       theme_bw() +
       theme(legend.position = "none",
             panel.border= element_blank(),
