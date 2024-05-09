@@ -1,10 +1,10 @@
 ---
-title: "Summarizing and post-processing cTWAS result"
+title: "Summarizing and post-processing cTWAS results"
 author: "Kaixuan Luo, Sheng Qian"
 date: "`r Sys.Date()`"
 output: rmarkdown::html_vignette
 vignette: >
-  %\VignetteIndexEntry{Summarizing and post-processing cTWAS result}
+  %\VignetteIndexEntry{Summarizing and post-processing cTWAS results}
   %\VignetteEngine{knitr::rmarkdown}
   %\VignetteEncoding{UTF-8}
 ---
@@ -13,60 +13,157 @@ vignette: >
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(message = FALSE,
                       warning = FALSE,
-                      fig.width = 6,
-                      fig.height = 4,
+                      fig.width = 8,
+                      fig.height = 6,
                       fig.align = "center",
                       fig.cap = "&nbsp;",
                       dpi = 120)
 ```
 
 
-## Summarizing and visualizing cTWAS output
+## Summarizing and visualizing cTWAS result
+
+Load the packages
+```{r load_package, message=FALSE}
+library(ctwas)
+library(tidyverse)
+```
+
+Load the cTWAS results from the `ctwas_sumstats()` function
+```{r load_ctwas_res}
+# output directory
+outputdir <- "/project2/xinhe/shared_data/multigroup_ctwas/tutorial/LDL_multitissue_tutorial/output"
+outname <- "LDL.Liver_Adipose"
+
+# directory storing computed correlation matrices
+cor_dir <- file.path(outputdir, "cor_matrix")
+
+# GWAS sample size
+gwas_n <- 343621
+
+# Load region info
+region_info <- readRDS(file.path(outputdir, "region_info.RDS"))
+
+# # Load z_snp
+# z_snp <- readRDS(file.path(outputdir, paste0(outname, ".preprocessed.z_snp.RDS")))
+
+# Load weights
+weights <- readRDS(file.path(outputdir, paste0(outname, ".preprocessed.weights.RDS")))
+
+# Load the cTWAS results 
+ctwas_res <- readRDS(file.path(outputdir, paste0(outname, ".ctwas_sumstats_res.RDS")))
+param <- ctwas_res$param
+finemap_res <- ctwas_res$finemap_res
+boundary_genes <- ctwas_res$boundary_genes
+region_data <- ctwas_res$region_data
+z_gene <- ctwas_res$z_gene
+```
 
 ### Assessing parameters and computing PVE
 
-We could use the `summarize_param()` function to assess the convergence of the estimated parameters and to compute the proportion of variance explained (PVE) by variants and genes. 
-```{r summarize_param, eval=FALSE}
+We could use the `summarize_param()` function to assess the convergence of the estimated parameters and 
+to compute the proportion of variance explained (PVE) by variants and genes. 
+```{r summarize_param}
 ctwas_parameters <- summarize_param(param, gwas_n)
 saveRDS(ctwas_parameters, file.path(outputdir, paste0(outname, ".ctwas_parameters.RDS")))
 
 ctwas_parameters
 ```
 
+## Summarizing cTWAS results
 
+To interpret and visualize the results, we need to add gene names to the finemapping result. 
 
-### Interpreting cTWAS output
-
-We will add the gene names to the results (the PredictDB weights use Ensembl IDs as the primary identifier). 
-
-We then show all molecular traits with PIP > 0.8, which is the threshold we used in the paper.
-```{r, eval=FALSE}
-# load information for all genes
-gene_info <- get_gene_info(weights)
-
-# add gene names to cTWAS results
-gene_idx <- match(finemap_res$id[finemap_res$type!="SNP"], gene_info$id)
-finemap_res$genename[finemap_res$type!="SNP"] <- gene_info$genename[gene_idx]
-
-# add z-scores to cTWAS results
-s_idx <- match(finemap_res$id[finemap_res$type=="SNP"], z_snp$id)
-finemap_res$z[finemap_res$type=="SNP"] <- z_snp$z[s_idx]
-
-g_idx <- match(finemap_res$id[finemap_res$type!="SNP"], z_gene$id)
-finemap_res$z[finemap_res$type!="SNP"] <- z_gene$z[g_idx]
-
-# select PIP > 0.8
-finemap_res <- finemap_res[order(-finemap_res$susie_pip),]
-ctwas_res <- finemap_res[finemap_res$type!="SNP" & finemap_res$susie_pip > 0.8,]
+We use gene annotations from Ensembl database (EnsDb.Hsapiens.v86). Please choose the Ensembl database for your specific data. 
+```{r load_ens_db}
+# load gene info database
+library(EnsDb.Hsapiens.v86)
+ens_db <- EnsDb.Hsapiens.v86
 ```
 
+We then add gene names and use gene mid-points to represent gene positions.
+```{r add_gene_names}
+# extract gene IDs from finemapping result
+finemap_res$gene_id <- NA
+finemap_res$gene_name <- NA
+finemap_gene_res <- finemap_res[finemap_res$type!="SNP",]
+gene_id <- sapply(strsplit(finemap_gene_res$id, split = "[|]"), "[[", 1)
+gene_id <- sapply(strsplit(gene_id, split = "[.]"), "[[", 1)
+finemap_gene_res$gene_id <- gene_id
+finemap_SNP_res <- finemap_res[finemap_res$type=="SNP",]
 
-### Combining PIPs across tissues or molecular traits
+# get gene position info
+gene_annot_gr <- genes(ens_db, filter = GeneIdFilter(finemap_gene_res$gene_id))
+gene_annot_gr$start_pos <- start(gene_annot_gr)
+gene_annot_gr$end_pos <- end(gene_annot_gr)
+# use the midpoint as gene position
+gene_annot_gr$gene_mid_pos <- round((gene_annot_gr$start_pos+gene_annot_gr$end_pos)/2)
+# get gene_name and gene position
+gene_annot_df <- data.frame(gene_id = gene_annot_gr$gene_id, 
+                            gene_name = gene_annot_gr$gene_name, 
+                            gene_pos = gene_annot_gr$gene_mid_pos)
 
-## Visualizing cTWAS results
+# add gene name to finemapping result and update with gene positions
+gene_annot_idx <- match(finemap_gene_res$gene_id, gene_annot_df$gene_id)
+finemap_gene_res$pos <- gene_annot_df$gene_pos[gene_annot_idx]
+finemap_gene_res$gene_name <- gene_annot_df$gene_name[gene_annot_idx]
+finemap_res <- rbind(finemap_gene_res, finemap_SNP_res)
+```
+
+## Interpreting cTWAS results
+
+We then show all molecular traits with PIP > 0.8, which is the threshold we used in the paper.
+```{r interpret_res, eval=FALSE}
+# select PIP > 0.8
+finemap_sig_res <- finemap_res[finemap_res$type!="SNP" & finemap_res$susie_pip > 0.8,]
+
+head(finemap_sig_res[order(-finemap_sig_res$susie_pip),])
+```
+
+## Visualzing cTWAS results
 
 We could make locus plots for regions of interest.
+```{r locus_plot}
+make_locusplot(finemap_res,
+               region_id = "1:107867043-109761309",
+               weights = weights,
+               cor_dir = cor_dir,
+               ens_db = ens_db,
+               gene_biotype="protein_coding",
+               legend.position = "right")
+```
 
+We could zoom in the region by specifing the `locus_range`, and highlight the positions using `highlight_pos`.
+```{r locus_plot_2}
+make_locusplot(finemap_res,
+               region_id = "1:107867043-109761309",
+               weights = weights,
+               ens_db = ens_db,
+               cor_dir = cor_dir, 
+               locus_range = c(109e6, 109.6e6),
+               gene_biotype="protein_coding",
+               legend.position = "right",
+               panel.heights = c(4, 4, 0.3, 4),
+               highlight_pos = 109275684)
+```
+
+If we do not have precomputed correlation matrices, 
+we could compute those by providing region_info and region_data
+
+```{r locus_plot_3, eval=FALSE}
+make_locusplot(finemap_res,
+               region_id = "1:107867043-109761309",
+               weights = weights,
+               ens_db = ens_db,
+               region_info = region_info, 
+               region_data = region_data,
+               cor_dir = NULL,
+               locus_range = c(109e6, 109.6e6),
+               gene_biotype="protein_coding",
+               legend.position = "right",
+               panel.heights = c(4, 4, 0.3, 4),
+               highlight_pos = 109275684)
+```
 
 ## Post-processing
 

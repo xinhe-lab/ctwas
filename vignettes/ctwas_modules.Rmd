@@ -29,6 +29,30 @@ We require first running the data preprocessing and harmonization steps before r
 
 Please follow the tutorial [Preparing cTWAS input data]() to prepare cTWAS input data.
 
+Load the packages
+```{r load_package, message=FALSE}
+library(ctwas)
+```
+
+Load the prepared input data
+```{r load_ctwas_res, eval=FALSE}
+# output directory
+outputdir <- "/project2/xinhe/shared_data/multigroup_ctwas/tutorial/LDL_multitissue_tutorial/output/"
+outname <- "LDL.Liver_Adipose"
+
+# Load z_snp
+z_snp <- readRDS(file.path(outputdir, paste0(outname, ".preprocessed.z_snp.RDS")))
+
+# Load weights
+weights <- readRDS(file.path(outputdir, paste0(outname, ".preprocessed.weights.RDS")))
+
+# Load region info
+region_info <- readRDS(file.path(outputdir, "region_info.RDS"))
+
+# Load gene z-scores
+z_gene <- readRDS(file.path(outputdir, paste0(outname, ".z_gene.RDS")))
+```
+
 ### Assemble input data for the regions
 
 After we have done data preprocessing and computed z-scores of molecular traits, we assemble the input data for all the regions using the `assemble_region_data()` function .  

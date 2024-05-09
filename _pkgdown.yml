@@ -17,8 +17,8 @@ navbar:
         href: articles/ctwas_main_function.html
       - text: Using cTWAS modules
         href: articles/ctwas_modules.html
-      - text: Summarizing and post-processing cTWAS result
-        href: articles/ctwas_postprocessing.html
+      - text: Summarizing and post-processing cTWAS results
+        href: articles/summarizing_postprocessing_results.html
       - text: FAQ
         href: articles/FAQ.html
     source:
