@@ -1,0 +1,186 @@
+---
+title: "Summarizing and post-processing cTWAS result"
+author: "Kaixuan Luo, Sheng Qian"
+date: "`r Sys.Date()`"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{Summarizing and post-processing cTWAS result}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(message = FALSE,
+                      warning = FALSE,
+                      fig.width = 6,
+                      fig.height = 4,
+                      fig.align = "center",
+                      fig.cap = "&nbsp;",
+                      dpi = 120)
+```
+
+
+## Summarizing and visualizing cTWAS output
+
+### Assessing parameters and computing PVE
+
+We could use the `summarize_param()` function to assess the convergence of the estimated parameters and to compute the proportion of variance explained (PVE) by variants and genes. 
+```{r summarize_param, eval=FALSE}
+ctwas_parameters <- summarize_param(param, gwas_n)
+saveRDS(ctwas_parameters, file.path(outputdir, paste0(outname, ".ctwas_parameters.RDS")))
+
+ctwas_parameters
+```
+
+
+
+### Interpreting cTWAS output
+
+We will add the gene names to the results (the PredictDB weights use Ensembl IDs as the primary identifier). 
+
+We then show all molecular traits with PIP > 0.8, which is the threshold we used in the paper.
+```{r, eval=FALSE}
+# load information for all genes
+gene_info <- get_gene_info(weights)
+
+# add gene names to cTWAS results
+gene_idx <- match(finemap_res$id[finemap_res$type!="SNP"], gene_info$id)
+finemap_res$genename[finemap_res$type!="SNP"] <- gene_info$genename[gene_idx]
+
+# add z-scores to cTWAS results
+s_idx <- match(finemap_res$id[finemap_res$type=="SNP"], z_snp$id)
+finemap_res$z[finemap_res$type=="SNP"] <- z_snp$z[s_idx]
+
+g_idx <- match(finemap_res$id[finemap_res$type!="SNP"], z_gene$id)
+finemap_res$z[finemap_res$type!="SNP"] <- z_gene$z[g_idx]
+
+# select PIP > 0.8
+finemap_res <- finemap_res[order(-finemap_res$susie_pip),]
+ctwas_res <- finemap_res[finemap_res$type!="SNP" & finemap_res$susie_pip > 0.8,]
+```
+
+
+### Combining PIPs across tissues or molecular traits
+
+## Visualizing cTWAS results
+
+We could make locus plots for regions of interest.
+
+
+## Post-processing
+
+### Merging regions
+
+We first select cross-boundary genes to merge, 
+We then identify overlapping regions from these cross-boundary genes, 
+and create `merged_region_data` and `merged_region_info` for these merged regions. 
+
+We rerun finemapping for the merged regions.
+
+```{r merge_regions, eval=FALSE}
+high_PIP_genes <- unique(finemap_res[finemap_res$type != "SNP" & finemap_res$susie_pip >= 0.5, "id"])
+selected_boundary_genes <- boundary_genes[boundary_genes$id %in% high_PIP_genes, , drop=FALSE]
+
+if (nrow(selected_boundary_genes) > 0){
+  res <- merge_finemap_regions(selected_boundary_genes,
+                               region_data,
+                               region_info,
+                               finemap_res,
+                               z_snp,
+                               z_gene,
+                               weights,
+                               expand = TRUE,
+                               group_prior = group_prior,
+                               group_prior_var = group_prior_var,
+                               L = 5,
+                               save_cor = TRUE,
+                               cor_dir = paste0(outputdir, "/cor_matrix/"),
+                               ncore = 1,
+                               verbose = TRUE)
+  finemap_merged_regions_res <- res$finemap_merged_regions_res
+  merged_region_data <- res$merged_region_data
+  merged_region_info <- res$merged_region_info
+  merge_region_id_list <- res$merge_region_id_list
+}
+```
+
+
+Optionally, we could update the finemapping results for the regions got merged.
+
+```{r merge_regions_2, eval=FALSE}
+updated_finemap_res <- update_merged_regions_finemap_res(finemap_res,
+                                                        finemap_merged_regions_res, 
+                                                        merge_region_id_list)
+```
+
+
+### Rerun finemapping with L = 1 for regions with LD mismatches
+
+LD mismatches between GWAS data and the reference LD could lead to false positives in fine-mapping. Diagnostic tools including [SuSiE-RSS][susierss_diagnostic], and [DENTIST][DENTIST], have been developed to check possible LD mismatch. 
+
+Here, we perform the LD mismatch diagnosis using [SuSiE-RSS][susierss_diagnostic] for selected regions. It is an optional step that users could run after finishing the main cTWAS analysis. Users could choose regions of interest, to be confident of the results.
+
+Here we check the top 10 regions with highest total non-SNP PIPs:
+```{r LD_mismatch, eval=FALSE}
+nonSNP_PIP_df <- compute_region_nonSNP_PIPs(finemap_res)
+selected_nonSNP_PIP_df <- nonSNP_PIP_df[order(nonSNP_PIP_df$nonSNP_PIP, decreasing = TRUE),]
+selected_region_ids <- selected_nonSNP_PIP_df$region_id[1:10]
+```
+
+
+We perform LD mismatch diagnosis for these regions using SuSiE RSS to detect problematic SNPs. This returns a list of problematic SNPs (diagnostic test `p-value < 5e-8` by default), flipped SNPs, and the test statistics of `kriging_rss` function from SuSiE-RSS. 
+```{r LD_mismatch_2, eval=FALSE}
+selected_region_info <- region_info[region_info$region_id %in% selected_region_ids, ]
+# We use SuSiE RSS to perform LD mismatch diagnosis for these high PIP regions.
+res <- detect_ld_mismatch_susie(z_snp, selected_region_info, gwas_n, 
+                                ncore = ncore, p_diff_thresh = 5e-8)
+problematic_snps <- res$problematic_snps
+flipped_snps <- res$flipped_snps
+condz_stats <- res$condz_stats
+saveRDS(res, file.path(outputdir, paste0(outname, ".detect_ld_mismatch_res.RDS")))
+```
+
+
+We choose large effect genes (or molecular traits) (abs(z) > 3) with problematic SNPs in their weights, and then select regions containing the problematic genes (molecular traits).
+```{r LD_mismatch_3, eval=FALSE}
+problematic_genes <- get_problematic_genes(problematic_snps, 
+                                           weights, 
+                                           z_gene, 
+                                           z_thresh = 3)
+
+problematic_region_ids <- unique(finemap_res[finemap_res$id %in% problematic_genes, "region_id"])
+```
+
+We then rerun the fine-mapping with `L = 1` for the problematic regions. 
+```{r LD_mismatch_4, eval=FALSE}
+if (length(problematic_region_ids) > 0){
+  # rerun the fine-mapping with L = 1 for the problematic regions
+  rerun_region_data <- screened_region_data[problematic_region_ids]
+  finemap_rerun_region_res <- finemap_regions(rerun_region_data,
+                                              region_info,
+                                              weights,
+                                              group_prior = group_prior,
+                                              group_prior_var = group_prior_var,
+                                              L = 1,
+                                     cor_dir = file.path(outputdir, "cor_matrix"), 
+                                              ncore = ncore, verbose = TRUE)
+}
+```
+
+
+Optimally, we could update finemapping results for problematic regions. 
+```{r LD_mismatch_5, eval=FALSE}
+updated_finemap_res <- update_finemap_res(finemap_res, finemap_rerun_region_res)
+```
+
+
+
+[reference]: https://xinhe-lab.github.io/ctwas/reference/index.html
+[UKBB_LD_ref]: https://uchicago.box.com/s/jqocacd2fulskmhoqnasrknbt59x3xkn
+[LDetect]: https://github.com/endrebak/ldetect
+[PredictDB]: http://predictdb.org/
+[FUSION_format]: http://gusevlab.org/projects/fusion/#compute-your-own-predictive-models
+[S-PrediXcan]: https://www.nature.com/articles/s41467-018-03621-1
+[susierss_diagnostic]: https://stephenslab.github.io/susieR/articles/susierss_diagnostic.html
+[DENTIST]: https://github.com/Yves-CHEN/DENTIST/

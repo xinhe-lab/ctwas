@@ -347,6 +347,7 @@ param <- res$param
 finemap_res <- res$finemap_res
 boundary_genes <- res$boundary_genes
 region_data <- res$region_data
+z_gene <- res$z_gene
 ```
 
 
@@ -615,7 +616,7 @@ loginfo("%d problematic regions", length(problematic_region_ids))
 
 We then rerun the fine-mapping with L = 1 for the problematic regions, and update finemapping results. 
 ```{r, eval=FALSE}
-if (length(problematic_region_ids) > 1){
+if (length(problematic_region_ids) > 0){
   # rerun the fine-mapping with L = 1 for the problematic regions
   rerun_region_data <- screened_region_data[problematic_region_ids]
   finemap_problematic_regions_res <- finemap_regions(rerun_region_data,
@@ -645,21 +646,40 @@ We then show all molecular traits with PIP > 0.8, which is the threshold we used
 # load information for all genes
 gene_info <- get_gene_info(weights)
 
+#load information for all genes
+gene_info <- data.frame(gene=as.character(), genename=as.character(), gene_type=as.character(), weight=as.character())
+
+for (i in 1:length(weight_files)){
+  sqlite <- RSQLite::dbDriver("SQLite")
+  db = RSQLite::dbConnect(sqlite, weight_files[i])
+  query <- function(...) RSQLite::dbGetQuery(db, ...)
+  gene_info_current <- query("select gene, genename, gene_type from extra")
+  RSQLite::dbDisconnect(db)
+
+  gene_info_current$weight <- weight_files[i]
+  
+  gene_info <- rbind(gene_info, gene_info_current)
+}
+
+gene_info$weight <- sapply(gene_info$weight, function(x){rev(unlist(strsplit(tools::file_path_sans_ext(x), "/")))[1]})
+gene_info$id <- paste(gene_info$gene, gene_info$weight, sep="|")
+
+#add gene names to cTWAS results
+ctwas_res$genename[ctwas_res$type!="SNP"] <- gene_info$genename[match(ctwas_res$id[ctwas_res$type!="SNP"], gene_info$id)]
+
 # add gene names to cTWAS results
 gene_idx <- match(finemap_res$id[finemap_res$type!="SNP"], gene_info$id)
 finemap_res$genename[finemap_res$type!="SNP"] <- gene_info$genename[gene_idx]
 
-# add z-scores to cTWAS results
-s_idx <- match(finemap_res$id[finemap_res$type=="SNP"], z_snp$id)
-finemap_res$z[finemap_res$type=="SNP"] <- z_snp$z[s_idx]
+# # add z-scores to cTWAS results
+# s_idx <- match(finemap_res$id[finemap_res$type=="SNP"], z_snp$id)
+# finemap_res$z[finemap_res$type=="SNP"] <- z_snp$z[s_idx]
+# 
+# g_idx <- match(finemap_res$id[finemap_res$type!="SNP"], z_gene$id)
+# finemap_res$z[finemap_res$type!="SNP"] <- z_gene$z[g_idx]
 
-g_idx <- match(finemap_res$id[finemap_res$type!="SNP"], z_gene$id)
-finemap_res$z[finemap_res$type!="SNP"] <- z_gene$z[g_idx]
-
-# select PIP > 0.8
-finemap_res <- finemap_res[order(-finemap_res$susie_pip),]
-ctwas_res <- finemap_res[finemap_res$type!="SNP" & finemap_res$susie_pip > 0.8,]
 ```
+
 
 
 ### Combining PIPs across tissues or molecular traits

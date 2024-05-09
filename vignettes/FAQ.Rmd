@@ -27,6 +27,6 @@ knitr::opts_chunk$set(message = FALSE,
 
 * How to use a different LD reference
 
-
+* Running with LD matrices
 
 

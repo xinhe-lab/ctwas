@@ -11,8 +11,14 @@ navbar:
     tutorial:
       text: Tutorial
       menu:
-      - text: Using cTWAS with summary statistics
-        href: articles/multigroup_ctwas_pipeline.html
+      - text: Preparing cTWAS input data
+        href: articles/preparing_ctwas_input_data.html
+      - text: Using cTWAS main function
+        href: articles/ctwas_main_function.html
+      - text: Using cTWAS modules
+        href: articles/ctwas_modules.html
+      - text: Summarizing and post-processing cTWAS result
+        href: articles/ctwas_postprocessing.html
       - text: FAQ
         href: articles/FAQ.html
     source:

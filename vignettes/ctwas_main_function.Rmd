@@ -1,0 +1,82 @@
+---
+title: "Using cTWAS main function"
+author: "Kaixuan Luo, Sheng Qian"
+date: "`r Sys.Date()`"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{Using cTWAS main function}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(message = FALSE,
+                      warning = FALSE,
+                      fig.width = 6,
+                      fig.height = 4,
+                      fig.align = "center",
+                      fig.cap = "&nbsp;",
+                      dpi = 120)
+```
+
+
+
+## Using cTWAS main function
+
+In this tutorial, we will show how to perform cTWAS main analysis with summary statistics using the `ctwas_sumstats()` function. 
+
+We require first running the data preprocessing and harmonization steps before running cTWAS main analysis. 
+
+Please follow the tutorial [Preparing cTWAS input data]() to prepare cTWAS input data.
+
+The `ctwas_sumstats()` function is a main function to run cTWAS analysis with summary statistics. It takes preprocessed GWAS z-scores (`z_snp`), `weights`, `region_info` as input, and will perform the main steps: computing z_scores of molecular traits, assembling input `region_data`, estimating parameters, screening regions, and finemapping. 
+If `z_gene` is already computed when preparing cTWAS input data, we could specify the `z_gene` argument in the function, then it will skip computing z_scores of molecular traits.
+
+```{r ctwas_sumstats, eval=FALSE}
+res <- ctwas_sumstats(z_snp,
+                        weights,
+                        region_info,
+                        thin = 0.1,
+                        niter_prefit = 3,
+                        niter = 30,
+                        L = 5,
+                        group_prior_var_structure = "shared_type",
+                        maxSNP = 20000,
+                        min_nonSNP_PIP = 0.5,
+                        ncore = ncore,
+                        save_cor = TRUE,
+                        cor_dir = file.path(outputdir, "cor_matrix"),
+                        outputdir = outputdir,
+                        outname = outname,
+                        logfile = file.path(outputdir, paste0(outname, ".ctwas_sumstats.log")),
+                        verbose = TRUE)
+
+param <- res$param
+finemap_res <- res$finemap_res
+boundary_genes <- res$boundary_genes
+z_gene <- res$z_gene
+region_data <- res$region_data
+```
+
+
+
+Some main argument settings:
+
+-   `z_snp` is a data frame with preprocessed GWAS z-scores.
+-   `weights` is a list of preprocessed weights from PredictDB or FUSION prediction models.
+-   `region_info` is a data frame with genome coordinates, LD matrix and SNP info of all the regions
+-   The `thin` argument randomly selects a subset of variants (10% when thin = 0.1) to use during the parameter estimation and screening regions, reducing computation.
+-   The `niter_prefit` argument and `niter` argument sets the number of EM iterations for estimating parameters. We set `niter_prefit = 3`, and `niter = 30` by default.
+-   The `L` argument sets the number of effects for SuSiE during the screening regions and fine mapping steps. We set `L = 5` by default.
+-   There are several options for how to handle the prior effect size parameters by specifying the `group_prior_var_stucture`. See the section "Estimating parameters" for more details about these settings.
+-   The `maxSNP` sets a maximum on the number of variants that can be in a single region to prevent memory issues during fine-mapping.
+-   `min_nonSNP_PIP` is a threshold for selecting regions with strong non-SNP signals for finemapping. We set `min_nonSNP_PIP = 0.5` by default, so regions with total non-SNP signals greater than 0.5 will be selected for finemapping.
+-   If the `save_cor` argument is TRUE, it will save the correlation matrices (SNP-SNP, SNP-gene, and gene-gene correlation matrices) in the `cor_dir` directory for future access.
+-   If `outputdir` is not NULL, it will save the output from each step as a `.RDS` file to the `outputdir` directory. The `.RDS` files will have `outname` as the prefix.
+-   The `ncore` argument specifies the number of cores to use when parallelizing over regions.
+-   If the `logfile` argument is specified, it will write log messages to the log file.
+-   If the `verbose` argument is TRUE, it will print more detailed messages.
+ 
+The function returns a list including: 
+estimated parameters, fine-mapping results, boundary genes, z_scores of molecular traits, assembled region data for all the regions.
