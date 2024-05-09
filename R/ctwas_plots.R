@@ -7,17 +7,17 @@
 #'
 #' @param weights a list of weights
 #'
-#' @param screened_region_data a list of screened region_data for regions with strong signals
-#'
-#' @param cor_matrix_path path of correlation matrices
+#' @param cor_dir path of correlation matrices
 #'
 #' @param ens_db Ensembl database
+#'
+#' @param region_data a list of region_data used for finemapping
 #'
 #' @param locus_range a vector of start and end positions to define the locus region to be plotted
 #'
 #' If NULL, the entire region will be plotted (with 100 bp flanks on both sides).
 #'
-#' @param focus_gene the gene to focus the plot. If NULL, use the lead TWAS feature
+#' @param focus_gene the gene name to focus the plot. If NULL, choose the gene with the highest PIP
 #'
 #' @param gene_biotype specified biotypes to be displayed in gene tracks or NULL to display all possible ones.
 #' By default, only show protein coding genes.
@@ -25,6 +25,10 @@
 #' @param point.size size values for SNP and non-SNP data points in the scatter plots
 #'
 #' @param point.alpha alpha values for SNP and non-SNP data points in the scatter plots
+#'
+#' @param genelabel.size Font size for gene text
+#'
+#' @param legend.text.size Font size for legend text
 #'
 #' @param legend.position position to put legends. If "none", no legends will be shown.
 #'
@@ -36,37 +40,52 @@
 #' @import ggplot2
 #' @import ggrepel
 #' @importFrom locuszoomr locus gg_genetracks
+#' @importFrom logging loginfo
 #'
 #' @export
 #'
 make_locusplot <- function(finemap_res,
                            region_id,
                            weights,
-                           screened_region_data,
-                           cor_matrix_path,
+                           cor_dir,
                            ens_db,
+                           region_data = NULL,
                            locus_range = NULL,
                            focus_gene = NULL,
                            gene_biotype = "protein_coding",
                            point.size = c(1, 3.5),
                            point.alpha = c(0.4, 0.6),
+                           genelabel.size = 2.5,
+                           legend.text.size = 10,
                            legend.position = "none",
-                           panel.heights = c(4, 4, 0.3, 4),
+                           panel.heights = c(4, 4, 0.3, 3),
                            check_alignment = FALSE) {
 
   # select finemapping result for the target region
-  finemap_region_res <- finemap_res[finemap_res$region_id==region_id,]
+  finemap_region_res <- finemap_res[which(finemap_res$region_id==region_id), ]
   finemap_region_res$p <- (-log(2) - pnorm(abs(finemap_region_res$z), lower.tail=F, log.p=T))/log(10) # add pvalue
   finemap_region_res$object_type <- finemap_region_res$type # adding object_type for size and alpha. SNP and non-SNP
   finemap_region_res$object_type[finemap_region_res$object_type!="SNP"] <- "non-SNP"
 
   if (!is.null(focus_gene)) {
-    focus_gene <- finemap_region_res$id[which(finemap_region_res$gene_name == focus_gene)]
+    focus_gidx <- which(finemap_region_res$gene_name == focus_gene)
+    if (length(focus_gidx) == 0){
+      stop("can't find focus_gene in the fine-mapping result of the region")
+    } else if (length(focus_gidx) > 1){
+      finemap_region_gene_res <- finemap_region_res[focus_gidx,]
+      focus_gid <- finemap_region_gene_res$id[which.max(finemap_region_gene_res$susie_pip)]
+    } else{
+      focus_gid <- finemap_region_res$id[focus_gidx]
+    }
   } else{
-    # if focus_gene not specified, select the top gene
+    # if focus_gid not specified, select the top gene
     finemap_region_gene_res <- finemap_region_res[finemap_region_res$type != "SNP",]
-    focus_gene <- finemap_region_gene_res$id[which.max(finemap_region_gene_res$susie_pip)]
+    focus_gidx <- which.max(finemap_region_gene_res$susie_pip)
+    focus_gene <- finemap_region_gene_res$gene_name[focus_gidx]
+    focus_gid <- finemap_region_gene_res$id[focus_gidx]
   }
+  loginfo("focus gene: %s", focus_gene)
+  loginfo("focus id: %s", focus_gid)
 
   if (!is.null(locus_range)){
     finemap_region_res <- finemap_region_res[finemap_region_res$pos>=locus_range[1] & finemap_region_res$pos<=locus_range[2],, drop=F]
@@ -74,23 +93,28 @@ make_locusplot <- function(finemap_res,
     # if locus_range not specified, plot the whole region
     locus_range <- c(min(finemap_region_res$pos)-100, max(finemap_region_res$pos) + 100)
   }
+  loginfo("locus_range: %s", locus_range)
 
   # add r2 with the focus gene
-  R_gene <- readRDS(file.path(cor_matrix_path, paste0("region.", region_id, ".R_gene.RDS")))
-  R_snp_gene <- readRDS(file.path(cor_matrix_path, paste0("region.", region_id, ".R_snp_gene.RDS")))
-  R_snp <-  readRDS(file.path(cor_matrix_path, paste0("region.", region_id, ".R_snp.RDS")))
+  R_gene <- readRDS(file.path(cor_dir, paste0("region.", region_id, ".R_gene.RDS")))
+  R_snp_gene <- readRDS(file.path(cor_dir, paste0("region.", region_id, ".R_snp_gene.RDS")))
+  R_snp <-  readRDS(file.path(cor_dir, paste0("region.", region_id, ".R_snp.RDS")))
 
-  rownames(R_gene) <- screened_region_data[[region_id]]$gid
-  colnames(R_gene) <- screened_region_data[[region_id]]$gid
-  rownames(R_snp_gene) <- screened_region_data[[region_id]]$sid
-  colnames(R_snp_gene) <-screened_region_data[[region_id]]$gid
-  rownames(R_snp) <- screened_region_data[[region_id]]$sid
-  colnames(R_snp) <- screened_region_data[[region_id]]$sid
+  if (!is.null(region_data)) {
+    gids <- region_data[[region_id]]$gid
+    sids <- region_data[[region_id]]$sid
+    rownames(R_snp) <- sids
+    colnames(R_snp) <- sids
+    rownames(R_snp_gene) <- sids
+    colnames(R_snp_gene) <- gids
+    rownames(R_gene) <- gids
+    colnames(R_gene) <- gids
+  }
 
   finemap_region_res$r2 <- NA
-  finemap_region_res$r2[finemap_region_res$type!="SNP"] <- R_gene[finemap_region_res$id[finemap_region_res$type!="SNP"], focus_gene]^2
-  finemap_region_res$r2[finemap_region_res$type=="SNP"] <- R_snp_gene[finemap_region_res$id[finemap_region_res$type=="SNP"], focus_gene]^2
-  finemap_region_res$r2[finemap_region_res$id == focus_gene] <- 100
+  finemap_region_res$r2[finemap_region_res$type!="SNP"] <- R_gene[finemap_region_res$id[finemap_region_res$type!="SNP"], focus_gid]^2
+  finemap_region_res$r2[finemap_region_res$type=="SNP"] <- R_snp_gene[finemap_region_res$id[finemap_region_res$type=="SNP"], focus_gid]^2
+  finemap_region_res$r2[finemap_region_res$id == focus_gid] <- 100
 
   # r2 colors: lead gene: salmon, 0.4~1: purple, others "#7FC97F"
   r2_colors <- c("0-0.4" = "#7FC97F", "0.4-1" = "purple", "1" = "salmon")
@@ -101,7 +125,7 @@ make_locusplot <- function(finemap_res,
   finemap_region_res$r2_levels <- factor(finemap_region_res$r2_levels, levels = rev(names(r2_colors)))
 
   # gene labels
-  finemap_region_res$label <- paste0(finemap_region_res$gene_name, "(", finemap_region_res$context, ")")
+  finemap_region_res$label <- paste0(finemap_region_res$gene_name, " (", finemap_region_res$context, ")")
   finemap_region_res$label[finemap_region_res$type == "SNP"] <- NA
 
   # create a locus object for plotting
@@ -115,14 +139,14 @@ make_locusplot <- function(finemap_res,
   # loc$data$r2_color <- finemap_region_res$r2_color
 
   # get QTL info
-  focus_gene_qtls <- rownames(weights[[focus_gene]]$wgt)
+  focus_gene_qtls <- rownames(weights[[focus_gid]]$wgt)
   finemap_qtl_res <- finemap_region_res[finemap_region_res$id %in% focus_gene_qtls, ]
   # focus_gene_QTLs_res$qtl_name <- NULL
 
   # p-value panel
   p_pvalue <- ggplot(loc$data, aes(x = pos/1e6, y = p, label=label)) +
     geom_point(aes(shape=type, size = object_type, alpha=object_type, color = r2_levels, fill = r2_levels)) +
-    geom_text_repel(size=2, color="black") +
+    geom_text_repel(size=genelabel.size, color="black") +
     scale_shape_manual(values = c(21, 22, 23, 24, 25)) +
     scale_alpha_manual(values=c("SNP"=point.alpha[1], "non-SNP"=point.alpha[2]), guide="none") +
     scale_size_manual(values=c("SNP"=point.size[1], "non-SNP"=point.size[2]), guide="none") +
@@ -132,6 +156,7 @@ make_locusplot <- function(finemap_res,
     labs(x = "", y = expression(-log[10]("p-value")), shape = "Type", color = expression(R^2)) +
     theme_bw() +
     theme(legend.position = legend.position,
+          legend.text = element_text(size=legend.text.size),
           axis.ticks.x = element_blank(),
           axis.text.x = element_blank(),
           panel.border= element_blank(),
@@ -142,7 +167,7 @@ make_locusplot <- function(finemap_res,
   # PIP panel
   p_pip <- ggplot(loc$data, aes(x=pos/1e6, y=susie_pip, label=label)) +
     geom_point(aes(shape=type, size = object_type, alpha=object_type, color = r2_levels, fill = r2_levels)) +
-    geom_text_repel(size=2, color="black") +
+    geom_text_repel(size=genelabel.size, color="black") +
     scale_shape_manual(values = c(21, 22, 23, 24, 25)) +
     scale_alpha_manual(values=c("SNP"=point.alpha[1], "non-SNP"=point.alpha[2]), guide="none") +
     scale_size_manual(values=c("SNP"=point.size[1], "non-SNP"=point.size[2]), guide="none") +
@@ -157,10 +182,10 @@ make_locusplot <- function(finemap_res,
           plot.margin = margin(b=0, l=10, t=0, r=10))
 
   # QTL panel
-  p_qtl <- ggplot(finemap_qtl_res) +
+  p_qtl <- ggplot(finemap_qtl_res, aes(x=pos/1e6)) +
     geom_rect(aes(xmin=locus_range[1]/1e6, xmax=locus_range[2]/1e6, ymin=0.1, ymax=0.2),
               fill = "lightgray") +
-    geom_segment(aes(x=pos/1e6, xend=pos/1e6, y=0.1, yend=0.2), color = r2_colors["1"]) +
+    geom_segment(aes(x=pos/1e6, xend=pos/1e6, y=0.1, yend=0.2), color = "salmon") +
     theme(
       axis.title = element_blank(),
       axis.text.y=element_blank(),

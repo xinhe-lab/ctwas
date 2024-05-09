@@ -13,7 +13,7 @@ compute_region_cor <- function(sids, gids, R_snp, weights, snpinfo) {
   names(wgtlist) <- names(weights)
 
   # compute correlation matrices
-  R_snp_gene <- matrix(NA, nrow(R_snp), length(gids))
+  R_snp_gene <- matrix(NA, nrow = nrow(R_snp), ncol = length(gids))
   R_gene <- diag(length(gids))
 
   if (length(gids) > 0) {
@@ -47,6 +47,14 @@ compute_region_cor <- function(sids, gids, R_snp, weights, snpinfo) {
   R_snp <- R_snp[sidx, sidx, drop = F]
   R_snp_gene <- R_snp_gene[sidx, , drop = F]
 
+  # add rownames and colnames
+  rownames(R_snp) <- sids
+  colnames(R_snp) <- sids
+  rownames(R_snp_gene) <- sids
+  colnames(R_snp_gene) <- gids
+  rownames(R_gene) <- gids
+  colnames(R_gene) <- gids
+
   if (anyNA(R_snp))
     stop("R_snp matrix contains missing values!\n")
 
@@ -55,8 +63,6 @@ compute_region_cor <- function(sids, gids, R_snp, weights, snpinfo) {
 
   if (anyNA(R_gene))
     stop("R_gene matrix contains missing values!\n")
-
-  # loginfo("%d genes, %d SNPs in the correlation matrices", ncol(R_snp_gene), nrow(R_snp_gene))
 
   return(list("R_snp" = R_snp,
               "R_snp_gene" = R_snp_gene,
