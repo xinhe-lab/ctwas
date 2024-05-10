@@ -5,13 +5,13 @@
 <meta charset="utf-8">
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Summarizing and post-processing cTWAS results • ctwas</title>
+<title>Summarizing and post-processing cTWAS result • ctwas</title>
 <!-- jquery --><script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.4.1/jquery.min.js" integrity="sha256-CSXorXvZcTkaix6Yvo6HppcZGetbYMGWSFlBw8HfCJo=" crossorigin="anonymous"></script><!-- Bootstrap --><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/3.4.1/css/bootstrap.min.css" integrity="sha256-bZLfwXAP04zRMK2BjiO8iu9pf4FbLqX6zitd+tIvLhE=" crossorigin="anonymous">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/3.4.1/js/bootstrap.min.js" integrity="sha256-nuL8/2cJ5NDSSwnKD8VqreErSWHtnEP9E7AySL+1ev4=" crossorigin="anonymous"></script><!-- bootstrap-toc --><link rel="stylesheet" href="../bootstrap-toc.css">
 <script src="../bootstrap-toc.js"></script><!-- Font Awesome icons --><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.12.1/css/all.min.css" integrity="sha256-mmgLkCYLUQbXn0B1SRqzHar6dCnv9oZFPEC1g1cwlkk=" crossorigin="anonymous">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.12.1/css/v4-shims.min.css" integrity="sha256-wZjR52fzng1pJHwx4aV2AO3yyTOXrcDW7jBpJtTwVxw=" crossorigin="anonymous">
 <!-- clipboard.js --><script src="https://cdnjs.cloudflare.com/ajax/libs/clipboard.js/2.0.6/clipboard.min.js" integrity="sha256-inc5kl9MA1hkeYUt+EC3BhlIgyp/2jDIyBLS6k3UxPI=" crossorigin="anonymous"></script><!-- headroom.js --><script src="https://cdnjs.cloudflare.com/ajax/libs/headroom/0.11.0/headroom.min.js" integrity="sha256-AsUX4SJE1+yuDu5+mAVzJbuYNPHj/WroHuZ8Ir/CkE0=" crossorigin="anonymous"></script><script src="https://cdnjs.cloudflare.com/ajax/libs/headroom/0.11.0/jQuery.headroom.min.js" integrity="sha256-ZX/yNShbjqsohH1k95liqY9Gd8uOiE1S4vZc+9KQ1K4=" crossorigin="anonymous"></script><!-- pkgdown --><link href="../pkgdown.css" rel="stylesheet">
-<script src="../pkgdown.js"></script><meta property="og:title" content="Summarizing and post-processing cTWAS results">
+<script src="../pkgdown.js"></script><meta property="og:title" content="Summarizing and post-processing cTWAS result">
 <meta property="og:description" content="ctwas">
 <!-- mathjax --><script src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/MathJax.js" integrity="sha256-nvJJv9wWKEm88qvoQl9ekL2J+k/RWIsaSScxxlsrv8k=" crossorigin="anonymous"></script><script src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/config/TeX-AMS-MML_HTMLorMML.js" integrity="sha256-84DKXVJXs0/F8OTMzX4UR909+jtl4G7SPypPavF+GfA=" crossorigin="anonymous"></script><!--[if lt IE 9]>
 <script src="https://oss.maxcdn.com/html5shiv/3.7.3/html5shiv.min.js"></script>
@@ -84,10 +84,10 @@
       </header><script src="summarizing_postprocessing_results_files/accessible-code-block-0.0.1/empty-anchor.js"></script><div class="row">
   <div class="col-md-9 contents">
     <div class="page-header toc-ignore">
-      <h1 data-toc-skip>Summarizing and post-processing cTWAS results</h1>
+      <h1 data-toc-skip>Summarizing and post-processing cTWAS result</h1>
                         <h4 data-toc-skip class="author">Kaixuan Luo, Sheng Qian</h4>
             
-            <h4 data-toc-skip class="date">2024-05-09</h4>
+            <h4 data-toc-skip class="date">2024-05-10</h4>
       
       <small class="dont-index">Source: <a href="https://github.com/xinhe-lab/ctwas/blob/multigroup_test/vignettes/summarizing_postprocessing_results.Rmd" class="external-link"><code>vignettes/summarizing_postprocessing_results.Rmd</code></a></small>
       <div class="hidden name"><code>summarizing_postprocessing_results.Rmd</code></div>
@@ -137,39 +137,41 @@
 <p>We could use the <code><a href="../reference/summarize_param.html">summarize_param()</a></code> function to assess the convergence of the estimated parameters and to compute the proportion of variance explained (PVE) by variants and genes.</p>
 <div class="sourceCode" id="cb3"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">ctwas_parameters</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/summarize_param.html">summarize_param</a></span><span class="op">(</span><span class="va">param</span>, <span class="va">gwas_n</span><span class="op">)</span></span>
-<span><span class="fu"><a href="https://rdrr.io/r/base/readRDS.html" class="external-link">saveRDS</a></span><span class="op">(</span><span class="va">ctwas_parameters</span>, <span class="fu"><a href="https://rdrr.io/r/base/file.path.html" class="external-link">file.path</a></span><span class="op">(</span><span class="va">outputdir</span>, <span class="fu"><a href="https://rdrr.io/r/base/paste.html" class="external-link">paste0</a></span><span class="op">(</span><span class="va">outname</span>, <span class="st">".ctwas_parameters.RDS"</span><span class="op">)</span><span class="op">)</span><span class="op">)</span></span>
-<span></span>
-<span><span class="va">ctwas_parameters</span></span></code></pre></div>
-<pre><code><span><span class="co">## $group_size</span></span>
-<span><span class="co">##   expression|liver expression|adipose                SNP </span></span>
-<span><span class="co">##               8775              10538            6435220 </span></span>
-<span><span class="co">## </span></span>
-<span><span class="co">## $group_prior</span></span>
-<span><span class="co">##   expression|liver expression|adipose                SNP </span></span>
-<span><span class="co">##       0.0144522860       0.0021325754       0.0002151146 </span></span>
-<span><span class="co">## </span></span>
-<span><span class="co">## $group_prior_var</span></span>
-<span><span class="co">##   expression|liver expression|adipose                SNP </span></span>
-<span><span class="co">##          24.524181          24.524181           9.749157 </span></span>
-<span><span class="co">## </span></span>
-<span><span class="co">## $enrichment</span></span>
-<span><span class="co">##   expression|liver expression|adipose </span></span>
-<span><span class="co">##          67.184133           9.913673 </span></span>
-<span><span class="co">## </span></span>
-<span><span class="co">## $group_pve</span></span>
-<span><span class="co">##   expression|liver expression|adipose                SNP </span></span>
-<span><span class="co">##         0.00905104         0.00160390         0.03927540 </span></span>
-<span><span class="co">## </span></span>
-<span><span class="co">## $total_pve</span></span>
-<span><span class="co">## [1] 0.04993034</span></span>
-<span><span class="co">## </span></span>
-<span><span class="co">## $attributable_pve</span></span>
-<span><span class="co">##   expression|liver expression|adipose                SNP </span></span>
-<span><span class="co">##         0.18127336         0.03212276         0.78660388 </span></span>
-<span><span class="co">## </span></span>
-<span><span class="co">## $convergence_plot</span></span></code></pre>
+<span><span class="fu"><a href="https://rdrr.io/r/base/readRDS.html" class="external-link">saveRDS</a></span><span class="op">(</span><span class="va">ctwas_parameters</span>, <span class="fu"><a href="https://rdrr.io/r/base/file.path.html" class="external-link">file.path</a></span><span class="op">(</span><span class="va">outputdir</span>, <span class="fu"><a href="https://rdrr.io/r/base/paste.html" class="external-link">paste0</a></span><span class="op">(</span><span class="va">outname</span>, <span class="st">".ctwas_parameters.RDS"</span><span class="op">)</span><span class="op">)</span><span class="op">)</span></span></code></pre></div>
+<p>Estimated prior inclusion probability:</p>
+<div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">ctwas_parameters</span><span class="op">$</span><span class="va">group_prior</span></span></code></pre></div>
+<pre><code><span><span class="co">##   expression|liver expression|adipose                SNP </span></span>
+<span><span class="co">##       0.0144522860       0.0021325754       0.0002151146</span></span></code></pre>
+<p>Estimated prior effect size:</p>
+<div class="sourceCode" id="cb6"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">ctwas_parameters</span><span class="op">$</span><span class="va">group_prior_var</span></span></code></pre></div>
+<pre><code><span><span class="co">##   expression|liver expression|adipose                SNP </span></span>
+<span><span class="co">##          24.524181          24.524181           9.749157</span></span></code></pre>
+<p>Estimated enrichment of molecular traits over variants:</p>
+<div class="sourceCode" id="cb8"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">ctwas_parameters</span><span class="op">$</span><span class="va">enrichment</span></span></code></pre></div>
+<pre><code><span><span class="co">##   expression|liver expression|adipose </span></span>
+<span><span class="co">##          67.184133           9.913673</span></span></code></pre>
+<p>PVE explained by molecular traits and variants:</p>
+<div class="sourceCode" id="cb10"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">ctwas_parameters</span><span class="op">$</span><span class="va">group_pve</span></span></code></pre></div>
+<pre><code><span><span class="co">##   expression|liver expression|adipose                SNP </span></span>
+<span><span class="co">##         0.00905104         0.00160390         0.03927540</span></span></code></pre>
+<p>Total heritability (sum of PVE)</p>
+<div class="sourceCode" id="cb12"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">ctwas_parameters</span><span class="op">$</span><span class="va">total_pve</span></span></code></pre></div>
+<pre><code><span><span class="co">## [1] 0.04993034</span></span></code></pre>
+<p>Attributable heritability</p>
+<div class="sourceCode" id="cb14"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">ctwas_parameters</span><span class="op">$</span><span class="va">attributable_pve</span></span></code></pre></div>
+<pre><code><span><span class="co">##   expression|liver expression|adipose                SNP </span></span>
+<span><span class="co">##         0.18127336         0.03212276         0.78660388</span></span></code></pre>
+<p>Plot convergence</p>
+<div class="sourceCode" id="cb16"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">ctwas_parameters</span><span class="op">$</span><span class="va">convergence_plot</span></span></code></pre></div>
 <div class="figure" style="text-align: center">
-<img src="summarizing_postprocessing_results_files/figure-html/summarize_param-1.png" alt="&amp;nbsp;" width="960"><p class="caption">
+<img src="summarizing_postprocessing_results_files/figure-html/unnamed-chunk-7-1.png" alt="&amp;nbsp;" width="720"><p class="caption">
  
 </p>
 </div>
@@ -179,13 +181,13 @@
 <h2 id="summarizing-ctwas-results">Summarizing cTWAS results<a class="anchor" aria-label="anchor" href="#summarizing-ctwas-results"></a>
 </h2>
 <p>To interpret and visualize the results, we need to add gene names to the finemapping result.</p>
-<p>We use gene annotations from Ensembl database (EnsDb.Hsapiens.v86). Please choose the Ensembl database for your specific data.</p>
-<div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
+<p>We use gene annotations from the Ensembl database (EnsDb.Hsapiens.v86). Please choose the Ensembl database for your specific data.</p>
+<div class="sourceCode" id="cb17"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># load gene info database</span></span>
 <span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va">EnsDb.Hsapiens.v86</span><span class="op">)</span></span>
 <span><span class="va">ens_db</span> <span class="op">&lt;-</span> <span class="va">EnsDb.Hsapiens.v86</span></span></code></pre></div>
 <p>We then add gene names and use gene mid-points to represent gene positions.</p>
-<div class="sourceCode" id="cb6"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb18"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># extract gene IDs from finemapping result</span></span>
 <span><span class="va">finemap_res</span><span class="op">$</span><span class="va">gene_id</span> <span class="op">&lt;-</span> <span class="cn">NA</span></span>
 <span><span class="va">finemap_res</span><span class="op">$</span><span class="va">gene_name</span> <span class="op">&lt;-</span> <span class="cn">NA</span></span>
@@ -215,18 +217,101 @@
 <div class="section level2">
 <h2 id="interpreting-ctwas-results">Interpreting cTWAS results<a class="anchor" aria-label="anchor" href="#interpreting-ctwas-results"></a>
 </h2>
-<p>We then show all molecular traits with PIP &gt; 0.8, which is the threshold we used in the paper.</p>
-<div class="sourceCode" id="cb7"><pre class="downlit sourceCode r">
+<p>We list all molecular traits with PIP &gt; 0.8, which is the threshold we used in the paper.</p>
+<div class="sourceCode" id="cb19"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># select PIP &gt; 0.8</span></span>
-<span><span class="va">finemap_sig_res</span> <span class="op">&lt;-</span> <span class="va">finemap_res</span><span class="op">[</span><span class="va">finemap_res</span><span class="op">$</span><span class="va">type</span><span class="op">!=</span><span class="st">"SNP"</span> <span class="op">&amp;</span> <span class="va">finemap_res</span><span class="op">$</span><span class="va">susie_pip</span> <span class="op">&gt;</span> <span class="fl">0.8</span>,<span class="op">]</span></span>
+<span><span class="va">sig_finemap_res</span> <span class="op">&lt;-</span> <span class="va">finemap_res</span><span class="op">[</span><span class="va">finemap_res</span><span class="op">$</span><span class="va">type</span><span class="op">!=</span><span class="st">"SNP"</span> <span class="op">&amp;</span> <span class="va">finemap_res</span><span class="op">$</span><span class="va">susie_pip</span> <span class="op">&gt;</span> <span class="fl">0.8</span>,<span class="op">]</span></span>
 <span></span>
-<span><span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">head</a></span><span class="op">(</span><span class="va">finemap_sig_res</span><span class="op">[</span><span class="fu"><a href="https://rdrr.io/r/base/order.html" class="external-link">order</a></span><span class="op">(</span><span class="op">-</span><span class="va">finemap_sig_res</span><span class="op">$</span><span class="va">susie_pip</span><span class="op">)</span>,<span class="op">]</span><span class="op">)</span></span></code></pre></div>
+<span><span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">head</a></span><span class="op">(</span><span class="va">sig_finemap_res</span><span class="op">[</span><span class="fu"><a href="https://rdrr.io/r/base/order.html" class="external-link">order</a></span><span class="op">(</span><span class="op">-</span><span class="va">sig_finemap_res</span><span class="op">$</span><span class="va">susie_pip</span><span class="op">)</span>,<span class="op">]</span><span class="op">)</span></span></code></pre></div>
+<p>When we have multiple contexts (tissues), it is useful to evaluate the combined PIP for each molecular trait over different contexts:</p>
+<div class="sourceCode" id="cb20"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">finemap_gene_res</span> <span class="op">&lt;-</span> <span class="va">finemap_res</span><span class="op">[</span><span class="va">finemap_res</span><span class="op">$</span><span class="va">type</span><span class="op">!=</span><span class="st">"SNP"</span>,<span class="op">]</span></span>
+<span></span>
+<span><span class="co"># combine PIPs across contexts (tissues)</span></span>
+<span><span class="va">gene_pip_df</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/stats/aggregate.html" class="external-link">aggregate</a></span><span class="op">(</span><span class="va">finemap_gene_res</span><span class="op">$</span><span class="va">susie_pip</span>, by<span class="op">=</span><span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span><span class="va">finemap_gene_res</span><span class="op">$</span><span class="va">gene_id</span><span class="op">)</span>, FUN<span class="op">=</span><span class="va">sum</span><span class="op">)</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/base/colnames.html" class="external-link">colnames</a></span><span class="op">(</span><span class="va">gene_pip_df</span><span class="op">)</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"gene_id"</span>, <span class="st">"combined_pip"</span><span class="op">)</span></span>
+<span><span class="va">gene_annot_idx</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/match.html" class="external-link">match</a></span><span class="op">(</span><span class="va">gene_pip_df</span><span class="op">$</span><span class="va">gene_id</span>, <span class="va">gene_annot_df</span><span class="op">$</span><span class="va">gene_id</span><span class="op">)</span></span>
+<span><span class="va">gene_pip_df</span><span class="op">$</span><span class="va">gene_name</span> <span class="op">&lt;-</span> <span class="va">gene_annot_df</span><span class="op">$</span><span class="va">gene_name</span><span class="op">[</span><span class="va">gene_annot_idx</span><span class="op">]</span></span>
+<span><span class="va">gene_pip_df</span> <span class="op">&lt;-</span> <span class="va">gene_pip_df</span><span class="op">[</span>, <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"gene_id"</span>, <span class="st">"gene_name"</span>, <span class="st">"combined_pip"</span><span class="op">)</span><span class="op">]</span></span>
+<span></span>
+<span><span class="co"># PIPs for each context</span></span>
+<span><span class="va">contexts</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/unique.html" class="external-link">unique</a></span><span class="op">(</span><span class="va">finemap_gene_res</span><span class="op">$</span><span class="va">context</span><span class="op">)</span></span>
+<span><span class="va">gene_pips_df</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/matrix.html" class="external-link">matrix</a></span><span class="op">(</span><span class="cn">NA</span>, nrow<span class="op">=</span><span class="fu"><a href="https://rdrr.io/r/base/nrow.html" class="external-link">nrow</a></span><span class="op">(</span><span class="va">gene_pip_df</span><span class="op">)</span>, ncol<span class="op">=</span><span class="fu"><a href="https://rdrr.io/r/base/length.html" class="external-link">length</a></span><span class="op">(</span><span class="va">contexts</span><span class="op">)</span><span class="op">)</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/base/colnames.html" class="external-link">colnames</a></span><span class="op">(</span><span class="va">gene_pips_df</span><span class="op">)</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/paste.html" class="external-link">paste0</a></span><span class="op">(</span><span class="va">contexts</span>, <span class="st">"_pip"</span><span class="op">)</span></span>
+<span><span class="kw">for</span> <span class="op">(</span><span class="va">i</span> <span class="kw">in</span> <span class="fl">1</span><span class="op">:</span><span class="fu"><a href="https://rdrr.io/r/base/nrow.html" class="external-link">nrow</a></span><span class="op">(</span><span class="va">gene_pips_df</span><span class="op">)</span><span class="op">)</span><span class="op">{</span></span>
+<span>  <span class="va">gene_id</span> <span class="op">&lt;-</span> <span class="va">gene_pip_df</span><span class="op">$</span><span class="va">gene_id</span><span class="op">[</span><span class="va">i</span><span class="op">]</span></span>
+<span>  <span class="va">finemap_gene_res_subset</span> <span class="op">&lt;-</span> <span class="va">finemap_gene_res</span><span class="op">[</span><span class="fu"><a href="https://rdrr.io/r/base/which.html" class="external-link">which</a></span><span class="op">(</span><span class="va">finemap_gene_res</span><span class="op">$</span><span class="va">gene_id</span><span class="op">==</span><span class="va">gene_id</span><span class="op">)</span>,<span class="op">]</span></span>
+<span>  <span class="va">gene_contexts</span> <span class="op">&lt;-</span> <span class="va">finemap_gene_res_subset</span><span class="op">$</span><span class="va">context</span></span>
+<span>  <span class="va">gene_pips_df</span><span class="op">[</span><span class="va">i</span>, <span class="fu"><a href="https://rdrr.io/r/base/paste.html" class="external-link">paste0</a></span><span class="op">(</span><span class="va">gene_contexts</span>, <span class="st">"_pip"</span><span class="op">)</span><span class="op">]</span> <span class="op">&lt;-</span> <span class="va">finemap_gene_res_subset</span><span class="op">$</span><span class="va">susie_pip</span></span>
+<span><span class="op">}</span></span>
+<span><span class="va">gene_pips_df</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/cbind.html" class="external-link">cbind</a></span><span class="op">(</span><span class="va">gene_pip_df</span>, <span class="va">gene_pips_df</span><span class="op">)</span></span>
+<span></span>
+<span><span class="co"># sort by combined PIP</span></span>
+<span><span class="va">gene_pips_df</span> <span class="op">&lt;-</span> <span class="va">gene_pips_df</span><span class="op">[</span><span class="fu"><a href="https://rdrr.io/r/base/order.html" class="external-link">order</a></span><span class="op">(</span><span class="op">-</span><span class="va">gene_pips_df</span><span class="op">$</span><span class="va">combined_pip</span><span class="op">)</span>,<span class="op">]</span></span>
+<span><span class="co"># select combined PIP &gt; 0.8</span></span>
+<span><span class="va">sig_gene_pips_df</span> <span class="op">&lt;-</span> <span class="va">gene_pips_df</span><span class="op">[</span><span class="va">gene_pips_df</span><span class="op">$</span><span class="va">combined_pip</span> <span class="op">&gt;</span> <span class="fl">0.8</span>, <span class="op">]</span></span>
+<span>  </span>
+<span><span class="co"># list genes with combined PIP &gt; 0.8 or top 20 genes with highest combined PIPs</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">head</a></span><span class="op">(</span><span class="va">gene_pips_df</span>, <span class="fu"><a href="https://rdrr.io/r/base/Extremes.html" class="external-link">max</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/nrow.html" class="external-link">nrow</a></span><span class="op">(</span><span class="va">sig_gene_pips_df</span><span class="op">)</span>, <span class="fl">20</span><span class="op">)</span><span class="op">)</span></span></code></pre></div>
+<pre><code><span><span class="co">##              gene_id gene_name combined_pip    liver_pip  adipose_pip</span></span>
+<span><span class="co">## 2785 ENSG00000153786    ZDHHC7    1.1885530 2.051826e-01 9.833704e-01</span></span>
+<span><span class="co">## 1645 ENSG00000123612    ACVR1C    1.0640076 9.381139e-01 1.258937e-01</span></span>
+<span><span class="co">## 2095 ENSG00000134222     PSRC1    1.0193856 1.000000e+00 1.938563e-02</span></span>
+<span><span class="co">## 3595 ENSG00000168899     VAMP5    1.0007488 5.018790e-03 9.957300e-01</span></span>
+<span><span class="co">## 1711 ENSG00000125629    INSIG2    1.0005182 9.999974e-01 5.207537e-04</span></span>
+<span><span class="co">## 906  ENSG00000104870     FCGRT    1.0000531 6.890371e-05 9.999842e-01</span></span>
+<span><span class="co">## 5355 ENSG00000261701       HPR    1.0000006 1.000000e+00 6.028600e-07</span></span>
+<span><span class="co">## 1081 ENSG00000107443      CCNJ    1.0000000           NA 1.000000e+00</span></span>
+<span><span class="co">## 4696 ENSG00000197114     ZGPAT    0.9996843 9.996843e-01           NA</span></span>
+<span><span class="co">## 4929 ENSG00000204599    TRIM39    0.9996749 9.987271e-01 9.477794e-04</span></span>
+<span><span class="co">## 2486 ENSG00000142534     RPS11    0.9984900 8.700934e-01 1.283966e-01</span></span>
+<span><span class="co">## 3307 ENSG00000165029     ABCA1    0.9947563 9.947563e-01           NA</span></span>
+<span><span class="co">## 2768 ENSG00000152684      PELO    0.9918423 9.139214e-01 7.792089e-02</span></span>
+<span><span class="co">## 4307 ENSG00000183087      GAS6    0.9903482 9.871194e-01 3.228812e-03</span></span>
+<span><span class="co">## 440  ENSG00000082701     GSK3B    0.9883018 9.883018e-01           NA</span></span>
+<span><span class="co">## 762  ENSG00000100979      PLTP    0.9835695 9.821665e-01 1.402914e-03</span></span>
+<span><span class="co">## 3171 ENSG00000162836      ACP6    0.9803660 9.763189e-01 4.047100e-03</span></span>
+<span><span class="co">## 3181 ENSG00000163083     INHBB    0.9793823 9.793823e-01           NA</span></span>
+<span><span class="co">## 1520 ENSG00000119537      KDSR    0.9782196 8.724115e-01 1.058081e-01</span></span>
+<span><span class="co">## 2172 ENSG00000136271     DDX56    0.9755742 9.717791e-01 3.795073e-03</span></span>
+<span><span class="co">## 2753 ENSG00000151292   CSNK1G3    0.9747330 9.697076e-01 5.025412e-03</span></span>
+<span><span class="co">## 955  ENSG00000105287     PRKD2    0.9739308 9.735878e-01 3.429443e-04</span></span>
+<span><span class="co">## 5307 ENSG00000255974    CYP2A6    0.9726368 9.703135e-01 2.323308e-03</span></span>
+<span><span class="co">## 131  ENSG00000015520    NPC1L1    0.9715337 8.454926e-01 1.260411e-01</span></span>
+<span><span class="co">## 3883 ENSG00000173757    STAT5B    0.9705069 9.681830e-01 2.323851e-03</span></span>
+<span><span class="co">## 1025 ENSG00000105866       SP4    0.9698799 9.683790e-01 1.500853e-03</span></span>
+<span><span class="co">## 2560 ENSG00000143771     CNIH4    0.9688407 9.643197e-01 4.520982e-03</span></span>
+<span><span class="co">## 4035 ENSG00000176920      FUT2    0.9681595 9.681595e-01           NA</span></span>
+<span><span class="co">## 2695 ENSG00000149485     FADS1    0.9681429 9.681429e-01           NA</span></span>
+<span><span class="co">## 485  ENSG00000087087      SRRT    0.9567536 9.283432e-01 2.841042e-02</span></span>
+<span><span class="co">## 2288 ENSG00000138439   FAM117B    0.9489060           NA 9.489060e-01</span></span>
+<span><span class="co">## 2809 ENSG00000155158    TTC39B    0.9453617 9.424667e-01 2.894983e-03</span></span>
+<span><span class="co">## 3614 ENSG00000169174     PCSK9    0.9437763           NA 9.437763e-01</span></span>
+<span><span class="co">## 3861 ENSG00000173273      TNKS    0.9405702 9.405702e-01           NA</span></span>
+<span><span class="co">## 1549 ENSG00000119965  C10orf88    0.9367484 8.050771e-01 1.316713e-01</span></span>
+<span><span class="co">## 2170 ENSG00000136111    TBC1D4    0.9248189 7.443954e-01 1.804235e-01</span></span>
+<span><span class="co">## 490  ENSG00000087237      CETP    0.9138415 4.339903e-02 8.704425e-01</span></span>
+<span><span class="co">## 2293 ENSG00000138496     PARP9    0.9106863 9.106863e-01           NA</span></span>
+<span><span class="co">## 3157 ENSG00000162607      USP1    0.8987965 8.923145e-01 6.482049e-03</span></span>
+<span><span class="co">## 4133 ENSG00000179023   KLHDC7A    0.8967349 7.799812e-01 1.167536e-01</span></span>
+<span><span class="co">## 2618 ENSG00000145390     USP53    0.8917811 8.666812e-01 2.509988e-02</span></span>
+<span><span class="co">## 2754 ENSG00000151360      ALLC    0.8899287 8.899287e-01           NA</span></span>
+<span><span class="co">## 4142 ENSG00000179119   SPTY2D1    0.8797328 7.652548e-01 1.144780e-01</span></span>
+<span><span class="co">## 1508 ENSG00000118971     CCND2    0.8730757 7.596135e-01 1.134622e-01</span></span>
+<span><span class="co">## 586  ENSG00000095485   CWF19L1    0.8725110 7.003567e-01 1.721543e-01</span></span>
+<span><span class="co">## 4983 ENSG00000205978    NYNRIN    0.8697279 8.681045e-01 1.623422e-03</span></span>
+<span><span class="co">## 2505 ENSG00000142765     SYTL1    0.8650402 8.626569e-01 2.383332e-03</span></span>
+<span><span class="co">## 911  ENSG00000104888   SLC17A7    0.8482341 8.482290e-01 5.113841e-06</span></span>
+<span><span class="co">## 3804 ENSG00000172336      POP7    0.8438463 8.438463e-01           NA</span></span>
+<span><span class="co">## 392  ENSG00000076554     TPD52    0.8166550 1.205181e-02 8.046032e-01</span></span>
+<span><span class="co">## 3290 ENSG00000164713      BRI3    0.8111217 8.074609e-01 3.660857e-03</span></span>
+<span><span class="co">## 1204 ENSG00000110243     APOA5    0.8085898 8.085898e-01           NA</span></span></code></pre>
 </div>
 <div class="section level2">
-<h2 id="visualzing-ctwas-results">Visualzing cTWAS results<a class="anchor" aria-label="anchor" href="#visualzing-ctwas-results"></a>
+<h2 id="visualizing-ctwas-results">Visualizing cTWAS results<a class="anchor" aria-label="anchor" href="#visualizing-ctwas-results"></a>
 </h2>
 <p>We could make locus plots for regions of interest.</p>
-<div class="sourceCode" id="cb8"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb22"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="../reference/make_locusplot.html">make_locusplot</a></span><span class="op">(</span><span class="va">finemap_res</span>,</span>
 <span>               region_id <span class="op">=</span> <span class="st">"1:107867043-109761309"</span>,</span>
 <span>               weights <span class="op">=</span> <span class="va">weights</span>,</span>
@@ -234,17 +319,17 @@
 <span>               ens_db <span class="op">=</span> <span class="va">ens_db</span>,</span>
 <span>               gene_biotype<span class="op">=</span><span class="st">"protein_coding"</span>,</span>
 <span>               legend.position <span class="op">=</span> <span class="st">"right"</span><span class="op">)</span></span></code></pre></div>
-<pre><code><span><span class="co">## 2024-05-09 15:33:09 INFO::focus gene: PSRC1</span></span>
-<span><span class="co">## 2024-05-09 15:33:09 INFO::focus id: ENSG00000134222.16|mashr_Liver</span></span>
-<span><span class="co">## 2024-05-09 15:33:09 INFO::locus_range: 107768052,109760983</span></span>
-<span><span class="co">## 2024-05-09 15:33:12 INFO::QTL positions: 109275684</span></span></code></pre>
+<pre><code><span><span class="co">## 2024-05-10 12:02:17 INFO::focus gene: PSRC1</span></span>
+<span><span class="co">## 2024-05-10 12:02:17 INFO::focus id: ENSG00000134222.16|mashr_Liver</span></span>
+<span><span class="co">## 2024-05-10 12:02:17 INFO::locus_range: 107768052,109760983</span></span>
+<span><span class="co">## 2024-05-10 12:02:19 INFO::QTL positions: 109275684</span></span></code></pre>
 <div class="figure" style="text-align: center">
-<img src="summarizing_postprocessing_results_files/figure-html/locus_plot-1.png" alt="&amp;nbsp;" width="960"><p class="caption">
+<img src="summarizing_postprocessing_results_files/figure-html/locus_plot-1.png" alt="&amp;nbsp;" width="720"><p class="caption">
  
 </p>
 </div>
 <p>We could zoom in the region by specifing the <code>locus_range</code>, and highlight the positions using <code>highlight_pos</code>.</p>
-<div class="sourceCode" id="cb10"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb24"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="../reference/make_locusplot.html">make_locusplot</a></span><span class="op">(</span><span class="va">finemap_res</span>,</span>
 <span>               region_id <span class="op">=</span> <span class="st">"1:107867043-109761309"</span>,</span>
 <span>               weights <span class="op">=</span> <span class="va">weights</span>,</span>
@@ -255,18 +340,18 @@
 <span>               legend.position <span class="op">=</span> <span class="st">"right"</span>,</span>
 <span>               panel.heights <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">4</span>, <span class="fl">4</span>, <span class="fl">0.3</span>, <span class="fl">4</span><span class="op">)</span>,</span>
 <span>               highlight_pos <span class="op">=</span> <span class="fl">109275684</span><span class="op">)</span></span></code></pre></div>
-<pre><code><span><span class="co">## 2024-05-09 15:33:14 INFO::focus gene: PSRC1</span></span>
-<span><span class="co">## 2024-05-09 15:33:14 INFO::focus id: ENSG00000134222.16|mashr_Liver</span></span>
-<span><span class="co">## 2024-05-09 15:33:14 INFO::locus_range: 1.09e+08,109600000</span></span>
-<span><span class="co">## 2024-05-09 15:33:17 INFO::QTL positions: 109275684</span></span>
-<span><span class="co">## 2024-05-09 15:33:17 INFO::highlight positions: 109275684</span></span></code></pre>
+<pre><code><span><span class="co">## 2024-05-10 12:02:21 INFO::focus gene: PSRC1</span></span>
+<span><span class="co">## 2024-05-10 12:02:21 INFO::focus id: ENSG00000134222.16|mashr_Liver</span></span>
+<span><span class="co">## 2024-05-10 12:02:21 INFO::locus_range: 1.09e+08,109600000</span></span>
+<span><span class="co">## 2024-05-10 12:02:23 INFO::QTL positions: 109275684</span></span>
+<span><span class="co">## 2024-05-10 12:02:23 INFO::highlight positions: 109275684</span></span></code></pre>
 <div class="figure" style="text-align: center">
-<img src="summarizing_postprocessing_results_files/figure-html/locus_plot_2-1.png" alt="&amp;nbsp;" width="960"><p class="caption">
+<img src="summarizing_postprocessing_results_files/figure-html/locus_plot_2-1.png" alt="&amp;nbsp;" width="720"><p class="caption">
  
 </p>
 </div>
 <p>If we do not have precomputed correlation matrices, we could compute those by providing region_info and region_data</p>
-<div class="sourceCode" id="cb12"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb26"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="../reference/make_locusplot.html">make_locusplot</a></span><span class="op">(</span><span class="va">finemap_res</span>,</span>
 <span>               region_id <span class="op">=</span> <span class="st">"1:107867043-109761309"</span>,</span>
 <span>               weights <span class="op">=</span> <span class="va">weights</span>,</span>
@@ -288,7 +373,7 @@
 </h3>
 <p>We first select cross-boundary genes to merge, We then identify overlapping regions from these cross-boundary genes, and create <code>merged_region_data</code> and <code>merged_region_info</code> for these merged regions.</p>
 <p>We rerun finemapping for the merged regions.</p>
-<div class="sourceCode" id="cb13"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb27"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">high_PIP_genes</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/unique.html" class="external-link">unique</a></span><span class="op">(</span><span class="va">finemap_res</span><span class="op">[</span><span class="va">finemap_res</span><span class="op">$</span><span class="va">type</span> <span class="op">!=</span> <span class="st">"SNP"</span> <span class="op">&amp;</span> <span class="va">finemap_res</span><span class="op">$</span><span class="va">susie_pip</span> <span class="op">&gt;=</span> <span class="fl">0.5</span>, <span class="st">"id"</span><span class="op">]</span><span class="op">)</span></span>
 <span><span class="va">selected_boundary_genes</span> <span class="op">&lt;-</span> <span class="va">boundary_genes</span><span class="op">[</span><span class="va">boundary_genes</span><span class="op">$</span><span class="va">id</span> <span class="op"><a href="https://rdrr.io/r/base/match.html" class="external-link">%in%</a></span> <span class="va">high_PIP_genes</span>, , drop<span class="op">=</span><span class="cn">FALSE</span><span class="op">]</span></span>
 <span></span>
@@ -314,7 +399,7 @@
 <span>  <span class="va">merge_region_id_list</span> <span class="op">&lt;-</span> <span class="va">res</span><span class="op">$</span><span class="va">merge_region_id_list</span></span>
 <span><span class="op">}</span></span></code></pre></div>
 <p>Optionally, we could update the finemapping results for the regions got merged.</p>
-<div class="sourceCode" id="cb14"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb28"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">updated_finemap_res</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/update_merged_regions_finemap_res.html">update_merged_regions_finemap_res</a></span><span class="op">(</span><span class="va">finemap_res</span>,</span>
 <span>                                                        <span class="va">finemap_merged_regions_res</span>, </span>
 <span>                                                        <span class="va">merge_region_id_list</span><span class="op">)</span></span></code></pre></div>
@@ -325,12 +410,12 @@
 <p>LD mismatches between GWAS data and the reference LD could lead to false positives in fine-mapping. Diagnostic tools including <a href="https://stephenslab.github.io/susieR/articles/susierss_diagnostic.html" class="external-link">SuSiE-RSS</a>, and <a href="https://github.com/Yves-CHEN/DENTIST/" class="external-link">DENTIST</a>, have been developed to check possible LD mismatch.</p>
 <p>Here, we perform the LD mismatch diagnosis using <a href="https://stephenslab.github.io/susieR/articles/susierss_diagnostic.html" class="external-link">SuSiE-RSS</a> for selected regions. It is an optional step that users could run after finishing the main cTWAS analysis. Users could choose regions of interest, to be confident of the results.</p>
 <p>Here we check the top 10 regions with highest total non-SNP PIPs:</p>
-<div class="sourceCode" id="cb15"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb29"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">nonSNP_PIP_df</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/compute_region_nonSNP_PIPs.html">compute_region_nonSNP_PIPs</a></span><span class="op">(</span><span class="va">finemap_res</span><span class="op">)</span></span>
 <span><span class="va">selected_nonSNP_PIP_df</span> <span class="op">&lt;-</span> <span class="va">nonSNP_PIP_df</span><span class="op">[</span><span class="fu"><a href="https://rdrr.io/r/base/order.html" class="external-link">order</a></span><span class="op">(</span><span class="va">nonSNP_PIP_df</span><span class="op">$</span><span class="va">nonSNP_PIP</span>, decreasing <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span>,<span class="op">]</span></span>
 <span><span class="va">selected_region_ids</span> <span class="op">&lt;-</span> <span class="va">selected_nonSNP_PIP_df</span><span class="op">$</span><span class="va">region_id</span><span class="op">[</span><span class="fl">1</span><span class="op">:</span><span class="fl">10</span><span class="op">]</span></span></code></pre></div>
 <p>We perform LD mismatch diagnosis for these regions using SuSiE RSS to detect problematic SNPs. This returns a list of problematic SNPs (diagnostic test <code>p-value &lt; 5e-8</code> by default), flipped SNPs, and the test statistics of <code>kriging_rss</code> function from SuSiE-RSS.</p>
-<div class="sourceCode" id="cb16"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb30"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">selected_region_info</span> <span class="op">&lt;-</span> <span class="va">region_info</span><span class="op">[</span><span class="va">region_info</span><span class="op">$</span><span class="va">region_id</span> <span class="op"><a href="https://rdrr.io/r/base/match.html" class="external-link">%in%</a></span> <span class="va">selected_region_ids</span>, <span class="op">]</span></span>
 <span><span class="co"># We use SuSiE RSS to perform LD mismatch diagnosis for these high PIP regions.</span></span>
 <span><span class="va">res</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/detect_ld_mismatch_susie.html">detect_ld_mismatch_susie</a></span><span class="op">(</span><span class="va">z_snp</span>, <span class="va">selected_region_info</span>, <span class="va">gwas_n</span>, </span>
@@ -340,7 +425,7 @@
 <span><span class="va">condz_stats</span> <span class="op">&lt;-</span> <span class="va">res</span><span class="op">$</span><span class="va">condz_stats</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/readRDS.html" class="external-link">saveRDS</a></span><span class="op">(</span><span class="va">res</span>, <span class="fu"><a href="https://rdrr.io/r/base/file.path.html" class="external-link">file.path</a></span><span class="op">(</span><span class="va">outputdir</span>, <span class="fu"><a href="https://rdrr.io/r/base/paste.html" class="external-link">paste0</a></span><span class="op">(</span><span class="va">outname</span>, <span class="st">".detect_ld_mismatch_res.RDS"</span><span class="op">)</span><span class="op">)</span><span class="op">)</span></span></code></pre></div>
 <p>We choose large effect genes (or molecular traits) (abs(z) &gt; 3) with problematic SNPs in their weights, and then select regions containing the problematic genes (molecular traits).</p>
-<div class="sourceCode" id="cb17"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb31"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">problematic_genes</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/get_problematic_genes.html">get_problematic_genes</a></span><span class="op">(</span><span class="va">problematic_snps</span>, </span>
 <span>                                           <span class="va">weights</span>, </span>
 <span>                                           <span class="va">z_gene</span>, </span>
@@ -348,7 +433,7 @@
 <span></span>
 <span><span class="va">problematic_region_ids</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/unique.html" class="external-link">unique</a></span><span class="op">(</span><span class="va">finemap_res</span><span class="op">[</span><span class="va">finemap_res</span><span class="op">$</span><span class="va">id</span> <span class="op"><a href="https://rdrr.io/r/base/match.html" class="external-link">%in%</a></span> <span class="va">problematic_genes</span>, <span class="st">"region_id"</span><span class="op">]</span><span class="op">)</span></span></code></pre></div>
 <p>We then rerun the fine-mapping with <code>L = 1</code> for the problematic regions.</p>
-<div class="sourceCode" id="cb18"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb32"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="kw">if</span> <span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/length.html" class="external-link">length</a></span><span class="op">(</span><span class="va">problematic_region_ids</span><span class="op">)</span> <span class="op">&gt;</span> <span class="fl">0</span><span class="op">)</span><span class="op">{</span></span>
 <span>  <span class="co"># rerun the fine-mapping with L = 1 for the problematic regions</span></span>
 <span>  <span class="va">rerun_region_data</span> <span class="op">&lt;-</span> <span class="va">screened_region_data</span><span class="op">[</span><span class="va">problematic_region_ids</span><span class="op">]</span></span>
@@ -362,7 +447,7 @@
 <span>                                              ncore <span class="op">=</span> <span class="va">ncore</span>, verbose <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span>
 <span><span class="op">}</span></span></code></pre></div>
 <p>Optimally, we could update finemapping results for problematic regions.</p>
-<div class="sourceCode" id="cb19"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb33"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">updated_finemap_res</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/update_finemap_res.html">update_finemap_res</a></span><span class="op">(</span><span class="va">finemap_res</span>, <span class="va">finemap_rerun_region_res</span><span class="op">)</span></span></code></pre></div>
 </div>
 </div>
