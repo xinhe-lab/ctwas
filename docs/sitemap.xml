@@ -16,22 +16,16 @@
     <loc>/articles/ctwas_modules.html</loc>
   </url>
   <url>
-    <loc>/articles/ctwas_sumstats_genomewide.html</loc>
-  </url>
-  <url>
     <loc>/articles/index.html</loc>
   </url>
   <url>
-    <loc>/articles/multigroup_ctwas_modules.html</loc>
-  </url>
-  <url>
-    <loc>/articles/multigroup_ctwas_pipeline.html</loc>
+    <loc>/articles/postprocessing_ctwas_results.html</loc>
   </url>
   <url>
     <loc>/articles/preparing_ctwas_input_data.html</loc>
   </url>
   <url>
-    <loc>/articles/summarizing_postprocessing_results.html</loc>
+    <loc>/articles/summarizing_ctwas_results.html</loc>
   </url>
   <url>
     <loc>/authors.html</loc>

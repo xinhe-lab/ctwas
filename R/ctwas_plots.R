@@ -26,9 +26,11 @@
 #' @param gene_biotype specified biotypes to be displayed in gene tracks or NULL to display all possible ones.
 #' By default, only show protein coding genes.
 #'
-#' @param point.size size values for SNP and non-SNP data points in the scatter plots
+#' @param point.sizes size values for SNP and non-SNP data points in the scatter plots
 #'
 #' @param point.alpha alpha values for SNP and non-SNP data points in the scatter plots
+#'
+#' @param point.shapes shapes values for data points of different types in the scatter plots
 #'
 #' @param genelabel.size Font size for gene text
 #'
@@ -59,8 +61,9 @@ make_locusplot <- function(finemap_res,
                            locus_range = NULL,
                            focus_gene = NULL,
                            gene_biotype = "protein_coding",
-                           point.size = c(1, 3.5),
+                           point.sizes = c(1, 3.5),
                            point.alpha = c(0.4, 0.6),
+                           point.shapes = c(21:25),
                            genelabel.size = 2.5,
                            legend.text.size = 10,
                            legend.position = "none",
@@ -198,6 +201,13 @@ make_locusplot <- function(finemap_res,
   finemap_region_res$label <- paste0(finemap_region_res$gene_name, " (", finemap_region_res$context, ")")
   finemap_region_res$label[finemap_region_res$type == "SNP"] <- NA
 
+  # set shapes, sizes, and alpha for data points
+  point.shapes <- point.shapes[1:length(unique(finemap_region_res$type))]
+  names(point.shapes) <- c("SNP", setdiff(unique(finemap_region_res$type), "SNP"))
+
+  point.alpha <- c("SNP"= point.alpha[1], "non-SNP"= point.alpha[2])
+  point.sizes <- c("SNP"= point.sizes[1], "non-SNP"= point.sizes[2])
+
   # create a locus object for plotting
   loc <- locuszoomr::locus(
     data = finemap_region_res,
@@ -206,20 +216,19 @@ make_locusplot <- function(finemap_res,
     ens_db = ens_db,
     labs = "id")
 
-  # loc$data$r2_color <- finemap_region_res$r2_color
-
   # get QTL info
   focus_gene_qtls <- rownames(weights[[focus_gid]]$wgt)
   finemap_qtl_res <- finemap_region_res[finemap_region_res$id %in% focus_gene_qtls, ]
   loginfo("QTL positions: %s", finemap_qtl_res$pos)
 
   # p-value panel
-  p_pvalue <- ggplot(loc$data, aes(x = pos/1e6, y = p, label=label)) +
-    geom_point(aes(shape=type, size = object_type, alpha=object_type, color = r2_levels, fill = r2_levels)) +
+  p_pvalue <- ggplot(loc$data, aes(x = pos/1e6, y = p, label=label,
+                                   shape=type, size = object_type, alpha=object_type)) +
+    geom_point(aes(color = r2_levels, fill = r2_levels)) +
     geom_text_repel(size=genelabel.size, color="black") +
-    scale_shape_manual(values = c(21, 22, 23, 24, 25)) +
-    scale_alpha_manual(values=c("SNP"=point.alpha[1], "non-SNP"=point.alpha[2]), guide="none") +
-    scale_size_manual(values=c("SNP"=point.size[1], "non-SNP"=point.size[2]), guide="none") +
+    scale_shape_manual(values = point.shapes) +
+    scale_alpha_manual(values = point.alpha, guide="none") +
+    scale_size_manual(values = point.sizes, guide="none") +
     scale_color_manual(values = r2_colors) +
     scale_fill_manual(values = r2_colors, guide="none") +
     xlim(loc$xrange/1e6) +
@@ -235,12 +244,13 @@ make_locusplot <- function(finemap_res,
 
 
   # PIP panel
-  p_pip <- ggplot(loc$data, aes(x=pos/1e6, y=susie_pip, label=label)) +
-    geom_point(aes(shape=type, size = object_type, alpha=object_type, color = r2_levels, fill = r2_levels)) +
+  p_pip <- ggplot(loc$data, aes(x=pos/1e6, y=susie_pip, label=label,
+                                shape=type, size = object_type, alpha=object_type)) +
+    geom_point(aes(color = r2_levels, fill = r2_levels)) +
     geom_text_repel(size=genelabel.size, color="black") +
-    scale_shape_manual(values = c(21, 22, 23, 24, 25)) +
-    scale_alpha_manual(values=c("SNP"=point.alpha[1], "non-SNP"=point.alpha[2]), guide="none") +
-    scale_size_manual(values=c("SNP"=point.size[1], "non-SNP"=point.size[2]), guide="none") +
+    scale_shape_manual(values = point.shapes) +
+    scale_alpha_manual(values = point.alpha, guide="none") +
+    scale_size_manual(values = point.sizes, guide="none") +
     scale_color_manual(values = r2_colors) +
     scale_fill_manual(values = r2_colors, guide="none") +
     xlim(loc$xrange/1e6) +
@@ -278,16 +288,16 @@ make_locusplot <- function(finemap_res,
     highlight_pos <- as.integer(highlight_pos)
 
     p_pvalue <- p_pvalue +
-      geom_vline(xintercept = highlight_pos/1e6, linetype="dotted", color = "blue", size=0.5)
+      geom_vline(xintercept = highlight_pos/1e6, linetype="dotted", color = "cyan", size=0.5)
 
     p_pip <- p_pip +
-      geom_vline(xintercept = highlight_pos/1e6, linetype="dotted", color = "blue", size=0.5)
+      geom_vline(xintercept = highlight_pos/1e6, linetype="dotted", color = "cyan", size=0.5)
 
     p_qtl <- p_qtl +
-      geom_vline(xintercept = highlight_pos/1e6, linetype="dotted", color = "blue", size=0.5)
+      geom_vline(xintercept = highlight_pos/1e6, linetype="dotted", color = "cyan", size=0.5)
 
     p_genes <- p_genes +
-      geom_vline(xintercept = highlight_pos/1e6, linetype="dotted", color = "blue", size=0.5) +
+      geom_vline(xintercept = highlight_pos/1e6, linetype="dotted", color = "cyan", size=0.5) +
       theme_bw() +
       theme(legend.position = "none",
             panel.border= element_blank(),

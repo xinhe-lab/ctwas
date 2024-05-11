@@ -1,0 +1,226 @@
+---
+title: "Summarizing cTWAS result"
+author: "Kaixuan Luo, Sheng Qian"
+date: "`r Sys.Date()`"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{Summarizing cTWAS result}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(message = FALSE,
+                      warning = FALSE,
+                      fig.align = "center",
+                      fig.cap = "&nbsp;",
+                      dpi = 120)
+```
+
+
+
+## Summarizing cTWAS result
+
+Load the packages
+```{r load_package, message=FALSE}
+library(ctwas)
+library(tidyverse)
+```
+
+
+Load the cTWAS results from the `ctwas_sumstats()` function
+```{r load_ctwas_res}
+# output directory
+outputdir <- "/project2/xinhe/shared_data/multigroup_ctwas/tutorial/LDL_multitissue_tutorial/output"
+outname <- "LDL.Liver_Adipose"
+
+# directory storing computed correlation matrices
+cor_dir <- file.path(outputdir, "cor_matrix")
+
+# GWAS sample size
+gwas_n <- 343621
+
+# Load region info
+region_info <- readRDS(file.path(outputdir, "region_info.RDS"))
+
+# # Load z_snp
+# z_snp <- readRDS(file.path(outputdir, paste0(outname, ".preprocessed.z_snp.RDS")))
+
+# Load weights
+weights <- readRDS(file.path(outputdir, paste0(outname, ".preprocessed.weights.RDS")))
+
+# Load the cTWAS results 
+ctwas_res <- readRDS(file.path(outputdir, paste0(outname, ".ctwas_sumstats_res.RDS")))
+param <- ctwas_res$param
+finemap_res <- ctwas_res$finemap_res
+boundary_genes <- ctwas_res$boundary_genes
+region_data <- ctwas_res$region_data
+z_gene <- ctwas_res$z_gene
+```
+
+
+### Assessing parameters and computing PVE
+
+We could use the `summarize_param()` function to assess the convergence of the estimated parameters and 
+to compute the proportion of variance explained (PVE) by variants and genes. 
+```{r summarize_param}
+ctwas_parameters <- summarize_param(param, gwas_n)
+saveRDS(ctwas_parameters, file.path(outputdir, paste0(outname, ".ctwas_parameters.RDS")))
+```
+
+Estimated prior inclusion probability:
+```{r}
+ctwas_parameters$group_prior
+```
+
+Estimated prior effect size:
+```{r}
+ctwas_parameters$group_prior_var
+```
+
+Estimated enrichment of molecular traits over variants:
+```{r}
+ctwas_parameters$enrichment
+```
+
+PVE explained by molecular traits and variants:
+```{r}
+ctwas_parameters$group_pve
+```
+
+Total heritability (sum of PVE)
+```{r}
+ctwas_parameters$total_pve
+```
+
+Attributable heritability
+```{r}
+ctwas_parameters$attributable_pve
+```
+
+Plot convergence
+```{r convergence_plot, fig.width = 7, fig.height=5}
+ctwas_parameters$convergence_plot
+```
+
+
+## Interpreting cTWAS results
+
+To interpret and visualize the results, we need to add gene names to the finemapping result. 
+
+We use gene annotations from the Ensembl database (EnsDb.Hsapiens.v86). Please choose the Ensembl database for your specific data. 
+```{r load_ens_db}
+# load gene info database
+library(EnsDb.Hsapiens.v86)
+ens_db <- EnsDb.Hsapiens.v86
+```
+
+
+We then add gene names and use gene mid-points to represent gene positions.
+```{r add_gene_names}
+# extract gene IDs from finemapping result
+finemap_res$gene_id <- NA
+finemap_res$gene_name <- NA
+finemap_gene_res <- finemap_res[finemap_res$type!="SNP",]
+gene_id <- sapply(strsplit(finemap_gene_res$id, split = "[|]"), "[[", 1)
+gene_id <- sapply(strsplit(gene_id, split = "[.]"), "[[", 1)
+finemap_gene_res$gene_id <- gene_id
+finemap_SNP_res <- finemap_res[finemap_res$type=="SNP",]
+
+# get gene position info
+gene_annot_gr <- genes(ens_db, filter = GeneIdFilter(finemap_gene_res$gene_id))
+gene_annot_gr$start_pos <- start(gene_annot_gr)
+gene_annot_gr$end_pos <- end(gene_annot_gr)
+# use the midpoint as gene position
+gene_annot_gr$gene_mid_pos <- round((gene_annot_gr$start_pos+gene_annot_gr$end_pos)/2)
+# get gene_name and gene position
+gene_annot_df <- data.frame(gene_id = gene_annot_gr$gene_id, 
+                            gene_name = gene_annot_gr$gene_name, 
+                            gene_pos = gene_annot_gr$gene_mid_pos)
+
+# add gene name to finemapping result and update gene positions
+gene_annot_idx <- match(finemap_gene_res$gene_id, gene_annot_df$gene_id)
+finemap_gene_res$pos <- gene_annot_df$gene_pos[gene_annot_idx]
+finemap_gene_res$gene_name <- gene_annot_df$gene_name[gene_annot_idx]
+finemap_res <- rbind(finemap_gene_res, finemap_SNP_res)
+```
+
+
+We list all molecular traits with PIP > 0.8, which is the threshold we used in the paper.
+```{r interpret_res, eval=FALSE}
+# select PIP > 0.8
+sig_finemap_res <- finemap_res[finemap_res$type!="SNP" & finemap_res$susie_pip > 0.8,]
+
+head(sig_finemap_res[order(-sig_finemap_res$susie_pip),])
+```
+
+
+When we have multiple contexts (tissues), 
+it is useful to evaluate the combined PIP for each molecular trait over different contexts:
+
+```{r}
+finemap_gene_res <- finemap_res[finemap_res$type!="SNP",]
+
+# combine PIPs across contexts (tissues)
+gene_pip_df <- aggregate(finemap_gene_res$susie_pip, by=list(finemap_gene_res$gene_id), FUN=sum)
+colnames(gene_pip_df) <- c("gene_id", "combined_pip")
+gene_annot_idx <- match(gene_pip_df$gene_id, gene_annot_df$gene_id)
+gene_pip_df$gene_name <- gene_annot_df$gene_name[gene_annot_idx]
+gene_pip_df <- gene_pip_df[, c("gene_id", "gene_name", "combined_pip")]
+
+# PIPs for each context
+contexts <- unique(finemap_gene_res$context)
+gene_pips_df <- matrix(NA, nrow=nrow(gene_pip_df), ncol=length(contexts))
+colnames(gene_pips_df) <- paste0(contexts, "_pip")
+for (i in 1:nrow(gene_pips_df)){
+  gene_id <- gene_pip_df$gene_id[i]
+  finemap_gene_res_subset <- finemap_gene_res[which(finemap_gene_res$gene_id==gene_id),]
+  gene_contexts <- finemap_gene_res_subset$context
+  gene_pips_df[i, paste0(gene_contexts, "_pip")] <- finemap_gene_res_subset$susie_pip
+}
+gene_pips_df <- cbind(gene_pip_df, gene_pips_df)
+
+# sort by combined PIP
+gene_pips_df <- gene_pips_df[order(-gene_pips_df$combined_pip),]
+# select combined PIP > 0.8
+sig_gene_pips_df <- gene_pips_df[gene_pips_df$combined_pip > 0.8, ]
+
+# list genes with combined PIP > 0.8 or top 20 genes with highest combined PIPs
+head(gene_pips_df, max(nrow(sig_gene_pips_df), 20))
+```
+
+
+
+## Visualizing cTWAS results
+
+We could make locus plots for regions of interest,
+and zoom in the region by specifying the `locus_range`.
+```{r locus_plot, fig.width= 10, fig.height=8}
+make_locusplot(finemap_res,
+               region_id = "1:107867043-109761309",
+               weights = weights,
+               ens_db = ens_db,
+               cor_dir = cor_dir, 
+               locus_range = c(109e6, 109.6e6),
+               gene_biotype="protein_coding",
+               legend.position = "right")
+```
+
+
+If we do not have precomputed correlation matrices, 
+we could compute those by providing `region_info` and `region_data`.
+
+```{r, eval=FALSE}
+make_locusplot(finemap_res,
+               region_id = "1:107867043-109761309",
+               weights = weights,
+               ens_db = ens_db,
+               region_info = region_info, 
+               region_data = region_data,
+               cor_dir = NULL,
+               locus_range = c(109e6, 109.6e6),
+               gene_biotype="protein_coding",
+               legend.position = "right")
+```
+

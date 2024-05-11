@@ -1,11 +1,12 @@
 pandoc: 2.7.3
-pkgdown: 2.0.7
+pkgdown: 2.0.9
 pkgdown_sha: ~
 articles:
-  FAQ: FAQ.html
   ctwas_main_function: ctwas_main_function.html
   ctwas_modules: ctwas_modules.html
+  FAQ: FAQ.html
+  postprocessing_ctwas_results: postprocessing_ctwas_results.html
   preparing_ctwas_input_data: preparing_ctwas_input_data.html
-  summarizing_postprocessing_results: summarizing_postprocessing_results.html
-last_built: 2024-05-10T16:59Z
+  summarizing_ctwas_results: summarizing_ctwas_results.html
+last_built: 2024-05-11T02:50Z
 

@@ -16,8 +16,9 @@ make_locusplot(
   locus_range = NULL,
   focus_gene = NULL,
   gene_biotype = "protein_coding",
-  point.size = c(1, 3.5),
+  point.sizes = c(1, 3.5),
   point.alpha = c(0.4, 0.6),
+  point.shapes = c(21:25),
   genelabel.size = 2.5,
   legend.text.size = 10,
   legend.position = "none",
@@ -51,9 +52,11 @@ If NULL, the entire region will be plotted (with 100 bp flanks on both sides).}
 \item{gene_biotype}{specified biotypes to be displayed in gene tracks or NULL to display all possible ones.
 By default, only show protein coding genes.}
 
-\item{point.size}{size values for SNP and non-SNP data points in the scatter plots}
+\item{point.sizes}{size values for SNP and non-SNP data points in the scatter plots}
 
 \item{point.alpha}{alpha values for SNP and non-SNP data points in the scatter plots}
+
+\item{point.shapes}{shapes values for data points of different types in the scatter plots}
 
 \item{genelabel.size}{Font size for gene text}
 

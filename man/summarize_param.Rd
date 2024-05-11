@@ -4,7 +4,13 @@
 \alias{summarize_param}
 \title{Summarize and plot cTWAS parameter estimates}
 \usage{
-summarize_param(param, gwas_n = NA, plot = TRUE)
+summarize_param(
+  param,
+  gwas_n = NA,
+  plot = TRUE,
+  title.size = 10,
+  legend.size = 8
+)
 }
 \arguments{
 \item{param}{a list of cTWAS parameter estimation result from \code{est_param}}
@@ -12,6 +18,10 @@ summarize_param(param, gwas_n = NA, plot = TRUE)
 \item{gwas_n}{the sample size of the GWAS summary statistics}
 
 \item{plot}{if TRUE, return a plot of the estimated parameters}
+
+\item{title.size}{font size of the plot title}
+
+\item{legend.size}{font size of the plot legend title}
 }
 \description{
 Summarize and plot cTWAS parameter estimates
