@@ -348,40 +348,29 @@ finemap_regions <- function(region_data,
     }
   }
 
-  cl <- parallel::makeCluster(ncore, outfile = "")
-  doParallel::registerDoParallel(cl)
+  region_ids <- names(region_data)
+  finemap_region_res_list <- parallel::mclapply(region_ids, function(region_id){
+    finemap_region_res_df <- finemap_region(region_data = region_data,
+                                            region_id = region_id,
+                                            region_info = region_info,
+                                            weights = weights,
+                                            L = L,
+                                            group_prior = group_prior,
+                                            group_prior_var = group_prior_var,
+                                            groups = groups,
+                                            use_null_weight = use_null_weight,
+                                            coverage = coverage,
+                                            min_abs_corr = min_abs_corr,
+                                            force_compute_cor = force_compute_cor,
+                                            save_cor = save_cor,
+                                            cor_dir = cor_dir,
+                                            annotate_susie_result = annotate_susie_result,
+                                            verbose = verbose,
+                                            ...)
+    finemap_region_res_df
+  }, mc.cores = ncore)
 
-  corelist <- region2core(region_data, ncore)
-
-  finemap_res <- foreach (core = 1:length(corelist), .combine = "rbind", .packages = "ctwas") %dopar% {
-
-    finemap_res.core.list <- list()
-    # run finemapping for each region
-    region_ids.core <- corelist[[core]]
-    for (region_id in region_ids.core) {
-      finemap_res.core.list[[region_id]] <- finemap_region(region_data = region_data,
-                                                           region_id = region_id,
-                                                           region_info = region_info,
-                                                           weights = weights,
-                                                           L = L,
-                                                           group_prior = group_prior,
-                                                           group_prior_var = group_prior_var,
-                                                           groups = groups,
-                                                           use_null_weight = use_null_weight,
-                                                           coverage = coverage,
-                                                           min_abs_corr = min_abs_corr,
-                                                           force_compute_cor = force_compute_cor,
-                                                           save_cor = save_cor,
-                                                           cor_dir = cor_dir,
-                                                           annotate_susie_result = annotate_susie_result,
-                                                           verbose = verbose,
-                                                           ...)
-    }
-    finemap_res.core <- do.call(rbind, finemap_res.core.list)
-    finemap_res.core
-  }
-  parallel::stopCluster(cl)
-  rownames(finemap_res) <- NULL
+  finemap_res <- do.call(rbind, finemap_region_res_list)
 
   return(finemap_res)
 }

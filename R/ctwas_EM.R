@@ -23,7 +23,6 @@
 #' @param verbose TRUE/FALSE. If TRUE, print detail messages
 #'
 #' @importFrom logging loginfo
-#' @importFrom foreach %dopar% foreach
 #'
 #' @return a list of parameters
 #'
@@ -57,80 +56,17 @@ EM_est_param <- function(region_data,
   rownames(group_prior_var_iters) <- groups
   colnames(group_prior_var_iters) <- paste0("iter", 1:ncol(group_prior_var_iters))
 
-  # start running EM iterations
-  cl <- parallel::makeCluster(ncore, outfile = "")
-  doParallel::registerDoParallel(cl)
-
-  corelist <- region2core(region_data, ncore)
-
+  region_ids <- names(region_data)
   for (iter in 1:niter){
     loginfo("Start EM iteration %d", iter)
-    EM_susie_res <- foreach (core = 1:length(corelist), .combine = "rbind", .packages = "ctwas") %dopar% {
-      susie_res.core.list <- list()
-      # run susie for each region
-      region_ids.core <- corelist[[core]]
-      for (region_id in region_ids.core) {
-        # load susie input data
-        sid <- region_data[[region_id]][["sid"]]
-        gid <- region_data[[region_id]][["gid"]]
-        z <- region_data[[region_id]][["z"]]
-        gs_group <- region_data[[region_id]][["gs_group"]]
-        g_type <- region_data[[region_id]][["g_type"]]
-        g_context <- region_data[[region_id]][["g_context"]]
-        g_group <- region_data[[region_id]][["g_group"]]
-
-        if (verbose){
-          loginfo("Load input data for region %s", region_id)
-          loginfo("%d SNPs in the region.", length(sid))
-          loginfo("%d genes in the region.", length(gid))
-          loginfo("groups in the region: %s", unique(gs_group))
-        }
-
-        if (length(z) < 2) {
-          stop(paste(length(z), "variables in the region. At least two variables in a region are needed to run susie"))
-        }
-
-        # update priors, prior variances and null_weight based on the estimated group_prior and group_prior_var from the previous iteration
-        res <- set_region_susie_priors(pi_prior, V_prior, gs_group, L = 1, use_null_weight = use_null_weight)
-        prior <- res$prior
-        V <- res$V
-        null_weight <- res$null_weight
-        rm(res)
-
-        # Use an identity matrix as LD, R does not matter for susie when L = 1
-        R <- diag(length(z))
-
-        # in susie, prior_variance is under standardized scale (if performed)
-        if (verbose)
-          loginfo("run susie for region %s", region_id)
-
-        susie_res <- ctwas_susie_rss(z = z,
-                                     R = R,
-                                     prior_weights = prior,
-                                     prior_variance = V,
-                                     L = 1,
-                                     null_weight = null_weight,
-                                     max_iter = 1,
-                                     ...)
-        if (verbose)
-          loginfo("annotate susie result for region %s", region_id)
-
-        # annotate susie result
-        susie_res_df <- anno_susie(susie_res,
-                                   gid = gid,
-                                   sid = sid,
-                                   g_type = g_type,
-                                   g_context = g_context,
-                                   g_group = g_group,
-                                   region_id = region_id,
-                                   include_cs_index = FALSE)
-
-        susie_res.core.list[[region_id]] <- susie_res_df
-      }
-
-      susie_res.core <- do.call(rbind, susie_res.core.list)
-      susie_res.core
-    }
+    EM_susie_res_list <- parallel::mclapply(region_ids, function(region_id){
+      susie_region_res_df <- ctwas_susie_region_L1(region_data, region_id,
+                                                   pi_prior, V_prior,
+                                                   use_null_weight = use_null_weight,
+                                                   verbose = verbose, ...)
+      susie_region_res_df
+    }, mc.cores = ncore)
+    EM_susie_res <- do.call(rbind, EM_susie_res_list)
 
     # update estimated group_prior from the current iteration
     if (verbose)
@@ -188,10 +124,7 @@ EM_est_param <- function(region_data,
     group_prior_var_iters[names(V_prior), iter] <- V_prior
 
     loginfo("After iteration %d, group_prior_var {%s}: {%s}", iter, names(V_prior), format(V_prior, digits = 4))
-
   }
-
-  parallel::stopCluster(cl)
 
   group_size <- table(EM_susie_res$group)
   group_size <- group_size[rownames(group_prior_iters)]
@@ -204,6 +137,64 @@ EM_est_param <- function(region_data,
               "group_size" = group_size))
 }
 
+# run susie for one region with L = 1 without LD matrix
+ctwas_susie_region_L1 <- function(region_data, region_id, pi_prior, V_prior,
+                                  use_null_weight = TRUE, verbose = FALSE, ...){
+  # load susie input data
+  regiondata <- region_data[[region_id]]
+  sid <- regiondata[["sid"]]
+  gid <- regiondata[["gid"]]
+  z <- regiondata[["z"]]
+  gs_group <- regiondata[["gs_group"]]
+  g_type <- regiondata[["g_type"]]
+  g_context <- regiondata[["g_context"]]
+  g_group <- regiondata[["g_group"]]
 
+  if (verbose){
+    loginfo("Load input data for region %s", region_id)
+    loginfo("%d SNPs in the region.", length(sid))
+    loginfo("%d genes in the region.", length(gid))
+    loginfo("groups in the region: %s", unique(gs_group))
+  }
 
+  if (length(z) < 2) {
+    stop(paste(length(z), "variables in the region. At least two variables in a region are needed to run susie"))
+  }
 
+  # update priors, prior variances and null_weight based on the estimated group_prior and group_prior_var from the previous iteration
+  res <- set_region_susie_priors(pi_prior, V_prior, gs_group, L = 1, use_null_weight = use_null_weight)
+  prior <- res$prior
+  V <- res$V
+  null_weight <- res$null_weight
+  rm(res)
+
+  # Use an identity matrix as LD, R does not matter for susie when L = 1
+  R <- diag(length(z))
+
+  # in susie, prior_variance is under standardized scale (if performed)
+  if (verbose)
+    loginfo("run susie for region %s", region_id)
+
+  susie_res <- ctwas_susie_rss(z = z,
+                               R = R,
+                               prior_weights = prior,
+                               prior_variance = V,
+                               L = 1,
+                               null_weight = null_weight,
+                               max_iter = 1,
+                               ...)
+  if (verbose)
+    loginfo("annotate susie result for region %s", region_id)
+
+  # annotate susie result
+  susie_res_df <- anno_susie(susie_res,
+                             gid = gid,
+                             sid = sid,
+                             g_type = g_type,
+                             g_context = g_context,
+                             g_group = g_group,
+                             region_id = region_id,
+                             include_cs_index = FALSE)
+
+  return(susie_res_df)
+}

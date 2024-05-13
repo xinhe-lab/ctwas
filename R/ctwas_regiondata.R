@@ -241,38 +241,29 @@ add_z_to_region_data <- function(region_data,
   # Combine z-scores from z_snp and z_gene
   zdf <- combine_z(z_snp, z_gene)
 
-  cl <- parallel::makeCluster(ncore, outfile = "")
-  doParallel::registerDoParallel(cl)
-  corelist <- region2core(region_data, ncore)
-
   region_ids <- names(region_data)
-  region_data2 <- foreach (core = 1:length(corelist), .combine = "c") %dopar% {
-    region_data2.core <- list()
-    region_ids.core <- corelist[[core]]
-    for (region_id in region_ids.core) {
-      # add z-scores and types of the region to the region_data
-      region_data2.core[[region_id]] <- region_data[[region_id]]
-      gid <- region_data[[region_id]][["gid"]]
-      sid <- region_data[[region_id]][["sid"]]
-      g_idx <- match(gid, zdf$id)
-      s_idx <- match(sid, zdf$id)
-      gs_idx <- c(g_idx, s_idx)
-      # region_data2.core[[region_id]][["zdf"]] <- zdf[gs_idx,]
-      region_data2.core[[region_id]][["z"]] <- zdf$z[gs_idx]
-      region_data2.core[[region_id]][["gs_type"]] <- zdf$type[gs_idx]
-      region_data2.core[[region_id]][["gs_context"]] <- zdf$context[gs_idx]
-      region_data2.core[[region_id]][["gs_group"]] <- zdf$group[gs_idx]
-      region_data2.core[[region_id]][["g_type"]] <- zdf$type[g_idx]
-      region_data2.core[[region_id]][["g_context"]] <- zdf$context[g_idx]
-      region_data2.core[[region_id]][["g_group"]] <- zdf$group[g_idx]
-    }
-    region_data2.core
-  }
-  parallel::stopCluster(cl)
+  region_data2 <- parallel::mclapply(region_ids, function(region_id){
+    # add z-scores and types of the region to the region_data
+    regiondata <- region_data[[region_id]]
+    gid <- regiondata[["gid"]]
+    sid <- regiondata[["sid"]]
+    g_idx <- match(gid, zdf$id)
+    s_idx <- match(sid, zdf$id)
+    gs_idx <- c(g_idx, s_idx)
+    # region_data2.core[[region_id]][["zdf"]] <- zdf[gs_idx,]
+    regiondata[["z"]] <- zdf$z[gs_idx]
+    regiondata[["gs_type"]] <- zdf$type[gs_idx]
+    regiondata[["gs_context"]] <- zdf$context[gs_idx]
+    regiondata[["gs_group"]] <- zdf$group[gs_idx]
+    regiondata[["g_type"]] <- zdf$type[g_idx]
+    regiondata[["g_context"]] <- zdf$context[g_idx]
+    regiondata[["g_group"]] <- zdf$group[g_idx]
+    regiondata
+  }, mc.cores = ncore)
+  names(region_data2) <- region_ids
 
   return(region_data2)
 }
-
 
 #' adjust region_data for boundary genes
 adjust_boundary_genes <- function(boundary_genes, region_info, weights, region_data){

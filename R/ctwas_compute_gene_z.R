@@ -25,7 +25,7 @@ compute_gene_z <- function (z_snp, weights, ncore = 1, logfile = NULL){
   z_snp <- z_snp[z_snp$id %in% weight_snpnames, c("id", "z")]
   loginfo("%d SNPs with weights", nrow(z_snp))
 
-  z_gene <- mclapply(names(weights), function(id) {
+  z_gene <- parallel::mclapply(names(weights), function(id) {
     wgt <- weights[[id]][["wgt"]]
     snpnames <- rownames(wgt)
     R.s <- weights[[id]][["R_wgt"]]

@@ -10,7 +10,7 @@
 #' with significant difference between observed z-scores and estimated values
 #'
 #' @importFrom logging addHandler loginfo
-#' @importFrom foreach %dopar% foreach
+#' @importFrom parallel mclapply
 #'
 #' @return a list of problematic SNPs, flipped SNPs,
 #' and test statistics from susie's `kriging_rss` function
@@ -26,66 +26,15 @@ detect_ld_mismatch_susie <- function(z_snp,
   region_ids <- region_info$region_id
   loginfo("Perform LD mismatch diagnosis for %d regions", length(region_ids))
 
-  nregions <- length(region_ids)
-  corelist <- lapply(1:ncore, function(core){
-    njobs <- ceiling(nregions/ncore);
-    jobs <- ((core-1)*njobs+1):(core*njobs);
-    jobs[jobs<=nregions]
-  })
-  names(corelist) <- 1:ncore
-
-  cl <- parallel::makeCluster(ncore, outfile = "")
-  doParallel::registerDoParallel(cl)
-
-  outlist <- foreach(core = 1:ncore, .combine = "c", .packages = c("ctwas", "stats")) %dopar% {
-
-    region_ids_core <- region_ids[corelist[[core]]]
-
-    outlist_core <- list()
-    for(region_id in region_ids_core) {
-
-      regioninfo <- region_info[region_info$region_id %in% region_id, ]
-
-      # load LD matrix
-      LD_matrix_files <- unlist(strsplit(regioninfo$LD_matrix, split = ";"))
-      stopifnot(all(file.exists(LD_matrix_files)))
-      if (length(LD_matrix_files) == 1){
-        R_snp <- load_LD(LD_matrix_files)
-      } else {
-        R_snp <- lapply(LD_matrix_files, load_LD)
-        R_snp <- suppressWarnings(as.matrix(Matrix::bdiag(R_snp)))
-      }
-
-      # load SNP info
-      SNP_info_files <- unlist(strsplit(regioninfo$SNP_info, split = ";"))
-      stopifnot(all(file.exists(SNP_info_files)))
-      ld_snpinfo <- read_LD_SNP_files(SNP_info_files)
-
-      # Match GWAS sumstats with LD reference files. Only keep variants included in LD reference.
-      z_snp.region <- z_snp[z_snp$id %in% ld_snpinfo$id,]
-      R_snp.idx <- match(z_snp.region$id, ld_snpinfo$id)
-      R_snp.region <- R_snp[R_snp.idx, R_snp.idx]
-      stopifnot(nrow(z_snp.region) == nrow(R_snp.region))
-
-      # # Estimate lambda (consistency) between the z-scores and LD matrix
-      # lambda <- estimate_s_rss(z = z.locus$z, R = R.locus, n = gwas_n)
-
-      # Compute expected z-scores based on conditional distribution of z-scores
-      condz_stats <- kriging_rss(z = z_snp.region$z, R = R_snp.region, n = gwas_n)$conditional_dist
-      condz_stats <- cbind(z_snp.region[,c("id", "A1", "A2")], condz_stats)
-
-      # compute p-values for the significance of z-score difference between observed and estimated values
-      condz_stats$p_diff <- pchisq(condz_stats$z_std_diff^2, df = 1, lower.tail=F)
-
-      outlist_core[[as.character(region_id)]] <- condz_stats
-    }
-    outlist_core
-  }
-  parallel::stopCluster(cl)
-  stopifnot(length(outlist) == length(region_ids))
+  condz_list <- parallel::mclapply(region_ids, function(region_id){
+    condz_region_res <- compute_region_condz(region_info, region_id, z_snp, gwas_n)
+    condz_region_res
+  }, mc.cores = ncore)
+  names(condz_list) <- region_ids
+  condz_stats <- data.table::rbindlist(condz_list, idcol = "region_id")
+  rownames(condz_stats) <- NULL
 
   # return problematic variants and flipped variants
-  condz_stats <- data.table::rbindlist(outlist, idcol = "region_id")
   problematic_snps <- condz_stats$id[which(condz_stats$p_diff < p_diff_thresh)]
   flipped_snps <- condz_stats$id[which(condz_stats$logLR > 2 & abs(condz_stats$z) > 2)]
 
@@ -94,6 +43,44 @@ detect_ld_mismatch_susie <- function(z_snp,
               flipped_snps = flipped_snps))
 }
 
+#' Compute expected z-scores based on conditional distribution of z-scores using SuSiE RSS
+compute_region_condz <- function(region_info, region_id, z_snp, gwas_n){
+
+  regioninfo <- region_info[region_info$region_id %in% region_id, ]
+
+  # load LD matrix
+  LD_matrix_files <- unlist(strsplit(regioninfo$LD_matrix, split = ";"))
+  stopifnot(all(file.exists(LD_matrix_files)))
+  if (length(LD_matrix_files) == 1){
+    R_snp <- load_LD(LD_matrix_files)
+  } else {
+    R_snp <- lapply(LD_matrix_files, load_LD)
+    R_snp <- suppressWarnings(as.matrix(Matrix::bdiag(R_snp)))
+  }
+
+  # load SNP info
+  SNP_info_files <- unlist(strsplit(regioninfo$SNP_info, split = ";"))
+  stopifnot(all(file.exists(SNP_info_files)))
+  ld_snpinfo <- read_LD_SNP_files(SNP_info_files)
+
+  # Match GWAS sumstats with LD reference files. Only keep variants included in LD reference.
+  z_snp.region <- z_snp[z_snp$id %in% ld_snpinfo$id,]
+  R_snp.idx <- match(z_snp.region$id, ld_snpinfo$id)
+  R_snp.region <- R_snp[R_snp.idx, R_snp.idx]
+  stopifnot(nrow(z_snp.region) == nrow(R_snp.region))
+
+  # # Estimate lambda (consistency) between the z-scores and LD matrix
+  # lambda <- estimate_s_rss(z = z.locus$z, R = R.locus, n = gwas_n)
+
+  # Compute expected z-scores based on conditional distribution of z-scores
+  condz_stats <- kriging_rss(z = z_snp.region$z, R = R_snp.region, n = gwas_n)$conditional_dist
+  condz_stats <- cbind(z_snp.region[,c("id", "A1", "A2")], condz_stats)
+
+  # compute p-values for the significance of z-score difference between observed and estimated values
+  condz_stats$p_diff <- pchisq(condz_stats$z_std_diff^2, df = 1, lower.tail=F)
+
+  return(condz_stats)
+}
 
 #' Get problematic genes
 #'
