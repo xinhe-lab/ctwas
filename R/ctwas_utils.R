@@ -52,9 +52,11 @@ load_weights <- function(weight_file,
                          load_predictdb_LD = FALSE,
                          method_FUSION = c("lasso","enet","top1","blup"),
                          ncore = 1){
-  #library(tidyverse)
+
   weight_format <- match.arg(weight_format)
   method_FUSION <- match.arg(method_FUSION)
+  stopifnot(file.exists(weight_file))
+
   if(weight_format == "PredictDB"){
     weight_name <- tools::file_path_sans_ext(basename(weight_file))
     # read the PredictDB weights

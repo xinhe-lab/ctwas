@@ -85,7 +85,7 @@ We use the `est_param()` function to estimate two sets of parameters: the prior 
 There are several options for how to handle the prior effect size parameters by specifying the `group_prior_var_stucture`:
 
 - "shared_type" (default option) allows all groups in one molecular QTL type to share the same variance parameter.
-- "shared_context" allows all groups in one molecular QTL type to share the same variance parameter.
+- "shared_context" allows all groups in one context (tissue, cell type, condition) to share the same variance parameter.
 - "shared_nonSNP" allows all non-SNP groups to share the same variance parameter.
 - "shared_all" allows all groups to share the same variance parameter.
 - "independent" allows all groups to have their own separate variance parameters.

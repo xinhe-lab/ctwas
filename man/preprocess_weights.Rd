@@ -16,7 +16,8 @@ preprocess_weights(
   scale_by_ld_variance = FALSE,
   filter_protein_coding_genes = FALSE,
   load_predictdb_LD = FALSE,
-  method_FUSION = c("lasso", "enet", "top1", "blup")
+  method_FUSION = c("lasso", "enet", "top1", "blup"),
+  logfile = NULL
 )
 }
 \arguments{
@@ -39,6 +40,8 @@ preprocess_weights(
 \item{load_predictdb_LD}{TRUE/FALSE. If TRUE, load pre-computed LD among weight SNPs. This option is only for PredictDB weights}
 
 \item{method_FUSION}{a string, specifying the method to choose in FUSION models}
+
+\item{logfile}{the log file, if NULL will print log info on screen.}
 }
 \value{
 a list of processed weights

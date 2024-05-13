@@ -21,6 +21,10 @@
 #'
 #' @param method_FUSION a string, specifying the method to choose in FUSION models
 #'
+#' @param logfile the log file, if NULL will print log info on screen.
+#'
+#' @importFrom logging addHandler loginfo writeToFile
+#'
 #' @return a list of processed weights
 #'
 #' @export
@@ -36,15 +40,23 @@ preprocess_weights <- function(weight_file,
                                scale_by_ld_variance = FALSE,
                                filter_protein_coding_genes = FALSE,
                                load_predictdb_LD = FALSE,
-                               method_FUSION = c("lasso","enet","top1","blup")){
+                               method_FUSION = c("lasso","enet","top1","blup"),
+                               logfile = NULL){
 
   # check input arguments
   weight_format <- match.arg(weight_format)
   method_FUSION <- match.arg(method_FUSION)
 
+  if (!is.null(logfile)) {
+    addHandler(writeToFile, file = logfile, level = "DEBUG")
+  }
+
   if (length(weight_file) > 1) {
     stop("Please provide only one weight file in weight_file.")
   }
+
+  stopifnot(file.exists(weight_file))
+
   if (is.null(type)) {
     type <- "gene"
   }
@@ -53,8 +65,8 @@ preprocess_weights <- function(weight_file,
   }
 
   loginfo("Load weight: %s", weight_file)
-  loginfo("type = %s", type)
-  loginfo("context = %s", context)
+  loginfo("type: %s", type)
+  loginfo("context: %s", context)
 
   # load LD SNPs information
   region_info <- region_info[order(region_info$chrom, region_info$start),]

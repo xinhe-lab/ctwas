@@ -10,8 +10,8 @@ EM_est_param(
   niter = 20,
   init_group_prior = NULL,
   init_group_prior_var = NULL,
-  group_prior_var_structure = c("independent", "shared_nonSNP", "shared_all",
-    "shared_type", "shared_context"),
+  group_prior_var_structure = c("shared_type", "shared_context", "shared_nonSNP",
+    "shared_all", "independent"),
   use_null_weight = TRUE,
   ncore = 1,
   verbose = FALSE,
@@ -28,11 +28,11 @@ EM_est_param(
 \item{init_group_prior_var}{a vector of initial prior variances for SNPs and gene effects.}
 
 \item{group_prior_var_structure}{a string indicating the structure to put on the prior variance parameters.
-"independent" is the default and allows all groups to have their own separate variance parameters.
+"shared_type" allows all groups in one molecular QTL type to share the same variance parameter.
+"shared_context" allows all groups in one context (tissue, cell type, condition) to share the same variance parameter.
 "shared_nonSNP" allows all non-SNP groups to share the same variance parameter.
 "shared_all" allows all groups to share the same variance parameter.
-"shared_type" allows all groups in one molecular QTL type to share the same variance parameter.
-"shared_context" allows all groups in one molecular QTL type to share the same variance parameter.}
+"independent" allows all groups to have their own separate variance parameters.}
 
 \item{use_null_weight}{TRUE/FALSE. If TRUE, allow for a probability of no effect in susie}
 

@@ -8,7 +8,7 @@
 #'
 #' @param group_prior_var_structure a string indicating the structure to put on the prior variance parameters.
 #' "shared_type" allows all groups in one molecular QTL type to share the same variance parameter.
-#' "shared_context" allows all groups in one molecular QTL type to share the same variance parameter.
+#' "shared_context" allows all groups in one context (tissue, cell type, condition) to share the same variance parameter.
 #' "shared_nonSNP" allows all non-SNP groups to share the same variance parameter.
 #' "shared_all" allows all groups to share the same variance parameter.
 #' "independent" allows all groups to have their own separate variance parameters.
