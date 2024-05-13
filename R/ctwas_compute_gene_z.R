@@ -11,6 +11,7 @@
 #' @return a data frame of z-scores of molecular traits
 #'
 #' @importFrom logging addHandler loginfo writeToFile
+#' @importFrom parallel mclapply
 #'
 #' @export
 compute_gene_z <- function (z_snp, weights, ncore = 1, logfile = NULL){
@@ -24,9 +25,7 @@ compute_gene_z <- function (z_snp, weights, ncore = 1, logfile = NULL){
   z_snp <- z_snp[z_snp$id %in% weight_snpnames, c("id", "z")]
   loginfo("%d SNPs with weights", nrow(z_snp))
 
-  cl <- parallel::makeCluster(ncore, outfile = "")
-  doParallel::registerDoParallel(cl)
-  z_gene <- foreach(id = names(weights), .combine = "rbind") %dopar% {
+  z_gene <- mclapply(names(weights), function(id) {
     wgt <- weights[[id]][["wgt"]]
     snpnames <- rownames(wgt)
     R.s <- weights[[id]][["R_wgt"]]
@@ -38,9 +37,10 @@ compute_gene_z <- function (z_snp, weights, ncore = 1, logfile = NULL){
     z.g <- as.matrix(crossprod(wgt, z.s)/sqrt(t(wgt)%*%R.s%*% wgt))
     dimnames(z.g) <- NULL
     data.frame(id = id, z = z.g, type = type, context = context, group = group)
-  }
-  parallel::stopCluster(cl)
+  }, mc.cores = ncore)
+  z_gene <- do.call("rbind", z_gene)
   rownames(z_gene) <- NULL
+
   return(z_gene)
 }
 
