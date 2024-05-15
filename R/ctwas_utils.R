@@ -27,9 +27,9 @@ read_LD_SNP_files <- function(files){
   return(LD_snpinfo)
 }
 
-#' read all LD SNP info for all regions as a data frame
-#' if region_info has files in SNP_info available, read from the files in SNP_info;
-#' otherwise, use all SNP info from the LD reference.
+#' Read LD SNP info for all regions as a data frame
+#' if region_info has files in 'SNP_info' column, read from the files in the 'SNP_info' column;
+#' otherwise, use all SNP info from the LD reference 'LD_ref_snpinfo'.
 #'
 #' @param region_info a data frame of region definition and associated file names
 #'
@@ -39,7 +39,7 @@ read_LD_SNP_files <- function(files){
 #'
 #' @export
 #'
-read_region_LD_SNP_info <- function(region_info, LD_ref_snpinfo = NULL, ncore = 1){
+read_LD_snpinfo_regions <- function(region_info, LD_ref_snpinfo = NULL, ncore = 1){
 
   region_ids <- region_info$region_id
 
@@ -58,26 +58,26 @@ read_region_LD_SNP_info <- function(region_info, LD_ref_snpinfo = NULL, ncore = 
 
   # if region_info has files in SNP_info available, read from the files in SNP_info;
   # otherwise, use all SNP info from the LD reference.
-  region_LD_snpinfo_list <- parallel::mclapply(region_ids, function(region_id){
-    regioninfo <- region_info[region_info$region_id == region_id, ]
+  LD_snpinfo_regions_list <- parallel::mclapply(region_ids, function(region_id){
+    regioninfo <- region_info[which(region_info$region_id == region_id), ]
     if (!is.null(regioninfo$SNP_info)){
       SNP_info_files <- unlist(strsplit(regioninfo$SNP_info, split = ";"))
       stopifnot(all(file.exists(SNP_info_files)))
-      LD_snpinfo <- read_LD_SNP_files(SNP_info_files)
+      region_LD_snpinfo <- read_LD_SNP_files(SNP_info_files)
     } else {
       region_chrom <- regioninfo$chrom
       region_start <- regioninfo$start
       region_stop <- regioninfo$stop
       ref_snp_idx <- which(LD_ref_snpinfo$chrom == region_chrom & LD_ref_snpinfo$pos >= region_start & LD_ref_snpinfo$pos < region_stop)
-      LD_snpinfo <- LD_ref_snpinfo[ref_snp_idx, ]
+      region_LD_snpinfo <- LD_ref_snpinfo[ref_snp_idx, ]
     }
-    region_LD_snpinfo <- cbind(LD_snpinfo, region_id = regioninfo$region_id)
-    region_LD_snpinfo
+    cbind(region_LD_snpinfo, region_id = regioninfo$region_id)
   }, mc.cores = ncore)
-  names(region_LD_snpinfo_list) <- region_ids
-  region_LD_snpinfo <- do.call(rbind, region_LD_snpinfo_list)
+  names(LD_snpinfo_regions_list) <- region_ids
+  LD_snpinfo_regions <- do.call(rbind, LD_snpinfo_regions_list)
+  rownames(LD_snpinfo_regions) <- NULL
 
-  return(region_LD_snpinfo)
+  return(LD_snpinfo_regions)
 }
 
 #' Load PredictDB or FUSION weights
