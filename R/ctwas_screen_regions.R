@@ -4,7 +4,10 @@
 #'
 #' @param region_info a data frame of region definition and associated LD file names
 #'
-#' @param weights a list of weights
+#' @param weights a list of weights for each gene
+#'
+#' @param LD_snpinfo a data frame, SNP info for LD reference,
+#'  with columns "chrom", "id", "pos", and "region_id".
 #'
 #' @param group_prior a vector of two prior inclusion probabilities for SNPs and genes.
 #'
@@ -37,6 +40,7 @@ screen_regions <- function(
     region_data,
     region_info,
     weights,
+    LD_snpinfo,
     group_prior = NULL,
     group_prior_var = NULL,
     L = 5,
@@ -96,6 +100,7 @@ screen_regions <- function(
   finemap_screening_res <- finemap_regions(region_data,
                                            region_info,
                                            weights,
+                                           LD_snpinfo,
                                            L = L,
                                            group_prior = group_prior,
                                            group_prior_var = group_prior_var,
@@ -114,6 +119,7 @@ screen_regions <- function(
   loginfo("Number of regions selected: %d", length(screened_region_data))
 
   return(list(screened_region_data = screened_region_data,
+              screened_region_ids = screened_region_ids,
               region_nonSNP_PIP_df = region_nonSNP_PIP_df))
 }
 

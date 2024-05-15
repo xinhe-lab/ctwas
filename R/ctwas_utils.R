@@ -1,29 +1,83 @@
 
 #' read a single LD SNP info file as a data frame
 read_LD_SNP_file <- function(file){
-  ld_snpinfo <- data.table::fread(file, header = T)
+  LD_snpinfo <- data.table::fread(file, header = TRUE)
   target_header <- c("chrom", "id", "pos", "alt", "ref")
 
-  if (!all(target_header %in% colnames(ld_snpinfo))){
-    stop("The .Rvar file needs to contain the following columns: ",
+  if (!all(target_header %in% colnames(LD_snpinfo))){
+    stop("The LD SNP info file needs to contain the following columns: ",
          paste(target_header, collapse = " "))
   }
-  # if (length(unique(ld_snpinfo$chrom)) != 1){
-  #   stop("LD region needs to be on only one chromosome.")
-  # }
+  if (length(unique(LD_snpinfo$chrom)) != 1){
+    stop("LD region needs to be on only one chromosome.")
+  }
 
-  return(ld_snpinfo)
+  return(LD_snpinfo)
 }
 
 #' read all LD SNP info files as a data frame
 read_LD_SNP_files <- function(files){
   if (length(files) > 0) {
     files <- unique(files)
-    ld_snpinfo <- do.call(rbind, lapply(files, read_LD_SNP_file))
+    LD_snpinfo <- do.call(rbind, lapply(files, read_LD_SNP_file))
   } else {
-    ld_snpinfo <- data.table::data.table()
+    warning("No LD SNP info files to read")
+    LD_snpinfo <- data.table::data.table()
   }
-  return(ld_snpinfo)
+  return(LD_snpinfo)
+}
+
+#' read all LD SNP info for all regions as a data frame
+#' if region_info has files in SNP_info available, read from the files in SNP_info;
+#' otherwise, use all SNP info from the LD reference.
+#'
+#' @param region_info a data frame of region definition and associated file names
+#'
+#' @param LD_ref_snpinfo a data frame of all variant info in the LD reference.
+#'
+#' @param ncore The number of cores used to parallelize susie over regions
+#'
+#' @export
+#'
+read_region_LD_SNP_info <- function(region_info, LD_ref_snpinfo = NULL, ncore = 1){
+
+  region_ids <- region_info$region_id
+
+  # check input
+  if (any(is.null(region_info$SNP_info))){
+    if (is.null(LD_ref_snpinfo)){
+      stop("SNP_info in region_info is not available, please provide LD reference SNP info")
+    } else {
+      target_header <- c("chrom", "id", "pos", "alt", "ref")
+      if (!all(target_header %in% colnames(LD_ref_snpinfo))){
+        stop("The LD reference SNP info needs to contain the following columns: ",
+             paste(target_header, collapse = " "))
+      }
+    }
+  }
+
+  # if region_info has files in SNP_info available, read from the files in SNP_info;
+  # otherwise, use all SNP info from the LD reference.
+  region_LD_snpinfo_list <- parallel::mclapply(region_ids, function(region_id){
+    regioninfo <- region_info[region_info$region_id == region_id, ]
+    if (!is.null(regioninfo$SNP_info)){
+      SNP_info_files <- unlist(strsplit(regioninfo$SNP_info, split = ";"))
+      stopifnot(all(file.exists(SNP_info_files)))
+      LD_snpinfo <- read_LD_SNP_files(SNP_info_files)
+    } else {
+      region_chrom <- regioninfo$chrom
+      region_start <- regioninfo$start
+      region_stop <- regioninfo$stop
+      ref_snp_idx <- which(LD_ref_snpinfo$chrom == region_chrom & LD_ref_snpinfo$pos >= region_start & LD_ref_snpinfo$pos < region_stop)
+      LD_snpinfo <- LD_ref_snpinfo[ref_snp_idx, ]
+    }
+    region_LD_snpinfo <- cbind(LD_snpinfo, region_id = regioninfo$region_id)
+    region_LD_snpinfo
+  }, mc.cores = ncore)
+  names(region_LD_snpinfo_list) <- region_ids
+  region_LD_snpinfo <- do.call(rbind, region_LD_snpinfo_list)
+
+  return(region_LD_snpinfo)
 }
 
 #' Load PredictDB or FUSION weights

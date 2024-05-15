@@ -2,10 +2,24 @@
 % Please edit documentation in R/ctwas_compute_region_cor.R
 \name{compute_region_cor}
 \alias{compute_region_cor}
-\title{Compute correlation matrices for a region}
+\title{Compute correlation matrices for a single region}
 \usage{
-compute_region_cor(sids, gids, R_snp, weights, snpinfo)
+compute_region_cor(sids, gids, R_snp, LD_sids, weights)
+}
+\arguments{
+\item{sids}{SNP IDs}
+
+\item{gids}{gene IDs}
+
+\item{R_snp}{LD (R) matrix}
+
+\item{LD_sids}{SNP IDs matching with the rows and columns of the LD matrix}
+
+\item{weights}{a list of weights for all the genes}
+}
+\value{
+a list of correlation matrices (R_snp, R_snp_gene and R_gene)
 }
 \description{
-Compute correlation matrices for a region
+Compute correlation matrices for a single region
 }

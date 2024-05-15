@@ -5,13 +5,13 @@
 \title{Harmonize z scores from GWAS to match ld reference genotypes.
 Flip signs when reverse complement matches, remove strand ambiguous SNPs}
 \usage{
-harmonize_z_ld(z_snp, ld_snpinfo, drop_strand_ambig = TRUE)
+harmonize_z_ld(z_snp, LD_snpinfo, drop_strand_ambig = TRUE)
 }
 \arguments{
 \item{z_snp}{a data frame, with columns "id", "A1", "A2" and "z".
 Z scores for every SNP. "A1" is the effect allele.}
 
-\item{ld_snpinfo}{a data frame, snp info for LD reference,
+\item{LD_snpinfo}{a data frame, snp info for LD reference,
 with columns "chrom", "id", "pos", "alt", "ref".}
 
 \item{drop_strand_ambig}{TRUE/FALSE, if TRUE remove strand ambiguous variants (A/T, G/C).}

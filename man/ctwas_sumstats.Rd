@@ -8,6 +8,7 @@ ctwas_sumstats(
   z_snp,
   weights,
   region_info,
+  LD_snpinfo,
   z_gene = NULL,
   thin = 0.1,
   niter_prefit = 3,
@@ -37,9 +38,12 @@ ctwas_sumstats(
 \item{z_snp}{A data frame with four columns: "id", "A1", "A2", "z".
 giving the z scores for snps. "A1" is effect allele. "A2" is the other allele.}
 
-\item{weights}{a list of weights}
+\item{weights}{a list of prediction weights}
 
 \item{region_info}{a data frame of region definition and associated LD file names}
+
+\item{LD_snpinfo}{a data frame, SNP info for LD reference,
+with columns "chrom", "id", "pos", and "region_id".}
 
 \item{z_gene}{A data frame with columns: "id", "z", giving the z-scores for genes.}
 
@@ -98,7 +102,8 @@ having 1 or fewer effects will be used for parameter estimation}
 \item{...}{Additional arguments of \code{susie_rss}.}
 }
 \value{
-a list of estimated parameters, fine-mapping results, boundary genes, z_gene, and region_data
+a list of estimated parameters, fine-mapping results, boundary genes,
+z_gene, region_data, and screened_region_data
 }
 \description{
 Causal inference for TWAS using summary statistics

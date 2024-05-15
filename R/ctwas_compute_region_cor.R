@@ -1,6 +1,25 @@
 
-#' Compute correlation matrices for a region
-compute_region_cor <- function(sids, gids, R_snp, weights, snpinfo) {
+#' Compute correlation matrices for a single region
+#'
+#' @param sids SNP IDs
+#'
+#' @param gids gene IDs
+#'
+#' @param R_snp LD (R) matrix
+#'
+#' @param LD_sids SNP IDs matching with the rows and columns of the LD matrix
+#'
+#' @param weights a list of weights for all the genes
+#'
+#' @return a list of correlation matrices (R_snp, R_snp_gene and R_gene)
+#'
+#' @export
+#'
+compute_region_cor <- function(sids, gids, R_snp, LD_sids, weights) {
+  # check input data
+  if (!is.list(weights)){
+    stop("'weights' should be a list.")
+  }
 
   # subset weights to genes in this region
   weights <- weights[gids]
@@ -8,7 +27,7 @@ compute_region_cor <- function(sids, gids, R_snp, weights, snpinfo) {
   # extract wgtlist and filter by SNPs in LD
   wgtlist <- lapply(weights, function(x){
     wgt <- x$wgt
-    wgt[rownames(wgt) %in% snpinfo$id, , drop=FALSE]
+    wgt[rownames(wgt) %in% LD_sids, , drop=FALSE]
     })
   names(wgtlist) <- names(weights)
 
@@ -23,7 +42,7 @@ compute_region_cor <- function(sids, gids, R_snp, weights, snpinfo) {
       gid <- gids[i]
       wgt <- wgtlist[[gid]]
       snpnames <- rownames(wgt)
-      ld.idx <- match(snpnames, snpinfo$id)
+      ld.idx <- match(snpnames, LD_sids)
       ldr[[gid]] <- ld.idx
       R.s <- R_snp[ld.idx, ld.idx]
       R_snp_gene[,i] <- sapply(1:nrow(R_snp),
@@ -43,7 +62,7 @@ compute_region_cor <- function(sids, gids, R_snp, weights, snpinfo) {
   }
 
   # subset R_snp and R_snp_gene by sidx
-  sidx <- match(sids, snpinfo$id)
+  sidx <- match(sids, LD_sids)
   R_snp <- R_snp[sidx, sidx, drop = F]
   R_snp_gene <- R_snp_gene[sidx, , drop = F]
 

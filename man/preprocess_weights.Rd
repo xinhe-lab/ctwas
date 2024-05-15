@@ -8,8 +8,9 @@ preprocess_weights(
   weight_file,
   region_info,
   gwas_snp_ids,
-  type = NULL,
-  context = NULL,
+  LD_snpinfo,
+  type,
+  context,
   weight_format = c("PredictDB", "FUSION"),
   ncore = 1,
   drop_strand_ambig = TRUE,
@@ -27,7 +28,7 @@ preprocess_weights(
 
 \item{gwas_snp_ids}{a vector of SNP IDs in GWAS summary statistics (z_snp$id).}
 
-\item{type}{a string, specifying QTL type of each weight file, e.g. eQTL, sQTL, pQTL.}
+\item{type}{a string, specifying QTL type of each weight file, e.g. expression, splicing, protein.}
 
 \item{context}{a string, specifying tissue/cell type/condition of each weight file, e.g. Liver, Lung, Brain.}
 

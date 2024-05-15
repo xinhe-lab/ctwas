@@ -5,7 +5,7 @@
 \title{Harmonize weight to match ld reference genotypes.
 Flip signs when reverse complement matches, remove ambiguous variants from the prediction models}
 \usage{
-harmonize_wgt_ld(wgt.matrix, snps, ld_snpinfo, drop_strand_ambig = TRUE)
+harmonize_wgt_ld(wgt.matrix, snps, LD_snpinfo, drop_strand_ambig = TRUE)
 }
 \arguments{
 \item{wgt.matrix}{from FUSION weight .Rdat file}
@@ -14,7 +14,7 @@ harmonize_wgt_ld(wgt.matrix, snps, ld_snpinfo, drop_strand_ambig = TRUE)
 with columns "chrom", "id", "pos", "alt", "ref". The effect allele
 for FUSION is alt.}
 
-\item{ld_snpinfo}{a data frame, snp info for LD reference,
+\item{LD_snpinfo}{a data frame, snp info for LD reference,
 with columns "chrom", "id", "pos", "alt", "ref".}
 
 \item{drop_strand_ambig}{TRUE/FALSE, if TRUE remove strand ambiguous variants (A/T, G/C).}

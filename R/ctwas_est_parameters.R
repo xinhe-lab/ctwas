@@ -60,9 +60,9 @@ est_param <- function(
     addHandler(writeToFile, file= logfile, level='DEBUG')
   }
 
-  loginfo('Estimating parameters ... ')
-
   group_prior_var_structure <- match.arg(group_prior_var_structure)
+
+  loginfo('Estimating parameters ... ')
 
   # extract thin value from region_data
   thin <- unique(sapply(region_data, "[[", "thin"))
@@ -142,10 +142,12 @@ est_param <- function(
   group_prior_var_iters <- EM_res$group_prior_var_iters
 
   # adjust parameters to account for thin
-  loginfo("Adjust parameters to account for thin (thin = %s)", thin)
-  group_prior["SNP"] <- group_prior["SNP"] * thin
-  group_prior_iters["SNP",] <- group_prior_iters["SNP",] * thin
-  group_size["SNP"] <- group_size["SNP"]/thin
+  if (thin != 1){
+    loginfo("Adjust parameters to account for thin (thin = %s)", thin)
+    group_prior["SNP"] <- group_prior["SNP"] * thin
+    group_prior_iters["SNP",] <- group_prior_iters["SNP",] * thin
+    group_size["SNP"] <- group_size["SNP"]/thin
+  }
   group_size <- group_size[names(group_prior)]
   loginfo("Estimated group_prior {%s}: {%s}", names(group_prior), format(group_prior, digits = 4))
   loginfo("Estimated group_prior_var {%s}: {%s}", names(group_prior_var), format(group_prior_var, digits = 4))
