@@ -9,7 +9,7 @@ assemble_region_data(
   z_snp,
   z_gene,
   weights,
-  LD_snpinfo,
+  snp_info,
   thin = 0.1,
   maxSNP = Inf,
   trim_by = c("random", "z"),
@@ -29,7 +29,7 @@ assemble_region_data(
 
 \item{weights}{a list of weights}
 
-\item{LD_snpinfo}{a data frame, SNP info for LD reference,
+\item{snp_info}{a data frame, SNP info for LD reference,
 with required columns "chrom", "id", "pos", and "region_id".}
 
 \item{thin}{The proportion of SNPs to be used for the parameter estimation and

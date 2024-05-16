@@ -4,7 +4,7 @@
 \alias{adjust_boundary_genes}
 \title{adjust region_data for boundary genes}
 \usage{
-adjust_boundary_genes(boundary_genes, LD_snpinfo, weights, region_data)
+adjust_boundary_genes(boundary_genes, snp_info, weights, region_data)
 }
 \description{
 adjust region_data for boundary genes

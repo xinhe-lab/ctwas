@@ -8,6 +8,7 @@ merge_region_data(
   boundary_genes,
   region_data,
   region_info,
+  snp_info,
   z_snp,
   z_gene,
   expand = TRUE,

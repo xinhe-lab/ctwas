@@ -1,11 +1,11 @@
 
-#' Harmonize z scores from GWAS to match ld reference genotypes.
+#' Harmonize z scores from GWAS to match LD reference genotypes.
 #' Flip signs when reverse complement matches, remove strand ambiguous SNPs
 #'
 #' @param z_snp a data frame, with columns "id", "A1", "A2" and "z".
 #'     Z scores for every SNP. "A1" is the effect allele.
 #'
-#' @param LD_snpinfo a data frame, snp info for LD reference,
+#' @param snp_info a data frame, SNP info for LD reference,
 #'  with columns "chrom", "id", "pos", "alt", "ref".
 #'
 #' @param drop_strand_ambig TRUE/FALSE, if TRUE remove strand ambiguous variants (A/T, G/C).
@@ -14,22 +14,22 @@
 #'
 #' @return a data frame, z_snp with the "z" columns flipped to match LD ref.
 #'
-harmonize_z_ld <- function(z_snp, LD_snpinfo, drop_strand_ambig = TRUE){
+harmonize_z <- function(z_snp, snp_info, drop_strand_ambig = TRUE){
 
   # Check LD reference SNP info
   target_header <- c("chrom", "id", "pos", "alt", "ref")
-  if (!all(target_header %in% colnames(LD_snpinfo))){
+  if (!all(target_header %in% colnames(snp_info))){
     stop("The LD reference SNP info needs to contain the following columns: ",
          paste(target_header, collapse = " "))
   }
 
-  snpnames <- intersect(z_snp$id, LD_snpinfo$id)
+  snpnames <- intersect(z_snp$id, snp_info$id)
   loginfo("Harmonize %s variants in both GWAS and LD reference", length(snpnames))
 
   if (length(snpnames) != 0) {
     z.idx <- match(snpnames, z_snp$id)
-    ld.idx <- match(snpnames, LD_snpinfo$id)
-    qc <- allele.qc(z_snp[z.idx,]$A1, z_snp[z.idx,]$A2, LD_snpinfo[ld.idx,]$alt, LD_snpinfo[ld.idx,]$ref)
+    ld.idx <- match(snpnames, snp_info$id)
+    qc <- allele.qc(z_snp[z.idx,]$A1, z_snp[z.idx,]$A2, snp_info[ld.idx,]$alt, snp_info[ld.idx,]$ref)
     ifflip <- qc[["flip"]]
     ifremove <- !qc[["keep"]]
     flip.idx <- z.idx[ifflip]
@@ -46,7 +46,7 @@ harmonize_z_ld <- function(z_snp, LD_snpinfo, drop_strand_ambig = TRUE){
   return(z_snp)
 }
 
-#' Harmonize weight to match ld reference genotypes.
+#' Harmonize weight to match LD reference genotypes.
 #' Flip signs when reverse complement matches, remove ambiguous variants from the prediction models
 #'
 #' @param wgt.matrix from FUSION weight .Rdat file
@@ -55,30 +55,30 @@ harmonize_z_ld <- function(z_snp, LD_snpinfo, drop_strand_ambig = TRUE){
 #'  with columns "chrom", "id", "pos", "alt", "ref". The effect allele
 #'  for FUSION is alt.
 #'
-#' @param LD_snpinfo a data frame, snp info for LD reference,
+#' @param snp_info a data frame, SNP info for LD reference,
 #'  with columns "chrom", "id", "pos", "alt", "ref".
 #'
 #' @param drop_strand_ambig TRUE/FALSE, if TRUE remove strand ambiguous variants (A/T, G/C).
 #'
 #' @return wgt.matrix and snps with alleles flipped to match
 #'
-harmonize_wgt_ld <- function (wgt.matrix, snps, LD_snpinfo, drop_strand_ambig = TRUE){
+harmonize_weights <- function (wgt.matrix, snps, snp_info, drop_strand_ambig = TRUE){
 
   # Check LD reference SNP info
   target_header <- c("chrom", "id", "pos", "alt", "ref")
-  if (!all(target_header %in% colnames(LD_snpinfo))){
+  if (!all(target_header %in% colnames(snp_info))){
     stop("The LD reference SNP info needs to contain the following columns: ",
          paste(target_header, collapse = " "))
   }
 
   colnames(snps) <- c("chrom", "id", "cm", "pos", "alt", "ref")
   snps <- snps[match(rownames(wgt.matrix), snps$id), ]
-  snpnames <- intersect(snps$id, LD_snpinfo$id)
+  snpnames <- intersect(snps$id, snp_info$id)
 
   if (length(snpnames) != 0) {
     snps.idx <- match(snpnames, snps$id)
-    ld.idx <- match(snpnames, LD_snpinfo$id)
-    qc <- allele.qc(snps[snps.idx,]$alt, snps[snps.idx,]$ref, LD_snpinfo[ld.idx,]$alt, LD_snpinfo[ld.idx,]$ref)
+    ld.idx <- match(snpnames, snp_info$id)
+    qc <- allele.qc(snps[snps.idx,]$alt, snps[snps.idx,]$ref, snp_info[ld.idx,]$alt, snp_info[ld.idx,]$ref)
     ifflip <- qc[["flip"]]
     ifremove <- !qc[["keep"]]
     flip.idx <- snps.idx[ifflip]

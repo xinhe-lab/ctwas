@@ -7,7 +7,7 @@
 #'
 #' @param region_info a data frame of region definition and associated LD file names
 #'
-#' @param LD_snpinfo a data frame, SNP info for LD reference,
+#' @param snp_info a data frame, SNP info for LD reference,
 #'  with columns "chrom", "id", "pos", and "region_id".
 #'
 #' @param z_gene A data frame with columns: "id", "z", giving the z-scores for genes.
@@ -77,7 +77,7 @@ ctwas_sumstats <- function(
     z_snp,
     weights,
     region_info,
-    LD_snpinfo,
+    snp_info,
     z_gene = NULL,
     thin = 0.1,
     niter_prefit = 3,
@@ -125,7 +125,7 @@ ctwas_sumstats <- function(
                                           z_snp,
                                           z_gene,
                                           weights,
-                                          LD_snpinfo,
+                                          snp_info,
                                           thin = thin,
                                           maxSNP = maxSNP,
                                           trim_by = "random",
@@ -149,6 +149,7 @@ ctwas_sumstats <- function(
                      niter = niter,
                      p_single_effect = p_single_effect,
                      ncore = ncore,
+                     verbose = verbose,
                      ...)
   group_prior <- param$group_prior
   group_prior_var <- param$group_prior_var
@@ -162,7 +163,7 @@ ctwas_sumstats <- function(
   screen_regions_res <- screen_regions(region_data,
                                        region_info,
                                        weights,
-                                       LD_snpinfo,
+                                       snp_info,
                                        group_prior = group_prior,
                                        group_prior_var = group_prior_var,
                                        L = L,
@@ -171,13 +172,12 @@ ctwas_sumstats <- function(
                                        verbose = verbose,
                                        ...)
   screened_region_data <- screen_regions_res$screened_region_data
-  screened_region_ids <- screen_regions_res$screened_region_ids
   region_nonSNP_PIP_df <- screen_regions_res$region_nonSNP_PIP_df
 
   # Expand screened region_data with all SNPs in the regions
   if (thin < 1){
     screened_region_data <- expand_region_data(screened_region_data,
-                                               LD_snpinfo,
+                                               snp_info,
                                                z_snp,
                                                z_gene,
                                                trim_by = "z",
@@ -199,7 +199,7 @@ ctwas_sumstats <- function(
     finemap_res <- finemap_regions(screened_region_data,
                                    region_info,
                                    weights,
-                                   LD_snpinfo,
+                                   snp_info,
                                    group_prior = group_prior,
                                    group_prior_var = group_prior_var,
                                    L = L,

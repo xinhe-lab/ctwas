@@ -8,9 +8,8 @@
 #'
 #' @param weights a list of weights for each gene
 #'
-#' @param LD_snpinfo a data frame, SNP info for LD reference,
+#' @param snp_info a data frame, SNP info for LD reference,
 #'  with columns "chrom", "id", "pos", and "region_id".
-#'  This is optional when running with L = 1 and not annotating SNPs
 #'
 #' @param L the number of effects for susie during the fine mapping steps
 #'
@@ -52,7 +51,7 @@ finemap_region <- function(region_data,
                            region_id,
                            region_info,
                            weights,
-                           LD_snpinfo,
+                           snp_info,
                            L = 5,
                            group_prior = NULL,
                            group_prior_var = NULL,
@@ -72,7 +71,7 @@ finemap_region <- function(region_data,
   }
 
   if (verbose){
-    loginfo("Finemapping region %s with L = %d", region_id, L)
+    loginfo("Fine-mapping region %s with L = %d", region_id, L)
   }
 
   # load input data for the region
@@ -115,31 +114,58 @@ finemap_region <- function(region_data,
     R_s_file <- file.path(cor_dir, paste0("region.", region_id, ".R_snp.RDS"))
   }
 
-  if (force_compute_cor) {
-    # force compute correlation matrix
+  cor_files_exist <- isTRUE(!is.null(cor_dir) && file.exists(R_sg_file) && file.exists(R_g_file) && file.exists(R_s_file))
+
+  if (cor_files_exist && !force_compute_cor) {
+    if (verbose){
+      loginfo("Load correlation matrices for region %s", region_id)
+    }
+    # load precomputed correlation matrices
+    R_snp_gene <- load_LD(R_sg_file)
+    R_gene <- load_LD(R_g_file)
+    R_snp <- load_LD(R_s_file)
+    # gene first then SNPs
+    R <- rbind(cbind(R_gene, t(R_snp_gene)),
+               cbind(R_snp_gene, R_snp))
+    rm(R_gene, R_snp_gene, R_snp)
+  } else if (L == 1 && !force_compute_cor) {
+    # if L = 1, do not need LD
+    R <- diag(length(z))
+  } else {
+    # if no precomputed correlation matrices, or L > 1, or force_compute_cor = TRUE,
+    # compute correlation matrices
+    if (verbose){
+      loginfo("Compute correlation matrices for region %s", region_id)
+    }
+    # load LD matrix of the region
     regioninfo <- region_info[which(region_info$region_id == region_id), ]
+    if(!is.character(regioninfo$LD_matrix) || is.null(regioninfo$LD_matrix)){
+      stop("LD_matrix in region_info is required for computing correlation matrices")
+    }
     LD_matrix_files <- unlist(strsplit(regioninfo$LD_matrix, split = ";"))
     stopifnot(all(file.exists(LD_matrix_files)))
-    if (length(LD_matrix_files) == 1){
+    if (length(LD_matrix_files)==1) {
       R_snp <- load_LD(LD_matrix_files)
     } else {
       R_snp <- lapply(LD_matrix_files, load_LD)
       R_snp <- suppressWarnings(as.matrix(Matrix::bdiag(R_snp)))
     }
     # load SNP info of the region
-    SNP_info_files <- unlist(strsplit(regioninfo$SNP_info, split = ";"))
-    stopifnot(all(file.exists(SNP_info_files)))
-    region_LD_snpinfo <- read_LD_SNP_files(SNP_info_files)
+    if (!is.character(regioninfo$SNP_info) || is.null(regioninfo$SNP_info)){
+      snpinfo <- snp_info[which(snp_info$region_id == region_id), ]
+    } else{
+      snp_info_files <- unlist(strsplit(regioninfo$SNP_info, split = ";"))
+      stopifnot(all(file.exists(snp_info_files)))
+      snpinfo <- read_snp_info_files(snp_info_files)
+    }
 
     # Compute correlation matrices
-    if (verbose){
-      loginfo("Compute correlation matrices for region %s", region_id)
-    }
-    res <- compute_region_cor(sid, gid, R_snp, region_LD_snpinfo$id, weights)
+    res <- compute_region_cor(sid, gid, R_snp, snpinfo$id, weights)
     R_snp <- res$R_snp
     R_snp_gene <- res$R_snp_gene
     R_gene <- res$R_gene
     rm(res)
+    # save correlation matrices
     if (isTRUE(save_cor && !is.null(cor_dir))) {
       saveRDS(R_snp_gene, file=R_sg_file)
       saveRDS(R_gene, file=R_g_file)
@@ -149,55 +175,6 @@ finemap_region <- function(region_data,
     R <- rbind(cbind(R_gene, t(R_snp_gene)),
                cbind(R_snp_gene, R_snp))
     rm(R_gene, R_snp_gene, R_snp)
-  } else {
-    if ( isTRUE(!is.null(cor_dir) && file.exists(R_sg_file) && file.exists(R_g_file) && file.exists(R_s_file)) ) {
-      # load precomputed correlation matrices
-      R_snp_gene <- load_LD(R_sg_file)
-      R_gene <- load_LD(R_g_file)
-      R_snp <- load_LD(R_s_file)
-      # gene first then SNPs
-      R <- rbind(cbind(R_gene, t(R_snp_gene)),
-                 cbind(R_snp_gene, R_snp))
-      rm(R_gene, R_snp_gene, R_snp)
-    } else if (L == 1) {
-      # if L = 1, do not need LD
-      R <- diag(length(z))
-    } else {
-      # if L > 1, compute correlation matrix
-      regioninfo <- region_info[which(region_info$region_id == region_id), ]
-      LD_matrix_files <- unlist(strsplit(regioninfo$LD_matrix, split = ";"))
-      stopifnot(all(file.exists(LD_matrix_files)))
-      if (length(LD_matrix_files)==1) {
-        R_snp <- load_LD(LD_matrix_files)
-      } else {
-        R_snp <- lapply(LD_matrix_files, load_LD)
-        R_snp <- suppressWarnings(as.matrix(Matrix::bdiag(R_snp)))
-      }
-      # load SNP info of the region
-      SNP_info_files <- unlist(strsplit(regioninfo$SNP_info, split = ";"))
-      stopifnot(all(file.exists(SNP_info_files)))
-      region_LD_snpinfo <- read_LD_SNP_files(SNP_info_files)
-
-      # Compute correlation matrices
-      if (verbose){
-        loginfo("Compute correlation matrices for region %s", region_id)
-      }
-      res <- compute_region_cor(sid, gid, R_snp, region_LD_snpinfo$id, weights)
-      R_snp <- res$R_snp
-      R_snp_gene <- res$R_snp_gene
-      R_gene <- res$R_gene
-      rm(res)
-      # save correlation matrices
-      if (isTRUE(save_cor && !is.null(cor_dir))) {
-        saveRDS(R_snp_gene, file=R_sg_file)
-        saveRDS(R_gene, file=R_g_file)
-        saveRDS(R_snp, file=R_s_file)
-      }
-      # gene first then SNPs
-      R <- rbind(cbind(R_gene, t(R_snp_gene)),
-                 cbind(R_snp_gene, R_snp))
-      rm(R_gene, R_snp_gene, R_snp)
-    }
   }
 
   if (anyNA(R))
@@ -221,6 +198,8 @@ finemap_region <- function(region_data,
   # annotate susie result
   if (isTRUE(annotate_susie_result)) {
     geneinfo <- get_gene_info(weights[gid])
+    snpinfo <- snp_info[which(snp_info$region_id == region_id), ]
+
     susie_res_df <- anno_susie(susie_res,
                                gid = gid,
                                sid = sid,
@@ -230,7 +209,7 @@ finemap_region <- function(region_data,
                                g_context = g_context,
                                g_group = g_group,
                                geneinfo = geneinfo,
-                               snpinfo = LD_snpinfo,
+                               snpinfo = snpinfo,
                                include_cs_index = TRUE)
 
   } else {
@@ -239,6 +218,7 @@ finemap_region <- function(region_data,
                                gid = gid,
                                sid = sid,
                                region_id = region_id,
+                               z = z,
                                g_type = g_type,
                                g_context = g_context,
                                g_group = g_group,
@@ -257,7 +237,7 @@ finemap_region <- function(region_data,
 #'
 #' @param weights a list of weights for each gene
 #'
-#' @param LD_snpinfo a data frame, SNP info for LD reference,
+#' @param snp_info a data frame, SNP info for LD reference,
 #'  with columns "chrom", "id", "pos", and "region_id".
 #'
 #' @param L the number of effects for susie during the fine mapping steps
@@ -300,7 +280,7 @@ finemap_region <- function(region_data,
 finemap_regions <- function(region_data,
                             region_info,
                             weights,
-                            LD_snpinfo,
+                            snp_info,
                             L = 5,
                             group_prior = NULL,
                             group_prior_var = NULL,
@@ -325,7 +305,7 @@ finemap_regions <- function(region_data,
     stop("'weights' should be a list.")
   }
 
-  loginfo('Finemapping %d regions ...', length(region_data))
+  loginfo('Fine-mapping %d regions ...', length(region_data))
 
   if (is.null(groups)){
     if(!is.null(group_prior)){
@@ -337,25 +317,24 @@ finemap_regions <- function(region_data,
 
   region_ids <- names(region_data)
   finemap_region_res_list <- parallel::mclapply(region_ids, function(region_id){
-    finemap_region_res_df <- finemap_region(region_data = region_data,
-                                            region_id = region_id,
-                                            region_info = region_info,
-                                            weights = weights,
-                                            LD_snpinfo = LD_snpinfo,
-                                            L = L,
-                                            group_prior = group_prior,
-                                            group_prior_var = group_prior_var,
-                                            groups = groups,
-                                            use_null_weight = use_null_weight,
-                                            coverage = coverage,
-                                            min_abs_corr = min_abs_corr,
-                                            force_compute_cor = force_compute_cor,
-                                            save_cor = save_cor,
-                                            cor_dir = cor_dir,
-                                            annotate_susie_result = annotate_susie_result,
-                                            verbose = verbose,
-                                            ...)
-    finemap_region_res_df
+    finemap_region(region_data = region_data,
+                   region_id = region_id,
+                   region_info = region_info,
+                   weights = weights,
+                   snp_info = snp_info,
+                   L = L,
+                   group_prior = group_prior,
+                   group_prior_var = group_prior_var,
+                   groups = groups,
+                   use_null_weight = use_null_weight,
+                   coverage = coverage,
+                   min_abs_corr = min_abs_corr,
+                   force_compute_cor = force_compute_cor,
+                   save_cor = save_cor,
+                   cor_dir = cor_dir,
+                   annotate_susie_result = annotate_susie_result,
+                   verbose = verbose,
+                   ...)
   }, mc.cores = ncore)
 
   finemap_res <- do.call(rbind, finemap_region_res_list)

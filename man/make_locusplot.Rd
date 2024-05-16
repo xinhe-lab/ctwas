@@ -11,11 +11,14 @@ make_locusplot(
   ens_db,
   save_cor = FALSE,
   cor_dir = NULL,
-  region_info = NULL,
   region_data = NULL,
+  region_info = NULL,
+  snp_info = NULL,
   locus_range = NULL,
   focus_gene = NULL,
   gene_biotype = "protein_coding",
+  p_thresh = NULL,
+  pip_thresh = NULL,
   point.sizes = c(1, 3.5),
   point.alpha = c(0.4, 0.6),
   point.shapes = c(21:25),
@@ -39,9 +42,12 @@ make_locusplot(
 
 \item{cor_dir}{path of correlation matrices}
 
+\item{region_data}{a list of region_data used for finemapping}
+
 \item{region_info}{a data frame of region definition and associated LD file names}
 
-\item{region_data}{a list of region_data used for finemapping}
+\item{snp_info}{a data frame, SNP info for LD reference,
+with columns "chrom", "id", "pos", and "region_id".}
 
 \item{locus_range}{a vector of start and end positions to define the locus region to be plotted
 

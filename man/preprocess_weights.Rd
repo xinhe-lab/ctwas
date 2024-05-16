@@ -8,7 +8,7 @@ preprocess_weights(
   weight_file,
   region_info,
   gwas_snp_ids,
-  LD_snpinfo,
+  snp_info,
   type,
   context,
   weight_format = c("PredictDB", "FUSION"),
@@ -27,6 +27,9 @@ preprocess_weights(
 \item{region_info}{a data frame of region definition and associated file names.}
 
 \item{gwas_snp_ids}{a vector of SNP IDs in GWAS summary statistics (z_snp$id).}
+
+\item{snp_info}{a data frame, SNP info for LD reference,
+with columns "chrom", "id", "pos", "alt", "ref".}
 
 \item{type}{a string, specifying QTL type of each weight file, e.g. expression, splicing, protein.}
 

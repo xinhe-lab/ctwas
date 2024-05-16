@@ -36,7 +36,7 @@ EM_est_param <- function(region_data,
                          verbose = FALSE,
                          ...){
 
-  # get groups and types from region_data
+  # get groups, types and contexts from region_data
   groups <- unique(unlist(lapply(region_data, "[[", "gs_group")))
   types <- unique(unlist(lapply(region_data, "[[", "gs_type")))
   contexts <- unique(unlist(lapply(region_data, "[[", "gs_context")))
@@ -58,24 +58,25 @@ EM_est_param <- function(region_data,
 
   region_ids <- names(region_data)
   for (iter in 1:niter){
-    loginfo("Start EM iteration %d", iter)
+    if (verbose){
+      loginfo("Start EM iteration %d ...", iter)
+    }
+
     EM_susie_res_list <- parallel::mclapply(region_ids, function(region_id){
-      susie_region_res_df <- ctwas_susie_region_L1(region_data, region_id,
-                                                   pi_prior, V_prior,
-                                                   use_null_weight = use_null_weight,
-                                                   verbose = verbose, ...)
-      susie_region_res_df
+      ctwas_susie_region_L1(region_data, region_id,
+                            pi_prior, V_prior,
+                            use_null_weight = use_null_weight,
+                            ...)
     }, mc.cores = ncore)
     EM_susie_res <- do.call(rbind, EM_susie_res_list)
 
     # update estimated group_prior from the current iteration
-    if (verbose)
-      loginfo("Update estimated group_prior after iteration %d", iter)
-
     pi_prior <- sapply(names(pi_prior), function(x){mean(EM_susie_res$susie_pip[EM_susie_res$group==x])})
     group_prior_iters[names(pi_prior),iter] <- pi_prior
 
-    loginfo("After iteration %d, group_prior {%s}: {%s}", iter, names(pi_prior), format(pi_prior, digits = 4))
+    if (verbose){
+      loginfo("Iteration %d, group_prior {%s}: {%s}", iter, names(pi_prior), format(pi_prior, digits = 4))
+    }
 
     # update estimated group_prior_var from the current iteration
     # in susie, mu2 is under standardized scale (if performed)
@@ -85,9 +86,6 @@ EM_est_param <- function(region_data,
     # X2 = 5*X
     # res2 = susie(X2,y,L=10)
     # res$mu2 is identical to res2$mu2 but coefficients are on diff scale.
-    if (verbose)
-      loginfo("Update estimated group_prior_var after iteration %d", iter)
-
     if (group_prior_var_structure=="independent") {
       V_prior <- sapply(names(V_prior),
                         function(x){
@@ -123,7 +121,9 @@ EM_est_param <- function(region_data,
     }
     group_prior_var_iters[names(V_prior), iter] <- V_prior
 
-    loginfo("After iteration %d, group_prior_var {%s}: {%s}", iter, names(V_prior), format(V_prior, digits = 4))
+    if (verbose){
+      loginfo("Iteration %d, group_prior_var {%s}: {%s}", iter, names(V_prior), format(V_prior, digits = 4))
+    }
   }
 
   group_size <- table(EM_susie_res$group)
@@ -138,8 +138,9 @@ EM_est_param <- function(region_data,
 }
 
 # run susie for one region with L = 1 without LD matrix
-ctwas_susie_region_L1 <- function(region_data, region_id, pi_prior, V_prior,
-                                  use_null_weight = TRUE, verbose = FALSE, ...){
+ctwas_susie_region_L1 <- function(region_data, region_id,
+                                  pi_prior, V_prior,
+                                  use_null_weight = TRUE, ...){
   # load susie input data
   regiondata <- region_data[[region_id]]
   sid <- regiondata[["sid"]]
@@ -149,13 +150,6 @@ ctwas_susie_region_L1 <- function(region_data, region_id, pi_prior, V_prior,
   g_type <- regiondata[["g_type"]]
   g_context <- regiondata[["g_context"]]
   g_group <- regiondata[["g_group"]]
-
-  if (verbose){
-    loginfo("Load input data for region %s", region_id)
-    loginfo("%d SNPs in the region.", length(sid))
-    loginfo("%d genes in the region.", length(gid))
-    loginfo("groups in the region: %s", unique(gs_group))
-  }
 
   if (length(z) < 2) {
     stop(paste(length(z), "variables in the region. At least two variables in a region are needed to run susie"))
@@ -172,9 +166,6 @@ ctwas_susie_region_L1 <- function(region_data, region_id, pi_prior, V_prior,
   R <- diag(length(z))
 
   # in susie, prior_variance is under standardized scale (if performed)
-  if (verbose)
-    loginfo("run susie for region %s", region_id)
-
   susie_res <- ctwas_susie_rss(z = z,
                                R = R,
                                prior_weights = prior,
@@ -183,9 +174,6 @@ ctwas_susie_region_L1 <- function(region_data, region_id, pi_prior, V_prior,
                                null_weight = null_weight,
                                max_iter = 1,
                                ...)
-  if (verbose)
-    loginfo("annotate susie result for region %s", region_id)
-
   # annotate susie result
   susie_res_df <- anno_susie(susie_res,
                              gid = gid,

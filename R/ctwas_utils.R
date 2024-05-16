@@ -1,83 +1,20 @@
 
-#' read a single LD SNP info file as a data frame
-read_LD_SNP_file <- function(file){
-  LD_snpinfo <- data.table::fread(file, header = TRUE)
+#' Read a single SNP info file as a data frame
+read_snp_info_file <- function(file){
+  snp_info <- as.data.frame(data.table::fread(file, header = TRUE))
   target_header <- c("chrom", "id", "pos", "alt", "ref")
-
-  if (!all(target_header %in% colnames(LD_snpinfo))){
-    stop("The LD SNP info file needs to contain the following columns: ",
+  if (!all(target_header %in% colnames(snp_info))){
+    stop("The SNP info file needs to contain the following columns: ",
          paste(target_header, collapse = " "))
   }
-  if (length(unique(LD_snpinfo$chrom)) != 1){
-    stop("LD region needs to be on only one chromosome.")
-  }
-
-  return(LD_snpinfo)
+  return(snp_info)
 }
 
-#' read all LD SNP info files as a data frame
-read_LD_SNP_files <- function(files){
-  if (length(files) > 0) {
-    files <- unique(files)
-    LD_snpinfo <- do.call(rbind, lapply(files, read_LD_SNP_file))
-  } else {
-    warning("No LD SNP info files to read")
-    LD_snpinfo <- data.table::data.table()
-  }
-  return(LD_snpinfo)
-}
-
-#' Read LD SNP info for all regions as a data frame
-#' if region_info has files in 'SNP_info' column, read from the files in the 'SNP_info' column;
-#' otherwise, use all SNP info from the LD reference 'LD_ref_snpinfo'.
-#'
-#' @param region_info a data frame of region definition and associated file names
-#'
-#' @param LD_ref_snpinfo a data frame of all variant info in the LD reference.
-#'
-#' @param ncore The number of cores used to parallelize susie over regions
-#'
-#' @export
-#'
-read_LD_snpinfo_regions <- function(region_info, LD_ref_snpinfo = NULL, ncore = 1){
-
-  region_ids <- region_info$region_id
-
-  # check input
-  if (any(is.null(region_info$SNP_info))){
-    if (is.null(LD_ref_snpinfo)){
-      stop("SNP_info in region_info is not available, please provide LD reference SNP info")
-    } else {
-      target_header <- c("chrom", "id", "pos", "alt", "ref")
-      if (!all(target_header %in% colnames(LD_ref_snpinfo))){
-        stop("The LD reference SNP info needs to contain the following columns: ",
-             paste(target_header, collapse = " "))
-      }
-    }
-  }
-
-  # if region_info has files in SNP_info available, read from the files in SNP_info;
-  # otherwise, use all SNP info from the LD reference.
-  LD_snpinfo_regions_list <- parallel::mclapply(region_ids, function(region_id){
-    regioninfo <- region_info[which(region_info$region_id == region_id), ]
-    if (!is.null(regioninfo$SNP_info)){
-      SNP_info_files <- unlist(strsplit(regioninfo$SNP_info, split = ";"))
-      stopifnot(all(file.exists(SNP_info_files)))
-      region_LD_snpinfo <- read_LD_SNP_files(SNP_info_files)
-    } else {
-      region_chrom <- regioninfo$chrom
-      region_start <- regioninfo$start
-      region_stop <- regioninfo$stop
-      ref_snp_idx <- which(LD_ref_snpinfo$chrom == region_chrom & LD_ref_snpinfo$pos >= region_start & LD_ref_snpinfo$pos < region_stop)
-      region_LD_snpinfo <- LD_ref_snpinfo[ref_snp_idx, ]
-    }
-    cbind(region_LD_snpinfo, region_id = regioninfo$region_id)
-  }, mc.cores = ncore)
-  names(LD_snpinfo_regions_list) <- region_ids
-  LD_snpinfo_regions <- do.call(rbind, LD_snpinfo_regions_list)
-  rownames(LD_snpinfo_regions) <- NULL
-
-  return(LD_snpinfo_regions)
+#' Read all SNP info files as a data frame
+read_snp_info_files <- function(files){
+  snp_info <- do.call(rbind, lapply(files, read_snp_info_file))
+  snp_info <- unique(as.data.frame(snp_info))
+  return(snp_info)
 }
 
 #' Load PredictDB or FUSION weights
@@ -122,7 +59,7 @@ load_weights <- function(weight_file,
     extra_table <- query("select * from extra")
 
     # subset to protein coding genes only
-    if (isTRUE(filter_protein_coding_genes)){
+    if (filter_protein_coding_genes) {
       if ("protein_coding" %in% extra_table$gene_type){ #filter only there exist protein coding genes
         loginfo("Keep protein coding genes only")
         extra_table <- extra_table[extra_table$gene_type=="protein_coding",,drop=F]
@@ -264,5 +201,177 @@ load_LD <- function(file, format = c("rds", "rdata", "csv", "txt", "tsv")) {
   }
 
   return(res)
+}
+
+
+#' Prepare .pvar file
+#'
+#' @param pgenf pgen file
+#' .pvar file format: https://www.cog-genomics.org/plink/2.0/formats#pvar
+#'
+#' @param outputdir a string, the directory to store output
+#'
+#' @return corresponding pvar file
+#'
+#' @importFrom tools file_ext file_path_sans_ext
+#'
+prep_pvar <- function(pgenf, outputdir = getwd()){
+
+  if (file_ext(pgenf) == "pgen"){
+    pvarf <- paste0(file_path_sans_ext(pgenf), ".pvar")
+    pvarf2 <-  paste0(outputdir, basename(file_path_sans_ext(pgenf)), ".hpvar")
+
+    # pgenlib can't read pvar without header, check if header present
+    firstl <- read.table(file = pvarf, header = F, comment.char = '',
+                         nrows = 1, stringsAsFactors = F)
+
+    if (substr(firstl[1,1],1,1) == '#') {
+      pvarfout <- pvarf
+    } else {
+      pvarfout <- pvarf2
+
+      if (!file.exists(pvarf2)) {
+        pvar <- data.table::fread(pvarf, header = F)
+
+        if (ncol(pvar) == 6) {
+          colnames(pvar) <- c('#CHROM', 'ID', 'CM', 'POS', 'ALT', 'REF')
+        } else if (ncol(pvar) == 5){
+          colnames(pvar) <- c('#CHROM', 'ID', 'POS', 'ALT', 'REF')
+        } else {
+          stop(".pvar file has incorrect format")
+        }
+
+        data.table::fwrite(pvar, file = pvarf2 , sep="\t", quote = F)
+      }
+    }
+
+  } else if (file_ext(pgenf) == "bed"){
+    # .bim file has no header
+    pvarf <- paste0(file_path_sans_ext(pgenf), ".bim")
+    pvarf2 <-  file.path(outputdir, paste0(basename(file_path_sans_ext(pgenf)), ".hbim"))
+
+    if (!file.exists(pvarf2)){
+      pvar <- data.table::fread(pvarf, header = F)
+      colnames(pvar) <- c('#CHROM', 'ID', 'CM', 'POS', 'ALT', 'REF')
+      data.table::fwrite(pvar, file = pvarf2 , sep="\t", quote = F)
+    }
+    pvarfout <- pvarf2
+  } else {
+    stop("Unrecognized genotype input format")
+  }
+
+  return(pvarfout)
+}
+
+#' Read .pgen file into R
+#'
+#' @param pgenf .pgen file or .bed file
+#'
+#' @param pvarf .pvar file or .bim file with have proper
+#'  header.  Matching `pgenf`.
+#'
+#' @return  A matrix of allele count for each variant (columns) in each sample
+#'  (rows). ALT allele in pvar file is counted (A1 allele in .bim file is the ALT
+#'   allele).
+#'
+#' @importFrom pgenlibr NewPvar
+#' @importFrom pgenlibr NewPgen
+#' @importFrom tools file_ext file_path_sans_ext
+#'
+prep_pgen <- function(pgenf, pvarf){
+
+  pvar <- pgenlibr::NewPvar(pvarf)
+
+  if (file_ext(pgenf) == "pgen"){
+    pgen <- pgenlibr::NewPgen(pgenf, pvar = pvar)
+
+  } else if (file_ext(pgenf) == "bed"){
+    famf <- paste0(file_path_sans_ext(pgenf), ".fam")
+    fam <- data.table::fread(famf, header = F)
+    raw_s_ct <- nrow(fam)
+    pgen <- pgenlibr::NewPgen(pgenf, pvar = pvar, raw_sample_ct = raw_s_ct)
+
+  } else{
+    stop("unrecognized input")
+  }
+
+  return(pgen)
+}
+
+#' Read pgen file into R
+#'
+#' @param pgen .pgen file or .bed file
+#'
+#' @param variantidx variant index. If NULL, all variants will be extracted.
+#'
+#' @return A matrix, columns are allele count for each SNP, rows are
+#'  for each sample.
+#'
+#' @importFrom pgenlibr GetVariantCt
+#' @importFrom pgenlibr ReadList
+#'
+read_pgen <- function(pgen, variantidx = NULL, meanimpute = F ){
+  if (is.null(variantidx)){
+    variantidx <- 1: pgenlibr::GetVariantCt(pgen)}
+
+  pgenlibr::ReadList(pgen,
+                     variant_subset = variantidx,
+                     meanimpute = meanimpute)
+}
+
+
+#' Read .pvar file into R
+#' @param pvarf .pvar file with proper format: https://www.cog-genomics.org/plink/2.0/formats#pvar
+#'
+#' @return A data.table. variant info
+#'
+read_pvar <- function(pvarf){
+  pvar <- data.table::fread(pvarf, skip = "#CHROM")
+  pvar <- dplyr::rename(pvar, "chrom" = "#CHROM", "pos" = "POS",
+                        "alt" = "ALT", "ref" = "REF", "id" = "ID")
+  pvar <- pvar[, c("chrom", "id", "pos", "alt", "ref")]
+  return(pvar)
+}
+
+#' Read .bim file into R
+#' @param bimf .bim file with proper format: https://www.cog-genomics.org/plink/2.0/formats#bim
+#'
+#' @return A data.table. variant info
+#'
+read_bim <- function(bimf) {
+  bim <- data.table::fread(bimf)
+  colnames(bim) <- c("chr", "id", "cm", "pos", "alt", "ref")
+  return(bim)
+}
+
+#' Read variant information from .pvar or .bim file into R
+#' @param var_info_file .pvar or .bim file with proper format:
+#' .pvar: https://www.cog-genomics.org/plink/2.0/formats#pvar
+#' .bim: https://www.cog-genomics.org/plink/2.0/formats#bim
+#'
+#' @return A data.table. variant info
+#' @importFrom tools file_ext
+#'
+read_var_info <- function(var_info_file){
+  if (file_ext(var_info_file) == "pvar"){
+    var_info <- read_pvar(var_info_file)
+  } else if (file_ext(var_info_file) == "bim"){
+    var_info <- read_bim(var_info_file)
+  } else{
+    stop("unrecognized input")
+  }
+  return(var_info)
+}
+
+#' assign regions to cores
+region2core <- function(region_data, ncore = 1){
+  region_ids <- names(region_data)
+  if (ncore > 1) {
+    d <- cut(1:length(region_ids), ncore, labels = FALSE)
+    corelist <- split(region_ids,d)
+  } else {
+    corelist <- list("1" = region_ids)
+  }
+  return(corelist)
 }
 

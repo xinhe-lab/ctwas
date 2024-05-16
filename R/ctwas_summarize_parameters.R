@@ -51,7 +51,7 @@ summarize_param <- function(param,
                   total_pve = sum(group_pve),
                   attributable_pve = group_pve/sum(group_pve))
 
-  if (isTRUE(plot)){
+  if (plot){
 
     # inclusion plot
     df <- data.frame(niter = rep(1:ncol(group_prior_iters), nrow(group_prior_iters)),
@@ -127,8 +127,7 @@ summarize_param <- function(param,
             legend.text = element_text(size=legend.size)) +
       scale_colour_discrete(drop = FALSE)
 
-    convergence_plot <- cowplot::plot_grid(p_pi, p_sigma2, p_enrich, p_pve)
-    outlist[["convergence_plot"]] <- convergence_plot
+    outlist$convergence_plot <- cowplot::plot_grid(p_pi, p_sigma2, p_enrich, p_pve)
   }
 
   return(outlist)
