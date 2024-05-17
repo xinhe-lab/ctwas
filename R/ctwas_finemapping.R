@@ -51,7 +51,7 @@ finemap_region <- function(region_data,
                            region_id,
                            region_info,
                            weights,
-                           snp_info,
+                           snp_info = NULL,
                            L = 5,
                            group_prior = NULL,
                            group_prior_var = NULL,
@@ -114,8 +114,10 @@ finemap_region <- function(region_data,
     R_s_file <- file.path(cor_dir, paste0("region.", region_id, ".R_snp.RDS"))
   }
 
-  cor_files_exist <- isTRUE(!is.null(cor_dir) && file.exists(R_sg_file) && file.exists(R_g_file) && file.exists(R_s_file))
+  regioninfo <- region_info[which(region_info$region_id == region_id), ]
+  snpinfo <- NULL
 
+  cor_files_exist <- isTRUE(!is.null(cor_dir) && file.exists(R_sg_file) && file.exists(R_g_file) && file.exists(R_s_file))
   if (cor_files_exist && !force_compute_cor) {
     if (verbose){
       loginfo("Load correlation matrices for region %s", region_id)
@@ -138,7 +140,6 @@ finemap_region <- function(region_data,
       loginfo("Compute correlation matrices for region %s", region_id)
     }
     # load LD matrix of the region
-    regioninfo <- region_info[which(region_info$region_id == region_id), ]
     if(!is.character(regioninfo$LD_matrix) || is.null(regioninfo$LD_matrix)){
       stop("LD_matrix in region_info is required for computing correlation matrices")
     }
@@ -153,7 +154,7 @@ finemap_region <- function(region_data,
     # load SNP info of the region
     if (!is.character(regioninfo$SNP_info) || is.null(regioninfo$SNP_info)){
       snpinfo <- snp_info[which(snp_info$region_id == region_id), ]
-    } else{
+    } else {
       snp_info_files <- unlist(strsplit(regioninfo$SNP_info, split = ";"))
       stopifnot(all(file.exists(snp_info_files)))
       snpinfo <- read_snp_info_files(snp_info_files)
@@ -196,9 +197,18 @@ finemap_region <- function(region_data,
                                ...)
 
   # annotate susie result
-  if (isTRUE(annotate_susie_result)) {
+  if (annotate_susie_result) {
     geneinfo <- get_gene_info(weights[gid])
-    snpinfo <- snp_info[which(snp_info$region_id == region_id), ]
+
+    if (is.null(snpinfo)) {
+      if (!is.character(regioninfo$SNP_info) || is.null(regioninfo$SNP_info)){
+        snpinfo <- snp_info[which(snp_info$region_id == region_id), ]
+      } else {
+        snp_info_files <- unlist(strsplit(regioninfo$SNP_info, split = ";"))
+        stopifnot(all(file.exists(snp_info_files)))
+        snpinfo <- read_snp_info_files(snp_info_files)
+      }
+    }
 
     susie_res_df <- anno_susie(susie_res,
                                gid = gid,
@@ -280,7 +290,7 @@ finemap_region <- function(region_data,
 finemap_regions <- function(region_data,
                             region_info,
                             weights,
-                            snp_info,
+                            snp_info = NULL,
                             L = 5,
                             group_prior = NULL,
                             group_prior_var = NULL,
@@ -316,6 +326,11 @@ finemap_regions <- function(region_data,
   }
 
   region_ids <- names(region_data)
+
+  if (!is.null(snp_info)){
+    snp_info <- snp_info[which(snp_info$region_id %in% region_ids), ]
+  }
+
   finemap_region_res_list <- parallel::mclapply(region_ids, function(region_id){
     finemap_region(region_data = region_data,
                    region_id = region_id,

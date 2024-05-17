@@ -22,11 +22,9 @@ compute_gene_z <- function (z_snp, weights, ncore = 1, logfile = NULL){
   if (!is.null(logfile)) {
     addHandler(writeToFile, file = logfile, level = "DEBUG")
   }
-  loginfo("Computing z-scores for %d weights ...", length(weights))
-  loginfo("%d SNPs in z_snp", nrow(z_snp))
+  loginfo("Computing gene z-scores ...")
   weight_snpnames <- unique(unlist(lapply(weights, function(x){rownames(x[["wgt"]])})))
   z_snp <- z_snp[z_snp$id %in% weight_snpnames, c("id", "z")]
-  loginfo("%d SNPs with weights", nrow(z_snp))
 
   z_gene <- parallel::mclapply(names(weights), function(id) {
     wgt <- weights[[id]][["wgt"]]
