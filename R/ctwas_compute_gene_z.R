@@ -15,7 +15,10 @@
 #'
 #' @export
 compute_gene_z <- function (z_snp, weights, ncore = 1, logfile = NULL){
-
+  # check input data
+  if (!is.list(weights)){
+    stop("'weights' should be a list.")
+  }
   if (!is.null(logfile)) {
     addHandler(writeToFile, file = logfile, level = "DEBUG")
   }
@@ -46,7 +49,10 @@ compute_gene_z <- function (z_snp, weights, ncore = 1, logfile = NULL){
 
 #' get gene info from weights
 get_gene_info <- function(weights){
-
+  # check input data
+  if (!is.list(weights)){
+    stop("'weights' should be a list.")
+  }
   gene_info <- lapply(names(weights), function(x){
     as.data.frame(weights[[x]][c("chrom", "p0","p1", "gene_name", "weight_name")])})
   gene_info <- do.call(rbind, gene_info)
@@ -61,6 +67,8 @@ get_gene_info <- function(weights){
 
 #' get regions for each gene
 get_gene_regions <- function(gene_info, region_info){
+
+  gene_info <- gene_info[gene_info$chrom %in% unique(region_info$chrom), , drop=FALSE]
   for (i in 1:nrow(gene_info)) {
     chrom <- gene_info[i, "chrom"]
     p0 <- gene_info[i, "p0"]
