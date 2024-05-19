@@ -82,6 +82,9 @@ preprocess_weights <- function(weight_file,
   weight_table <- loaded_weight$weight_table
   weight_name <- loaded_weight$weight_name
   R_wgt_all <- loaded_weight$R_wgt
+  if(R_wgt_all!=NULL){
+    weight_table <- weight_table[weight_table$gene %in% unique(R_wgt_all$GENE), ] #remove genes without predictdb LD
+  }
   gnames <- unique(weight_table$gene)
   loginfo("Number of genes with weights provided: %d in %s", length(gnames), weight_name)
   # remove variants in weight table, but not in LD reference and GWAS
@@ -101,7 +104,6 @@ preprocess_weights <- function(weight_file,
   pb <- txtProgressBar(min = 0, max = length(gnames), initial = 0, style = 3)
   for (i in 1:length(gnames)){
     gname <- gnames[i]
-    # cat("gname:", gname, "\n")
     wgt <- weight_table[weight_table$gene==gname,]
     wgt.matrix <- as.matrix(wgt[, "weight", drop = F])
     rownames(wgt.matrix) <- wgt$rsid
