@@ -123,6 +123,10 @@ load_weights <- function(weight_file,
           out_table$gene <- gname
           out_table <- out_table[,c("gene","rsid","varID","ref","alt","value")]
           colnames(out_table) <- c("gene","rsid","varID","ref_allele","eff_allele","weight")
+          out_table["abs_weight"] <- abs(out_table$weight)
+          out_table <- out_table[order(-out_table$abs_weight),]
+          out_table <- head(out_table,5) #select the top 5 weight SNPs (largest weights)
+          out_table <- out_table[,c("gene","rsid","varID","ref_allele","eff_allele","weight")]
           out_table
         }
       }
