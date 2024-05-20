@@ -23,12 +23,13 @@
 #' @param drop_strand_ambig TRUE/FALSE, if TRUE remove strand ambiguous variants (A/T, G/C).
 #'
 #' @param method_FUSION a string, specifying the method to choose in FUSION models
-#' 
+#'
 #' @param genome_version a string, specifying the genome version of FUSION models
 #'
 #' @param logfile the log file, if NULL will print log info on screen.
 #'
 #' @importFrom logging addHandler loginfo writeToFile
+#' @importFrom foreach %dopar% foreach
 #'
 #' @return a list of processed weights
 #'
@@ -49,22 +50,13 @@ preprocess_weights <- function(weight_file,
                                method_FUSION = c("lasso","enet","top1","blup"),
                                genome_version = c("b38","b37"),
                                logfile = NULL){
-
-<<<<<<< multigroup_test
+  if (!is.null(logfile)) {
+    addHandler(writeToFile, file = logfile, level = "DEBUG")
+  }
   # check input arguments
   weight_format <- match.arg(weight_format)
   method_FUSION <- match.arg(method_FUSION)
   genome_version <- match.arg(genome_version)
-
-=======
->>>>>>> no_LD_test
-  if (!is.null(logfile)) {
-    addHandler(writeToFile, file = logfile, level = "DEBUG")
-  }
-
-  # check input arguments
-  weight_format <- match.arg(weight_format)
-  method_FUSION <- match.arg(method_FUSION)
 
   if (length(weight_file) > 1) {
     stop("Please provide only one weight file in weight_file.")
