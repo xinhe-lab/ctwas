@@ -20,6 +20,8 @@
 #' @param drop_strand_ambig TRUE/FALSE, if TRUE remove strand ambiguous variants (A/T, G/C).
 #'
 #' @param method_FUSION a string, specifying the method to choose in FUSION models
+#' 
+#' @param genome_version a string, specifying the genome version of FUSION models
 #'
 #' @param logfile the log file, if NULL will print log info on screen.
 #'
@@ -41,11 +43,13 @@ preprocess_weights <- function(weight_file,
                                filter_protein_coding_genes = FALSE,
                                load_predictdb_LD = FALSE,
                                method_FUSION = c("lasso","enet","top1","blup"),
+                               genome_version = c("b38","b37"),
                                logfile = NULL){
 
   # check input arguments
   weight_format <- match.arg(weight_format)
   method_FUSION <- match.arg(method_FUSION)
+  genome_version <- match.arg(genome_version)
 
   if (!is.null(logfile)) {
     addHandler(writeToFile, file = logfile, level = "DEBUG")
@@ -78,6 +82,7 @@ preprocess_weights <- function(weight_file,
                                 filter_protein_coding_genes = filter_protein_coding_genes,
                                 load_predictdb_LD = load_predictdb_LD,
                                 method_FUSION = method_FUSION,
+                                genome_version = genome_version,
                                 ncore=ncore)
   weight_table <- loaded_weight$weight_table
   weight_name <- loaded_weight$weight_name
