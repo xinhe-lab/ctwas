@@ -82,7 +82,7 @@ preprocess_weights <- function(weight_file,
   weight_table <- loaded_weight$weight_table
   weight_name <- loaded_weight$weight_name
   R_wgt_all <- loaded_weight$R_wgt
-  if(R_wgt_all!=NULL){
+  if(!is.null(R_wgt_all)){
     weight_table <- weight_table[weight_table$gene %in% unique(R_wgt_all$GENE), ] #remove genes without predictdb LD
   }
   gnames <- unique(weight_table$gene)
