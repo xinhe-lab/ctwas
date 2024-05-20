@@ -3,11 +3,14 @@
 #' @param z_snp A data frame with four columns: "id", "A1", "A2", "z".
 #' giving the z scores for snps. "A1" is effect allele. "A2" is the other allele.
 #'
-#' @param weights a list of weights
-#'
-#' @param z_gene A data frame with columns: "id", "z", giving the z-scores for genes.
+#' @param weights a list of prediction weights
 #'
 #' @param region_info a data frame of region definition and associated LD file names
+#'
+#' @param snp_info a data frame, SNP info for LD reference,
+#'  with columns "chrom", "id", "pos", and "region_id".
+#'
+#' @param z_gene A data frame with columns: "id", "z", giving the z-scores for genes.
 #'
 #' @param niter_prefit the number of iterations of the E-M algorithm to perform during the initial parameter estimation step
 #'
@@ -65,7 +68,8 @@
 #'
 #' @importFrom logging addHandler loginfo writeToFile
 #'
-#' @return a list of estimated parameters, fine-mapping results, boundary genes, z_gene, and region_data
+#' @return a list of estimated parameters, fine-mapping results, boundary genes,
+#' z_gene, region_data, and screened_region_data
 #'
 #' @export
 #'
@@ -73,6 +77,7 @@ ctwas_sumstats <- function(
     z_snp,
     weights,
     region_info,
+    snp_info,
     z_gene = NULL,
     thin = 0.1,
     niter_prefit = 3,
@@ -120,6 +125,7 @@ ctwas_sumstats <- function(
                                           z_snp,
                                           z_gene,
                                           weights,
+                                          snp_info,
                                           thin = thin,
                                           maxSNP = maxSNP,
                                           trim_by = "random",
@@ -143,6 +149,7 @@ ctwas_sumstats <- function(
                      niter = niter,
                      p_single_effect = p_single_effect,
                      ncore = ncore,
+                     verbose = verbose,
                      ...)
   group_prior <- param$group_prior
   group_prior_var <- param$group_prior_var
@@ -154,34 +161,33 @@ ctwas_sumstats <- function(
   #. fine-map all regions with thinned SNPs
   #. select regions with strong non-SNP signals
   screen_regions_res <- screen_regions(region_data,
-                                         region_info,
-                                         weights,
-                                         group_prior = group_prior,
-                                         group_prior_var = group_prior_var,
-                                         L = L,
-                                         minvar = 2,
-                                         mingene = 1,
-                                         min_nonSNP_PIP = min_nonSNP_PIP,
-                                         ncore = ncore,
-                                         verbose = verbose,
-                                         ...)
+                                       region_info,
+                                       weights,
+                                       snp_info,
+                                       group_prior = group_prior,
+                                       group_prior_var = group_prior_var,
+                                       L = L,
+                                       min_nonSNP_PIP = min_nonSNP_PIP,
+                                       ncore = ncore,
+                                       verbose = verbose,
+                                       ...)
   screened_region_data <- screen_regions_res$screened_region_data
   region_nonSNP_PIP_df <- screen_regions_res$region_nonSNP_PIP_df
 
   # Expand screened region_data with all SNPs in the regions
   if (thin < 1){
     screened_region_data <- expand_region_data(screened_region_data,
-                                               region_info,
+                                               snp_info,
                                                z_snp,
                                                z_gene,
                                                trim_by = "z",
                                                maxSNP = maxSNP,
                                                ncore = ncore)
-    # update data in screened regions with screened_region_data (full SNPs)
-    region_data[names(screened_region_data)] <- screened_region_data
-    if (!is.null(outputdir)) {
-      saveRDS(region_data, file.path(outputdir, paste0(outname, ".region_data.RDS")))
-    }
+    # # update data in screened regions with screened_region_data (full SNPs)
+    # region_data[screened_region_ids] <- screened_region_data
+    # if (!is.null(outputdir)) {
+    #   saveRDS(region_data, file.path(outputdir, paste0(outname, ".region_data.RDS")))
+    # }
   }
   if (!is.null(outputdir)) {
     saveRDS(screened_region_data, file.path(outputdir, paste0(outname, ".screened_region_data.RDS")))
@@ -193,6 +199,7 @@ ctwas_sumstats <- function(
     finemap_res <- finemap_regions(screened_region_data,
                                    region_info,
                                    weights,
+                                   snp_info,
                                    group_prior = group_prior,
                                    group_prior_var = group_prior_var,
                                    L = L,
@@ -216,7 +223,8 @@ ctwas_sumstats <- function(
               "finemap_res" = finemap_res,
               "boundary_genes" = boundary_genes,
               "z_gene" = z_gene,
-              "region_data" = region_data))
+              "region_data" = region_data,
+              "screened_region_data" = screened_region_data))
 
 }
 

@@ -240,6 +240,7 @@ get_merged_region_info <- function(boundary_genes, region_info){
 merge_region_data <- function(boundary_genes,
                               region_data,
                               region_info,
+                              snp_info,
                               z_snp,
                               z_gene,
                               expand = TRUE,
@@ -254,9 +255,11 @@ merge_region_data <- function(boundary_genes,
   merged_region_info <- res$merged_region_info
   merge_region_id_list <- res$merge_region_id_list
 
+  # remap SNP info for merged regions
+  merged_snp_info <- map_snp_info_regions(merged_region_info, snp_info, ncore = ncore)
+
   # Merge region data
   loginfo("Merging region_data ...")
-
   merged_region_data <- list()
   for (i in 1:nrow(merged_region_info)){
     merged_regioninfo <- merged_region_info[i,]
@@ -284,27 +287,30 @@ merge_region_data <- function(boundary_genes,
   }
   loginfo("%d regions in merged_region_data", length(merged_region_data))
 
-  if (isTRUE(expand)){
-    loginfo("Expand region_data with full SNPs for %d merged regions", length(merged_region_data))
+  if (expand) {
+    # expand with full SNPs
     merged_region_data <- expand_region_data(merged_region_data,
-                                             merged_region_info,
+                                             merged_snp_info,
                                              z_snp,
                                              z_gene,
                                              trim_by = "z",
                                              maxSNP = maxSNP,
                                              ncore = ncore)
-  }else{
-    # trim regions with SNPs more than maxSNP
-    merged_region_data <- trim_region_data(merged_region_data, z_snp, trim_by = trim_by, maxSNP = maxSNP, seed = seed)
+  }
 
-    # add z-scores to region_data
-    loginfo("Add z-scores to region_data...")
+  # trim regions with SNPs more than maxSNP
+  merged_region_data <- trim_region_data(merged_region_data, z_snp, trim_by = trim_by, maxSNP = maxSNP, seed = seed)
+
+  # add z-scores to region_data
+  if (add_z) {
+    loginfo("Adding z-scores to region_data ...")
     merged_region_data <- add_z_to_region_data(merged_region_data, z_snp, z_gene, ncore = ncore)
   }
 
   return(list(merged_region_data = merged_region_data,
               merged_region_info = merged_region_info,
-              merge_region_id_list = merge_region_id_list))
+              merge_region_id_list = merge_region_id_list,
+              merged_snp_info = merged_snp_info))
 
 }
 

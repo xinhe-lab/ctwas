@@ -8,6 +8,7 @@ finemap_regions(
   region_data,
   region_info,
   weights,
+  snp_info,
   L = 5,
   group_prior = NULL,
   group_prior_var = NULL,
@@ -18,7 +19,7 @@ finemap_regions(
   ncore = 1,
   force_compute_cor = FALSE,
   save_cor = FALSE,
-  cor_dir = getwd(),
+  cor_dir = NULL,
   annotate_susie_result = TRUE,
   verbose = FALSE,
   logfile = NULL,
@@ -31,6 +32,9 @@ finemap_regions(
 \item{region_info}{a data frame of region definition and associated LD file names}
 
 \item{weights}{a list of weights for each gene}
+
+\item{snp_info}{a data frame, SNP info for LD reference,
+with columns "chrom", "id", "pos", and "region_id".}
 
 \item{L}{the number of effects for susie during the fine mapping steps}
 

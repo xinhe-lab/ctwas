@@ -4,7 +4,10 @@
 #'
 #' @param region_info a data frame of region definition and associated LD file names
 #'
-#' @param weights a list of weights
+#' @param weights a list of weights for each gene
+#'
+#' @param snp_info a data frame, SNP info for LD reference,
+#'  with columns "chrom", "id", "pos", and "region_id".
 #'
 #' @param group_prior a vector of two prior inclusion probabilities for SNPs and genes.
 #'
@@ -37,6 +40,7 @@ screen_regions <- function(
     region_data,
     region_info,
     weights,
+    snp_info,
     group_prior = NULL,
     group_prior_var = NULL,
     L = 5,
@@ -96,6 +100,7 @@ screen_regions <- function(
   finemap_screening_res <- finemap_regions(region_data,
                                            region_info,
                                            weights,
+                                           snp_info,
                                            L = L,
                                            group_prior = group_prior,
                                            group_prior_var = group_prior_var,
@@ -105,15 +110,35 @@ screen_regions <- function(
                                            ...)
 
   # select regions based on total non-SNP PIP of the region
-  loginfo("Computing non-SNP PIPs ...")
+  loginfo("Computing non-SNP PIPs for the regions ...")
   region_nonSNP_PIP_df <- compute_region_nonSNP_PIPs(finemap_screening_res)
-
-  loginfo("Select regions with non-SNP PIP >= %s", min_nonSNP_PIP)
   screened_region_ids <- region_nonSNP_PIP_df$region_id[region_nonSNP_PIP_df$nonSNP_PIP >= min_nonSNP_PIP]
   screened_region_data <- region_data[screened_region_ids]
-  loginfo("Number of regions selected: %d", length(screened_region_data))
+  loginfo("Selected %d regions with non-SNP PIP >= %s", length(screened_region_data), min_nonSNP_PIP)
+
+  region_nonSNP_PIP_df <- region_nonSNP_PIP_df[order(region_nonSNP_PIP_df$nonSNP_PIP, decreasing = T), ]
 
   return(list(screened_region_data = screened_region_data,
               region_nonSNP_PIP_df = region_nonSNP_PIP_df))
+}
+
+
+#' Compute non-SNP PIPs for regions
+#'
+#' @param finemap_res a data frame of finemapping result
+#'
+#' @export
+compute_region_nonSNP_PIPs <- function(finemap_res){
+  region_ids <- unique(finemap_res$region_id)
+  if (length(region_ids) == 0) {
+    stop("no region_ids in finemap_res!")
+  }
+  nonSNP_PIPs <- sapply(region_ids, function(x){
+    finemap_region_res <- finemap_res[finemap_res$region_id == x,]
+    nonSNP_PIP <- sum(finemap_region_res$susie_pip[finemap_region_res$type != "SNP"])
+    nonSNP_PIP[is.na(nonSNP_PIP)] <- 0 # 0 if nonSNP_PIP is NA
+    nonSNP_PIP
+  })
+  return(data.frame(region_id = region_ids, nonSNP_PIP = nonSNP_PIPs))
 }
 

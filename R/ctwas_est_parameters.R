@@ -60,9 +60,9 @@ est_param <- function(
     addHandler(writeToFile, file= logfile, level='DEBUG')
   }
 
-  loginfo('Estimating parameters ... ')
-
   group_prior_var_structure <- match.arg(group_prior_var_structure)
+
+  loginfo('Estimating parameters ... ')
 
   # extract thin value from region_data
   thin <- unique(sapply(region_data, "[[", "thin"))
@@ -121,7 +121,6 @@ est_param <- function(
 
   # Run EM for more (niter) iterations, getting rough estimates
   loginfo("Run EM for %d iterations, getting accurate estimates ...", niter)
-
   EM_res <- EM_est_param(selected_region_data,
                          niter = niter,
                          init_group_prior = EM_prefit_res$group_prior,
@@ -142,10 +141,12 @@ est_param <- function(
   group_prior_var_iters <- EM_res$group_prior_var_iters
 
   # adjust parameters to account for thin
-  loginfo("Adjust parameters to account for thin (thin = %s)", thin)
-  group_prior["SNP"] <- group_prior["SNP"] * thin
-  group_prior_iters["SNP",] <- group_prior_iters["SNP",] * thin
-  group_size["SNP"] <- group_size["SNP"]/thin
+  if (thin != 1){
+    loginfo("Adjust parameters to account for thin (thin = %s)", thin)
+    group_prior["SNP"] <- group_prior["SNP"] * thin
+    group_prior_iters["SNP",] <- group_prior_iters["SNP",] * thin
+    group_size["SNP"] <- group_size["SNP"]/thin
+  }
   group_size <- group_size[names(group_prior)]
   loginfo("Estimated group_prior {%s}: {%s}", names(group_prior), format(group_prior, digits = 4))
   loginfo("Estimated group_prior_var {%s}: {%s}", names(group_prior_var), format(group_prior_var, digits = 4))
@@ -161,4 +162,21 @@ est_param <- function(
   return(param)
 }
 
+
+#' Select single effect regions
+compute_region_p_single_effect <- function(region_data, group_prior){
+  region_ids <- names(region_data)
+  if (length(region_ids) == 0) {
+    stop("no region_ids in region_data!")
+  }
+  p_single_effect <- sapply(region_ids, function(x){
+    group_size <- table(region_data[[x]][["gs_group"]])
+    group_size <- group_size[names(group_prior)]
+    group_size[is.na(group_size)] <- 0
+    p1 <- prod((1-group_prior)^group_size) * (1 + sum(group_size*(group_prior/(1-group_prior))))
+    p1
+  })
+  return(data.frame(region_id = region_ids, p_single_effect = p_single_effect))
+
+}
 

@@ -8,6 +8,7 @@ screen_regions(
   region_data,
   region_info,
   weights,
+  snp_info,
   group_prior = NULL,
   group_prior_var = NULL,
   L = 5,
@@ -25,7 +26,10 @@ screen_regions(
 
 \item{region_info}{a data frame of region definition and associated LD file names}
 
-\item{weights}{a list of weights}
+\item{weights}{a list of weights for each gene}
+
+\item{snp_info}{a data frame, SNP info for LD reference,
+with columns "chrom", "id", "pos", and "region_id".}
 
 \item{group_prior}{a vector of two prior inclusion probabilities for SNPs and genes.}
 
