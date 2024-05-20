@@ -24,7 +24,9 @@
 #'
 #' @param method_FUSION a string, specifying the method to choose in FUSION models
 #'
-#' @param genome_version a string, specifying the genome version of FUSION models
+#' @param fusion_genome_version a string, specifying the genome version of FUSION models
+#' 
+#' @param fusion_top_n_snps a number, specifying the top n weight SNPs included in FUSION models. If NULL, using all weight SNPs
 #'
 #' @param logfile the log file, if NULL will print log info on screen.
 #'
@@ -48,7 +50,8 @@ preprocess_weights <- function(weight_file,
                                filter_protein_coding_genes = FALSE,
                                load_predictdb_LD = FALSE,
                                method_FUSION = c("lasso","enet","top1","blup"),
-                               genome_version = c("b38","b37"),
+                               fusion_genome_version = c("b38","b37"),
+                               fusion_top_n_snps = NULL,
                                logfile = NULL){
   if (!is.null(logfile)) {
     addHandler(writeToFile, file = logfile, level = "DEBUG")
@@ -56,7 +59,7 @@ preprocess_weights <- function(weight_file,
   # check input arguments
   weight_format <- match.arg(weight_format)
   method_FUSION <- match.arg(method_FUSION)
-  genome_version <- match.arg(genome_version)
+  fusion_genome_version <- match.arg(fusion_genome_version)
 
   if (length(weight_file) > 1) {
     stop("Please provide only one weight file in weight_file.")
@@ -89,7 +92,7 @@ preprocess_weights <- function(weight_file,
                                 filter_protein_coding_genes = filter_protein_coding_genes,
                                 load_predictdb_LD = load_predictdb_LD,
                                 method_FUSION = method_FUSION,
-                                genome_version = genome_version,
+                                fusion_genome_version = fusion_genome_version,
                                 ncore=ncore)
   weight_table <- loaded_weight$weight_table
   weight_name <- loaded_weight$weight_name
@@ -139,9 +142,10 @@ preprocess_weights <- function(weight_file,
                        stringsAsFactors = F)
 
     w <- harmonize_weights(wgt.matrix,
-                          snps,
-                          snp_info_wgt,
-                          drop_strand_ambig = drop_strand_ambig)
+                           snps,
+                           snp_info_wgt,
+                           drop_strand_ambig = drop_strand_ambig)
+
     wgt.matrix <- w[["wgt"]]
     snps <- w[["snps"]]
     wgt.matrix <- wgt.matrix[abs(wgt.matrix[, "weight"]) > 0, , drop = F]
@@ -150,7 +154,18 @@ preprocess_weights <- function(weight_file,
     snpnames <- intersect(rownames(wgt.matrix), snp_info_wgt$id)
     wgt.idx <- match(snpnames, rownames(wgt.matrix))
     wgt <- wgt.matrix[wgt.idx, "weight", drop = F]
+    wgt <- as.data.frame(wgt)
 
+    if (weight_format == "FUSION"){
+      wgt[,"abs_weight"] <- abs(wgt$weight)
+      wgt <- wgt[order(-wgt$abs_weight),]
+      if(!is.null(fusion_top_n_snps)){
+        wgt <- head(wgt,fusion_top_n_snps)
+      }
+      wgt <- wgt[,"weight",drop=F]
+      snpnames <- intersect(rownames(wgt), snp_info_wgt$id)
+    }
+   
     snps.idx <- match(snpnames, snps$id)
     snps <- snps[snps.idx,]
 
@@ -159,7 +174,7 @@ preprocess_weights <- function(weight_file,
       wgt <- wgt*sqrt(snp_info_wgt$variance[snp_info_wgt.idx])
     }
 
-    n_wgt <- nrow(wgt.matrix)
+    n_wgt <- nrow(wgt)
 
     if(n_wgt>0){
       p0 <- min(snps[snps[, "id"] %in% snpnames, "pos"])

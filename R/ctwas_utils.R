@@ -29,7 +29,7 @@ read_snp_info_files <- function(files){
 #'
 #' @param method_FUSION a string, specifying the method to choose in FUSION models
 #' 
-#' @param genome_version a string, specifying the genome version of FUSION models
+#' @param fusion_genome_version a string, specifying the genome version of FUSION models
 #'
 #' @param ncore integer, number of cores for parallel computing.
 #'
@@ -44,12 +44,12 @@ load_weights <- function(weight_file,
                          filter_protein_coding_genes = FALSE,
                          load_predictdb_LD = FALSE,
                          method_FUSION = c("lasso","enet","top1","blup"),
-                         genome_version = c("b38","b37"),
+                         fusion_genome_version = c("b38","b37"),
                          ncore = 1){
 
   weight_format <- match.arg(weight_format)
   method_FUSION <- match.arg(method_FUSION)
-  genome_version <- match.arg(genome_version)
+  fusion_genome_version <- match.arg(fusion_genome_version)
   stopifnot(file.exists(weight_file))
 
   if(weight_format == "PredictDB"){
@@ -98,9 +98,9 @@ load_weights <- function(weight_file,
         gname <- wgtpos[i, "ID"]
         colnames(snps) <- c("chrom", "rsid", "cm", "pos", "alt", "ref")
         snps[is.na(snps$rsid),"rsid"] <- paste0("chr",snps[is.na(snps$rsid),"chrom"],"_",snps[is.na(snps$rsid),"pos"],
-                                                "_",snps[is.na(snps$rsid),"ref"], "_",snps[is.na(snps$rsid),"alt"],"_",genome_version)
+                                                "_",snps[is.na(snps$rsid),"ref"], "_",snps[is.na(snps$rsid),"alt"],"_",fusion_genome_version)
 
-        snps[,"varID"] <- paste0("chr",snps[,"chrom"],"_",snps[,"pos"],"_",snps[,"ref"],"_",snps[,"alt"],"_",genome_version)
+        snps[,"varID"] <- paste0("chr",snps[,"chrom"],"_",snps[,"pos"],"_",snps[,"ref"],"_",snps[,"alt"],"_",fusion_genome_version)
 
         rownames(wgt.matrix) <- snps$rsid
         g.method <- method_FUSION
@@ -118,10 +118,6 @@ load_weights <- function(weight_file,
           out_table$gene <- gname
           out_table <- out_table[,c("gene","rsid","varID","ref","alt","value")]
           colnames(out_table) <- c("gene","rsid","varID","ref_allele","eff_allele","weight")
-          out_table["abs_weight"] <- abs(out_table$weight)
-          out_table <- out_table[order(-out_table$abs_weight),]
-          out_table <- head(out_table,5) #select the top 5 weight SNPs (largest weights)
-          out_table <- out_table[,c("gene","rsid","varID","ref_allele","eff_allele","weight")]
           out_table
         }
       }
