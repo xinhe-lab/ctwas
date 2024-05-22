@@ -2,12 +2,13 @@
 #'
 #' @param region_data a list object indexing regions, variants and genes.
 #'
-#' @param region_info a data frame of region definition and associated LD file names
+#' @param use_LD TRUE/FALSE. If TRUE, use LD for finemapping. Otherwise, use "no-LD" version.
+#'
+#' @param LD_info a list of paths to LD matrices for each of the regions. Required when \code{use_LD = TRUE}.
+#'
+#' @param snp_info a list of SNP info data frames for LD reference. Required when \code{use_LD = TRUE}.
 #'
 #' @param weights a list of weights for each gene
-#'
-#' @param snp_info a data frame, SNP info for LD reference,
-#'  with columns "chrom", "id", "pos", and "region_id".
 #'
 #' @param group_prior a vector of two prior inclusion probabilities for SNPs and genes.
 #'
@@ -38,9 +39,10 @@
 #'
 screen_regions <- function(
     region_data,
-    region_info,
-    weights,
-    snp_info,
+    use_LD = TRUE,
+    LD_info = NULL,
+    snp_info = NULL,
+    weights = NULL,
     group_prior = NULL,
     group_prior_var = NULL,
     L = 5,
@@ -68,6 +70,13 @@ screen_regions <- function(
 
   if (thin <= 0 || thin > 1){
     stop("thin value needs to be in (0,1]")
+  }
+
+  if (!use_LD) {
+    if (L != 1){
+      warning("L has to be 1 for no-LD version. Set L = 1")
+      L <- 1
+    }
   }
 
   # adjust to account for thin argument
@@ -98,13 +107,14 @@ screen_regions <- function(
   # run finemapping for all regions containing thinned SNPs
   loginfo("Run initial screening for %d regions ...", length(region_data))
   finemap_screening_res <- finemap_regions(region_data,
-                                           region_info,
-                                           weights,
-                                           snp_info,
+                                           use_LD = use_LD,
+                                           LD_info = LD_info,
+                                           snp_info = snp_info,
+                                           weights = weights,
                                            L = L,
                                            group_prior = group_prior,
                                            group_prior_var = group_prior_var,
-                                           annotate_susie_result = FALSE,
+                                           include_cs_index = FALSE,
                                            ncore = ncore,
                                            verbose = verbose,
                                            ...)
