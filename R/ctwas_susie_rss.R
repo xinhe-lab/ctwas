@@ -36,6 +36,7 @@ ctwas_susie_rss <- function(z,
   return(susie_res)
 }
 
+
 #' annotate susie results with SNP and gene information
 anno_susie <- function(susie_res,
                        gid,
@@ -45,29 +46,11 @@ anno_susie <- function(susie_res,
                        g_type = "gene",
                        g_context = "gene",
                        g_group = "gene",
-                       geneinfo = NULL,
-                       snpinfo = NULL,
                        include_cs_index = TRUE) {
 
-  if (!is.null(geneinfo)) {
-    gidx <- match(gid, geneinfo$id)
-    gene_anno <- data.frame(geneinfo[gidx,  c("chrom", "p0", "id")],
-                            type = g_type, context = g_context, group = g_group)
-    colnames(gene_anno) <-  c("chrom", "pos", "id", "type", "context", "group")
-  } else {
-    gene_anno <- data.frame(id = gid, type = g_type, context = g_context, group = g_group)
-  }
-
-  if (!is.null(snpinfo)) {
-    sidx <- match(sid, snpinfo$id)
-    snp_anno <- data.frame(snpinfo[sidx, c("chrom", "pos", "id")],
-                           type = "SNP", context = "SNP", group = "SNP")
-    colnames(snp_anno) <-  c("chrom", "pos", "id", "type", "context", "group")
-  } else {
-    snp_anno <- data.frame(id = sid, type = "SNP", context = "SNP", group = "SNP")
-  }
-
-  susie_res_df <- as.data.frame(rbind(gene_anno, snp_anno))
+  gene_df <- data.frame(id = gid, type = g_type, context = g_context, group = g_group)
+  snp_df <- data.frame(id = sid, type = "SNP", context = "SNP", group = "SNP")
+  susie_res_df <- rbind(gene_df, snp_df)
 
   if (!is.null(z)) {
     susie_res_df$z <- z

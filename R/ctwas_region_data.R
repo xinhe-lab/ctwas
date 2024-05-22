@@ -6,10 +6,9 @@
 #'
 #' @param z_gene A data frame with columns: "id", "z", giving the z-scores for genes.
 #'
-#' @param weights a list of weights
+#' @param weights a list of preprocessed weights.
 #'
-#' @param snp_info a data frame, SNP info for LD reference,
-#'  with required columns "chrom", "id", "pos", and "region_id".
+#' @param snp_info a list of SNP info data frames for LD reference.
 #'
 #' @param thin The proportion of SNPs to be used for the parameter estimation and
 #' initial screening region steps.
@@ -58,26 +57,28 @@ assemble_region_data <- function(region_info,
   trim_by <- match.arg(trim_by)
 
   if (!is.list(weights)){
-    stop("'weights' should be a list.")
+    stop("'weights' should be a list object.")
   }
 
-  snp_info <- snp_info[which(snp_info$region_id %in% region_info$region_id), ]
+  if (thin > 1 | thin <= 0){
+    stop("thin needs to be in (0,1]")
+  }
 
-  # The LD reference SNP info here needs to contain "region_id"
-  target_header <- c("chrom", "id", "pos", "region_id")
+  # Check LD reference SNP info
+  if (class(snp_info) == "list") {
+    snp_info <- as.data.frame(data.table::rbindlist(snp_info, idcol = "region_id"))
+  }
+  target_header <- c("chrom", "id", "pos", "alt", "ref", "region_id")
   if (!all(target_header %in% colnames(snp_info))){
     stop("SNP info needs to contain the following columns: ",
          paste(target_header, collapse = " "))
   }
 
   # begin assembling region_data
+  region_ids <- region_info$region_id
   loginfo("Assembling region_data ...")
-  loginfo("Number of regions in total: %d", nrow(region_info))
+  loginfo("Number of regions in total: %d", length(region_ids))
   loginfo("thin = %s", thin)
-
-  if (thin > 1 | thin <= 0){
-    stop("thin needs to be in (0,1]")
-  }
 
   region_info <- region_info[order(region_info$chrom, region_info$start),]
 
@@ -94,8 +95,8 @@ assemble_region_data <- function(region_info,
     # select genes in the chromosome
     geneinfo <- gene_info[gene_info$chrom == b, ]
 
-    # read SNP info in the regions
-    snpinfo <- snp_info[snp_info$region_id %in% regioninfo$region_id, ]
+    # read SNP info in the chromosome
+    snpinfo <- snp_info[snp_info$chrom == b, ]
 
     # select SNPs
     snpinfo$keep <- rep(1, nrow(snpinfo))
@@ -110,7 +111,9 @@ assemble_region_data <- function(region_info,
     }
 
     # get region_data for the chromosome
-    region_data_chr <- assign_region_ids(regioninfo, geneinfo, snpinfo,
+    region_data_chr <- assign_region_ids(regioninfo,
+                                         geneinfo,
+                                         snpinfo,
                                          thin = thin,
                                          thin_gwas_snps = thin_gwas_snps,
                                          seed = seed)
@@ -126,7 +129,7 @@ assemble_region_data <- function(region_info,
     rownames(boundary_genes) <- NULL
     loginfo("Number of boundary genes: %d", nrow(boundary_genes))
     if (nrow(boundary_genes) > 0) {
-      region_data <- adjust_boundary_genes(boundary_genes, snp_info, weights, region_data)
+      region_data <- adjust_boundary_genes(boundary_genes, weights, region_data, snp_info)
     }
   }else{
     boundary_genes <- NULL
@@ -281,18 +284,24 @@ add_z_to_region_data <- function(region_data,
 }
 
 #' Adjust region_data for boundary genes
-adjust_boundary_genes <- function(boundary_genes, snp_info, weights, region_data){
+adjust_boundary_genes <- function(boundary_genes,
+                                  weights,
+                                  region_data,
+                                  snp_info){
   logging::loginfo("Adjusting for boundary genes ...")
-
-  # Check LD reference SNP info, needs to contain "region_id"
-  target_header <- c("chrom", "id", "pos", "region_id")
-  if (!all(target_header %in% colnames(snp_info))){
-    stop("The LD reference SNP info needs to contain the following columns: ",
-         paste(target_header, collapse = " "))
-  }
 
   if (!is.list(weights)){
     stop("'weights' should be a list.")
+  }
+
+  # Check LD reference SNP info
+  if (class(snp_info) == "list") {
+    snp_info <- as.data.frame(data.table::rbindlist(snp_info, idcol = "region_id"))
+  }
+  target_header <- c("chrom", "id", "pos", "alt", "ref", "region_id")
+  if (!all(target_header %in% colnames(snp_info))){
+    stop("SNP info needs to contain the following columns: ",
+         paste(target_header, collapse = " "))
   }
 
   for (i in 1:nrow(boundary_genes)){
@@ -300,8 +309,8 @@ adjust_boundary_genes <- function(boundary_genes, snp_info, weights, region_data
     region_ids <- unlist(strsplit(boundary_genes[i, "region_id"], split = ";"))
     wgt <- weights[[gname]][["wgt"]]
 
-    region_r2 <- sapply(region_ids, function(region_id){
-      snpinfo <- snp_info[which(snp_info$region_id == region_id), ]
+    region_r2 <- sapply(region_ids, function(x){
+      snpinfo <- snp_info[snp_info$region_id == x, ]
       sum(wgt[which(rownames(wgt) %in% snpinfo$id)]^2)
     })
 
@@ -321,8 +330,7 @@ adjust_boundary_genes <- function(boundary_genes, snp_info, weights, region_data
 #'
 #' @param region_data a list of region gene IDs and SNP IDs and associated file names
 #'
-#' @param snp_info a data frame, SNP info for LD reference,
-#'  with required columns "chrom", "id", "pos", and "region_id".
+#' @param snp_info a list of SNP info data frames for LD reference.
 #'
 #' @param z_snp A data frame with columns: "id", "z", giving the z-scores for SNPs.
 #'
@@ -359,31 +367,29 @@ expand_region_data <- function(region_data,
   # check arguments
   trim_by <- match.arg(trim_by)
 
-  region_ids <- names(region_data)
+  # update SNP IDs for each region
+  thin <- sapply(region_data, "[[", "thin")
+  loginfo("Expanding %d regions with full SNPs ...", length(which(thin < 1)))
 
-  snp_info <- snp_info[which(snp_info$region_id %in% region_ids), ]
-
-  # The SNP info needs to contain "region_id"
-  target_header <- c("chrom", "id", "pos", "region_id")
+  # Check LD reference SNP info
+  if (class(snp_info) == "list") {
+    snp_info <- as.data.frame(data.table::rbindlist(snp_info, idcol = "region_id"))
+  }
+  target_header <- c("chrom", "id", "pos", "alt", "ref", "region_id")
   if (!all(target_header %in% colnames(snp_info))){
     stop("SNP info needs to contain the following columns: ",
          paste(target_header, collapse = " "))
   }
 
-  if (!all(region_ids %in% snp_info$region_id)){
-    stop("Not all regions in region_data are included in 'snp_info'.")
-  }
-
-  # update SNP IDs for each region
-  thin <- sapply(region_data, "[[", "thin")
-  loginfo("Expanding %d regions with full SNPs ...", length(which(thin < 1)))
-
+  region_ids <- names(region_data)
   region_data <- parallel::mclapply(region_ids, function(region_id){
     # add z-scores and types of the region to the region_data
     regiondata <- region_data[[region_id]]
     if (regiondata[["thin"]] < 1){
+
       # load all SNPs in the region
-      snpinfo <- snp_info[which(snp_info$region_id == region_id), ]
+      snpinfo <- snp_info[snp_info$region_id == region_id, ]
+
       # update sid in the region
       snpinfo$keep <- rep(1, nrow(snpinfo))
       # remove SNPs not in z_snp

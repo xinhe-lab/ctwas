@@ -7,8 +7,8 @@
 #'
 #' @param gwas_snp_ids a vector of SNP IDs in GWAS summary statistics (z_snp$id).
 #'
-#' @param snp_info a data frame, SNP info for LD reference,
-#'  with columns "chrom", "id", "pos", "alt", "ref".
+#' @param snp_info a list of SNP info data frames for LD reference,
+#'  with columns "chrom", "id", "pos", "alt", "ref", and "region_id".
 #'
 #' @param type a string, specifying QTL type of each weight file, e.g. expression, splicing, protein.
 #'
@@ -27,6 +27,7 @@
 #' @param logfile the log file, if NULL will print log info on screen.
 #'
 #' @importFrom logging addHandler loginfo writeToFile
+#' @importFrom foreach %dopar% foreach
 #'
 #' @return a list of processed weights
 #'
@@ -55,12 +56,17 @@ preprocess_weights <- function(weight_file,
   weight_format <- match.arg(weight_format)
   method_FUSION <- match.arg(method_FUSION)
 
+  loginfo("Load weight: %s", weight_file)
+
   if (length(weight_file) > 1) {
     stop("Please provide only one weight file in weight_file.")
   }
   stopifnot(file.exists(weight_file))
 
   # Check LD reference SNP info
+  if (class(snp_info) == "list") {
+    snp_info <- as.data.frame(data.table::rbindlist(snp_info, idcol = "region_id"))
+  }
   target_header <- c("chrom", "id", "pos", "alt", "ref")
   if (!all(target_header %in% colnames(snp_info))){
     stop("SNP info needs to contain the following columns: ",
@@ -76,7 +82,6 @@ preprocess_weights <- function(weight_file,
     context <- tools::file_path_sans_ext(basename(weight_file))
   }
 
-  loginfo("Load weight: %s", weight_file)
   loginfo("type: %s", type)
   loginfo("context: %s", context)
 
@@ -100,7 +105,7 @@ preprocess_weights <- function(weight_file,
   weight_table <- weight_table[weight_table$rsid %in% snpnames, ]
   # loginfo("Remove %s genes after intersecting with LD reference and GWAS", length(setdiff(gnames, weight_table$gene)))
   gnames <- unique(weight_table$gene)
-  loginfo("%d variants and %d genes left after intersecting with LD reference and GWAS z_snp", length(snpnames), length(gnames))
+  loginfo("%d variants and %d genes left after intersecting with LD reference and z_snp", length(snpnames), length(gnames))
   # subset to variants in weight table
   snp_info_wgt <- snp_info[snp_info$id %in% weight_table$rsid,]
   loginfo("Harmonizing weights with LD reference ...")

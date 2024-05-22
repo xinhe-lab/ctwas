@@ -9,16 +9,17 @@
 #'
 #' @param ens_db Ensembl database
 #'
+#' @param use_LD TRUE/FALSE. If TRUE, use LD for finemapping. Otherwise, use "no-LD" version.
+#'
+#' @param LD_info a list of paths to LD matrices for each of the regions. Required when \code{use_LD = TRUE}.
+#'
+#' @param snp_info a list of SNP info data frames for LD reference. Required when \code{use_LD = TRUE}.
+#'
 #' @param save_cor TRUE/FALSE. If TRUE, save correlation (R) matrices to \code{cor_dir}
 #'
 #' @param cor_dir path of correlation matrices
 #'
 #' @param region_data a list of region_data used for finemapping
-#'
-#' @param region_info a data frame of region definition and associated LD file names
-#'
-#' @param snp_info a data frame, SNP info for LD reference,
-#'  with columns "chrom", "id", "pos", and "region_id".
 #'
 #' @param locus_range a vector of start and end positions to define the locus region to be plotted
 #'
@@ -57,11 +58,12 @@ make_locusplot <- function(finemap_res,
                            region_id,
                            weights,
                            ens_db,
+                           use_LD = TRUE,
+                           LD_info = NULL,
+                           snp_info = NULL,
                            save_cor = FALSE,
                            cor_dir = NULL,
                            region_data = NULL,
-                           region_info = NULL,
-                           snp_info = NULL,
                            locus_range = NULL,
                            focus_gene = NULL,
                            gene_biotype = "protein_coding",
@@ -107,111 +109,114 @@ make_locusplot <- function(finemap_res,
   loginfo("focus id: %s", focus_gid)
 
   if (!is.null(locus_range)){
-    finemap_region_res <- finemap_region_res[finemap_region_res$pos>=locus_range[1] & finemap_region_res$pos<=locus_range[2],, drop=F]
+    if (is.null(finemap_region_res$pos)){
+      stop("please annotate finemapping result first!")
+    }
+    idx_in_range <- which(finemap_region_res$pos>=locus_range[1] & finemap_region_res$pos<=locus_range[2])
+    finemap_region_res <- finemap_region_res[idx_in_range,, drop=F]
   }else{
     # if locus_range not specified, plot the whole region
     locus_range <- c(min(finemap_region_res$pos)-100, max(finemap_region_res$pos) + 100)
   }
   loginfo("locus_range: %s", locus_range)
 
-  # add r2 with the focus gene
-  # load precomputed correlation matrices if available
-  if (!is.null(cor_dir)) {
-    if (!dir.exists(cor_dir))
-      dir.create(cor_dir, recursive = TRUE)
-    R_sg_file <- file.path(cor_dir, paste0("region.", region_id, ".R_snp_gene.RDS"))
-    R_g_file <- file.path(cor_dir, paste0("region.", region_id, ".R_gene.RDS"))
-    R_s_file <- file.path(cor_dir, paste0("region.", region_id, ".R_snp.RDS"))
-  }
+  if (use_LD) {
+    # add r2 with the focus gene
+    # load precomputed correlation matrices if available
+    if (!is.null(cor_dir)) {
+      if (!dir.exists(cor_dir))
+        dir.create(cor_dir, recursive = TRUE)
+      R_sg_file <- file.path(cor_dir, paste0("region.", region_id, ".R_snp_gene.RDS"))
+      R_g_file <- file.path(cor_dir, paste0("region.", region_id, ".R_gene.RDS"))
+      R_s_file <- file.path(cor_dir, paste0("region.", region_id, ".R_snp.RDS"))
+    }
 
-  cor_files_exist <- isTRUE(!is.null(cor_dir) && file.exists(R_sg_file) && file.exists(R_g_file) && file.exists(R_s_file))
+    cor_files_exist <- isTRUE(!is.null(cor_dir) && file.exists(R_sg_file) && file.exists(R_g_file) && file.exists(R_s_file))
 
-  if (cor_files_exist) {
-    # load precomputed correlation matrices
-    loginfo("Load correlation matrices for region %s", region_id)
-    R_snp_gene <- load_LD(R_sg_file)
-    R_gene <- load_LD(R_g_file)
-    R_snp <- load_LD(R_s_file)
+    if (cor_files_exist) {
+      # load precomputed correlation matrices
+      loginfo("Load correlation matrices for region %s", region_id)
+      R_snp_gene <- load_LD(R_sg_file)
+      R_gene <- load_LD(R_g_file)
+      R_snp <- load_LD(R_s_file)
 
-    if (!is.null(region_data)) {
-      gids <- region_data[[region_id]]$gid
-      sids <- region_data[[region_id]]$sid
+      if (!is.null(region_data)) {
+        gids <- region_data[[region_id]]$gid
+        sids <- region_data[[region_id]]$sid
+        if (region_data[[region_id]]$thin != 1){
+          stop("thin != 1 in the region_data, please expand the region with full SNPs")
+        }
+        rownames(R_snp) <- sids
+        colnames(R_snp) <- sids
+        rownames(R_snp_gene) <- sids
+        colnames(R_snp_gene) <- gids
+        rownames(R_gene) <- gids
+        colnames(R_gene) <- gids
+      }
+    } else {
+      # compute correlations
+      loginfo("Compute correlation matrices for region %s", region_id)
+
+      if (is.null(region_data)) {
+        stop("region_data is needed for computing correlation matrices")
+      }
       if (region_data[[region_id]]$thin != 1){
         stop("thin != 1 in the region_data, please expand the region with full SNPs")
       }
+      # load LD matrix of the region
+      if (is.null(LD_info) || is.null(snp_info)) {
+        stop("LD_info and snp_info are required for computing correlation matrices")
+      }
+      LD_matrix_files <- LD_info[[region_id]]$LD_matrix
+      stopifnot(all(file.exists(LD_matrix_files)))
+      if (length(LD_matrix_files)==1) {
+        R_snp <- load_LD(LD_matrix_files)
+      } else {
+        R_snp <- lapply(LD_matrix_files, load_LD)
+        R_snp <- suppressWarnings(as.matrix(Matrix::bdiag(R_snp)))
+      }
+      # load SNP info of the region
+      snpinfo <- snp_info[[region_id]]
+
+      # compute correlation matrices
+      sid <- region_data[[region_id]]$sid
+      gid <- region_data[[region_id]]$gid
+      res <- compute_region_cor(sid, gid, R_snp, snpinfo$id, weights)
+      R_snp <- res$R_snp
+      R_snp_gene <- res$R_snp_gene
+      R_gene <- res$R_gene
       rownames(R_snp) <- sids
       colnames(R_snp) <- sids
       rownames(R_snp_gene) <- sids
       colnames(R_snp_gene) <- gids
       rownames(R_gene) <- gids
       colnames(R_gene) <- gids
+      rm(res)
+      # save correlation matrices
+      if (isTRUE(save_cor && !is.null(cor_dir))) {
+        saveRDS(R_snp_gene, file=R_sg_file)
+        saveRDS(R_gene, file=R_g_file)
+        saveRDS(R_snp, file=R_s_file)
+      }
     }
-  } else {
-    # compute correlations
-    loginfo("Compute correlation matrices for region %s", region_id)
 
-    if (!is.null(region_data)) {
-      stop("region_data is needed for computing correlation matrices")
-    }
-    if (region_data[[region_id]]$thin != 1){
-      stop("thin != 1 in the region_data, please expand the region with full SNPs")
-    }
-    # select region info for the region ids to finemap
-    regioninfo <- region_info[region_info$region_id %in% region_id, ]
-    # load LD matrix of the region
-    if(!is.character(regioninfo$LD_matrix) || is.null(regioninfo$LD_matrix)){
-      stop("LD_matrix in region_info is required for computing correlation matrices")
-    }
-    LD_matrix_files <- unlist(strsplit(regioninfo$LD_matrix, split = ";"))
-    stopifnot(all(file.exists(LD_matrix_files)))
-    if (length(LD_matrix_files)==1) {
-      R_snp <- load_LD(LD_matrix_files)
-    } else {
-      R_snp <- lapply(LD_matrix_files, load_LD)
-      R_snp <- suppressWarnings(as.matrix(Matrix::bdiag(R_snp)))
-    }
-    # load SNP info of the region
-    if (!is.character(regioninfo$SNP_info) || is.null(regioninfo$SNP_info)){
-      snpinfo <- snp_info[which(snp_info$region_id == region_id), ]
-    } else{
-      snp_info_files <- unlist(strsplit(regioninfo$SNP_info, split = ";"))
-      stopifnot(all(file.exists(snp_info_files)))
-      snpinfo <- read_snp_info_files(snp_info_files)
-    }
-    # compute correlation matrices
-    sid <- region_data[[region_id]]$sid
-    gid <- region_data[[region_id]]$gid
-    res <- compute_region_cor(sid, gid, R_snp, snpinfo$id, weights)
-    R_snp <- res$R_snp
-    R_snp_gene <- res$R_snp_gene
-    R_gene <- res$R_gene
-    rownames(R_snp) <- sids
-    colnames(R_snp) <- sids
-    rownames(R_snp_gene) <- sids
-    colnames(R_snp_gene) <- gids
-    rownames(R_gene) <- gids
-    colnames(R_gene) <- gids
-    rm(res)
-    # save correlation matrices
-    if (isTRUE(save_cor && !is.null(cor_dir))) {
-      saveRDS(R_snp_gene, file=R_sg_file)
-      saveRDS(R_gene, file=R_g_file)
-      saveRDS(R_snp, file=R_s_file)
-    }
+    finemap_region_res$r2 <- NA
+    finemap_region_res$r2[finemap_region_res$type!="SNP"] <- R_gene[finemap_region_res$id[finemap_region_res$type!="SNP"], focus_gid]^2
+    finemap_region_res$r2[finemap_region_res$type=="SNP"] <- R_snp_gene[finemap_region_res$id[finemap_region_res$type=="SNP"], focus_gid]^2
+    finemap_region_res$r2[finemap_region_res$id == focus_gid] <- 100
+
+    # r2 colors: lead gene: salmon, 0.4~1: purple, others "#7FC97F"
+    r2_colors <- c("0-0.4" = "#7FC97F", "0.4-1" = "purple", "1" = "salmon")
+
+    finemap_region_res$r2_levels <- cut(finemap_region_res$r2,
+                                        breaks = c(0, 0.4, 1, Inf),
+                                        labels = names(r2_colors))
+    finemap_region_res$r2_levels <- factor(finemap_region_res$r2_levels, levels = rev(names(r2_colors)))
+  } else{
+    finemap_region_res$r2 <- NA
+    finemap_region_res$r2_levels <- NA
+    r2_colors <- "black"
   }
-
-  finemap_region_res$r2 <- NA
-  finemap_region_res$r2[finemap_region_res$type!="SNP"] <- R_gene[finemap_region_res$id[finemap_region_res$type!="SNP"], focus_gid]^2
-  finemap_region_res$r2[finemap_region_res$type=="SNP"] <- R_snp_gene[finemap_region_res$id[finemap_region_res$type=="SNP"], focus_gid]^2
-  finemap_region_res$r2[finemap_region_res$id == focus_gid] <- 100
-
-  # r2 colors: lead gene: salmon, 0.4~1: purple, others "#7FC97F"
-  r2_colors <- c("0-0.4" = "#7FC97F", "0.4-1" = "purple", "1" = "salmon")
-
-  finemap_region_res$r2_levels <- cut(finemap_region_res$r2,
-                                      breaks = c(0, 0.4, 1, Inf),
-                                      labels = names(r2_colors))
-  finemap_region_res$r2_levels <- factor(finemap_region_res$r2_levels, levels = rev(names(r2_colors)))
 
   # gene labels
   finemap_region_res$label <- paste0(finemap_region_res$gene_name, " (", finemap_region_res$context, ")")

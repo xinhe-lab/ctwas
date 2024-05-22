@@ -1,4 +1,4 @@
-#' Causal inference for TWAS using summary statistics
+#' running cTWAS analysis with "no LD" version
 #'
 #' @param z_snp A data frame with four columns: "id", "A1", "A2", "z".
 #' giving the z scores for snps. "A1" is effect allele. "A2" is the other allele.
@@ -7,9 +7,7 @@
 #'
 #' @param region_info a data frame of region definition and associated LD file names
 #'
-#' @param snp_info a list of SNP info data frames for LD reference.
-#'
-#' @param LD_info a list of paths to LD matrices for each of the regions.
+#' @param snp_info a list or data frame of reference SNP info.
 #'
 #' @param z_gene A data frame with columns: "id", "z", giving the z-scores for genes.
 #'
@@ -18,8 +16,6 @@
 #' @param niter the number of iterations of the E-M algorithm to perform during the complete parameter estimation step
 #'
 #' @param thin The proportion of SNPs to be used for estimating parameters and screening regions.
-#'
-#' @param L the number of effects for susie during the fine mapping steps
 #'
 #' @param init_group_prior a vector of initial values of prior inclusion probabilities for SNPs and genes.
 #'
@@ -44,18 +40,7 @@
 #'
 #' @param use_null_weight TRUE/FALSE. If TRUE, allow for a probability of no effect in susie
 #'
-#' @param coverage A number between 0 and 1 specifying the \dQuote{coverage} of the estimated confidence sets
-#'
-#' @param min_abs_corr Minimum absolute correlation allowed in a
-#'.  credible set. The default, 0.5, corresponds to a squared
-#'   correlation of 0.25, which is a commonly used threshold for
-#'   genotype data in genetic studies.
-#'
 #' @param ncore The number of cores used to parallelize susie over regions
-#'
-#' @param save_cor TRUE/FALSE. If TRUE, save correlation (R) matrices to \code{cor_dir}
-#'
-#' @param cor_dir The directory to store correlation (R) matrices
 #'
 #' @param outputdir The directory to store output. If specified, save outputs to the directory.
 #'
@@ -74,17 +59,15 @@
 #'
 #' @export
 #'
-ctwas_sumstats <- function(
+ctwas_sumstats_noLD <- function(
     z_snp,
     weights,
     region_info,
     snp_info,
-    LD_info,
     z_gene = NULL,
     thin = 0.1,
     niter_prefit = 3,
     niter = 30,
-    L = 5,
     init_group_prior = NULL,
     init_group_prior_var = NULL,
     group_prior_var_structure = c("shared_type", "shared_context", "shared_nonSNP", "shared_all", "independent"),
@@ -92,16 +75,11 @@ ctwas_sumstats <- function(
     min_nonSNP_PIP = 0.5,
     p_single_effect = 0.8,
     use_null_weight = TRUE,
-    coverage = 0.95,
-    min_abs_corr = 0.5,
     ncore = 1,
-    save_cor = FALSE,
-    cor_dir = NULL,
     outputdir = NULL,
-    outname = "ctwas",
+    outname = "ctwas_noLD",
     logfile = NULL,
-    verbose = FALSE,
-    ...){
+    verbose = FALSE){
 
   if (!is.null(logfile)) {
     addHandler(writeToFile, file=logfile, level='DEBUG')
@@ -151,8 +129,8 @@ ctwas_sumstats <- function(
                      niter = niter,
                      p_single_effect = p_single_effect,
                      ncore = ncore,
-                     verbose = verbose,
-                     ...)
+                     verbose = verbose)
+
   group_prior <- param$group_prior
   group_prior_var <- param$group_prior_var
   if (!is.null(outputdir)) {
@@ -163,17 +141,13 @@ ctwas_sumstats <- function(
   #. fine-map all regions with thinned SNPs
   #. select regions with strong non-SNP signals
   screen_regions_res <- screen_regions(region_data,
-                                       use_LD = TRUE,
-                                       LD_info = LD_info,
-                                       snp_info = snp_info,
-                                       weights = weights,
+                                       use_LD = FALSE,
                                        group_prior = group_prior,
                                        group_prior_var = group_prior_var,
-                                       L = L,
+                                       L = 1,
                                        min_nonSNP_PIP = min_nonSNP_PIP,
                                        ncore = ncore,
-                                       verbose = verbose,
-                                       ...)
+                                       verbose = verbose)
   screened_region_data <- screen_regions_res$screened_region_data
   region_nonSNP_PIP_df <- screen_regions_res$region_nonSNP_PIP_df
 
@@ -200,21 +174,14 @@ ctwas_sumstats <- function(
   #. save correlation matrices if save_cor is TRUE
   if (length(screened_region_data) > 0){
     finemap_res <- finemap_regions(screened_region_data,
-                                   use_LD = TRUE,
-                                   LD_info = LD_info,
-                                   snp_info = snp_info,
-                                   weights = weights,
+                                   use_LD = FALSE,
                                    group_prior = group_prior,
                                    group_prior_var = group_prior_var,
-                                   L = L,
+                                   L = 1,
                                    use_null_weight = use_null_weight,
-                                   coverage = coverage,
-                                   min_abs_corr = min_abs_corr,
-                                   save_cor = save_cor,
-                                   cor_dir = cor_dir,
+                                   include_cs_index = FALSE,
                                    ncore = ncore,
-                                   verbose = verbose,
-                                   ...)
+                                   verbose = verbose)
     if (!is.null(outputdir)) {
       saveRDS(finemap_res, file.path(outputdir, paste0(outname, ".finemap_res.RDS")))
     }

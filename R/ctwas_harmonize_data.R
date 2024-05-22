@@ -5,7 +5,7 @@
 #' @param z_snp a data frame, with columns "id", "A1", "A2" and "z".
 #'     Z scores for every SNP. "A1" is the effect allele.
 #'
-#' @param snp_info a data frame, SNP info for LD reference,
+#' @param snp_info a list or data frame of SNP info for LD reference,
 #'  with columns "chrom", "id", "pos", "alt", "ref".
 #'
 #' @param drop_strand_ambig TRUE/FALSE, if TRUE remove strand ambiguous variants (A/T, G/C).
@@ -17,9 +17,12 @@
 harmonize_z <- function(z_snp, snp_info, drop_strand_ambig = TRUE){
 
   # Check LD reference SNP info
+  if (class(snp_info) == "list") {
+    snp_info <- as.data.frame(data.table::rbindlist(snp_info, idcol = "region_id"))
+  }
   target_header <- c("chrom", "id", "pos", "alt", "ref")
   if (!all(target_header %in% colnames(snp_info))){
-    stop("The LD reference SNP info needs to contain the following columns: ",
+    stop("SNP info needs to contain the following columns: ",
          paste(target_header, collapse = " "))
   }
 
@@ -55,7 +58,7 @@ harmonize_z <- function(z_snp, snp_info, drop_strand_ambig = TRUE){
 #'  with columns "chrom", "id", "pos", "alt", "ref". The effect allele
 #'  for FUSION is alt.
 #'
-#' @param snp_info a data frame, SNP info for LD reference,
+#' @param snp_info a list or data frame of SNP info for LD reference,
 #'  with columns "chrom", "id", "pos", "alt", "ref".
 #'
 #' @param drop_strand_ambig TRUE/FALSE, if TRUE remove strand ambiguous variants (A/T, G/C).
@@ -65,9 +68,12 @@ harmonize_z <- function(z_snp, snp_info, drop_strand_ambig = TRUE){
 harmonize_weights <- function (wgt.matrix, snps, snp_info, drop_strand_ambig = TRUE){
 
   # Check LD reference SNP info
+  if (class(snp_info) == "list") {
+    snp_info <- as.data.frame(data.table::rbindlist(snp_info, idcol = "region_id"))
+  }
   target_header <- c("chrom", "id", "pos", "alt", "ref")
   if (!all(target_header %in% colnames(snp_info))){
-    stop("The LD reference SNP info needs to contain the following columns: ",
+    stop("SNP info needs to contain the following columns: ",
          paste(target_header, collapse = " "))
   }
 
