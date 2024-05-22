@@ -7,8 +7,8 @@
 #'
 #' @param gwas_snp_ids a vector of SNP IDs in GWAS summary statistics (z_snp$id).
 #'
-#' @param snp_info a data frame, SNP info for LD reference,
-#'  with columns "chrom", "id", "pos", "alt", "ref".
+#' @param snp_info a list of SNP info data frames for LD reference,
+#'  with columns "chrom", "id", "pos", "alt", "ref", and "region_id".
 #'
 #' @param type a string, specifying QTL type of each weight file, e.g. expression, splicing, protein.
 #'
@@ -25,7 +25,7 @@
 #' @param method_FUSION a string, specifying the method to choose in FUSION models
 #'
 #' @param fusion_genome_version a string, specifying the genome version of FUSION models
-#' 
+#'
 #' @param fusion_top_n_snps a number, specifying the top n weight SNPs included in FUSION models. If NULL, using all weight SNPs
 #'
 #' @param logfile the log file, if NULL will print log info on screen.
@@ -67,6 +67,9 @@ preprocess_weights <- function(weight_file,
   stopifnot(file.exists(weight_file))
 
   # Check LD reference SNP info
+  if (class(snp_info) == "list") {
+    snp_info <- as.data.frame(data.table::rbindlist(snp_info, idcol = "region_id"))
+  }
   target_header <- c("chrom", "id", "pos", "alt", "ref")
   if (!all(target_header %in% colnames(snp_info))){
     stop("SNP info needs to contain the following columns: ",
@@ -165,7 +168,7 @@ preprocess_weights <- function(weight_file,
       wgt <- wgt[,"weight",drop=F]
       snpnames <- intersect(rownames(wgt), snp_info_wgt$id)
     }
-   
+
     snps.idx <- match(snpnames, snps$id)
     snps <- snps[snps.idx,]
 

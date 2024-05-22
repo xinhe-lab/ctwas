@@ -29,9 +29,10 @@ anno_finemap_res <- function(finemap_res, snp_info, ens_db, use_gene_pos = c("mi
          paste(target_header, collapse = " "))
   }
 
+  finemap_res <- cbind(chrom = NA, pos = NA, finemap_res, gene_id = NA, gene_name = NA)
+  finemap_res <- finemap_res[, unique(colnames(finemap_res))]
+
   # extract gene IDs from finemapping result
-  finemap_res$gene_id <- NA
-  finemap_res$gene_name <- NA
   finemap_gene_res <- finemap_res[finemap_res$type!="SNP",]
   gene_id <- sapply(strsplit(finemap_gene_res$id, split = "[|]"), "[[", 1)
   gene_id <- sapply(strsplit(gene_id, split = "[.]"), "[[", 1)
@@ -39,6 +40,7 @@ anno_finemap_res <- function(finemap_res, snp_info, ens_db, use_gene_pos = c("mi
 
   # get gene position info
   gene_annot_gr <- genes(ens_db, filter = GeneIdFilter(finemap_gene_res$gene_id))
+  gene_annot_gr$chrom <- seqnames(gene_annot_gr)
   gene_annot_gr$start_pos <- start(gene_annot_gr)
   gene_annot_gr$end_pos <- end(gene_annot_gr)
   if (use_gene_pos == "mid"){
@@ -53,10 +55,12 @@ anno_finemap_res <- function(finemap_res, snp_info, ens_db, use_gene_pos = c("mi
   # get gene_name and gene position
   gene_annot_df <- data.frame(gene_id = gene_annot_gr$gene_id,
                               gene_name = gene_annot_gr$gene_name,
+                              gene_chrom = gene_annot_gr$chrom,
                               gene_pos = gene_annot_gr$gene_pos)
 
   # add gene name to finemapping result and update gene positions
   gene_annot_idx <- match(finemap_gene_res$gene_id, gene_annot_df$gene_id)
+  finemap_gene_res$chrom <- gene_annot_df$gene_chrom[gene_annot_idx]
   finemap_gene_res$pos <- gene_annot_df$gene_pos[gene_annot_idx]
   finemap_gene_res$gene_name <- gene_annot_df$gene_name[gene_annot_idx]
 
@@ -75,20 +79,29 @@ anno_finemap_res <- function(finemap_res, snp_info, ens_db, use_gene_pos = c("mi
 #'
 #' @param finemap_res a data frame of cTWAS finemapping result
 #'
+#' @param contexts a character vector of contexts to sum
+#'
 #' @return a data frame of combined gene PIPs and PIPs for each context
 #' @export
-sum_pip_across_contexts <- function(finemap_res){
+sum_pip_across_contexts <- function(finemap_res, contexts){
+
   finemap_gene_res <- finemap_res[finemap_res$type!="SNP",]
 
   # combine PIPs across contexts (tissues)
   gene_pip_df <- aggregate(finemap_gene_res$susie_pip, by=list(finemap_gene_res$gene_id), FUN=sum)
   colnames(gene_pip_df) <- c("gene_id", "combined_pip")
-  gene_annot_idx <- match(gene_pip_df$gene_id, gene_annot_df$gene_id)
-  gene_pip_df$gene_name <- gene_annot_df$gene_name[gene_annot_idx]
-  gene_pip_df <- gene_pip_df[, c("gene_id", "gene_name", "combined_pip")]
+
+  if (!is.null(finemap_gene_res$gene_name)){
+    idx <- match(gene_pip_df$gene_id, finemap_gene_res$gene_id)
+    gene_pip_df$gene_name <- finemap_gene_res$gene_name[idx]
+    gene_pip_df <- gene_pip_df[, c("gene_id", "gene_name", "combined_pip")]
+  }
 
   # PIPs for each context
-  contexts <- unique(finemap_gene_res$context)
+  if (missing(contexts)){
+    contexts <- unique(finemap_gene_res$context)
+  }
+
   gene_pips_df <- matrix(NA, nrow=nrow(gene_pip_df), ncol=length(contexts))
   colnames(gene_pips_df) <- paste0(contexts, "_pip")
   for (i in 1:nrow(gene_pips_df)){
