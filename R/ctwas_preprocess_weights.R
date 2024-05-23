@@ -41,11 +41,14 @@ preprocess_weights <- function(weight_file,
                                filter_protein_coding_genes = FALSE,
                                load_predictdb_LD = FALSE,
                                method_FUSION = c("lasso","enet","top1","blup"),
+                               fusion_genome_version = c("b38","b37"),
+                               fusion_top_n_snps = NULL,
                                logfile = NULL){
 
   # check input arguments
   weight_format <- match.arg(weight_format)
   method_FUSION <- match.arg(method_FUSION)
+  fusion_genome_version <- match.arg(fusion_genome_version)
 
   if (!is.null(logfile)) {
     addHandler(writeToFile, file = logfile, level = "DEBUG")
@@ -78,6 +81,7 @@ preprocess_weights <- function(weight_file,
                                 filter_protein_coding_genes = filter_protein_coding_genes,
                                 load_predictdb_LD = load_predictdb_LD,
                                 method_FUSION = method_FUSION,
+                                fusion_genome_version = fusion_genome_version,
                                 ncore=ncore)
   weight_table <- loaded_weight$weight_table
   weight_name <- loaded_weight$weight_name
@@ -137,7 +141,18 @@ preprocess_weights <- function(weight_file,
     snpnames <- intersect(rownames(wgt.matrix), ld_snpinfo_wgt$id)
     wgt.idx <- match(snpnames, rownames(wgt.matrix))
     wgt <- wgt.matrix[wgt.idx, "weight", drop = F]
+    wgt <- as.data.frame(wgt)
 
+    if (weight_format == "FUSION"){
+      wgt[,"abs_weight"] <- abs(wgt$weight)
+      wgt <- wgt[order(-wgt$abs_weight),]
+      if(!is.null(fusion_top_n_snps)){
+        wgt <- head(wgt,fusion_top_n_snps)
+      }
+      wgt <- wgt[,"weight",drop=F]
+      snpnames <- intersect(rownames(wgt), ld_snpinfo_wgt$id)
+    }
+  
     snps.idx <- match(snpnames, snps$id)
     snps <- snps[snps.idx,]
 
