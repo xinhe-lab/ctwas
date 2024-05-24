@@ -81,8 +81,8 @@ finemap_region <- function(region_data,
 
   # load input data for the region
   regiondata <- region_data[[region_id]]
-  sid <- regiondata[["sid"]]
-  gid <- regiondata[["gid"]]
+  sids <- regiondata[["sid"]]
+  gids <- regiondata[["gid"]]
   z <- regiondata[["z"]]
   gs_group <- regiondata[["gs_group"]]
   g_type <- regiondata[["g_type"]]
@@ -120,9 +120,6 @@ finemap_region <- function(region_data,
     R <- diag(length(z))
     include_cs_index <- FALSE
   } else {
-    if (verbose){
-      loginfo("Fine-mapping using LD version ...")
-    }
     # compute correlation matrices
     if (!is.null(cor_dir)) {
       if (!dir.exists(cor_dir))
@@ -154,7 +151,7 @@ finemap_region <- function(region_data,
       if (is.null(LD_info) || is.null(snp_info)) {
         stop("LD_info and snp_info are required for computing correlation matrices")
       }
-      LD_matrix_files <- LD_info[[region_id]]$LD_matrix
+      LD_matrix_files <- unlist(strsplit(LD_info$LD_matrix[LD_info$region_id == region_id], split = ";"))
       stopifnot(all(file.exists(LD_matrix_files)))
       if (length(LD_matrix_files)==1) {
         R_snp <- load_LD(LD_matrix_files)
@@ -163,10 +160,10 @@ finemap_region <- function(region_data,
         R_snp <- suppressWarnings(as.matrix(Matrix::bdiag(R_snp)))
       }
       # load SNP info of the region
-      snpinfo <- snp_info[[region_id]]
+      snpinfo <- do.call(rbind, snp_info[region_id])
 
       # Compute correlation matrices
-      res <- compute_region_cor(sid, gid, R_snp, snpinfo$id, weights)
+      res <- compute_region_cor(sids, gids, R_snp, snpinfo$id, weights)
       R_snp <- res$R_snp
       R_snp_gene <- res$R_snp_gene
       R_gene <- res$R_gene
@@ -203,8 +200,8 @@ finemap_region <- function(region_data,
                                ...)
 
   susie_res_df <- anno_susie(susie_res,
-                             gid = gid,
-                             sid = sid,
+                             gids = gids,
+                             sids = sids,
                              region_id = region_id,
                              z = z,
                              g_type = g_type,

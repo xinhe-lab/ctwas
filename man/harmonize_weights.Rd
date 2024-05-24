@@ -14,7 +14,7 @@ harmonize_weights(wgt.matrix, snps, snp_info, drop_strand_ambig = TRUE)
 with columns "chrom", "id", "pos", "alt", "ref". The effect allele
 for FUSION is alt.}
 
-\item{snp_info}{a data frame, SNP info for LD reference,
+\item{snp_info}{a list or data frame of SNP info for LD reference,
 with columns "chrom", "id", "pos", "alt", "ref".}
 
 \item{drop_strand_ambig}{TRUE/FALSE, if TRUE remove strand ambiguous variants (A/T, G/C).}

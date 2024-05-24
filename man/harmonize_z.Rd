@@ -11,7 +11,7 @@ harmonize_z(z_snp, snp_info, drop_strand_ambig = TRUE)
 \item{z_snp}{a data frame, with columns "id", "A1", "A2" and "z".
 Z scores for every SNP. "A1" is the effect allele.}
 
-\item{snp_info}{a data frame, SNP info for LD reference,
+\item{snp_info}{a list or data frame of SNP info for LD reference,
 with columns "chrom", "id", "pos", "alt", "ref".}
 
 \item{drop_strand_ambig}{TRUE/FALSE, if TRUE remove strand ambiguous variants (A/T, G/C).}

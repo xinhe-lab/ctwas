@@ -6,7 +6,9 @@
 \usage{
 detect_ld_mismatch_susie(
   z_snp,
-  region_info,
+  region_ids,
+  LD_info,
+  snp_info,
   gwas_n = NULL,
   ncore = 1,
   p_diff_thresh = 5e-08

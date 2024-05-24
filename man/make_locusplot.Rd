@@ -9,11 +9,12 @@ make_locusplot(
   region_id,
   weights,
   ens_db,
+  use_LD = TRUE,
+  LD_info = NULL,
+  snp_info = NULL,
   save_cor = FALSE,
   cor_dir = NULL,
   region_data = NULL,
-  region_info = NULL,
-  snp_info = NULL,
   locus_range = NULL,
   focus_gene = NULL,
   gene_biotype = "protein_coding",
@@ -38,16 +39,17 @@ make_locusplot(
 
 \item{ens_db}{Ensembl database}
 
+\item{use_LD}{TRUE/FALSE. If TRUE, use LD for finemapping. Otherwise, use "no-LD" version.}
+
+\item{LD_info}{a list of paths to LD matrices for each of the regions. Required when \code{use_LD = TRUE}.}
+
+\item{snp_info}{a list of SNP info data frames for LD reference. Required when \code{use_LD = TRUE}.}
+
 \item{save_cor}{TRUE/FALSE. If TRUE, save correlation (R) matrices to \code{cor_dir}}
 
 \item{cor_dir}{path of correlation matrices}
 
 \item{region_data}{a list of region_data used for finemapping}
-
-\item{region_info}{a data frame of region definition and associated LD file names}
-
-\item{snp_info}{a data frame, SNP info for LD reference,
-with columns "chrom", "id", "pos", and "region_id".}
 
 \item{locus_range}{a vector of start and end positions to define the locus region to be plotted
 

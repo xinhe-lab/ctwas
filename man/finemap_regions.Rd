@@ -6,9 +6,10 @@
 \usage{
 finemap_regions(
   region_data,
-  region_info,
-  weights,
-  snp_info,
+  use_LD = TRUE,
+  LD_info = NULL,
+  snp_info = NULL,
+  weights = NULL,
   L = 5,
   group_prior = NULL,
   group_prior_var = NULL,
@@ -20,7 +21,7 @@ finemap_regions(
   force_compute_cor = FALSE,
   save_cor = FALSE,
   cor_dir = NULL,
-  annotate_susie_result = TRUE,
+  include_cs_index = TRUE,
   verbose = FALSE,
   logfile = NULL,
   ...
@@ -29,12 +30,13 @@ finemap_regions(
 \arguments{
 \item{region_data}{region_data to be finemapped}
 
-\item{region_info}{a data frame of region definition and associated LD file names}
+\item{use_LD}{TRUE/FALSE. If TRUE, use LD for finemapping. Otherwise, use "no-LD" version.}
+
+\item{LD_info}{a list of paths to LD matrices for each of the regions. Required when \code{use_LD = TRUE}.}
+
+\item{snp_info}{a list of SNP info data frames for LD reference. Required when \code{use_LD = TRUE}.}
 
 \item{weights}{a list of weights for each gene}
-
-\item{snp_info}{a data frame, SNP info for LD reference,
-with columns "chrom", "id", "pos", and "region_id".}
 
 \item{L}{the number of effects for susie during the fine mapping steps}
 

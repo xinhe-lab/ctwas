@@ -4,7 +4,7 @@
 \alias{compute_region_cor}
 \title{Compute correlation matrices for a single region}
 \usage{
-compute_region_cor(sids, gids, R_snp, snpinfo_sids, weights)
+compute_region_cor(sids, gids, R_snp, LD_sids, weights)
 }
 \arguments{
 \item{sids}{SNP IDs}
@@ -13,7 +13,7 @@ compute_region_cor(sids, gids, R_snp, snpinfo_sids, weights)
 
 \item{R_snp}{LD (R) matrix}
 
-\item{snpinfo_sids}{SNP IDs for the rows and columns of the LD matrix}
+\item{LD_sids}{SNP IDs for the rows and columns of the LD matrix}
 
 \item{weights}{a list of weights for all the genes}
 }

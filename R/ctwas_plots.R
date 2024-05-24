@@ -179,9 +179,9 @@ make_locusplot <- function(finemap_res,
       snpinfo <- snp_info[[region_id]]
 
       # compute correlation matrices
-      sid <- region_data[[region_id]]$sid
-      gid <- region_data[[region_id]]$gid
-      res <- compute_region_cor(sid, gid, R_snp, snpinfo$id, weights)
+      sids <- region_data[[region_id]]$sid
+      gids <- region_data[[region_id]]$gid
+      res <- compute_region_cor(sids, gids, R_snp, snpinfo$id, weights)
       R_snp <- res$R_snp
       R_snp_gene <- res$R_snp_gene
       R_gene <- res$R_gene

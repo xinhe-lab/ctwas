@@ -10,6 +10,8 @@
 #' @param snp_info a list of SNP info data frames for LD reference,
 #'  with columns "chrom", "id", "pos", "alt", "ref", and "region_id".
 #'
+#' @param LD_info a list of paths to LD matrices for each of the regions. Required when \code{load_predictdb_LD = FALSE}.
+#'
 #' @param type a string, specifying QTL type of each weight file, e.g. expression, splicing, protein.
 #'
 #' @param context a string, specifying tissue/cell type/condition of each weight file, e.g. Liver, Lung, Brain.
@@ -40,9 +42,10 @@
 preprocess_weights <- function(weight_file,
                                region_info,
                                gwas_snp_ids,
-                               snp_info,
                                type,
                                context,
+                               snp_info,
+                               LD_info = NULL,
                                weight_format = c("PredictDB", "FUSION"),
                                ncore = 1,
                                drop_strand_ambig = TRUE,
@@ -68,10 +71,10 @@ preprocess_weights <- function(weight_file,
 
   # Check LD reference SNP info
   if (class(snp_info) == "list") {
-    snp_info <- as.data.frame(data.table::rbindlist(snp_info, idcol = "region_id"))
+    snp_info_df <- as.data.frame(data.table::rbindlist(snp_info, idcol = "region_id"))
   }
   target_header <- c("chrom", "id", "pos", "alt", "ref")
-  if (!all(target_header %in% colnames(snp_info))){
+  if (!all(target_header %in% colnames(snp_info_df))){
     stop("SNP info needs to contain the following columns: ",
          paste(target_header, collapse = " "))
   }
@@ -108,14 +111,14 @@ preprocess_weights <- function(weight_file,
   # remove variants in weight table, but not in LD reference and GWAS
   loginfo("Number of variants in weights: %d", length(unique(weight_table$rsid)))
   # take the intersect of SNPs in weights, LD reference and SNPs in z_snp
-  snpnames <- Reduce(intersect, list(weight_table$rsid, snp_info$id, gwas_snp_ids))
+  snpnames <- Reduce(intersect, list(weight_table$rsid, snp_info_df$id, gwas_snp_ids))
   # loginfo("Remove %d variants after intersecting with LD reference and GWAS", length(setdiff(weight_table$rsid, snpnames)))
   weight_table <- weight_table[weight_table$rsid %in% snpnames, ]
   # loginfo("Remove %s genes after intersecting with LD reference and GWAS", length(setdiff(gnames, weight_table$gene)))
   gnames <- unique(weight_table$gene)
   loginfo("%d variants and %d genes left after intersecting with LD reference and GWAS z_snp", length(snpnames), length(gnames))
   # subset to variants in weight table
-  snp_info_wgt <- snp_info[snp_info$id %in% weight_table$rsid,]
+  snp_info_wgt <- snp_info_df[snp_info_df$id %in% weight_table$rsid,]
   loginfo("Harmonizing weights with LD reference ...")
   rsid_varID <- weight_table[,c("rsid", "varID")]
 
@@ -157,15 +160,23 @@ preprocess_weights <- function(weight_file,
     snpnames <- intersect(rownames(wgt.matrix), snp_info_wgt$id)
     wgt.idx <- match(snpnames, rownames(wgt.matrix))
     wgt <- wgt.matrix[wgt.idx, "weight", drop = F]
-    wgt <- as.data.frame(wgt)
+
+    # wgt <- as.data.frame(wgt)
+    # if (weight_format == "FUSION"){
+    #   wgt[,"abs_weight"] <- abs(wgt$weight)
+    #   wgt <- wgt[order(-wgt$abs_weight),]
+    #   if(!is.null(fusion_top_n_snps)){
+    #     wgt <- head(wgt,fusion_top_n_snps)
+    #   }
+    #   wgt <- wgt[,"weight",drop=F]
+    #   snpnames <- intersect(rownames(wgt), snp_info_wgt$id)
+    # }
 
     if (weight_format == "FUSION"){
-      wgt[,"abs_weight"] <- abs(wgt$weight)
-      wgt <- wgt[order(-wgt$abs_weight),]
+      wgt <- wgt[order(-abs(wgt[,"weight"])), , drop = F]
       if(!is.null(fusion_top_n_snps)){
-        wgt <- head(wgt,fusion_top_n_snps)
+        wgt <- wgt[seq_len(fusion_top_n_snps), , drop = F]
       }
-      wgt <- wgt[,"weight",drop=F]
       snpnames <- intersect(rownames(wgt), snp_info_wgt$id)
     }
 
@@ -201,6 +212,10 @@ preprocess_weights <- function(weight_file,
 
   if(!load_predictdb_LD){
     loginfo("Computing LD between variants in weights ...")
+    if (is.null(LD_info) || is.null(snp_info)) {
+      stop("LD_info and snp_info are required for computing LD")
+    }
+
     weight_info <- as.data.frame(do.call(rbind, weights)[,c("chrom","p0","p1","gene_name","weight_name","type","context")])
     weight_info$weight_id <- paste0(weight_info$gene_name, "|", weight_name)
     for (k in 1:nrow(weight_info)) {
@@ -232,15 +247,17 @@ preprocess_weights <- function(weight_file,
           for (batch in batches) {
             # load the R_snp and SNP info for the region
             region_ids <- strsplit(batch, ";")[[1]]
-            reg_idx <- match(region_ids, region_info$region_id)
+            reg_idx <- match(region_ids, LD_info$region_id)
             if (length(reg_idx) > 1){
-              R_snp <- lapply(region_info$LD_matrix[reg_idx], load_LD)
+              R_snp <- lapply(LD_info$LD_matrix[reg_idx], load_LD)
               R_snp <- suppressWarnings({as.matrix(Matrix::bdiag(R_snp))})
             }
             else{
-              R_snp <- load_LD(region_info$LD_matrix[reg_idx])
+              R_snp <- load_LD(LD_info$LD_matrix[reg_idx])
             }
-            snpinfo <- read_snp_info_files(region_info$SNP_info[reg_idx])
+
+            snpinfo <- do.call(rbind, snp_info[region_ids])
+
             weight_ids <- weightinfo[weightinfo$region_id == batch, "weight_id"]
             for(weight_id in weight_ids){
               snpnames <- rownames(weights[[weight_id]]$wgt)

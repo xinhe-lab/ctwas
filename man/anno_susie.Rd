@@ -6,15 +6,13 @@
 \usage{
 anno_susie(
   susie_res,
-  gid,
-  sid,
+  gids,
+  sids,
   region_id,
   z = NULL,
   g_type = "gene",
   g_context = "gene",
   g_group = "gene",
-  geneinfo = NULL,
-  snpinfo = NULL,
   include_cs_index = TRUE
 )
 }

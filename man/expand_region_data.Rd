@@ -19,8 +19,7 @@ expand_region_data(
 \arguments{
 \item{region_data}{a list of region gene IDs and SNP IDs and associated file names}
 
-\item{snp_info}{a data frame, SNP info for LD reference,
-with required columns "chrom", "id", "pos", and "region_id".}
+\item{snp_info}{a list of SNP info data frames for LD reference.}
 
 \item{z_snp}{A data frame with columns: "id", "z", giving the z-scores for SNPs.}
 

@@ -28,7 +28,7 @@ read_snp_info_files <- function(files){
 #' @param load_predictdb_LD TRUE/FALSE. If TRUE, load pre-computed LD among weight SNPs. This option is only for PredictDB weights
 #'
 #' @param method_FUSION a string, specifying the method to choose in FUSION models
-#' 
+#'
 #' @param fusion_genome_version a string, specifying the genome version of FUSION models
 #'
 #' @param ncore integer, number of cores for parallel computing.
@@ -53,6 +53,7 @@ load_weights <- function(weight_file,
   stopifnot(file.exists(weight_file))
 
   if(weight_format == "PredictDB"){
+
     weight_name <- tools::file_path_sans_ext(basename(weight_file))
     # read the PredictDB weights
     sqlite <- RSQLite::dbDriver("SQLite")
@@ -72,7 +73,11 @@ load_weights <- function(weight_file,
     }
 
     if (isTRUE(load_predictdb_LD)){
-      R_wgt <- read.table(gzfile(paste0(tools::file_path_sans_ext(weight_file), ".txt.gz")), header=T)
+      predictdb_LD_file <- paste0(tools::file_path_sans_ext(weight_file), ".txt.gz")
+      if (!file.exists(predictdb_LD_file)){
+        stop(paste("PredictDB LD file", predictdb_LD_file, "does not exist!"))
+      }
+      R_wgt <- read.table(gzfile(predictdb_LD_file), header=T)
     }
     else{
       R_wgt <- NULL

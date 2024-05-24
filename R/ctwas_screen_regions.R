@@ -105,7 +105,7 @@ screen_regions <- function(
   }
 
   # run finemapping for all regions containing thinned SNPs
-  loginfo("Run initial screening for %d regions ...", length(region_data))
+  loginfo("Run initial screening ...")
   finemap_screening_res <- finemap_regions(region_data,
                                            use_LD = use_LD,
                                            LD_info = LD_info,

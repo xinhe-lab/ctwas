@@ -4,15 +4,13 @@
 \alias{get_merged_region_info}
 \title{Get merged region info}
 \usage{
-get_merged_region_info(boundary_genes, region_info)
-}
-\arguments{
-\item{boundary_genes}{a data frame of boundary gene info}
-
-\item{region_info}{a data frame of region definition and associated LD file names}
-}
-\value{
-a data frame of merged region info
+get_merged_region_info(
+  boundary_genes,
+  region_info,
+  use_LD = TRUE,
+  LD_info,
+  snp_info
+)
 }
 \description{
 Get merged region info

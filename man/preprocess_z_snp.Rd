@@ -16,8 +16,8 @@ preprocess_z_snp(
 \item{z_snp}{A data frame with two columns: "id", "A1", "A2", "z". giving the z scores for
 snps. "A1" is effect allele. "A2" is the other allele.}
 
-\item{snp_info}{a data frame, SNP info for LD reference,
-with columns "chrom", "id", "pos", "alt", "ref".}
+\item{snp_info}{a list of SNP info data frames for LD reference,
+with columns "chrom", "id", "pos", "alt", "ref", and "region_id".}
 
 \item{drop_multiallelic}{TRUE/FALSE. If TRUE, multiallelic variants will be dropped from the summary statistics.}
 

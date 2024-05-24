@@ -39,8 +39,8 @@ ctwas_susie_rss <- function(z,
 
 #' annotate susie results with SNP and gene information
 anno_susie <- function(susie_res,
-                       gid,
-                       sid,
+                       gids,
+                       sids,
                        region_id,
                        z = NULL,
                        g_type = "gene",
@@ -48,8 +48,8 @@ anno_susie <- function(susie_res,
                        g_group = "gene",
                        include_cs_index = TRUE) {
 
-  gene_df <- data.frame(id = gid, type = g_type, context = g_context, group = g_group)
-  snp_df <- data.frame(id = sid, type = "SNP", context = "SNP", group = "SNP")
+  gene_df <- data.frame(id = gids, type = g_type, context = g_context, group = g_group)
+  snp_df <- data.frame(id = sids, type = "SNP", context = "SNP", group = "SNP")
   susie_res_df <- rbind(gene_df, snp_df)
 
   if (!is.null(z)) {
@@ -60,7 +60,7 @@ anno_susie <- function(susie_res,
 
   susie_res_df$susie_pip <- susie_res$pip
 
-  p <- length(gid) + length(sid)
+  p <- length(gids) + length(sids)
   susie_res_df$mu2 <- colSums(susie_res$mu2[, seq(1, p)[1:p!=susie_res$null_index], drop = F]) #WARN: not sure for L>1
 
   if (include_cs_index) {

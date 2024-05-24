@@ -18,16 +18,17 @@
 #' @export
 #'
 detect_ld_mismatch_susie <- function(z_snp,
-                                     region_info,
+                                     region_ids,
+                                     LD_info,
+                                     snp_info,
                                      gwas_n = NULL,
                                      ncore = 1,
                                      p_diff_thresh = 5e-8){
 
-  region_ids <- region_info$region_id
   loginfo("Perform LD mismatch diagnosis for %d regions", length(region_ids))
 
   condz_list <- parallel::mclapply(region_ids, function(region_id){
-    compute_region_condz(region_info, region_id, z_snp, gwas_n)
+    compute_region_condz(region_id, LD_info, snp_info, z_snp, gwas_n)
   }, mc.cores = ncore)
   names(condz_list) <- region_ids
   condz_stats <- data.table::rbindlist(condz_list, idcol = "region_id")
@@ -43,15 +44,10 @@ detect_ld_mismatch_susie <- function(z_snp,
 }
 
 #' Compute expected z-scores based on conditional distribution of z-scores using SuSiE RSS
-compute_region_condz <- function(region_info, region_id, z_snp, gwas_n){
-
-  regioninfo <- region_info[region_info$region_id %in% region_id, ]
+compute_region_condz <- function(region_id, LD_info, snp_info, z_snp, gwas_n){
 
   # load LD matrix
-  if(!is.character(regioninfo$LD_matrix) || is.null(regioninfo$LD_matrix)){
-    stop("LD_matrix in region_info is required")
-  }
-  LD_matrix_files <- unlist(strsplit(regioninfo$LD_matrix, split = ";"))
+  LD_matrix_files <- unlist(strsplit(LD_info[LD_info$region_id == region_id, "LD_matrix"], split = ";"))
   stopifnot(all(file.exists(LD_matrix_files)))
   if (length(LD_matrix_files) == 1){
     R_snp <- load_LD(LD_matrix_files)
@@ -61,16 +57,11 @@ compute_region_condz <- function(region_info, region_id, z_snp, gwas_n){
   }
 
   # load SNP info
-  if(!is.character(regioninfo$SNP_info) || is.null(regioninfo$SNP_info)){
-    stop("SNP_info in region_info is required for computing correlation matrices")
-  }
-  snp_info_files <- unlist(strsplit(regioninfo$SNP_info, split = ";"))
-  stopifnot(all(file.exists(snp_info_files)))
-  snpinfo <- read_snp_info_files(snp_info_files)
+  snpinfo <- do.call(rbind, snp_info[region_id])
 
   # Match GWAS sumstats with LD reference files. Only keep variants included in LD reference.
-  region_z_snp <- z_snp[z_snp$id %in% snp_info$id,]
-  sidx <- match(region_z_snp$id, snp_info$id)
+  region_z_snp <- z_snp[z_snp$id %in% snpinfo$id,]
+  sidx <- match(region_z_snp$id, snpinfo$id)
   region_R_snp <- R_snp[sidx, sidx]
 
   # # Estimate lambda (consistency) between the z-scores and LD matrix

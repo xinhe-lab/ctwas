@@ -10,6 +10,7 @@ load_weights(
   filter_protein_coding_genes = FALSE,
   load_predictdb_LD = FALSE,
   method_FUSION = c("lasso", "enet", "top1", "blup"),
+  fusion_genome_version = c("b38", "b37"),
   ncore = 1
 )
 }
@@ -23,6 +24,8 @@ load_weights(
 \item{load_predictdb_LD}{TRUE/FALSE. If TRUE, load pre-computed LD among weight SNPs. This option is only for PredictDB weights}
 
 \item{method_FUSION}{a string, specifying the method to choose in FUSION models}
+
+\item{fusion_genome_version}{a string, specifying the genome version of FUSION models}
 
 \item{ncore}{integer, number of cores for parallel computing.}
 }

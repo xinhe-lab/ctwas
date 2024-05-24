@@ -8,10 +8,12 @@ merge_finemap_regions(
   boundary_genes,
   region_data,
   region_info,
-  finemap_res,
+  LD_info,
+  snp_info,
   z_snp,
   z_gene,
   weights,
+  use_LD = TRUE,
   maxSNP = Inf,
   expand = TRUE,
   group_prior = NULL,
@@ -34,8 +36,6 @@ merge_finemap_regions(
 \item{region_data}{a list of original region_data}
 
 \item{region_info}{a data frame of region definition and associated LD file names}
-
-\item{finemap_res}{a data frame of finemapping result}
 
 \item{z_snp}{A data frame with columns: "id", "z", giving the z-scores for SNPs.}
 

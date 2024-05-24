@@ -2,7 +2,7 @@
 % Please edit documentation in R/ctwas_region_data.R
 \name{assign_region_ids}
 \alias{assign_region_ids}
-\title{assign gene and SNP IDs for regions in the regioninfo}
+\title{Assign gene and SNP IDs for regions in the regioninfo}
 \usage{
 assign_region_ids(
   regioninfo,
@@ -14,5 +14,5 @@ assign_region_ids(
 )
 }
 \description{
-assign gene and SNP IDs for regions in the regioninfo
+Assign gene and SNP IDs for regions in the regioninfo
 }

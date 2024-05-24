@@ -8,9 +8,10 @@ preprocess_weights(
   weight_file,
   region_info,
   gwas_snp_ids,
-  snp_info,
   type,
   context,
+  snp_info,
+  LD_info = NULL,
   weight_format = c("PredictDB", "FUSION"),
   ncore = 1,
   drop_strand_ambig = TRUE,
@@ -18,6 +19,8 @@ preprocess_weights(
   filter_protein_coding_genes = FALSE,
   load_predictdb_LD = FALSE,
   method_FUSION = c("lasso", "enet", "top1", "blup"),
+  fusion_genome_version = c("b38", "b37"),
+  fusion_top_n_snps = NULL,
   logfile = NULL
 )
 }
@@ -28,12 +31,14 @@ preprocess_weights(
 
 \item{gwas_snp_ids}{a vector of SNP IDs in GWAS summary statistics (z_snp$id).}
 
-\item{snp_info}{a data frame, SNP info for LD reference,
-with columns "chrom", "id", "pos", "alt", "ref".}
-
 \item{type}{a string, specifying QTL type of each weight file, e.g. expression, splicing, protein.}
 
 \item{context}{a string, specifying tissue/cell type/condition of each weight file, e.g. Liver, Lung, Brain.}
+
+\item{snp_info}{a list of SNP info data frames for LD reference,
+with columns "chrom", "id", "pos", "alt", "ref", and "region_id".}
+
+\item{LD_info}{a list of paths to LD matrices for each of the regions. Required when \code{load_predictdb_LD = FALSE}.}
 
 \item{weight_format}{a string, specifying format of each weight file, e.g. PredictDB, FUSION.}
 
@@ -44,6 +49,10 @@ with columns "chrom", "id", "pos", "alt", "ref".}
 \item{load_predictdb_LD}{TRUE/FALSE. If TRUE, load pre-computed LD among weight SNPs. This option is only for PredictDB weights}
 
 \item{method_FUSION}{a string, specifying the method to choose in FUSION models}
+
+\item{fusion_genome_version}{a string, specifying the genome version of FUSION models}
+
+\item{fusion_top_n_snps}{a number, specifying the top n weight SNPs included in FUSION models. If NULL, using all weight SNPs}
 
 \item{logfile}{the log file, if NULL will print log info on screen.}
 }

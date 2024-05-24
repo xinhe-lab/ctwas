@@ -4,7 +4,7 @@
 \alias{compute_region_condz}
 \title{Compute expected z-scores based on conditional distribution of z-scores using SuSiE RSS}
 \usage{
-compute_region_condz(region_info, region_id, z_snp, gwas_n)
+compute_region_condz(region_id, LD_info, snp_info, z_snp, gwas_n)
 }
 \description{
 Compute expected z-scores based on conditional distribution of z-scores using SuSiE RSS

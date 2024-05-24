@@ -6,9 +6,10 @@
 \usage{
 screen_regions(
   region_data,
-  region_info,
-  weights,
-  snp_info,
+  use_LD = TRUE,
+  LD_info = NULL,
+  snp_info = NULL,
+  weights = NULL,
   group_prior = NULL,
   group_prior_var = NULL,
   L = 5,
@@ -24,12 +25,13 @@ screen_regions(
 \arguments{
 \item{region_data}{a list object indexing regions, variants and genes.}
 
-\item{region_info}{a data frame of region definition and associated LD file names}
+\item{use_LD}{TRUE/FALSE. If TRUE, use LD for finemapping. Otherwise, use "no-LD" version.}
+
+\item{LD_info}{a list of paths to LD matrices for each of the regions. Required when \code{use_LD = TRUE}.}
+
+\item{snp_info}{a list of SNP info data frames for LD reference. Required when \code{use_LD = TRUE}.}
 
 \item{weights}{a list of weights for each gene}
-
-\item{snp_info}{a data frame, SNP info for LD reference,
-with columns "chrom", "id", "pos", and "region_id".}
 
 \item{group_prior}{a vector of two prior inclusion probabilities for SNPs and genes.}
 

@@ -6,15 +6,6 @@
 \usage{
 add_z_to_region_data(region_data, z_snp, z_gene, ncore = 1)
 }
-\arguments{
-\item{region_data}{a list of region data}
-
-\item{z_snp}{A data frame with columns: "id", "z", giving the z-scores for SNPs.}
-
-\item{z_gene}{A data frame with columns: "id", "z", giving the z-scores for genes.}
-
-\item{ncore}{The number of cores used to parallelize susie over regions}
-}
 \description{
 add z-scores from z_snp and z_gene to region_data
 }

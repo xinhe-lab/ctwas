@@ -27,10 +27,9 @@ assemble_region_data(
 
 \item{z_gene}{A data frame with columns: "id", "z", giving the z-scores for genes.}
 
-\item{weights}{a list of weights}
+\item{weights}{a list of preprocessed weights.}
 
-\item{snp_info}{a data frame, SNP info for LD reference,
-with required columns "chrom", "id", "pos", and "region_id".}
+\item{snp_info}{a list of SNP info data frames for LD reference.}
 
 \item{thin}{The proportion of SNPs to be used for the parameter estimation and
 initial screening region steps.

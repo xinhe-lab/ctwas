@@ -2,10 +2,10 @@
 % Please edit documentation in R/ctwas_region_data.R
 \name{adjust_boundary_genes}
 \alias{adjust_boundary_genes}
-\title{adjust region_data for boundary genes}
+\title{Adjust region_data for boundary genes}
 \usage{
-adjust_boundary_genes(boundary_genes, snp_info, weights, region_data)
+adjust_boundary_genes(boundary_genes, weights, region_data, snp_info)
 }
 \description{
-adjust region_data for boundary genes
+Adjust region_data for boundary genes
 }

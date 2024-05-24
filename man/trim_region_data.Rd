@@ -2,7 +2,7 @@
 % Please edit documentation in R/ctwas_region_data.R
 \name{trim_region_data}
 \alias{trim_region_data}
-\title{Remove SNPs from region_data if the total number of SNPs exceeds limit}
+\title{Trim SNPs from region_data if the total number of SNPs exceeds limit}
 \usage{
 trim_region_data(
   region_data,
@@ -13,5 +13,5 @@ trim_region_data(
 )
 }
 \description{
-Remove SNPs from region_data if the total number of SNPs exceeds limit
+Trim SNPs from region_data if the total number of SNPs exceeds limit
 }
