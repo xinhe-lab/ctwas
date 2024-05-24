@@ -141,9 +141,9 @@ preprocess_weights <- function(weight_file,
     snpnames <- intersect(rownames(wgt.matrix), ld_snpinfo_wgt$id)
     wgt.idx <- match(snpnames, rownames(wgt.matrix))
     wgt <- wgt.matrix[wgt.idx, "weight", drop = F]
-    wgt <- as.data.frame(wgt)
 
     if (weight_format == "FUSION"){
+      wgt <- as.data.frame(wgt)
       wgt[,"abs_weight"] <- abs(wgt$weight)
       wgt <- wgt[order(-wgt$abs_weight),]
       if(!is.null(fusion_top_n_snps)){
@@ -151,6 +151,7 @@ preprocess_weights <- function(weight_file,
       }
       wgt <- wgt[,"weight",drop=F]
       snpnames <- intersect(rownames(wgt), ld_snpinfo_wgt$id)
+      wgt <- as.matrix(wgt)
     }
   
     snps.idx <- match(snpnames, snps$id)
