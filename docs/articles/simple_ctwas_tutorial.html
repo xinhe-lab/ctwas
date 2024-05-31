@@ -174,6 +174,7 @@
 <span>                          <span class="va">snp_info</span>, </span>
 <span>                          drop_multiallelic <span class="op">=</span> <span class="cn">TRUE</span>, </span>
 <span>                          drop_strand_ambig <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span></code></pre></div>
+<<<<<<< HEAD
 <pre><code><span><span class="co">## 2024-05-30 21:05:59 INFO::Preprocessing z_snp...</span></span>
 <span><span class="co">## 2024-05-30 21:05:59 INFO::z_snp has 407828 variants in total</span></span>
 <span><span class="co">## 2024-05-30 21:05:59 INFO::267361 variants left after filtering by snp_info</span></span>
@@ -182,6 +183,16 @@
 <span><span class="co">## 2024-05-30 21:06:00 INFO::Flip signs for 267289 (99.98%) variants</span></span>
 <span><span class="co">## 2024-05-30 21:06:00 INFO::Remove 45738 strand ambiguous variants</span></span>
 <span><span class="co">## 2024-05-30 21:06:00 INFO::221593 variants left after preprocessing and harmonization.</span></span></code></pre>
+=======
+<pre><code><span><span class="co">## 2024-05-30 20:48:07 INFO::Preprocessing z_snp...</span></span>
+<span><span class="co">## 2024-05-30 20:48:07 INFO::z_snp has 407828 variants in total</span></span>
+<span><span class="co">## 2024-05-30 20:48:07 INFO::267361 variants left after filtering by snp_info</span></span>
+<span><span class="co">## 2024-05-30 20:48:07 INFO::Drop 30 multiallelic variants</span></span>
+<span><span class="co">## 2024-05-30 20:48:07 INFO::Harmonize 267331 variants in both GWAS and LD reference</span></span>
+<span><span class="co">## 2024-05-30 20:48:08 INFO::Flip signs for 267289 (99.98%) variants</span></span>
+<span><span class="co">## 2024-05-30 20:48:08 INFO::Remove 45738 strand ambiguous variants</span></span>
+<span><span class="co">## 2024-05-30 20:48:08 INFO::221593 variants left after preprocessing and harmonization.</span></span></code></pre>
+>>>>>>> 3f77ed7f563c1070af8ffd7551f0f0247b00cb09
 </div>
 <div class="section level3">
 <h3 id="harmonizing-prediction-models-and-the-reference-data">Harmonizing prediction models and the reference data<a class="anchor" aria-label="anchor" href="#harmonizing-prediction-models-and-the-reference-data"></a>
@@ -204,6 +215,7 @@
 <span>                                    scale_by_ld_variance <span class="op">=</span> <span class="cn">TRUE</span>,</span>
 <span>                                    load_predictdb_LD <span class="op">=</span> <span class="cn">TRUE</span>,</span>
 <span>                                    filter_protein_coding_genes <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span></code></pre></div>
+<<<<<<< HEAD
 <pre><code><span><span class="co">## 2024-05-30 21:06:00 INFO::Load weight: /tmp/jobs/40040286/RtmpZOBlNC/temp_libpath1caa72ec27cd/ctwas/extdata/sample_data/expression_Liver.db</span></span>
 <span><span class="co">## 2024-05-30 21:06:00 INFO::type: expression</span></span>
 <span><span class="co">## 2024-05-30 21:06:00 INFO::context: liver</span></span>
@@ -212,6 +224,16 @@
 <span><span class="co">## 2024-05-30 21:06:01 INFO::Number of variants in weights: 16929</span></span>
 <span><span class="co">## 2024-05-30 21:06:01 INFO::529 variants and 410 genes left after intersecting with LD reference and GWAS z_snp</span></span>
 <span><span class="co">## 2024-05-30 21:06:01 INFO::Harmonizing weights with LD reference ...</span></span></code></pre>
+=======
+<pre><code><span><span class="co">## 2024-05-30 20:48:08 INFO::Load weight: /tmp/jobs/40040286/RtmpZOBlNC/temp_libpath1caa469b608e/ctwas/extdata/sample_data/expression_Liver.db</span></span>
+<span><span class="co">## 2024-05-30 20:48:08 INFO::type: expression</span></span>
+<span><span class="co">## 2024-05-30 20:48:08 INFO::context: liver</span></span>
+<span><span class="co">## 2024-05-30 20:48:08 INFO::Keep protein coding genes only</span></span>
+<span><span class="co">## 2024-05-30 20:48:08 INFO::Number of genes with weights provided: 11479 in expression_Liver</span></span>
+<span><span class="co">## 2024-05-30 20:48:08 INFO::Number of variants in weights: 16929</span></span>
+<span><span class="co">## 2024-05-30 20:48:08 INFO::529 variants and 410 genes left after intersecting with LD reference and GWAS z_snp</span></span>
+<span><span class="co">## 2024-05-30 20:48:08 INFO::Harmonizing weights with LD reference ...</span></span></code></pre>
+>>>>>>> 3f77ed7f563c1070af8ffd7551f0f0247b00cb09
 <div class="sourceCode" id="cb11"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">weight_adipose_file</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/system.file.html" class="external-link">system.file</a></span><span class="op">(</span><span class="st">"extdata/sample_data"</span>, <span class="st">"expression_Adipose_Subcutaneous.db"</span>, package <span class="op">=</span> <span class="st">"ctwas"</span><span class="op">)</span></span>
 <span></span>
@@ -227,6 +249,7 @@
 <span>                                      scale_by_ld_variance <span class="op">=</span> <span class="cn">TRUE</span>,</span>
 <span>                                      load_predictdb_LD <span class="op">=</span> <span class="cn">TRUE</span>,</span>
 <span>                                      filter_protein_coding_genes <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span></code></pre></div>
+<<<<<<< HEAD
 <pre><code><span><span class="co">## 2024-05-30 21:06:02 INFO::Load weight: /tmp/jobs/40040286/RtmpZOBlNC/temp_libpath1caa72ec27cd/ctwas/extdata/sample_data/expression_Adipose_Subcutaneous.db</span></span>
 <span><span class="co">## 2024-05-30 21:06:02 INFO::type: expression</span></span>
 <span><span class="co">## 2024-05-30 21:06:02 INFO::context: adipose</span></span>
@@ -235,6 +258,16 @@
 <span><span class="co">## 2024-05-30 21:06:02 INFO::Number of variants in weights: 23737</span></span>
 <span><span class="co">## 2024-05-30 21:06:02 INFO::720 variants and 484 genes left after intersecting with LD reference and GWAS z_snp</span></span>
 <span><span class="co">## 2024-05-30 21:06:02 INFO::Harmonizing weights with LD reference ...</span></span></code></pre>
+=======
+<pre><code><span><span class="co">## 2024-05-30 20:48:09 INFO::Load weight: /tmp/jobs/40040286/RtmpZOBlNC/temp_libpath1caa469b608e/ctwas/extdata/sample_data/expression_Adipose_Subcutaneous.db</span></span>
+<span><span class="co">## 2024-05-30 20:48:09 INFO::type: expression</span></span>
+<span><span class="co">## 2024-05-30 20:48:09 INFO::context: adipose</span></span>
+<span><span class="co">## 2024-05-30 20:48:10 INFO::Keep protein coding genes only</span></span>
+<span><span class="co">## 2024-05-30 20:48:10 INFO::Number of genes with weights provided: 13102 in expression_Adipose_Subcutaneous</span></span>
+<span><span class="co">## 2024-05-30 20:48:10 INFO::Number of variants in weights: 23737</span></span>
+<span><span class="co">## 2024-05-30 20:48:10 INFO::720 variants and 484 genes left after intersecting with LD reference and GWAS z_snp</span></span>
+<span><span class="co">## 2024-05-30 20:48:10 INFO::Harmonizing weights with LD reference ...</span></span></code></pre>
+>>>>>>> 3f77ed7f563c1070af8ffd7551f0f0247b00cb09
 <div class="sourceCode" id="cb13"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># concatenate weights from different types or contexts</span></span>
 <span><span class="va">weights</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="va">weights_liver</span>, <span class="va">weights_adipose</span><span class="op">)</span></span></code></pre></div>
@@ -407,10 +440,17 @@
 <span>               use_LD <span class="op">=</span> <span class="cn">FALSE</span>,</span>
 <span>               pip_thresh <span class="op">=</span> <span class="fl">0.8</span>,</span>
 <span>               locus_range <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">71.6e6</span>,<span class="fl">72.4e6</span><span class="op">)</span><span class="op">)</span></span></code></pre></div>
+<<<<<<< HEAD
 <pre><code><span><span class="co">## 2024-05-30 21:06:07 INFO::focus gene: HPR</span></span>
 <span><span class="co">## 2024-05-30 21:06:07 INFO::focus id: ENSG00000261701.6|expression_Liver</span></span>
 <span><span class="co">## 2024-05-30 21:06:07 INFO::locus_range: 71600000,72400000</span></span>
 <span><span class="co">## 2024-05-30 21:06:08 INFO::QTL positions: 72063820,72063928</span></span></code></pre>
+=======
+<pre><code><span><span class="co">## 2024-05-30 20:48:15 INFO::focus gene: HPR</span></span>
+<span><span class="co">## 2024-05-30 20:48:15 INFO::focus id: ENSG00000261701.6|expression_Liver</span></span>
+<span><span class="co">## 2024-05-30 20:48:15 INFO::locus_range: 71600000,72400000</span></span>
+<span><span class="co">## 2024-05-30 20:48:15 INFO::QTL positions: 72063820,72063928</span></span></code></pre>
+>>>>>>> 3f77ed7f563c1070af8ffd7551f0f0247b00cb09
 <div class="figure" style="text-align: center">
 <img src="simple_ctwas_tutorial_files/figure-html/locus_plot-1.png" alt="&amp;nbsp;" width="1200"><p class="caption">
  
