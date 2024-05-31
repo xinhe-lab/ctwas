@@ -25,13 +25,14 @@ This document demonstrates how to run a simple analysis using cTWAS with GWAS su
 
 In this tutorial, we will show how to perform cTWAS main analysis with summary statistics without using LD matrices. 
 
+
 Load the `ctwas` package.
 ```{r load_packages, message=FALSE}
 library(ctwas)
 ```
 
 
-We require first running the data preprocessing and harmonization steps before running cTWAS analysis. Please read the tutorial [Preparing cTWAS input data]() to prepare cTWAS input data.
+We require first running the data preprocessing and harmonization steps before running cTWAS analysis. Please read the "Preparing cTWAS input data" tutorial to prepare cTWAS input data.
 
 In this tutorial, we use sample data for chromosome 16 provided in the package. 
 
@@ -100,7 +101,7 @@ head(region_info)
 
 
 Note: in this simple tutorial, we use the "no-LD" version, so we use `use_LD = FALSE`. 
-Please see the [tutorials]() for running cTWAS using the LD version. 
+Please see the other tutorials for running full cTWAS analysis using LD. 
 
 ### Harmonizing GWAS z-scores and the reference data
 
@@ -269,7 +270,7 @@ finemap_res <- anno_finemap_res(finemap_res, snp_info, ens_db, use_gene_pos = "m
 
 
 We list all molecular traits with PIP > 0.8, which is the threshold we used in the paper.
-```{r interpret_res, eval=FALSE}
+```{r interpret_res}
 # select PIP > 0.8
 sig_finemap_res <- finemap_res[finemap_res$type!="SNP" & finemap_res$susie_pip > 0.8,]
 
@@ -281,7 +282,7 @@ head(sig_finemap_res[order(-sig_finemap_res$susie_pip),])
 When we have multiple contexts (tissues), 
 it is useful to evaluate the combined PIP for each molecular trait across contexts:
 
-```{r combine_pips, eval=FALSE}
+```{r combine_pips}
 # combine PIPs across contexts (tissues)
 combined_gene_pips <- sum_pip_across_contexts(finemap_res)
 

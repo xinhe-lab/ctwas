@@ -24,7 +24,7 @@ knitr::opts_chunk$set(message = FALSE,
 
 This document demonstrates how to use the summary statistics version of cTWAS. Running cTWAS involves several major steps: preparing input data, computing z-scores of molecular traits, estimating parameters, screening for candidate genomic regions, and fine-mapping these regions. In this tutorial, we will show how to perform cTWAS analysis by running each of the cTWAS modules separately. This would allow more flexible controls of the cTWAS modules with different settings (memory, parallelization, etc.). We could save the results from each module for future access.
 
-We require first running the data preprocessing and harmonization steps before running cTWAS main analysis. Please follow the tutorial [Preparing cTWAS input data]() to prepare cTWAS input data.
+We require first running the data preprocessing and harmonization steps before running cTWAS main analysis. Please follow the "Preparing cTWAS input data" tutorial to prepare cTWAS input data.
 
 *Important*: It is possible to run cTWAS without any reference LD data. This would make the data preparation and analysis considerably simpler and faster. To do this, we make the assumption that there is at most one causal signal (either a variant or a molecular trait) in a single GWAS locus. This can be implemented by running the fine-mapping analysis (see below) with the option of L = 1. The downside of running cTWAS without LD is that you may miss secondary signals in certain regions. See the section below “Running cTWAS without LD” for details.  
 
