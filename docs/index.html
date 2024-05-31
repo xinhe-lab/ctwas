@@ -33,7 +33,7 @@
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="index.html">ctwas</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">0.2.1</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">0.2.3</span>
       </span>
     </div>
 
@@ -50,6 +50,9 @@
   </a>
   <ul class="dropdown-menu" role="menu">
 <li>
+      <a href="articles/simple_ctwas_tutorial.html">Simple cTWAS tutorial</a>
+    </li>
+    <li>
       <a href="articles/preparing_ctwas_input_data.html">Preparing cTWAS input data</a>
     </li>
     <li>
@@ -87,11 +90,28 @@
       </header><div class="row">
   <div class="contents col-md-9">
 <div class="section level1">
-<div class="page-header"><h1 id="ctwas">cTWAS<a class="anchor" aria-label="anchor" href="#ctwas"></a>
+<div class="page-header"><h1 id="ctwas-integrating-molecular-qtls-and-gwas-for-gene-discovery">cTWAS: integrating molecular QTLs and GWAS for gene discovery<a class="anchor" aria-label="anchor" href="#ctwas-integrating-molecular-qtls-and-gwas-for-gene-discovery"></a>
 </h1></div>
-<p>Running cTWAS involves four main steps: preparing input data, computing gene z-scores, estimating parameters, and fine-mapping genes and variants.</p>
-<p>We have included <a href="https://xinhe-lab.github.io/multigroup_ctwas/articles/" class="external-link">tutorials</a> for using cTWAS with summary statistics.</p>
-<p>You can <a href="https://github.com/xinhe-lab/ctwas/tree/multigroup_test" class="external-link">browse source code</a>.</p>
+<p>Expression Quantitative Trait Loci (eQTLs) have often been used to nominate candidate genes from Genome-wide association studies (GWAS). However, commonly used methods are susceptible to false positives largely due to Linkage Disequilibrium of eQTLs with causal variants acting on the phenotype directly.</p>
+<p>Our method, causal-TWAS (cTWAS), addressed this challenge by borrowing ideas from statistical fine-mapping. It is a generalization of Transcriptome-wide association studies (TWAS), but when analyzing any gene, it adjusts for other nearby genes and all nearby genetic variants.</p>
+<p>While the <a href="https://doi.org/10.1038/s41588-023-01648-9" class="external-link">published paper</a> analyzes a single eQTL dataset, the latest version of cTWAS extends the method to integrate multiple groups of prediction models, allowing for joint analysis of multiple types of molecular traits, across potentially different tissues, cell types or conditions.</p>
+<p>Running cTWAS involves four main steps: preparing input data, computing gene z-scores, estimating parameters, and fine-mapping. The output of cTWAS are posterior inclusion probabilities (PIPs) for all variants and molecular traits..</p>
+<p>We have included the following tutorials:</p>
+<ul>
+<li><p><a href="https://xinhe-lab.github.io/multigroup_ctwas/articles/simple_ctwas_tutorial.html" class="external-link">A minimum tutorial of how to run cTWAS without LD</a></p></li>
+<li>
+<p>To run the full cTWAS, a few more tutorials including:</p>
+<ul>
+<li><p><a href="https://xinhe-lab.github.io/multigroup_ctwas/articles/preparing_ctwas_input_data.html" class="external-link">Preparing input data</a></p></li>
+<li><p><a href="https://xinhe-lab.github.io/multigroup_ctwas/articles/ctwas_main_function.html" class="external-link">Running cTWAS main function</a></p></li>
+<li><p><a href="https://xinhe-lab.github.io/multigroup_ctwas/articles/ctwas_modules.html" class="external-link">Running cTWAS by modules</a></p></li>
+<li><p><a href="https://xinhe-lab.github.io/multigroup_ctwas/articles/summarizing_ctwas_results.html" class="external-link">Summarizing and visualizing cTWAS results</a></p></li>
+<li><p><a href="https://xinhe-lab.github.io/multigroup_ctwas/articles/postprocessing_ctwas_results.html" class="external-link">Post-processing cTWAS results</a></p></li>
+</ul>
+</li>
+</ul>
+<p>You can <a href="https://github.com/xinhe-lab/ctwas/tree/multigroup_test" class="external-link">browse source code</a> and <a href="https://github.com/xinhe-lab/ctwas/issues" class="external-link">report a bug</a> here.</p>
+<p><img style="display:block;margin:auto" width="700" height="300" src="reference/figures/workflow.png"></p>
 <div class="section level2">
 <h2 id="install">Install<a class="anchor" aria-label="anchor" href="#install"></a>
 </h2>
@@ -110,6 +130,7 @@
 <h2 id="useful-resources">Useful resources<a class="anchor" aria-label="anchor" href="#useful-resources"></a>
 </h2>
 <p>We have pre-computed the LD matrices of European samples from UK Biobank. They can be downloaded <a href="https://uchicago.box.com/s/jqocacd2fulskmhoqnasrknbt59x3xkn" class="external-link">here</a>.</p>
+<p>We have the lists of reference variant information from all the LD matrices in the genome in <a href="https://uchicago.box.com/s/t089or92dkovv0epkrjvxq8r9db9ys99" class="external-link">hg38</a> and <a href="https://uchicago.box.com/s/ufko2gjagcb693dob4khccqubuztb9pz" class="external-link">hg19</a>.</p>
 <p>cTWAS requires the expression prediction models, or weights, of genes. The pre-computed weights of GTEx expression and splicing traits can be downloaded from <a href="https://predictdb.org/post/2021/07/21/gtex-v8-models-on-eqtl-and-sqtl/" class="external-link">PredictDB</a>.</p>
 </div>
 <div class="section level2">

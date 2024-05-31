@@ -25,6 +25,9 @@
     <loc>/articles/preparing_ctwas_input_data.html</loc>
   </url>
   <url>
+    <loc>/articles/simple_ctwas_tutorial.html</loc>
+  </url>
+  <url>
     <loc>/articles/summarizing_ctwas_results.html</loc>
   </url>
   <url>
@@ -52,6 +55,9 @@
     <loc>/reference/adjust_boundary_genes.html</loc>
   </url>
   <url>
+    <loc>/reference/anno_finemap_res.html</loc>
+  </url>
+  <url>
     <loc>/reference/anno_susie.html</loc>
   </url>
   <url>
@@ -71,6 +77,9 @@
   </url>
   <url>
     <loc>/reference/compute_gene_z.html</loc>
+  </url>
+  <url>
+    <loc>/reference/compute_region_condz.html</loc>
   </url>
   <url>
     <loc>/reference/compute_region_cor.html</loc>
@@ -103,6 +112,9 @@
     <loc>/reference/ctwas_sumstats.html</loc>
   </url>
   <url>
+    <loc>/reference/ctwas_sumstats_noLD.html</loc>
+  </url>
+  <url>
     <loc>/reference/ctwas_susie_rss.html</loc>
   </url>
   <url>
@@ -110,6 +122,9 @@
   </url>
   <url>
     <loc>/reference/detect_ld_mismatch_susie_rss.html</loc>
+  </url>
+  <url>
+    <loc>/reference/diagnose_ld_mismatch_susie.html</loc>
   </url>
   <url>
     <loc>/reference/est_param.html</loc>
@@ -163,7 +178,13 @@
     <loc>/reference/get_regionlist.html</loc>
   </url>
   <url>
+    <loc>/reference/harmonize_weights.html</loc>
+  </url>
+  <url>
     <loc>/reference/harmonize_wgt_ld.html</loc>
+  </url>
+  <url>
+    <loc>/reference/harmonize_z.html</loc>
   </url>
   <url>
     <loc>/reference/harmonize_z_ld.html</loc>
@@ -196,6 +217,9 @@
     <loc>/reference/make_locusplot.html</loc>
   </url>
   <url>
+    <loc>/reference/map_snp_info_regions.html</loc>
+  </url>
+  <url>
     <loc>/reference/merge_finemap_regions.html</loc>
   </url>
   <url>
@@ -209,6 +233,9 @@
   </url>
   <url>
     <loc>/reference/prep_pvar.html</loc>
+  </url>
+  <url>
+    <loc>/reference/preprocess_region_LD_snp_info.html</loc>
   </url>
   <url>
     <loc>/reference/preprocess_weights.html</loc>
@@ -244,6 +271,12 @@
     <loc>/reference/read_pvar.html</loc>
   </url>
   <url>
+    <loc>/reference/read_snp_info_file.html</loc>
+  </url>
+  <url>
+    <loc>/reference/read_snp_info_files.html</loc>
+  </url>
+  <url>
     <loc>/reference/read_var_info.html</loc>
   </url>
   <url>
@@ -269,6 +302,9 @@
   </url>
   <url>
     <loc>/reference/single_effect_regression.html</loc>
+  </url>
+  <url>
+    <loc>/reference/sum_pip_across_contexts.html</loc>
   </url>
   <url>
     <loc>/reference/summarize_param.html</loc>

@@ -29,13 +29,12 @@ Load the package
 library(ctwas)
 ```
 
-### Memory and Parallelization
-
 ### Running cTWAS without LD matrices
 
-In case you do not have LD matrices, it is possible to run cTWAS without LD matrices. 
-To do this, simply set `L = 1` and `cor_dir = NULL`. 
-Then it will run with `L = 1` without LD matrices. 
+It is possible to run cTWAS without LD matrices. 
+To do this, simply set `use_LD = FALSE`, and `L = 1`. 
+
+### Memory and parallelization
 
 ### How to use a different LD reference
 

@@ -17,7 +17,7 @@
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">ctwas</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">0.2.1</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">0.2.3</span>
       </span>
     </div>
 
@@ -32,6 +32,9 @@
     <span class="caret"></span>
   </a>
   <ul class="dropdown-menu" role="menu"><li>
+      <a href="../articles/simple_ctwas_tutorial.html">Simple cTWAS tutorial</a>
+    </li>
+    <li>
       <a href="../articles/preparing_ctwas_input_data.html">Preparing cTWAS input data</a>
     </li>
     <li>
@@ -77,13 +80,17 @@
 <span>  <span class="va">region_id</span>,</span>
 <span>  <span class="va">weights</span>,</span>
 <span>  <span class="va">ens_db</span>,</span>
+<span>  use_LD <span class="op">=</span> <span class="cn">TRUE</span>,</span>
+<span>  LD_info <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  snp_info <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  save_cor <span class="op">=</span> <span class="cn">FALSE</span>,</span>
 <span>  cor_dir <span class="op">=</span> <span class="cn">NULL</span>,</span>
-<span>  region_info <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  region_data <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  locus_range <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  focus_gene <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  gene_biotype <span class="op">=</span> <span class="st">"protein_coding"</span>,</span>
+<span>  p_thresh <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  pip_thresh <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  point.sizes <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">1</span>, <span class="fl">3.5</span><span class="op">)</span>,</span>
 <span>  point.alpha <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">0.4</span>, <span class="fl">0.6</span><span class="op">)</span>,</span>
 <span>  point.shapes <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">21</span><span class="op">:</span><span class="fl">25</span><span class="op">)</span>,</span>
@@ -113,16 +120,24 @@
 <dd><p>Ensembl database</p></dd>
 
 
+<dt>use_LD</dt>
+<dd><p>TRUE/FALSE. If TRUE, use LD for finemapping. Otherwise, use "no-LD" version.</p></dd>
+
+
+<dt>LD_info</dt>
+<dd><p>a list of paths to LD matrices for each of the regions. Required when <code>use_LD = TRUE</code>.</p></dd>
+
+
+<dt>snp_info</dt>
+<dd><p>a list of SNP info data frames for LD reference. Required when <code>use_LD = TRUE</code>.</p></dd>
+
+
 <dt>save_cor</dt>
 <dd><p>TRUE/FALSE. If TRUE, save correlation (R) matrices to <code>cor_dir</code></p></dd>
 
 
 <dt>cor_dir</dt>
 <dd><p>path of correlation matrices</p></dd>
-
-
-<dt>region_info</dt>
-<dd><p>a data frame of region definition and associated LD file names</p></dd>
 
 
 <dt>region_data</dt>
