@@ -21,78 +21,103 @@ knitr::opts_chunk$set(message = FALSE,
 ```
 
 
-## Using cTWAS modules
 
-In this tutorial, we will show how to perform cTWAS analysis with summary statistics by running each of the cTWAS modules separately. This would allow more flexible controls of the cTWAS modules with different settings (memory, parallelization, etc.). We could save the results from each module for future access.
+This document demonstrates how to use the summary statistics version of cTWAS. Running cTWAS involves several major steps: preparing input data, computing z-scores of molecular traits, estimating parameters, screening for candidate genomic regions, and fine-mapping these regions. In this tutorial, we will show how to perform cTWAS analysis by running each of the cTWAS modules separately. This would allow more flexible controls of the cTWAS modules with different settings (memory, parallelization, etc.). We could save the results from each module for future access.
 
-We require first running the data preprocessing and harmonization steps before running cTWAS main analysis. 
+We require first running the data preprocessing and harmonization steps before running cTWAS main analysis. Please follow the tutorial [Preparing cTWAS input data]() to prepare cTWAS input data.
 
-Please follow the tutorial [Preparing cTWAS input data]() to prepare cTWAS input data.
+*Important*: It is possible to run cTWAS without any reference LD data. This would make the data preparation and analysis considerably simpler and faster. To do this, we make the assumption that there is at most one causal signal (either a variant or a molecular trait) in a single GWAS locus. This can be implemented by running the fine-mapping analysis (see below) with the option of L = 1. The downside of running cTWAS without LD is that you may miss secondary signals in certain regions. See the section below “Running cTWAS without LD” for details.  
 
 Load the packages
 ```{r load_package, message=FALSE}
 library(ctwas)
 ```
 
-Load the prepared input data
-```{r load_ctwas_res, eval=FALSE}
-# output directory
-outputdir <- "/project2/xinhe/shared_data/multigroup_ctwas/tutorial/LDL_multitissue_tutorial/output/"
-outname <- "LDL.Liver_Adipose"
+
+In this version of cTWAS, we allow the joint analysis of multiple groups of molecular traits. This could be: eQTL of multiple tissues; or eQTLs, splicing QTLs and other types of QTLs in a single tissue. In a more complex setting, multiple types of QTL data from multiple tissues/cell types. Each group is defined by its “type” (kind of molecular traits), and “context” (tissue, cell type, condition, etc.). Please see the section "Harmonizing prediction models and the reference data" in the "Preparing cTWAS input data" tutorial. 
+
+Load the prepared input data, including GWAS summary statistics (Z scores of variants), weights of molecular traits, region information, and computed Z-scores of the molecular traits. 
+
+In this tutorial, we use sample data for chromosome 16 provided in the package. 
+
+```{r load_sample_data}
+
+# load sample data
 
 # Load z_snp
-z_snp <- readRDS(file.path(outputdir, paste0(outname, ".preprocessed.z_snp.RDS")))
+z_snp <- readRDS(system.file("extdata/sample_data", "LDL_example.preprocessed.z_snp.RDS", package = "ctwas"))
 
 # Load weights
-weights <- readRDS(file.path(outputdir, paste0(outname, ".preprocessed.weights.RDS")))
+weights <- readRDS(system.file("extdata/sample_data", "LDL_example.preprocessed.weights.RDS", package = "ctwas"))
 
 # Load region info
-region_info <- readRDS(file.path(outputdir, "region_info.RDS"))
+region_info <- readRDS(system.file("extdata/sample_data", "LDL_example.region_info.RDS", package = "ctwas"))
+
+# Load LD info
+LD_info <- readRDS(system.file("extdata/sample_data", "LDL_example.LD_info.RDS", package = "ctwas"))
+
+# Load SNP info
+snp_info <- readRDS(system.file("extdata/sample_data", "LDL_example.snp_info.RDS", package = "ctwas"))
 
 # Load gene z-scores
-z_gene <- readRDS(file.path(outputdir, paste0(outname, ".z_gene.RDS")))
+z_gene <- readRDS(system.file("extdata/sample_data", "LDL_example.z_gene.RDS", 
+package = "ctwas"))
 ```
 
-### Assemble input data for the regions
+Let's set the cTWAS output directory and output name, and we use 6 cores to parallelize computing over regions.
+```{r settings}
+setwd("/project2/xinhe/shared_data/multigroup_ctwas/tutorial/LDL_multitissue_tutorial/")
 
-After we have done data preprocessing and computed z-scores of molecular traits, we assemble the input data for all the regions using the `assemble_region_data()` function .  
-It assigns genes (molecular traits), SNPs and their z-score data for each region.
-`region_info` is a data frame with genome coordinates, LD matrix and SNP info of all the regions. `z_snp` is a data frame with preprocessed GWAS z-scores. `z_gene` is a data frame with computed z-scores of molecular traits. `weights` is a list of preprocessed weights from PredictDB or FUSION prediction models. The `thin` argument randomly selects a subset of variants (10% when thin = 0.1) to use during the parameter estimation and screening regions, reducing computation. If `thin = 1`, it will use all the SNPs. If `adjust_boundary_genes = TRUE`, it will identify the genes (molecular traits) that cross boundaries of multiple regions, and reassign them to one of the regions with the largest effect according to the eQTL effect sizes. `maxSNP` sets a maximum on the number of variants that can be in a single region to prevent memory issues during fine-mapping. If the number of SNPs in a region is more than `maxSNP`, It will trim the SNPs (randomly, by default) in the region. `ncore` specifies the number of cores to use when parallelizing over regions.
+outputdir <- "./ctwas_output"
+dir.create(outputdir, showWarnings=F, recursive=T)
+
+outname <- "LDL_example"
+
+ncore <- 6
+``` 
+
+
+## Assemble input data for the regions
+
+Because cTWAS runs region-by-region, we will first need to prepare data for each region. After data preprocessing and computation of z-scores of molecular traits, we assemble the input data for all the regions using the `assemble_region_data()` function .  
+It assigns genes (molecular traits), SNPs and their z-score data for each region. The function has several main arguments. `region_info` is a data frame with genome coordinates, LD matrix and SNP info of all the regions. `z_snp` is a data frame with preprocessed GWAS z-scores. `z_gene` is a data frame with computed z-scores of molecular traits. `weights` is a list of preprocessed weights from prediction models. 
 
 ```{r assemble_region_data, eval=FALSE}
-res <- assemble_region_data(region_info, 
-                            z_snp, 
-                            z_gene, 
-                            weights,
-                            thin = 0.1,
-                            maxSNP = 20000,
-                            adjust_boundary_genes = TRUE,
-                            ncore = ncore)
+thin <- 0.1
+maxSNP <- 20000
+res <- assemble_region_data(region_info, z_snp, z_gene, weights, snp_info,
+                            thin = thin, maxSNP = maxSNP,
+                            adjust_boundary_genes = TRUE, ncore = ncore)
 region_data <- res$region_data
 boundary_genes <- res$boundary_genes
 
-saveRDS(res, file.path(outputdir, paste0(outname, ".region_data.thin", thin, ".RDS")))
+
+# we could save the results for future access
+# saveRDS(region_data, file.path(outputdir, paste0(outname, ".region_data.thin", thin, ".RDS")))
+# saveRDS(boundary_genes, file.path(outputdir, paste0(outname, ".boundary_genes.RDS")))
 ```
 
 
-This functions returns a list with `region_data`, assembled input data for all the regions, 
-as well as a data frame containing the region information for each of cross-boundary genes (or molecular traits).
+The function has a few extra arguments to control its behavior. The `thin` argument randomly selects a subset of variants (10% when thin = 0.1) to use during parameter estimation and screening for candidate regions. This helps reduce computation. If `thin = 1`, it will use all the SNPs. If `adjust_boundary_genes = TRUE`, it will identify the genes (molecular traits) that cross boundaries of multiple regions, and assign them to one of these regions where the total weight of the variants in the region is the highest. `maxSNP` sets a maximum on the number of variants that can be in a single region to prevent memory issues during fine-mapping. If the number of SNPs in a region is more than `maxSNP`, It will trim the SNPs (randomly, by default) in the region. `ncore` specifies the number of cores to use when parallelizing over regions.
 
-### Estimating parameters
+This functions returns `region_data`, a list object containing input data (gene and SNP IDs, z-scores, region genomic coordinates, etc.) for each of the regions, 
+as well as a data frame `boundary_genes`, containing the information for each of cross-boundary genes (or molecular traits).
+
+## Estimating parameters
 
 We use the `est_param()` function to estimate two sets of parameters: the prior inclusion probabilities and the prior effect size variance. It will take the assembled `region_data` as input. 
 
-There are several options for how to handle the prior effect size parameters by specifying the `group_prior_var_stucture`:
+As described in the Introduction, cTWAS can analyze multiple groups of molecular traits. This step will estimate the prior parameters for each group. But we allow sharing of the prior effect variance parameters among groups. This may improve the accuracy of parameter estimation. If the input data has several groups of similar molecular traits (e.g. eQTLs from several brain regions), estimation of parameters for each group separately may lead to relatively large estimation error. There are several options to control how parameters are shared among groups. This can be done by specifying the `group_prior_var_stucture`:
 
 - "shared_type" (default option) allows all groups in one molecular QTL type to share the same variance parameter.
-- "shared_context" allows all groups in one context (tissue, cell type, condition) to share the same variance parameter.
+-  "shared_context" allows all groups in one context (tissue, cell type, condition) to share the same variance parameter.
 - "shared_nonSNP" allows all non-SNP groups to share the same variance parameter.
 - "shared_all" allows all groups to share the same variance parameter.
 - "independent" allows all groups to have their own separate variance parameters.
 
-This step will run the EM algorithm to estimate parameters and return estimate parameters (`group_prior`, `group_prior_var`, etc.).
-It will run two rounds of EM algorithm, first round uses fewer iterations (`niter_prefit=3` by default) to get rough parameter estimates, 
-and using the estimated priors in the first round, we select regions with single effect to run the second round.
+This step will run the EM algorithm to estimate parameters and return the estimated parameters (`group_prior`, `group_prior_var`, etc.).
+For technical reasons (see Methods of the cTWAS paper), it will run two rounds of EM algorithm. In the first round, it uses fewer iterations (`niter_prefit=3` by default) to get rough parameter estimates, and using these values, select regions for the analysis in the second run of EM. 
+
 We use more iterations in the second round (`niter=30` by default) to get accurate parameter estimates. 
 
 ```{r est_param, eval=FALSE}
@@ -103,92 +128,103 @@ param <- est_param(region_data,
                    ncore = ncore)
 group_prior <- param$group_prior
 group_prior_var <- param$group_prior_var
-saveRDS(param, file.path(outputdir, paste0(outname, ".param.RDS")))
+# saveRDS(param, file.path(outputdir, paste0(outname, ".param.RDS")))
 ```
 
 
-### Screening regions
+*Note:*, we used sample data (from chr16) in this example, however, in real data analysis, parameter estimation should be done using data from the entire genome.
 
-After parameter estimation, we use the `screen_regions()` function to perform a screening process to fine-map all regions using thinned variants, and select regions with strong signals (total non-SNP PIP greater than 0.5, by default). It returns a data frame with region IDs and nonSNP PIPs for each region. We could further narrow down the list of regions by using more stringent `min_nonSNP_PIP` cutoffs.
+## Screening regions
+
+After parameter estimation, we use the `screen_regions()` function to perform a screening process to select regions with likely causal signals in molecular traits. Only these regions would be subject to full fine-mapping analysis, using all genetic variants, in the final step. Thus screening regions can save computational time. To find these regions, we perform an initial fine-mapping with thinned SNPs (a subset of all variants, see the Section “Assemble input data”). Then we select the candidate regions with the total PIP from molecular traits (non-SNPs) greater than 0.5, by default. It returns a data frame with region IDs and non-SNP PIPs for each region. We could further narrow down the list of regions by using more stringent `min_nonSNP_PIP` cutoffs.
 
 ```{r screen_regions, eval=FALSE}
-screen_regions_res <- screen_regions(region_data,
-                                     region_info,
-                                     weights,
-                                     L = 5,
-                                     group_prior = group_prior,
-                                     group_prior_var = group_prior_var,
-                                     min_nonSNP_PIP = 0.5,
-                                     ncore = ncore,
-                                     verbose = TRUE)
-screened_region_data <- screen_regions_res$screened_region_data
-region_nonSNP_PIP_df <- screen_regions_res$region_nonSNP_PIP_df
+res <- screen_regions(region_data,
+                      use_LD = TRUE,
+                      LD_info = LD_info,
+                      snp_info = snp_info, 
+                      weights = weights, 
+                      L = 5,
+                      group_prior = group_prior,
+                      group_prior_var = group_prior_var,
+                      min_nonSNP_PIP = 0.5,
+                      ncore = ncore,
+                      verbose = FALSE)
+screened_region_data <- res$screened_region_data
+region_nonSNP_PIP_df <- res$region_nonSNP_PIP_df
 ```
 
 
-After selecting regions with strong signals, we expand the screened regions with 
-full sets of SNPs for final finemapping.  If the number of SNPs in a region is more than `maxSNP`, It will trim the SNPs in the region (according to the z-scores, by default).
-This step is not needed if `thin = 1`.
+*Note*, it is possible to run without LD.  To do this, simply set `use_LD = FALSE`, and `L = 1`.
+
+After selecting regions, we expand the screened regions with 
+full sets of SNPs for final fine mapping.  If the number of SNPs in a region is more than `maxSNP`, It will trim the SNPs in the region (according to the z-scores, by default).
+
+The following step is not needed if `thin = 1`.
 
 ```{r expand_region_data, eval=FALSE}
 if (thin < 1){
   screened_region_data <- expand_region_data(screened_region_data,
-                                             region_info,
+                                             snp_info,
                                              z_snp,
                                              z_gene,
                                              trim_by = "z",
                                              maxSNP = 20000,
                                              ncore = ncore)
-
-  # update data in screened regions with screened_region_data
-  region_data[names(screened_region_data)] <- screened_region_data
-  saveRDS(region_data, file.path(outputdir, paste0(outname, ".region_data.RDS")))
 }
 
-saveRDS(screened_region_data, file.path(outputdir, paste0(outname, ".screened_region_data.RDS")))
+# saveRDS(screened_region_data, file.path(outputdir, paste0(outname, ".screened_region_data.RDS")))
 ```
 
 
-### Fine-mapping screened regions
+## Fine-mapping screened regions
 
 We now perform the fine-mapping step for each of the screened regions with the estimated parameters.
 
 The `finemap_regions()` function performs fine-mapping for the regions in the `screened_region_data`.
 
-It first computes correlation matrices (SNP-SNP, SNP-gene, and gene-gene correlation matrices), 
+It first computes correlation matrices among all variables included in fine-mapping (SNPs, and molecular traits), 
 and then runs fine-mapping with estimated parameters (`group_prior` and `group_prior_var`),
 and returns a data frame with fine-mapping results for the regions.
 
 If `save_cor = TRUE`, it will save the computed correlation matrices to `cor_dir` for future access.
 
 ```{r finemap_regions, eval=FALSE}
+# directory for computed correlation matrices
+cor_dir <- file.path(outputdir, "cor_matrix")
+
+# finemap screened regions
 finemap_res <- finemap_regions(screened_region_data,
-                               region_info,
-                               weights,
+                               use_LD = TRUE,
+                               LD_info = LD_info,
+                               snp_info = snp_info,
+                               weights = weights,
                                group_prior = group_prior,
                                group_prior_var = group_prior_var,
                                L = 5,
                                save_cor = TRUE,
-                               cor_dir = file.path(outputdir, "cor_matrix"),
+                               cor_dir = cor_dir,
                                ncore = ncore,
                                verbose = TRUE)
-saveRDS(finemap_res, file.path(outputdir, paste0(outname, ".ctwas.res.RDS")))
+
+# saveRDS(finemap_res, file.path(outputdir, paste0(outname, ".ctwas.res.RDS")))
 ```
 
 
+*Note*, it is possible to run without LD.  To do this, simply set `use_LD = FALSE`, and `L = 1`.
 
-### Fine-mapping a single region
+## Fine-mapping a single region
 
-We could also run finemapping for a single region (or multiple regions) with precomputed parameters. 
+We could also run fine mapping for a single region (or multiple regions) with precomputed parameters. 
 
-Here we show an example for finemapping a single region "16:71020125-72901251".
+Here we show an example for fine mapping a single region "16:71020125-72901251".
 
-We will first expand the region of interest with a full set of SNPs using the preassembled `region_data`.
+We will first expand the region of interest with a full set of SNPs using the assembled `region_data`.
 
-```{r finemap_single_region, eval=FALSE}
+```{r example_region, eval=FALSE}
 region_id <- "16:71020125-72901251"
 selected_region_data <- expand_region_data(region_data[region_id],
-                                           region_info,
+                                           snp_info,
                                            z_snp,
                                            z_gene,
                                            maxSNP = 20000,
@@ -196,24 +232,25 @@ selected_region_data <- expand_region_data(region_data[region_id],
 ```
 
 
-We could then perform finemapping for this region of interest:
-```{r finemap_single_region_2, eval=FALSE}
+We could then perform fine mapping for this region of interest:
+```{r finemap_single_region, eval=FALSE}
 finemap_region_res <- finemap_regions(selected_region_data,
-                                      region_info,
-                                      weights,
+                                      use_LD = TRUE,
+                                      LD_info = LD_info,
+                                      snp_info = snp_info,
+                                      weights = weights,
                                       group_prior = group_prior,
                                       group_prior_var = group_prior_var,
                                       L = 5,
                                       save_cor = TRUE,
-                                      cor_dir = file.path(outputdir, "cor_matrix"),
+                                      cor_dir = cor_dir,
                                       verbose = TRUE)
 ```
-
 
 
 ## Running cTWAS without LD matrices
 
 In case you do not have LD matrices, it is possible to run cTWAS without LD matrices. 
 
-To do this, simply set `L = 1` in `screen_regions()` and `finemap_regions()` and also set `cor_dir = NULL` in  `finemap_regions()` . Then it will run these steps with `L = 1` without LD matrices. 
+To do this, simply set `use_LD = FALSE`, and `L = 1` in `screen_regions()` and `finemap_regions()`. Then it will run these steps with `L = 1` without LD matrices. 
 

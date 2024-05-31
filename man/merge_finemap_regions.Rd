@@ -2,18 +2,18 @@
 % Please edit documentation in R/ctwas_merge_regions.R
 \name{merge_finemap_regions}
 \alias{merge_finemap_regions}
-\title{Title}
+\title{Merge regions with boundary genes and finemap merged regions}
 \usage{
 merge_finemap_regions(
   boundary_genes,
   region_data,
   region_info,
-  LD_info,
-  snp_info,
   z_snp,
   z_gene,
   weights,
   use_LD = TRUE,
+  LD_info = NULL,
+  snp_info = NULL,
   maxSNP = Inf,
   expand = TRUE,
   group_prior = NULL,
@@ -31,17 +31,23 @@ merge_finemap_regions(
 )
 }
 \arguments{
-\item{boundary_genes}{a data frame of boundary gene info}
+\item{boundary_genes}{a data frame of boundary genes}
 
 \item{region_data}{a list of original region_data}
 
-\item{region_info}{a data frame of region definition and associated LD file names}
+\item{region_info}{a data frame of region definitions}
 
 \item{z_snp}{A data frame with columns: "id", "z", giving the z-scores for SNPs.}
 
 \item{z_gene}{A data frame with columns: "id", "z", giving the z-scores for genes.}
 
 \item{weights}{a list of weights for each gene}
+
+\item{use_LD}{TRUE/FALSE. If TRUE, use LD for finemapping.}
+
+\item{LD_info}{a list of paths to LD matrices for each of the regions.}
+
+\item{snp_info}{a list of SNP info data frames for LD reference.}
 
 \item{maxSNP}{Inf or integer. Maximum number of SNPs in a region. Default is
 Inf, no limit. This can be useful if there are many SNPs in a region and you don't
@@ -81,5 +87,5 @@ a list of merged region data, merged region info,
   merged region IDs,and finemapping results for merged regions.
 }
 \description{
-Title
+Merge regions with boundary genes and finemap merged regions
 }

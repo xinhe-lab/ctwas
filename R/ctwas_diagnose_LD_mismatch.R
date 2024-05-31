@@ -1,11 +1,19 @@
 
-#' Detect LD mismatches using SuSiE RSS
+#' Diagnose LD mismatches using SuSiE RSS
 #'
 #' @param z_snp A data frame with two columns: "id", "A1", "A2", "z". giving the z scores for
 #' snps. "A1" is effect allele. "A2" is the other allele.
-#' @param ld_Rinfo a vector of paths to the variant information for all LD matrices
-#' @param gwas_n integer, GWAS sample size
+#'
+#' @param region_ids A vector of region IDs to run diagnosis
+#'
+#' @param LD_info a list of paths to LD matrices for each of the regions.
+#'
+#' @param snp_info a list of SNP info data frames for LD reference.
+#'
+#' @param gwas_n integer, GWAS sample size.
+#'
 #' @param ncore integer, number of cores for parallel computing.
+#'
 #' @param p_diff_thresh numeric, p-value threshold for identifying problematic SNPs
 #' with significant difference between observed z-scores and estimated values
 #'
@@ -17,13 +25,13 @@
 #'
 #' @export
 #'
-detect_ld_mismatch_susie <- function(z_snp,
-                                     region_ids,
-                                     LD_info,
-                                     snp_info,
-                                     gwas_n = NULL,
-                                     ncore = 1,
-                                     p_diff_thresh = 5e-8){
+diagnose_ld_mismatch_susie <- function(z_snp,
+                                       region_ids,
+                                       LD_info,
+                                       snp_info,
+                                       gwas_n = NULL,
+                                       ncore = 1,
+                                       p_diff_thresh = 5e-8){
 
   loginfo("Perform LD mismatch diagnosis for %d regions", length(region_ids))
 
@@ -77,11 +85,14 @@ compute_region_condz <- function(region_id, LD_info, snp_info, z_snp, gwas_n){
   return(condz_stats)
 }
 
-#' Get problematic genes
+#' Get problematic genes from problematic SNPs
 #'
-#' @param problematic_snps a character vector of problematic SNP rsIDs
+#' @param problematic_snps a character vector of problematic SNP rsIDs.
+#'
 #' @param weights a list of weights
+#'
 #' @param z_gene A data frame with columns: "id", "z", giving the z-scores for genes.
+#'
 #' @param z_thresh cutoff of abs(z-scores) to select genes with large effect sizes
 #'
 #' @return a vector of problematic genes

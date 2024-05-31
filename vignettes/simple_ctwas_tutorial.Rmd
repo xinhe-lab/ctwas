@@ -25,17 +25,9 @@ This document demonstrates how to run a simple analysis using cTWAS with GWAS su
 
 In this tutorial, we will show how to perform cTWAS main analysis with summary statistics without using LD matrices. 
 
-Load the `ctwas` package and some other packages needed for summarizing and visualizing cTWAS result
+Load the `ctwas` package.
 ```{r load_packages, message=FALSE}
 library(ctwas)
-library(tidyverse)
-library(locuszoomr)
-```
-
-
-We also need gene annotations from the Ensembl database. We use `EnsDb.Hsapiens.v86` for the example data, please choose the Ensembl database for your specific data. 
-```{r load_ens_db, message=FALSE}
-library(EnsDb.Hsapiens.v86)
 ```
 
 
@@ -44,7 +36,7 @@ We require first running the data preprocessing and harmonization steps before r
 In this tutorial, we use sample data for chromosome 16 provided in the package. 
 
 ```{r load_z_snp}
-# Load z_snp sample data
+# load z_snp sample data
 z_snp <- readRDS(system.file("extdata/sample_data", "LDL_example.z_snp.RDS", package = "ctwas"))
 ```
 
@@ -56,9 +48,19 @@ gwas_n <- 343621
 ```
 
 
-### Region info
+## Reference data
 
-We require a data frame `region_info` containing the region definitions, with the following columns: "chrom", "start", "stop", for the genomic coordinates of the regions.
+cTWAS assumes that the genome is partitioned into approximately independent LD regions. LD reference information can be provided as genetic correlation matrices (termed "R matrices") of these regions. 
+
+Note: when running cTWAS without LD, you can skip "LD matrices". But you will still need to have a list of SNPs `snp_info` as a “reference”, with the information of these SNPs.  See the section "SNP info".
+
+It is critical that the genome build (e.g. hg38) of the LD reference matches the genome build used to train the prediction models. The genome build of the GWAS summary statistics does not matter because variant positions are determined by the LD reference.
+
+The choice of LD reference population is important for fine-mapping. Best practice for fine-mapping is to use an in-sample LD reference (LD computed using the subjects in the GWAS sample). If in-sample LD reference is not an option, the LD reference should be as representative of the population in the GWAS sample as possible.
+
+### Region info and SNP info
+
+We require a data frame `region_info` containing the region definitions, with the following columns: "chrom", "start", "stop", for the genomic coordinates of the regions, and "region_id" for the IDs of the regions (by default, we use [chrom:start-stop] as region IDs).
 
 Here we use the b38 European LDetect blocks, included in the package.
 
@@ -66,17 +68,25 @@ Here we use the b38 European LDetect blocks, included in the package.
 region_file <- system.file("extdata/ldetect", "EUR.b38.bed", package = "ctwas")
 region_info <- read.table(region_file, header = TRUE)
 colnames(region_info)[1:3] <- c("chrom", "start", "stop")
+region_info$chrom <- as.numeric(gsub("chr", "", region_info$chrom))
+region_info$region_id <- paste0(region_info$chr, ":", region_info$start, "-", region_info$stop)
 ```
 
 
-## SNP info 
 
-We will need to have a list of variants as a “reference”, with the position and allele information of these variants. We provide a function, `preprocess_region_LD_snp_info()` to preprocess region definitions and map variants from the LD reference to regions, which takes input of `region_info` and a data frame of variant information from the entire genome, and returns processed `region_info`, `snp_info`.
+### LD and SNP info
 
-```{r}
+We need a list of variants as a “reference”, with the positions and allele information of these variants. We provide a function, `preprocess_region_LD_snp_info()` to preprocess region definitions and map variants from the LD reference to regions, which takes input of `region_info` and a data frame `ref_snp_info` with variant information from the entire genome, and returns processed `region_info`, `snp_info`.
+
+We have the lists of reference variant information from all the LD matrices in the genome in [hg38](https://uchicago.box.com/s/t089or92dkovv0epkrjvxq8r9db9ys99) and [hg19](https://uchicago.box.com/s/ufko2gjagcb693dob4khccqubuztb9pz).
+
+In this example, we use variant information for chr16 in hg38.
+
+```{r snp_info}
+example_chrom <- 16
 ref_snp_info_file <- system.file("extdata/sample_data", "ukb_b38_0.1_chr16_var_info.Rvar.gz", package = "ctwas")
 ref_snp_info <- data.table::fread(ref_snp_info_file, sep = "\t")
-example_chrom <- 16
+
 res <- preprocess_region_LD_snp_info(region_info, 
                                      ref_snp_info = ref_snp_info, 
                                      chrom = example_chrom, 
@@ -109,13 +119,14 @@ z_snp <- preprocess_z_snp(z_snp,
 
 The `preprocess_weight()` function harmonizes the PredictDB/FUSION prediction models and LD reference. 
 
+In this version of cTWAS, we allow the joint analysis of multiple groups of molecular traits. This could be: eQTL of multiple tissues; or eQTLs, splicing QTLs and other types of QTLs in a single tissue. In a more complex setting, multiple types of QTL data from multiple tissues/cell types. Each group is defined by its “type” (kind of molecular traits), and “context” (tissue, cell type, condition, etc.).  So, we specify the `type` and `context` arguments for each weight file. 
+
 In this example, we use liver and subcutaneous adipose gene expression models. We specify the `type` and `context` arguments for each weight file. 
-We preprocess each of the weight files, and then simply concatenate them to  get a list of all processed weights.
+We preprocess each of the weight files, and then simply concatenate them to get a list of all processed weights from different types or contexts.
 
 ```{r preprocess_weights}
 # preprocess weights
 weight_liver_file <- system.file("extdata/sample_data", "expression_Liver.db", package = "ctwas")
-
 weights_liver <- preprocess_weights(weight_liver_file,
                                     region_info,
                                     z_snp$id,
@@ -144,6 +155,7 @@ weights_adipose <- preprocess_weights(weight_adipose_file,
                                       load_predictdb_LD = TRUE,
                                       filter_protein_coding_genes = TRUE)
 
+# concatenate weights from different types or contexts
 weights <- c(weights_liver, weights_adipose)
 ```
 
@@ -155,7 +167,7 @@ We use the function `ctwas_sumstats_noLD()` to run cTWAS analysis without LD. It
 
 If `z_gene` is already computed when preparing cTWAS input data, we could specify the `z_gene` argument in the function, then it will skip computing z-scores of molecular traits.
 
-```{r ctwas_sumstats_noLD, eval=FALSE, message=FALSE}
+```{r ctwas_sumstats_noLD, eval=FALSE}
 ctwas_res <- ctwas_sumstats_noLD(z_snp,
                                  weights,
                                  region_info,
@@ -166,12 +178,14 @@ ctwas_res <- ctwas_sumstats_noLD(z_snp,
                                  group_prior_var_structure = "shared_type",
                                  maxSNP = 20000,
                                  min_nonSNP_PIP = 0.5,
-                                 ncore = 1)
+                                 ncore = 6)
 ```
 
+
 ```{r, include=FALSE}
-ctwas_res <- readRDS(system.file("extdata/sample_data", "ctwas_sumstats_noLD_res.RDS", package = "ctwas"))
+ctwas_res <- readRDS(system.file("extdata/sample_data", "LDL_example.ctwas_sumstats_noLD_res.RDS", package = "ctwas"))
 ```
+
 
 ```{r}
 param <- ctwas_res$param
@@ -181,6 +195,7 @@ z_gene <- ctwas_res$z_gene
 region_data <- ctwas_res$region_data
 screened_region_data <- ctwas_res$screened_region_data
 ```
+
 
 Major argument settings:
 
@@ -206,6 +221,7 @@ We could use the function `summarize_param()` to assess the convergence of the e
 ```{r summarize_param}
 ctwas_parameters <- summarize_param(param, gwas_n)
 ```
+
 
 ```{r}
 # Estimated prior inclusion probability
@@ -235,6 +251,12 @@ ctwas_parameters$convergence_plot
 
 
 ## Interpreting cTWAS results
+
+We need gene annotations from the Ensembl database. We use `EnsDb.Hsapiens.v86` for the example data, please choose the Ensembl database for your specific data. 
+```{r load_ens_db, message=FALSE}
+library(EnsDb.Hsapiens.v86)
+```
+
 
 To interpret the results, we add gene names (from Ensembl database) to the finemapping result, and use mid-points to represent gene positions.
 ```{r add_gene_names}
@@ -273,6 +295,12 @@ head(combined_gene_pips, max(nrow(sig_gene_pips_df), 20))
 
 
 ## Visualizing cTWAS results
+
+We need locuszoomr package for visualizing cTWAS result.
+```{r, message=FALSE}
+library(locuszoomr)
+```
+
 
 We could make locus plots for regions of interest,
 and zoom in the region by specifying the `locus_range`.

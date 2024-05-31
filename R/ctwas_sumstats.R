@@ -5,7 +5,7 @@
 #'
 #' @param weights a list of prediction weights
 #'
-#' @param region_info a data frame of region definition and associated LD file names
+#' @param region_info a data frame of region definitions.
 #'
 #' @param snp_info a list of SNP info data frames for LD reference.
 #'

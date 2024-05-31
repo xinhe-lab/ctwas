@@ -1,16 +1,22 @@
-#' Title
+#' Merge regions with boundary genes and finemap merged regions
 #'
-#' @param boundary_genes a data frame of boundary gene info
+#' @param boundary_genes a data frame of boundary genes
 #'
 #' @param region_data a list of original region_data
 #'
-#' @param region_info a data frame of region definition and associated LD file names
+#' @param region_info a data frame of region definitions
 #'
 #' @param z_snp A data frame with columns: "id", "z", giving the z-scores for SNPs.
 #'
 #' @param z_gene A data frame with columns: "id", "z", giving the z-scores for genes.
 #'
 #' @param weights a list of weights for each gene
+#'
+#' @param use_LD TRUE/FALSE. If TRUE, use LD for finemapping.
+#'
+#' @param LD_info a list of paths to LD matrices for each of the regions.
+#'
+#' @param snp_info a list of SNP info data frames for LD reference.
 #'
 #' @param expand TRUE/FALSE. If TRUE, expand merged region_data with full SNPs
 #'
@@ -55,12 +61,12 @@
 merge_finemap_regions <- function(boundary_genes,
                                   region_data,
                                   region_info,
-                                  LD_info,
-                                  snp_info,
                                   z_snp,
                                   z_gene,
                                   weights,
                                   use_LD = TRUE,
+                                  LD_info = NULL,
+                                  snp_info = NULL,
                                   maxSNP = Inf,
                                   expand = TRUE,
                                   group_prior = NULL,
@@ -175,7 +181,6 @@ get_merged_region_info <- function(boundary_genes, region_info, use_LD = TRUE, L
   merge_region_id_list <- list()
   merged_LD_info <- NULL
   for(merge_label in merge_labels){
-    browser()
     df <- boundary_genes[boundary_genes$merge_label == merge_label,,drop=F]
     new_region_chrom <- df$chrom[1]
     new_region_start <- min(df$region_start)

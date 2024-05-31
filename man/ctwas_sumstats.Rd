@@ -41,7 +41,7 @@ giving the z scores for snps. "A1" is effect allele. "A2" is the other allele.}
 
 \item{weights}{a list of prediction weights}
 
-\item{region_info}{a data frame of region definition and associated LD file names}
+\item{region_info}{a data frame of region definitions.}
 
 \item{snp_info}{a list of SNP info data frames for LD reference.}
 

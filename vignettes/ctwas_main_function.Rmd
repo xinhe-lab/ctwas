@@ -21,6 +21,7 @@ knitr::opts_chunk$set(message = FALSE,
 ```
 
 
+
 ## Using cTWAS main function
 
 In this tutorial, we will show how to perform cTWAS main analysis with summary statistics using the `ctwas_sumstats()` function. 
@@ -34,29 +35,47 @@ Load the packages
 library(ctwas)
 ```
 
+
 Load the prepared input data
 ```{r load_ctwas_res, eval=FALSE}
-# output directory
-outputdir <- "/project2/xinhe/shared_data/multigroup_ctwas/tutorial/LDL_multitissue_tutorial/output/"
-outname <- "LDL.Liver_Adipose"
-
 # Load z_snp
-z_snp <- readRDS(file.path(outputdir, paste0(outname, ".preprocessed.z_snp.RDS")))
+z_snp <- readRDS(system.file("extdata/sample_data", "LDL_example.preprocessed.z_snp.RDS", package = "ctwas"))
 
 # Load weights
-weights <- readRDS(file.path(outputdir, paste0(outname, ".preprocessed.weights.RDS")))
+weights <- readRDS(system.file("extdata/sample_data", "LDL_example.preprocessed.weights.RDS", package = "ctwas"))
 
-# Load region info
-region_info <- readRDS(file.path(outputdir, "region_info.RDS"))
+# Load region_info, LD_info and snp_info
+region_info <- readRDS(system.file("extdata/sample_data", "LDL_example.region_info.RDS", package = "ctwas"))
+LD_info <- readRDS(system.file("extdata/sample_data", "LDL_example.LD_info.RDS", package = "ctwas"))
+snp_info <- readRDS(system.file("extdata/sample_data", "LDL_example.snp_info.RDS", package = "ctwas"))
 ```
 
-The `ctwas_sumstats()` function is a main function to run cTWAS analysis with summary statistics. It takes preprocessed GWAS z-scores (`z_snp`), `weights`, `region_info` as input, and will perform the main steps: computing z_scores of molecular traits, assembling input `region_data`, estimating parameters, screening regions, and finemapping. 
+
+Let's set the cTWAS output directory and output name, and we use 6 cores to parallelize computing over regions.
+```{r settings}
+setwd("/project2/xinhe/shared_data/multigroup_ctwas/tutorial/LDL_multitissue_tutorial/")
+
+outputdir <- "./ctwas_output"
+dir.create(outputdir, showWarnings=F, recursive=T)
+
+outname <- "LDL_example"
+
+ncore <- 6
+``` 
+
+
+The `ctwas_sumstats()` function is a main function to run cTWAS analysis with summary statistics. It takes preprocessed GWAS z-scores (`z_snp`), `weights`, `region_info`, and `snp_info` as input, and will perform the main steps: computing z_scores of molecular traits, assembling input `region_data`, estimating parameters, screening regions, and finemapping. 
 If `z_gene` is already computed when preparing cTWAS input data, we could specify the `z_gene` argument in the function, then it will skip computing z_scores of molecular traits.
 
 ```{r ctwas_sumstats, eval=FALSE}
-res <- ctwas_sumstats(z_snp,
+cor_dir <- file.path(outputdir, "cor_matrix")
+log_file <- file.path(outputdir, paste0(outname, ".ctwas_sumstats.log"))
+
+ctwas_res <- ctwas_sumstats(z_snp,
                       weights,
-                      region_info,
+                      region_info = region_info,
+                      snp_info = snp_info,
+                      LD_info = LD_info,
                       thin = 0.1,
                       niter_prefit = 3,
                       niter = 30,
@@ -66,25 +85,31 @@ res <- ctwas_sumstats(z_snp,
                       min_nonSNP_PIP = 0.5,
                       ncore = ncore,
                       save_cor = TRUE,
-                      cor_dir = file.path(outputdir, "cor_matrix"),
+                      cor_dir = cor_dir,
                       outputdir = outputdir,
                       outname = outname,
-                      logfile = file.path(outputdir, paste0(outname, ".ctwas_sumstats.log")),
-                      verbose = TRUE)
+                      logfile = log_file,
+                      verbose = FALSE)
 
-param <- res$param
-finemap_res <- res$finemap_res
-boundary_genes <- res$boundary_genes
-z_gene <- res$z_gene
-region_data <- res$region_data
+param <- ctwas_res$param
+finemap_res <- ctwas_res$finemap_res
+boundary_genes <- ctwas_res$boundary_genes
+z_gene <- ctwas_res$z_gene
+region_data <- ctwas_res$region_data
+screened_region_data <- ctwas_res$screened_region_data
+
+# saveRDS(ctwas_res, file.path(outputdir, paste0(outname, ".ctwas_sumstats_res.RDS")))
 ```
+
 
 
 Major argument settings:
 
 -   `z_snp` is a data frame with preprocessed GWAS z-scores.
 -   `weights` is a list of preprocessed weights from PredictDB or FUSION prediction models.
--   `region_info` is a data frame with genome coordinates, LD matrix and SNP info of all the regions
+-   `region_info` is a data frame of region definitions.
+-   `snp_info` is a list of SNP info data frames for LD reference.
+-   `LD_info` is a list of paths to LD matrices for each of the regions.
 -   The `thin` argument randomly selects a subset of variants (10% when thin = 0.1) to use during the parameter estimation and screening regions, reducing computation.
 -   The `niter_prefit` argument and `niter` argument sets the number of EM iterations for estimating parameters. We set `niter_prefit = 3`, and `niter = 30` by default.
 -   The `L` argument sets the number of effects for SuSiE during the screening regions and fine mapping steps. We set `L = 5` by default.
@@ -96,12 +121,12 @@ Major argument settings:
 -   The `ncore` argument specifies the number of cores to use when parallelizing over regions.
 -   If the `logfile` argument is specified, it will write log messages to the log file.
 -   If the `verbose` argument is TRUE, it will print more detailed messages.
-
+ 
 The function returns a list including: 
-estimated parameters, fine-mapping results, boundary genes, z_scores of molecular traits, assembled region data for all the regions.
+estimated parameters, fine-mapping results, boundary genes, z_scores of molecular traits, assembled region data for all the regions, and region data with full SNPs for screened regions. 
 
 ## Running cTWAS without LD matrices
 
 In case you do not have LD matrices, it is possible to run cTWAS without LD matrices. 
 
-To do this, simply set `L = 1` and `cor_dir = NULL`. Then it will run the main function with `L = 1` throughout the steps without LD matrices. 
+To do this, we could use the main function `ctwas_sumstats_noLD()`, and do not specify `LD_info`. Then it will run the main function with `L = 1` throughout the steps without LD matrices. 

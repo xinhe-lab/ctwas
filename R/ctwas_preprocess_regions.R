@@ -33,7 +33,7 @@ preprocess_region_LD_snp_info <- function(region_info = NULL,
 
   # assign region ids
   if (is.null(region_info$region_id)) {
-    region_info$region_id <- paste0(region_info$chr, ":", region_info$start, "-", region_info$stop)
+    region_info$region_id <- paste0(region_info$chrom, ":", region_info$start, "-", region_info$stop)
   }
   rownames(region_info) <- NULL
 
