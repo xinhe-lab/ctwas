@@ -2,12 +2,12 @@
 % Please edit documentation in R/ctwas_diagnose_LD_mismatch.R
 \name{get_problematic_genes}
 \alias{get_problematic_genes}
-\title{Get problematic genes}
+\title{Get problematic genes from problematic SNPs}
 \usage{
 get_problematic_genes(problematic_snps, weights, z_gene, z_thresh = 3)
 }
 \arguments{
-\item{problematic_snps}{a character vector of problematic SNP rsIDs}
+\item{problematic_snps}{a character vector of problematic SNP rsIDs.}
 
 \item{weights}{a list of weights}
 
@@ -19,5 +19,5 @@ get_problematic_genes(problematic_snps, weights, z_gene, z_thresh = 3)
 a vector of problematic genes
 }
 \description{
-Get problematic genes
+Get problematic genes from problematic SNPs
 }

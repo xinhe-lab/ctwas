@@ -18,14 +18,18 @@ diagnose_ld_mismatch_susie(
 \item{z_snp}{A data frame with two columns: "id", "A1", "A2", "z". giving the z scores for
 snps. "A1" is effect allele. "A2" is the other allele.}
 
-\item{gwas_n}{integer, GWAS sample size}
+\item{region_ids}{A vector of region IDs to run diagnosis}
+
+\item{LD_info}{a list of paths to LD matrices for each of the regions.}
+
+\item{snp_info}{a list of SNP info data frames for LD reference.}
+
+\item{gwas_n}{integer, GWAS sample size.}
 
 \item{ncore}{integer, number of cores for parallel computing.}
 
 \item{p_diff_thresh}{numeric, p-value threshold for identifying problematic SNPs
 with significant difference between observed z-scores and estimated values}
-
-\item{ld_Rinfo}{a vector of paths to the variant information for all LD matrices}
 }
 \value{
 a list of problematic SNPs, flipped SNPs,

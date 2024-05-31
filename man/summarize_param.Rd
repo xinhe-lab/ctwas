@@ -6,10 +6,11 @@
 \usage{
 summarize_param(
   param,
-  gwas_n = NA,
+  gwas_n,
   plot = TRUE,
   title.size = 10,
-  legend.size = 8
+  legend.size = 8,
+  title.font = c("bold", "plain", "italic", "bold.italic")
 )
 }
 \arguments{
@@ -22,6 +23,8 @@ summarize_param(
 \item{title.size}{font size of the plot title}
 
 \item{legend.size}{font size of the plot legend title}
+
+\item{title.font}{font of the plot title}
 }
 \description{
 Summarize and plot cTWAS parameter estimates

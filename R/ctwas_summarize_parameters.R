@@ -10,6 +10,8 @@
 #'
 #' @param legend.size font size of the plot legend title
 #'
+#' @param title.font font of the plot title
+#'
 #' @importFrom logging loginfo
 #' @import ggplot2
 #' @importFrom cowplot plot_grid theme_cowplot
@@ -17,10 +19,13 @@
 #' @export
 #'
 summarize_param <- function(param,
-                            gwas_n = NA,
+                            gwas_n,
                             plot = TRUE,
                             title.size = 10,
-                            legend.size = 8){
+                            legend.size = 8,
+                            title.font = c("bold", "plain", "italic", "bold.italic")){
+
+  title.font <- match.arg(title.font)
 
   group_prior <- param$group_prior
   # estimated group prior (all iterations)
@@ -69,7 +74,7 @@ summarize_param <- function(param,
       theme(plot.title=element_text(size=title.size)) +
       expand_limits(y=0) +
       guides(color = guide_legend(title = "Group")) +
-      theme(legend.title = element_text(size=legend.size, face="bold"),
+      theme(legend.title = element_text(size=legend.size, face=title.font),
             legend.text = element_text(size=legend.size))
 
     # effect size plot
@@ -87,7 +92,7 @@ summarize_param <- function(param,
       theme(plot.title=element_text(size=title.size)) +
       expand_limits(y=0) +
       guides(color = guide_legend(title = "Group")) +
-      theme(legend.title = element_text(size=legend.size, face="bold"),
+      theme(legend.title = element_text(size=legend.size, face=title.font),
             legend.text = element_text(size=legend.size))
 
     # PVE plot
@@ -105,7 +110,7 @@ summarize_param <- function(param,
       theme(plot.title=element_text(size=title.size)) +
       expand_limits(y=0) +
       guides(color = guide_legend(title = "Group")) +
-      theme(legend.title = element_text(size=legend.size, face="bold"),
+      theme(legend.title = element_text(size=legend.size, face=title.font),
             legend.text = element_text(size=legend.size))
 
     # enrichment plot
@@ -123,7 +128,7 @@ summarize_param <- function(param,
       theme(plot.title=element_text(size=title.size)) +
       expand_limits(y=0) +
       guides(color = guide_legend(title = "Group")) +
-      theme(legend.title = element_text(size=legend.size, face="bold"),
+      theme(legend.title = element_text(size=legend.size, face=title.font),
             legend.text = element_text(size=legend.size)) +
       scale_colour_discrete(drop = FALSE)
 
