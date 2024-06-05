@@ -1,24 +1,27 @@
+Encoding: UTF-8
 Package: ctwas
 Type: Package
 Title: Adjusting for genetic confounders in transcriptome-wide association studies 
   improves discovery of risk genes of complex traits
 Date: 2024-06-05
-Version: 0.2.5
+Version: 0.2.6
 Authors@R: c(person("Siming","Zhao",role="aut",email="siming.zhao06@gmail.com"),
              person("Wesley","Crouse",role="aut"),
              person("Sheng","Qian",role="aut",email="shengqian@uchicago.edu"),
              person("Kaixuan","Luo",role=c("aut", "cre"),email="kevinlkx@gmail.com"),
              person("Matthew","Stephens",role="aut"),
              person("Xin","He",role="aut"))
-Description: This package implements the causal-TWAS (cTWAS) method we developed to identify
-  causal genes in GWAS. It is a generalization of Transcriptome-wide association studies (TWAS), 
-  but when analyzing any gene, it adjusts for other nearby genes and all nearby genetic variants.
-URL: https://github.com/xinhe-lab/ctwas
+Description: This package implements the "causal-TWAS" (cTWAS) method
+    for identifying causal genes in genome-wide association studies
+    (GWAS) described in S. Zhao et al (2024)
+    <DOI:10.1038/s41588-023-01648-9>. cTWAS generalizes methods for
+    "transcriptome-wide association studies" (TWAS) in that when
+    analyzing a gene it adjusts for not only other nearby genes but
+    also nearby genetic variants.
+URL: https://github.com/xinhe-lab/ctwas/, https://xinhe-lab.github.io/ctwas/
 BugReports: https://github.com/xinhe-lab/ctwas/issues
 Depends: R (>= 3.5.0)
 License: MIT + file LICENCE
-Encoding: UTF-8
-LazyData: true
 Imports:
     utils,
     methods,
@@ -54,9 +57,11 @@ Suggests:
 biocViews:
     Genetics,
     Software
-Remotes:
-    bioc::AnnotationFilter,
-    bioc::ensembldb
+LazyData: true
+LazyDataCompression: xz
 VignetteBuilder: knitr
 NeedsCompilation: no
 RoxygenNote: 7.3.0
+Remotes:
+    bioc::AnnotationFilter,
+    bioc::ensembldb
