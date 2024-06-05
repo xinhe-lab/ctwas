@@ -4,7 +4,7 @@ Type: Package
 Title: Adjusting for genetic confounders in transcriptome-wide association studies 
   improves discovery of risk genes of complex traits
 Date: 2024-06-05
-Version: 0.2.6
+Version: 0.2.7
 Authors@R: c(person("Siming","Zhao",role="aut",email="siming.zhao06@gmail.com"),
              person("Wesley","Crouse",role="aut"),
              person("Sheng","Qian",role="aut",email="shengqian@uchicago.edu"),
@@ -57,8 +57,6 @@ Suggests:
 biocViews:
     Genetics,
     Software
-LazyData: true
-LazyDataCompression: xz
 VignetteBuilder: knitr
 NeedsCompilation: no
 RoxygenNote: 7.3.0
