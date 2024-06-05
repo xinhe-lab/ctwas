@@ -1,5 +1,7 @@
 ^.*\.Rproj$
 ^\.Rproj\.user$
 ^_pkgdown\.yml$
+^workflow\.png$
 ^docs$
-^pkgdown$
+^README\.md$
+^development$

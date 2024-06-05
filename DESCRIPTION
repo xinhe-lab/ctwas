@@ -4,14 +4,14 @@ Type: Package
 Title: Adjusting for Genetic Confounders in Transcriptome-Wide Association Studies 
   Improves Discovery of Risk Genes of Complex Traits
 Date: 2024-06-05
-Version: 0.2.10
+Version: 0.2.11
 Authors@R: c(person("Siming","Zhao",role="aut",email="siming.zhao06@gmail.com"),
              person("Wesley","Crouse",role="aut"),
              person("Sheng","Qian",role="aut",email="shengqian@uchicago.edu"),
              person("Kaixuan","Luo",role=c("aut", "cre"),email="kevinlkx@gmail.com"),
              person("Matthew","Stephens",role="aut"),
              person("Xin","He",role="aut"))
-Description: This package implements the "causal-TWAS" (cTWAS) method
+Description: Implements the "causal-TWAS" (cTWAS) method
     for identifying causal genes in genome-wide association studies
     (GWAS) described in S. Zhao et al (2024)
     <DOI:10.1038/s41588-023-01648-9>. cTWAS generalizes methods for
@@ -56,7 +56,7 @@ biocViews:
     Software
 VignetteBuilder: knitr
 NeedsCompilation: no
-RoxygenNote: 7.3.0
+RoxygenNote: 7.3.1
 Remotes:
     bioc::AnnotationFilter,
     bioc::ensembldb
