@@ -22,7 +22,8 @@ with columns "chrom", "id", "pos", "alt", "ref".}
 \item{use_gene_pos}{use mid (midpoint), start or end positions to represent gene positions}
 }
 \value{
-a data frame of cTWAS finemapping result including gene names and updated positions
+a data frame of cTWAS finemapping result including gene
+names and updated positions
 }
 \description{
 Annotate cTWAS finemapping result with ensembl gene annotation database

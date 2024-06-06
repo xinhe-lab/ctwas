@@ -9,12 +9,15 @@
 #'
 #' @param use_gene_pos use mid (midpoint), start or end positions to represent gene positions
 #'
+#' @importFrom data.table rbindlist
 #' @importFrom ensembldb genes
 #' @importFrom AnnotationFilter GeneIdFilter
 #'
-#' @return a data frame of cTWAS finemapping result including gene names and updated positions
+#' @return a data frame of cTWAS finemapping result including gene
+#' names and updated positions
 #'
 #' @export
+#' 
 anno_finemap_res <- function(finemap_res, snp_info, ens_db, use_gene_pos = c("mid", "start", "end")){
 
   use_gene_pos <- match.arg(use_gene_pos)
