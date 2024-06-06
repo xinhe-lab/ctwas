@@ -17,8 +17,8 @@
 harmonize_z <- function(z_snp, snp_info, drop_strand_ambig = TRUE){
 
   # Check LD reference SNP info
-  if (class(snp_info) == "list") {
-    snp_info <- as.data.frame(data.table::rbindlist(snp_info, idcol = "region_id"))
+  if (inherits(snp_info,"list")) {
+    snp_info <- as.data.frame(rbindlist(snp_info, idcol = "region_id"))
   }
   target_header <- c("chrom", "id", "pos", "alt", "ref")
   if (!all(target_header %in% colnames(snp_info))){
@@ -69,8 +69,8 @@ harmonize_z <- function(z_snp, snp_info, drop_strand_ambig = TRUE){
 harmonize_weights <- function (wgt.matrix, snps, snp_info, drop_strand_ambig = TRUE){
 
   # Check LD reference SNP info
-  if (class(snp_info) == "list") {
-    snp_info <- as.data.frame(data.table::rbindlist(snp_info, idcol = "region_id"))
+  if (inherits(snp_info,"list")) {
+    snp_info <- as.data.frame(rbindlist(snp_info, idcol = "region_id"))
   }
   target_header <- c("chrom", "id", "pos", "alt", "ref")
   if (!all(target_header %in% colnames(snp_info))){

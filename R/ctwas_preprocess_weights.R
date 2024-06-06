@@ -76,7 +76,7 @@ preprocess_weights <- function(weight_file,
   stopifnot(file.exists(weight_file))
 
   # Check LD reference SNP info
-  if (class(snp_info) == "list") {
+  if (inherits(snp_info,"list")) {
     snp_info_df <- as.data.frame(rbindlist(snp_info, idcol = "region_id"))
   }
   target_header <- c("chrom", "id", "pos", "alt", "ref")

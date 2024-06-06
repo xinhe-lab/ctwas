@@ -16,7 +16,7 @@
 #' @export
 compute_gene_z <- function (z_snp, weights, ncore = 1, logfile = NULL){
   # check input data
-  if (!is.list(weights)){
+  if (!inherits(weights,"list")){
     stop("'weights' should be a list.")
   }
   if (!is.null(logfile)) {
@@ -48,7 +48,7 @@ compute_gene_z <- function (z_snp, weights, ncore = 1, logfile = NULL){
 # get gene info from weights
 get_gene_info <- function(weights){
   # check input data
-  if (!is.list(weights)){
+  if (!inherits(weights,"list")){
     stop("'weights' should be a list.")
   }
   gene_info <- lapply(names(weights), function(x){

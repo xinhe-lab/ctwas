@@ -59,7 +59,7 @@ assemble_region_data <- function(region_info,
   # check arguments
   trim_by <- match.arg(trim_by)
 
-  if (!is.list(weights)){
+  if (!inherits(weights,"list")){
     stop("'weights' should be a list object.")
   }
 
@@ -68,7 +68,7 @@ assemble_region_data <- function(region_info,
   }
 
   # Check LD reference SNP info
-  if (class(snp_info) == "list") {
+  if (inherits(snp_info,"list")) {
     snp_info <- as.data.frame(rbindlist(snp_info, idcol = "region_id"))
   }
   target_header <- c("chrom", "id", "pos", "alt", "ref", "region_id")
@@ -298,12 +298,12 @@ adjust_boundary_genes <- function(boundary_genes,
                                   snp_info){
   loginfo("Adjusting for boundary genes ...")
 
-  if (!is.list(weights)){
+  if (!inherits(weights,"list")){
     stop("'weights' should be a list.")
   }
 
   # Check LD reference SNP info
-  if (class(snp_info) == "list") {
+  if (inherits(snp_info,"list")) {
     snp_info <- as.data.frame(rbindlist(snp_info, idcol = "region_id"))
   }
   target_header <- c("chrom", "id", "pos", "alt", "ref", "region_id")
@@ -382,7 +382,7 @@ expand_region_data <- function(region_data,
   loginfo("Expanding %d regions with full SNPs ...", length(which(thin < 1)))
 
   # Check LD reference SNP info
-  if (class(snp_info) == "list") {
+  if (inherits(snp_info,"list")) {
     snp_info <- as.data.frame(rbindlist(snp_info, idcol = "region_id"))
   }
   target_header <- c("chrom", "id", "pos", "alt", "ref", "region_id")

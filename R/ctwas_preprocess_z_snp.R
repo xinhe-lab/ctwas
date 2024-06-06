@@ -32,7 +32,7 @@ preprocess_z_snp <- function(z_snp,
 
   loginfo("Preprocessing z_snp...")
 
-  if (class(snp_info) == "list") {
+  if (inherits(snp_info,"list")) {
     snp_info <- as.data.frame(rbindlist(snp_info, idcol = "region_id"))
   }
 

@@ -99,7 +99,7 @@ make_locusplot <- function(finemap_res,
                            panel.heights = c(4, 4, 0.3, 4),
                            highlight_pos = NULL) {
 
-  if (!is.list(weights)){
+  if (!inherits(weights,"list")){
     stop("'weights' should be a list.")
   }
 

@@ -11,6 +11,8 @@
 #'
 #' @param ncore The number of cores used to parallelize over regions
 #'
+#' @importFrom readr parse_number
+#'
 #' @export
 #'
 preprocess_region_LD_snp_info <- function(region_info = NULL,
@@ -24,7 +26,9 @@ preprocess_region_LD_snp_info <- function(region_info = NULL,
     stop("region_info needs to contain the following columns: ",
          paste(target_header, collapse = " "))
   }
-  region_info$chrom <- as.numeric(gsub("chr", "", region_info$chrom))
+  if (is.character(region_info$chrom)) {
+    region_info$chrom <- readr::parse_number(region_info$chrom)
+  }
   region_info$start <- as.numeric(region_info$start)
   region_info$stop <- as.numeric(region_info$stop)
 

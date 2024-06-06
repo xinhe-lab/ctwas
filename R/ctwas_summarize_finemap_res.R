@@ -26,7 +26,7 @@ anno_finemap_res <- function(finemap_res, snp_info, ens_db,
   use_gene_pos <- match.arg(use_gene_pos)
 
   # Check LD reference SNP info
-  if (class(snp_info) == "list") {
+  if (inherits(snp_info,"list")) {
     snp_info <- as.data.frame(rbindlist(snp_info, idcol = "region_id"))
   }
   target_header <- c("chrom", "id", "pos", "alt", "ref")
