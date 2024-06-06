@@ -1,0 +1,22 @@
+citHeader("To cite the ctwas package, please use:")
+
+bibentry(bibtype = "Article",
+         title = paste("Adjusting for genetic confounders in transcriptome-wide",
+         "association studies improves discovery of risk genes of complex traits"),
+         author = c(person("Siming Zhao"),
+                    person("Wesley Crouse"),
+                    person("Sheng Qian"),
+                    person("Kaixuan Luo"),
+                    person("Matthew Stephens"),
+                    person("Xin He")),
+         journal = "Nature Genetics",
+         doi = "10.1038/s41588-023-01648-9",
+         volume  = 56,
+         pages   = "336-347",
+         year = "2024",
+         url = "https://doi.org/10.1038/s41588-023-01648-9",
+         textVersion =
+           paste("Zhao, S., Crouse, W., Qian, S., Luo, K., Stephens, M., & He, X. (2024).",
+                 "Adjusting for genetic confounders in transcriptome-wide association studies",
+                 "improves discovery of risk genes of complex traits. Nature Genetics",
+                 "56:336–347 (2024). https://doi.org/10.1038/s41588-023-01648-9"))
