@@ -4,7 +4,7 @@ Type: Package
 Title: Adjusting for Genetic Confounders in Transcriptome-Wide Association
   Studies Improves Discovery of Risk Genes of Complex Traits
 Date: 2024-06-06
-Version: 0.2.20
+Version: 0.2.21
 Authors@R: c(person("Siming","Zhao",role="aut",email="siming.zhao06@gmail.com"),
              person("Wesley","Crouse",role="aut"),
              person("Sheng","Qian",role="aut",email="shengqian@uchicago.edu"),
@@ -44,6 +44,7 @@ Imports:
     RSQLite,
     locuszoomr,
     pgenlibr,
+    GenomicRanges,
     ensembldb,
     AnnotationFilter
 Suggests: 
@@ -59,5 +60,6 @@ VignetteBuilder: knitr
 NeedsCompilation: no
 RoxygenNote: 7.3.1
 Remotes:
+    bioc::GenomicRanges,
     bioc::AnnotationFilter,
     bioc::ensembldb

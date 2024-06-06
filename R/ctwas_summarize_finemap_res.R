@@ -16,6 +16,7 @@
 #' @importFrom data.table rbindlist
 #' @importFrom ensembldb genes
 #' @importFrom AnnotationFilter GeneIdFilter
+#' @importFrom GenomicRanges seqnames start end
 #'
 #' @export
 #'
