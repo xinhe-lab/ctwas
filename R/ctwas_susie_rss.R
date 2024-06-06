@@ -1,5 +1,5 @@
 
-#' Run cTWAS version of susie_rss for a single region
+# Run cTWAS version of susie_rss for a single region
 ctwas_susie_rss <- function(z,
                             R,
                             prior_weights = NULL,
@@ -37,7 +37,7 @@ ctwas_susie_rss <- function(z,
 }
 
 
-#' annotate susie results with SNP and gene information
+# annotate susie results with SNP and gene information
 anno_susie <- function(susie_res,
                        gids,
                        sids,
@@ -79,7 +79,7 @@ anno_susie <- function(susie_res,
 }
 
 
-#' set pi_prior and V_prior based on init_group_prior and init_group_prior_var
+# set pi_prior and V_prior based on init_group_prior and init_group_prior_var
 initiate_group_priors <- function(group_prior = NULL, group_prior_var = NULL, groups) {
 
   if (is.null(group_prior)){
@@ -125,7 +125,7 @@ set_region_susie_priors <- function(pi_prior, V_prior, gs_group, L, use_null_wei
 
   if (any(is.na(V_prior))){
     V <- matrix(rep(50, L * p), nrow = L)
-    # following the default in susieR::susie_rss
+    # following the default in susie_rss of susieR
   } else{
     V <- unname(V_prior[gs_group])
     V <- matrix(rep(V, each = L), nrow=L)

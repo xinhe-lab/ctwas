@@ -1,5 +1,5 @@
 
-#' Preprocess GWAS z-scores, harmonize GWAS z-scores with LD reference
+#' @title Preprocess GWAS z-scores, harmonize GWAS z-scores with LD reference
 #'
 #' @param z_snp A data frame with two columns: "id", "A1", "A2", "z". giving the z scores for
 #' snps. "A1" is effect allele. "A2" is the other allele.
@@ -13,9 +13,10 @@
 #'
 #' @param logfile the log file, if NULL will print log info on screen.
 #'
-#' @importFrom logging addHandler loginfo writeToFile
-#'
 #' @return a data frame preprocessed GWAS z-scores
+#'
+#' @importFrom logging addHandler loginfo writeToFile
+#' @importFrom data.table rbindlist
 #'
 #' @export
 #'
@@ -32,7 +33,7 @@ preprocess_z_snp <- function(z_snp,
   loginfo("Preprocessing z_snp...")
 
   if (class(snp_info) == "list") {
-    snp_info <- as.data.frame(data.table::rbindlist(snp_info, idcol = "region_id"))
+    snp_info <- as.data.frame(rbindlist(snp_info, idcol = "region_id"))
   }
 
   target_header <- c("chrom", "id", "pos", "alt", "ref")

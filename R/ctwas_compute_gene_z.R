@@ -1,4 +1,4 @@
-#' Compute z-scores of molecular traits
+#' @title Computes z-scores of molecular traits
 #'
 #' @param z_snp A data frame with columns: "id", "z", giving the z-scores for SNPs.
 #'
@@ -26,7 +26,7 @@ compute_gene_z <- function (z_snp, weights, ncore = 1, logfile = NULL){
   weight_snpnames <- unique(unlist(lapply(weights, function(x){rownames(x[["wgt"]])})))
   z_snp <- z_snp[z_snp$id %in% weight_snpnames, c("id", "z")]
 
-  z_gene <- parallel::mclapply(names(weights), function(id) {
+  z_gene <- mclapply(names(weights), function(id) {
     wgt <- weights[[id]][["wgt"]]
     snpnames <- rownames(wgt)
     R.s <- weights[[id]][["R_wgt"]]
@@ -45,7 +45,7 @@ compute_gene_z <- function (z_snp, weights, ncore = 1, logfile = NULL){
   return(z_gene)
 }
 
-#' get gene info from weights
+# get gene info from weights
 get_gene_info <- function(weights){
   # check input data
   if (!is.list(weights)){
@@ -63,7 +63,7 @@ get_gene_info <- function(weights){
   return(gene_info)
 }
 
-#' get regions for each gene
+# get regions for each gene
 get_gene_regions <- function(gene_info, region_info){
 
   gene_info <- gene_info[gene_info$chrom %in% unique(region_info$chrom), , drop=FALSE]
@@ -80,14 +80,14 @@ get_gene_regions <- function(gene_info, region_info){
   return(gene_info)
 }
 
-#' Combine SNP and gene z-scores
-#'
-#' @param z_snp a data frame with four columns: "id", "A1", "A2", "z". ("A1" and "A2" are optional)
-#'
-#' @param z_gene a data frame with columns: "id", "z", "type", "context", "group".
-#'
-#' @export
-#'
+# Combines SNP and gene z-scores
+#
+# @param z_snp a data frame of SNP z-scores, with columns: "id", "A1", "A2", "z".
+# ("A1" and "A2" are optional)
+#
+# @param z_gene a data frame of gene z-scores, with columns: "id", "z", "type",
+# "context", "group".
+#
 combine_z <- function(z_snp, z_gene){
   z_snp$type <- "SNP"
   z_snp$context <- "SNP"

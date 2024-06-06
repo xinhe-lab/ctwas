@@ -2,7 +2,7 @@
 % Please edit documentation in R/ctwas_merge_regions.R
 \name{update_merged_regions_finemap_res}
 \alias{update_merged_regions_finemap_res}
-\title{Update finemapping result for merged regions}
+\title{Updates finemapping result for merged regions}
 \usage{
 update_merged_regions_finemap_res(
   finemap_res,
@@ -18,5 +18,5 @@ update_merged_regions_finemap_res(
 \item{merge_region_id_list}{a list with new region IDs and merged region IDs}
 }
 \description{
-Update finemapping result for merged regions
+Updates finemapping result for merged regions
 }

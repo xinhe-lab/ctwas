@@ -2,7 +2,7 @@
 % Please edit documentation in R/ctwas_summarize_finemap_res.R
 \name{sum_pip_across_contexts}
 \alias{sum_pip_across_contexts}
-\title{Combine PIPs across contexts (tissues)}
+\title{Combines PIPs across contexts (tissues)}
 \usage{
 sum_pip_across_contexts(finemap_res, contexts)
 }
@@ -15,5 +15,5 @@ sum_pip_across_contexts(finemap_res, contexts)
 a data frame of combined gene PIPs and PIPs for each context
 }
 \description{
-Combine PIPs across contexts (tissues)
+Combines PIPs across contexts (tissues)
 }

@@ -1,22 +1,19 @@
 
-#' Compute correlation matrices for a single region
-#'
-#' @param sids SNP IDs
-#'
-#' @param gids gene IDs
-#'
-#' @param R_snp LD (R) matrix
-#'
-#' @param LD_sids SNP IDs for the rows and columns of the LD matrix
-#'
-#' @param weights a list of weights for all the genes
-#'
-#' @return a list of correlation matrices (R_snp, R_snp_gene and R_gene)
-#'
+# @title Computes correlation matrices for a single region
+#
+# @param sids SNP IDs
+#
+# @param gids gene IDs
+#
+# @param R_snp LD (R) matrix
+#
+# @param LD_sids SNP IDs for the rows and columns of the LD matrix
+#
+# @param weights a list of weights for all the genes
+#
+# @return a list of correlation matrices (R_snp, R_snp_gene and R_gene)
+#
 #' @importFrom utils combn
-#' 
-#' @export
-#'
 compute_region_cor <- function(sids, gids, R_snp, LD_sids, weights) {
 
   # check input data

@@ -1,12 +1,15 @@
 
-#' Convert PLINK genotype data to LD matrices and SNP info files,
-#' save LD matrices as .RDS files and SNP info as .Rvar files
+#' @title Converts PLINK genotype data to LD matrices and SNP info files,
+#' saves LD matrices as .RDS files and SNP info as .Rvar files
 #'
-#' @param region_info a data frame of region information, with columns: chr, start, stop positions
+#' @param region_info a data frame of region information, with columns:
+#' chr, start, stop positions
 #'
-#' @param genotype_files Reference genotype files in PLINK binary genotype data in .pgen or .bed format
+#' @param genotype_files Reference genotype files in PLINK binary genotype data
+#' in .pgen or .bed format
 #'
-#' @param varinfo_files Reference variant information files in PLINK .pvar or .bim format.
+#' @param varinfo_files Reference variant information files in PLINK
+#' .pvar or .bim format.
 #'
 #' The output will use the genome positions in \code{varinfo_files}.
 #'
@@ -18,17 +21,19 @@
 #'
 #' @param include_variance TRUE/FALSE, if TRUE, include variance in .Rvar output
 #'
-#' @param include_allele_freq TRUE/FALSE, if TRUE, include allele frequency in .Rvar output
+#' @param include_allele_freq TRUE/FALSE, if TRUE, include allele frequency
+#' in .Rvar output
+#'
+#' @return a data frame of updated region info, with paths of LD matrices and
+#' variance information files
 #'
 #' @importFrom logging loginfo
-#'
-#' @return a data frame of updated region info, with paths of LD matrices and variance information files
-#'
 #' @importFrom utils write.table
 #' @importFrom utils txtProgressBar
 #' @importFrom utils setTxtProgressBar
 #' @importFrom readr parse_number
-#' 
+#' @importFrom Rfast cora colVars
+#'
 #' @export
 #'
 convert_geno_to_LD_matrix <- function(region_info,

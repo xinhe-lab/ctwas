@@ -1,4 +1,4 @@
-#' Screen regions with strong non-SNP PIPs to be used in finemapping step
+#' @title Screens regions with strong non-SNP PIPs to be used in finemapping step
 #'
 #' @param region_data a list object indexing regions, variants and genes.
 #'
@@ -133,7 +133,7 @@ screen_regions <- function(
 }
 
 
-#' Compute non-SNP PIPs for regions
+#' @title Computes non-SNP PIPs for regions
 #'
 #' @param finemap_res a data frame of finemapping result
 #'

@@ -1,4 +1,4 @@
-#' run cTWAS finemapping for a single region
+#' @title Runs cTWAS finemapping for a single region
 #'
 #' @param region_data a list object with data for the regions
 #'
@@ -42,9 +42,10 @@
 #'
 #' @param ... Additional arguments of \code{susie_rss}.
 #'
-#' @importFrom logging loginfo
-#'
 #' @return a data frame of finemapping results.
+#'
+#' @importFrom logging loginfo
+#' @importFrom Matrix bdiag
 #'
 #' @export
 #'
@@ -157,7 +158,7 @@ finemap_region <- function(region_data,
         R_snp <- load_LD(LD_matrix_files)
       } else {
         R_snp <- lapply(LD_matrix_files, load_LD)
-        R_snp <- suppressWarnings(as.matrix(Matrix::bdiag(R_snp)))
+        R_snp <- suppressWarnings(as.matrix(bdiag(R_snp)))
       }
       # load SNP info of the region
       snpinfo <- do.call(rbind, snp_info[region_id])
@@ -213,7 +214,7 @@ finemap_region <- function(region_data,
 
 }
 
-#' run cTWAS finemapping for multiple regions
+#' @title Runs cTWAS finemapping for multiple regions
 #'
 #' @param region_data region_data to be finemapped
 #'
@@ -256,9 +257,10 @@ finemap_region <- function(region_data,
 #'
 #' @param ... Additional arguments of \code{susie_rss}.
 #'
-#' @importFrom logging addHandler loginfo writeToFile
+#' @return a data frame of cTWAS finemapping results.
 #'
-#' @return finemapping results.
+#' @importFrom logging addHandler loginfo writeToFile
+#' @importFrom parallel mclapply
 #'
 #' @export
 #'
@@ -312,7 +314,7 @@ finemap_regions <- function(region_data,
 
   region_ids <- names(region_data)
 
-  finemap_region_res_list <- parallel::mclapply(region_ids, function(region_id){
+  finemap_region_res_list <- mclapply(region_ids, function(region_id){
     finemap_region(region_data = region_data,
                    region_id = region_id,
                    use_LD = use_LD,

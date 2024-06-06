@@ -2,7 +2,7 @@
 % Please edit documentation in R/ctwas_diagnose_LD_mismatch.R
 \name{update_finemap_res}
 \alias{update_finemap_res}
-\title{Update finemapping result}
+\title{Updates finemapping result}
 \usage{
 update_finemap_res(finemap_res, new_finemap_res)
 }
@@ -12,5 +12,5 @@ update_finemap_res(finemap_res, new_finemap_res)
 \item{new_finemap_res}{a data frame of new finemapping result}
 }
 \description{
-Update finemapping result
+Updates finemapping result
 }

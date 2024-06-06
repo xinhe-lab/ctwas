@@ -2,7 +2,7 @@
 % Please edit documentation in R/ctwas_preprocess_regions.R
 \name{map_snp_info_regions}
 \alias{map_snp_info_regions}
-\title{Read SNP info from all regions and map SNPs to regions.}
+\title{Reads SNP info from all regions and map SNPs to regions.}
 \usage{
 map_snp_info_regions(region_info, ref_snp_info, ncore = 1)
 }
@@ -14,5 +14,5 @@ map_snp_info_regions(region_info, ref_snp_info, ncore = 1)
 \item{ncore}{The number of cores used to parallelize over regions}
 }
 \description{
-Read SNP info from all regions and map SNPs to regions.
+Reads SNP info from all regions and map SNPs to regions.
 }

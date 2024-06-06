@@ -2,7 +2,7 @@
 % Please edit documentation in R/ctwas_merge_regions.R
 \name{merge_finemap_regions}
 \alias{merge_finemap_regions}
-\title{Merge regions with boundary genes and finemap merged regions}
+\title{Merges regions with boundary genes and finemaps merged regions}
 \usage{
 merge_finemap_regions(
   boundary_genes,
@@ -87,5 +87,5 @@ a list of merged region data, merged region info,
   merged region IDs,and finemapping results for merged regions.
 }
 \description{
-Merge regions with boundary genes and finemap merged regions
+Merges regions with boundary genes and finemaps merged regions
 }

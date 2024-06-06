@@ -2,7 +2,7 @@
 % Please edit documentation in R/ctwas_finemapping.R
 \name{finemap_regions}
 \alias{finemap_regions}
-\title{run cTWAS finemapping for multiple regions}
+\title{Runs cTWAS finemapping for multiple regions}
 \usage{
 finemap_regions(
   region_data,
@@ -70,8 +70,8 @@ genotype data in genetic studies.}
 \item{...}{Additional arguments of \code{susie_rss}.}
 }
 \value{
-finemapping results.
+a data frame of cTWAS finemapping results.
 }
 \description{
-run cTWAS finemapping for multiple regions
+Runs cTWAS finemapping for multiple regions
 }

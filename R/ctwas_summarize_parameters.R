@@ -1,4 +1,4 @@
-#' Summarize and plot cTWAS parameter estimates
+#' @title Summarizes and plots cTWAS parameter estimates
 #'
 #' @param param a list of cTWAS parameter estimation result from \code{est_param}
 #'
@@ -13,7 +13,18 @@
 #' @param title.font font of the plot title
 #'
 #' @importFrom logging loginfo
-#' @import ggplot2
+#' @importFrom ggplot2 ggplot
+#' @importFrom ggplot2 aes
+#' @importFrom ggplot2 geom_point
+#' @importFrom ggplot2 geom_line
+#' @importFrom ggplot2 xlab ylab ggtitle
+#' @importFrom ggplot2 expand_limits
+#' @importFrom ggplot2 theme
+#' @importFrom ggplot2 theme_bw
+#' @importFrom ggplot2 element_text
+#' @importFrom ggplot2 guides
+#' @importFrom ggplot2 guide_legend
+#' @importFrom ggplot2 scale_colour_discrete
 #' @importFrom cowplot plot_grid theme_cowplot
 #'
 #' @export
@@ -132,7 +143,7 @@ summarize_param <- function(param,
             legend.text = element_text(size=legend.size)) +
       scale_colour_discrete(drop = FALSE)
 
-    outlist$convergence_plot <- cowplot::plot_grid(p_pi, p_sigma2, p_enrich, p_pve)
+    outlist$convergence_plot <- plot_grid(p_pi, p_sigma2, p_enrich, p_pve)
   }
 
   return(outlist)

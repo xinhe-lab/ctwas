@@ -1,5 +1,5 @@
 
-#' Diagnose LD mismatches using SuSiE RSS
+#' @title Diagnose LD mismatches using SuSiE RSS
 #'
 #' @param z_snp A data frame with two columns: "id", "A1", "A2", "z". giving the z scores for
 #' snps. "A1" is effect allele. "A2" is the other allele.
@@ -19,6 +19,7 @@
 #'
 #' @importFrom logging addHandler loginfo
 #' @importFrom parallel mclapply
+#' @importFrom data.table rbindlist
 #'
 #' @return a list of problematic SNPs, flipped SNPs,
 #' and test statistics from susie's `kriging_rss` function
@@ -35,11 +36,11 @@ diagnose_ld_mismatch_susie <- function(z_snp,
 
   loginfo("Perform LD mismatch diagnosis for %d regions", length(region_ids))
 
-  condz_list <- parallel::mclapply(region_ids, function(region_id){
+  condz_list <- mclapply(region_ids, function(region_id){
     compute_region_condz(region_id, LD_info, snp_info, z_snp, gwas_n)
   }, mc.cores = ncore)
   names(condz_list) <- region_ids
-  condz_stats <- data.table::rbindlist(condz_list, idcol = "region_id")
+  condz_stats <- rbindlist(condz_list, idcol = "region_id")
   rownames(condz_stats) <- NULL
 
   # return problematic variants and flipped variants
@@ -55,6 +56,7 @@ diagnose_ld_mismatch_susie <- function(z_snp,
 # z-scores using SuSiE RSS.
 #
 #' @importFrom stats pchisq
+#' @importFrom Matrix bdiag
 compute_region_condz <- function(region_id, LD_info, snp_info, z_snp, gwas_n){
 
   # load LD matrix
@@ -64,7 +66,7 @@ compute_region_condz <- function(region_id, LD_info, snp_info, z_snp, gwas_n){
     R_snp <- load_LD(LD_matrix_files)
   } else {
     R_snp <- lapply(LD_matrix_files, load_LD)
-    R_snp <- suppressWarnings(as.matrix(Matrix::bdiag(R_snp)))
+    R_snp <- suppressWarnings(as.matrix(bdiag(R_snp)))
   }
 
   # load SNP info
@@ -88,7 +90,7 @@ compute_region_condz <- function(region_id, LD_info, snp_info, z_snp, gwas_n){
   return(condz_stats)
 }
 
-#' Get problematic genes from problematic SNPs
+#' @title Gets problematic genes from problematic SNPs
 #'
 #' @param problematic_snps a character vector of problematic SNP rsIDs.
 #'
@@ -135,7 +137,7 @@ get_problematic_genes <- function(problematic_snps, weights, z_gene, z_thresh = 
   return(problematic_genes)
 }
 
-#' Update finemapping result
+#' @title Updates finemapping result
 #'
 #' @param finemap_res a data frame of original finemapping result
 #' @param new_finemap_res a data frame of new finemapping result

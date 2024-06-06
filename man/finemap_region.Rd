@@ -2,7 +2,7 @@
 % Please edit documentation in R/ctwas_finemapping.R
 \name{finemap_region}
 \alias{finemap_region}
-\title{run cTWAS finemapping for a single region}
+\title{Runs cTWAS finemapping for a single region}
 \usage{
 finemap_region(
   region_data,
@@ -73,5 +73,5 @@ the data frame of finemapping results.}
 a data frame of finemapping results.
 }
 \description{
-run cTWAS finemapping for a single region
+Runs cTWAS finemapping for a single region
 }

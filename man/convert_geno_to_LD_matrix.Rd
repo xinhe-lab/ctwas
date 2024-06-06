@@ -2,8 +2,8 @@
 % Please edit documentation in R/ctwas_convert_geno_to_LD_matrix.R
 \name{convert_geno_to_LD_matrix}
 \alias{convert_geno_to_LD_matrix}
-\title{Convert PLINK genotype data to LD matrices and SNP info files,
-save LD matrices as .RDS files and SNP info as .Rvar files}
+\title{Converts PLINK genotype data to LD matrices and SNP info files,
+saves LD matrices as .RDS files and SNP info as .Rvar files}
 \usage{
 convert_geno_to_LD_matrix(
   region_info,
@@ -17,11 +17,14 @@ convert_geno_to_LD_matrix(
 )
 }
 \arguments{
-\item{region_info}{a data frame of region information, with columns: chr, start, stop positions}
+\item{region_info}{a data frame of region information, with columns:
+chr, start, stop positions}
 
-\item{genotype_files}{Reference genotype files in PLINK binary genotype data in .pgen or .bed format}
+\item{genotype_files}{Reference genotype files in PLINK binary genotype data
+in .pgen or .bed format}
 
-\item{varinfo_files}{Reference variant information files in PLINK .pvar or .bim format.
+\item{varinfo_files}{Reference variant information files in PLINK
+.pvar or .bim format.
 
 The output will use the genome positions in \code{varinfo_files}.}
 
@@ -33,12 +36,14 @@ The output will use the genome positions in \code{varinfo_files}.}
 
 \item{include_variance}{TRUE/FALSE, if TRUE, include variance in .Rvar output}
 
-\item{include_allele_freq}{TRUE/FALSE, if TRUE, include allele frequency in .Rvar output}
+\item{include_allele_freq}{TRUE/FALSE, if TRUE, include allele frequency
+in .Rvar output}
 }
 \value{
-a data frame of updated region info, with paths of LD matrices and variance information files
+a data frame of updated region info, with paths of LD matrices and
+variance information files
 }
 \description{
-Convert PLINK genotype data to LD matrices and SNP info files,
-save LD matrices as .RDS files and SNP info as .Rvar files
+Converts PLINK genotype data to LD matrices and SNP info files,
+saves LD matrices as .RDS files and SNP info as .Rvar files
 }

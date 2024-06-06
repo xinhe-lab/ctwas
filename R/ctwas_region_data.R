@@ -1,4 +1,4 @@
-#' Assemble data for all the regions
+#' @title Assembles data for all the regions
 #'
 #' @param region_info a data frame of region definition and associated file names
 #'
@@ -20,12 +20,14 @@
 #' have enough memory to run the program. This applies to the last rerun step
 #' (using full SNPs and rerun susie for regions with strong gene signals) only.
 #'
-#' @param trim_by remove SNPs if the total number of SNPs exceeds limit, options: "random",
-#' or "z" (trim SNPs with lower |z|) See parameter `maxSNP` for more information.
+#' @param trim_by remove SNPs if the total number of SNPs exceeds limit,
+#' options: "random", or "z" (trim SNPs with lower |z|).
+#' See parameter `maxSNP` for more information.
 #'
-#' @param adjust_boundary_genes identify cross-boundary genes, adjust region_data and update weighs
+#' @param adjust_boundary_genes identify cross-boundary genes, adjust region_data
 #'
-#' @param thin_gwas_snps TRUE/FALSE, if TRUE, only apply thin to GWAS SNPs, Otherwise, apply thins to all SNPs.
+#' @param thin_gwas_snps TRUE/FALSE, if TRUE, only apply thin to GWAS SNPs.
+#' Otherwise, apply thins to all SNPs.
 #'
 #' @param add_z TRUE/FALSE, if TRUE, add z-scores to the region_data
 #'
@@ -33,9 +35,10 @@
 #'
 #' @param seed seed for random sampling
 #'
-#' @importFrom logging loginfo
-#'
 #' @return a list with region_data, updated weights, and cross-bounary genes
+#'
+#' @importFrom logging loginfo
+#' @importFrom data.table rbindlist
 #'
 #' @export
 #'
@@ -66,7 +69,7 @@ assemble_region_data <- function(region_info,
 
   # Check LD reference SNP info
   if (class(snp_info) == "list") {
-    snp_info <- as.data.frame(data.table::rbindlist(snp_info, idcol = "region_id"))
+    snp_info <- as.data.frame(rbindlist(snp_info, idcol = "region_id"))
   }
   target_header <- c("chrom", "id", "pos", "alt", "ref", "region_id")
   if (!all(target_header %in% colnames(snp_info))){
@@ -146,7 +149,7 @@ assemble_region_data <- function(region_info,
   return(list(region_data=region_data, boundary_genes=boundary_genes))
 }
 
-#' Assign gene and SNP IDs for regions in the regioninfo
+# Assign gene and SNP IDs for regions in the regioninfo
 assign_region_ids <- function(regioninfo,
                               geneinfo,
                               snpinfo,
@@ -216,7 +219,8 @@ assign_region_ids <- function(regioninfo,
 }
 
 
-#' Trim SNPs from region_data if the total number of SNPs exceeds limit
+# Trim SNPs from region_data if the total number of SNPs exceeds limit
+#' @importFrom logging loginfo
 trim_region_data <- function(region_data, z_snp, trim_by = c("random", "z"), maxSNP = Inf, seed = 99){
 
   trim_by <- match.arg(trim_by)
@@ -226,7 +230,7 @@ trim_region_data <- function(region_data, z_snp, trim_by = c("random", "z"), max
       # trim SNPs with lower |z|
       for (region_id in names(region_data)){
         if (length(region_data[[region_id]][["sid"]]) > maxSNP){
-          logging::loginfo("Trim region %s with SNPs more than %s", region_id, maxSNP)
+          loginfo("Trim region %s with SNPs more than %s", region_id, maxSNP)
           idx <- match(region_data[[region_id]][["sid"]], z_snp$id)
           z.abs <- abs(z_snp[idx, "z"])
           ifkeep <- rank(-z.abs) <= maxSNP
@@ -234,10 +238,10 @@ trim_region_data <- function(region_data, z_snp, trim_by = c("random", "z"), max
         }
       }
     } else {
-      # randomly trim snps
+      # randomly trim SNPs
       for (region_id in names(region_data)){
         if (length(region_data[[region_id]][["sid"]]) > maxSNP){
-          logging::loginfo("Trim region %s with SNPs more than %s", region_id, maxSNP)
+          loginfo("Trim region %s with SNPs more than %s", region_id, maxSNP)
           n.snps <- length(region_data[[region_id]][["sid"]])
           ifkeep <- rep(FALSE, n.snps)
           set.seed(seed)
@@ -251,18 +255,20 @@ trim_region_data <- function(region_data, z_snp, trim_by = c("random", "z"), max
   return(region_data)
 }
 
-#' add z-scores from z_snp and z_gene to region_data
+# add z-scores from z_snp and z_gene to region_data
+#' @importFrom logging loginfo
+#' @importFrom parallel mclapply
 add_z_to_region_data <- function(region_data,
                                  z_snp,
                                  z_gene,
                                  ncore = 1){
-  logging::loginfo("Adding z-scores to region_data ...")
+  loginfo("Adding z-scores to region_data ...")
 
   # Combine z-scores from z_snp and z_gene
   zdf <- combine_z(z_snp, z_gene)
 
   region_ids <- names(region_data)
-  region_data2 <- parallel::mclapply(region_ids, function(region_id){
+  region_data2 <- mclapply(region_ids, function(region_id){
     # add z-scores and types of the region to the region_data
     regiondata <- region_data[[region_id]]
     gid <- regiondata[["gid"]]
@@ -283,12 +289,14 @@ add_z_to_region_data <- function(region_data,
   return(region_data2)
 }
 
-#' Adjust region_data for boundary genes
+# Adjust region_data for boundary genes
+#' @importFrom logging loginfo
+#' @importFrom data.table rbindlist
 adjust_boundary_genes <- function(boundary_genes,
                                   weights,
                                   region_data,
                                   snp_info){
-  logging::loginfo("Adjusting for boundary genes ...")
+  loginfo("Adjusting for boundary genes ...")
 
   if (!is.list(weights)){
     stop("'weights' should be a list.")
@@ -296,7 +304,7 @@ adjust_boundary_genes <- function(boundary_genes,
 
   # Check LD reference SNP info
   if (class(snp_info) == "list") {
-    snp_info <- as.data.frame(data.table::rbindlist(snp_info, idcol = "region_id"))
+    snp_info <- as.data.frame(rbindlist(snp_info, idcol = "region_id"))
   }
   target_header <- c("chrom", "id", "pos", "alt", "ref", "region_id")
   if (!all(target_header %in% colnames(snp_info))){
@@ -326,7 +334,7 @@ adjust_boundary_genes <- function(boundary_genes,
   return(region_data)
 }
 
-#' Expand region_data with full SNPs
+#' @title Expands region_data with full SNPs
 #'
 #' @param region_data a list of region gene IDs and SNP IDs and associated file names
 #'
@@ -349,9 +357,11 @@ adjust_boundary_genes <- function(boundary_genes,
 #'
 #' @param seed seed for random sampling
 #'
-#' @importFrom logging loginfo
-#'
 #' @return updated region_data with full SNPs
+#'
+#' @importFrom logging loginfo
+#' @importFrom data.table rbindlist
+#' @importFrom parallel mclapply
 #'
 #' @export
 #'
@@ -373,7 +383,7 @@ expand_region_data <- function(region_data,
 
   # Check LD reference SNP info
   if (class(snp_info) == "list") {
-    snp_info <- as.data.frame(data.table::rbindlist(snp_info, idcol = "region_id"))
+    snp_info <- as.data.frame(rbindlist(snp_info, idcol = "region_id"))
   }
   target_header <- c("chrom", "id", "pos", "alt", "ref", "region_id")
   if (!all(target_header %in% colnames(snp_info))){
@@ -382,7 +392,7 @@ expand_region_data <- function(region_data,
   }
 
   region_ids <- names(region_data)
-  region_data <- parallel::mclapply(region_ids, function(region_id){
+  region_data <- mclapply(region_ids, function(region_id){
     # add z-scores and types of the region to the region_data
     regiondata <- region_data[[region_id]]
     if (regiondata[["thin"]] < 1){

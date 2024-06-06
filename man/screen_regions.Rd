@@ -2,7 +2,7 @@
 % Please edit documentation in R/ctwas_screen_regions.R
 \name{screen_regions}
 \alias{screen_regions}
-\title{Screen regions with strong non-SNP PIPs to be used in finemapping step}
+\title{Screens regions with strong non-SNP PIPs to be used in finemapping step}
 \usage{
 screen_regions(
   region_data,
@@ -58,5 +58,5 @@ will be selected to run finemapping using full SNPs.}
 a list of screened_region_data, and a data frame of region ids and non-SNP PIPs
 }
 \description{
-Screen regions with strong non-SNP PIPs to be used in finemapping step
+Screens regions with strong non-SNP PIPs to be used in finemapping step
 }

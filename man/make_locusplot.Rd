@@ -2,7 +2,7 @@
 % Please edit documentation in R/ctwas_plots.R
 \name{make_locusplot}
 \alias{make_locusplot}
-\title{Plot the cTWAS result for a single locus}
+\title{Plots the cTWAS result for a single locus}
 \usage{
 make_locusplot(
   finemap_res,
@@ -77,5 +77,5 @@ By default, only show protein coding genes.}
 \item{highlight_pos}{If not NULL, highlighst the position in all panels for the genomic position.}
 }
 \description{
-Plot the cTWAS result for a single locus
+Plots the cTWAS result for a single locus
 }

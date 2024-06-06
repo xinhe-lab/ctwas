@@ -1,5 +1,5 @@
 
-#' Preprocess PredictDB/FUSION weights and harmonize with LD reference
+#' @title Preprocess PredictDB/FUSION weights and harmonize with LD reference
 #'
 #' @param weight_file a string or a vector, pointing path to one or multiple sets of weights in PredictDB or FUSION format.
 #'
@@ -32,13 +32,17 @@
 #'
 #' @param logfile the log file, if NULL will print log info on screen.
 #'
-#' @importFrom logging addHandler loginfo writeToFile
-#' @importFrom foreach %dopar% foreach
-#'
 #' @return a list of processed weights
 #'
+#' @importFrom logging addHandler loginfo writeToFile
+#' @importFrom foreach %dopar% foreach
+#' @importFrom parallel mclapply makeCluster stopCluster
+#' @importFrom doParallel registerDoParallel
+#' @importFrom data.table rbindlist
+#' @importFrom tools file_path_sans_ext
 #' @importFrom stats complete.cases
-#' 
+#' @importFrom Matrix bdiag
+#'
 #' @export
 #'
 preprocess_weights <- function(weight_file,
@@ -73,7 +77,7 @@ preprocess_weights <- function(weight_file,
 
   # Check LD reference SNP info
   if (class(snp_info) == "list") {
-    snp_info_df <- as.data.frame(data.table::rbindlist(snp_info, idcol = "region_id"))
+    snp_info_df <- as.data.frame(rbindlist(snp_info, idcol = "region_id"))
   }
   target_header <- c("chrom", "id", "pos", "alt", "ref")
   if (!all(target_header %in% colnames(snp_info_df))){
@@ -87,7 +91,7 @@ preprocess_weights <- function(weight_file,
   }
 
   if (missing(context)) {
-    context <- tools::file_path_sans_ext(basename(weight_file))
+    context <- file_path_sans_ext(basename(weight_file))
   }
 
   loginfo("Load weight: %s", weight_file)
@@ -228,8 +232,8 @@ preprocess_weights <- function(weight_file,
       weight_info[k, "region_id"] <- paste(sort(region_info[idx, "region_id"]), collapse = ";")
     }
     # impute LD for weights for each chromosome
-    cl <- parallel::makeCluster(ncore, outfile = "")
-    doParallel::registerDoParallel(cl)
+    cl <- makeCluster(ncore, outfile = "")
+    registerDoParallel(cl)
 
     for (b in unique(weight_info$chrom)) {
       loginfo("Computing LD for weight variants on chr%s", b)
@@ -252,7 +256,7 @@ preprocess_weights <- function(weight_file,
             reg_idx <- match(region_ids, LD_info$region_id)
             if (length(reg_idx) > 1){
               R_snp <- lapply(LD_info$LD_matrix[reg_idx], load_LD)
-              R_snp <- suppressWarnings({as.matrix(Matrix::bdiag(R_snp))})
+              R_snp <- suppressWarnings({as.matrix(bdiag(R_snp))})
             }
             else{
               R_snp <- load_LD(LD_info$LD_matrix[reg_idx])
@@ -277,6 +281,7 @@ preprocess_weights <- function(weight_file,
         }
       }
     }
+    stopCluster(cl)
   }
   return(weights)
 }

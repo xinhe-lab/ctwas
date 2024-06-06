@@ -2,7 +2,7 @@
 % Please edit documentation in R/ctwas_region_data.R
 \name{assemble_region_data}
 \alias{assemble_region_data}
-\title{Assemble data for all the regions}
+\title{Assembles data for all the regions}
 \usage{
 assemble_region_data(
   region_info,
@@ -41,12 +41,14 @@ Inf, no limit. This can be useful if there are many SNPs in a region and you don
 have enough memory to run the program. This applies to the last rerun step
 (using full SNPs and rerun susie for regions with strong gene signals) only.}
 
-\item{trim_by}{remove SNPs if the total number of SNPs exceeds limit, options: "random",
-or "z" (trim SNPs with lower |z|) See parameter `maxSNP` for more information.}
+\item{trim_by}{remove SNPs if the total number of SNPs exceeds limit,
+options: "random", or "z" (trim SNPs with lower |z|).
+See parameter `maxSNP` for more information.}
 
-\item{adjust_boundary_genes}{identify cross-boundary genes, adjust region_data and update weighs}
+\item{adjust_boundary_genes}{identify cross-boundary genes, adjust region_data}
 
-\item{thin_gwas_snps}{TRUE/FALSE, if TRUE, only apply thin to GWAS SNPs, Otherwise, apply thins to all SNPs.}
+\item{thin_gwas_snps}{TRUE/FALSE, if TRUE, only apply thin to GWAS SNPs.
+Otherwise, apply thins to all SNPs.}
 
 \item{add_z}{TRUE/FALSE, if TRUE, add z-scores to the region_data}
 
@@ -58,5 +60,5 @@ or "z" (trim SNPs with lower |z|) See parameter `maxSNP` for more information.}
 a list with region_data, updated weights, and cross-bounary genes
 }
 \description{
-Assemble data for all the regions
+Assembles data for all the regions
 }

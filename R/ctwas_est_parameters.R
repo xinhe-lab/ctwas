@@ -1,4 +1,4 @@
-#' Estimate cTWAS parameters
+#' @title Estimates cTWAS parameters using EM
 #'
 #' @param region_data a list object indexing regions, variants and genes.
 #'
@@ -163,7 +163,7 @@ est_param <- function(
 }
 
 
-#' Select single effect regions
+# Select single effect regions
 compute_region_p_single_effect <- function(region_data, group_prior){
   region_ids <- names(region_data)
   if (length(region_ids) == 0) {

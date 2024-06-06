@@ -1,7 +1,8 @@
 
 # Read a single SNP info file as a data frame
+#' @importFrom data.table fread
 read_snp_info_file <- function (file){
-  snp_info <- as.data.frame(data.table::fread(file, header = TRUE))
+  snp_info <- as.data.frame(fread(file, header = TRUE))
   target_header <- c("chrom", "id", "pos", "alt", "ref")
   if (!all(target_header %in% colnames(snp_info))){
     stop("The SNP info file needs to contain the following columns: ",
@@ -17,7 +18,7 @@ read_snp_info_files <- function (files){
   return(snp_info)
 }
 
-#' Load PredictDB or FUSION weights
+#' @title Loads PredictDB or FUSION weights
 #'
 #' @param weight_file a string or a vector, pointing path to one or multiple sets of weights in PredictDB or FUSION format.
 #'
@@ -38,6 +39,11 @@ read_snp_info_files <- function (files){
 #' @importFrom magrittr %>%
 #' @importFrom tibble as_tibble
 #' @importFrom dplyr left_join mutate select
+#' @importFrom tools file_path_sans_ext
+#' @importFrom RSQLite dbDriver dbConnect dbGetQuery dbDisconnect
+#' @importFrom foreach %dopar% foreach
+#' @importFrom parallel makeCluster stopCluster
+#' @importFrom doParallel registerDoParallel
 #'
 #' @export
 #'
@@ -56,11 +62,11 @@ load_weights <- function(weight_file,
 
   if(weight_format == "PredictDB"){
 
-    weight_name <- tools::file_path_sans_ext(basename(weight_file))
+    weight_name <- file_path_sans_ext(basename(weight_file))
     # read the PredictDB weights
-    sqlite <- RSQLite::dbDriver("SQLite")
-    db = RSQLite::dbConnect(sqlite, weight_file)
-    query <- function(...) RSQLite::dbGetQuery(db, ...)
+    sqlite <- dbDriver("SQLite")
+    db <- dbConnect(sqlite, weight_file)
+    query <- function(...) dbGetQuery(db, ...)
     weight_table <- query("select * from weights")
     weight_table <- weight_table[weight_table$weight!=0,]
     extra_table <- query("select * from extra")
@@ -75,7 +81,7 @@ load_weights <- function(weight_file,
     }
 
     if (isTRUE(load_predictdb_LD)){
-      predictdb_LD_file <- paste0(tools::file_path_sans_ext(weight_file), ".txt.gz")
+      predictdb_LD_file <- paste0(file_path_sans_ext(weight_file), ".txt.gz")
       if (!file.exists(predictdb_LD_file)){
         stop(paste("PredictDB LD file", predictdb_LD_file, "does not exist!"))
       }
@@ -84,10 +90,10 @@ load_weights <- function(weight_file,
     else{
       R_wgt <- NULL
     }
-    RSQLite::dbDisconnect(db)
+    dbDisconnect(db)
   }
   else if (weight_format == "FUSION"){
-    weight_name <- tools::file_path_sans_ext(basename(weight_file))
+    weight_name <- ile_path_sans_ext(basename(weight_file))
     wgtdir <- dirname(weight_file)
     wgtposfile <- file.path(wgtdir, paste0(basename(weight_file), ".pos"))
     wgtpos <- read.table(wgtposfile, header = T, stringsAsFactors = F)
@@ -95,8 +101,8 @@ load_weights <- function(weight_file,
                                             paste(ID, ave(ID, ID, FUN = seq_along), sep = "_ID"), ID))
     wgtpos <- wgtpos[wgtpos$ID!="NA_IDNA",] #filter NA genes
     loginfo("Loading FUSION weights ...")
-    cl <- parallel::makeCluster(ncore, outfile = "", type = "FORK")
-    doParallel::registerDoParallel(cl)
+    cl <- makeCluster(ncore, outfile = "", type = "FORK")
+    registerDoParallel(cl)
     weight_table <- NULL
     if (nrow(wgtpos) > 0) {
       weight_table <- foreach(i = 1:nrow(wgtpos), .combine = "rbind") %dopar% {
@@ -121,14 +127,14 @@ load_weights <- function(weight_file,
         if (nrow(wgt.matrix) > 0){
           out_table <- as_tibble(wgt.matrix[,g.method]) %>%
             mutate(rsid = rownames(wgt.matrix)) %>%
-            left_join(tibble::as_tibble(snps) %>% select(-cm), by = "rsid")
+            left_join(as_tibble(snps) %>% select(-cm), by = "rsid")
           out_table$gene <- gname
           out_table <- out_table[,c("gene","rsid","varID","ref","alt","value")]
           colnames(out_table) <- c("gene","rsid","varID","ref_allele","eff_allele","weight")
           out_table
         }
       }
-      parallel::stopCluster(cl)
+      stopCluster(cl)
     }
     extra_table <- NULL
     R_wgt <- NULL
@@ -136,6 +142,7 @@ load_weights <- function(weight_file,
   return(list(weight_table=weight_table,extra_table=extra_table,weight_name=weight_name,R_wgt=R_wgt))
 }
 
+# gets LD matrix of weights
 #' @importFrom stats setNames
 get_weight_LD <- function (R_wgt_all, gname, rsid_varID){
   R_wgt <- R_wgt_all[R_wgt_all$GENE == gname,]
@@ -179,12 +186,14 @@ get_weight_LD <- function (R_wgt_all, gname, rsid_varID){
 # Load LD matrix
 #
 #' @importFrom utils read.csv
+#' @importFrom data.table fread
+#' @importFrom tools file_ext
 load_LD <- function (file, format = c("rds", "rdata", "csv", "txt", "tsv")) {
   format <- match.arg(format)
 
   # if format is missing, try to guess format by file extension
   if (missing(format)) {
-    file_ext_lower <- tolower(tools::file_ext(file))
+    file_ext_lower <- tolower(file_ext(file))
 
     if (file_ext_lower == "rds"){
       format <- "rds"
@@ -208,7 +217,7 @@ load_LD <- function (file, format = c("rds", "rdata", "csv", "txt", "tsv")) {
   } else if (format == "csv"){
     res <- as.matrix(read.csv(file, sep=",", row.names=1))
   } else if (format %in% c("txt", "tsv")){
-    res <- as.matrix(data.table::fread(file))
+    res <- as.matrix(fread(file))
   } else {
     stop("Unknown file format!")
   }
@@ -217,18 +226,18 @@ load_LD <- function (file, format = c("rds", "rdata", "csv", "txt", "tsv")) {
 }
 
 
-#' Prepare .pvar file
-#'
-#' @param pgenf pgen file
-#' .pvar file format: https://www.cog-genomics.org/plink/2.0/formats#pvar
-#'
-#' @param outputdir a string, the directory to store output
-#'
-#' @return corresponding pvar file
-#'
+# Prepare .pvar file
+#
+# @param pgenf pgen file
+# .pvar file format: https://www.cog-genomics.org/plink/2.0/formats#pvar
+#
+# @param outputdir a string, the directory to store output
+#
+# @return corresponding pvar file
+#
 #' @importFrom utils read.table
+#' @importFrom data.table fread fwrite
 #' @importFrom tools file_ext file_path_sans_ext
-#'
 prep_pvar <- function(pgenf, outputdir = getwd()){
 
   if (file_ext(pgenf) == "pgen"){
@@ -245,7 +254,7 @@ prep_pvar <- function(pgenf, outputdir = getwd()){
       pvarfout <- pvarf2
 
       if (!file.exists(pvarf2)) {
-        pvar <- data.table::fread(pvarf, header = F)
+        pvar <- fread(pvarf, header = F)
 
         if (ncol(pvar) == 6) {
           colnames(pvar) <- c('#CHROM', 'ID', 'CM', 'POS', 'ALT', 'REF')
@@ -255,7 +264,7 @@ prep_pvar <- function(pgenf, outputdir = getwd()){
           stop(".pvar file has incorrect format")
         }
 
-        data.table::fwrite(pvar, file = pvarf2 , sep="\t", quote = F)
+        fwrite(pvar, file = pvarf2 , sep="\t", quote = F)
       }
     }
 
@@ -265,9 +274,9 @@ prep_pvar <- function(pgenf, outputdir = getwd()){
     pvarf2 <-  file.path(outputdir, paste0(basename(file_path_sans_ext(pgenf)), ".hbim"))
 
     if (!file.exists(pvarf2)){
-      pvar <- data.table::fread(pvarf, header = F)
+      pvar <- fread(pvarf, header = F)
       colnames(pvar) <- c('#CHROM', 'ID', 'CM', 'POS', 'ALT', 'REF')
-      data.table::fwrite(pvar, file = pvarf2 , sep="\t", quote = F)
+      fwrite(pvar, file = pvarf2 , sep="\t", quote = F)
     }
     pvarfout <- pvarf2
   } else {
@@ -277,33 +286,32 @@ prep_pvar <- function(pgenf, outputdir = getwd()){
   return(pvarfout)
 }
 
-#' Read .pgen file into R
-#'
-#' @param pgenf .pgen file or .bed file
-#'
-#' @param pvarf .pvar file or .bim file with have proper
-#'  header.  Matching `pgenf`.
-#'
-#' @return  A matrix of allele count for each variant (columns) in each sample
-#'  (rows). ALT allele in pvar file is counted (A1 allele in .bim file is the ALT
-#'   allele).
-#'
-#' @importFrom pgenlibr NewPvar
-#' @importFrom pgenlibr NewPgen
+# Read .pgen file into R
+#
+# @param pgenf .pgen file or .bed file
+#
+# @param pvarf .pvar file or .bim file with have proper
+#  header.  Matching `pgenf`.
+#
+# @return  A matrix of allele count for each variant (columns) in each sample
+#  (rows). ALT allele in pvar file is counted (A1 allele in .bim file is the ALT
+#   allele).
+#
+#' @importFrom data.table fread
+#' @importFrom pgenlibr NewPgen NewPvar
 #' @importFrom tools file_ext file_path_sans_ext
-#'
 prep_pgen <- function(pgenf, pvarf){
 
-  pvar <- pgenlibr::NewPvar(pvarf)
+  pvar <- NewPvar(pvarf)
 
   if (file_ext(pgenf) == "pgen"){
-    pgen <- pgenlibr::NewPgen(pgenf, pvar = pvar)
+    pgen <- NewPgen(pgenf, pvar = pvar)
 
   } else if (file_ext(pgenf) == "bed"){
     famf <- paste0(file_path_sans_ext(pgenf), ".fam")
-    fam <- data.table::fread(famf, header = F)
+    fam <- fread(famf, header = F)
     raw_s_ct <- nrow(fam)
-    pgen <- pgenlibr::NewPgen(pgenf, pvar = pvar, raw_sample_ct = raw_s_ct)
+    pgen <- NewPgen(pgenf, pvar = pvar, raw_sample_ct = raw_s_ct)
 
   } else{
     stop("unrecognized input")
@@ -312,60 +320,59 @@ prep_pgen <- function(pgenf, pvarf){
   return(pgen)
 }
 
-#' Read pgen file into R
-#'
-#' @param pgen .pgen file or .bed file
-#'
-#' @param variantidx variant index. If NULL, all variants will be extracted.
-#'
-#' @return A matrix, columns are allele count for each SNP, rows are
-#'  for each sample.
-#'
+# Read pgen file into R
+#
+# @param pgen .pgen file or .bed file
+#
+# @param variantidx variant index. If NULL, all variants will be extracted.
+#
+# @return A matrix, columns are allele count for each SNP, rows are
+#  for each sample.
+#
 #' @importFrom pgenlibr GetVariantCt
 #' @importFrom pgenlibr ReadList
-#'
 read_pgen <- function(pgen, variantidx = NULL, meanimpute = F ){
   if (is.null(variantidx)){
-    variantidx <- 1: pgenlibr::GetVariantCt(pgen)}
+    variantidx <- 1: GetVariantCt(pgen)}
 
-  pgenlibr::ReadList(pgen,
-                     variant_subset = variantidx,
-                     meanimpute = meanimpute)
+  ReadList(pgen,
+           variant_subset = variantidx,
+           meanimpute = meanimpute)
 }
 
 
-#' Read .pvar file into R
-#' @param pvarf .pvar file with proper format: https://www.cog-genomics.org/plink/2.0/formats#pvar
-#'
-#' @return A data.table. variant info
-#'
+# Read .pvar file into R
+# @param pvarf .pvar file with proper format: https://www.cog-genomics.org/plink/2.0/formats#pvar
+#
+# @return A data.table. variant info
+#' @importFrom data.table fread
+#' @importFrom dplyr rename
 read_pvar <- function(pvarf){
-  pvar <- data.table::fread(pvarf, skip = "#CHROM")
-  pvar <- dplyr::rename(pvar, "chrom" = "#CHROM", "pos" = "POS",
-                        "alt" = "ALT", "ref" = "REF", "id" = "ID")
+  pvar <- fread(pvarf, skip = "#CHROM")
+  pvar <- rename(pvar, "chrom" = "#CHROM", "pos" = "POS",
+                 "alt" = "ALT", "ref" = "REF", "id" = "ID")
   pvar <- pvar[, c("chrom", "id", "pos", "alt", "ref")]
   return(pvar)
 }
 
-#' Read .bim file into R
-#' @param bimf .bim file with proper format: https://www.cog-genomics.org/plink/2.0/formats#bim
-#'
-#' @return A data.table. variant info
-#'
+# Read .bim file into R
+# @param bimf .bim file with proper format: https://www.cog-genomics.org/plink/2.0/formats#bim
+#
+# @return A data.table. variant info
+#' @importFrom data.table fread
 read_bim <- function(bimf) {
-  bim <- data.table::fread(bimf)
+  bim <- fread(bimf)
   colnames(bim) <- c("chr", "id", "cm", "pos", "alt", "ref")
   return(bim)
 }
 
-#' Read variant information from .pvar or .bim file into R
-#' @param var_info_file .pvar or .bim file with proper format:
-#' .pvar: https://www.cog-genomics.org/plink/2.0/formats#pvar
-#' .bim: https://www.cog-genomics.org/plink/2.0/formats#bim
-#'
-#' @return A data.table. variant info
+# Read variant information from .pvar or .bim file into R
+# @param var_info_file .pvar or .bim file with proper format:
+# .pvar: https://www.cog-genomics.org/plink/2.0/formats#pvar
+# .bim: https://www.cog-genomics.org/plink/2.0/formats#bim
+#
+# @return A data.table. variant info
 #' @importFrom tools file_ext
-#'
 read_var_info <- function(var_info_file){
   if (file_ext(var_info_file) == "pvar"){
     var_info <- read_pvar(var_info_file)
@@ -377,7 +384,7 @@ read_var_info <- function(var_info_file){
   return(var_info)
 }
 
-#' assign regions to cores
+# assign regions to cores
 region2core <- function(region_data, ncore = 1){
   region_ids <- names(region_data)
   if (ncore > 1) {

@@ -2,7 +2,7 @@
 % Please edit documentation in R/ctwas_est_parameters.R
 \name{est_param}
 \alias{est_param}
-\title{Estimate cTWAS parameters}
+\title{Estimates cTWAS parameters using EM}
 \usage{
 est_param(
   region_data,
@@ -61,5 +61,5 @@ having at most one causal effect will be used selected for the complete paramete
 a list with estimated parameters
 }
 \description{
-Estimate cTWAS parameters
+Estimates cTWAS parameters using EM
 }

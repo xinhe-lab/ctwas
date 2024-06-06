@@ -1,5 +1,5 @@
 
-#' Preprocess region info, LD info, and SNP info from all regions and map SNPs to regions.
+#' @title Preprocess region info, LD info, and SNP info from all regions and map SNPs to regions.
 #'
 #' @param region_info a data frame of region definition
 #'
@@ -73,7 +73,7 @@ preprocess_region_LD_snp_info <- function(region_info = NULL,
 }
 
 
-#' Read SNP info from all regions and map SNPs to regions.
+#' @title Reads SNP info from all regions and map SNPs to regions.
 #'
 #' @param region_info a data frame of region definition
 #'
@@ -99,7 +99,7 @@ map_snp_info_regions <- function(region_info,
   ref_snp_info <- ref_snp_info[ref_snp_info$chrom %in% region_info$chrom, ]
 
   region_ids <- region_info$region_id
-  snp_info <- parallel::mclapply(region_ids, function(region_id){
+  snp_info <- mclapply(region_ids, function(region_id){
     regioninfo <- region_info[which(region_info$region_id == region_id), ]
     region_chrom <- regioninfo$chrom
     region_start <- regioninfo$start

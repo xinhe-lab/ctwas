@@ -1,5 +1,6 @@
 
-# convert old version regionlist to new version region data
+# converts old version regionlist to new version region data
+#' @importFrom logging loginfo
 convert_regionlist_to_region_data <- function(regionlist, region_info, z_snp, z_gene, thin, ncore = 1){
 
   region_info <- region_info[order(region_info$chrom, region_info$start),]
@@ -38,7 +39,9 @@ convert_region_tags_to_region_id <- function(region_info, region_tags1, region_t
 
   stopifnot(length(region_tags1) == length(region_tags2))
   region_tags <- paste0(region_tags1, "_", region_tags2)
-  region_tags_df <- unique(data.frame(region_tag1 = region_tags1, region_tag2 = region_tags2, region_tag = region_tags))
+  region_tags_df <- unique(data.frame(region_tag1 = region_tags1,
+                                      region_tag2 = region_tags2,
+                                      region_tag = region_tags))
 
   region_info <- region_info[order(region_info$chrom, region_info$start),]
 

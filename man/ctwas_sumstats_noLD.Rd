@@ -2,7 +2,7 @@
 % Please edit documentation in R/ctwas_sumstats_noLD.R
 \name{ctwas_sumstats_noLD}
 \alias{ctwas_sumstats_noLD}
-\title{running cTWAS analysis with "no LD" version}
+\title{Runs cTWAS analysis with "no LD" version}
 \usage{
 ctwas_sumstats_noLD(
   z_snp,
@@ -86,5 +86,5 @@ a list of estimated parameters, fine-mapping results, boundary genes,
 z_gene, region_data, and screened_region_data
 }
 \description{
-running cTWAS analysis with "no LD" version
+Runs cTWAS analysis with "no LD" version
 }

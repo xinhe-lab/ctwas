@@ -2,7 +2,7 @@
 % Please edit documentation in R/ctwas_screen_regions.R
 \name{compute_region_nonSNP_PIPs}
 \alias{compute_region_nonSNP_PIPs}
-\title{Compute non-SNP PIPs for regions}
+\title{Computes non-SNP PIPs for regions}
 \usage{
 compute_region_nonSNP_PIPs(finemap_res)
 }
@@ -10,5 +10,5 @@ compute_region_nonSNP_PIPs(finemap_res)
 \item{finemap_res}{a data frame of finemapping result}
 }
 \description{
-Compute non-SNP PIPs for regions
+Computes non-SNP PIPs for regions
 }

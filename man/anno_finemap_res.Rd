@@ -2,7 +2,7 @@
 % Please edit documentation in R/ctwas_summarize_finemap_res.R
 \name{anno_finemap_res}
 \alias{anno_finemap_res}
-\title{Annotate cTWAS finemapping result with ensembl gene annotation database}
+\title{Annotates cTWAS finemapping result with ensembl gene annotation database}
 \usage{
 anno_finemap_res(
   finemap_res,
@@ -19,12 +19,13 @@ with columns "chrom", "id", "pos", "alt", "ref".}
 
 \item{ens_db}{ensembl gene annotation database}
 
-\item{use_gene_pos}{use mid (midpoint), start or end positions to represent gene positions}
+\item{use_gene_pos}{use mid (midpoint), start or end positions to
+represent gene positions}
 }
 \value{
 a data frame of cTWAS finemapping result including gene
 names and updated positions
 }
 \description{
-Annotate cTWAS finemapping result with ensembl gene annotation database
+Annotates cTWAS finemapping result with ensembl gene annotation database
 }

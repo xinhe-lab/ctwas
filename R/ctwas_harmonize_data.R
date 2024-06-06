@@ -1,19 +1,19 @@
 
-#' Harmonize z scores from GWAS to match LD reference genotypes.
-#' Flip signs when reverse complement matches, remove strand ambiguous SNPs
-#'
-#' @param z_snp a data frame, with columns "id", "A1", "A2" and "z".
-#'     Z scores for every SNP. "A1" is the effect allele.
-#'
-#' @param snp_info a list or data frame of SNP info for LD reference,
-#'  with columns "chrom", "id", "pos", "alt", "ref".
-#'
-#' @param drop_strand_ambig TRUE/FALSE, if TRUE remove strand ambiguous variants (A/T, G/C).
-#'
+# @title Harmonizes z scores from GWAS to match LD reference genotypes.
+# Flips signs when reverse complement matches, and removes strand ambiguous SNPs
+#
+# @param z_snp a data frame, with columns "id", "A1", "A2" and "z".
+#     Z scores for every SNP. "A1" is the effect allele.
+#
+# @param snp_info a list or data frame of SNP info for LD reference,
+#  with columns "chrom", "id", "pos", "alt", "ref".
+#
+# @param drop_strand_ambig TRUE/FALSE, if TRUE remove strand ambiguous variants (A/T, G/C).
+#
+# @return a data frame, z_snp with the "z" columns flipped to match LD reference.
+#
 #' @importFrom logging loginfo
-#'
-#' @return a data frame, z_snp with the "z" columns flipped to match LD ref.
-#'
+#' @importFrom data.table rbindlist
 harmonize_z <- function(z_snp, snp_info, drop_strand_ambig = TRUE){
 
   # Check LD reference SNP info
@@ -49,22 +49,23 @@ harmonize_z <- function(z_snp, snp_info, drop_strand_ambig = TRUE){
   return(z_snp)
 }
 
-#' Harmonize weight to match LD reference genotypes.
-#' Flip signs when reverse complement matches, remove ambiguous variants from the prediction models
-#'
-#' @param wgt.matrix from FUSION weight .Rdat file
-#'
-#' @param snps from FUSION weight .Rdat file
-#'  with columns "chrom", "id", "pos", "alt", "ref". The effect allele
-#'  for FUSION is alt.
-#'
-#' @param snp_info a list or data frame of SNP info for LD reference,
-#'  with columns "chrom", "id", "pos", "alt", "ref".
-#'
-#' @param drop_strand_ambig TRUE/FALSE, if TRUE remove strand ambiguous variants (A/T, G/C).
-#'
-#' @return wgt.matrix and snps with alleles flipped to match
-#'
+# Harmonize weight to match LD reference genotypes.
+# Flip signs when reverse complement matches, remove ambiguous variants from the prediction models
+#
+# @param wgt.matrix from FUSION weight .Rdat file
+#
+# @param snps from FUSION weight .Rdat file
+#  with columns "chrom", "id", "pos", "alt", "ref". The effect allele
+#  for FUSION is alt.
+#
+# @param snp_info a list or data frame of SNP info for LD reference,
+#  with columns "chrom", "id", "pos", "alt", "ref".
+#
+# @param drop_strand_ambig TRUE/FALSE, if TRUE remove strand ambiguous variants (A/T, G/C).
+#
+# @return wgt.matrix and snps with alleles flipped to match
+#
+#' @importFrom data.table rbindlist
 harmonize_weights <- function (wgt.matrix, snps, snp_info, drop_strand_ambig = TRUE){
 
   # Check LD reference SNP info
@@ -104,7 +105,7 @@ harmonize_weights <- function (wgt.matrix, snps, snp_info, drop_strand_ambig = T
 # flip alleles
 # Copied from allele.qc function
 # in https://github.com/gusevlab/fusion_twas/blob/master/FUSION.assoc_test.R,
-allele.qc = function(a1,a2,ref1,ref2) {
+allele.qc <- function(a1,a2,ref1,ref2) {
   a1 = toupper(a1)
   a2 = toupper(a2)
   ref1 = toupper(ref1)

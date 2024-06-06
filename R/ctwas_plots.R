@@ -1,5 +1,5 @@
 
-#' Plot the cTWAS result for a single locus
+#' @title Plots the cTWAS result for a single locus
 #'
 #' @param finemap_res a data frame of cTWAS finemapping result
 #'
@@ -47,10 +47,28 @@
 #' @param highlight_pos If not NULL, highlighst the position in all panels for the genomic position.
 #'
 #' @importFrom magrittr %>%
-#' @import ggplot2
-#' @import ggrepel
 #' @importFrom locuszoomr locus gg_genetracks
 #' @importFrom logging loginfo
+#' @importFrom Matrix bdiag
+#' @importFrom cowplot plot_grid
+#' @importFrom ggplot2 ggplot
+#' @importFrom ggplot2 aes
+#' @importFrom ggplot2 geom_point
+#' @importFrom ggplot2 scale_shape_manual
+#' @importFrom ggplot2 scale_alpha_manual
+#' @importFrom ggplot2 scale_size_manual
+#' @importFrom ggplot2 scale_color_manual
+#' @importFrom ggplot2 scale_fill_manual
+#' @importFrom ggplot2 labs
+#' @importFrom ggplot2 xlim
+#' @importFrom ggplot2 theme
+#' @importFrom ggplot2 theme_bw
+#' @importFrom ggplot2 element_text
+#' @importFrom ggplot2 element_blank
+#' @importFrom ggplot2 element_line
+#' @importFrom ggplot2 geom_vline
+#' @importFrom ggplot2 margin
+#' @importFrom ggrepel geom_text_repel
 #'
 #' @export
 #'
@@ -173,7 +191,7 @@ make_locusplot <- function(finemap_res,
         R_snp <- load_LD(LD_matrix_files)
       } else {
         R_snp <- lapply(LD_matrix_files, load_LD)
-        R_snp <- suppressWarnings(as.matrix(Matrix::bdiag(R_snp)))
+        R_snp <- suppressWarnings(as.matrix(bdiag(R_snp)))
       }
       # load SNP info of the region
       snpinfo <- snp_info[[region_id]]
@@ -230,7 +248,7 @@ make_locusplot <- function(finemap_res,
   point.sizes <- c("SNP"= point.sizes[1], "non-SNP"= point.sizes[2])
 
   # create a locus object for plotting
-  loc <- locuszoomr::locus(
+  loc <- locus(
     data = finemap_region_res,
     seqname = unique(finemap_region_res$chrom),
     xrange = locus_range,
@@ -333,6 +351,6 @@ make_locusplot <- function(finemap_res,
             plot.margin = margin(b=10, l=10, t=10, r=10))
   }
 
-  cowplot::plot_grid(p_pvalue, p_pip, p_qtl, p_genes, ncol = 1,
-                     rel_heights = panel.heights, align = "v")
+  plot_grid(p_pvalue, p_pip, p_qtl, p_genes, ncol = 1,
+            rel_heights = panel.heights, align = "v")
 }

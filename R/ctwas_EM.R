@@ -1,40 +1,40 @@
-#' Run EM to estimate parameters.
-#' Iteratively run susie and estimate parameters - RSS version
-#'
-#' @param region_data a list object with the susie input data for each region
-#'
-#' @param niter the number of iterations of the E-M algorithm to perform
-#'
-#' @param init_group_prior a vector of initial prior inclusion probabilities for SNPs and genes.
-#'
-#' @param init_group_prior_var a vector of initial prior variances for SNPs and gene effects.
-#'
-#' @param group_prior_var_structure a string indicating the structure to put on the prior variance parameters.
-#' "shared_type" allows all groups in one molecular QTL type to share the same variance parameter.
-#' "shared_context" allows all groups in one context (tissue, cell type, condition) to share the same variance parameter.
-#' "shared_nonSNP" allows all non-SNP groups to share the same variance parameter.
-#' "shared_all" allows all groups to share the same variance parameter.
-#' "independent" allows all groups to have their own separate variance parameters.
-#'
-#' @param use_null_weight TRUE/FALSE. If TRUE, allow for a probability of no effect in susie
-#'
-#' @param ncore The number of cores used to parallelize susie over regions
-#'
-#' @param verbose TRUE/FALSE. If TRUE, print detail messages
-#'
+# @title Runs EM to estimate parameters.
+#
+# @param region_data a list object with the susie input data for each region
+#
+# @param niter the number of iterations of the E-M algorithm to perform
+#
+# @param init_group_prior a vector of initial prior inclusion probabilities for SNPs and genes.
+#
+# @param init_group_prior_var a vector of initial prior variances for SNPs and gene effects.
+#
+# @param group_prior_var_structure a string indicating the structure to put on the prior variance parameters.
+# "shared_type" allows all groups in one molecular QTL type to share the same variance parameter.
+# "shared_context" allows all groups in one context (tissue, cell type, condition) to share the same variance parameter.
+# "shared_nonSNP" allows all non-SNP groups to share the same variance parameter.
+# "shared_all" allows all groups to share the same variance parameter.
+# "independent" allows all groups to have their own separate variance parameters.
+#
+# @param use_null_weight TRUE/FALSE. If TRUE, allow for a probability of no effect in susie
+#
+# @param ncore The number of cores used to parallelize susie over regions
+#
+# @param verbose TRUE/FALSE. If TRUE, print detail messages
+#
+# @return a list of parameters
+#
 #' @importFrom logging loginfo
-#'
-#' @return a list of parameters
-#'
-EM_est_param <- function(region_data,
-                         niter = 20,
-                         init_group_prior = NULL,
-                         init_group_prior_var = NULL,
-                         group_prior_var_structure = c("shared_type", "shared_context", "shared_nonSNP", "shared_all", "independent"),
-                         use_null_weight = TRUE,
-                         ncore = 1,
-                         verbose = FALSE,
-                         ...){
+#' @importFrom parallel mclapply
+EM_est_param <- function(
+    region_data,
+    niter = 20,
+    init_group_prior = NULL,
+    init_group_prior_var = NULL,
+    group_prior_var_structure = c("shared_type", "shared_context", "shared_nonSNP", "shared_all", "independent"),
+    use_null_weight = TRUE,
+    ncore = 1,
+    verbose = FALSE,
+    ...){
 
   # get groups, types and contexts from region_data
   groups <- unique(unlist(lapply(region_data, "[[", "gs_group")))
@@ -62,7 +62,7 @@ EM_est_param <- function(region_data,
       loginfo("Start EM iteration %d ...", iter)
     }
 
-    EM_susie_res_list <- parallel::mclapply(region_ids, function(region_id){
+    EM_susie_res_list <- mclapply(region_ids, function(region_id){
       ctwas_susie_region_L1(region_data, region_id,
                             pi_prior, V_prior,
                             use_null_weight = use_null_weight,

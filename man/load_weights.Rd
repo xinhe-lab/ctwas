@@ -2,7 +2,7 @@
 % Please edit documentation in R/ctwas_utils.R
 \name{load_weights}
 \alias{load_weights}
-\title{Load PredictDB or FUSION weights}
+\title{Loads PredictDB or FUSION weights}
 \usage{
 load_weights(
   weight_file,
@@ -30,5 +30,5 @@ load_weights(
 \item{ncore}{integer, number of cores for parallel computing.}
 }
 \description{
-Load PredictDB or FUSION weights
+Loads PredictDB or FUSION weights
 }

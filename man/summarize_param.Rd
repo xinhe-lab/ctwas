@@ -2,7 +2,7 @@
 % Please edit documentation in R/ctwas_summarize_parameters.R
 \name{summarize_param}
 \alias{summarize_param}
-\title{Summarize and plot cTWAS parameter estimates}
+\title{Summarizes and plots cTWAS parameter estimates}
 \usage{
 summarize_param(
   param,
@@ -27,5 +27,5 @@ summarize_param(
 \item{title.font}{font of the plot title}
 }
 \description{
-Summarize and plot cTWAS parameter estimates
+Summarizes and plots cTWAS parameter estimates
 }

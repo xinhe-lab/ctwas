@@ -1,4 +1,4 @@
-#' Annotate cTWAS finemapping result with ensembl gene annotation database
+#' @title Annotates cTWAS finemapping result with ensembl gene annotation database
 #'
 #' @param finemap_res a data frame of cTWAS finemapping result
 #'
@@ -7,17 +7,18 @@
 #'
 #' @param ens_db ensembl gene annotation database
 #'
-#' @param use_gene_pos use mid (midpoint), start or end positions to represent gene positions
+#' @param use_gene_pos use mid (midpoint), start or end positions to
+#' represent gene positions
+#'
+#' @return a data frame of cTWAS finemapping result including gene
+#' names and updated positions
 #'
 #' @importFrom data.table rbindlist
 #' @importFrom ensembldb genes
 #' @importFrom AnnotationFilter GeneIdFilter
 #'
-#' @return a data frame of cTWAS finemapping result including gene
-#' names and updated positions
-#'
 #' @export
-#' 
+#'
 anno_finemap_res <- function(finemap_res, snp_info, ens_db,
                              use_gene_pos = c("mid", "start", "end")){
 
@@ -25,7 +26,7 @@ anno_finemap_res <- function(finemap_res, snp_info, ens_db,
 
   # Check LD reference SNP info
   if (class(snp_info) == "list") {
-    snp_info <- as.data.frame(data.table::rbindlist(snp_info, idcol = "region_id"))
+    snp_info <- as.data.frame(rbindlist(snp_info, idcol = "region_id"))
   }
   target_header <- c("chrom", "id", "pos", "alt", "ref")
   if (!all(target_header %in% colnames(snp_info))){
@@ -79,13 +80,16 @@ anno_finemap_res <- function(finemap_res, snp_info, ens_db,
   return(finemap_res)
 }
 
-#' Combine PIPs across contexts (tissues)
+#' @title Combines PIPs across contexts (tissues)
 #'
 #' @param finemap_res a data frame of cTWAS finemapping result
 #'
 #' @param contexts a character vector of contexts to sum
 #'
 #' @return a data frame of combined gene PIPs and PIPs for each context
+#'
+#' @importFrom stats aggregate
+#'
 #' @export
 sum_pip_across_contexts <- function(finemap_res, contexts){
 

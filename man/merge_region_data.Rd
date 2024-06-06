@@ -2,7 +2,7 @@
 % Please edit documentation in R/ctwas_merge_regions.R
 \name{merge_region_data}
 \alias{merge_region_data}
-\title{Merge region data for cross-boundary genes}
+\title{Merges region data for cross-boundary genes}
 \usage{
 merge_region_data(
   boundary_genes,
@@ -48,5 +48,5 @@ or "z" (trim SNPs with lower |z|) See parameter `maxSNP` for more information.}
 a list of merged region_data, and a data frame of merged region info
 }
 \description{
-Merge region data for cross-boundary genes
+Merges region data for cross-boundary genes
 }
