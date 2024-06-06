@@ -24,6 +24,9 @@
 #'
 #' @return a data frame of updated region info, with paths of LD matrices and variance information files
 #'
+#' @importFrom utils write.table
+#' @importFrom utils txtProgressBar
+#' @importFrom utils setTxtProgressBar
 #' @importFrom readr parse_number
 #' 
 #' @export

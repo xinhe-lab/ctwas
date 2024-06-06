@@ -51,7 +51,10 @@ diagnose_ld_mismatch_susie <- function(z_snp,
               flipped_snps = flipped_snps))
 }
 
-#' Compute expected z-scores based on conditional distribution of z-scores using SuSiE RSS
+# Compute expected z-scores based on conditional distribution of
+# z-scores using SuSiE RSS.
+#
+#' @importFrom stats pchisq
 compute_region_condz <- function(region_id, LD_info, snp_info, z_snp, gwas_n){
 
   # load LD matrix

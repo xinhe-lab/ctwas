@@ -13,6 +13,8 @@
 #'
 #' @return a list of correlation matrices (R_snp, R_snp_gene and R_gene)
 #'
+#' @importFrom utils combn
+#' 
 #' @export
 #'
 compute_region_cor <- function(sids, gids, R_snp, LD_sids, weights) {

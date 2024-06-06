@@ -176,8 +176,8 @@ ctwas_susie_region_L1 <- function(region_data, region_id,
                                ...)
   # annotate susie result
   susie_res_df <- anno_susie(susie_res,
-                             gid = gid,
-                             sid = sid,
+                             gids = gid,
+                             sids = sid,
                              g_type = g_type,
                              g_context = g_context,
                              g_group = g_group,

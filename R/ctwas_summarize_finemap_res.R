@@ -18,7 +18,8 @@
 #'
 #' @export
 #' 
-anno_finemap_res <- function(finemap_res, snp_info, ens_db, use_gene_pos = c("mid", "start", "end")){
+anno_finemap_res <- function(finemap_res, snp_info, ens_db,
+                             use_gene_pos = c("mid", "start", "end")){
 
   use_gene_pos <- match.arg(use_gene_pos)
 

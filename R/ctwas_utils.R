@@ -1,6 +1,6 @@
 
-#' Read a single SNP info file as a data frame
-read_snp_info_file <- function(file){
+# Read a single SNP info file as a data frame
+read_snp_info_file <- function (file){
   snp_info <- as.data.frame(data.table::fread(file, header = TRUE))
   target_header <- c("chrom", "id", "pos", "alt", "ref")
   if (!all(target_header %in% colnames(snp_info))){
@@ -10,8 +10,8 @@ read_snp_info_file <- function(file){
   return(snp_info)
 }
 
-#' Read all SNP info files as a data frame
-read_snp_info_files <- function(files){
+# Read all SNP info files as a data frame
+read_snp_info_files <- function (files){
   snp_info <- do.call(rbind, lapply(files, read_snp_info_file))
   snp_info <- unique(as.data.frame(snp_info))
   return(snp_info)
@@ -33,6 +33,8 @@ read_snp_info_files <- function(files){
 #'
 #' @param ncore integer, number of cores for parallel computing.
 #'
+#' @importFrom utils read.table
+#' @importFrom stats complete.cases
 #' @importFrom magrittr %>%
 #' @importFrom tibble as_tibble
 #' @importFrom dplyr left_join mutate select
@@ -134,8 +136,8 @@ load_weights <- function(weight_file,
   return(list(weight_table=weight_table,extra_table=extra_table,weight_name=weight_name,R_wgt=R_wgt))
 }
 
-
-get_weight_LD <- function(R_wgt_all, gname, rsid_varID){
+#' @importFrom stats setNames
+get_weight_LD <- function (R_wgt_all, gname, rsid_varID){
   R_wgt <- R_wgt_all[R_wgt_all$GENE == gname,]
   #convert covariance to correlation
   R_wgt_stdev <- R_wgt[R_wgt$RSID1==R_wgt$RSID2,]
@@ -174,8 +176,10 @@ get_weight_LD <- function(R_wgt_all, gname, rsid_varID){
 }
 
 
-#' Load LD matrix
-load_LD <- function(file, format = c("rds", "rdata", "csv", "txt", "tsv")) {
+# Load LD matrix
+#
+#' @importFrom utils read.csv
+load_LD <- function (file, format = c("rds", "rdata", "csv", "txt", "tsv")) {
   format <- match.arg(format)
 
   # if format is missing, try to guess format by file extension
@@ -222,6 +226,7 @@ load_LD <- function(file, format = c("rds", "rdata", "csv", "txt", "tsv")) {
 #'
 #' @return corresponding pvar file
 #'
+#' @importFrom utils read.table
 #' @importFrom tools file_ext file_path_sans_ext
 #'
 prep_pvar <- function(pgenf, outputdir = getwd()){

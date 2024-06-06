@@ -37,6 +37,8 @@
 #'
 #' @return a list of processed weights
 #'
+#' @importFrom stats complete.cases
+#' 
 #' @export
 #'
 preprocess_weights <- function(weight_file,

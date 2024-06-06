@@ -123,15 +123,18 @@ impute_expr <- function(pgenfs,
   return(exprfs)
 }
 
+#' @importFrom utils read.table
+#' @importFrom stats setNames
+#' @importFrom stats complete.cases
 read_weight_predictdb <- function (weight, 
                                    chrom, 
                                    ld_snpinfo, 
                                    z_snp = NULL, 
-                                   harmonize_wgt = T, 
+                                   harmonize_wgt = TRUE, 
                                    strand_ambig_action = c("drop", "none", "recover"), 
                                    ld_pgenfs=NULL, 
                                    ld_Rinfo=NULL,
-                                   scale_by_ld_variance=T, 
+                                   scale_by_ld_variance=TRUE, 
                                    ncore=1){
   
   strand_ambig_action <- match.arg(strand_ambig_action)
@@ -397,11 +400,15 @@ prep_exprvar <- function(exprf){
   exprvarf
 }
 
-#' Read .exprvar file into R
-#' 
-#' @param exprvarf expression variable info files, prepared by the \code{prep_exprvar} function
-#' 
-#' @return A data.table. variant info
+# Read .exprvar file into R.
+# 
+# @param exprvarf expression variable info files, prepared by the
+#   \code{prep_exprvar} function
+# 
+# @return A data.table. variant info
+#
+#' @importFrom stats setNames
+#' @importFrom data.table data.table
 #' 
 read_exprvar <- function(exprvarf){
 
