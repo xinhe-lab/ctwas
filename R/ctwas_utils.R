@@ -199,7 +199,7 @@ load_LD <- function (file, format = c("rds", "rdata", "csv", "txt", "tsv")) {
       format <- "rds"
     } else if (file_ext_lower %in% c("rdata", "rd", "rda", "rdat")){
       format <- "rdata"
-    } else if (file_ext_upper %in% c("csv", "csv.gz")) {
+    } else if (file_ext_lower %in% c("csv", "csv.gz")) {
       format <- "csv"
     } else if (file_ext_lower %in% c("txt", "txt.gz")){
       format <- "txt"
