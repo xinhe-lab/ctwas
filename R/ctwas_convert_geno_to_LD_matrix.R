@@ -32,7 +32,6 @@
 #' @importFrom utils txtProgressBar
 #' @importFrom utils setTxtProgressBar
 #' @importFrom readr parse_number
-#' @importFrom Rfast cora colVars
 #'
 #' @export
 #'
