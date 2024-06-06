@@ -24,6 +24,8 @@
 #'
 #' @return a data frame of updated region info, with paths of LD matrices and variance information files
 #'
+#' @importFrom readr parse_number
+#' 
 #' @export
 #'
 convert_geno_to_LD_matrix <- function(region_info,
