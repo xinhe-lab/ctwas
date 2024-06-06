@@ -298,8 +298,6 @@ Performs Bayesian multiple linear regression of Y on
   non-zero element is normal with zero mean and variance \code{var(Y)
   * scaled_prior_variance}. The model is fitted using the
   \dQuote{Iterative Bayesian Stepwise Selection} (IBSS) algorithm.
-  See also \code{\link{susie_trendfilter}} for applying susie to
-  non-parametric regression, particularly changepoint problems.
 }
 \details{
 \code{susie_suff_stat} performs sum of single-effect
