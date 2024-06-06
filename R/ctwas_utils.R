@@ -36,6 +36,7 @@ read_snp_info_files <- function (files){
 #'
 #' @importFrom utils read.table
 #' @importFrom stats complete.cases
+#' @importFrom stats ave
 #' @importFrom magrittr %>%
 #' @importFrom tibble as_tibble
 #' @importFrom dplyr left_join mutate select
@@ -93,11 +94,12 @@ load_weights <- function(weight_file,
     dbDisconnect(db)
   }
   else if (weight_format == "FUSION"){
-    weight_name <- ile_path_sans_ext(basename(weight_file))
+    weight_name <- file_path_sans_ext(basename(weight_file))
     wgtdir <- dirname(weight_file)
     wgtposfile <- file.path(wgtdir, paste0(basename(weight_file), ".pos"))
     wgtpos <- read.table(wgtposfile, header = T, stringsAsFactors = F)
-    wgtpos <- transform(wgtpos, ID = ifelse(duplicated(ID) | duplicated(ID, fromLast = TRUE),
+    wgtpos <- transform(wgtpos,
+                        ID = ifelse(duplicated(ID) | duplicated(ID, fromLast = TRUE),
                                             paste(ID, ave(ID, ID, FUN = seq_along), sep = "_ID"), ID))
     wgtpos <- wgtpos[wgtpos$ID!="NA_IDNA",] #filter NA genes
     loginfo("Loading FUSION weights ...")
@@ -122,8 +124,8 @@ load_weights <- function(weight_file,
           wgt.matrix[,"top1"][-which.max(wgt.matrix[,"top1"]^2)] <- 0
         }
 
-        wgt.matrix <- wgt.matrix[abs(wgt.matrix[, g.method]) > 0, , drop = F]
-        wgt.matrix <- wgt.matrix[complete.cases(wgt.matrix), , drop = F]
+        wgt.matrix <- wgt.matrix[abs(wgt.matrix[, g.method]) > 0, , drop = FALSE]
+        wgt.matrix <- wgt.matrix[complete.cases(wgt.matrix), , drop = FALSE]
         if (nrow(wgt.matrix) > 0){
           out_table <- as_tibble(wgt.matrix[,g.method]) %>%
             mutate(rsid = rownames(wgt.matrix)) %>%

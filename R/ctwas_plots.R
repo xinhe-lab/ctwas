@@ -67,6 +67,9 @@
 #' @importFrom ggplot2 element_blank
 #' @importFrom ggplot2 element_line
 #' @importFrom ggplot2 geom_vline
+#' @importFrom ggplot2 geom_rect
+#' @importFrom ggplot2 geom_segment
+#' @importFrom ggplot2 geom_hline
 #' @importFrom ggplot2 margin
 #' @importFrom ggrepel geom_text_repel
 #'
