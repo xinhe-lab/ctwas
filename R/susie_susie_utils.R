@@ -616,7 +616,6 @@ susie_prune_single_effects = function (s,L = 0,V = NULL,verbose = FALSE) {
 #' X = matrix(rnorm(n*p),nrow = n,ncol = p)
 #' X = scale(X,center = TRUE,scale = TRUE)
 #' y = drop(X %*% beta + rnorm(n))
-#' input_ss = compute_suff_stat(X,y,standardize = TRUE)
 #' ss = univariate_regression(X,y)
 #' R = cor(X)
 #' attr(R,"eigen") = eigen(R,symmetric = TRUE)
