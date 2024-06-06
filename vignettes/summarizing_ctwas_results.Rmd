@@ -21,8 +21,7 @@ knitr::opts_chunk$set(message = FALSE,
 ```
 
 
-
-## Summarizing and visualizing cTWAS results
+In this document, we will show how to summarize and visualize cTWAS results.
 
 Load the `ctwas` package. We also need packages `tidyverse`, `locuszoomr` for summarizing and visualizing cTWAS result
 ```{r load_packages, message=FALSE}
@@ -38,33 +37,24 @@ library(EnsDb.Hsapiens.v86)
 ```
 
 
-Load the cTWAS results from the `ctwas_sumstats()` function
+Load the cTWAS results
 ```{r load_ctwas_res}
-# directory with computed correlation matrices
-cor_dir <- system.file("extdata/sample_data", "cor_matrix", package = "ctwas")
-
 # GWAS sample size
 gwas_n <- 343621
-
-# Load region_info, LD_info and snp_info
-region_info <- readRDS(system.file("extdata/sample_data", "LDL_example.region_info.RDS", package = "ctwas"))
-
-LD_info <- readRDS(system.file("extdata/sample_data", "LDL_example.LD_info.RDS", package = "ctwas"))
-
-snp_info <- readRDS(system.file("extdata/sample_data", "LDL_example.snp_info.RDS", package = "ctwas"))
-
-# Load z_snp
-z_snp <- readRDS(system.file("extdata/sample_data", "LDL_example.preprocessed.z_snp.RDS", package = "ctwas"))
-
 # Load weights
 weights <- readRDS(system.file("extdata/sample_data", "LDL_example.preprocessed.weights.RDS", package = "ctwas"))
 
-# Load the cTWAS results
-param <- readRDS(system.file("extdata/sample_data", "LDL_example.param.RDS", package = "ctwas"))
+# Load cTWAS results
+ctwas_res <- readRDS(system.file("extdata/sample_data", "LDL_example.ctwas_sumstats_res.RDS", package = "ctwas"))
+param <- ctwas_res$param
+finemap_res <- ctwas_res$finemap_res
+boundary_genes <- ctwas_res$boundary_genes
+z_gene <- ctwas_res$z_gene
+region_data <- ctwas_res$region_data
+screened_region_data <- ctwas_res$screened_region_data
 
-finemap_res <- readRDS(system.file("extdata/sample_data", "LDL_example.finemap_res.RDS", package = "ctwas"))
-
-screened_region_data <- readRDS(system.file("extdata/sample_data", "LDL_example.screened_region_data.RDS", package = "ctwas"))
+# directory with computed correlation matrices
+cor_dir <- system.file("extdata/sample_data", "cor_matrix", package = "ctwas")
 ```
 
 
@@ -130,6 +120,7 @@ head(sig_finemap_res[order(-sig_finemap_res$susie_pip),])
 When we have multiple contexts (tissues, conditions), 
 it is useful to evaluate the combined PIP for each molecular trait over different contexts:
 
+
 ```{r combine_pips}
 # combine PIPs across contexts (tissues)
 combined_gene_pips <- sum_pip_across_contexts(finemap_res)
@@ -160,6 +151,6 @@ make_locusplot(finemap_res,
                legend.position = "right")
 ```
 
-If we do not have precomputed correlation matrices, we could compute those by specifying `region_data`, `LD_info` and `snp_info`. Or we could skip coloring correlations by setting `use_LD = FALSE`. 
 
+If we do not have precomputed correlation matrices, we could compute those by specifying `region_data`, `LD_info` and `snp_info`. Or we could skip coloring correlations by setting `use_LD = FALSE`. 
 

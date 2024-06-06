@@ -53,11 +53,12 @@ weights <- readRDS(system.file("extdata/sample_data", "LDL_example.preprocessed.
 # Load region info
 region_info <- readRDS(system.file("extdata/sample_data", "LDL_example.region_info.RDS", package = "ctwas"))
 
-# Load LD info
-LD_info <- readRDS(system.file("extdata/sample_data", "LDL_example.LD_info.RDS", package = "ctwas"))
-
 # Load SNP info
 snp_info <- readRDS(system.file("extdata/sample_data", "LDL_example.snp_info.RDS", package = "ctwas"))
+
+# Load LD info
+# need to be replaced with your own paths to LD matrices
+LD_info <- readRDS(system.file("extdata/sample_data", "LDL_example.LD_info.RDS", package = "ctwas"))
 
 # Load gene z-scores
 z_gene <- readRDS(system.file("extdata/sample_data", "LDL_example.z_gene.RDS", 
@@ -66,8 +67,6 @@ package = "ctwas"))
 
 Let's set the cTWAS output directory and output name, and we use 6 cores to parallelize computing over regions.
 ```{r settings}
-setwd("/project2/xinhe/shared_data/multigroup_ctwas/tutorial/LDL_multitissue_tutorial/")
-
 outputdir <- "./ctwas_output"
 dir.create(outputdir, showWarnings=F, recursive=T)
 
@@ -211,7 +210,7 @@ finemap_res <- finemap_regions(screened_region_data,
 ```
 
 
-*Note*, it is possible to run without LD.  To do this, simply set `use_LD = FALSE`, and `L = 1`.
+*Note*: it is possible to run without LD.  To do this, simply set `use_LD = FALSE`, and `L = 1`.
 
 ## Fine-mapping a single region
 
@@ -222,7 +221,7 @@ Here we show an example for fine mapping a single region "16:71020125-72901251".
 We will first expand the region of interest with a full set of SNPs using the assembled `region_data`.
 
 ```{r example_region, eval=FALSE}
-region_id <- "16:71020125-72901251"
+region_id <- "16_71020125_72901251"
 selected_region_data <- expand_region_data(region_data[region_id],
                                            snp_info,
                                            z_snp,

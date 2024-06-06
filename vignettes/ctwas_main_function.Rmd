@@ -36,30 +36,32 @@ library(ctwas)
 ```
 
 
-Load the prepared input data
-```{r load_ctwas_res, eval=FALSE}
+Load the prepared input data.
+
+Note: you would need to update the paths to LD matrices in LD_info.
+```{r load_ctwas_res}
 # Load z_snp
 z_snp <- readRDS(system.file("extdata/sample_data", "LDL_example.preprocessed.z_snp.RDS", package = "ctwas"))
 
 # Load weights
 weights <- readRDS(system.file("extdata/sample_data", "LDL_example.preprocessed.weights.RDS", package = "ctwas"))
 
-# Load region_info, LD_info and snp_info
+# Load region_info, and snp_info
 region_info <- readRDS(system.file("extdata/sample_data", "LDL_example.region_info.RDS", package = "ctwas"))
-LD_info <- readRDS(system.file("extdata/sample_data", "LDL_example.LD_info.RDS", package = "ctwas"))
 snp_info <- readRDS(system.file("extdata/sample_data", "LDL_example.snp_info.RDS", package = "ctwas"))
+
+# Load LD_info
+# need to update the paths to LD matrices in LD_info
+LD_info <- readRDS(system.file("extdata/sample_data", "LDL_example.LD_info.RDS", package = "ctwas"))
 ```
 
 
 Let's set the cTWAS output directory and output name, and we use 6 cores to parallelize computing over regions.
-```{r settings}
-setwd("/project2/xinhe/shared_data/multigroup_ctwas/tutorial/LDL_multitissue_tutorial/")
-
+```{r settings, eval=FALSE}
 outputdir <- "./ctwas_output"
 dir.create(outputdir, showWarnings=F, recursive=T)
 
 outname <- "LDL_example"
-
 ncore <- 6
 ``` 
 
@@ -72,24 +74,24 @@ cor_dir <- file.path(outputdir, "cor_matrix")
 log_file <- file.path(outputdir, paste0(outname, ".ctwas_sumstats.log"))
 
 ctwas_res <- ctwas_sumstats(z_snp,
-                      weights,
-                      region_info = region_info,
-                      snp_info = snp_info,
-                      LD_info = LD_info,
-                      thin = 0.1,
-                      niter_prefit = 3,
-                      niter = 30,
-                      L = 5,
-                      group_prior_var_structure = "shared_type",
-                      maxSNP = 20000,
-                      min_nonSNP_PIP = 0.5,
-                      ncore = ncore,
-                      save_cor = TRUE,
-                      cor_dir = cor_dir,
-                      outputdir = outputdir,
-                      outname = outname,
-                      logfile = log_file,
-                      verbose = FALSE)
+                            weights,
+                            region_info = region_info,
+                            snp_info = snp_info,
+                            LD_info = LD_info,
+                            thin = 0.1,
+                            niter_prefit = 3,
+                            niter = 30,
+                            L = 5,
+                            group_prior_var_structure = "shared_type",
+                            maxSNP = 20000,
+                            min_nonSNP_PIP = 0.5,
+                            ncore = ncore,
+                            save_cor = TRUE,
+                            cor_dir = cor_dir,
+                            outputdir = outputdir,
+                            outname = outname,
+                            logfile = log_file,
+                            verbose = FALSE)
 
 param <- ctwas_res$param
 finemap_res <- ctwas_res$finemap_res
@@ -121,7 +123,7 @@ Major argument settings:
 -   The `ncore` argument specifies the number of cores to use when parallelizing over regions.
 -   If the `logfile` argument is specified, it will write log messages to the log file.
 -   If the `verbose` argument is TRUE, it will print more detailed messages.
- 
+
 The function returns a list including: 
 estimated parameters, fine-mapping results, boundary genes, z_scores of molecular traits, assembled region data for all the regions, and region data with full SNPs for screened regions. 
 

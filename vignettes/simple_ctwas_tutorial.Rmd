@@ -180,6 +180,8 @@ ctwas_res <- ctwas_sumstats_noLD(z_snp,
                                  maxSNP = 20000,
                                  min_nonSNP_PIP = 0.5,
                                  ncore = 6)
+
+# saveRDS(ctwas_res, file.path(outputdir, paste0(outname, ".ctwas_sumstats_noLD_res.RDS")))
 ```
 
 

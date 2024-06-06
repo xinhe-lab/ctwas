@@ -50,9 +50,11 @@ Note: It is possible to run cTWAS without using the LD reference. In that case, 
 In the tutorial, we use sample data provided in the package.
 
 Let's set the cTWAS output directory and output name:
-```{r settings}
-setwd("/project2/xinhe/shared_data/multigroup_ctwas/tutorial/LDL_multitissue_tutorial/")
+```{r, eval=FALSE, include=FALSE}
+# setwd("/project2/xinhe/shared_data/multigroup_ctwas/tutorial/LDL_multitissue_tutorial/")
+```
 
+```{r settings, eval=FALSE}
 outputdir <- "./ctwas_output"
 dir.create(outputdir, showWarnings=F, recursive=T)
 
@@ -74,7 +76,7 @@ wget https://gwas.mrcieu.ac.uk/files/ukb-d-30780_irnt/ukb-d-30780_irnt.vcf.gz
 cTWAS needs a data frame `z_snp` as input, with columns "id", "A1", "A2", "z". Each row has data of a variant.  We use rsIDs as the variant IDs. The naming of variant IDs should be consistent between summary statistics, LD reference and weights. `A1` is the alternate allele, and `A2` is the reference allele. `z` is the z-scores of variants in GWAS. In the GWAS summary statistics VCF file we downloaded here, z-scores are not available, so we need to compute them from the effect sizes and standard errors. 
 
 Let us read the GWAS summary statistics and convert it to the `z_snp` data frame. We will also collect the sample size, which will be used later. 
- 
+
 ```{r read_sumstats, eval=FALSE}
 # read the VCF data using the VariantAnnotation and gwasvcf packages
 z_snp <- VariantAnnotation::readVcf("ukb-d-30780_irnt.vcf.gz")
@@ -93,7 +95,7 @@ cat("gwas_n=", gwas_n, "\n")
 z_snp <- z_snp[,c("rsid", "ALT", "REF", "Z")]
 colnames(z_snp) <- c("id", "A1", "A2", "z")
 
-saveRDS(z_snp, file.path(outputdir, paste0(gwas_name, ".z_snp.RDS")))
+# saveRDS(z_snp, file.path(outputdir, paste0(gwas_name, ".z_snp.RDS")))
 ```
 
 
@@ -169,7 +171,9 @@ When running with LD, we will also need to add the column: "LD_matrix":
 
 The following paths were from the University of Chicago RCC cluster, please replace them with your own paths. 
 ```{r add_LD_paths}
-LD_dir <- "/project2/mstephens/wcrouse/UKB_LDR_0.1/"
+# please change this to your own directory for LD matrices.
+LD_dir <- "/project2/mstephens/wcrouse/UKB_LDR_0.1"
+
 genome_version <- "b38"
 LD_filestem <- sprintf("ukb_%s_0.1_chr%s.R_snp.%s_%s", genome_version, region_info$chrom, region_info$start, region_info$stop)
 region_info$LD_matrix <- file.path(LD_dir, paste0(LD_filestem, ".RDS"))
@@ -195,9 +199,6 @@ varinfo_files <- "/gpfs/data/xhe-lab/ukb_LDR/neale_lab/neale_variants_hg38.bim"
 # the positions should match those in varinfo_files
 region_file <- system.file("extdata/ldetect", "EUR.b38.bed", package = "ctwas")
 region_info <- read.table(region_file, header = TRUE, stringsAsFactors = FALSE)
-# specify output
-outputdir <- "/gpfs/data/xhe-lab/ctwas/LDR/UKB_b38/"
-outname <- "ukb_b38_0.1"
 
 # generate LD matrices (.RDS) and variant info (.Rvar)
 # update region info with paths of LD matrices and variant info files
@@ -206,8 +207,8 @@ updated_region_info <- convert_geno_to_LD_matrix(region_info,
                                                  genotype_files, 
                                                  varinfo_files,
                                                  chrom = 1:22,
-                                                 outputdir = outputdir, 
-                                                 outname = outname)
+                                                 outputdir = "/gpfs/data/xhe-lab/ctwas/LDR/UKB_b38/", 
+                                                 outname = "ukb_b38_0.1")
 ```
 
 
@@ -228,6 +229,10 @@ res <- preprocess_region_LD_snp_info(region_info,
 region_info <- res$region_info
 snp_info <- res$snp_info
 LD_info <- res$LD_info
+
+# saveRDS(region_info, file.path(outputdir, paste0(outname, "region_info.RDS")))
+# saveRDS(snp_info, file.path(outputdir, paste0(outname, ".snp_info.RDS")))
+# saveRDS(LD_info, file.path(outputdir, paste0(outname, ".LD_info.RDS")))
 ```
 
 
@@ -265,7 +270,7 @@ snp_info <- res$snp_info
 There are a few potential problems when preparing the input data. First, the variants in the three sets of input data, GWAS summary statistics, weights, and the reference data, may not match. Only variants in all three input data will be used in cTWAS. So it is important to maximize the overlap of the variants in the three sets. This can be done for example, by imputing GWAS summary statistics of the variants missing in GWAS but in the LD reference. Another useful pre-processing step is to perform Minor allele frequency (MAF) filtering on the GWAS data so that only those with MAF above a certain cutoff would be used in the analysis, ideally the same cutoff used in the references. Additionally, when building the prediction models of gene expression, it is better to impute the genotype data using the LD reference, if possible.  All these steps should be done before running cTWAS.  
 
 The second potential problem is that the effect alleles in the prediction model, GWAS and LD reference may not agree with each other, thus we need to ``harmonize'' the data to ensure that the effect alleles match. If the data are not already harmonized, we provide some options for harmonization. These inputs should be harmonized prior to cTWAS analysis, i.e. the reference and alternative alleles for each variant should match across all three data sources. 
-    
+
 Another potential problem is the LD of the GWAS data (in-sample LD) do not match the reference LD. This can lead to false positives in fine-mapping tools. Diagnostic tools including [SuSiE-RSS][susierss_diagnostic], and [DENTIST][DENTIST], have been developed to check possible LD mismatch. Because it is very time consuming to run the LD mismatch diagnosis for all the regions across the genome, we will perform LD mismatch diagnosis and adjustment only for selected regions with high PIP signals in the post-processing section. 
 
 
@@ -314,7 +319,7 @@ We get a list of processed weights for each weight file, and then we simply conc
 
 ```{r preprocess_weights, eval=FALSE}
 weight_liver_file <- system.file("extdata/sample_data", 
-"expression_Liver.db", package = "ctwas")
+                                 "expression_Liver.db", package = "ctwas")
 weights_liver <- preprocess_weights(weight_liver_file,
                                     region_info,
                                     z_snp$id,
@@ -360,8 +365,8 @@ The `compute_gene_z` function computes z-scores for the molecular traits using p
 
 ```{r compute_gene_z, eval=FALSE}
 z_gene <- compute_gene_z(z_snp, weights, ncore = 6)
-
 # saveRDS(z_gene, file = file.path(outputdir, paste0(outname, ".z_gene.RDS")))
+head(z_gene)
 ```
 
 
