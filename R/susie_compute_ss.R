@@ -12,6 +12,7 @@
 #' @importFrom methods as
 #'
 #' @examples
+#' library(susieR)
 #' data(N2finemapping)
 #' ss = compute_ss(N2finemapping$X, N2finemapping$Y[,1])
 #' 
