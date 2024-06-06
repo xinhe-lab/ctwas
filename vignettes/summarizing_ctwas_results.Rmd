@@ -149,7 +149,7 @@ We could make locus plots for regions of interest. We could zoom in the region b
 
 ```{r locus_plot, fig.width=10, fig.height=8}
 make_locusplot(finemap_res,
-               region_id = "16:71020125-72901251",
+               region_id = "16_71020125_72901251",
                weights = weights,
                ens_db = ens_db, 
                use_LD = TRUE,

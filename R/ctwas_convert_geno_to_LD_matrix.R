@@ -58,7 +58,7 @@ convert_geno_to_LD_matrix <- function(region_info,
     region_info$chr <- readr::parse_number(region_info$chr)
   }
   region_info <- region_info[order(region_info$chr, region_info$start), ]
-  region_info[, "region_id"] <- paste0(region_info$chr, ":", region_info$start, "-", region_info$stop)
+  region_info[, "region_id"] <- paste0(region_info$chr, "_", region_info$start, "_", region_info$stop)
   region_info[, "LD_matrix"] <- NA
   region_info[, "SNP_info"] <- NA
 
@@ -88,7 +88,7 @@ convert_geno_to_LD_matrix <- function(region_info,
 
       # loginfo("Region %s", rn)
       regioninfo <- region_info_chr[rn, ]
-      region_id <- paste0(regioninfo$chr, ":", regioninfo$start, "-", regioninfo$stop)
+      region_id <- paste0(regioninfo$chr, "_", regioninfo$start, "_", regioninfo$stop)
       region_idx <- which(region_info$region_id == region_id)
       region_start <- regioninfo$start
       region_stop <- regioninfo$stop

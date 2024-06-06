@@ -151,7 +151,7 @@ The naming convention for the LD matrices is `[filestem]_chr[#].R_snp.[start]_[e
 
 ### Region info
 
-We require a data frame `region_info` containing the region definitions, with the following columns: "chrom", "start", "stop", for the genomic coordinates of the regions, and "region_id" for the IDs of the regions (by default, we use [chrom:start-stop] as region IDs).
+We require a data frame `region_info` containing the region definitions, with the following columns: "chrom", "start", "stop", for the genomic coordinates of the regions, and "region_id" for the IDs of the regions (by default, we use [chrom_start_stop] as region IDs).
 
 Here we use the b38 European LDetect blocks, included in the package.
 
@@ -160,7 +160,7 @@ region_file <- system.file("extdata/ldetect", "EUR.b38.bed", package = "ctwas")
 region_info <- read.table(region_file, header = TRUE)
 colnames(region_info)[1:3] <- c("chrom", "start", "stop")
 region_info$chrom <- as.numeric(gsub("chr", "", region_info$chrom))
-region_info$region_id <- paste0(region_info$chr, ":", region_info$start, "-", region_info$stop)
+region_info$region_id <- paste0(region_info$chr, "_", region_info$start, "_", region_info$stop)
 ```
 
 

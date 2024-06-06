@@ -186,7 +186,7 @@ get_merged_region_info <- function(boundary_genes, region_info, use_LD = TRUE, L
     new_region_chrom <- df$chrom[1]
     new_region_start <- min(df$region_start)
     new_region_stop <- max(df$region_stop)
-    new_region_id <- paste0(new_region_chrom, ":", new_region_start, "-", new_region_stop)
+    new_region_id <- paste0(new_region_chrom, "_", new_region_start, "_", new_region_stop)
 
     merged_region_ids <- unique(unlist(strsplit(df[df$merge_label == merge_label, "region_id"], split = ";")))
 
