@@ -46,6 +46,10 @@ convert_geno_to_LD_matrix <- function(region_info,
 
   loginfo("Convert genotype data to LD matrices")
 
+  if (!requireNamespace("Rfast", quietly = TRUE)){
+    stop("Rfast package is required for converting genotype to LD matrix")
+  }
+
   if (!dir.exists(outputdir)){
     dir.create(outputdir, showWarnings=FALSE, recursive = TRUE)
   }
