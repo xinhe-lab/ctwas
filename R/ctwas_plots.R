@@ -134,7 +134,7 @@ make_locusplot <- function(finemap_res,
       stop("please annotate finemapping result first!")
     }
     idx_in_range <- which(finemap_region_res$pos>=locus_range[1] & finemap_region_res$pos<=locus_range[2])
-    finemap_region_res <- finemap_region_res[idx_in_range,, drop=F]
+    finemap_region_res <- finemap_region_res[idx_in_range,, drop=FALSE]
   }else{
     # if locus_range not specified, plot the whole region
     locus_range <- c(min(finemap_region_res$pos)-100, max(finemap_region_res$pos) + 100)
@@ -234,9 +234,17 @@ make_locusplot <- function(finemap_res,
                                         labels = names(r2_colors))
     finemap_region_res$r2_levels <- factor(finemap_region_res$r2_levels, levels = rev(names(r2_colors)))
   } else{
-    finemap_region_res$r2 <- NA
-    finemap_region_res$r2_levels <- NA
-    r2_colors <- "black"
+    # finemap_region_res$r2 <- NA
+    # finemap_region_res$r2_levels <- NA
+    # r2_colors <- "black"
+    r2_colors <- c("0-1" = "gray", "1" = "salmon")
+
+    finemap_region_res$r2 <- 0.1
+    finemap_region_res$r2[finemap_region_res$id == focus_gid] <- 100
+    finemap_region_res$r2_levels <- cut(finemap_region_res$r2,
+                                        breaks = c(0, 1, Inf),
+                                        labels = names(r2_colors))
+    finemap_region_res$r2_levels <- factor(finemap_region_res$r2_levels, levels = rev(names(r2_colors)))
   }
 
   # gene labels
@@ -271,8 +279,6 @@ make_locusplot <- function(finemap_res,
     scale_shape_manual(values = point.shapes) +
     scale_alpha_manual(values = point.alpha, guide="none") +
     scale_size_manual(values = point.sizes, guide="none") +
-    scale_color_manual(values = r2_colors) +
-    scale_fill_manual(values = r2_colors, guide="none") +
     xlim(loc$xrange/1e6) +
     labs(x = "", y = expression(-log[10]("p-value")), shape = "Type", color = expression(R^2)) +
     theme_bw() +
@@ -283,6 +289,16 @@ make_locusplot <- function(finemap_res,
           panel.border= element_blank(),
           axis.line = element_line(colour = "black"),
           plot.margin = margin(b=0, l=10, t=10, r=10))
+
+  if (use_LD) {
+    p_pvalue <- p_pvalue +
+      scale_color_manual(values = r2_colors) +
+      scale_fill_manual(values = r2_colors, guide="none")
+  } else {
+    p_pvalue <- p_pvalue +
+      scale_color_manual(values = r2_colors, guide="none") +
+      scale_fill_manual(values = r2_colors, guide="none")
+  }
 
   if (!is.null(p_thresh)) {
     p_pvalue <- p_pvalue + geom_hline(yintercept=-log10(p_thresh), linetype="dashed", color = "red")
@@ -354,6 +370,6 @@ make_locusplot <- function(finemap_res,
             plot.margin = margin(b=10, l=10, t=10, r=10))
   }
 
-  plot_grid(p_pvalue, p_pip, p_qtl, p_genes, ncol = 1,
-            rel_heights = panel.heights, align = "v")
+  cowplot::plot_grid(p_pvalue, p_pip, p_qtl, p_genes, ncol = 1,
+                     rel_heights = panel.heights, align = "v", axis="tblr")
 }
