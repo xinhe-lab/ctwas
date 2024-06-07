@@ -21,6 +21,8 @@ preprocess_weights(
   method_FUSION = c("lasso", "enet", "top1", "blup"),
   fusion_genome_version = c("b38", "b37"),
   fusion_top_n_snps = NULL,
+  LD_format = c("rds", "rdata", "csv", "txt", "custom"),
+  LD_loader = NULL,
   logfile = NULL
 )
 }
@@ -53,6 +55,11 @@ with columns "chrom", "id", "pos", "alt", "ref", and "region_id".}
 \item{fusion_genome_version}{a string, specifying the genome version of FUSION models}
 
 \item{fusion_top_n_snps}{a number, specifying the top n weight SNPs included in FUSION models. If NULL, using all weight SNPs}
+
+\item{LD_format}{file format for LD matrix. If "custom", use a user defined
+\code{LD_loader()} function to load LD matrix.}
+
+\item{LD_loader}{a user defined function to load LD matrix when \code{LD_format = "custom"}.}
 
 \item{logfile}{the log file, if NULL will print log info on screen.}
 }

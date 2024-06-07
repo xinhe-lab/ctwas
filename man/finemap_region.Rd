@@ -21,6 +21,8 @@ finemap_region(
   force_compute_cor = FALSE,
   save_cor = FALSE,
   cor_dir = NULL,
+  LD_format = c("rds", "rdata", "csv", "txt", "custom"),
+  LD_loader = NULL,
   include_cs_index = TRUE,
   verbose = FALSE,
   ...
@@ -62,12 +64,16 @@ genotype data in genetic studies.}
 
 \item{cor_dir}{a string, the directory to store correlation (R) matrices}
 
+\item{LD_format}{file format for LD matrix. If "custom", use a user defined
+\code{LD_loader()} function to load LD matrix.}
+
+\item{LD_loader}{a user defined function to load LD matrix when \code{LD_format = "custom"}.}
+
+\item{include_cs_index}{TRUE/FALSE. If TRUE, add cs_index to finemapping results.}
+
 \item{verbose}{TRUE/FALSE. If TRUE, print detail messages}
 
 \item{...}{Additional arguments of \code{susie_rss}.}
-
-\item{annotate_susie_result}{TRUE/FALSE. If TRUE, add gene and SNP information and cs_index to
-the data frame of finemapping results.}
 }
 \value{
 a data frame of finemapping results.

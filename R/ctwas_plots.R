@@ -19,6 +19,11 @@
 #'
 #' @param cor_dir path of correlation matrices
 #'
+#' @param LD_format file format for LD matrix. If "custom", use a user defined
+#' \code{LD_loader()} function to load LD matrix.
+#'
+#' @param LD_loader a user defined function to load LD matrix when \code{LD_format = "custom"}.
+#'
 #' @param region_data a list of region_data used for finemapping
 #'
 #' @param locus_range a vector of start and end positions to define the locus region to be plotted
@@ -84,6 +89,8 @@ make_locusplot <- function(finemap_res,
                            snp_info = NULL,
                            save_cor = FALSE,
                            cor_dir = NULL,
+                           LD_format = c("rds", "rdata", "csv", "txt", "custom"),
+                           LD_loader = NULL,
                            region_data = NULL,
                            locus_range = NULL,
                            focus_gene = NULL,
@@ -102,6 +109,8 @@ make_locusplot <- function(finemap_res,
   if (!inherits(weights,"list")){
     stop("'weights' should be a list.")
   }
+
+  LD_format <- match.arg(LD_format)
 
   # select finemapping result for the target region
   finemap_region_res <- finemap_res[which(finemap_res$region_id==region_id), ]
@@ -190,11 +199,11 @@ make_locusplot <- function(finemap_res,
       }
       LD_matrix_files <- LD_info[[region_id]]$LD_matrix
       stopifnot(all(file.exists(LD_matrix_files)))
-      if (length(LD_matrix_files)==1) {
-        R_snp <- load_LD(LD_matrix_files)
-      } else {
-        R_snp <- lapply(LD_matrix_files, load_LD)
+      if (length(LD_matrix_files) > 1) {
+        R_snp <- lapply(LD_matrix_files, load_LD, format = LD_format, LD_loader = LD_loader)
         R_snp <- suppressWarnings(as.matrix(bdiag(R_snp)))
+      } else {
+        R_snp <- load_LD(LD_matrix_files, format = LD_format, LD_loader = LD_loader)
       }
       # load SNP info of the region
       snpinfo <- snp_info[[region_id]]

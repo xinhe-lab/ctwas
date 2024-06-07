@@ -11,7 +11,9 @@ diagnose_ld_mismatch_susie(
   snp_info,
   gwas_n = NULL,
   ncore = 1,
-  p_diff_thresh = 5e-08
+  p_diff_thresh = 5e-08,
+  LD_format = c("rds", "rdata", "csv", "txt", "custom"),
+  LD_loader = NULL
 )
 }
 \arguments{
@@ -30,6 +32,11 @@ snps. "A1" is effect allele. "A2" is the other allele.}
 
 \item{p_diff_thresh}{numeric, p-value threshold for identifying problematic SNPs
 with significant difference between observed z-scores and estimated values}
+
+\item{LD_format}{file format for LD matrix. If "custom", use a user defined
+\code{LD_loader()} function to load LD matrix.}
+
+\item{LD_loader}{a user defined function to load LD matrix when \code{LD_format = "custom"}.}
 }
 \value{
 a list of problematic SNPs, flipped SNPs,

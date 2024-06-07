@@ -14,6 +14,8 @@ make_locusplot(
   snp_info = NULL,
   save_cor = FALSE,
   cor_dir = NULL,
+  LD_format = c("rds", "rdata", "csv", "txt", "custom"),
+  LD_loader = NULL,
   region_data = NULL,
   locus_range = NULL,
   focus_gene = NULL,
@@ -48,6 +50,11 @@ make_locusplot(
 \item{save_cor}{TRUE/FALSE. If TRUE, save correlation (R) matrices to \code{cor_dir}}
 
 \item{cor_dir}{path of correlation matrices}
+
+\item{LD_format}{file format for LD matrix. If "custom", use a user defined
+\code{LD_loader()} function to load LD matrix.}
+
+\item{LD_loader}{a user defined function to load LD matrix when \code{LD_format = "custom"}.}
 
 \item{region_data}{a list of region_data used for finemapping}
 

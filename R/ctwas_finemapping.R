@@ -4,13 +4,13 @@
 #'
 #' @param region_id a character string of region id to be finemapped
 #'
-#' @param weights a list of preprocessed weights
-#'
 #' @param use_LD TRUE/FALSE. If TRUE, use LD for finemapping. Otherwise, use "no-LD" version.
 #'
 #' @param LD_info a list of paths to LD matrices for each of the regions. Required when \code{use_LD = TRUE}.
 #'
 #' @param snp_info a list of SNP info data frames for LD reference. Required when \code{use_LD = TRUE}.
+#'
+#' @param weights a list of preprocessed weights
 #'
 #' @param L the number of effects for susie during the fine mapping steps
 #'
@@ -35,8 +35,12 @@
 #'
 #' @param cor_dir a string, the directory to store correlation (R) matrices
 #'
-#' @param annotate_susie_result TRUE/FALSE. If TRUE, add gene and SNP information and cs_index to
-#' the data frame of finemapping results.
+#' @param LD_format file format for LD matrix. If "custom", use a user defined
+#' \code{LD_loader()} function to load LD matrix.
+#'
+#' @param LD_loader a user defined function to load LD matrix when \code{LD_format = "custom"}.
+#'
+#' @param include_cs_index TRUE/FALSE. If TRUE, add cs_index to finemapping results.
 #'
 #' @param verbose TRUE/FALSE. If TRUE, print detail messages
 #'
@@ -65,6 +69,8 @@ finemap_region <- function(region_data,
                            force_compute_cor = FALSE,
                            save_cor = FALSE,
                            cor_dir = NULL,
+                           LD_format = c("rds", "rdata", "csv", "txt", "custom"),
+                           LD_loader = NULL,
                            include_cs_index = TRUE,
                            verbose = FALSE,
                            ...){
@@ -79,6 +85,8 @@ finemap_region <- function(region_data,
       stop("'weights' should be a list.")
     }
   }
+
+  LD_format <- match.arg(LD_format)
 
   # load input data for the region
   regiondata <- region_data[[region_id]]
@@ -154,11 +162,11 @@ finemap_region <- function(region_data,
       }
       LD_matrix_files <- unlist(strsplit(LD_info$LD_matrix[LD_info$region_id == region_id], split = ";"))
       stopifnot(all(file.exists(LD_matrix_files)))
-      if (length(LD_matrix_files)==1) {
-        R_snp <- load_LD(LD_matrix_files)
-      } else {
-        R_snp <- lapply(LD_matrix_files, load_LD)
+      if (length(LD_matrix_files) > 1) {
+        R_snp <- lapply(LD_matrix_files, load_LD, format = LD_format, LD_loader = LD_loader)
         R_snp <- suppressWarnings(as.matrix(bdiag(R_snp)))
+      } else {
+        R_snp <- load_LD(LD_matrix_files, format = LD_format, LD_loader = LD_loader)
       }
       # load SNP info of the region
       snpinfo <- do.call(rbind, snp_info[region_id])
@@ -218,13 +226,13 @@ finemap_region <- function(region_data,
 #'
 #' @param region_data region_data to be finemapped
 #'
-#' @param weights a list of weights for each gene
-#'
 #' @param use_LD TRUE/FALSE. If TRUE, use LD for finemapping. Otherwise, use "no-LD" version.
 #'
 #' @param LD_info a list of paths to LD matrices for each of the regions. Required when \code{use_LD = TRUE}.
 #'
 #' @param snp_info a list of SNP info data frames for LD reference. Required when \code{use_LD = TRUE}.
+#'
+#' @param weights a list of weights for each gene
 #'
 #' @param L the number of effects for susie during the fine mapping steps
 #'
@@ -250,6 +258,13 @@ finemap_region <- function(region_data,
 #' @param save_cor TRUE/FALSE. If TRUE, save correlation (R) matrices to \code{cor_dir}
 #'
 #' @param cor_dir a string, the directory to store correlation (R) matrices
+#'
+#' @param LD_format file format for LD matrix. If "custom", use a user defined
+#' \code{LD_loader()} function to load LD matrix.
+#'
+#' @param LD_loader a user defined function to load LD matrix when \code{LD_format = "custom"}.
+#'
+#' @param include_cs_index TRUE/FALSE. If TRUE, add cs_index to finemapping results.
 #'
 #' @param verbose TRUE/FALSE. If TRUE, print detail messages
 #'
@@ -280,6 +295,8 @@ finemap_regions <- function(region_data,
                             force_compute_cor = FALSE,
                             save_cor = FALSE,
                             cor_dir = NULL,
+                            LD_format = c("rds", "rdata", "csv", "txt", "custom"),
+                            LD_loader = NULL,
                             include_cs_index = TRUE,
                             verbose = FALSE,
                             logfile = NULL,

@@ -30,6 +30,11 @@
 #'
 #' @param fusion_top_n_snps a number, specifying the top n weight SNPs included in FUSION models. If NULL, using all weight SNPs
 #'
+#' @param LD_format file format for LD matrix. If "custom", use a user defined
+#' \code{LD_loader()} function to load LD matrix.
+#'
+#' @param LD_loader a user defined function to load LD matrix when \code{LD_format = "custom"}.
+#'
 #' @param logfile the log file, if NULL will print log info on screen.
 #'
 #' @return a list of processed weights
@@ -61,6 +66,8 @@ preprocess_weights <- function(weight_file,
                                method_FUSION = c("lasso","enet","top1","blup"),
                                fusion_genome_version = c("b38","b37"),
                                fusion_top_n_snps = NULL,
+                               LD_format = c("rds", "rdata", "csv", "txt", "custom"),
+                               LD_loader = NULL,
                                logfile = NULL){
   if (!is.null(logfile)) {
     addHandler(writeToFile, file = logfile, level = "DEBUG")
@@ -69,6 +76,7 @@ preprocess_weights <- function(weight_file,
   weight_format <- match.arg(weight_format)
   method_FUSION <- match.arg(method_FUSION)
   fusion_genome_version <- match.arg(fusion_genome_version)
+  LD_format <- match.arg(LD_format)
 
   if (length(weight_file) > 1) {
     stop("Please provide only one weight file in weight_file.")
@@ -254,12 +262,12 @@ preprocess_weights <- function(weight_file,
             # load the R_snp and SNP info for the region
             region_ids <- strsplit(batch, ";")[[1]]
             reg_idx <- match(region_ids, LD_info$region_id)
-            if (length(reg_idx) > 1){
-              R_snp <- lapply(LD_info$LD_matrix[reg_idx], load_LD)
-              R_snp <- suppressWarnings({as.matrix(bdiag(R_snp))})
-            }
-            else{
-              R_snp <- load_LD(LD_info$LD_matrix[reg_idx])
+            LD_matrix_files <- LD_info$LD_matrix[reg_idx]
+            if (length(LD_matrix_files) > 1) {
+              R_snp <- lapply(LD_matrix_files, load_LD, format = LD_format, LD_loader = LD_loader)
+              R_snp <- suppressWarnings(as.matrix(bdiag(R_snp)))
+            } else {
+              R_snp <- load_LD(LD_matrix_files, format = LD_format, LD_loader = LD_loader)
             }
 
             snpinfo <- do.call(rbind, snp_info[region_ids])

@@ -186,17 +186,18 @@ get_weight_LD <- function (R_wgt_all, gname, rsid_varID){
 
 
 # Load LD matrix
-#
+# @param file path to LD matrix
+# @param format file format for LD matrix
+# @param LD_loader a user defined function to load LD matrix
 #' @importFrom utils read.csv
 #' @importFrom data.table fread
 #' @importFrom tools file_ext
-load_LD <- function (file, format = c("rds", "rdata", "csv", "txt", "tsv")) {
+load_LD <- function (file, format = c("rds", "rdata", "csv", "txt", "custom"), LD_loader = NULL) {
   format <- match.arg(format)
 
   # if format is missing, try to guess format by file extension
   if (missing(format)) {
     file_ext_lower <- tolower(file_ext(file))
-
     if (file_ext_lower == "rds"){
       format <- "rds"
     } else if (file_ext_lower %in% c("rdata", "rd", "rda", "rdat")){
@@ -205,26 +206,26 @@ load_LD <- function (file, format = c("rds", "rdata", "csv", "txt", "tsv")) {
       format <- "csv"
     } else if (file_ext_lower %in% c("txt", "txt.gz")){
       format <- "txt"
-    } else if (file_ext_lower %in% c("tsv", "tsv.gz")){
-      format <- "tsv"
     } else {
-      stop("Unknown LD file format!")
+      # set format to "custom" if not matched with known formats
+      format <- "custom"
     }
   }
 
   if (format == "rds"){
-    res <- readRDS(file)
+    R <- readRDS(file)
   } else if (format == "rdata"){
-    res <- get(load(file))
+    R <- get(load(file))
   } else if (format == "csv"){
-    res <- as.matrix(read.csv(file, sep=",", row.names=1))
-  } else if (format %in% c("txt", "tsv")){
-    res <- as.matrix(fread(file))
-  } else {
-    stop("Unknown file format!")
+    R <- as.matrix(read.csv(file, sep=",", row.names=1))
+  } else if (format == "txt"){
+    R <- as.matrix(fread(file))
+  } else if (format == "custom") {
+    # use LD_loader() function to load LD matrix
+    R <- LD_loader(file)
   }
 
-  return(res)
+  return(R)
 }
 
 

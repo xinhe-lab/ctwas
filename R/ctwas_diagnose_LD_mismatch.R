@@ -17,12 +17,17 @@
 #' @param p_diff_thresh numeric, p-value threshold for identifying problematic SNPs
 #' with significant difference between observed z-scores and estimated values
 #'
-#' @importFrom logging addHandler loginfo
-#' @importFrom parallel mclapply
-#' @importFrom data.table rbindlist
+#' @param LD_format file format for LD matrix. If "custom", use a user defined
+#' \code{LD_loader()} function to load LD matrix.
+#'
+#' @param LD_loader a user defined function to load LD matrix when \code{LD_format = "custom"}.
 #'
 #' @return a list of problematic SNPs, flipped SNPs,
 #' and test statistics from susie's `kriging_rss` function
+#'
+#' @importFrom logging addHandler loginfo
+#' @importFrom parallel mclapply
+#' @importFrom data.table rbindlist
 #'
 #' @export
 #'
@@ -32,12 +37,16 @@ diagnose_ld_mismatch_susie <- function(z_snp,
                                        snp_info,
                                        gwas_n = NULL,
                                        ncore = 1,
-                                       p_diff_thresh = 5e-8){
+                                       p_diff_thresh = 5e-8,
+                                       LD_format = c("rds", "rdata", "csv", "txt", "custom"),
+                                       LD_loader = NULL){
 
   loginfo("Perform LD mismatch diagnosis for %d regions", length(region_ids))
+  LD_format <- match.arg(LD_format)
 
   condz_list <- mclapply(region_ids, function(region_id){
-    compute_region_condz(region_id, LD_info, snp_info, z_snp, gwas_n)
+    compute_region_condz(region_id, LD_info, snp_info, z_snp, gwas_n,
+                         LD_format = LD_format, LD_loader = LD_loader)
   }, mc.cores = ncore)
   names(condz_list) <- region_ids
   condz_stats <- rbindlist(condz_list, idcol = "region_id")
@@ -57,16 +66,20 @@ diagnose_ld_mismatch_susie <- function(z_snp,
 #
 #' @importFrom stats pchisq
 #' @importFrom Matrix bdiag
-compute_region_condz <- function(region_id, LD_info, snp_info, z_snp, gwas_n){
+compute_region_condz <- function(region_id, LD_info, snp_info, z_snp, gwas_n,
+                                 LD_format = c("rds", "rdata", "csv", "txt", "custom"),
+                                 LD_loader = NULL){
+
+  LD_format <- match.arg(LD_format)
 
   # load LD matrix
   LD_matrix_files <- unlist(strsplit(LD_info[LD_info$region_id == region_id, "LD_matrix"], split = ";"))
   stopifnot(all(file.exists(LD_matrix_files)))
-  if (length(LD_matrix_files) == 1){
-    R_snp <- load_LD(LD_matrix_files)
-  } else {
-    R_snp <- lapply(LD_matrix_files, load_LD)
+  if (length(LD_matrix_files) > 1) {
+    R_snp <- lapply(LD_matrix_files, load_LD, format = LD_format, LD_loader = LD_loader)
     R_snp <- suppressWarnings(as.matrix(bdiag(R_snp)))
+  } else {
+    R_snp <- load_LD(LD_matrix_files, format = LD_format, LD_loader = LD_loader)
   }
 
   # load SNP info
