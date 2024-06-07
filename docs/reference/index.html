@@ -17,7 +17,7 @@
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">ctwas</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">0.2.3</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">0.2.25</span>
       </span>
     </div>
 
@@ -73,61 +73,29 @@
           <p class="section-desc"></p>
         </th>
       </tr></tbody><tbody><tr><td>
-          <p><code><a href="EM_est_param.html">EM_est_param()</a></code> </p>
+          <p><code><a href="N2finemapping.html">N2finemapping</a></code> </p>
         </td>
-        <td><p>Run EM to estimate parameters. Iteratively run susie and estimate parameters - RSS version</p></td>
-      </tr><tr><td>
-          <p><code><a href="add_z_to_region_data.html">add_z_to_region_data()</a></code> </p>
-        </td>
-        <td><p>add z-scores from z_snp and z_gene to region_data</p></td>
-      </tr><tr><td>
-          <p><code><a href="adjust_boundary_genes.html">adjust_boundary_genes()</a></code> </p>
-        </td>
-        <td><p>Adjust region_data for boundary genes</p></td>
+        <td><p>Simulated Fine-mapping Data with Two Effect Variables</p></td>
       </tr><tr><td>
           <p><code><a href="anno_finemap_res.html">anno_finemap_res()</a></code> </p>
         </td>
-        <td><p>Annotate cTWAS finemapping result with ensembl gene annotation database</p></td>
-      </tr><tr><td>
-          <p><code><a href="anno_susie.html">anno_susie()</a></code> </p>
-        </td>
-        <td><p>annotate susie results with SNP and gene information</p></td>
+        <td><p>Annotates cTWAS finemapping result with ensembl gene annotation database</p></td>
       </tr><tr><td>
           <p><code><a href="assemble_region_data.html">assemble_region_data()</a></code> </p>
         </td>
-        <td><p>Assemble data for all the regions</p></td>
-      </tr><tr><td>
-          <p><code><a href="assign_region_ids.html">assign_region_ids()</a></code> </p>
-        </td>
-        <td><p>Assign gene and SNP IDs for regions in the regioninfo</p></td>
+        <td><p>Assembles data for all the regions</p></td>
       </tr><tr><td>
           <p><code><a href="coef.susie.html">coef(<i>&lt;susie&gt;</i>)</a></code> </p>
         </td>
         <td><p>Extract regression coefficients from susie fit</p></td>
       </tr><tr><td>
-          <p><code><a href="combine_z.html">combine_z()</a></code> </p>
-        </td>
-        <td><p>Combine SNP and gene z-scores</p></td>
-      </tr><tr><td>
           <p><code><a href="compute_gene_z.html">compute_gene_z()</a></code> </p>
         </td>
-        <td><p>Compute z-scores of molecular traits</p></td>
-      </tr><tr><td>
-          <p><code><a href="compute_region_condz.html">compute_region_condz()</a></code> </p>
-        </td>
-        <td><p>Compute expected z-scores based on conditional distribution of z-scores using SuSiE RSS</p></td>
-      </tr><tr><td>
-          <p><code><a href="compute_region_cor.html">compute_region_cor()</a></code> </p>
-        </td>
-        <td><p>Compute correlation matrices for a single region</p></td>
+        <td><p>Computes z-scores of molecular traits</p></td>
       </tr><tr><td>
           <p><code><a href="compute_region_nonSNP_PIPs.html">compute_region_nonSNP_PIPs()</a></code> </p>
         </td>
-        <td><p>Compute non-SNP PIPs for regions</p></td>
-      </tr><tr><td>
-          <p><code><a href="compute_region_p_single_effect.html">compute_region_p_single_effect()</a></code> </p>
-        </td>
-        <td><p>Select single effect regions</p></td>
+        <td><p>Computes non-SNP PIPs for regions</p></td>
       </tr><tr><td>
           <p><code><a href="compute_ss.html">compute_ss()</a></code> </p>
         </td>
@@ -135,7 +103,7 @@
       </tr><tr><td>
           <p><code><a href="convert_geno_to_LD_matrix.html">convert_geno_to_LD_matrix()</a></code> </p>
         </td>
-        <td><p>Convert PLINK genotype data to LD matrices and SNP info files, save LD matrices as .RDS files and SNP info as .Rvar files</p></td>
+        <td><p>Converts PLINK genotype data to LD matrices and SNP info files, saves LD matrices as .RDS files and SNP info as .Rvar files</p></td>
       </tr><tr><td>
           <p><code><a href="ctwas_sumstats.html">ctwas_sumstats()</a></code> </p>
         </td>
@@ -143,11 +111,7 @@
       </tr><tr><td>
           <p><code><a href="ctwas_sumstats_noLD.html">ctwas_sumstats_noLD()</a></code> </p>
         </td>
-        <td><p>running cTWAS analysis with "no LD" version</p></td>
-      </tr><tr><td>
-          <p><code><a href="ctwas_susie_rss.html">ctwas_susie_rss()</a></code> </p>
-        </td>
-        <td><p>Run cTWAS version of susie_rss for a single region</p></td>
+        <td><p>Runs cTWAS analysis with "no LD" version</p></td>
       </tr><tr><td>
           <p><code><a href="diagnose_ld_mismatch_susie.html">diagnose_ld_mismatch_susie()</a></code> </p>
         </td>
@@ -155,7 +119,7 @@
       </tr><tr><td>
           <p><code><a href="est_param.html">est_param()</a></code> </p>
         </td>
-        <td><p>Estimate cTWAS parameters</p></td>
+        <td><p>Estimates cTWAS parameters using EM</p></td>
       </tr><tr><td>
           <p><code><a href="estimate_s_rss.html">estimate_s_rss()</a></code> </p>
         </td>
@@ -163,87 +127,47 @@
       </tr><tr><td>
           <p><code><a href="expand_region_data.html">expand_region_data()</a></code> </p>
         </td>
-        <td><p>Expand region_data with full SNPs</p></td>
+        <td><p>Expands region_data with full SNPs</p></td>
       </tr><tr><td>
           <p><code><a href="finemap_region.html">finemap_region()</a></code> </p>
         </td>
-        <td><p>run cTWAS finemapping for a single region</p></td>
+        <td><p>Runs cTWAS finemapping for a single region</p></td>
       </tr><tr><td>
           <p><code><a href="finemap_regions.html">finemap_regions()</a></code> </p>
         </td>
-        <td><p>run cTWAS finemapping for multiple regions</p></td>
-      </tr><tr><td>
-          <p><code><a href="get_gene_info.html">get_gene_info()</a></code> </p>
-        </td>
-        <td><p>get gene info from weights</p></td>
-      </tr><tr><td>
-          <p><code><a href="get_gene_regions.html">get_gene_regions()</a></code> </p>
-        </td>
-        <td><p>get regions for each gene</p></td>
-      </tr><tr><td>
-          <p><code><a href="get_merged_region_info.html">get_merged_region_info()</a></code> </p>
-        </td>
-        <td><p>Get merged region info</p></td>
+        <td><p>Runs cTWAS finemapping for multiple regions</p></td>
       </tr><tr><td>
           <p><code><a href="get_problematic_genes.html">get_problematic_genes()</a></code> </p>
         </td>
-        <td><p>Get problematic genes</p></td>
-      </tr><tr><td>
-          <p><code><a href="harmonize_weights.html">harmonize_weights()</a></code> </p>
-        </td>
-        <td><p>Harmonize weight to match LD reference genotypes. Flip signs when reverse complement matches, remove ambiguous variants from the prediction models</p></td>
-      </tr><tr><td>
-          <p><code><a href="harmonize_z.html">harmonize_z()</a></code> </p>
-        </td>
-        <td><p>Harmonize z scores from GWAS to match LD reference genotypes. Flip signs when reverse complement matches, remove strand ambiguous SNPs</p></td>
-      </tr><tr><td>
-          <p><code><a href="initiate_group_priors.html">initiate_group_priors()</a></code> </p>
-        </td>
-        <td><p>set pi_prior and V_prior based on init_group_prior and init_group_prior_var</p></td>
+        <td><p>Gets problematic genes from problematic SNPs</p></td>
       </tr><tr><td>
           <p><code><a href="kriging_rss.html">kriging_rss()</a></code> </p>
         </td>
         <td><p>Compute Distribution of z-scores of Variant j Given Other z-scores, and Detect Possible Allele Switch Issue</p></td>
       </tr><tr><td>
-          <p><code><a href="label_overlapping_regions.html">label_overlapping_regions()</a></code> </p>
-        </td>
-        <td><p>Identify overlapping regions</p></td>
-      </tr><tr><td>
-          <p><code><a href="load_LD.html">load_LD()</a></code> </p>
-        </td>
-        <td><p>Load LD matrix</p></td>
-      </tr><tr><td>
           <p><code><a href="load_weights.html">load_weights()</a></code> </p>
         </td>
-        <td><p>Load PredictDB or FUSION weights</p></td>
+        <td><p>Loads PredictDB or FUSION weights</p></td>
       </tr><tr><td>
           <p><code><a href="make_locusplot.html">make_locusplot()</a></code> </p>
         </td>
-        <td><p>Plot the cTWAS result for a single locus</p></td>
+        <td><p>Plots the cTWAS result for a single locus</p></td>
       </tr><tr><td>
           <p><code><a href="map_snp_info_regions.html">map_snp_info_regions()</a></code> </p>
         </td>
-        <td><p>Read SNP info from all regions and map SNPs to regions.</p></td>
+        <td><p>Reads SNP info from all regions and map SNPs to regions.</p></td>
       </tr><tr><td>
           <p><code><a href="merge_finemap_regions.html">merge_finemap_regions()</a></code> </p>
         </td>
-        <td><p>Merge regions with boundary genes and finemap merged regions</p></td>
+        <td><p>Merges regions with boundary genes and finemaps merged regions</p></td>
       </tr><tr><td>
           <p><code><a href="merge_region_data.html">merge_region_data()</a></code> </p>
         </td>
-        <td><p>Merge region data for cross-boundary genes</p></td>
+        <td><p>Merges region data for cross-boundary genes</p></td>
       </tr><tr><td>
           <p><code><a href="predict.susie.html">predict(<i>&lt;susie&gt;</i>)</a></code> </p>
         </td>
         <td><p>Predict outcomes or extract coefficients from susie fit.</p></td>
-      </tr><tr><td>
-          <p><code><a href="prep_pgen.html">prep_pgen()</a></code> </p>
-        </td>
-        <td><p>Read .pgen file into R</p></td>
-      </tr><tr><td>
-          <p><code><a href="prep_pvar.html">prep_pvar()</a></code> </p>
-        </td>
-        <td><p>Prepare .pvar file</p></td>
       </tr><tr><td>
           <p><code><a href="preprocess_region_LD_snp_info.html">preprocess_region_LD_snp_info()</a></code> </p>
         </td>
@@ -257,49 +181,17 @@
         </td>
         <td><p>Preprocess GWAS z-scores, harmonize GWAS z-scores with LD reference</p></td>
       </tr><tr><td>
-          <p><code><a href="read_bim.html">read_bim()</a></code> </p>
-        </td>
-        <td><p>Read .bim file into R</p></td>
-      </tr><tr><td>
-          <p><code><a href="read_exprvar.html">read_exprvar()</a></code> </p>
-        </td>
-        <td><p>Read .exprvar file into R</p></td>
-      </tr><tr><td>
-          <p><code><a href="read_pgen.html">read_pgen()</a></code> </p>
-        </td>
-        <td><p>Read pgen file into R</p></td>
-      </tr><tr><td>
-          <p><code><a href="read_pvar.html">read_pvar()</a></code> </p>
-        </td>
-        <td><p>Read .pvar file into R</p></td>
-      </tr><tr><td>
-          <p><code><a href="read_snp_info_file.html">read_snp_info_file()</a></code> </p>
-        </td>
-        <td><p>Read a single SNP info file as a data frame</p></td>
-      </tr><tr><td>
-          <p><code><a href="read_snp_info_files.html">read_snp_info_files()</a></code> </p>
-        </td>
-        <td><p>Read all SNP info files as a data frame</p></td>
-      </tr><tr><td>
-          <p><code><a href="read_var_info.html">read_var_info()</a></code> </p>
-        </td>
-        <td><p>Read variant information from .pvar or .bim file into R</p></td>
-      </tr><tr><td>
-          <p><code><a href="region2core.html">region2core()</a></code> </p>
-        </td>
-        <td><p>assign regions to cores</p></td>
-      </tr><tr><td>
           <p><code><a href="screen_regions.html">screen_regions()</a></code> </p>
         </td>
-        <td><p>Screen regions with strong non-SNP PIPs to be used in finemapping step</p></td>
+        <td><p>Screens regions with strong non-SNP PIPs to be used in finemapping step</p></td>
       </tr><tr><td>
           <p><code><a href="sum_pip_across_contexts.html">sum_pip_across_contexts()</a></code> </p>
         </td>
-        <td><p>Combine PIPs across contexts (tissues)</p></td>
+        <td><p>Combines PIPs across contexts (tissues)</p></td>
       </tr><tr><td>
           <p><code><a href="summarize_param.html">summarize_param()</a></code> </p>
         </td>
-        <td><p>Summarize and plot cTWAS parameter estimates</p></td>
+        <td><p>Summarizes and plots cTWAS parameter estimates</p></td>
       </tr><tr><td>
           <p><code><a href="susie.html">susie()</a></code> <code><a href="susie.html">susie_suff_stat()</a></code> </p>
         </td>
@@ -317,21 +209,17 @@
         </td>
         <td><p>Sum of Single Effects (SuSiE) Regression using summary statistics</p></td>
       </tr><tr><td>
-          <p><code><a href="trim_region_data.html">trim_region_data()</a></code> </p>
-        </td>
-        <td><p>Trim SNPs from region_data if the total number of SNPs exceeds limit</p></td>
-      </tr><tr><td>
           <p><code><a href="univariate_regression.html">univariate_regression()</a></code> </p>
         </td>
         <td><p>Perform Univariate Linear Regression Separately for Columns of X</p></td>
       </tr><tr><td>
           <p><code><a href="update_finemap_res.html">update_finemap_res()</a></code> </p>
         </td>
-        <td><p>Update finemapping result</p></td>
+        <td><p>Updates finemapping result</p></td>
       </tr><tr><td>
           <p><code><a href="update_merged_regions_finemap_res.html">update_merged_regions_finemap_res()</a></code> </p>
         </td>
-        <td><p>Update finemapping result for merged regions</p></td>
+        <td><p>Updates finemapping result for merged regions</p></td>
       </tr></tbody></table></div>
 
   <div class="col-md-3 hidden-xs hidden-sm" id="pkgdown-sidebar">

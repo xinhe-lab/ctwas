@@ -33,7 +33,7 @@
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">ctwas</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">0.2.3</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">0.2.25</span>
       </span>
     </div>
 
@@ -93,7 +93,7 @@
       <h1 data-toc-skip>Simple cTWAS tutorial</h1>
                         <h4 data-toc-skip class="author">Kaixuan Luo, Sheng Qian</h4>
             
-            <h4 data-toc-skip class="date">2024-05-30</h4>
+            <h4 data-toc-skip class="date">2024-06-06</h4>
       
       <small class="dont-index">Source: <a href="https://github.com/xinhe-lab/ctwas/blob/multigroup_test/vignettes/simple_ctwas_tutorial.Rmd" class="external-link"><code>vignettes/simple_ctwas_tutorial.Rmd</code></a></small>
       <div class="hidden name"><code>simple_ctwas_tutorial.Rmd</code></div>
@@ -106,7 +106,7 @@
 <p>In this tutorial, we will show how to perform cTWAS main analysis with summary statistics without using LD matrices.</p>
 <p>Load the <code>ctwas</code> package.</p>
 <div class="sourceCode" id="cb1"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://github.com/xinhe-lab/ctwas" class="external-link">ctwas</a></span><span class="op">)</span></span></code></pre></div>
+<code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://github.com/xinhe-lab/ctwas/" class="external-link">ctwas</a></span><span class="op">)</span></span></code></pre></div>
 <p>We require first running the data preprocessing and harmonization steps before running cTWAS analysis. Please read the “Preparing cTWAS input data” tutorial to prepare cTWAS input data.</p>
 <p>In this tutorial, we use sample data for chromosome 16 provided in the package.</p>
 <div class="sourceCode" id="cb2"><pre class="downlit sourceCode r">
@@ -126,14 +126,14 @@
 <div class="section level3">
 <h3 id="region-info-and-snp-info">Region info and SNP info<a class="anchor" aria-label="anchor" href="#region-info-and-snp-info"></a>
 </h3>
-<p>We require a data frame <code>region_info</code> containing the region definitions, with the following columns: “chrom”, “start”, “stop”, for the genomic coordinates of the regions, and “region_id” for the IDs of the regions (by default, we use [chrom:start-stop] as region IDs).</p>
+<p>We require a data frame <code>region_info</code> containing the region definitions, with the following columns: “chrom”, “start”, “stop”, for the genomic coordinates of the regions, and “region_id” for the IDs of the regions (by default, we use [chrom_start_stop] as region IDs).</p>
 <p>Here we use the b38 European LDetect blocks, included in the package.</p>
 <div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">region_file</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/system.file.html" class="external-link">system.file</a></span><span class="op">(</span><span class="st">"extdata/ldetect"</span>, <span class="st">"EUR.b38.bed"</span>, package <span class="op">=</span> <span class="st">"ctwas"</span><span class="op">)</span></span>
 <span><span class="va">region_info</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/utils/read.table.html" class="external-link">read.table</a></span><span class="op">(</span><span class="va">region_file</span>, header <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/colnames.html" class="external-link">colnames</a></span><span class="op">(</span><span class="va">region_info</span><span class="op">)</span><span class="op">[</span><span class="fl">1</span><span class="op">:</span><span class="fl">3</span><span class="op">]</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"chrom"</span>, <span class="st">"start"</span>, <span class="st">"stop"</span><span class="op">)</span></span>
 <span><span class="va">region_info</span><span class="op">$</span><span class="va">chrom</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/numeric.html" class="external-link">as.numeric</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/grep.html" class="external-link">gsub</a></span><span class="op">(</span><span class="st">"chr"</span>, <span class="st">""</span>, <span class="va">region_info</span><span class="op">$</span><span class="va">chrom</span><span class="op">)</span><span class="op">)</span></span>
-<span><span class="va">region_info</span><span class="op">$</span><span class="va">region_id</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/paste.html" class="external-link">paste0</a></span><span class="op">(</span><span class="va">region_info</span><span class="op">$</span><span class="va">chr</span>, <span class="st">":"</span>, <span class="va">region_info</span><span class="op">$</span><span class="va">start</span>, <span class="st">"-"</span>, <span class="va">region_info</span><span class="op">$</span><span class="va">stop</span><span class="op">)</span></span></code></pre></div>
+<span><span class="va">region_info</span><span class="op">$</span><span class="va">region_id</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/paste.html" class="external-link">paste0</a></span><span class="op">(</span><span class="va">region_info</span><span class="op">$</span><span class="va">chr</span>, <span class="st">"_"</span>, <span class="va">region_info</span><span class="op">$</span><span class="va">start</span>, <span class="st">"_"</span>, <span class="va">region_info</span><span class="op">$</span><span class="va">stop</span><span class="op">)</span></span></code></pre></div>
 </div>
 <div class="section level3">
 <h3 id="ld-and-snp-info">LD and SNP info<a class="anchor" aria-label="anchor" href="#ld-and-snp-info"></a>
@@ -156,12 +156,12 @@
 <span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">head</a></span><span class="op">(</span><span class="va">region_info</span><span class="op">)</span></span></code></pre></div>
 <pre><code><span><span class="co">##   chrom   start    stop          region_id</span></span>
-<span><span class="co">## 1    16   10054 1157206   16:10054-1157206</span></span>
-<span><span class="co">## 2    16 1157206 2714828 16:1157206-2714828</span></span>
-<span><span class="co">## 3    16 2714828 3951195 16:2714828-3951195</span></span>
-<span><span class="co">## 4    16 3951195 5068344 16:3951195-5068344</span></span>
-<span><span class="co">## 5    16 5068344 5841579 16:5068344-5841579</span></span>
-<span><span class="co">## 6    16 5841579 6843550 16:5841579-6843550</span></span></code></pre>
+<span><span class="co">## 1    16   10054 1157206   16_10054_1157206</span></span>
+<span><span class="co">## 2    16 1157206 2714828 16_1157206_2714828</span></span>
+<span><span class="co">## 3    16 2714828 3951195 16_2714828_3951195</span></span>
+<span><span class="co">## 4    16 3951195 5068344 16_3951195_5068344</span></span>
+<span><span class="co">## 5    16 5068344 5841579 16_5068344_5841579</span></span>
+<span><span class="co">## 6    16 5841579 6843550 16_5841579_6843550</span></span></code></pre>
 <p>Note: in this simple tutorial, we use the “no-LD” version, so we use <code>use_LD = FALSE</code>. Please see the other tutorials for running full cTWAS analysis using LD.</p>
 </div>
 <div class="section level3">
@@ -174,14 +174,14 @@
 <span>                          <span class="va">snp_info</span>, </span>
 <span>                          drop_multiallelic <span class="op">=</span> <span class="cn">TRUE</span>, </span>
 <span>                          drop_strand_ambig <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span></code></pre></div>
-<pre><code><span><span class="co">## 2024-05-30 21:24:58 INFO::Preprocessing z_snp...</span></span>
-<span><span class="co">## 2024-05-30 21:24:58 INFO::z_snp has 407828 variants in total</span></span>
-<span><span class="co">## 2024-05-30 21:24:58 INFO::267361 variants left after filtering by snp_info</span></span>
-<span><span class="co">## 2024-05-30 21:24:58 INFO::Drop 30 multiallelic variants</span></span>
-<span><span class="co">## 2024-05-30 21:24:58 INFO::Harmonize 267331 variants in both GWAS and LD reference</span></span>
-<span><span class="co">## 2024-05-30 21:25:00 INFO::Flip signs for 267289 (99.98%) variants</span></span>
-<span><span class="co">## 2024-05-30 21:25:00 INFO::Remove 45738 strand ambiguous variants</span></span>
-<span><span class="co">## 2024-05-30 21:25:00 INFO::221593 variants left after preprocessing and harmonization.</span></span></code></pre>
+<pre><code><span><span class="co">## 2024-06-06 20:39:10 INFO::Preprocessing z_snp...</span></span>
+<span><span class="co">## 2024-06-06 20:39:11 INFO::z_snp has 407828 variants in total</span></span>
+<span><span class="co">## 2024-06-06 20:39:11 INFO::267361 variants left after filtering by snp_info</span></span>
+<span><span class="co">## 2024-06-06 20:39:11 INFO::Drop 30 multiallelic variants</span></span>
+<span><span class="co">## 2024-06-06 20:39:11 INFO::Harmonize 267331 variants in both GWAS and LD reference</span></span>
+<span><span class="co">## 2024-06-06 20:39:12 INFO::Flip signs for 267289 (99.98%) variants</span></span>
+<span><span class="co">## 2024-06-06 20:39:12 INFO::Remove 45738 strand ambiguous variants</span></span>
+<span><span class="co">## 2024-06-06 20:39:12 INFO::221593 variants left after preprocessing and harmonization.</span></span></code></pre>
 </div>
 <div class="section level3">
 <h3 id="harmonizing-prediction-models-and-the-reference-data">Harmonizing prediction models and the reference data<a class="anchor" aria-label="anchor" href="#harmonizing-prediction-models-and-the-reference-data"></a>
@@ -204,14 +204,14 @@
 <span>                                    scale_by_ld_variance <span class="op">=</span> <span class="cn">TRUE</span>,</span>
 <span>                                    load_predictdb_LD <span class="op">=</span> <span class="cn">TRUE</span>,</span>
 <span>                                    filter_protein_coding_genes <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span></code></pre></div>
-<pre><code><span><span class="co">## 2024-05-30 21:25:00 INFO::Load weight: /tmp/jobs/40040286/RtmpZOBlNC/temp_libpath1caa5a9766aa/ctwas/extdata/sample_data/expression_Liver.db</span></span>
-<span><span class="co">## 2024-05-30 21:25:00 INFO::type: expression</span></span>
-<span><span class="co">## 2024-05-30 21:25:00 INFO::context: liver</span></span>
-<span><span class="co">## 2024-05-30 21:25:00 INFO::Keep protein coding genes only</span></span>
-<span><span class="co">## 2024-05-30 21:25:00 INFO::Number of genes with weights provided: 11479 in expression_Liver</span></span>
-<span><span class="co">## 2024-05-30 21:25:00 INFO::Number of variants in weights: 16929</span></span>
-<span><span class="co">## 2024-05-30 21:25:00 INFO::529 variants and 410 genes left after intersecting with LD reference and GWAS z_snp</span></span>
-<span><span class="co">## 2024-05-30 21:25:00 INFO::Harmonizing weights with LD reference ...</span></span></code></pre>
+<pre><code><span><span class="co">## 2024-06-06 20:39:13 INFO::Load weight: /tmp/jobs/40126978/Rtmp2H5UrK/temp_libpath4b5b2313bcffe/ctwas/extdata/sample_data/expression_Liver.db</span></span>
+<span><span class="co">## 2024-06-06 20:39:13 INFO::type: expression</span></span>
+<span><span class="co">## 2024-06-06 20:39:13 INFO::context: liver</span></span>
+<span><span class="co">## 2024-06-06 20:39:13 INFO::Keep protein coding genes only</span></span>
+<span><span class="co">## 2024-06-06 20:39:13 INFO::Number of genes with weights provided: 11479 in expression_Liver</span></span>
+<span><span class="co">## 2024-06-06 20:39:13 INFO::Number of variants in weights: 16929</span></span>
+<span><span class="co">## 2024-06-06 20:39:13 INFO::529 variants and 410 genes left after intersecting with LD reference and GWAS z_snp</span></span>
+<span><span class="co">## 2024-06-06 20:39:13 INFO::Harmonizing weights with LD reference ...</span></span></code></pre>
 <div class="sourceCode" id="cb11"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">weight_adipose_file</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/system.file.html" class="external-link">system.file</a></span><span class="op">(</span><span class="st">"extdata/sample_data"</span>, <span class="st">"expression_Adipose_Subcutaneous.db"</span>, package <span class="op">=</span> <span class="st">"ctwas"</span><span class="op">)</span></span>
 <span></span>
@@ -227,14 +227,14 @@
 <span>                                      scale_by_ld_variance <span class="op">=</span> <span class="cn">TRUE</span>,</span>
 <span>                                      load_predictdb_LD <span class="op">=</span> <span class="cn">TRUE</span>,</span>
 <span>                                      filter_protein_coding_genes <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span></code></pre></div>
-<pre><code><span><span class="co">## 2024-05-30 21:25:01 INFO::Load weight: /tmp/jobs/40040286/RtmpZOBlNC/temp_libpath1caa5a9766aa/ctwas/extdata/sample_data/expression_Adipose_Subcutaneous.db</span></span>
-<span><span class="co">## 2024-05-30 21:25:01 INFO::type: expression</span></span>
-<span><span class="co">## 2024-05-30 21:25:01 INFO::context: adipose</span></span>
-<span><span class="co">## 2024-05-30 21:25:01 INFO::Keep protein coding genes only</span></span>
-<span><span class="co">## 2024-05-30 21:25:01 INFO::Number of genes with weights provided: 13102 in expression_Adipose_Subcutaneous</span></span>
-<span><span class="co">## 2024-05-30 21:25:01 INFO::Number of variants in weights: 23737</span></span>
-<span><span class="co">## 2024-05-30 21:25:01 INFO::720 variants and 484 genes left after intersecting with LD reference and GWAS z_snp</span></span>
-<span><span class="co">## 2024-05-30 21:25:01 INFO::Harmonizing weights with LD reference ...</span></span></code></pre>
+<pre><code><span><span class="co">## 2024-06-06 20:39:14 INFO::Load weight: /tmp/jobs/40126978/Rtmp2H5UrK/temp_libpath4b5b2313bcffe/ctwas/extdata/sample_data/expression_Adipose_Subcutaneous.db</span></span>
+<span><span class="co">## 2024-06-06 20:39:14 INFO::type: expression</span></span>
+<span><span class="co">## 2024-06-06 20:39:14 INFO::context: adipose</span></span>
+<span><span class="co">## 2024-06-06 20:39:14 INFO::Keep protein coding genes only</span></span>
+<span><span class="co">## 2024-06-06 20:39:14 INFO::Number of genes with weights provided: 13102 in expression_Adipose_Subcutaneous</span></span>
+<span><span class="co">## 2024-06-06 20:39:14 INFO::Number of variants in weights: 23737</span></span>
+<span><span class="co">## 2024-06-06 20:39:14 INFO::720 variants and 484 genes left after intersecting with LD reference and GWAS z_snp</span></span>
+<span><span class="co">## 2024-06-06 20:39:14 INFO::Harmonizing weights with LD reference ...</span></span></code></pre>
 <div class="sourceCode" id="cb13"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># concatenate weights from different types or contexts</span></span>
 <span><span class="va">weights</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="va">weights_liver</span>, <span class="va">weights_adipose</span><span class="op">)</span></span></code></pre></div>
@@ -256,7 +256,9 @@
 <span>                                 group_prior_var_structure <span class="op">=</span> <span class="st">"shared_type"</span>,</span>
 <span>                                 maxSNP <span class="op">=</span> <span class="fl">20000</span>,</span>
 <span>                                 min_nonSNP_PIP <span class="op">=</span> <span class="fl">0.5</span>,</span>
-<span>                                 ncore <span class="op">=</span> <span class="fl">6</span><span class="op">)</span></span></code></pre></div>
+<span>                                 ncore <span class="op">=</span> <span class="fl">6</span><span class="op">)</span></span>
+<span></span>
+<span><span class="co"># saveRDS(ctwas_res, file.path(outputdir, paste0(outname, ".ctwas_sumstats_noLD_res.RDS")))</span></span></code></pre></div>
 <div class="sourceCode" id="cb15"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">param</span> <span class="op">&lt;-</span> <span class="va">ctwas_res</span><span class="op">$</span><span class="va">param</span></span>
 <span><span class="va">finemap_res</span> <span class="op">&lt;-</span> <span class="va">ctwas_res</span><span class="op">$</span><span class="va">finemap_res</span></span>
@@ -355,8 +357,8 @@
 <span><span class="co">## 5338    16 72070235                 ENSG00000261701.6|expression_Liver</span></span>
 <span><span class="co">## 36      16 56972848 ENSG00000087237.10|expression_Adipose_Subcutaneous</span></span>
 <span><span class="co">##            type context              group         z            region_id</span></span>
-<span><span class="co">## 5338 expression   liver   expression|liver -18.40315 16:71020125-72901251</span></span>
-<span><span class="co">## 36   expression adipose expression|adipose  13.74984 16:55869862-57630418</span></span>
+<span><span class="co">## 5338 expression   liver   expression|liver -18.40315 16_71020125_72901251</span></span>
+<span><span class="co">## 36   expression adipose expression|adipose  13.74984 16_55869862_57630418</span></span>
 <span><span class="co">##      susie_pip      mu2         gene_id gene_name</span></span>
 <span><span class="co">## 5338         1 335.4591 ENSG00000261701       HPR</span></span>
 <span><span class="co">## 36           1 187.7014 ENSG00000087237      CETP</span></span></code></pre>
@@ -395,22 +397,19 @@
 <div class="section level2">
 <h2 id="visualizing-ctwas-results">Visualizing cTWAS results<a class="anchor" aria-label="anchor" href="#visualizing-ctwas-results"></a>
 </h2>
-<p>We need locuszoomr package for visualizing cTWAS result.</p>
-<div class="sourceCode" id="cb36"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://github.com/myles-lewis/locuszoomr" class="external-link">locuszoomr</a></span><span class="op">)</span></span></code></pre></div>
 <p>We could make locus plots for regions of interest, and zoom in the region by specifying the <code>locus_range</code>.</p>
-<div class="sourceCode" id="cb37"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb36"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="../reference/make_locusplot.html">make_locusplot</a></span><span class="op">(</span><span class="va">finemap_res</span>,</span>
-<span>               region_id <span class="op">=</span> <span class="st">"16:71020125-72901251"</span>,</span>
+<span>               region_id <span class="op">=</span> <span class="st">"16_71020125_72901251"</span>,</span>
 <span>               weights <span class="op">=</span> <span class="va">weights</span>,</span>
 <span>               ens_db <span class="op">=</span> <span class="va">ens_db</span>,</span>
 <span>               use_LD <span class="op">=</span> <span class="cn">FALSE</span>,</span>
 <span>               pip_thresh <span class="op">=</span> <span class="fl">0.8</span>,</span>
 <span>               locus_range <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">71.6e6</span>,<span class="fl">72.4e6</span><span class="op">)</span><span class="op">)</span></span></code></pre></div>
-<pre><code><span><span class="co">## 2024-05-30 21:25:06 INFO::focus gene: HPR</span></span>
-<span><span class="co">## 2024-05-30 21:25:06 INFO::focus id: ENSG00000261701.6|expression_Liver</span></span>
-<span><span class="co">## 2024-05-30 21:25:06 INFO::locus_range: 71600000,72400000</span></span>
-<span><span class="co">## 2024-05-30 21:25:07 INFO::QTL positions: 72063820,72063928</span></span></code></pre>
+<pre><code><span><span class="co">## 2024-06-06 20:39:20 INFO::focus gene: HPR</span></span>
+<span><span class="co">## 2024-06-06 20:39:20 INFO::focus id: ENSG00000261701.6|expression_Liver</span></span>
+<span><span class="co">## 2024-06-06 20:39:20 INFO::locus_range: 71600000,72400000</span></span>
+<span><span class="co">## 2024-06-06 20:39:20 INFO::QTL positions: 72063820,72063928</span></span></code></pre>
 <div class="figure" style="text-align: center">
 <img src="simple_ctwas_tutorial_files/figure-html/locus_plot-1.png" alt="&amp;nbsp;" width="1200"><p class="caption">
  

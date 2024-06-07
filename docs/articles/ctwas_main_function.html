@@ -33,7 +33,7 @@
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">ctwas</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">0.2.3</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">0.2.25</span>
       </span>
     </div>
 
@@ -93,7 +93,7 @@
       <h1 data-toc-skip>Using cTWAS main function</h1>
                         <h4 data-toc-skip class="author">Kaixuan Luo, Sheng Qian</h4>
             
-            <h4 data-toc-skip class="date">2024-05-30</h4>
+            <h4 data-toc-skip class="date">2024-06-06</h4>
       
       <small class="dont-index">Source: <a href="https://github.com/xinhe-lab/ctwas/blob/multigroup_test/vignettes/ctwas_main_function.Rmd" class="external-link"><code>vignettes/ctwas_main_function.Rmd</code></a></small>
       <div class="hidden name"><code>ctwas_main_function.Rmd</code></div>
@@ -110,8 +110,9 @@
 <p>Please follow the “Preparing cTWAS input data” tutorial to prepare cTWAS input data.</p>
 <p>Load the packages</p>
 <div class="sourceCode" id="cb1"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://github.com/xinhe-lab/ctwas" class="external-link">ctwas</a></span><span class="op">)</span></span></code></pre></div>
-<p>Load the prepared input data</p>
+<code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://github.com/xinhe-lab/ctwas/" class="external-link">ctwas</a></span><span class="op">)</span></span></code></pre></div>
+<p>Load the prepared input data.</p>
+<p>Note: you would need to update the paths to LD matrices in LD_info.</p>
 <div class="sourceCode" id="cb2"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># Load z_snp</span></span>
 <span><span class="va">z_snp</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/readRDS.html" class="external-link">readRDS</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/system.file.html" class="external-link">system.file</a></span><span class="op">(</span><span class="st">"extdata/sample_data"</span>, <span class="st">"LDL_example.preprocessed.z_snp.RDS"</span>, package <span class="op">=</span> <span class="st">"ctwas"</span><span class="op">)</span><span class="op">)</span></span>
@@ -119,19 +120,19 @@
 <span><span class="co"># Load weights</span></span>
 <span><span class="va">weights</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/readRDS.html" class="external-link">readRDS</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/system.file.html" class="external-link">system.file</a></span><span class="op">(</span><span class="st">"extdata/sample_data"</span>, <span class="st">"LDL_example.preprocessed.weights.RDS"</span>, package <span class="op">=</span> <span class="st">"ctwas"</span><span class="op">)</span><span class="op">)</span></span>
 <span></span>
-<span><span class="co"># Load region_info, LD_info and snp_info</span></span>
+<span><span class="co"># Load region_info, and snp_info</span></span>
 <span><span class="va">region_info</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/readRDS.html" class="external-link">readRDS</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/system.file.html" class="external-link">system.file</a></span><span class="op">(</span><span class="st">"extdata/sample_data"</span>, <span class="st">"LDL_example.region_info.RDS"</span>, package <span class="op">=</span> <span class="st">"ctwas"</span><span class="op">)</span><span class="op">)</span></span>
-<span><span class="va">LD_info</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/readRDS.html" class="external-link">readRDS</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/system.file.html" class="external-link">system.file</a></span><span class="op">(</span><span class="st">"extdata/sample_data"</span>, <span class="st">"LDL_example.LD_info.RDS"</span>, package <span class="op">=</span> <span class="st">"ctwas"</span><span class="op">)</span><span class="op">)</span></span>
-<span><span class="va">snp_info</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/readRDS.html" class="external-link">readRDS</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/system.file.html" class="external-link">system.file</a></span><span class="op">(</span><span class="st">"extdata/sample_data"</span>, <span class="st">"LDL_example.snp_info.RDS"</span>, package <span class="op">=</span> <span class="st">"ctwas"</span><span class="op">)</span><span class="op">)</span></span></code></pre></div>
+<span><span class="va">snp_info</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/readRDS.html" class="external-link">readRDS</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/system.file.html" class="external-link">system.file</a></span><span class="op">(</span><span class="st">"extdata/sample_data"</span>, <span class="st">"LDL_example.snp_info.RDS"</span>, package <span class="op">=</span> <span class="st">"ctwas"</span><span class="op">)</span><span class="op">)</span></span>
+<span></span>
+<span><span class="co"># Load LD_info</span></span>
+<span><span class="co"># need to update the paths to LD matrices in LD_info</span></span>
+<span><span class="va">LD_info</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/readRDS.html" class="external-link">readRDS</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/system.file.html" class="external-link">system.file</a></span><span class="op">(</span><span class="st">"extdata/sample_data"</span>, <span class="st">"LDL_example.LD_info.RDS"</span>, package <span class="op">=</span> <span class="st">"ctwas"</span><span class="op">)</span><span class="op">)</span></span></code></pre></div>
 <p>Let’s set the cTWAS output directory and output name, and we use 6 cores to parallelize computing over regions.</p>
 <div class="sourceCode" id="cb3"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/getwd.html" class="external-link">setwd</a></span><span class="op">(</span><span class="st">"/project2/xinhe/shared_data/multigroup_ctwas/tutorial/LDL_multitissue_tutorial/"</span><span class="op">)</span></span>
-<span></span>
-<span><span class="va">outputdir</span> <span class="op">&lt;-</span> <span class="st">"./ctwas_output"</span></span>
+<code class="sourceCode R"><span><span class="va">outputdir</span> <span class="op">&lt;-</span> <span class="st">"./ctwas_output"</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/files2.html" class="external-link">dir.create</a></span><span class="op">(</span><span class="va">outputdir</span>, showWarnings<span class="op">=</span><span class="cn">F</span>, recursive<span class="op">=</span><span class="cn">T</span><span class="op">)</span></span>
 <span></span>
 <span><span class="va">outname</span> <span class="op">&lt;-</span> <span class="st">"LDL_example"</span></span>
-<span></span>
 <span><span class="va">ncore</span> <span class="op">&lt;-</span> <span class="fl">6</span></span></code></pre></div>
 <p>The <code><a href="../reference/ctwas_sumstats.html">ctwas_sumstats()</a></code> function is a main function to run cTWAS analysis with summary statistics. It takes preprocessed GWAS z-scores (<code>z_snp</code>), <code>weights</code>, <code>region_info</code>, and <code>snp_info</code> as input, and will perform the main steps: computing z_scores of molecular traits, assembling input <code>region_data</code>, estimating parameters, screening regions, and finemapping. If <code>z_gene</code> is already computed when preparing cTWAS input data, we could specify the <code>z_gene</code> argument in the function, then it will skip computing z_scores of molecular traits.</p>
 <div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
@@ -139,24 +140,24 @@
 <span><span class="va">log_file</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/file.path.html" class="external-link">file.path</a></span><span class="op">(</span><span class="va">outputdir</span>, <span class="fu"><a href="https://rdrr.io/r/base/paste.html" class="external-link">paste0</a></span><span class="op">(</span><span class="va">outname</span>, <span class="st">".ctwas_sumstats.log"</span><span class="op">)</span><span class="op">)</span></span>
 <span></span>
 <span><span class="va">ctwas_res</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/ctwas_sumstats.html">ctwas_sumstats</a></span><span class="op">(</span><span class="va">z_snp</span>,</span>
-<span>                      <span class="va">weights</span>,</span>
-<span>                      region_info <span class="op">=</span> <span class="va">region_info</span>,</span>
-<span>                      snp_info <span class="op">=</span> <span class="va">snp_info</span>,</span>
-<span>                      LD_info <span class="op">=</span> <span class="va">LD_info</span>,</span>
-<span>                      thin <span class="op">=</span> <span class="fl">0.1</span>,</span>
-<span>                      niter_prefit <span class="op">=</span> <span class="fl">3</span>,</span>
-<span>                      niter <span class="op">=</span> <span class="fl">30</span>,</span>
-<span>                      L <span class="op">=</span> <span class="fl">5</span>,</span>
-<span>                      group_prior_var_structure <span class="op">=</span> <span class="st">"shared_type"</span>,</span>
-<span>                      maxSNP <span class="op">=</span> <span class="fl">20000</span>,</span>
-<span>                      min_nonSNP_PIP <span class="op">=</span> <span class="fl">0.5</span>,</span>
-<span>                      ncore <span class="op">=</span> <span class="va">ncore</span>,</span>
-<span>                      save_cor <span class="op">=</span> <span class="cn">TRUE</span>,</span>
-<span>                      cor_dir <span class="op">=</span> <span class="va">cor_dir</span>,</span>
-<span>                      outputdir <span class="op">=</span> <span class="va">outputdir</span>,</span>
-<span>                      outname <span class="op">=</span> <span class="va">outname</span>,</span>
-<span>                      logfile <span class="op">=</span> <span class="va">log_file</span>,</span>
-<span>                      verbose <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span></span>
+<span>                            <span class="va">weights</span>,</span>
+<span>                            region_info <span class="op">=</span> <span class="va">region_info</span>,</span>
+<span>                            snp_info <span class="op">=</span> <span class="va">snp_info</span>,</span>
+<span>                            LD_info <span class="op">=</span> <span class="va">LD_info</span>,</span>
+<span>                            thin <span class="op">=</span> <span class="fl">0.1</span>,</span>
+<span>                            niter_prefit <span class="op">=</span> <span class="fl">3</span>,</span>
+<span>                            niter <span class="op">=</span> <span class="fl">30</span>,</span>
+<span>                            L <span class="op">=</span> <span class="fl">5</span>,</span>
+<span>                            group_prior_var_structure <span class="op">=</span> <span class="st">"shared_type"</span>,</span>
+<span>                            maxSNP <span class="op">=</span> <span class="fl">20000</span>,</span>
+<span>                            min_nonSNP_PIP <span class="op">=</span> <span class="fl">0.5</span>,</span>
+<span>                            ncore <span class="op">=</span> <span class="va">ncore</span>,</span>
+<span>                            save_cor <span class="op">=</span> <span class="cn">TRUE</span>,</span>
+<span>                            cor_dir <span class="op">=</span> <span class="va">cor_dir</span>,</span>
+<span>                            outputdir <span class="op">=</span> <span class="va">outputdir</span>,</span>
+<span>                            outname <span class="op">=</span> <span class="va">outname</span>,</span>
+<span>                            logfile <span class="op">=</span> <span class="va">log_file</span>,</span>
+<span>                            verbose <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span></span>
 <span></span>
 <span><span class="va">param</span> <span class="op">&lt;-</span> <span class="va">ctwas_res</span><span class="op">$</span><span class="va">param</span></span>
 <span><span class="va">finemap_res</span> <span class="op">&lt;-</span> <span class="va">ctwas_res</span><span class="op">$</span><span class="va">finemap_res</span></span>

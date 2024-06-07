@@ -17,7 +17,7 @@
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">ctwas</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">0.2.3</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">0.2.25</span>
       </span>
     </div>
 
@@ -93,8 +93,20 @@
 snps. "A1" is effect allele. "A2" is the other allele.</p></dd>
 
 
+<dt>region_ids</dt>
+<dd><p>A vector of region IDs to run diagnosis</p></dd>
+
+
+<dt>LD_info</dt>
+<dd><p>a list of paths to LD matrices for each of the regions.</p></dd>
+
+
+<dt>snp_info</dt>
+<dd><p>a list of SNP info data frames for LD reference.</p></dd>
+
+
 <dt>gwas_n</dt>
-<dd><p>integer, GWAS sample size</p></dd>
+<dd><p>integer, GWAS sample size.</p></dd>
 
 
 <dt>ncore</dt>
@@ -104,10 +116,6 @@ snps. "A1" is effect allele. "A2" is the other allele.</p></dd>
 <dt>p_diff_thresh</dt>
 <dd><p>numeric, p-value threshold for identifying problematic SNPs
 with significant difference between observed z-scores and estimated values</p></dd>
-
-
-<dt>ld_Rinfo</dt>
-<dd><p>a vector of paths to the variant information for all LD matrices</p></dd>
 
 </dl></div>
     <div id="value">

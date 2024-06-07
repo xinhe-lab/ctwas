@@ -33,7 +33,7 @@
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">ctwas</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">0.2.3</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">0.2.25</span>
       </span>
     </div>
 
@@ -93,7 +93,7 @@
       <h1 data-toc-skip>Using cTWAS modules</h1>
                         <h4 data-toc-skip class="author">Kaixuan Luo, Sheng Qian</h4>
             
-            <h4 data-toc-skip class="date">2024-05-30</h4>
+            <h4 data-toc-skip class="date">2024-06-06</h4>
       
       <small class="dont-index">Source: <a href="https://github.com/xinhe-lab/ctwas/blob/multigroup_test/vignettes/ctwas_modules.Rmd" class="external-link"><code>vignettes/ctwas_modules.Rmd</code></a></small>
       <div class="hidden name"><code>ctwas_modules.Rmd</code></div>
@@ -107,7 +107,7 @@
 <p><em>Important</em>: It is possible to run cTWAS without any reference LD data. This would make the data preparation and analysis considerably simpler and faster. To do this, we make the assumption that there is at most one causal signal (either a variant or a molecular trait) in a single GWAS locus. This can be implemented by running the fine-mapping analysis (see below) with the option of L = 1. The downside of running cTWAS without LD is that you may miss secondary signals in certain regions. See the section below “Running cTWAS without LD” for details.</p>
 <p>Load the packages</p>
 <div class="sourceCode" id="cb1"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://github.com/xinhe-lab/ctwas" class="external-link">ctwas</a></span><span class="op">)</span></span></code></pre></div>
+<code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://github.com/xinhe-lab/ctwas/" class="external-link">ctwas</a></span><span class="op">)</span></span></code></pre></div>
 <p>In this version of cTWAS, we allow the joint analysis of multiple groups of molecular traits. This could be: eQTL of multiple tissues; or eQTLs, splicing QTLs and other types of QTLs in a single tissue. In a more complex setting, multiple types of QTL data from multiple tissues/cell types. Each group is defined by its “type” (kind of molecular traits), and “context” (tissue, cell type, condition, etc.). Please see the section “Harmonizing prediction models and the reference data” in the “Preparing cTWAS input data” tutorial.</p>
 <p>Load the prepared input data, including GWAS summary statistics (Z scores of variants), weights of molecular traits, region information, and computed Z-scores of the molecular traits.</p>
 <p>In this tutorial, we use sample data for chromosome 16 provided in the package.</p>
@@ -123,20 +123,19 @@
 <span><span class="co"># Load region info</span></span>
 <span><span class="va">region_info</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/readRDS.html" class="external-link">readRDS</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/system.file.html" class="external-link">system.file</a></span><span class="op">(</span><span class="st">"extdata/sample_data"</span>, <span class="st">"LDL_example.region_info.RDS"</span>, package <span class="op">=</span> <span class="st">"ctwas"</span><span class="op">)</span><span class="op">)</span></span>
 <span></span>
-<span><span class="co"># Load LD info</span></span>
-<span><span class="va">LD_info</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/readRDS.html" class="external-link">readRDS</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/system.file.html" class="external-link">system.file</a></span><span class="op">(</span><span class="st">"extdata/sample_data"</span>, <span class="st">"LDL_example.LD_info.RDS"</span>, package <span class="op">=</span> <span class="st">"ctwas"</span><span class="op">)</span><span class="op">)</span></span>
-<span></span>
 <span><span class="co"># Load SNP info</span></span>
 <span><span class="va">snp_info</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/readRDS.html" class="external-link">readRDS</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/system.file.html" class="external-link">system.file</a></span><span class="op">(</span><span class="st">"extdata/sample_data"</span>, <span class="st">"LDL_example.snp_info.RDS"</span>, package <span class="op">=</span> <span class="st">"ctwas"</span><span class="op">)</span><span class="op">)</span></span>
+<span></span>
+<span><span class="co"># Load LD info</span></span>
+<span><span class="co"># need to be replaced with your own paths to LD matrices</span></span>
+<span><span class="va">LD_info</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/readRDS.html" class="external-link">readRDS</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/system.file.html" class="external-link">system.file</a></span><span class="op">(</span><span class="st">"extdata/sample_data"</span>, <span class="st">"LDL_example.LD_info.RDS"</span>, package <span class="op">=</span> <span class="st">"ctwas"</span><span class="op">)</span><span class="op">)</span></span>
 <span></span>
 <span><span class="co"># Load gene z-scores</span></span>
 <span><span class="va">z_gene</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/readRDS.html" class="external-link">readRDS</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/system.file.html" class="external-link">system.file</a></span><span class="op">(</span><span class="st">"extdata/sample_data"</span>, <span class="st">"LDL_example.z_gene.RDS"</span>, </span>
 <span>package <span class="op">=</span> <span class="st">"ctwas"</span><span class="op">)</span><span class="op">)</span></span></code></pre></div>
 <p>Let’s set the cTWAS output directory and output name, and we use 6 cores to parallelize computing over regions.</p>
 <div class="sourceCode" id="cb3"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/getwd.html" class="external-link">setwd</a></span><span class="op">(</span><span class="st">"/project2/xinhe/shared_data/multigroup_ctwas/tutorial/LDL_multitissue_tutorial/"</span><span class="op">)</span></span>
-<span></span>
-<span><span class="va">outputdir</span> <span class="op">&lt;-</span> <span class="st">"./ctwas_output"</span></span>
+<code class="sourceCode R"><span><span class="va">outputdir</span> <span class="op">&lt;-</span> <span class="st">"./ctwas_output"</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/files2.html" class="external-link">dir.create</a></span><span class="op">(</span><span class="va">outputdir</span>, showWarnings<span class="op">=</span><span class="cn">F</span>, recursive<span class="op">=</span><span class="cn">T</span><span class="op">)</span></span>
 <span></span>
 <span><span class="va">outname</span> <span class="op">&lt;-</span> <span class="st">"LDL_example"</span></span>
@@ -248,7 +247,7 @@ It assigns genes (molecular traits), SNPs and their z-score data for each region
 <span>                               verbose <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span>
 <span></span>
 <span><span class="co"># saveRDS(finemap_res, file.path(outputdir, paste0(outname, ".ctwas.res.RDS")))</span></span></code></pre></div>
-<p><em>Note</em>, it is possible to run without LD. To do this, simply set <code>use_LD = FALSE</code>, and <code>L = 1</code>.</p>
+<p><em>Note</em>: it is possible to run without LD. To do this, simply set <code>use_LD = FALSE</code>, and <code>L = 1</code>.</p>
 </div>
 <div class="section level2">
 <h2 id="fine-mapping-a-single-region">Fine-mapping a single region<a class="anchor" aria-label="anchor" href="#fine-mapping-a-single-region"></a>
@@ -257,7 +256,7 @@ It assigns genes (molecular traits), SNPs and their z-score data for each region
 <p>Here we show an example for fine mapping a single region “16:71020125-72901251”.</p>
 <p>We will first expand the region of interest with a full set of SNPs using the assembled <code>region_data</code>.</p>
 <div class="sourceCode" id="cb9"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">region_id</span> <span class="op">&lt;-</span> <span class="st">"16:71020125-72901251"</span></span>
+<code class="sourceCode R"><span><span class="va">region_id</span> <span class="op">&lt;-</span> <span class="st">"16_71020125_72901251"</span></span>
 <span><span class="va">selected_region_data</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/expand_region_data.html">expand_region_data</a></span><span class="op">(</span><span class="va">region_data</span><span class="op">[</span><span class="va">region_id</span><span class="op">]</span>,</span>
 <span>                                           <span class="va">snp_info</span>,</span>
 <span>                                           <span class="va">z_snp</span>,</span>
