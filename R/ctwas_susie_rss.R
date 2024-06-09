@@ -80,25 +80,25 @@ anno_susie <- function(susie_res,
 
 
 # set pi_prior and V_prior based on init_group_prior and init_group_prior_var
-initiate_group_priors <- function(group_prior = NULL, group_prior_var = NULL, groups) {
+initiate_group_priors <- function(group_prior = NULL, group_prior_var = NULL, group_names) {
 
   if (is.null(group_prior)){
-    group_prior <- structure(as.numeric(rep(NA,length(groups))), names=groups)
+    group_prior <- structure(as.numeric(rep(NA,length(group_names))), names=group_names)
   }
 
   if (is.null(group_prior_var)){
-    group_prior_var <- structure(as.numeric(rep(NA,length(groups))), names=groups)
+    group_prior_var <- structure(as.numeric(rep(NA,length(group_names))), names=group_names)
   }
 
-  if ( !setequal(names(group_prior), groups) || !setequal(names(group_prior_var), groups) ) {
-    stop("names of group_prior or group_prior_var do not match with groups")
+  if ( !setequal(names(group_prior), group_names) || !setequal(names(group_prior_var), group_names) ) {
+    stop("names of group_prior or group_prior_var do not match with group_names")
   }
 
   pi_prior <- list()
   V_prior <- list()
-  for (group in groups){
-    pi_prior[[group]] <- unname(group_prior[group])
-    V_prior[[group]] <- unname(group_prior_var[group])
+  for (group_name in group_names){
+    pi_prior[[group_name]] <- unname(group_prior[group_name])
+    V_prior[[group_name]] <- unname(group_prior_var[group_name])
   }
   pi_prior <- unlist(pi_prior)
   V_prior <- unlist(V_prior)

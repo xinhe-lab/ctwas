@@ -32,6 +32,9 @@
 #' "shared_all" allows all groups to share the same variance parameter.
 #' "independent" allows all groups to have their own separate variance parameters.
 #'
+#' @param screen_method screening regions by: "nonSNP_PIP" or
+#' "cs" (only available for "LD" version)
+#'
 #' @param maxSNP Inf or integer. Maximum number of SNPs in a region. Default is
 #' Inf, no limit. This can be useful if there are many SNPs in a region and you don't
 #' have enough memory to run the program. This applies to the finemapping step only.
@@ -88,6 +91,7 @@ ctwas_sumstats <- function(
     init_group_prior = NULL,
     init_group_prior_var = NULL,
     group_prior_var_structure = c("shared_type", "shared_context", "shared_nonSNP", "shared_all", "independent"),
+    screen_method = c("nonSNP_PIP", "cs"),
     maxSNP = 20000,
     min_nonSNP_PIP = 0.5,
     p_single_effect = 0.8,
@@ -170,12 +174,15 @@ ctwas_sumstats <- function(
                                        group_prior = group_prior,
                                        group_prior_var = group_prior_var,
                                        L = L,
+                                       screen_method = screen_method,
                                        min_nonSNP_PIP = min_nonSNP_PIP,
                                        ncore = ncore,
                                        verbose = verbose,
                                        ...)
   screened_region_data <- screen_regions_res$screened_region_data
-  region_nonSNP_PIP_df <- screen_regions_res$region_nonSNP_PIP_df
+  if (screen_method == "cs") {
+    L <- screen_regions_res$estimated_L
+  }
 
   # Expand screened region_data with all SNPs in the regions
   if (thin < 1){
@@ -186,11 +193,6 @@ ctwas_sumstats <- function(
                                                trim_by = "z",
                                                maxSNP = maxSNP,
                                                ncore = ncore)
-    # # update data in screened regions with screened_region_data (full SNPs)
-    # region_data[screened_region_ids] <- screened_region_data
-    # if (!is.null(outputdir)) {
-    #   saveRDS(region_data, file.path(outputdir, paste0(outname, ".region_data.RDS")))
-    # }
   }
   if (!is.null(outputdir)) {
     saveRDS(screened_region_data, file.path(outputdir, paste0(outname, ".screened_region_data.RDS")))

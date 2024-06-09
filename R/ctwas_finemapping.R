@@ -12,13 +12,13 @@
 #'
 #' @param weights a list of preprocessed weights
 #'
-#' @param L the number of effects for susie during the fine mapping steps
+#' @param L the number of effects for susie during the fine mapping
 #'
 #' @param group_prior a vector of two prior inclusion probabilities for SNPs and genes.
 #'
 #' @param group_prior_var a vector of two prior variances for SNPs and gene effects.
 #'
-#' @param groups a vector of group names for group_prior and group_prior_var.
+#' @param group_names a vector of group names for group_prior and group_prior_var.
 #'
 #' @param use_null_weight TRUE/FALSE. If TRUE, allow for a probability of no effect in susie
 #'
@@ -62,7 +62,7 @@ finemap_region <- function(region_data,
                            L = 5,
                            group_prior = NULL,
                            group_prior_var = NULL,
-                           groups = NULL,
+                           group_names = NULL,
                            use_null_weight = TRUE,
                            coverage = 0.95,
                            min_abs_corr = 0.5,
@@ -99,14 +99,14 @@ finemap_region <- function(region_data,
   g_group <- regiondata[["g_group"]]
 
   # set pi_prior and V_prior based on group_prior and group_prior_var
-  if (is.null(groups)){
+  if (is.null(group_names)){
     if(!is.null(group_prior)){
-      groups <- names(group_prior)
+      group_names <- names(group_prior)
     }else{
-      stop("'groups' is required when group_prior is null")
+      stop("'group_names' is required when group_prior is null")
     }
   }
-  res <- initiate_group_priors(group_prior, group_prior_var, groups)
+  res <- initiate_group_priors(group_prior, group_prior_var, group_names)
   pi_prior <- res$pi_prior
   V_prior <- res$V_prior
   rm(res)
@@ -234,13 +234,13 @@ finemap_region <- function(region_data,
 #'
 #' @param weights a list of weights for each gene
 #'
-#' @param L the number of effects for susie during the fine mapping steps
+#' @param L the number of effects or a vector of number of effects for each region.
 #'
 #' @param group_prior a vector of two prior inclusion probabilities for SNPs and genes.
 #'
 #' @param group_prior_var a vector of two prior variances for SNPs and gene effects.
 #'
-#' @param groups a vector of group names for group_prior and group_prior_var.
+#' @param group_names a vector of group names for group_prior and group_prior_var.
 #'
 #' @param use_null_weight TRUE/FALSE. If TRUE, allow for a probability of no effect in susie
 #'
@@ -287,7 +287,7 @@ finemap_regions <- function(region_data,
                             L = 5,
                             group_prior = NULL,
                             group_prior_var = NULL,
-                            groups = NULL,
+                            group_names = NULL,
                             use_null_weight = TRUE,
                             coverage = 0.95,
                             min_abs_corr = 0.5,
@@ -321,27 +321,34 @@ finemap_regions <- function(region_data,
     }
   }
 
-  if (is.null(groups)){
+  if (is.null(group_names)){
     if(!is.null(group_prior)){
-      groups <- names(group_prior)
+      group_names <- names(group_prior)
     }else{
-      groups <- unique(unlist(lapply(region_data, "[[", "gs_group")))
+      group_names <- unique(unlist(lapply(region_data, "[[", "gs_group")))
     }
   }
 
   region_ids <- names(region_data)
 
   finemap_region_res_list <- mclapply(region_ids, function(region_id){
+
+    if (length(L) > 1) {
+      region_L <- L[region_id]
+    } else {
+      region_L <- L
+    }
+
     finemap_region(region_data = region_data,
                    region_id = region_id,
                    use_LD = use_LD,
                    LD_info = LD_info,
                    snp_info = snp_info,
                    weights = weights,
-                   L = L,
+                   L = region_L,
                    group_prior = group_prior,
                    group_prior_var = group_prior_var,
-                   groups = groups,
+                   group_names = group_names,
                    use_null_weight = use_null_weight,
                    coverage = coverage,
                    min_abs_corr = min_abs_corr,
@@ -351,6 +358,7 @@ finemap_regions <- function(region_data,
                    include_cs_index = include_cs_index,
                    verbose = verbose,
                    ...)
+
   }, mc.cores = ncore)
 
   if (length(finemap_region_res_list) != length(region_ids)) {

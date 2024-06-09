@@ -83,6 +83,7 @@ ctwas_res <- ctwas_sumstats(z_snp,
                             niter = 30,
                             L = 5,
                             group_prior_var_structure = "shared_type",
+                            screen_method = "nonSNP_PIP",
                             maxSNP = 20000,
                             min_nonSNP_PIP = 0.5,
                             ncore = ncore,
@@ -116,6 +117,7 @@ Major argument settings:
 -   The `niter_prefit` argument and `niter` argument sets the number of EM iterations for estimating parameters. We set `niter_prefit = 3`, and `niter = 30` by default.
 -   The `L` argument sets the number of effects for SuSiE during the screening regions and fine mapping steps. We set `L = 5` by default.
 -   There are several options for how to handle the prior effect size parameters by specifying the `group_prior_var_stucture`. "shared_type" (default option) allows all groups in one molecular QTL type to share the same variance parameter. "shared_context" allows all groups in one context (tissue, cell type, condition) to share the same variance parameter. "shared_nonSNP" allows all non-SNP groups to share the same variance parameter. "shared_all" allows all groups to share the same variance parameter. "independent" allows all groups to have their own separate variance parameters.
+-   We can choose the method for screening regions by specifying the `screen_method` argument: "nonSNP_PIP" (by total non-SNP PIPs in a region) or "cs" (by the number of credible sets in a region). 
 -   The `maxSNP` sets a maximum on the number of variants that can be in a single region to prevent memory issues during fine-mapping.
 -   `min_nonSNP_PIP` is a threshold for selecting regions with strong non-SNP signals for finemapping. We set `min_nonSNP_PIP = 0.5` by default, so regions with total non-SNP signals greater than 0.5 will be selected for finemapping.
 -   If the `save_cor` argument is TRUE, it will save the correlation matrices (SNP-SNP, SNP-gene, and gene-gene correlation matrices) in the `cor_dir` directory for future access.

@@ -145,11 +145,11 @@ ctwas_sumstats_noLD <- function(
                                        group_prior = group_prior,
                                        group_prior_var = group_prior_var,
                                        L = 1,
+                                       screen_method = "nonSNP_PIP",
                                        min_nonSNP_PIP = min_nonSNP_PIP,
                                        ncore = ncore,
                                        verbose = verbose)
   screened_region_data <- screen_regions_res$screened_region_data
-  region_nonSNP_PIP_df <- screen_regions_res$region_nonSNP_PIP_df
 
   # Expand screened region_data with all SNPs in the regions
   if (thin < 1){
@@ -160,11 +160,6 @@ ctwas_sumstats_noLD <- function(
                                                trim_by = "z",
                                                maxSNP = maxSNP,
                                                ncore = ncore)
-    # # update data in screened regions with screened_region_data (full SNPs)
-    # region_data[screened_region_ids] <- screened_region_data
-    # if (!is.null(outputdir)) {
-    #   saveRDS(region_data, file.path(outputdir, paste0(outname, ".region_data.RDS")))
-    # }
   }
   if (!is.null(outputdir)) {
     saveRDS(screened_region_data, file.path(outputdir, paste0(outname, ".screened_region_data.RDS")))

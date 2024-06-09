@@ -13,7 +13,7 @@ finemap_regions(
   L = 5,
   group_prior = NULL,
   group_prior_var = NULL,
-  groups = NULL,
+  group_names = NULL,
   use_null_weight = TRUE,
   coverage = 0.95,
   min_abs_corr = 0.5,
@@ -40,13 +40,13 @@ finemap_regions(
 
 \item{weights}{a list of weights for each gene}
 
-\item{L}{the number of effects for susie during the fine mapping steps}
+\item{L}{the number of effects or a vector of number of effects for each region.}
 
 \item{group_prior}{a vector of two prior inclusion probabilities for SNPs and genes.}
 
 \item{group_prior_var}{a vector of two prior variances for SNPs and gene effects.}
 
-\item{groups}{a vector of group names for group_prior and group_prior_var.}
+\item{group_names}{a vector of group names for group_prior and group_prior_var.}
 
 \item{use_null_weight}{TRUE/FALSE. If TRUE, allow for a probability of no effect in susie}
 

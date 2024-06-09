@@ -116,19 +116,18 @@ LD mismatches between GWAS data and the reference LD could lead to false positiv
 
 Here, we perform the LD mismatch diagnosis using [SuSiE-RSS][susierss_diagnostic] for selected regions. It is an optional step that users could run after finishing the main cTWAS analysis. Users could choose regions of interest, to be confident of the results.
 
-Here we check regions with total non-SNP PIPs > 0.8:
+e.g. we could select regions with total non-SNP PIPs > 0.8 to run LD mismatch diagnosis:
 ```{r select_regions_to_rerun, eval=FALSE}
-nonSNP_PIP_df <- compute_region_nonSNP_PIPs(finemap_res)
-selected_nonSNP_PIP_df <- nonSNP_PIP_df[order(nonSNP_PIP_df$nonSNP_PIP, decreasing = TRUE),]
-selected_region_ids <- selected_nonSNP_PIP_df[selected_nonSNP_PIP_df$nonSNP_PIP
- > 0.8, "region_id"]
+nonSNP_PIPs <- compute_region_nonSNP_PIPs(finemap_res)
+selected_region_ids <- names(nonSNP_PIPs[nonSNP_PIPs >= 0.8])
 ```
 
 
 We perform LD mismatch diagnosis for these regions using SuSiE RSS to detect problematic SNPs. This returns a list of problematic SNPs (diagnostic test `p-value < 5e-8` by default), flipped SNPs, and the test statistics of `kriging_rss` function from SuSiE-RSS. 
 ```{r diagnose_LD_mismatch, eval=FALSE}
 # perform LD mismatch diagnosis for the selected regions
-res <- diagnose_ld_mismatch_susie(z_snp, region_ids, LD_info, snp_info, gwas_n, 
+res <- diagnose_ld_mismatch_susie(z_snp, selected_region_ids, 
+                                  LD_info, snp_info, gwas_n, 
                                   ncore = ncore, p_diff_thresh = 5e-8)
 problematic_snps <- res$problematic_snps
 flipped_snps <- res$flipped_snps

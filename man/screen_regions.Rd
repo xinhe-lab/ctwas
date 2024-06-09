@@ -12,9 +12,11 @@ screen_regions(
   weights = NULL,
   group_prior = NULL,
   group_prior_var = NULL,
+  group_names = NULL,
   L = 5,
   minvar = 2,
   mingene = 1,
+  screen_method = c("nonSNP_PIP", "cs"),
   min_nonSNP_PIP = 0.5,
   ncore = 1,
   logfile = NULL,
@@ -37,13 +39,19 @@ screen_regions(
 
 \item{group_prior_var}{a vector of two prior variances for SNPs and gene effects.}
 
+\item{group_names}{a vector of group names for group_prior and group_prior_var.}
+
 \item{L}{the number of effects for susie}
 
 \item{minvar}{minimum number of variables (snps and genes) in a region}
 
 \item{mingene}{minimum number of genes in a region}
 
-\item{min_nonSNP_PIP}{Regions with non-SNP PIP >= \code{min_nonSNP_PIP}
+\item{screen_method}{screening regions by: "nonSNP_PIP" or
+"cs" (only available for "LD" version)}
+
+\item{min_nonSNP_PIP}{If screening by "nonSNP_PIP",
+regions with non-SNP PIP >= \code{min_nonSNP_PIP}
 will be selected to run finemapping using full SNPs.}
 
 \item{ncore}{The number of cores used to parallelize susie over regions}
@@ -55,7 +63,8 @@ will be selected to run finemapping using full SNPs.}
 \item{...}{Additional arguments of \code{susie_rss}.}
 }
 \value{
-a list of screened_region_data, and a data frame of region ids and non-SNP PIPs
+a list of screened_region_data, and
+non-SNP PIPs or estimated L for each region
 }
 \description{
 Screens regions with strong non-SNP PIPs to be used in finemapping step
