@@ -42,9 +42,7 @@ read_snp_info_files <- function (files){
 #' @importFrom dplyr left_join mutate select
 #' @importFrom tools file_path_sans_ext
 #' @importFrom RSQLite dbDriver dbConnect dbGetQuery dbDisconnect
-#' @importFrom foreach %dopar% foreach
-#' @importFrom parallel makeCluster stopCluster
-#' @importFrom doParallel registerDoParallel
+#' @importFrom parallel mclapply
 #'
 #' @export
 #'
@@ -100,22 +98,24 @@ load_weights <- function(weight_file,
     wgtpos <- read.table(wgtposfile, header = T, stringsAsFactors = F)
     wgtpos <- transform(wgtpos,
                         ID = ifelse(duplicated(ID) | duplicated(ID, fromLast = TRUE),
-                                            paste(ID, ave(ID, ID, FUN = seq_along), sep = "_ID"), ID))
+                                    paste(ID, ave(ID, ID, FUN = seq_along), sep = "_ID"), ID))
     wgtpos <- wgtpos[wgtpos$ID!="NA_IDNA",] #filter NA genes
     loginfo("Loading FUSION weights ...")
-    cl <- makeCluster(ncore, outfile = "", type = "FORK")
-    registerDoParallel(cl)
     weight_table <- NULL
     if (nrow(wgtpos) > 0) {
-      weight_table <- foreach(i = 1:nrow(wgtpos), .combine = "rbind") %dopar% {
-        wf <- file.path(wgtdir, wgtpos[i, "WGT"])
-        load(wf)
+      weight_table_list <- mclapply(1:nrow(wgtpos), function(i){
+        load(file.path(wgtdir, wgtpos[i, "WGT"]))
         gname <- wgtpos[i, "ID"]
         colnames(snps) <- c("chrom", "rsid", "cm", "pos", "alt", "ref")
-        snps[is.na(snps$rsid),"rsid"] <- paste0("chr",snps[is.na(snps$rsid),"chrom"],"_",snps[is.na(snps$rsid),"pos"],
-                                                "_",snps[is.na(snps$rsid),"ref"], "_",snps[is.na(snps$rsid),"alt"],"_",fusion_genome_version)
+        snps[is.na(snps$rsid),"rsid"] <- paste0("chr",snps[is.na(snps$rsid),"chrom"],
+                                                "_",snps[is.na(snps$rsid),"pos"],
+                                                "_",snps[is.na(snps$rsid),"ref"],
+                                                "_",snps[is.na(snps$rsid),"alt"],
+                                                "_",fusion_genome_version)
 
-        snps[,"varID"] <- paste0("chr",snps[,"chrom"],"_",snps[,"pos"],"_",snps[,"ref"],"_",snps[,"alt"],"_",fusion_genome_version)
+        snps[,"varID"] <- paste0("chr",snps[,"chrom"],"_",snps[,"pos"],"_",
+                                 snps[,"ref"],"_",snps[,"alt"],
+                                 "_",fusion_genome_version)
 
         rownames(wgt.matrix) <- snps$rsid
         g.method <- method_FUSION
@@ -123,7 +123,6 @@ load_weights <- function(weight_file,
         if (g.method == "top1"){
           wgt.matrix[,"top1"][-which.max(wgt.matrix[,"top1"]^2)] <- 0
         }
-
         wgt.matrix <- wgt.matrix[abs(wgt.matrix[, g.method]) > 0, , drop = FALSE]
         wgt.matrix <- wgt.matrix[complete.cases(wgt.matrix), , drop = FALSE]
         if (nrow(wgt.matrix) > 0){
@@ -135,55 +134,20 @@ load_weights <- function(weight_file,
           colnames(out_table) <- c("gene","rsid","varID","ref_allele","eff_allele","weight")
           out_table
         }
+      })
+      if (length(weight_table_list) != nrow(wgtpos)) {
+        stop("Not all cores returned results. Try rerun with bigger memory or fewer cores")
       }
-      stopCluster(cl)
+      weight_table <- do.call(rbind, weight_table_list)
     }
     extra_table <- NULL
     R_wgt <- NULL
   }
-  return(list(weight_table=weight_table,extra_table=extra_table,weight_name=weight_name,R_wgt=R_wgt))
+  return(list(weight_table=weight_table,
+              extra_table=extra_table,
+              weight_name=weight_name,
+              R_wgt=R_wgt))
 }
-
-# gets LD matrix of weights
-#' @importFrom stats setNames
-get_weight_LD <- function (R_wgt_all, gname, rsid_varID){
-  R_wgt <- R_wgt_all[R_wgt_all$GENE == gname,]
-  #convert covariance to correlation
-  R_wgt_stdev <- R_wgt[R_wgt$RSID1==R_wgt$RSID2,]
-  R_wgt_stdev <- setNames(sqrt(R_wgt_stdev$VALUE), R_wgt_stdev$RSID1)
-  R_wgt$VALUE <- R_wgt$VALUE/(R_wgt_stdev[R_wgt$RSID1]*R_wgt_stdev[R_wgt$RSID2])
-
-  unique_id <- unique(c(R_wgt$RSID1, R_wgt$RSID2))
-
-  # Create an empty correlation matrix
-  n <- length(unique_id)
-  cor_matrix <- matrix(NA, nrow = n, ncol = n)
-
-  # Fill in the correlation values
-  for (i in 1:n) {
-    for (j in i:n) {  # Only iterate over half of the matrix
-      if (i == j) {
-        cor_matrix[i, j] <- 1  # Diagonal elements are 1
-      } else {
-        # Check if there are any matches for the RSID combination
-        matches <- R_wgt[R_wgt$RSID1 == unique_id[i] & R_wgt$RSID2 == unique_id[j], "VALUE"]
-        if (length(matches) > 0) {
-          cor_matrix[i, j] <- matches
-          cor_matrix[j, i] <- matches  # Set symmetric value
-        } else {
-          cor_matrix[i, j] <- NA  # No correlation value found
-          cor_matrix[j, i] <- NA  # No correlation value found
-        }
-      }
-    }
-  }
-
-  rownames(cor_matrix) <- rsid_varID$rsid[match(unique_id, rsid_varID$varID)]
-  colnames(cor_matrix) <- rsid_varID$rsid[match(unique_id, rsid_varID$varID)]
-
-  return(cor_matrix)
-}
-
 
 # Load LD matrix
 # @param file path to LD matrix
