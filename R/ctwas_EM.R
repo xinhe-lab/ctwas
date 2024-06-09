@@ -68,6 +68,9 @@ EM_est_param <- function(
                             use_null_weight = use_null_weight,
                             ...)
     }, mc.cores = ncore)
+    if (length(EM_susie_res_list) != length(region_ids)) {
+      stop("Not all cores returned results. Try rerun with bigger memory or fewer cores")
+    }
     EM_susie_res <- do.call(rbind, EM_susie_res_list)
 
     # update estimated group_prior from the current iteration

@@ -39,6 +39,9 @@ compute_gene_z <- function (z_snp, weights, ncore = 1, logfile = NULL){
     dimnames(z.g) <- NULL
     data.frame(id = id, z = z.g, type = type, context = context, group = group)
   }, mc.cores = ncore)
+  if (length(z_gene) != length(weights)) {
+    stop("Not all cores returned results. Try rerun with bigger memory or fewer cores")
+  }
   z_gene <- do.call("rbind", z_gene)
   rownames(z_gene) <- NULL
 

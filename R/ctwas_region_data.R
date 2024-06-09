@@ -284,6 +284,9 @@ add_z_to_region_data <- function(region_data,
     regiondata[["g_group"]] <- region_zdf$group[region_zdf$type != "SNP"]
     regiondata
   }, mc.cores = ncore)
+  if (length(region_data2) != length(region_ids)) {
+    stop("Not all cores returned results. Try rerun with bigger memory or fewer cores")
+  }
   names(region_data2) <- region_ids
 
   return(region_data2)
@@ -415,6 +418,9 @@ expand_region_data <- function(region_data,
     }
     regiondata
   }, mc.cores = ncore)
+  if (length(region_data) != length(region_ids)) {
+    stop("Not all cores returned results. Try rerun with bigger memory or fewer cores")
+  }
   names(region_data) <- region_ids
 
   # Trim regions with SNPs more than maxSNP

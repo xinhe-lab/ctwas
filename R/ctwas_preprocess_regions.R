@@ -113,6 +113,9 @@ map_snp_info_regions <- function(region_info,
     rownames(region_snp_info) <- NULL
     region_snp_info
   }, mc.cores = ncore)
+  if (length(snp_info) != length(region_ids)) {
+    stop("Not all cores returned results. Try rerun with bigger memory or fewer cores")
+  }
   names(snp_info) <- region_ids
 
   return(snp_info)
