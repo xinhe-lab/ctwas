@@ -135,14 +135,15 @@ group_prior_var <- param$group_prior_var
 
 ## Screening regions
 
-After parameter estimation, we use the `screen_regions()` function to perform a screening process to select regions with likely causal signals in molecular traits. Only these regions would be subject to full fine-mapping analysis, using all genetic variants, in the final step. Thus screening regions can save computational time. To find these regions, we perform an initial fine-mapping with thinned SNPs (a subset of all variants, see the Section “Assemble input data”). 
+After parameter estimation, we use the `screen_regions()` function to perform a screening process to select regions with likely causal signals in molecular traits. Only these regions would be subject to full fine-mapping analysis, using all genetic variants, in the final step. Thus screening regions can save computational time. To find these regions, we perform an initial fine-mapping with thinned SNPs (a subset of all variants, see the Section “Assemble input data”).
+
 
 Then we select the candidate regions with two options. 
 
 Option 1. When `screen_method = "nonSNP_PIP"`, we select regions with the total PIP from 
 molecular traits (non-SNPs) greater than 0.5 (by default). 
-It returns a vector of non-SNP PIPs for each region. 
-We could further narrow down the candidate regions by using more stringent `min_nonSNP_PIP` cutoffs.
+It returns `screened_region_data` which contains a subset of region data for selected regions.
+It also returns the values of non-SNP PIPs for all the regions. We could check the non-SNP PIPs and further adjust the screened regions by choosing different `min_nonSNP_PIP` cutoffs.
 
 ```{r screen_regions_nonSNP_PIP, eval=FALSE}
 res <- screen_regions(region_data,
@@ -158,12 +159,12 @@ res <- screen_regions(region_data,
                       ncore = ncore,
                       verbose = FALSE)
 screened_region_data <- res$screened_region_data
-nonSNP_PIPs <- screen_regions_res$nonSNP_PIPs
+nonSNP_PIPs <- res$nonSNP_PIPs
 ```
 
+
 Option 2. When `screen_method = "cs"`, we select regions with at least one credible set.
-It returns a vector of estimated L (number of credible sets) for each region. 
-Note: this option is not available in the "no-LD" version. 
+It returns `screened_region_data`, as well as estimated L (number of credible sets) for all the regions. Note: this option is not available for the "no-LD" version. 
 
 ```{r screen_regions_cs, eval=FALSE}
 res <- screen_regions(region_data,
@@ -172,17 +173,17 @@ res <- screen_regions(region_data,
                       snp_info = snp_info, 
                       weights = weights, 
                       L = 5,
-                      group_prior = group_prior,
-                      group_prior_var = group_prior_var,
                       screen_method = "cs",
                       min_nonSNP_PIP = 0.5,
                       ncore = ncore,
                       verbose = FALSE)
 screened_region_data <- res$screened_region_data
-estimated_L <- screen_regions_res$estimated_L
+estimated_L <- res$estimated_L
 ```
 
+
 *Note*: it is possible to run without LD.  To do this, simply set `use_LD = FALSE`, and `L = 1`.
+
 
 After selecting regions, we expand the screened regions with 
 full sets of SNPs for final fine mapping.  If the number of SNPs in a region is more than `maxSNP`, It will trim the SNPs in the region (according to the z-scores, by default).
@@ -238,6 +239,7 @@ finemap_res <- finemap_regions(screened_region_data,
 
 # saveRDS(finemap_res, file.path(outputdir, paste0(outname, ".ctwas.res.RDS")))
 ```
+
 
 If we run screening regions by the number of credible sets `screen_method = "cs"`, 
 we could use the estimated L for each region:

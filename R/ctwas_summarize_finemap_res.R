@@ -1,27 +1,38 @@
-#' @title Annotates cTWAS finemapping result with ensembl gene annotation database
+
+#' @title Annotates cTWAS finemapping result with gene annotations
 #'
 #' @param finemap_res a data frame of cTWAS finemapping result
 #'
 #' @param snp_info a list or data frame of SNP info for LD reference,
 #'  with columns "chrom", "id", "pos", "alt", "ref".
 #'
-#' @param ens_db ensembl gene annotation database
+#' @param gene_annot a data frame of gene annotations, with columns:
+#' "chrom", "start", "end", "gene_id", "gene_name", "gene_type.
 #'
 #' @param use_gene_pos use mid (midpoint), start or end positions to
-#' represent gene positions
+#' represent gene positions.
+#'
+#' @param filter_cs TRUE/FALSE. If TRUE, limits results in credible sets.
+#'
+#' @param filter_protein_coding_genes TRUE/FALSE. If TRUE, keep protein coding genes only.
 #'
 #' @return a data frame of cTWAS finemapping result including gene
-#' names and updated positions
+#' names, types and positions
 #'
+#' @importFrom logging loginfo
 #' @importFrom data.table rbindlist
-#' @importFrom ensembldb genes
-#' @importFrom AnnotationFilter GeneIdFilter
-#' @importFrom GenomicRanges seqnames start end
+#' @importFrom readr parse_number
+#' @importFrom magrittr %>%
+#' @importFrom dplyr left_join mutate select group_by ungroup n
 #'
 #' @export
 #'
-anno_finemap_res <- function(finemap_res, snp_info, ens_db,
-                             use_gene_pos = c("mid", "start", "end")){
+anno_finemap_res <- function(finemap_res,
+                             snp_info,
+                             gene_annot = NULL,
+                             use_gene_pos = c("mid", "start", "end"),
+                             filter_cs = FALSE,
+                             filter_protein_coding_genes = FALSE){
 
   use_gene_pos <- match.arg(use_gene_pos)
 
@@ -31,98 +42,213 @@ anno_finemap_res <- function(finemap_res, snp_info, ens_db,
   }
   target_header <- c("chrom", "id", "pos", "alt", "ref")
   if (!all(target_header %in% colnames(snp_info))){
-    stop("SNP info needs to contain the following columns: ",
+    stop("snp_info needs to contain the following columns: ",
          paste(target_header, collapse = " "))
   }
 
-  finemap_res <- cbind(chrom = NA, pos = NA, finemap_res, gene_id = NA, gene_name = NA)
-  finemap_res <- finemap_res[, unique(colnames(finemap_res))]
-
-  # extract gene IDs from finemapping result
-  finemap_gene_res <- finemap_res[finemap_res$type!="SNP",]
-  gene_id <- sapply(strsplit(finemap_gene_res$id, split = "[|]"), "[[", 1)
-  gene_id <- sapply(strsplit(gene_id, split = "[.]"), "[[", 1)
-  finemap_gene_res$gene_id <- gene_id
-
-  # get gene position info
-  gene_annot_gr <- genes(ens_db, filter = GeneIdFilter(finemap_gene_res$gene_id))
-  gene_annot_gr$chrom <- seqnames(gene_annot_gr)
-  gene_annot_gr$start_pos <- start(gene_annot_gr)
-  gene_annot_gr$end_pos <- end(gene_annot_gr)
-  if (use_gene_pos == "mid"){
-    # use the midpoint as gene position
-    gene_annot_gr$gene_pos <- round((gene_annot_gr$start_pos+gene_annot_gr$end_pos)/2)
-  } else if (use_gene_pos == "start") {
-    gene_annot_gr$gene_pos <- gene_annot_gr$start_pos
-  } else if (use_gene_pos == "end") {
-    gene_annot_gr$gene_pos <- gene_annot_gr$end_pos
+  # Check required columns for gene_annot
+  annot_cols <- c("gene_id", "gene_name", "gene_type", "start", "end")
+  if (!all(annot_cols %in% colnames(gene_annot))){
+    stop("gene_annot needs to contain the following columns: ",
+         paste(annot_cols, collapse = " "))
   }
 
-  # get gene_name and gene position
-  gene_annot_df <- data.frame(gene_id = gene_annot_gr$gene_id,
-                              gene_name = gene_annot_gr$gene_name,
-                              gene_chrom = gene_annot_gr$chrom,
-                              gene_pos = gene_annot_gr$gene_pos)
+  if (filter_cs) {
+    finemap_res <- finemap_res[finemap_res$cs_index!=0,]
+  }
 
-  # add gene name to finemapping result and update gene positions
-  gene_annot_idx <- match(finemap_gene_res$gene_id, gene_annot_df$gene_id)
-  finemap_gene_res$chrom <- gene_annot_df$gene_chrom[gene_annot_idx]
-  finemap_gene_res$pos <- gene_annot_df$gene_pos[gene_annot_idx]
-  finemap_gene_res$gene_name <- gene_annot_df$gene_name[gene_annot_idx]
+  finemap_gene_res <- finemap_res[finemap_res$type!="SNP",]
+
+  # extract gene ids
+  if (is.null(finemap_gene_res$gene_id)) {
+    finemap_gene_res$gene_id <- sapply(strsplit(finemap_gene_res$id, split = "[|]"), "[[", 1)
+  }
+
+  # add gene_name and gene_type
+  if (!all(c("gene_name", "gene_type") %in% colnames(finemap_gene_res))) {
+    # avoid duplicating columns when doing left_join()
+    finemap_gene_res[, c("gene_name", "gene_type", "start", "end")] <- NULL
+    if (!is.null(gene_annot$chrom)) {
+      finemap_gene_res$chrom <- NULL
+    }
+
+    # add gene annotations
+    loginfo("add gene_name and gene_type")
+    finemap_gene_res <- finemap_gene_res %>%
+      left_join(gene_annot, by = "gene_id", multiple = "all") %>%
+      mutate(start = as.numeric(start), end = as.numeric(end)) %>%
+      mutate(chrom = parse_number(as.character(chrom))) %>%
+      na.omit()
+
+    # split PIPs for molecular traits (e.g. introns) mapped to multiple genes
+    if (any(duplicated(finemap_gene_res$id))) {
+      loginfo("split PIPs for traits mapped to multiple genes")
+      finemap_gene_res <- finemap_gene_res %>%
+        group_by(id) %>%
+        mutate(susie_pip = ifelse(n() > 1, susie_pip / n(), susie_pip)) %>%
+        ungroup()
+    }
+  }
+
+  # limit to protein coding genes
+  if (filter_protein_coding_genes) {
+    finemap_gene_res <- finemap_gene_res[finemap_gene_res$gene_type=="protein_coding",]
+  }
+
+  # update gene position info
+  loginfo("use gene %s positions", use_gene_pos)
+  if (use_gene_pos == "mid"){
+    # use the midpoint as gene position
+    finemap_gene_res$pos <- round((finemap_gene_res$start+finemap_gene_res$end)/2)
+  } else if (use_gene_pos == "start") {
+    finemap_gene_res$pos <- finemap_gene_res$start
+  } else if (use_gene_pos == "end") {
+    finemap_gene_res$pos <- finemap_gene_res$end
+  }
 
   # add SNP positions
-  finemap_SNP_res <- finemap_res[finemap_res$type=="SNP",]
-  snp_idx <- match(finemap_SNP_res$id, snp_info$id)
-  finemap_SNP_res$chrom <- snp_info$chrom[snp_idx]
-  finemap_SNP_res$pos <- snp_info$pos[snp_idx]
+  loginfo("add SNP positions from snp_info")
+  finemap_snp_res <- finemap_res[finemap_res$type=="SNP",]
+  snp_idx <- match(finemap_snp_res$id, snp_info$id)
+  finemap_snp_res$chrom <- snp_info$chrom[snp_idx]
+  finemap_snp_res$chrom <- parse_number(as.character(finemap_snp_res$chrom))
+  finemap_snp_res$pos <- snp_info$pos[snp_idx]
+  finemap_snp_res$gene_id <- NA
+  finemap_snp_res$gene_name <- NA
+  finemap_snp_res$gene_type <- "SNP"
 
-  finemap_res <- rbind(finemap_gene_res, finemap_SNP_res)
+  new_colnames <- unique(c("chrom", "pos", "gene_id", "gene_name", "gene_type", colnames(finemap_res)))
+  finemap_res <- rbind(finemap_gene_res[,new_colnames],
+                       finemap_snp_res[,new_colnames])
 
   return(finemap_res)
 }
 
-#' @title Combines PIPs across contexts (tissues)
+
+#' @title Get gene annotation table from Ensembl database
+#' @param ens_db Ensembl gene annotation database
+#' @param gene_ids Ensembl gene IDs
 #'
-#' @param finemap_res a data frame of cTWAS finemapping result
-#'
-#' @param contexts a character vector of contexts to sum
-#'
-#' @return a data frame of combined gene PIPs and PIPs for each context
-#'
-#' @importFrom stats aggregate
+#' @importFrom ensembldb genes
+#' @importFrom AnnotationFilter GeneIdFilter
 #'
 #' @export
-sum_pip_across_contexts <- function(finemap_res, contexts){
+get_gene_annot_from_ens_db <- function(ens_db, gene_ids) {
+  gene_ids <- unique(na.omit(gene_ids))
+  if (any(grep("[.]", gene_ids))) {
+    gene_ids_trimmed <- sapply(strsplit(gene_ids, split = "[.]"), "[[", 1)
+  }
+  gene_annot_gr <- genes(ens_db, filter = GeneIdFilter(gene_ids_trimmed))
+  annot_idx <- match(gene_ids_trimmed, gene_annot_gr$gene_id)
+  if (anyNA(annot_idx)) {
+    warning(sprintf("remove %d gene_ids not found in ens_db.",
+                    length(which(is.na(annot_idx)))))
+    gene_ids <- gene_ids[!is.na(annot_idx)]
+    gene_ids_trimmed <- gene_ids_trimmed[!is.na(annot_idx)]
+    annot_idx <- annot_idx[!is.na(annot_idx)]
+  }
+  gene_annot <- as.data.frame(gene_annot_gr[annot_idx,])
+  gene_annot$gene_id <- gene_ids
+  colnames(gene_annot)[colnames(gene_annot) == 'seqnames'] <- 'chrom'
+  colnames(gene_annot)[colnames(gene_annot) == 'gene_biotype'] <- 'gene_type'
+  gene_annot$start <- as.numeric(gene_annot$start)
+  gene_annot$end <- as.numeric(gene_annot$end)
+  gene_annot <- gene_annot[, c("chrom", "start", "end", "gene_id", "gene_name", "gene_type")]
+  return(gene_annot)
+}
+
+
+#' @title Sums gene PIPs by context, type or group
+#'
+#' @param finemap_res a data frame of annotated cTWAS finemapping result
+#'
+#' @param by sum gene PIPs by "context", "type", or "group".
+#'
+#' @param replace_NA values to replace NAs with.
+#'
+#' @param digits digits to round combined PIPs
+#'
+#' @return a data frame of combined gene PIPs for each context, type or group
+#'
+#' @importFrom magrittr %>%
+#' @importFrom stats aggregate
+#' @importFrom dplyr left_join
+#'
+#' @export
+combine_gene_pips <- function(finemap_res,
+                              by = c("context", "type", "group"),
+                              filter_cs = FALSE,
+                              filter_protein_coding_genes = FALSE,
+                              replace_NA = NA,
+                              digits = 3){
+
+  by <- match.arg(by)
+
+  # Check to see if gene_name and gene_type are already in finemap_res
+  annot_cols <- c("gene_name", "gene_type")
+  if (!all(annot_cols %in% colnames(finemap_res))){
+    stop("finemap_res needs to contain the following columns: ",
+         paste(annot_cols, collapse = " "),
+         "\nHave you run anno_finemap_res() to annotate finemap_res?")
+  }
 
   finemap_gene_res <- finemap_res[finemap_res$type!="SNP",]
 
-  # combine PIPs across contexts (tissues)
-  gene_pip_df <- aggregate(finemap_gene_res$susie_pip, by=list(finemap_gene_res$gene_id), FUN=sum)
-  colnames(gene_pip_df) <- c("gene_id", "combined_pip")
-
-  if (!is.null(finemap_gene_res$gene_name)){
-    idx <- match(gene_pip_df$gene_id, finemap_gene_res$gene_id)
-    gene_pip_df$gene_name <- finemap_gene_res$gene_name[idx]
-    gene_pip_df <- gene_pip_df[, c("gene_id", "gene_name", "combined_pip")]
+  # filter credible sets
+  if (filter_cs) {
+    finemap_gene_res <- finemap_gene_res[finemap_gene_res$cs_index!=0,]
   }
 
-  # PIPs for each context
-  if (missing(contexts)){
+  # limit to protein coding genes
+  if (filter_protein_coding_genes) {
+    finemap_gene_res <- finemap_gene_res[finemap_gene_res$gene_type=="protein_coding",]
+  }
+
+  # sum PIPs
+  combined_gene_pips <- aggregate(finemap_gene_res$susie_pip,
+                                  by=list(finemap_gene_res$gene_name),
+                                  FUN=sum)
+  colnames(combined_gene_pips) <- c("gene_name", "combined_pip")
+
+  if (by == "context"){
+    # sum PIPs for each context
     contexts <- unique(finemap_gene_res$context)
+    for (context in contexts){
+      tmp_res <- finemap_gene_res[finemap_gene_res$context==context, c("gene_name", "susie_pip")]
+      tmp_res <- aggregate(tmp_res$susie_pip, by=list(tmp_res$gene_name), FUN=sum)
+      colnames(tmp_res) <- c("gene_name", paste0(context, "_pip"))
+      combined_gene_pips <- combined_gene_pips %>% left_join(tmp_res, by = "gene_name")
+    }
+  } else if (by == "type") {
+    # sum PIPs for each type
+    types <- unique(finemap_gene_res$type)
+    for (type in types){
+      tmp_res <- finemap_gene_res[finemap_gene_res$type==type, c("gene_name", "susie_pip")]
+      tmp_res <- aggregate(tmp_res$susie_pip, by=list(tmp_res$gene_name), FUN=sum)
+      colnames(tmp_res) <- c("gene_name", paste0(type, "_pip"))
+      combined_gene_pips <- combined_gene_pips %>% left_join(tmp_res, by = "gene_name")
+    }
+  } else if (by == "group") {
+    # sum PIPs for each group
+    groups <- unique(finemap_gene_res$group)
+    for (group in groups){
+      tmp_res <- finemap_gene_res[finemap_gene_res$group==group, c("gene_name", "susie_pip")]
+      tmp_res <- aggregate(tmp_res$susie_pip, by=list(tmp_res$gene_name), FUN=sum)
+      colnames(tmp_res) <- c("gene_name", paste0(group, "_pip"))
+      combined_gene_pips <- combined_gene_pips %>% left_join(tmp_res, by = "gene_name")
+    }
   }
 
-  gene_pips_df <- matrix(NA, nrow=nrow(gene_pip_df), ncol=length(contexts))
-  colnames(gene_pips_df) <- paste0(contexts, "_pip")
-  for (i in 1:nrow(gene_pips_df)){
-    gene_id <- gene_pip_df$gene_id[i]
-    finemap_gene_res_subset <- finemap_gene_res[which(finemap_gene_res$gene_id==gene_id),]
-    gene_contexts <- finemap_gene_res_subset$context
-    gene_pips_df[i, paste0(gene_contexts, "_pip")] <- finemap_gene_res_subset$susie_pip
+  if (!is.na(replace_NA)) {
+    combined_gene_pips[is.na(combined_gene_pips)] <- replace_NA
   }
-  gene_pips_df <- cbind(gene_pip_df, gene_pips_df)
 
-  # sort by combined PIP
-  gene_pips_df <- gene_pips_df[order(-gene_pips_df$combined_pip),]
+  # order by combined PIP
+  combined_gene_pips <- combined_gene_pips[order(-combined_gene_pips$combined_pip),]
 
-  return(gene_pips_df)
+  # round gene PIPs
+  combined_gene_pips[,-1] <- round(combined_gene_pips[, -1], digits)
+
+  return(combined_gene_pips)
 }
+

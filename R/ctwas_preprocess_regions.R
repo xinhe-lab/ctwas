@@ -26,9 +26,7 @@ preprocess_region_LD_snp_info <- function(region_info = NULL,
     stop("region_info needs to contain the following columns: ",
          paste(target_header, collapse = " "))
   }
-  if (is.character(region_info$chrom)) {
-    region_info$chrom <- readr::parse_number(region_info$chrom)
-  }
+  region_info$chrom <- readr::parse_number(as.character(region_info$chrom))
   region_info$start <- as.numeric(region_info$start)
   region_info$stop <- as.numeric(region_info$stop)
 

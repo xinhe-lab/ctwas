@@ -230,7 +230,7 @@ region_info <- res$region_info
 snp_info <- res$snp_info
 LD_info <- res$LD_info
 
-# saveRDS(region_info, file.path(outputdir, paste0(outname, "region_info.RDS")))
+# saveRDS(region_info, file.path(outputdir, paste0(outname, ".region_info.RDS")))
 # saveRDS(snp_info, file.path(outputdir, paste0(outname, ".snp_info.RDS")))
 # saveRDS(LD_info, file.path(outputdir, paste0(outname, ".LD_info.RDS")))
 ```

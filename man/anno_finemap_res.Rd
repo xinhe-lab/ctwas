@@ -2,13 +2,15 @@
 % Please edit documentation in R/ctwas_summarize_finemap_res.R
 \name{anno_finemap_res}
 \alias{anno_finemap_res}
-\title{Annotates cTWAS finemapping result with ensembl gene annotation database}
+\title{Annotates cTWAS finemapping result with gene annotations}
 \usage{
 anno_finemap_res(
   finemap_res,
   snp_info,
-  ens_db,
-  use_gene_pos = c("mid", "start", "end")
+  gene_annot = NULL,
+  use_gene_pos = c("mid", "start", "end"),
+  filter_cs = FALSE,
+  filter_protein_coding_genes = FALSE
 )
 }
 \arguments{
@@ -17,15 +19,20 @@ anno_finemap_res(
 \item{snp_info}{a list or data frame of SNP info for LD reference,
 with columns "chrom", "id", "pos", "alt", "ref".}
 
-\item{ens_db}{ensembl gene annotation database}
+\item{gene_annot}{a data frame of gene annotations, with columns:
+"chrom", "start", "end", "gene_id", "gene_name", "gene_type.}
 
 \item{use_gene_pos}{use mid (midpoint), start or end positions to
-represent gene positions}
+represent gene positions.}
+
+\item{filter_cs}{TRUE/FALSE. If TRUE, limits results in credible sets.}
+
+\item{filter_protein_coding_genes}{TRUE/FALSE. If TRUE, keep protein coding genes only.}
 }
 \value{
 a data frame of cTWAS finemapping result including gene
-names and updated positions
+names, types and positions
 }
 \description{
-Annotates cTWAS finemapping result with ensembl gene annotation database
+Annotates cTWAS finemapping result with gene annotations
 }
