@@ -18,8 +18,6 @@
 #'
 #' @param group_prior_var a vector of two prior variances for SNPs and gene effects.
 #'
-#' @param group_names a vector of group names for group_prior and group_prior_var.
-#'
 #' @param use_null_weight TRUE/FALSE. If TRUE, allow for a probability of no effect in susie
 #'
 #' @param coverage A number between 0 and 1 specifying the \dQuote{coverage} of the estimated confidence sets
@@ -62,7 +60,6 @@ finemap_region <- function(region_data,
                            L = 5,
                            group_prior = NULL,
                            group_prior_var = NULL,
-                           group_names = NULL,
                            use_null_weight = TRUE,
                            coverage = 0.95,
                            min_abs_corr = 0.5,
@@ -99,14 +96,12 @@ finemap_region <- function(region_data,
   g_group <- regiondata[["g_group"]]
 
   # set pi_prior and V_prior based on group_prior and group_prior_var
-  if (is.null(group_names)){
-    if(!is.null(group_prior)){
-      group_names <- names(group_prior)
-    }else{
-      stop("'group_names' is required when group_prior is null")
-    }
+  if(!is.null(group_prior)){
+    groups <- names(group_prior)
+  }else{
+    groups <- unique(unlist(lapply(region_data, "[[", "gs_group")))
   }
-  res <- initiate_group_priors(group_prior, group_prior_var, group_names)
+  res <- initiate_group_priors(group_prior, group_prior_var, groups)
   pi_prior <- res$pi_prior
   V_prior <- res$V_prior
   rm(res)
@@ -240,8 +235,6 @@ finemap_region <- function(region_data,
 #'
 #' @param group_prior_var a vector of two prior variances for SNPs and gene effects.
 #'
-#' @param group_names a vector of group names for group_prior and group_prior_var.
-#'
 #' @param use_null_weight TRUE/FALSE. If TRUE, allow for a probability of no effect in susie
 #'
 #' @param coverage A number between 0 and 1 specifying the \dQuote{coverage} of the estimated confidence sets
@@ -287,7 +280,6 @@ finemap_regions <- function(region_data,
                             L = 5,
                             group_prior = NULL,
                             group_prior_var = NULL,
-                            group_names = NULL,
                             use_null_weight = TRUE,
                             coverage = 0.95,
                             min_abs_corr = 0.5,
@@ -321,14 +313,6 @@ finemap_regions <- function(region_data,
     }
   }
 
-  if (is.null(group_names)){
-    if(!is.null(group_prior)){
-      group_names <- names(group_prior)
-    }else{
-      group_names <- unique(unlist(lapply(region_data, "[[", "gs_group")))
-    }
-  }
-
   region_ids <- names(region_data)
 
   finemap_region_res_list <- mclapply(region_ids, function(region_id){
@@ -348,7 +332,6 @@ finemap_regions <- function(region_data,
                    L = region_L,
                    group_prior = group_prior,
                    group_prior_var = group_prior_var,
-                   group_names = group_names,
                    use_null_weight = use_null_weight,
                    coverage = coverage,
                    min_abs_corr = min_abs_corr,

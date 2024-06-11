@@ -14,8 +14,6 @@
 #'
 #' @param group_prior_var a vector of two prior variances for SNPs and gene effects.
 #'
-#' @param group_names a vector of group names for group_prior and group_prior_var.
-#'
 #' @param L the number of effects for susie
 #'
 #' @param minvar minimum number of variables (snps and genes) in a region
@@ -52,7 +50,6 @@ screen_regions <- function(
     weights = NULL,
     group_prior = NULL,
     group_prior_var = NULL,
-    group_names = NULL,
     L = 5,
     minvar = 2,
     mingene = 1,
@@ -70,14 +67,6 @@ screen_regions <- function(
   loginfo("Screening regions ...")
 
   screen_method <- match.arg(screen_method)
-
-  if (is.null(group_names)){
-    if(!is.null(group_prior)){
-      group_names <- names(group_prior)
-    }else{
-      stop("'group_names' is required when group_prior is null")
-    }
-  }
 
   # extract thin value from region_data
   thin <- unique(sapply(region_data, "[[", "thin"))
@@ -164,7 +153,6 @@ screen_regions <- function(
                                              snp_info = snp_info,
                                              weights = weights,
                                              L = L,
-                                             group_names = group_names,
                                              include_cs_index = TRUE,
                                              ncore = ncore,
                                              verbose = verbose,

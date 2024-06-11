@@ -12,7 +12,6 @@ screen_regions(
   weights = NULL,
   group_prior = NULL,
   group_prior_var = NULL,
-  group_names = NULL,
   L = 5,
   minvar = 2,
   mingene = 1,
@@ -38,8 +37,6 @@ screen_regions(
 \item{group_prior}{a vector of two prior inclusion probabilities for SNPs and genes.}
 
 \item{group_prior_var}{a vector of two prior variances for SNPs and gene effects.}
-
-\item{group_names}{a vector of group names for group_prior and group_prior_var.}
 
 \item{L}{the number of effects for susie}
 
