@@ -9,27 +9,21 @@ make_locusplot(
   region_id,
   weights,
   ens_db,
-  use_LD = TRUE,
-  LD_info = NULL,
-  snp_info = NULL,
-  save_cor = FALSE,
-  cor_dir = NULL,
-  LD_format = c("rds", "rdata", "csv", "txt", "custom"),
-  LD_loader = NULL,
-  region_data = NULL,
+  R_snp_gene = NULL,
+  R_gene = NULL,
   locus_range = NULL,
   focus_gene = NULL,
-  gene_biotype = "protein_coding",
-  p_thresh = NULL,
-  pip_thresh = NULL,
+  filter_gene_biotype = "protein_coding",
+  highlight_pval = NULL,
+  highlight_pip = 0.8,
+  highlight_pos = NULL,
   point.sizes = c(1, 3.5),
   point.alpha = c(0.4, 0.6),
   point.shapes = c(21:25),
   genelabel.size = 2.5,
   legend.text.size = 10,
-  legend.position = "none",
-  panel.heights = c(4, 4, 0.3, 4),
-  highlight_pos = NULL
+  legend.position = c("none", "top", "left", "right", "bottom"),
+  panel.heights = c(4, 4, 0.3, 4)
 )
 }
 \arguments{
@@ -41,31 +35,26 @@ make_locusplot(
 
 \item{ens_db}{Ensembl database}
 
-\item{use_LD}{TRUE/FALSE. If TRUE, use LD for finemapping. Otherwise, use "no-LD" version.}
+\item{R_snp_gene}{SNP-gene correlation matrix of the region.
+If both R_snp_gene and R_gene are available,
+color data points with correlations with the focus gene.}
 
-\item{LD_info}{a list of paths to LD matrices for each of the regions. Required when \code{use_LD = TRUE}.}
+\item{R_gene}{gene-gene correlation matrix of the region}
 
-\item{snp_info}{a list of SNP info data frames for LD reference. Required when \code{use_LD = TRUE}.}
-
-\item{save_cor}{TRUE/FALSE. If TRUE, save correlation (R) matrices to \code{cor_dir}}
-
-\item{cor_dir}{path of correlation matrices}
-
-\item{LD_format}{file format for LD matrix. If "custom", use a user defined
-\code{LD_loader()} function to load LD matrix.}
-
-\item{LD_loader}{a user defined function to load LD matrix when \code{LD_format = "custom"}.}
-
-\item{region_data}{a list of region_data used for finemapping}
-
-\item{locus_range}{a vector of start and end positions to define the locus region to be plotted
-
+\item{locus_range}{a vector of start and end positions to define the region boundary to be plotted.
 If NULL, the entire region will be plotted (with 100 bp flanks on both sides).}
 
-\item{focus_gene}{the gene name to focus the plot. If NULL, choose the gene with the highest PIP}
+\item{focus_gene}{the gene name to focus the plot.
+If NULL, choose the gene with the highest PIP.}
 
-\item{gene_biotype}{specified biotypes to be displayed in gene tracks or NULL to display all possible ones.
-By default, only show protein coding genes.}
+\item{filter_gene_biotype}{biotype to be displayed in gene tracks.
+By default, limits to protein coding genes. If NULL, display all possible ones.}
+
+\item{highlight_pval}{pvalue to highlight with a horizontal line}
+
+\item{highlight_pip}{PIP to highlight with a horizontal line}
+
+\item{highlight_pos}{genomic positions to highlight with vertical lines}
 
 \item{point.sizes}{size values for SNP and non-SNP data points in the scatter plots}
 
@@ -80,8 +69,6 @@ By default, only show protein coding genes.}
 \item{legend.position}{position to put legends. If "none", no legends will be shown.}
 
 \item{panel.heights}{Relative heights of the panels.}
-
-\item{highlight_pos}{If not NULL, highlighst the position in all panels for the genomic position.}
 }
 \description{
 Plots the cTWAS result for a single locus

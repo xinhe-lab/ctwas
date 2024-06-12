@@ -137,47 +137,54 @@ When we have multiple contexts (e.g. tissues) or types (e.g. expression, splicin
 it is useful to evaluate the combined PIP for each gene by contexts, types, or groups.
 We could further limit results in credible sets and/or protein coding genes.
 ```{r combine_pips}
-# combine gene PIPs by contexts
+# combine gene PIPs by context
 combined_pip_by_context <- combine_gene_pips(finemap_res, 
                                              by = "context",
                                              filter_cs = TRUE,
                                              filter_protein_coding_genes = TRUE)
+print(combined_pip_by_context)
 
-# combine gene PIPs by types
+# combine gene PIPs by type
 combined_pip_by_type <- combine_gene_pips(finemap_res, 
                                           by = "type",
                                           filter_cs = TRUE,
                                           filter_protein_coding_genes = TRUE)
 
-# combine gene PIPs by groups
-combined_pip_by_groups <- combine_gene_pips(finemap_res, 
+# combine gene PIPs by group
+combined_pip_by_group <- combine_gene_pips(finemap_res, 
                                             by = "group",
                                             filter_cs = TRUE,
                                             filter_protein_coding_genes = TRUE)
 
 # select combined PIP > 0.8
-sig_gene_pips_df <- combined_pip_by_groups[combined_pip_by_groups$combined_pip > 0.8, ]
+sig_gene_pips_df <- combined_pip_by_context[combined_pip_by_context$combined_pip > 0.8, ]
 print(sig_gene_pips_df)
 ```
 
 
 ## Visualizing cTWAS results
 
-We could make locus plots for regions of interest. We could zoom in the region by specifying the `locus_range`.
+We could make locus plots for regions of interest. 
+We could zoom in the region by specifying the `locus_range`.
+
+If we want to show the correlations with the focus gene,
+we need correlation matrices of the region. 
+Because we have computed and saved correlation matrices during fine-mapping step,
+we could simply load those precomputed correlation matrices.
+```{r get_region_cor_res}
+cor_res <- get_region_cor(region_id = "16_71020125_72901251", cor_dir = cor_dir)
+```
 
 ```{r locus_plot, fig.width=10, fig.height=8}
 make_locusplot(finemap_res,
                region_id = "16_71020125_72901251",
                weights = weights,
                ens_db = ens_db, 
-               use_LD = TRUE,
-               cor_dir = cor_dir,
-               pip_thresh = 0.8,
+               R_snp_gene = cor_res$R_snp_gene,
+               R_gene = cor_res$R_gene,
                locus_range = c(71.6e6,72.4e6),
-               gene_biotype="protein_coding",
+               filter_gene_biotype = "protein_coding",
+               highlight_pip = 0.8,
                legend.position = "right")
 ```
-
-
-If we do not have precomputed correlation matrices, we could compute those by specifying `region_data`, `LD_info` and `snp_info`. Or we could skip coloring correlations by setting `use_LD = FALSE`. 
 

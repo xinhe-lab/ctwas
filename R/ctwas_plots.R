@@ -9,31 +9,26 @@
 #'
 #' @param ens_db Ensembl database
 #'
-#' @param use_LD TRUE/FALSE. If TRUE, use LD for finemapping. Otherwise, use "no-LD" version.
+#' @param R_snp_gene SNP-gene correlation matrix of the region.
+#' If both R_snp_gene and R_gene are available,
+#' color data points with correlations with the focus gene.
 #'
-#' @param LD_info a list of paths to LD matrices for each of the regions. Required when \code{use_LD = TRUE}.
+#' @param R_gene gene-gene correlation matrix of the region
 #'
-#' @param snp_info a list of SNP info data frames for LD reference. Required when \code{use_LD = TRUE}.
-#'
-#' @param save_cor TRUE/FALSE. If TRUE, save correlation (R) matrices to \code{cor_dir}
-#'
-#' @param cor_dir path of correlation matrices
-#'
-#' @param LD_format file format for LD matrix. If "custom", use a user defined
-#' \code{LD_loader()} function to load LD matrix.
-#'
-#' @param LD_loader a user defined function to load LD matrix when \code{LD_format = "custom"}.
-#'
-#' @param region_data a list of region_data used for finemapping
-#'
-#' @param locus_range a vector of start and end positions to define the locus region to be plotted
-#'
+#' @param locus_range a vector of start and end positions to define the region boundary to be plotted.
 #' If NULL, the entire region will be plotted (with 100 bp flanks on both sides).
 #'
-#' @param focus_gene the gene name to focus the plot. If NULL, choose the gene with the highest PIP
+#' @param focus_gene the gene name to focus the plot.
+#' If NULL, choose the gene with the highest PIP.
 #'
-#' @param gene_biotype specified biotypes to be displayed in gene tracks or NULL to display all possible ones.
-#' By default, only show protein coding genes.
+#' @param filter_gene_biotype biotype to be displayed in gene tracks.
+#' By default, limits to protein coding genes. If NULL, display all possible ones.
+#'
+#' @param highlight_pval pvalue to highlight with a horizontal line
+#'
+#' @param highlight_pip PIP to highlight with a horizontal line
+#'
+#' @param highlight_pos genomic positions to highlight with vertical lines
 #'
 #' @param point.sizes size values for SNP and non-SNP data points in the scatter plots
 #'
@@ -49,12 +44,9 @@
 #'
 #' @param panel.heights Relative heights of the panels.
 #'
-#' @param highlight_pos If not NULL, highlighst the position in all panels for the genomic position.
-#'
 #' @importFrom magrittr %>%
 #' @importFrom locuszoomr locus gg_genetracks
 #' @importFrom logging loginfo
-#' @importFrom Matrix bdiag
 #' @importFrom cowplot plot_grid
 #' @importFrom ggplot2 ggplot
 #' @importFrom ggplot2 aes
@@ -84,38 +76,34 @@ make_locusplot <- function(finemap_res,
                            region_id,
                            weights,
                            ens_db,
-                           use_LD = TRUE,
-                           LD_info = NULL,
-                           snp_info = NULL,
-                           save_cor = FALSE,
-                           cor_dir = NULL,
-                           LD_format = c("rds", "rdata", "csv", "txt", "custom"),
-                           LD_loader = NULL,
-                           region_data = NULL,
+                           R_snp_gene = NULL,
+                           R_gene = NULL,
                            locus_range = NULL,
                            focus_gene = NULL,
-                           gene_biotype = "protein_coding",
-                           p_thresh = NULL,
-                           pip_thresh = NULL,
+                           filter_gene_biotype = "protein_coding",
+                           highlight_pval = NULL,
+                           highlight_pip = 0.8,
+                           highlight_pos = NULL,
                            point.sizes = c(1, 3.5),
                            point.alpha = c(0.4, 0.6),
                            point.shapes = c(21:25),
                            genelabel.size = 2.5,
                            legend.text.size = 10,
-                           legend.position = "none",
-                           panel.heights = c(4, 4, 0.3, 4),
-                           highlight_pos = NULL) {
+                           legend.position = c("none", "top", "left", "right", "bottom"),
+                           panel.heights = c(4, 4, 0.3, 4)) {
 
   if (!inherits(weights,"list")){
     stop("'weights' should be a list.")
   }
 
-  LD_format <- match.arg(LD_format)
+  legend.position <- match.arg(legend.position)
 
   # select finemapping result for the target region
   finemap_region_res <- finemap_res[which(finemap_res$region_id==region_id), ]
-  finemap_region_res$p <- (-log(2) - pnorm(abs(finemap_region_res$z), lower.tail=F, log.p=T))/log(10) # add pvalue
-  finemap_region_res$object_type <- finemap_region_res$type # adding object_type for size and alpha. SNP and non-SNP
+  # convert z to -log10(pval)
+  finemap_region_res$p <- (-log(2) - pnorm(abs(finemap_region_res$z), lower.tail=F, log.p=T))/log(10)
+  # add object_type to plot SNP and non-SNP categories with different sizes and alphas
+  finemap_region_res$object_type <- finemap_region_res$type
   finemap_region_res$object_type[finemap_region_res$object_type!="SNP"] <- "non-SNP"
 
   if (!is.null(focus_gene)) {
@@ -129,7 +117,7 @@ make_locusplot <- function(finemap_res,
       focus_gid <- finemap_region_res$id[focus_gidx]
     }
   } else{
-    # if focus_gid not specified, select the top gene
+    # if focus_gene is not specified, choose the top gene with highest PIP
     finemap_region_gene_res <- finemap_region_res[finemap_region_res$type != "SNP",]
     focus_gidx <- which.max(finemap_region_gene_res$susie_pip)
     focus_gene <- finemap_region_gene_res$gene_name[focus_gidx]
@@ -150,86 +138,8 @@ make_locusplot <- function(finemap_res,
   }
   loginfo("locus_range: %s", locus_range)
 
-  if (use_LD) {
-    # add r2 with the focus gene
-    # load precomputed correlation matrices if available
-    if (!is.null(cor_dir)) {
-      if (!dir.exists(cor_dir))
-        dir.create(cor_dir, recursive = TRUE)
-      R_sg_file <- file.path(cor_dir, paste0("region.", region_id, ".R_snp_gene.RDS"))
-      R_g_file <- file.path(cor_dir, paste0("region.", region_id, ".R_gene.RDS"))
-      R_s_file <- file.path(cor_dir, paste0("region.", region_id, ".R_snp.RDS"))
-    }
-
-    cor_files_exist <- isTRUE(!is.null(cor_dir) && file.exists(R_sg_file) && file.exists(R_g_file) && file.exists(R_s_file))
-
-    if (cor_files_exist) {
-      # load precomputed correlation matrices
-      loginfo("Load correlation matrices for region %s", region_id)
-      R_snp_gene <- load_LD(R_sg_file)
-      R_gene <- load_LD(R_g_file)
-      R_snp <- load_LD(R_s_file)
-
-      if (!is.null(region_data)) {
-        gids <- region_data[[region_id]]$gid
-        sids <- region_data[[region_id]]$sid
-        if (region_data[[region_id]]$thin != 1){
-          stop("thin != 1 in the region_data, please expand the region with full SNPs")
-        }
-        rownames(R_snp) <- sids
-        colnames(R_snp) <- sids
-        rownames(R_snp_gene) <- sids
-        colnames(R_snp_gene) <- gids
-        rownames(R_gene) <- gids
-        colnames(R_gene) <- gids
-      }
-    } else {
-      # compute correlations
-      loginfo("Compute correlation matrices for region %s", region_id)
-
-      if (is.null(region_data)) {
-        stop("region_data is needed for computing correlation matrices")
-      }
-      if (region_data[[region_id]]$thin != 1){
-        stop("thin != 1 in the region_data, please expand the region with full SNPs")
-      }
-      # load LD matrix of the region
-      if (is.null(LD_info) || is.null(snp_info)) {
-        stop("LD_info and snp_info are required for computing correlation matrices")
-      }
-      LD_matrix_files <- LD_info[[region_id]]$LD_matrix
-      stopifnot(all(file.exists(LD_matrix_files)))
-      if (length(LD_matrix_files) > 1) {
-        R_snp <- lapply(LD_matrix_files, load_LD, format = LD_format, LD_loader = LD_loader)
-        R_snp <- suppressWarnings(as.matrix(bdiag(R_snp)))
-      } else {
-        R_snp <- load_LD(LD_matrix_files, format = LD_format, LD_loader = LD_loader)
-      }
-      # load SNP info of the region
-      snpinfo <- snp_info[[region_id]]
-
-      # compute correlation matrices
-      sids <- region_data[[region_id]]$sid
-      gids <- region_data[[region_id]]$gid
-      res <- compute_region_cor(sids, gids, R_snp, snpinfo$id, weights)
-      R_snp <- res$R_snp
-      R_snp_gene <- res$R_snp_gene
-      R_gene <- res$R_gene
-      rownames(R_snp) <- sids
-      colnames(R_snp) <- sids
-      rownames(R_snp_gene) <- sids
-      colnames(R_snp_gene) <- gids
-      rownames(R_gene) <- gids
-      colnames(R_gene) <- gids
-      rm(res)
-      # save correlation matrices
-      if (isTRUE(save_cor && !is.null(cor_dir))) {
-        saveRDS(R_snp_gene, file=R_sg_file)
-        saveRDS(R_gene, file=R_g_file)
-        saveRDS(R_snp, file=R_s_file)
-      }
-    }
-
+  if (!is.null(R_gene) && !is.null(R_snp_gene)) {
+    plot_r2 <- TRUE
     finemap_region_res$r2 <- NA
     finemap_region_res$r2[finemap_region_res$type!="SNP"] <- R_gene[finemap_region_res$id[finemap_region_res$type!="SNP"], focus_gid]^2
     finemap_region_res$r2[finemap_region_res$type=="SNP"] <- R_snp_gene[finemap_region_res$id[finemap_region_res$type=="SNP"], focus_gid]^2
@@ -243,6 +153,7 @@ make_locusplot <- function(finemap_res,
                                         labels = names(r2_colors))
     finemap_region_res$r2_levels <- factor(finemap_region_res$r2_levels, levels = rev(names(r2_colors)))
   } else{
+    plot_r2 <- FALSE
     # finemap_region_res$r2 <- NA
     # finemap_region_res$r2_levels <- NA
     # r2_colors <- "black"
@@ -299,7 +210,7 @@ make_locusplot <- function(finemap_res,
           axis.line = element_line(colour = "black"),
           plot.margin = margin(b=0, l=10, t=10, r=10))
 
-  if (use_LD) {
+  if (plot_r2) {
     p_pvalue <- p_pvalue +
       scale_color_manual(values = r2_colors) +
       scale_fill_manual(values = r2_colors, guide="none")
@@ -309,8 +220,9 @@ make_locusplot <- function(finemap_res,
       scale_fill_manual(values = r2_colors, guide="none")
   }
 
-  if (!is.null(p_thresh)) {
-    p_pvalue <- p_pvalue + geom_hline(yintercept=-log10(p_thresh), linetype="dashed", color = "red")
+  if (!is.null(highlight_pval)) {
+    p_pvalue <- p_pvalue +
+      geom_hline(yintercept=-log10(highlight_pval), linetype="dashed", color = "red")
   }
 
   # PIP panel
@@ -331,8 +243,9 @@ make_locusplot <- function(finemap_res,
           axis.line = element_line(colour = "black"),
           plot.margin = margin(b=0, l=10, t=0, r=10))
 
-  if (!is.null(p_thresh)) {
-    p_pip <- p_pip + geom_hline(yintercept=pip_thresh, linetype="dashed", color = "red")
+  if (!is.null(highlight_pip)) {
+    p_pip <- p_pip +
+      geom_hline(yintercept=highlight_pip, linetype="dashed", color = "red")
   }
 
   # QTL panel
@@ -354,11 +267,12 @@ make_locusplot <- function(finemap_res,
       plot.margin = margin(b=0, l=10, t=0, r=10))
 
   # gene track panel
-  p_genes <- gg_genetracks(loc, xticks=FALSE, filter_gene_biotype = gene_biotype, text_pos="top")
+  p_genes <- gg_genetracks(loc, xticks=FALSE,
+                           filter_gene_biotype = filter_gene_biotype,
+                           text_pos="top")
 
   if (!is.null(highlight_pos)){
     loginfo("highlight positions: %s", highlight_pos)
-
     highlight_pos <- as.integer(highlight_pos)
 
     p_pvalue <- p_pvalue +
