@@ -96,9 +96,11 @@ load_weights <- function(weight_file,
     wgtdir <- dirname(weight_file)
     wgtposfile <- file.path(wgtdir, paste0(basename(weight_file), ".pos"))
     wgtpos <- read.table(wgtposfile, header = T, stringsAsFactors = F)
-    wgtpos <- transform(wgtpos,
-                        ID = ifelse(duplicated(ID) | duplicated(ID, fromLast = TRUE),
-                                    paste(ID, ave(ID, ID, FUN = seq_along), sep = "_ID"), ID))
+    wgtpos$ID <-
+      ifelse(duplicated(wgtpos$ID) | duplicated(wgtpos$ID,fromLast = TRUE),
+             paste(wgtpos$ID,ave(wgtpos$ID,wgtpos$ID,FUN = seq_along),
+                   sep = "_ID"),
+             ID))
     wgtpos <- wgtpos[wgtpos$ID!="NA_IDNA",] #filter NA genes
     loginfo("Loading FUSION weights ...")
     weight_table <- NULL
