@@ -100,7 +100,7 @@ load_weights <- function(weight_file,
       ifelse(duplicated(wgtpos$ID) | duplicated(wgtpos$ID,fromLast = TRUE),
              paste(wgtpos$ID,ave(wgtpos$ID,wgtpos$ID,FUN = seq_along),
                    sep = "_ID"),
-             ID)
+             wgtpos$ID)
     wgtpos <- wgtpos[wgtpos$ID!="NA_IDNA",] #filter NA genes
     loginfo("Loading FUSION weights ...")
     weight_table <- NULL

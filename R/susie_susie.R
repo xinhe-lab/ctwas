@@ -204,6 +204,7 @@
 #' @seealso \code{\link{susie_rss}}
 #'
 #' @examples
+#' 
 #' # susie example.
 #' set.seed(1)
 #' n = 1000
