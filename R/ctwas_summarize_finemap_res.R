@@ -19,6 +19,7 @@
 #' @return a data frame of cTWAS finemapping result including gene
 #' names, types and positions
 #'
+#' @importFrom stats na.omit
 #' @importFrom logging loginfo
 #' @importFrom data.table rbindlist
 #' @importFrom readr parse_number
@@ -134,6 +135,7 @@ anno_finemap_res <- function(finemap_res,
 #' @param ens_db Ensembl gene annotation database
 #' @param gene_ids Ensembl gene IDs
 #'
+#' @importFrom stats na.omit
 #' @importFrom ensembldb genes
 #' @importFrom AnnotationFilter GeneIdFilter
 #'

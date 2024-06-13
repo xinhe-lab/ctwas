@@ -39,6 +39,7 @@
 #'
 #' @return a list of processed weights
 #'
+#' @importFrom utils head
 #' @importFrom logging addHandler loginfo writeToFile
 #' @importFrom foreach %dopar% foreach
 #' @importFrom parallel mclapply makeCluster stopCluster

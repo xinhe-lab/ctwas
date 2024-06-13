@@ -24,11 +24,10 @@ jobs:
         run: |
           install.packages(c("doParallel","foreach","logging","mixsqp"))
           install.packages(c("magrittr","tibble","dplyr","ggplot2","cowplot"))
-          install.packages(c("ggrepel","readr","data.table","R.utils"))
+          install.packages(c("ggrepel","readr","data.table"))
           install.packages(c("RSQLite","locuszoomr","pgenlibr","Rfast"))
           install.packages(c("knitr","rmarkdown","testthat","BiocManager"))
           install.packages(c("crayon","rcmdcheck"))
-          BiocManager::install("GenomicRanges")
           BiocManager::install("ensembldb")
           BiocManager::install("AnnotationFilter")
         shell: Rscript {0}

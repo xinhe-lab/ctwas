@@ -1,6 +1,8 @@
 ^.*\.Rproj$
 ^\.Rproj\.user$
 ^_pkgdown\.yml$
+^\.circleci$
+^\.github$
 ^workflow\.png$
 ^docs$
 ^README\.md$
