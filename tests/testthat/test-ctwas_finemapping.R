@@ -14,13 +14,15 @@ test_that("finemap_regions works with no-LD", {
   precomputed_finemap_res <- precomputed_finemap_res[precomputed_finemap_res$region_id == region_id,]
   rownames(precomputed_finemap_res) <- NULL
 
-  finemap_res <- suppressWarnings({
-    finemap_regions(region_data = screened_region_data[region_id],
-                    use_LD = FALSE,
-                    L = 1,
-                    weights = weights,
-                    group_prior = group_prior,
-                    group_prior_var = group_prior_var)
+  capture.output({
+    finemap_res <- suppressWarnings({
+      finemap_regions(region_data = screened_region_data[region_id],
+                      use_LD = FALSE,
+                      L = 1,
+                      weights = weights,
+                      group_prior = group_prior,
+                      group_prior_var = group_prior_var)
+    })
   })
   expect_equal(finemap_res, precomputed_finemap_res)
 })
