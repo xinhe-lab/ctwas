@@ -91,8 +91,7 @@ ref_snp_info <- data.table::fread(ref_snp_info_file, sep = "\t")
 res <- preprocess_region_LD_snp_info(region_info, 
                                      ref_snp_info = ref_snp_info, 
                                      chrom = example_chrom, 
-                                     use_LD = FALSE, 
-                                     ncore = 6)
+                                     use_LD = FALSE)
 region_info <- res$region_info
 snp_info <- res$snp_info
 
@@ -255,19 +254,33 @@ ctwas_parameters$convergence_plot
 
 ## Interpreting cTWAS results
 
-We need gene annotations from the Ensembl database. We use `EnsDb.Hsapiens.v86` for the example data, please choose the Ensembl database for your specific data. 
-```{r load_ens_db, message=FALSE}
+To interpret and visualize the results, we first need to add gene annotations 
+(gene names and gene types) to the finemapping result.
+
+We need a user defined data frame `gene_annot` that should contain the following columns:
+'chrom', 'start', 'end', 'gene_id', 'gene_name' and 'gene_type' for each gene or molecular trait.
+
+If you only used gene expression data, you can use the following function 
+to obtain the gene annotations from the Ensembl database.
+We use `EnsDb.Hsapiens.v86` for the example data, please choose the Ensembl database for your specific data. 
+
+```{r get_gene_annot, message=FALSE}
 library(EnsDb.Hsapiens.v86)
+ens_db <- EnsDb.Hsapiens.v86
+finemap_gene_res <- finemap_res[finemap_res$type!="SNP",]
+gene_ids <- unique(sapply(strsplit(finemap_gene_res$id, split = "[|]"), "[[", 1))
+gene_annot <- get_gene_annot_from_ens_db(ens_db, gene_ids)
 ```
 
 
-To interpret the results, we add gene names (from Ensembl database) to the finemapping result, and use mid-points to represent gene positions.
-```{r add_gene_names}
-# load gene info database
-ens_db <- EnsDb.Hsapiens.v86
-
-# add gene names and use gene mid-points to represent gene positions
-finemap_res <- anno_finemap_res(finemap_res, snp_info, ens_db, use_gene_pos = "mid")
+We then use `anno_finemap_res()` function to add gene annotations to the finemapping result,
+and use gene mid-points to represent gene positions.
+```{r anno_finemap_res}
+# add gene annotations and use gene mid-points to represent gene positions
+finemap_res <- anno_finemap_res(finemap_res, 
+                                snp_info,
+                                gene_annot,
+                                use_gene_pos = "mid")
 ```
 
 
@@ -280,35 +293,35 @@ head(sig_finemap_res[order(-sig_finemap_res$susie_pip),])
 ```
 
 
-
 When we have multiple contexts (tissues), 
 it is useful to evaluate the combined PIP for each molecular trait across contexts:
 
 ```{r combine_pips}
-# combine PIPs across contexts (tissues)
-combined_gene_pips <- sum_pip_across_contexts(finemap_res)
+# combine gene PIPs by context
+combined_pip_by_context <- combine_gene_pips(finemap_res, 
+                                             by = "context",
+                                             filter_protein_coding_genes = TRUE)
+head(combined_pip_by_context)
 
 # select combined PIP > 0.8
-sig_gene_pips_df <- combined_gene_pips[combined_gene_pips$combined_pip > 0.8, ]
-
-# list genes with combined PIP > 0.8 or top 20 genes with highest combined PIPs
-head(combined_gene_pips, max(nrow(sig_gene_pips_df), 20))
+sig_gene_pips_df <- combined_pip_by_context[combined_pip_by_context$combined_pip > 0.8, ]
+head(sig_gene_pips_df)
 ```
-
 
 
 ## Visualizing cTWAS results
 
-We could make locus plots for regions of interest,
-and zoom in the region by specifying the `locus_range`.
+We could make locus plots for regions of interest. 
+We could zoom in the region by specifying the `locus_range`.
+
 ```{r locus_plot, fig.width=10, fig.height=8}
 make_locusplot(finemap_res,
                region_id = "16_71020125_72901251",
                weights = weights,
                ens_db = ens_db,
-               use_LD = FALSE,
-               pip_thresh = 0.8,
-               locus_range = c(71.6e6,72.4e6))
+               locus_range = c(71.6e6,72.4e6),
+               highlight_pip = 0.8,
+               legend.position = "top")
 ```
 
 

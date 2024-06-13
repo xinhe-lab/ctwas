@@ -147,25 +147,22 @@ We could further limit results in credible sets and/or protein coding genes.
 # combine gene PIPs by context
 combined_pip_by_context <- combine_gene_pips(finemap_res, 
                                              by = "context",
-                                             filter_cs = TRUE,
                                              filter_protein_coding_genes = TRUE)
-print(combined_pip_by_context)
+head(combined_pip_by_context)
 
 # combine gene PIPs by type
 combined_pip_by_type <- combine_gene_pips(finemap_res, 
                                           by = "type",
-                                          filter_cs = TRUE,
                                           filter_protein_coding_genes = TRUE)
 
 # combine gene PIPs by group
 combined_pip_by_group <- combine_gene_pips(finemap_res, 
                                             by = "group",
-                                            filter_cs = TRUE,
                                             filter_protein_coding_genes = TRUE)
 
 # select combined PIP > 0.8
 sig_gene_pips_df <- combined_pip_by_context[combined_pip_by_context$combined_pip > 0.8, ]
-print(sig_gene_pips_df)
+head(sig_gene_pips_df)
 ```
 
 
