@@ -4,7 +4,7 @@ Type: Package
 Title: Adjusting for Genetic Confounders in Transcriptome-Wide Association
   Studies Improves Discovery of Risk Genes of Complex Traits
 Date: 2024-06-06
-Version: 0.2.30
+Version: 0.2.31
 Authors@R: c(person("Siming","Zhao",role="aut",email="siming.zhao06@gmail.com"),
              person("Wesley","Crouse",role="aut"),
              person("Sheng","Qian",role="aut",email="shengqian@uchicago.edu"),
@@ -51,7 +51,8 @@ Imports:
 Suggests: 
     Rfast,
     knitr,
-    rmarkdown
+    rmarkdown,
+    testthat (>= 3.0.0)
 biocViews:
     Genetics,
     Software
@@ -64,3 +65,4 @@ Remotes:
     bioc::GenomicRanges,
     bioc::AnnotationFilter,
     bioc::ensembldb
+Config/testthat/edition: 3

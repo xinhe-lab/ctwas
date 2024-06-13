@@ -12,6 +12,7 @@ get_region_cor(
   region_data = NULL,
   LD_info = NULL,
   snp_info = NULL,
+  weights = NULL,
   force_compute_cor = FALSE,
   save_cor = FALSE,
   cor_dir = NULL,
@@ -28,6 +29,8 @@ get_region_cor(
 \item{LD_info}{a list of paths to LD matrices for each of the regions. Required when \code{use_LD = TRUE}.}
 
 \item{snp_info}{a list of SNP info data frames for LD reference. Required when \code{use_LD = TRUE}.}
+
+\item{weights}{a list of weights}
 
 \item{force_compute_cor}{TRUE/FALSE. If TRUE, force computing correlation (R) matrices}
 

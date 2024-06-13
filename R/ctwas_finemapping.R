@@ -117,72 +117,29 @@ finemap_region <- function(region_data,
     if (verbose){
       loginfo("Fine-mapping using no-LD version ...")
     }
-    if (L != 1){
-      warning("L has to be 1 for no-LD version. Set L = 1")
-      L <- 1
-    }
+    # use an identity matrix as R in no-LD version
     R <- diag(length(z))
+    # do not include cs_index in no-LD version
     include_cs_index <- FALSE
   } else {
-    # compute correlation matrices
-    if (!is.null(cor_dir)) {
-      if (!dir.exists(cor_dir))
-        dir.create(cor_dir, recursive = TRUE)
-      R_sg_file <- file.path(cor_dir, paste0("region.", region_id, ".R_snp_gene.RDS"))
-      R_g_file <- file.path(cor_dir, paste0("region.", region_id, ".R_gene.RDS"))
-      R_s_file <- file.path(cor_dir, paste0("region.", region_id, ".R_snp.RDS"))
+    if (verbose){
+      loginfo("Fine-mapping using LD version ...")
     }
-    cor_files_exist <- isTRUE(!is.null(cor_dir) && file.exists(R_sg_file) && file.exists(R_g_file) && file.exists(R_s_file))
-    if (cor_files_exist && !force_compute_cor) {
-      if (verbose){
-        loginfo("Load correlation matrices for region %s", region_id)
-      }
-      # load precomputed correlation matrices
-      R_snp_gene <- load_LD(R_sg_file)
-      R_gene <- load_LD(R_g_file)
-      R_snp <- load_LD(R_s_file)
-      # gene first then SNPs
-      R <- rbind(cbind(R_gene, t(R_snp_gene)),
-                 cbind(R_snp_gene, R_snp))
-      rm(R_gene, R_snp_gene, R_snp)
-    } else {
-      # if no precomputed correlation matrices, or force_compute_cor = TRUE,
-      # compute correlation matrices
-      if (verbose){
-        loginfo("Compute correlation matrices for region %s", region_id)
-      }
-      # load LD matrix of the region
-      if (is.null(LD_info) || is.null(snp_info)) {
-        stop("LD_info and snp_info are required for computing correlation matrices")
-      }
-      LD_matrix_files <- unlist(strsplit(LD_info$LD_matrix[LD_info$region_id == region_id], split = ";"))
-      stopifnot(all(file.exists(LD_matrix_files)))
-      if (length(LD_matrix_files) > 1) {
-        R_snp <- lapply(LD_matrix_files, load_LD, format = LD_format, LD_loader = LD_loader)
-        R_snp <- suppressWarnings(as.matrix(bdiag(R_snp)))
-      } else {
-        R_snp <- load_LD(LD_matrix_files, format = LD_format, LD_loader = LD_loader)
-      }
-      # load SNP info of the region
-      snpinfo <- do.call(rbind, snp_info[region_id])
-
-      # Compute correlation matrices
-      res <- compute_region_cor(sids, gids, R_snp, snpinfo$id, weights)
-      R_snp <- res$R_snp
-      R_snp_gene <- res$R_snp_gene
-      R_gene <- res$R_gene
-      rm(res)
-      # save correlation matrices
-      if (isTRUE(save_cor && !is.null(cor_dir))) {
-        saveRDS(R_snp_gene, file=R_sg_file)
-        saveRDS(R_gene, file=R_g_file)
-        saveRDS(R_snp, file=R_s_file)
-      }
-      # gene first then SNPs
-      R <- rbind(cbind(R_gene, t(R_snp_gene)),
-                 cbind(R_snp_gene, R_snp))
-      rm(R_gene, R_snp_gene, R_snp)
-    }
+    cor_res <- get_region_cor(region_id,
+                              region_data = region_data,
+                              LD_info = LD_info,
+                              snp_info = snp_info,
+                              weights = weights,
+                              force_compute_cor = force_compute_cor,
+                              save_cor = save_cor,
+                              cor_dir = cor_dir,
+                              LD_format = LD_format,
+                              LD_loader = LD_loader,
+                              verbose = verbose)
+    # gene first then SNPs
+    R <- rbind(cbind(cor_res$R_gene, t(cor_res$R_snp_gene)),
+               cbind(cor_res$R_snp_gene, cor_res$R_snp))
+    rm(cor_res)
   }
 
   if (anyNA(R))
@@ -308,7 +265,7 @@ finemap_regions <- function(region_data,
   }
   if (!use_LD) {
     if (L != 1){
-      warning("L has to be 1 for no-LD version. Set L = 1")
+      loginfo("L has to be 1 for no-LD version. Set L = 1")
       L <- 1
     }
   }
@@ -338,6 +295,8 @@ finemap_regions <- function(region_data,
                    force_compute_cor = force_compute_cor,
                    save_cor = save_cor,
                    cor_dir = cor_dir,
+                   LD_format = LD_format,
+                   LD_loader = LD_loader,
                    include_cs_index = include_cs_index,
                    verbose = verbose,
                    ...)
@@ -348,6 +307,7 @@ finemap_regions <- function(region_data,
     stop("Not all cores returned results. Try rerun with bigger memory or fewer cores")
   }
   finemap_res <- do.call(rbind, finemap_region_res_list)
+  rownames(finemap_res) <- NULL
 
   return(finemap_res)
 }

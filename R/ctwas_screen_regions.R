@@ -82,11 +82,11 @@ screen_regions <- function(
 
   if (!use_LD) {
     if (L != 1){
-      warning("L has to be 1 for no-LD version. Set L = 1")
+      loginfo("L has to be 1 for no-LD version. Set L = 1")
       L <- 1
     }
     if (screen_method == "cs"){
-      warning("Screening by 'cs' is not available for no-LD version. Set screen_method = nonSNP_PIP")
+      loginfo("Screening by 'cs' is not available for no-LD version. Set screen_method = nonSNP_PIP")
       screen_method <- "nonSNP_PIP"
     }
   }

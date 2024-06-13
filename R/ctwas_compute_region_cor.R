@@ -101,6 +101,8 @@ compute_region_cor <- function(sids, gids, R_snp, LD_sids, weights) {
 #'
 #' @param snp_info a list of SNP info data frames for LD reference. Required when \code{use_LD = TRUE}.
 #'
+#' @param weights a list of weights
+#'
 #' @param force_compute_cor TRUE/FALSE. If TRUE, force computing correlation (R) matrices
 #'
 #' @param save_cor TRUE/FALSE. If TRUE, save correlation (R) matrices to \code{cor_dir}
@@ -124,6 +126,7 @@ get_region_cor <- function(region_id,
                            region_data = NULL,
                            LD_info = NULL,
                            snp_info = NULL,
+                           weights = NULL,
                            force_compute_cor = FALSE,
                            save_cor = FALSE,
                            cor_dir = NULL,
