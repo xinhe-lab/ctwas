@@ -12,9 +12,9 @@
 #' @param use_gene_pos use mid (midpoint), start or end positions to
 #' represent gene positions.
 #'
-#' @param filter_cs TRUE/FALSE. If TRUE, limits results in credible sets.
-#'
 #' @param filter_protein_coding_genes TRUE/FALSE. If TRUE, keep protein coding genes only.
+#'
+#' @param filter_cs TRUE/FALSE. If TRUE, limits results in credible sets.
 #'
 #' @return a data frame of cTWAS finemapping result including gene
 #' names, types and positions
@@ -31,8 +31,10 @@ anno_finemap_res <- function(finemap_res,
                              snp_info,
                              gene_annot = NULL,
                              use_gene_pos = c("mid", "start", "end"),
-                             filter_cs = FALSE,
-                             filter_protein_coding_genes = FALSE){
+                             filter_protein_coding_genes = FALSE,
+                             filter_cs = FALSE){
+
+  loginfo("Annotating ctwas finemapping result ...")
 
   use_gene_pos <- match.arg(use_gene_pos)
 
@@ -53,13 +55,21 @@ anno_finemap_res <- function(finemap_res,
          paste(annot_cols, collapse = " "))
   }
 
+  # limit to protein coding genes
+  if (filter_protein_coding_genes) {
+    loginfo("keep only protein coding genes")
+    gene_annot <- gene_annot[gene_annot$gene_type=="protein_coding",]
+  }
+
+  # limit to credible sets
   if (filter_cs) {
+    loginfo("keep only results in credible sets")
     finemap_res <- finemap_res[finemap_res$cs_index!=0,]
   }
 
+  # extract gene ids
   finemap_gene_res <- finemap_res[finemap_res$type!="SNP",]
 
-  # extract gene ids
   if (is.null(finemap_gene_res$gene_id)) {
     finemap_gene_res$gene_id <- sapply(strsplit(finemap_gene_res$id, split = "[|]"), "[[", 1)
   }
@@ -88,11 +98,6 @@ anno_finemap_res <- function(finemap_res,
         mutate(susie_pip = ifelse(n() > 1, susie_pip / n(), susie_pip)) %>%
         ungroup()
     }
-  }
-
-  # limit to protein coding genes
-  if (filter_protein_coding_genes) {
-    finemap_gene_res <- finemap_gene_res[finemap_gene_res$gene_type=="protein_coding",]
   }
 
   # update gene position info
@@ -158,11 +163,15 @@ get_gene_annot_from_ens_db <- function(ens_db, gene_ids) {
 }
 
 
-#' @title Sums gene PIPs by context, type or group
+#' @title Combines gene PIPs by context, type or group
 #'
 #' @param finemap_res a data frame of annotated cTWAS finemapping result
 #'
 #' @param by sum gene PIPs by "context", "type", or "group".
+#'
+#' @param filter_protein_coding_genes TRUE/FALSE. If TRUE, keep protein coding genes only.
+#'
+#' @param filter_cs TRUE/FALSE. If TRUE, limits results in credible sets.
 #'
 #' @param replace_NA values to replace NAs with.
 #'
@@ -177,8 +186,8 @@ get_gene_annot_from_ens_db <- function(ens_db, gene_ids) {
 #' @export
 combine_gene_pips <- function(finemap_res,
                               by = c("context", "type", "group"),
-                              filter_cs = FALSE,
                               filter_protein_coding_genes = FALSE,
+                              filter_cs = FALSE,
                               replace_NA = NA,
                               digits = 3){
 
@@ -189,19 +198,19 @@ combine_gene_pips <- function(finemap_res,
   if (!all(annot_cols %in% colnames(finemap_res))){
     stop("finemap_res needs to contain the following columns: ",
          paste(annot_cols, collapse = " "),
-         "\nHave you run anno_finemap_res() to annotate finemap_res?")
+         "\nPlease first run anno_finemap_res() to annotate finemap_res")
   }
 
   finemap_gene_res <- finemap_res[finemap_res$type!="SNP",]
 
-  # filter credible sets
-  if (filter_cs) {
-    finemap_gene_res <- finemap_gene_res[finemap_gene_res$cs_index!=0,]
-  }
-
   # limit to protein coding genes
   if (filter_protein_coding_genes) {
     finemap_gene_res <- finemap_gene_res[finemap_gene_res$gene_type=="protein_coding",]
+  }
+
+  # filter credible sets
+  if (filter_cs) {
+    finemap_gene_res <- finemap_gene_res[finemap_gene_res$cs_index!=0,]
   }
 
   # sum PIPs

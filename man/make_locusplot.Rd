@@ -13,17 +13,18 @@ make_locusplot(
   R_gene = NULL,
   locus_range = NULL,
   focus_gene = NULL,
-  filter_gene_biotype = "protein_coding",
+  filter_genetrack_biotype = "protein_coding",
   highlight_pval = NULL,
   highlight_pip = 0.8,
   highlight_pos = NULL,
+  label_QTLs = TRUE,
   point.sizes = c(1, 3.5),
   point.alpha = c(0.4, 0.6),
   point.shapes = c(21:25),
-  genelabel.size = 2.5,
+  label.text.size = 2.5,
   legend.text.size = 10,
-  legend.position = c("none", "top", "left", "right", "bottom"),
-  panel.heights = c(4, 4, 0.3, 4)
+  legend.position = "top",
+  panel.heights = c(4, 4, 1, 4)
 )
 }
 \arguments{
@@ -47,7 +48,7 @@ If NULL, the entire region will be plotted (with 100 bp flanks on both sides).}
 \item{focus_gene}{the gene name to focus the plot.
 If NULL, choose the gene with the highest PIP.}
 
-\item{filter_gene_biotype}{biotype to be displayed in gene tracks.
+\item{filter_genetrack_biotype}{biotype to be displayed in gene tracks.
 By default, limits to protein coding genes. If NULL, display all possible ones.}
 
 \item{highlight_pval}{pvalue to highlight with a horizontal line}
@@ -56,13 +57,15 @@ By default, limits to protein coding genes. If NULL, display all possible ones.}
 
 \item{highlight_pos}{genomic positions to highlight with vertical lines}
 
+\item{label_QTLs}{If TRUE, label SNP IDs in the QTL panel.}
+
 \item{point.sizes}{size values for SNP and non-SNP data points in the scatter plots}
 
 \item{point.alpha}{alpha values for SNP and non-SNP data points in the scatter plots}
 
 \item{point.shapes}{shapes values for data points of different types in the scatter plots}
 
-\item{genelabel.size}{Font size for gene text}
+\item{label.text.size}{Font size for gene and SNP label text}
 
 \item{legend.text.size}{Font size for legend text}
 

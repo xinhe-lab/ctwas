@@ -28,13 +28,20 @@ Load the packages.
 library(ctwas)
 ```
 
+
+We also need gene annotations from the Ensembl database. We use `EnsDb.Hsapiens.v86` for the example data, please choose the Ensembl database for your specific data. 
+```{r load_ens_db, message=FALSE}
+library(EnsDb.Hsapiens.v86)
+```
+
+
 Load the cTWAS results
 ```{r load_ctwas_res}
 # GWAS sample size
 gwas_n <- 343621
-
 # Load weights
 weights <- readRDS(system.file("extdata/sample_data", "LDL_example.preprocessed.weights.RDS", package = "ctwas"))
+
 
 # Load region_info, snp_info and LD_info
 region_info <- readRDS(system.file("extdata/sample_data", "LDL_example.region_info.RDS", package = "ctwas"))
@@ -94,17 +101,16 @@ ctwas_parameters$convergence_plot
 
 ## Summarizing cTWAS results
 
+
 To interpret and visualize the results, we first need to add gene annotations 
 (gene names and gene types) to the finemapping result.
 
-We need a user defined data frame of `gene_annot` that contains the following columns:
+We need a user defined data frame `gene_annot` that should contain the following columns:
 'chrom', 'start', 'end', 'gene_id', 'gene_name' and 'gene_type' for each gene or molecular trait.
 
 If you only used gene expression data, you can use the following function 
 to obtain the gene annotations from the Ensembl database.
-
-We use `EnsDb.Hsapiens.v86` for the example data, 
-please choose the Ensembl database for your specific data. 
+We use `EnsDb.Hsapiens.v86` for the example data, please choose the Ensembl database for your specific data. 
 ```{r get_gene_annot, message=FALSE}
 library(EnsDb.Hsapiens.v86)
 ens_db <- EnsDb.Hsapiens.v86
@@ -112,6 +118,7 @@ finemap_gene_res <- finemap_res[finemap_res$type!="SNP",]
 gene_ids <- unique(sapply(strsplit(finemap_gene_res$id, split = "[|]"), "[[", 1))
 gene_annot <- get_gene_annot_from_ens_db(ens_db, gene_ids)
 ```
+
 
 We then use `anno_finemap_res()` function to add gene annotations to the finemapping result,
 and use gene mid-points to represent gene positions.
@@ -123,6 +130,7 @@ finemap_res <- anno_finemap_res(finemap_res,
                                 use_gene_pos = "mid")
 ```
 
+
 ## Interpreting cTWAS results
 
 We list all molecular traits with PIP > 0.8, which is the threshold we used in the paper.
@@ -133,8 +141,7 @@ head(sig_finemap_res[order(-sig_finemap_res$susie_pip),])
 ```
 
 
-When we have multiple contexts (e.g. tissues) or types (e.g. expression, splicing), 
-it is useful to evaluate the combined PIP for each gene by contexts, types, or groups.
+When we have multiple contexts (e.g. tissues) or types (e.g. expression, splicing), it is useful to evaluate the combined PIP for each gene by contexts, types, or groups.
 We could further limit results in credible sets and/or protein coding genes.
 ```{r combine_pips}
 # combine gene PIPs by context
@@ -162,18 +169,19 @@ print(sig_gene_pips_df)
 ```
 
 
+
 ## Visualizing cTWAS results
 
 We could make locus plots for regions of interest. 
 We could zoom in the region by specifying the `locus_range`.
 
-If we want to show the correlations with the focus gene,
-we need correlation matrices of the region. 
+If we want to show the correlations with the focus gene, we need correlation matrices of the region. 
 Because we have computed and saved correlation matrices during fine-mapping step,
 we could simply load those precomputed correlation matrices.
 ```{r get_region_cor_res}
 cor_res <- get_region_cor(region_id = "16_71020125_72901251", cor_dir = cor_dir)
 ```
+
 
 ```{r locus_plot, fig.width=10, fig.height=8}
 make_locusplot(finemap_res,
@@ -183,8 +191,7 @@ make_locusplot(finemap_res,
                R_snp_gene = cor_res$R_snp_gene,
                R_gene = cor_res$R_gene,
                locus_range = c(71.6e6,72.4e6),
-               filter_gene_biotype = "protein_coding",
                highlight_pip = 0.8,
-               legend.position = "right")
+               legend.position = "top")
 ```
 

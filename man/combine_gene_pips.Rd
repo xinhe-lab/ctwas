@@ -2,13 +2,13 @@
 % Please edit documentation in R/ctwas_summarize_finemap_res.R
 \name{combine_gene_pips}
 \alias{combine_gene_pips}
-\title{Sums gene PIPs by context, type or group}
+\title{Combines gene PIPs by context, type or group}
 \usage{
 combine_gene_pips(
   finemap_res,
   by = c("context", "type", "group"),
-  filter_cs = FALSE,
   filter_protein_coding_genes = FALSE,
+  filter_cs = FALSE,
   replace_NA = NA,
   digits = 3
 )
@@ -18,6 +18,10 @@ combine_gene_pips(
 
 \item{by}{sum gene PIPs by "context", "type", or "group".}
 
+\item{filter_protein_coding_genes}{TRUE/FALSE. If TRUE, keep protein coding genes only.}
+
+\item{filter_cs}{TRUE/FALSE. If TRUE, limits results in credible sets.}
+
 \item{replace_NA}{values to replace NAs with.}
 
 \item{digits}{digits to round combined PIPs}
@@ -26,5 +30,5 @@ combine_gene_pips(
 a data frame of combined gene PIPs for each context, type or group
 }
 \description{
-Sums gene PIPs by context, type or group
+Combines gene PIPs by context, type or group
 }
