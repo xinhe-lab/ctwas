@@ -1,0 +1,41 @@
+version: 2
+jobs:
+  build:
+    docker:
+      - image: rocker/verse:latest
+    environment:
+      R_LIBS: ~/R/Library
+      R_REMOTES_NO_ERRORS_FROM_WARNINGS: true
+      _R_CHECK_FORCE_SUGGESTS_: false
+      NOT_CRAN: true
+    steps:
+      - restore_cache:
+          keys:
+            - r-pkg-cache-{{ arch }}-{{ .Branch }}
+            - r-pkg-cache-{{ arch }}-
+      - checkout
+      - run:
+          name: Install package dependencies
+          command: |
+            mkdir -p ~/R/Library
+            Rscript -e 'install.packages(c("doParallel","foreach","logging","mixsqp","magrittr","tibble","dplyr","ggplot2","cowplot","ggrepel","readr","data.table","R.utils","RSQLite","locuszoomr","pgenlibr","Rfast","knitr","rmarkdown","testthat","BiocManager"))'
+            Rscript -e 'BiocManager::install(c("GenomicRanges","ensembldb","AnnotationFilter"))'
+      - run:
+          name: Session information and installed package versions
+          command: |
+            Rscript -e 'sessionInfo()'
+            Rscript -e 'installed.packages()[, c("Package", "Version")]'
+            Rscript -e 'rmarkdown::pandoc_version()'
+      - run:
+          name: Build package
+          command: R CMD build --no-build-vignettes --no-manual .
+      - run:
+          name: Check package
+          no_output_timeout: 55m
+          command: R CMD check --ignore-vignettes --no-manual *tar.gz
+      - store_artifacts:
+          path: ctwas.Rcheck/
+      - save_cache:
+          key: r-pkg-cache-{{ arch }}-{{ .Branch }}
+          paths:
+            - "~/R/Library"
