@@ -28,12 +28,9 @@ jobs:
           install.packages(c("RSQLite","locuszoomr","pgenlibr","Rfast"))
           install.packages(c("knitr","rmarkdown","testthat","BiocManager"))
           install.packages(c("crayon","rcmdcheck"))
-          BiocManager::install("GenomeInfoDbData",ask = FALSE,type = "binary")
-          BiocManager::install("GenomeInfoDb",ask = FALSE,type = "binary")
-          BiocManager::install("AnnotationDbi",ask = FALSE,type = "binary")
-          BiocManager::install("ensembldb",ask = FALSE,type = "binary")
-          BiocManager::install("AnnotationFilter",ask = FALSE,type = "binary")
-          BiocManager::install("EnsDb.Hsapiens.v86",ask = FALSE,type = "binary")
+          BiocManager::install("ensembldb",ask = FALSE)
+          BiocManager::install("AnnotationFilter",ask = FALSE)
+          BiocManager::install("EnsDb.Hsapiens.v86",ask = FALSE)
         shell: Rscript {0}
       - name: Check
         run: |
