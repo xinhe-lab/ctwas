@@ -1,22 +1,16 @@
-#' @title Compute sufficient statistics for susie.
-#' 
-#' @param X An n by p matrix of covariates.
-#' 
-#' @param y An n vector.
-#' 
-#' @param standardize Logical flag indicating whether to standardize
-#'   columns of X to unit variance prior to fitting.
-#' 
-#' @return A list of sufficient statistics.
-#' 
+# @title Compute sufficient statistics for susie.
+#
+# @param X An n by p matrix of covariates.
+#
+# @param y An n vector.
+#
+# @param standardize Logical flag indicating whether to standardize
+#   columns of X to unit variance prior to fitting.
+#
+# @return A list of sufficient statistics.
+#
 #' @importFrom methods as
-#'
-#' @examples
-#' data(N2finemapping)
-#' ss = compute_ss(N2finemapping$X, N2finemapping$Y[,1])
-#' 
-#' @export
-#' 
+#
 compute_ss = function(X, y, standardize = TRUE) {
   y = y - mean(y)
   is.sparse = !is.matrix(X)

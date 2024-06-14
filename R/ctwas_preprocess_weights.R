@@ -41,9 +41,7 @@
 #'
 #' @importFrom utils head
 #' @importFrom logging addHandler loginfo writeToFile
-#' @importFrom foreach %dopar% foreach
-#' @importFrom parallel mclapply makeCluster stopCluster
-#' @importFrom doParallel registerDoParallel
+#' @importFrom parallel mclapply
 #' @importFrom data.table rbindlist
 #' @importFrom tools file_path_sans_ext
 #' @importFrom stats complete.cases

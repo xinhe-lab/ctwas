@@ -68,26 +68,6 @@
 #'   (number between 1 and L) of each reported CS in the supplied susie
 #'   fit.}
 #'
-#' @examples
-#' set.seed(1)
-#' n = 1000
-#' p = 1000
-#' beta = rep(0,p)
-#' beta[1:4] = 1
-#' X = matrix(rnorm(n*p),nrow = n,ncol = p)
-#' X = scale(X,center = TRUE,scale = TRUE)
-#' y = drop(X %*% beta + rnorm(n))
-#' s = susie(X,y,L = 10)
-#' susie_get_objective(s)
-#' susie_get_objective(s, last_only=FALSE)
-#' susie_get_residual_variance(s)
-#' susie_get_prior_variance(s)
-#' susie_get_posterior_mean(s)
-#' susie_get_posterior_sd(s)
-#' susie_get_niter(s)
-#' susie_get_pip(s)
-#' susie_get_lfsr(s)
-#'
 susie_get_objective = function (res, last_only = TRUE, warning_tol = 1e-6) {
   if (!all(diff(res$elbo) >= (-1*warning_tol)))
     warning("Objective is decreasing")

@@ -192,20 +192,3 @@ A \code{"susie"} object with some or all of the following
   p-vector of effects to be estimated. The required summary data are
   the p by p correlation matrix, \code{R}, and the p-vector \code{z}.
 }
-\examples{
-set.seed(1)
-n = 1000
-p = 1000
-beta = rep(0,p)
-beta[1:4] = 1
-X = matrix(rnorm(n*p),nrow = n,ncol = p)
-X = scale(X,center = TRUE,scale = TRUE)
-y = drop(X \%*\% beta + rnorm(n))
-
-input_ss <- compute_ss(X,y,standardize = TRUE)
-ss   <- univariate_regression(X,y)
-R    <- with(input_ss,cov2cor(XtX))
-zhat <- with(ss,betahat/sebetahat)
-res  <- susie_rss(zhat,R,L = 10)
-
-}

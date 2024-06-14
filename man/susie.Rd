@@ -312,30 +312,6 @@ the vector y should be centered to have mean zero before computing
 these summary statistics; you may also want to scale each column of
 X and y to have variance 1 (see examples).
 }
-\examples{
-# susie example.
-set.seed(1)
-n = 1000
-p = 1000
-beta = rep(0,p)
-beta[1:4] = 1
-X = matrix(rnorm(n*p),nrow = n,ncol = p)
-X = scale(X,center = TRUE,scale = TRUE)
-y = drop(X \%*\% beta + rnorm(n))
-res1 = susie(X,y,L = 10)
-plot(beta,coef(res1)[-1])
-abline(a = 0,b = 1,col = "skyblue",lty = "dashed")
-plot(y,predict(res1))
-abline(a = 0,b = 1,col = "skyblue",lty = "dashed")
-
-# susie_suff_stat example.
-input_ss = compute_ss(X,y,standardize = TRUE)
-res2 = with(input_ss,
-            susie_suff_stat(XtX = XtX,Xty = Xty,yty = yty,n = n,L = 10))
-plot(coef(res1)[-1],coef(res2)[-1])
-abline(a = 0,b = 1,col = "skyblue",lty = "dashed")
-
-}
 \references{
 G. Wang, A. Sarkar, P. Carbonetto and M. Stephens (2020). A simple
   new approach to variable selection in regression, with application

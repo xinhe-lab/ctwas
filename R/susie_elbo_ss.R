@@ -4,12 +4,14 @@
 # @param s a susie fit object
 # @param yty a scaler, y'y, where y is centered to have mean 0
 # @param n sample size
-get_objective_ss = function (XtX, Xty, s, yty, n)
+get_objective_ss = function (XtX, Xty, s, yty, n){
   Eloglik_ss(XtX,Xty,s,yty,n) - sum(s$KL)
+}
 
 # Expected loglikelihood for a susie fit.
-Eloglik_ss = function (XtX, Xty, s, yty, n)
+Eloglik_ss = function (XtX, Xty, s, yty, n){
   -n/2*log(2*pi*s$sigma2) - 1/(2*s$sigma2) * get_ER2_ss(XtX,Xty,s,yty)
+}
 
 # Expected squared residuals.
 get_ER2_ss = function (XtX, Xty, s, yty) {
@@ -28,5 +30,7 @@ get_ER2_ss = function (XtX, Xty, s, yty) {
 # @param s2 the residual variance
 # @param Eb the posterior mean of b (p vector) (alpha * mu)
 # @param Eb2 the posterior second moment of b (p vector) (alpha * mu2)
-SER_posterior_e_loglik_ss = function (dXtX, Xty, s2, Eb, Eb2)
-  -0.5/s2 * (-2*sum(Eb*Xty) + sum(dXtX * as.vector(Eb2)))
+SER_posterior_e_loglik_ss = function (dXtX, Xty, s2, Eb, Eb2){
+    -0.5/s2 * (-2*sum(Eb*Xty) + sum(dXtX * as.vector(Eb2)))
+}
+

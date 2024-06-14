@@ -13,5 +13,6 @@ estimate_residual_variance = function (X, Y, s) {
 # @param s a susie fit
 # @param yty a scaler, Y'Y, where Y is centered to have mean 0
 # @param n sample size
-estimate_residual_variance_ss = function (XtX, Xty, s, yty, n)
+estimate_residual_variance_ss = function (XtX, Xty, s, yty, n){
   (1/n)*get_ER2_ss(XtX,Xty,s,yty)
+}

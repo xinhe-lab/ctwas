@@ -1,8 +1,8 @@
 # @title Get objective function from data and susie fit object.
-# @param R p by p corelation matrix
+# @param R p by p correlation matrix
 # @param z length p vector
 # @param s a susie fit object
-get_objective_rss = function (R, z, s) 
+get_objective_rss = function (R, z, s)
   Eloglik_rss(s$sigma2, R,z,s) - sum(s$KL)
 
 # @title expected loglikelihood for a susie fit
@@ -16,7 +16,7 @@ Eloglik_rss = function (sigma2, R, z, s) {
 }
 
 # @title expected squared residuals
-# @importFrom Matrix diag
+#' @importFrom Matrix diag
 get_ER2_rss = function (sigma2, R, z, s) {
   d = sigma2 * attr(R,"eigen")$values + attr(R,"lambda")
   Dinv = 1/d

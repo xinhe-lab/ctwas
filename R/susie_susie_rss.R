@@ -156,22 +156,6 @@
 #' \item{Rr}{An p-vector of \code{t(X)} times fitted values, \code{X
 #'   \%*\% colSums(alpha*mu)}.}
 #'
-#' @examples
-#' set.seed(1)
-#' n = 1000
-#' p = 1000
-#' beta = rep(0,p)
-#' beta[1:4] = 1
-#' X = matrix(rnorm(n*p),nrow = n,ncol = p)
-#' X = scale(X,center = TRUE,scale = TRUE)
-#' y = drop(X %*% beta + rnorm(n))
-#'
-#' input_ss <- compute_ss(X,y,standardize = TRUE)
-#' ss   <- univariate_regression(X,y)
-#' R    <- with(input_ss,cov2cor(XtX))
-#' zhat <- with(ss,betahat/sebetahat)
-#' res  <- susie_rss(zhat,R,L = 10)
-#'
 #' @export
 #'
 susie_rss = function (z, R, maf = NULL, maf_thresh = 0, z_ld_weight = 0,
