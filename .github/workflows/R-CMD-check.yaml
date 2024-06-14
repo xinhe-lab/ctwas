@@ -28,6 +28,7 @@ jobs:
           install.packages(c("RSQLite","locuszoomr","pgenlibr","Rfast"))
           install.packages(c("knitr","rmarkdown","testthat","BiocManager"))
           install.packages(c("crayon","rcmdcheck"))
+          BiocManager::install("GenomeInfoDb",ask = FALSE)
           BiocManager::install("ensembldb",ask = FALSE)
           BiocManager::install("AnnotationFilter",ask = FALSE)
           BiocManager::install("EnsDb.Hsapiens.v86",ask = FALSE)
