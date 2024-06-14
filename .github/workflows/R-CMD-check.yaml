@@ -30,6 +30,7 @@ jobs:
           install.packages(c("crayon","rcmdcheck"))
           BiocManager::install("ensembldb")
           BiocManager::install("AnnotationFilter")
+          BiocManager::install("EnsDb.Hsapiens.v86")
         shell: Rscript {0}
       - name: Check
         run: |
