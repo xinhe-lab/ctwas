@@ -4,7 +4,7 @@ Type: Package
 Title: Adjusting for Genetic Confounders in Transcriptome-Wide Association
   Studies Improves Discovery of Risk Genes of Complex Traits
 Date: 2024-06-13
-Version: 0.2.37
+Version: 0.2.38
 Authors@R: c(person("Siming","Zhao",role="aut",email="siming.zhao06@gmail.com"),
              person("Wesley","Crouse",role="aut"),
              person("Sheng","Qian",role="aut",email="shengqian@uchicago.edu"),
@@ -29,8 +29,6 @@ Imports:
     tools,
     Matrix,
     parallel,
-    doParallel,
-    foreach,
     logging,
     mixsqp,
     magrittr,
@@ -51,7 +49,8 @@ Suggests:
     Rfast,
     knitr,
     rmarkdown,
-    testthat (>= 3.0.0)
+    testthat (>= 3.0.0),
+    EnsDb.Hsapiens.v86
 biocViews:
     Genetics,
     Software
@@ -62,5 +61,6 @@ NeedsCompilation: no
 RoxygenNote: 7.3.1
 Remotes:
     bioc::AnnotationFilter,
-    bioc::ensembldb
+    bioc::ensembldb,
+    bioc::EnsDb.Hsapiens.v86
 Config/testthat/edition: 3
