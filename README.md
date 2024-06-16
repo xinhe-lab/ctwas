@@ -1,6 +1,10 @@
 # cTWAS: integrating molecular QTLs and GWAS for gene discovery
 
-Expression Quantitative Trait Loci (eQTLs) have often been used to nominate candidate genes from Genome-wide association studies (GWAS). However, commonly used methods are susceptible to false positives largely due to Linkage Disequilibrium of eQTLs with causal variants acting on the phenotype directly. 
+Expression Quantitative Trait Loci (eQTLs) have often been used to
+nominate candidate genes from Genome-wide association studies
+(GWAS). However, commonly used methods are susceptible to false
+positives largely due to Linkage Disequilibrium of eQTLs with causal
+variants acting on the phenotype directly.
 
 Our method, causal-TWAS (cTWAS), addressed this challenge by borrowing ideas from statistical fine-mapping. It is a generalization of Transcriptome-wide association studies (TWAS), but when analyzing any gene, it adjusts for other nearby genes and all nearby genetic variants.  
 
