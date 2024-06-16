@@ -24,6 +24,10 @@
 #'
 #' @param drop_strand_ambig TRUE/FALSE, if TRUE remove strand ambiguous variants (A/T, G/C).
 #'
+#' @param scale_by_ld_variance TRUE/FALSE, if TRUE scale PredictDB weights by the variance.
+#' This is because PredictDB weights assume that variant genotypes are not
+#' standardized, but our implementation assumes standardized variant genotypes.
+#'
 #' @param method_FUSION a string, specifying the method to choose in FUSION models
 #'
 #' @param fusion_genome_version a string, specifying the genome version of FUSION models
@@ -34,6 +38,8 @@
 #' \code{LD_loader()} function to load LD matrix.
 #'
 #' @param LD_loader a user defined function to load LD matrix when \code{LD_format = "custom"}.
+#'
+#' @param ncore The number of cores used to parallelize computation.
 #'
 #' @param logfile the log file, if NULL will print log info on screen.
 #'
@@ -57,7 +63,6 @@ preprocess_weights <- function(weight_file,
                                snp_info,
                                LD_info = NULL,
                                weight_format = c("PredictDB", "FUSION"),
-                               ncore = 1,
                                drop_strand_ambig = TRUE,
                                scale_by_ld_variance = FALSE,
                                filter_protein_coding_genes = FALSE,
@@ -67,6 +72,7 @@ preprocess_weights <- function(weight_file,
                                fusion_top_n_snps = NULL,
                                LD_format = c("rds", "rdata", "csv", "txt", "custom"),
                                LD_loader = NULL,
+                               ncore = 1,
                                logfile = NULL){
   if (!is.null(logfile)) {
     addHandler(writeToFile, file = logfile, level = "DEBUG")
@@ -150,7 +156,7 @@ preprocess_weights <- function(weight_file,
     wgt_ld_idx <- match(wgt$rsid, snp_info_wgt$id)
     snp_info_pos <- as.integer(snp_info_wgt$pos[wgt_ld_idx])
     if (any(snp_pos != snp_info_pos)) {
-      warning(sprintf("Variant positions in %s weights are different from positions in snp_info. Use the positions in snp_info instead.", gname))
+      loginfo(sprintf("Variant positions in %s weights are different from positions in snp_info. Use the positions in snp_info instead.", gname))
       snp_pos <- snp_info_pos
     }
     snps <- data.frame(chrom = chrom,

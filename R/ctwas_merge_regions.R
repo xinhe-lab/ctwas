@@ -18,11 +18,11 @@
 #'
 #' @param snp_info a list of SNP info data frames for LD reference.
 #'
-#' @param expand TRUE/FALSE. If TRUE, expand merged region_data with full SNPs
-#'
 #' @param maxSNP Inf or integer. Maximum number of SNPs in a region. Default is
 #' Inf, no limit. This can be useful if there are many SNPs in a region and you don't
 #' have enough memory to run the program.
+#'
+#' @param expand TRUE/FALSE. If TRUE, expand merged region_data with full SNPs
 #'
 #' @param L the number of effects for susie during the fine mapping steps
 #'
@@ -39,17 +39,17 @@
 #'   correlation of 0.25, which is a commonly used threshold for
 #'   genotype data in genetic studies.
 #'
-#' @param ncore The number of cores used to parallelize computation over regions
-#'
 #' @param force_compute_cor TRUE/FALSE. If TRUE, force computing correlation (R) matrices
 #'
 #' @param save_cor TRUE/FALSE. If TRUE, save correlation (R) matrices
 #'
 #' @param cor_dir a string, the directory to store correlation (R) matrices
 #'
+#' @param ncore The number of cores used to parallelize computation over regions
+#'
 #' @param verbose TRUE/FALSE. If TRUE, print detail messages
 #'
-#' @param logfile the log file, if NULL will print log info on screen
+#' @param ... Additional arguments of \code{susie_rss}.
 #'
 #' @return a list of merged region data, merged region info,
 #'   merged region IDs,and finemapping results for merged regions.
@@ -69,9 +69,9 @@ merge_finemap_regions <- function(boundary_genes,
                                   snp_info = NULL,
                                   maxSNP = Inf,
                                   expand = TRUE,
+                                  L = 5,
                                   group_prior = NULL,
                                   group_prior_var = NULL,
-                                  L = 5,
                                   use_null_weight = TRUE,
                                   coverage = 0.95,
                                   min_abs_corr = 0.5,
@@ -225,26 +225,33 @@ get_merged_region_info <- function(boundary_genes, region_info, use_LD = TRUE, L
 #'
 #' @param region_info a data frame of region definition and associated LD file names
 #'
+#' @param use_LD TRUE/FALSE. If TRUE, use LD for finemapping.
+#'
+#' @param LD_info a list of paths to LD matrices for each of the regions.
+#'
+#' @param snp_info a list of SNP info data frames for LD reference.
+#'
 #' @param z_snp A data frame with columns: "id", "z", giving the z-scores for SNPs.
 #'
 #' @param z_gene A data frame with columns: "id", "z", giving the z-scores for genes.
 #'
 #' @param expand TRUE/FALSE. If TRUE, expand merged region_data with full SNPs
 #'
-#' @param trim_by remove SNPs if the total number of SNPs exceeds limit, options: "random",
-#' or "z" (trim SNPs with lower |z|) See parameter `maxSNP` for more information.
-#'
 #' @param maxSNP Inf or integer. Maximum number of SNPs in a region. Default is
 #' Inf, no limit. This can be useful if there are many SNPs in a region and you don't
 #' have enough memory to run the program.
+#'
+#' @param trim_by remove SNPs if the total number of SNPs exceeds limit, options: "random",
+#' or "z" (trim SNPs with lower |z|) See parameter `maxSNP` for more information.
 #'
 #' @param ncore The number of cores used to parallelize susie over regions
 #'
 #' @param seed seed for random sampling
 #'
-#' @importFrom logging loginfo
+#' @return a list of merged region data, merged region info, LD info, snp info,
+#' and merged region IDs.
 #'
-#' @return a list of merged region_data, and a data frame of merged region info
+#' @importFrom logging loginfo
 #'
 #' @export
 #'

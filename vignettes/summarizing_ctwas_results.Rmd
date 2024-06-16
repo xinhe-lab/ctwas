@@ -110,13 +110,11 @@ We need a user defined data frame `gene_annot` that should contain the following
 
 If you only used gene expression data, you can use the following function 
 to obtain the gene annotations from the Ensembl database.
-We use `EnsDb.Hsapiens.v86` for the example data, please choose the Ensembl database for your specific data. 
 ```{r get_gene_annot, message=FALSE}
-library(EnsDb.Hsapiens.v86)
 ens_db <- EnsDb.Hsapiens.v86
 finemap_gene_res <- finemap_res[finemap_res$type!="SNP",]
 gene_ids <- unique(sapply(strsplit(finemap_gene_res$id, split = "[|]"), "[[", 1))
-gene_annot <- get_gene_annot_from_ens_db(ens_db, gene_ids)
+gene_annot <- get_gene_annot_from_ens_db(ens_db = ens_db, gene_ids)
 ```
 
 

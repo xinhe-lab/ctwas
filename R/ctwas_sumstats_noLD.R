@@ -79,7 +79,8 @@ ctwas_sumstats_noLD <- function(
     outputdir = NULL,
     outname = "ctwas_noLD",
     logfile = NULL,
-    verbose = FALSE){
+    verbose = FALSE,
+    ...){
 
   if (!is.null(logfile)) {
     addHandler(writeToFile, file=logfile, level='DEBUG')
@@ -176,7 +177,8 @@ ctwas_sumstats_noLD <- function(
                                    use_null_weight = use_null_weight,
                                    include_cs_index = FALSE,
                                    ncore = ncore,
-                                   verbose = verbose)
+                                   verbose = verbose,
+                                   ...)
     if (!is.null(outputdir)) {
       saveRDS(finemap_res, file.path(outputdir, paste0(outname, ".finemap_res.RDS")))
     }

@@ -13,7 +13,6 @@ preprocess_weights(
   snp_info,
   LD_info = NULL,
   weight_format = c("PredictDB", "FUSION"),
-  ncore = 1,
   drop_strand_ambig = TRUE,
   scale_by_ld_variance = FALSE,
   filter_protein_coding_genes = FALSE,
@@ -23,6 +22,7 @@ preprocess_weights(
   fusion_top_n_snps = NULL,
   LD_format = c("rds", "rdata", "csv", "txt", "custom"),
   LD_loader = NULL,
+  ncore = 1,
   logfile = NULL
 )
 }
@@ -46,6 +46,10 @@ with columns "chrom", "id", "pos", "alt", "ref", and "region_id".}
 
 \item{drop_strand_ambig}{TRUE/FALSE, if TRUE remove strand ambiguous variants (A/T, G/C).}
 
+\item{scale_by_ld_variance}{TRUE/FALSE, if TRUE scale PredictDB weights by the variance.
+This is because PredictDB weights assume that variant genotypes are not
+standardized, but our implementation assumes standardized variant genotypes.}
+
 \item{filter_protein_coding_genes}{TRUE/FALSE. If TRUE, keep protein coding genes only. This option is only for PredictDB weights}
 
 \item{load_predictdb_LD}{TRUE/FALSE. If TRUE, load pre-computed LD among weight SNPs. This option is only for PredictDB weights}
@@ -60,6 +64,8 @@ with columns "chrom", "id", "pos", "alt", "ref", and "region_id".}
 \code{LD_loader()} function to load LD matrix.}
 
 \item{LD_loader}{a user defined function to load LD matrix when \code{LD_format = "custom"}.}
+
+\item{ncore}{The number of cores used to parallelize computation.}
 
 \item{logfile}{the log file, if NULL will print log info on screen.}
 }

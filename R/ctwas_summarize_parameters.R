@@ -26,6 +26,7 @@
 #' @importFrom ggplot2 guide_legend
 #' @importFrom ggplot2 scale_colour_discrete
 #' @importFrom cowplot plot_grid theme_cowplot
+#' @importFrom rlang .data
 #'
 #' @export
 #'
@@ -76,9 +77,9 @@ summarize_param <- function(param,
     factor_levels <- c(setdiff(rownames(group_prior_iters), "SNP"), "SNP")
     df$group <- factor(df$group, levels = factor_levels)
 
-    p_pi <- ggplot(df, aes(x=niter, y=value, group=group)) +
-      geom_line(aes(color=group)) +
-      geom_point(aes(color=group)) +
+    p_pi <- ggplot(df, aes(x=.data$niter, y=.data$value, group=.data$group, color=.data$group)) +
+      geom_line() +
+      geom_point() +
       xlab("Iteration") + ylab(bquote(pi)) +
       ggtitle("Proportion Causal") +
       theme_cowplot() +
@@ -94,9 +95,9 @@ summarize_param <- function(param,
                      group = rep(rownames(group_prior_var_iters), each=ncol(group_prior_var_iters)))
     df$group <- factor(df$group, levels = factor_levels)
 
-    p_sigma2 <- ggplot(df, aes(x=niter, y=value, group=group)) +
-      geom_line(aes(color=group)) +
-      geom_point(aes(color=group)) +
+    p_sigma2 <- ggplot(df, aes(x=.data$niter, y=.data$value, group=.data$group, color=.data$group)) +
+      geom_line() +
+      geom_point() +
       xlab("Iteration") + ylab(bquote(sigma^2)) +
       ggtitle("Effect Size") +
       theme_cowplot() +
@@ -112,9 +113,9 @@ summarize_param <- function(param,
                      group = rep(rownames(group_pve_iters), each=ncol(group_pve_iters)))
     df$group <- factor(df$group, levels = factor_levels)
 
-    p_pve <- ggplot(df, aes(x=niter, y=value, group=group)) +
-      geom_line(aes(color=group)) +
-      geom_point(aes(color=group)) +
+    p_pve <- ggplot(df, aes(x=.data$niter, y=.data$value, group=.data$group, color=.data$group)) +
+      geom_line() +
+      geom_point() +
       xlab("Iteration") + ylab(bquote(h[G]^2)) +
       ggtitle("PVE") +
       theme_cowplot() +
@@ -130,9 +131,9 @@ summarize_param <- function(param,
                      group = rep(rownames(enrichment_iters), each=ncol(enrichment_iters)))
     df$group <- factor(df$group, levels = factor_levels[factor_levels!="SNP"])
 
-    p_enrich <- ggplot(df, aes(x=niter, y=value, group=group)) +
-      geom_line(aes(color=group)) +
-      geom_point(aes(color=group)) +
+    p_enrich <- ggplot(df, aes(x=.data$niter, y=.data$value, group=.data$group, color=.data$group)) +
+      geom_line() +
+      geom_point() +
       xlab("Iteration") + ylab(bquote(pi[G]/pi[S])) +
       ggtitle("Enrichment") +
       theme_cowplot() +

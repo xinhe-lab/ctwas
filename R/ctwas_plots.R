@@ -71,6 +71,7 @@
 #' @importFrom ggplot2 geom_hline
 #' @importFrom ggplot2 margin
 #' @importFrom ggrepel geom_text_repel
+#' @importFrom rlang .data
 #'
 #' @export
 #'
@@ -202,10 +203,10 @@ make_locusplot <- function(finemap_res,
   loginfo("QTL positions: %s", finemap_qtl_res$pos)
 
   # p-value panel
-  p_pvalue <- ggplot(loc$data, aes(x=pos/1e6, y=p, shape=type,
-                                   size=object_type, alpha=object_type)) +
-    geom_point(aes(color = r2_levels, fill = r2_levels)) +
-    geom_text_repel(aes(label=label), size=label.text.size, color="black") +
+  p_pvalue <- ggplot(loc$data, aes(x=.data$pos/1e6, y=.data$p, shape=.data$type,
+                                   size=.data$object_type, alpha=.data$object_type)) +
+    geom_point(aes(color=.data$r2_levels, fill=.data$r2_levels)) +
+    geom_text_repel(aes(label=.data$label), size=label.text.size, color="black") +
     scale_shape_manual(values = point.shapes) +
     scale_alpha_manual(values = point.alpha, guide="none") +
     scale_size_manual(values = point.sizes, guide="none") +
@@ -236,10 +237,10 @@ make_locusplot <- function(finemap_res,
   }
 
   # PIP panel
-  p_pip <- ggplot(loc$data, aes(x=pos/1e6, y=susie_pip, shape=type,
-                                size=object_type, alpha=object_type)) +
-    geom_point(aes(color = r2_levels, fill = r2_levels)) +
-    geom_text_repel(aes(label=label), size=label.text.size, color="black") +
+  p_pip <- ggplot(loc$data, aes(x=.data$pos/1e6, y=.data$susie_pip, shape=.data$type,
+                       size=.data$object_type, alpha=.data$object_type)) +
+    geom_point(aes(color=.data$r2_levels, fill=.data$r2_levels)) +
+    geom_text_repel(aes(label=.data$label), size=label.text.size, color="black") +
     scale_shape_manual(values = point.shapes) +
     scale_alpha_manual(values = point.alpha, guide="none") +
     scale_size_manual(values = point.sizes, guide="none") +
@@ -249,6 +250,8 @@ make_locusplot <- function(finemap_res,
     labs(x = "", y = "PIP", shape = "Type", color = expression(R^2)) +
     theme_bw() +
     theme(legend.position = "none",
+          axis.ticks.x = element_blank(),
+          axis.text.x = element_blank(),
           panel.border= element_blank(),
           axis.line = element_line(colour = "black"),
           plot.margin = margin(b=0, l=10, t=0, r=10))
@@ -259,10 +262,10 @@ make_locusplot <- function(finemap_res,
   }
 
   # QTL panel
-  p_qtl <- ggplot(finemap_qtl_res, aes(x=pos/1e6)) +
+  p_qtl <- ggplot(finemap_qtl_res, aes(x=.data$pos/1e6)) +
     geom_rect(aes(xmin=loc$xrange[1]/1e6, xmax=loc$xrange[2]/1e6, ymin=0, ymax=1),
               fill="gray90") +
-    geom_segment(aes(x=pos/1e6, xend=pos/1e6, y=0, yend=1), color="salmon") +
+    geom_segment(aes(x=.data$pos/1e6, xend=.data$pos/1e6, y=0, yend=1), color="salmon") +
     labs(title = paste(focus_gene_name, focus_gene_context, focus_gene_type),
          y = "QTL") +
     theme(
@@ -281,7 +284,7 @@ make_locusplot <- function(finemap_res,
 
   if (label_QTLs){
     p_qtl <- p_qtl +
-      geom_text_repel(aes(y=0.5, label=id), size=label.text.size, color="black")
+      geom_text_repel(aes(y=0.5, label=.data$id), size=label.text.size, color="black")
   }
 
   # gene track panel
@@ -292,7 +295,7 @@ make_locusplot <- function(finemap_res,
     theme_bw() +
     theme(legend.position = "none",
           panel.border= element_blank(),
-          plot.margin = margin(b=10, l=10, t=10, r=10))
+          plot.margin = margin(b=10, l=10, t=0, r=10))
 
   if (!is.null(highlight_pos)){
     loginfo("highlight positions: %s", highlight_pos)

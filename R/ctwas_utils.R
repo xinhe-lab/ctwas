@@ -130,7 +130,7 @@ load_weights <- function(weight_file,
         if (nrow(wgt.matrix) > 0){
           out_table <- as_tibble(wgt.matrix[,g.method]) %>%
             mutate(rsid = rownames(wgt.matrix)) %>%
-            left_join(as_tibble(snps) %>% select(-cm), by = "rsid")
+            left_join(as_tibble(snps) %>% select(-"cm"), by = "rsid")
           out_table$gene <- gname
           out_table <- out_table[,c("gene","rsid","varID","ref","alt","value")]
           colnames(out_table) <- c("gene","rsid","varID","ref_allele","eff_allele","weight")
