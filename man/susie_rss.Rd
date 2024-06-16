@@ -192,3 +192,4 @@ A \code{"susie"} object with some or all of the following
   p-vector of effects to be estimated. The required summary data are
   the p by p correlation matrix, \code{R}, and the p-vector \code{z}.
 }
+\keyword{internal}

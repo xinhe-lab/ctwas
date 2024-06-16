@@ -206,7 +206,7 @@
 #' @importFrom stats var
 #' @importFrom utils modifyList
 #'
-#' @export
+#' @keywords internal
 #'
 susie <- function (X,Y,L = min(10,ncol(X)),
                    scaled_prior_variance = 0.2,
