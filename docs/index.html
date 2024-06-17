@@ -33,7 +33,7 @@
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="index.html">ctwas</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">0.2.25</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">0.2.41</span>
       </span>
     </div>
 
@@ -92,6 +92,7 @@
 <div class="section level1">
 <div class="page-header"><h1 id="ctwas-integrating-molecular-qtls-and-gwas-for-gene-discovery">cTWAS: integrating molecular QTLs and GWAS for gene discovery<a class="anchor" aria-label="anchor" href="#ctwas-integrating-molecular-qtls-and-gwas-for-gene-discovery"></a>
 </h1></div>
+<p><a href="https://github.com/xinhe-lab/ctwas/actions/workflows/R-CMD-check.yaml" class="external-link"><img src="https://github.com/xinhe-lab/ctwas/actions/workflows/R-CMD-check.yaml/badge.svg" alt="R-CMD-check"></a></p>
 <p>Expression Quantitative Trait Loci (eQTLs) have often been used to nominate candidate genes from Genome-wide association studies (GWAS). However, commonly used methods are susceptible to false positives largely due to Linkage Disequilibrium of eQTLs with causal variants acting on the phenotype directly.</p>
 <p>Our method, causal-TWAS (cTWAS), addressed this challenge by borrowing ideas from statistical fine-mapping. It is a generalization of Transcriptome-wide association studies (TWAS), but when analyzing any gene, it adjusts for other nearby genes and all nearby genetic variants.</p>
 <p>While the <a href="https://doi.org/10.1038/s41588-023-01648-9" class="external-link">published paper</a> analyzes a single eQTL dataset, the latest version of cTWAS extends the method to integrate multiple groups of prediction models, allowing for joint analysis of multiple types of molecular traits, across potentially different tissues, cell types or conditions.</p>
@@ -117,7 +118,7 @@
 </h2>
 <p>Install <code>ctwas</code>:</p>
 <pre><code><span><span class="co"># install.packages("remotes")</span></span>
-<span><span class="fu">remotes</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/remotes/man/install_github.html" class="external-link">install_github</a></span><span class="op">(</span><span class="st">"xinhe-lab/ctwas"</span>,ref <span class="op">=</span> <span class="st">"multigroup_test"</span><span class="op">)</span></span></code></pre>
+<span><span class="fu">remotes</span><span class="fu">::</span><span class="fu"><a href="https://remotes.r-lib.org/reference/install_github.html" class="external-link">install_github</a></span><span class="op">(</span><span class="st">"xinhe-lab/ctwas"</span>,ref <span class="op">=</span> <span class="st">"multigroup_test"</span><span class="op">)</span></span></code></pre>
 <p>Currently, <code>ctwas</code> has only been tested on linux systems. We recommend running <code>ctwas</code> on a High-Performance Computing system.</p>
 </div>
 <div class="section level2">

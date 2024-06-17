@@ -17,7 +17,7 @@
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">ctwas</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">0.2.25</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">0.2.41</span>
       </span>
     </div>
 
@@ -87,9 +87,9 @@
 <span>  snp_info <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  maxSNP <span class="op">=</span> <span class="cn">Inf</span>,</span>
 <span>  expand <span class="op">=</span> <span class="cn">TRUE</span>,</span>
+<span>  L <span class="op">=</span> <span class="fl">5</span>,</span>
 <span>  group_prior <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  group_prior_var <span class="op">=</span> <span class="cn">NULL</span>,</span>
-<span>  L <span class="op">=</span> <span class="fl">5</span>,</span>
 <span>  use_null_weight <span class="op">=</span> <span class="cn">TRUE</span>,</span>
 <span>  coverage <span class="op">=</span> <span class="fl">0.95</span>,</span>
 <span>  min_abs_corr <span class="op">=</span> <span class="fl">0.5</span>,</span>
@@ -150,16 +150,16 @@ have enough memory to run the program.</p></dd>
 <dd><p>TRUE/FALSE. If TRUE, expand merged region_data with full SNPs</p></dd>
 
 
+<dt>L</dt>
+<dd><p>the number of effects for susie during the fine mapping steps</p></dd>
+
+
 <dt>group_prior</dt>
 <dd><p>a vector of two prior inclusion probabilities for SNPs and genes.</p></dd>
 
 
 <dt>group_prior_var</dt>
 <dd><p>a vector of two prior variances for SNPs and gene effects.</p></dd>
-
-
-<dt>L</dt>
-<dd><p>the number of effects for susie during the fine mapping steps</p></dd>
 
 
 <dt>use_null_weight</dt>
@@ -197,8 +197,8 @@ genotype data in genetic studies.</p></dd>
 <dd><p>TRUE/FALSE. If TRUE, print detail messages</p></dd>
 
 
-<dt>logfile</dt>
-<dd><p>the log file, if NULL will print log info on screen</p></dd>
+<dt>...</dt>
+<dd><p>Additional arguments of <code>susie_rss</code>.</p></dd>
 
 </dl></div>
     <div id="value">

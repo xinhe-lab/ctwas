@@ -17,7 +17,7 @@
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">ctwas</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">0.2.25</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">0.2.41</span>
       </span>
     </div>
 
@@ -73,21 +73,17 @@
           <p class="section-desc"></p>
         </th>
       </tr></tbody><tbody><tr><td>
-          <p><code><a href="N2finemapping.html">N2finemapping</a></code> </p>
-        </td>
-        <td><p>Simulated Fine-mapping Data with Two Effect Variables</p></td>
-      </tr><tr><td>
           <p><code><a href="anno_finemap_res.html">anno_finemap_res()</a></code> </p>
         </td>
-        <td><p>Annotates cTWAS finemapping result with ensembl gene annotation database</p></td>
+        <td><p>Annotates cTWAS finemapping result with gene annotations</p></td>
       </tr><tr><td>
           <p><code><a href="assemble_region_data.html">assemble_region_data()</a></code> </p>
         </td>
         <td><p>Assembles data for all the regions</p></td>
       </tr><tr><td>
-          <p><code><a href="coef.susie.html">coef(<i>&lt;susie&gt;</i>)</a></code> </p>
+          <p><code><a href="combine_gene_pips.html">combine_gene_pips()</a></code> </p>
         </td>
-        <td><p>Extract regression coefficients from susie fit</p></td>
+        <td><p>Combines gene PIPs by context, type or group</p></td>
       </tr><tr><td>
           <p><code><a href="compute_gene_z.html">compute_gene_z()</a></code> </p>
         </td>
@@ -95,11 +91,7 @@
       </tr><tr><td>
           <p><code><a href="compute_region_nonSNP_PIPs.html">compute_region_nonSNP_PIPs()</a></code> </p>
         </td>
-        <td><p>Computes non-SNP PIPs for regions</p></td>
-      </tr><tr><td>
-          <p><code><a href="compute_ss.html">compute_ss()</a></code> </p>
-        </td>
-        <td><p>Compute sufficient statistics for susie.</p></td>
+        <td><p>Computes non-SNP PIPs for each region from finemapping result</p></td>
       </tr><tr><td>
           <p><code><a href="convert_geno_to_LD_matrix.html">convert_geno_to_LD_matrix()</a></code> </p>
         </td>
@@ -121,10 +113,6 @@
         </td>
         <td><p>Estimates cTWAS parameters using EM</p></td>
       </tr><tr><td>
-          <p><code><a href="estimate_s_rss.html">estimate_s_rss()</a></code> </p>
-        </td>
-        <td><p>Estimate s in <code>susie_rss</code> Model Using Regularized LD</p></td>
-      </tr><tr><td>
           <p><code><a href="expand_region_data.html">expand_region_data()</a></code> </p>
         </td>
         <td><p>Expands region_data with full SNPs</p></td>
@@ -137,17 +125,29 @@
         </td>
         <td><p>Runs cTWAS finemapping for multiple regions</p></td>
       </tr><tr><td>
+          <p><code><a href="get_L.html">get_L()</a></code> </p>
+        </td>
+        <td><p>get L for each region from finemapping result</p></td>
+      </tr><tr><td>
+          <p><code><a href="get_gene_annot_from_ens_db.html">get_gene_annot_from_ens_db()</a></code> </p>
+        </td>
+        <td><p>Get gene annotation table from Ensembl database</p></td>
+      </tr><tr><td>
           <p><code><a href="get_problematic_genes.html">get_problematic_genes()</a></code> </p>
         </td>
         <td><p>Gets problematic genes from problematic SNPs</p></td>
       </tr><tr><td>
-          <p><code><a href="kriging_rss.html">kriging_rss()</a></code> </p>
+          <p><code><a href="get_region_cor.html">get_region_cor()</a></code> </p>
         </td>
-        <td><p>Compute Distribution of z-scores of Variant j Given Other z-scores, and Detect Possible Allele Switch Issue</p></td>
+        <td><p>Gets correlation matrices for a single region. Load precomputed correlation matrices if available in <code>cor_dir</code>, otherwise, computes correlation matrices if no precomputed correlation matrices, or force_compute_cor = TRUE.</p></td>
       </tr><tr><td>
           <p><code><a href="load_weights.html">load_weights()</a></code> </p>
         </td>
         <td><p>Loads PredictDB or FUSION weights</p></td>
+      </tr><tr><td>
+          <p><code><a href="make_convergence_plots.html">make_convergence_plots()</a></code> </p>
+        </td>
+        <td><p>Make convergence plots for the estimated parameters</p></td>
       </tr><tr><td>
           <p><code><a href="make_locusplot.html">make_locusplot()</a></code> </p>
         </td>
@@ -165,10 +165,6 @@
         </td>
         <td><p>Merges region data for cross-boundary genes</p></td>
       </tr><tr><td>
-          <p><code><a href="predict.susie.html">predict(<i>&lt;susie&gt;</i>)</a></code> </p>
-        </td>
-        <td><p>Predict outcomes or extract coefficients from susie fit.</p></td>
-      </tr><tr><td>
           <p><code><a href="preprocess_region_LD_snp_info.html">preprocess_region_LD_snp_info()</a></code> </p>
         </td>
         <td><p>Preprocess region info, LD info, and SNP info from all regions and map SNPs to regions.</p></td>
@@ -185,33 +181,9 @@
         </td>
         <td><p>Screens regions with strong non-SNP PIPs to be used in finemapping step</p></td>
       </tr><tr><td>
-          <p><code><a href="sum_pip_across_contexts.html">sum_pip_across_contexts()</a></code> </p>
-        </td>
-        <td><p>Combines PIPs across contexts (tissues)</p></td>
-      </tr><tr><td>
           <p><code><a href="summarize_param.html">summarize_param()</a></code> </p>
         </td>
-        <td><p>Summarizes and plots cTWAS parameter estimates</p></td>
-      </tr><tr><td>
-          <p><code><a href="susie.html">susie()</a></code> <code><a href="susie.html">susie_suff_stat()</a></code> </p>
-        </td>
-        <td><p>Sum of Single Effects (SuSiE) Regression</p></td>
-      </tr><tr><td>
-          <p><code><a href="susie_get_methods.html">susie_get_objective()</a></code> <code><a href="susie_get_methods.html">susie_get_posterior_mean()</a></code> <code><a href="susie_get_methods.html">susie_get_posterior_sd()</a></code> <code><a href="susie_get_methods.html">susie_get_niter()</a></code> <code><a href="susie_get_methods.html">susie_get_prior_variance()</a></code> <code><a href="susie_get_methods.html">susie_get_residual_variance()</a></code> <code><a href="susie_get_methods.html">susie_get_lfsr()</a></code> <code><a href="susie_get_methods.html">susie_get_posterior_samples()</a></code> <code><a href="susie_get_methods.html">susie_get_cs()</a></code> <code><a href="susie_get_methods.html">susie_get_pip()</a></code> </p>
-        </td>
-        <td><p>Inferences From Fitted SuSiE Model</p></td>
-      </tr><tr><td>
-          <p><code><a href="susie_init_coef.html">susie_init_coef()</a></code> </p>
-        </td>
-        <td><p>Initialize a susie object using regression coefficients</p></td>
-      </tr><tr><td>
-          <p><code><a href="susie_rss.html">susie_rss()</a></code> </p>
-        </td>
-        <td><p>Sum of Single Effects (SuSiE) Regression using summary statistics</p></td>
-      </tr><tr><td>
-          <p><code><a href="univariate_regression.html">univariate_regression()</a></code> </p>
-        </td>
-        <td><p>Perform Univariate Linear Regression Separately for Columns of X</p></td>
+        <td><p>Summarizes estimated parameters</p></td>
       </tr><tr><td>
           <p><code><a href="update_finemap_res.html">update_finemap_res()</a></code> </p>
         </td>

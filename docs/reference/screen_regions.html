@@ -17,7 +17,7 @@
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">ctwas</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">0.2.25</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">0.2.41</span>
       </span>
     </div>
 
@@ -86,6 +86,7 @@
 <span>  L <span class="op">=</span> <span class="fl">5</span>,</span>
 <span>  minvar <span class="op">=</span> <span class="fl">2</span>,</span>
 <span>  mingene <span class="op">=</span> <span class="fl">1</span>,</span>
+<span>  screen_method <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"nonSNP_PIP"</span>, <span class="st">"cs"</span><span class="op">)</span>,</span>
 <span>  min_nonSNP_PIP <span class="op">=</span> <span class="fl">0.5</span>,</span>
 <span>  ncore <span class="op">=</span> <span class="fl">1</span>,</span>
 <span>  logfile <span class="op">=</span> <span class="cn">NULL</span>,</span>
@@ -136,8 +137,14 @@
 <dd><p>minimum number of genes in a region</p></dd>
 
 
+<dt>screen_method</dt>
+<dd><p>screening regions by: "nonSNP_PIP" or
+"cs" (only available for "LD" version)</p></dd>
+
+
 <dt>min_nonSNP_PIP</dt>
-<dd><p>Regions with non-SNP PIP &gt;= <code>min_nonSNP_PIP</code>
+<dd><p>If screening by "nonSNP_PIP",
+regions with non-SNP PIP &gt;= <code>min_nonSNP_PIP</code>
 will be selected to run finemapping using full SNPs.</p></dd>
 
 
@@ -161,7 +168,8 @@ will be selected to run finemapping using full SNPs.</p></dd>
     <h2>Value</h2>
     
 
-<p>a list of screened_region_data, and a data frame of region ids and non-SNP PIPs</p>
+<p>a list of screened_region_data, and
+non-SNP PIPs or estimated L for each region</p>
     </div>
 
   </div>

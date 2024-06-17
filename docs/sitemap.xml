@@ -73,6 +73,9 @@
     <loc>/reference/coef.susie.html</loc>
   </url>
   <url>
+    <loc>/reference/combine_gene_pips.html</loc>
+  </url>
+  <url>
     <loc>/reference/combine_z.html</loc>
   </url>
   <url>
@@ -154,7 +157,13 @@
     <loc>/reference/finemap_regions_L1.html</loc>
   </url>
   <url>
+    <loc>/reference/get_L.html</loc>
+  </url>
+  <url>
     <loc>/reference/get_cs_correlation.html</loc>
+  </url>
+  <url>
+    <loc>/reference/get_gene_annot_from_ens_db.html</loc>
   </url>
   <url>
     <loc>/reference/get_gene_info.html</loc>
@@ -173,6 +182,9 @@
   </url>
   <url>
     <loc>/reference/get_problematic_regions.html</loc>
+  </url>
+  <url>
+    <loc>/reference/get_region_cor.html</loc>
   </url>
   <url>
     <loc>/reference/get_region_idx.html</loc>
@@ -215,6 +227,9 @@
   </url>
   <url>
     <loc>/reference/load_weights.html</loc>
+  </url>
+  <url>
+    <loc>/reference/make_convergence_plots.html</loc>
   </url>
   <url>
     <loc>/reference/make_locusplot.html</loc>

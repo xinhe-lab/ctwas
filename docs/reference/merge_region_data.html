@@ -17,7 +17,7 @@
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">ctwas</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">0.2.25</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">0.2.41</span>
       </span>
     </div>
 
@@ -106,6 +106,18 @@
 <dd><p>a data frame of region definition and associated LD file names</p></dd>
 
 
+<dt>use_LD</dt>
+<dd><p>TRUE/FALSE. If TRUE, use LD for finemapping.</p></dd>
+
+
+<dt>LD_info</dt>
+<dd><p>a list of paths to LD matrices for each of the regions.</p></dd>
+
+
+<dt>snp_info</dt>
+<dd><p>a list of SNP info data frames for LD reference.</p></dd>
+
+
 <dt>z_snp</dt>
 <dd><p>A data frame with columns: "id", "z", giving the z-scores for SNPs.</p></dd>
 
@@ -141,7 +153,8 @@ or "z" (trim SNPs with lower |z|) See parameter `maxSNP` for more information.</
     <h2>Value</h2>
     
 
-<p>a list of merged region_data, and a data frame of merged region info</p>
+<p>a list of merged region data, merged region info, LD info, snp info,
+and merged region IDs.</p>
     </div>
 
   </div>

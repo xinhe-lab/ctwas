@@ -33,7 +33,7 @@
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">ctwas</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">0.2.25</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">0.2.41</span>
       </span>
     </div>
 
@@ -93,7 +93,7 @@
       <h1 data-toc-skip>Using cTWAS main function</h1>
                         <h4 data-toc-skip class="author">Kaixuan Luo, Sheng Qian</h4>
             
-            <h4 data-toc-skip class="date">2024-06-06</h4>
+            <h4 data-toc-skip class="date">2024-06-17</h4>
       
       <small class="dont-index">Source: <a href="https://github.com/xinhe-lab/ctwas/blob/multigroup_test/vignettes/ctwas_main_function.Rmd" class="external-link"><code>vignettes/ctwas_main_function.Rmd</code></a></small>
       <div class="hidden name"><code>ctwas_main_function.Rmd</code></div>
@@ -149,6 +149,7 @@
 <span>                            niter <span class="op">=</span> <span class="fl">30</span>,</span>
 <span>                            L <span class="op">=</span> <span class="fl">5</span>,</span>
 <span>                            group_prior_var_structure <span class="op">=</span> <span class="st">"shared_type"</span>,</span>
+<span>                            screen_method <span class="op">=</span> <span class="st">"nonSNP_PIP"</span>,</span>
 <span>                            maxSNP <span class="op">=</span> <span class="fl">20000</span>,</span>
 <span>                            min_nonSNP_PIP <span class="op">=</span> <span class="fl">0.5</span>,</span>
 <span>                            ncore <span class="op">=</span> <span class="va">ncore</span>,</span>
@@ -183,6 +184,7 @@
 <li>The <code>niter_prefit</code> argument and <code>niter</code> argument sets the number of EM iterations for estimating parameters. We set <code>niter_prefit = 3</code>, and <code>niter = 30</code> by default.</li>
 <li>The <code>L</code> argument sets the number of effects for SuSiE during the screening regions and fine mapping steps. We set <code>L = 5</code> by default.</li>
 <li>There are several options for how to handle the prior effect size parameters by specifying the <code>group_prior_var_stucture</code>. “shared_type” (default option) allows all groups in one molecular QTL type to share the same variance parameter. “shared_context” allows all groups in one context (tissue, cell type, condition) to share the same variance parameter. “shared_nonSNP” allows all non-SNP groups to share the same variance parameter. “shared_all” allows all groups to share the same variance parameter. “independent” allows all groups to have their own separate variance parameters.</li>
+<li>We can choose the method for screening regions by specifying the <code>screen_method</code> argument: “nonSNP_PIP” (by total non-SNP PIPs in a region) or “cs” (by the number of credible sets in a region).</li>
 <li>The <code>maxSNP</code> sets a maximum on the number of variants that can be in a single region to prevent memory issues during fine-mapping.</li>
 <li>
 <code>min_nonSNP_PIP</code> is a threshold for selecting regions with strong non-SNP signals for finemapping. We set <code>min_nonSNP_PIP = 0.5</code> by default, so regions with total non-SNP signals greater than 0.5 will be selected for finemapping.</li>

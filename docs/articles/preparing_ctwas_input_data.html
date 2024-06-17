@@ -33,7 +33,7 @@
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">ctwas</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">0.2.25</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">0.2.41</span>
       </span>
     </div>
 
@@ -93,7 +93,7 @@
       <h1 data-toc-skip>Preparing cTWAS input data</h1>
                         <h4 data-toc-skip class="author">Kaixuan Luo, Sheng Qian</h4>
             
-            <h4 data-toc-skip class="date">2024-06-06</h4>
+            <h4 data-toc-skip class="date">2024-06-17</h4>
       
       <small class="dont-index">Source: <a href="https://github.com/xinhe-lab/ctwas/blob/multigroup_test/vignettes/preparing_ctwas_input_data.Rmd" class="external-link"><code>vignettes/preparing_ctwas_input_data.Rmd</code></a></small>
       <div class="hidden name"><code>preparing_ctwas_input_data.Rmd</code></div>
@@ -108,7 +108,7 @@
 </h2>
 <p>Install <code>cTWAS</code> package</p>
 <div class="sourceCode" id="cb1"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="fu">remotes</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/remotes/man/install_github.html" class="external-link">install_github</a></span><span class="op">(</span><span class="st">"xinhe-lab/ctwas"</span>, ref <span class="op">=</span> <span class="st">"multigroup_test"</span><span class="op">)</span></span></code></pre></div>
+<code class="sourceCode R"><span><span class="fu">remotes</span><span class="fu">::</span><span class="fu"><a href="https://remotes.r-lib.org/reference/install_github.html" class="external-link">install_github</a></span><span class="op">(</span><span class="st">"xinhe-lab/ctwas"</span>, ref <span class="op">=</span> <span class="st">"multigroup_test"</span><span class="op">)</span></span></code></pre></div>
 <p>Load the package</p>
 <div class="sourceCode" id="cb2"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://github.com/xinhe-lab/ctwas/" class="external-link">ctwas</a></span><span class="op">)</span></span></code></pre></div>
@@ -252,47 +252,14 @@
 <span><span class="va">snp_info</span> <span class="op">&lt;-</span> <span class="va">res</span><span class="op">$</span><span class="va">snp_info</span></span>
 <span><span class="va">LD_info</span> <span class="op">&lt;-</span> <span class="va">res</span><span class="op">$</span><span class="va">LD_info</span></span>
 <span></span>
-<span><span class="co"># saveRDS(region_info, file.path(outputdir, paste0(outname, "region_info.RDS")))</span></span>
+<span><span class="co"># saveRDS(region_info, file.path(outputdir, paste0(outname, ".region_info.RDS")))</span></span>
 <span><span class="co"># saveRDS(snp_info, file.path(outputdir, paste0(outname, ".snp_info.RDS")))</span></span>
 <span><span class="co"># saveRDS(LD_info, file.path(outputdir, paste0(outname, ".LD_info.RDS")))</span></span></code></pre></div>
-<p>Let’s look at the <code>region_info</code>, <code>LD_info</code> and <code>snp_info</code>:</p>
-<div class="sourceCode" id="cb10"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">head</a></span><span class="op">(</span><span class="va">region_info</span>, <span class="fl">2</span><span class="op">)</span></span></code></pre></div>
-<pre><code><span><span class="co">##   chrom   start    stop          region_id</span></span>
-<span><span class="co">## 1    16   10054 1157206   16_10054_1157206</span></span>
-<span><span class="co">## 2    16 1157206 2714828 16_1157206_2714828</span></span></code></pre>
-<div class="sourceCode" id="cb12"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">head</a></span><span class="op">(</span><span class="va">LD_info</span>, <span class="fl">2</span><span class="op">)</span></span></code></pre></div>
-<pre><code><span><span class="co">##            region_id</span></span>
-<span><span class="co">## 1   16_10054_1157206</span></span>
-<span><span class="co">## 2 16_1157206_2714828</span></span>
-<span><span class="co">##                                                                             LD_matrix</span></span>
-<span><span class="co">## 1   /project2/mstephens/wcrouse/UKB_LDR_0.1/ukb_b38_0.1_chr16.R_snp.10054_1157206.RDS</span></span>
-<span><span class="co">## 2 /project2/mstephens/wcrouse/UKB_LDR_0.1/ukb_b38_0.1_chr16.R_snp.1157206_2714828.RDS</span></span></code></pre>
-<div class="sourceCode" id="cb14"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/utils/str.html" class="external-link">str</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">head</a></span><span class="op">(</span><span class="va">snp_info</span>, <span class="fl">2</span><span class="op">)</span><span class="op">)</span></span></code></pre></div>
-<pre><code><span><span class="co">## List of 2</span></span>
-<span><span class="co">##  $ 16_10054_1157206  :'data.frame':  4851 obs. of  7 variables:</span></span>
-<span><span class="co">##   ..$ chrom      : int [1:4851] 16 16 16 16 16 16 16 16 16 16 ...</span></span>
-<span><span class="co">##   ..$ id         : chr [1:4851] "rs2858946" "rs186272033" "rs28678857" "rs2562130" ...</span></span>
-<span><span class="co">##   ..$ pos        : int [1:4851] 31639 33520 33626 33629 33802 33807 33887 33950 34035 34053 ...</span></span>
-<span><span class="co">##   ..$ alt        : chr [1:4851] "C" "T" "G" "C" ...</span></span>
-<span><span class="co">##   ..$ ref        : chr [1:4851] "A" "C" "A" "A" ...</span></span>
-<span><span class="co">##   ..$ variance   : num [1:4851] 0.258 0.232 0.291 0.326 0.124 ...</span></span>
-<span><span class="co">##   ..$ allele_freq: num [1:4851] 0.177 0.856 0.803 0.786 0.932 ...</span></span>
-<span><span class="co">##  $ 16_1157206_2714828:'data.frame':  5572 obs. of  7 variables:</span></span>
-<span><span class="co">##   ..$ chrom      : int [1:5572] 16 16 16 16 16 16 16 16 16 16 ...</span></span>
-<span><span class="co">##   ..$ id         : chr [1:5572] "rs187537033" "rs139095010" "rs1609697" "rs145935766" ...</span></span>
-<span><span class="co">##   ..$ pos        : int [1:5572] 1157852 1158836 1158869 1159185 1160727 1160999 1161035 1161048 1161245 1162279 ...</span></span>
-<span><span class="co">##   ..$ alt        : chr [1:5572] "C" "C" "T" "C" ...</span></span>
-<span><span class="co">##   ..$ ref        : chr [1:5572] "T" "T" "C" "T" ...</span></span>
-<span><span class="co">##   ..$ variance   : num [1:5572] 0.025 0.082 0.3457 0.0418 0.0395 ...</span></span>
-<span><span class="co">##   ..$ allele_freq: num [1:5572] 0.984 0.952 0.739 0.974 0.978 ...</span></span></code></pre>
 <p>When running without LD, it takes input of <code>region_info</code> and a data frame <code>ref_snp_info</code> of variant information from the entire genome, and returns processed <code>region_info</code>, <code>snp_info</code>. We have the lists of reference variant information from all the LD matrices in the genome in <a href="https://uchicago.box.com/s/t089or92dkovv0epkrjvxq8r9db9ys99" class="external-link">hg38</a> and <a href="https://uchicago.box.com/s/ufko2gjagcb693dob4khccqubuztb9pz" class="external-link">hg19</a>.</p>
-<div class="sourceCode" id="cb16"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb10"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># use reference SNP information for chr16 in hg38</span></span>
 <span><span class="va">ref_snp_info_file</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/system.file.html" class="external-link">system.file</a></span><span class="op">(</span><span class="st">"extdata/sample_data"</span>, <span class="st">"ukb_b38_0.1_chr16_var_info.Rvar.gz"</span>, package <span class="op">=</span> <span class="st">"ctwas"</span><span class="op">)</span></span>
-<span><span class="va">ref_snp_info</span> <span class="op">&lt;-</span> <span class="fu">data.table</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/data.table/man/fread.html" class="external-link">fread</a></span><span class="op">(</span><span class="va">ref_snp_info_file</span>, sep <span class="op">=</span> <span class="st">"\t"</span><span class="op">)</span></span>
+<span><span class="va">ref_snp_info</span> <span class="op">&lt;-</span> <span class="fu">data.table</span><span class="fu">::</span><span class="fu"><a href="https://rdatatable.gitlab.io/data.table/reference/fread.html" class="external-link">fread</a></span><span class="op">(</span><span class="va">ref_snp_info_file</span>, sep <span class="op">=</span> <span class="st">"\t"</span><span class="op">)</span></span>
 <span><span class="va">res</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/preprocess_region_LD_snp_info.html">preprocess_region_LD_snp_info</a></span><span class="op">(</span><span class="va">region_info</span>, </span>
 <span>                                     ref_snp_info <span class="op">=</span> <span class="va">ref_snp_info</span>, </span>
 <span>                                     chrom <span class="op">=</span> <span class="fl">16</span>, </span>
@@ -312,7 +279,7 @@
 <h3 id="harmonizing-gwas-z-scores-and-the-reference-data">Harmonizing GWAS z-scores and the reference data<a class="anchor" aria-label="anchor" href="#harmonizing-gwas-z-scores-and-the-reference-data"></a>
 </h3>
 <p>The <code><a href="../reference/preprocess_z_snp.html">preprocess_z_snp()</a></code> function harmonizes GWAS z-scores and the reference data based on the included allele information. If <code>drop_multiallelic = TRUE</code>, it will drop multiallelic variants. If <code>drop_strand_ambig = TRUE</code>, it will drop strand ambiguous variants.</p>
-<div class="sourceCode" id="cb17"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb11"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># load z_snp sample data</span></span>
 <span><span class="va">z_snp</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/readRDS.html" class="external-link">readRDS</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/system.file.html" class="external-link">system.file</a></span><span class="op">(</span><span class="st">"extdata/sample_data"</span>, <span class="st">"LDL_example.z_snp.RDS"</span>, package <span class="op">=</span> <span class="st">"ctwas"</span><span class="op">)</span><span class="op">)</span></span>
 <span></span>
@@ -330,11 +297,11 @@
 <p>In this example, we use liver and subcutaneous adipose gene expression models. We preprocess each weight file separately and combine them in the end. We specify PredictDB or FUSION format in <code>weight_format</code> and the specific method in FUSION by <code>method_FUSION</code>. For the expression models, we limit to protein coding genes, by setting <code>filter_protein_coding_genes = TRUE</code>. We set <code>scale_by_ld_variance=TRUE</code> for PredictDB weights because PredictDB assumes the unstandardized genotypes (see the discussion in “Region info” section) For PredictDB models, we set <code>load_predictdb_LD=TRUE</code> to load pre-computed correlations (<code>.txt.gz</code> file) between weight variants. For FUSION models, we set <code>load_predictdb_LD=FALSE</code> to calculate correlations between weight variants with LD reference. It takes a while to calculate correlations using LD reference, and we could set <code>ncore</code> to parallelize the computation.</p>
 <p>In this version of cTWAS, we allow the joint analysis of multiple groups of molecular traits. This could be: eQTL of multiple tissues; or eQTLs, splicing QTLs and other types of QTLs in a single tissue. In a more complex setting, multiple types of QTL data from multiple tissues/cell types. Each group is defined by its “type” (kind of molecular traits), and “context” (tissue, cell type, condition, etc.). So, we specify the <code>type</code> and <code>context</code> arguments for each weight file.</p>
 <p>In this example, we will use liver and subcutaneous adipose gene expression models trained on GTEx v8 in the PredictDB format. We can download both the prediction models (.db) and the covariances between variants in the prediction models (.txt.gz) from the link below. The covariances can optionally be used for computing LD.</p>
-<div class="sourceCode" id="cb18"><pre class="sourceCode bash"><code class="sourceCode bash"><span id="cb18-1"><a href="#cb18-1"></a><span class="co"># download the weights files</span></span>
-<span id="cb18-2"><a href="#cb18-2"></a><span class="fu">wget</span> https://zenodo.org/record/3518299/files/mashr_eqtl.tar</span>
-<span id="cb18-3"><a href="#cb18-3"></a><span class="fu">tar</span> -xvf mashr_eqtl.tar</span></code></pre></div>
+<div class="sourceCode" id="cb12"><pre class="sourceCode bash"><code class="sourceCode bash"><span id="cb12-1"><a href="#cb12-1"></a><span class="co"># download the weights files</span></span>
+<span id="cb12-2"><a href="#cb12-2"></a><span class="fu">wget</span> https://zenodo.org/record/3518299/files/mashr_eqtl.tar</span>
+<span id="cb12-3"><a href="#cb12-3"></a><span class="fu">tar</span> -xvf mashr_eqtl.tar</span></code></pre></div>
 <p>We get a list of processed weights for each weight file, and then we simply concatenate them to get a list of all processed weights from different types or contexts.</p>
-<div class="sourceCode" id="cb19"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb13"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">weight_liver_file</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/system.file.html" class="external-link">system.file</a></span><span class="op">(</span><span class="st">"extdata/sample_data"</span>, </span>
 <span>                                 <span class="st">"expression_Liver.db"</span>, package <span class="op">=</span> <span class="st">"ctwas"</span><span class="op">)</span></span>
 <span><span class="va">weights_liver</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/preprocess_weights.html">preprocess_weights</a></span><span class="op">(</span><span class="va">weight_liver_file</span>,</span>
@@ -376,7 +343,7 @@
 <p>After we have done data preprocessing, we compute z-scores of molecular traits. This step basically performs Transcriptome-wide association studies (TWAS) on each molecular trait with a prediction model. The underlying calculation is based on <a href="https://www.nature.com/articles/s41467-018-03621-1" class="external-link">S-PrediXcan</a>.</p>
 <p>The <code>compute_gene_z</code> function computes z-scores for the molecular traits using preprocessed SNP z-scores (<code>z_snp</code>) and the preprocessed weights. We could set <code>ncore</code> to parallelize the computation.</p>
 <p><em>Note: the software uses the term “gene”, but they could be any molecular trait.</em></p>
-<div class="sourceCode" id="cb20"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb14"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">z_gene</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/compute_gene_z.html">compute_gene_z</a></span><span class="op">(</span><span class="va">z_snp</span>, <span class="va">weights</span>, ncore <span class="op">=</span> <span class="fl">6</span><span class="op">)</span></span>
 <span><span class="co"># saveRDS(z_gene, file = file.path(outputdir, paste0(outname, ".z_gene.RDS")))</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">head</a></span><span class="op">(</span><span class="va">z_gene</span><span class="op">)</span></span></code></pre></div>

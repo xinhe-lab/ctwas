@@ -18,7 +18,7 @@
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">ctwas</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">0.2.25</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">0.2.41</span>
       </span>
     </div>
 
@@ -100,10 +100,7 @@
 <span>  coverage <span class="op">=</span> <span class="fl">0.95</span>,</span>
 <span>  min_abs_corr <span class="op">=</span> <span class="fl">0.5</span>,</span>
 <span>  dedup <span class="op">=</span> <span class="cn">TRUE</span>,</span>
-<span>  squared <span class="op">=</span> <span class="cn">FALSE</span>,</span>
-<span>  check_symmetric <span class="op">=</span> <span class="cn">TRUE</span>,</span>
-<span>  n_purity <span class="op">=</span> <span class="fl">100</span>,</span>
-<span>  <span class="va">use_rfast</span></span>
+<span>  squared <span class="op">=</span> <span class="cn">FALSE</span></span>
 <span><span class="op">)</span></span>
 <span></span>
 <span><span class="fu">susie_get_pip</span><span class="op">(</span><span class="va">res</span>, prune_by_cs <span class="op">=</span> <span class="cn">FALSE</span>, prior_tol <span class="op">=</span> <span class="fl">1e-09</span><span class="op">)</span></span></code></pre></div>
@@ -175,25 +172,6 @@ threshold will be filtered out and not reported.</p></dd>
 <dt>squared</dt>
 <dd><p>If <code>squared = TRUE</code>, report min, mean and
 median of squared correlation instead of the absolute correlation.</p></dd>
-
-
-<dt>check_symmetric</dt>
-<dd><p>If <code>check_symmetric = TRUE</code>, perform a
-check for symmetry of matrix <code>Xcorr</code> when <code>Xcorr</code> is
-provided (not <code>NULL</code>).</p></dd>
-
-
-<dt>n_purity</dt>
-<dd><p>The maximum number of credible set (CS) variables
-used in calculating the correlation (“purity”)
-statistics. When the number of variables included in the CS is
-greater than this number, the CS variables are randomly subsampled.</p></dd>
-
-
-<dt>use_rfast</dt>
-<dd><p>Use the Rfast package for the purity calculations.
-By default <code>use_rfast = TRUE</code> if the Rfast package is
-installed.</p></dd>
 
 
 <dt>prune_by_cs</dt>
@@ -275,39 +253,6 @@ elements:</p>
 
 </dl></div>
 
-    <div id="ref-examples">
-    <h2>Examples</h2>
-    <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/base/Random.html" class="external-link">set.seed</a></span><span class="op">(</span><span class="fl">1</span><span class="op">)</span></span></span>
-<span class="r-in"><span><span class="va">n</span> <span class="op">=</span> <span class="fl">1000</span></span></span>
-<span class="r-in"><span><span class="va">p</span> <span class="op">=</span> <span class="fl">1000</span></span></span>
-<span class="r-in"><span><span class="va">beta</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/rep.html" class="external-link">rep</a></span><span class="op">(</span><span class="fl">0</span>,<span class="va">p</span><span class="op">)</span></span></span>
-<span class="r-in"><span><span class="va">beta</span><span class="op">[</span><span class="fl">1</span><span class="op">:</span><span class="fl">4</span><span class="op">]</span> <span class="op">=</span> <span class="fl">1</span></span></span>
-<span class="r-in"><span><span class="va">X</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/matrix.html" class="external-link">matrix</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/stats/Normal.html" class="external-link">rnorm</a></span><span class="op">(</span><span class="va">n</span><span class="op">*</span><span class="va">p</span><span class="op">)</span>,nrow <span class="op">=</span> <span class="va">n</span>,ncol <span class="op">=</span> <span class="va">p</span><span class="op">)</span></span></span>
-<span class="r-in"><span><span class="va">X</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/scale.html" class="external-link">scale</a></span><span class="op">(</span><span class="va">X</span>,center <span class="op">=</span> <span class="cn">TRUE</span>,scale <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span></span>
-<span class="r-in"><span><span class="va">y</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/drop.html" class="external-link">drop</a></span><span class="op">(</span><span class="va">X</span> <span class="op"><a href="https://rdrr.io/r/base/matmult.html" class="external-link">%*%</a></span> <span class="va">beta</span> <span class="op">+</span> <span class="fu"><a href="https://rdrr.io/r/stats/Normal.html" class="external-link">rnorm</a></span><span class="op">(</span><span class="va">n</span><span class="op">)</span><span class="op">)</span></span></span>
-<span class="r-in"><span><span class="va">s</span> <span class="op">=</span> <span class="fu"><a href="susie.html">susie</a></span><span class="op">(</span><span class="va">X</span>,<span class="va">y</span>,L <span class="op">=</span> <span class="fl">10</span><span class="op">)</span></span></span>
-<span class="r-err co"><span class="r-pr">#&gt;</span> <span class="error">Error in s$V[l, ]:</span> incorrect number of dimensions</span>
-<span class="r-in"><span><span class="fu">susie_get_objective</span><span class="op">(</span><span class="va">s</span><span class="op">)</span></span></span>
-<span class="r-err co"><span class="r-pr">#&gt;</span> <span class="error">Error in susie_get_objective(s):</span> could not find function "susie_get_objective"</span>
-<span class="r-in"><span><span class="fu">susie_get_objective</span><span class="op">(</span><span class="va">s</span>, last_only<span class="op">=</span><span class="cn">FALSE</span><span class="op">)</span></span></span>
-<span class="r-err co"><span class="r-pr">#&gt;</span> <span class="error">Error in susie_get_objective(s, last_only = FALSE):</span> could not find function "susie_get_objective"</span>
-<span class="r-in"><span><span class="fu">susie_get_residual_variance</span><span class="op">(</span><span class="va">s</span><span class="op">)</span></span></span>
-<span class="r-err co"><span class="r-pr">#&gt;</span> <span class="error">Error in susie_get_residual_variance(s):</span> could not find function "susie_get_residual_variance"</span>
-<span class="r-in"><span><span class="fu">susie_get_prior_variance</span><span class="op">(</span><span class="va">s</span><span class="op">)</span></span></span>
-<span class="r-err co"><span class="r-pr">#&gt;</span> <span class="error">Error in susie_get_prior_variance(s):</span> could not find function "susie_get_prior_variance"</span>
-<span class="r-in"><span><span class="fu">susie_get_posterior_mean</span><span class="op">(</span><span class="va">s</span><span class="op">)</span></span></span>
-<span class="r-err co"><span class="r-pr">#&gt;</span> <span class="error">Error in susie_get_posterior_mean(s):</span> could not find function "susie_get_posterior_mean"</span>
-<span class="r-in"><span><span class="fu">susie_get_posterior_sd</span><span class="op">(</span><span class="va">s</span><span class="op">)</span></span></span>
-<span class="r-err co"><span class="r-pr">#&gt;</span> <span class="error">Error in susie_get_posterior_sd(s):</span> could not find function "susie_get_posterior_sd"</span>
-<span class="r-in"><span><span class="fu">susie_get_niter</span><span class="op">(</span><span class="va">s</span><span class="op">)</span></span></span>
-<span class="r-err co"><span class="r-pr">#&gt;</span> <span class="error">Error in susie_get_niter(s):</span> could not find function "susie_get_niter"</span>
-<span class="r-in"><span><span class="fu">susie_get_pip</span><span class="op">(</span><span class="va">s</span><span class="op">)</span></span></span>
-<span class="r-err co"><span class="r-pr">#&gt;</span> <span class="error">Error in susie_get_pip(s):</span> could not find function "susie_get_pip"</span>
-<span class="r-in"><span><span class="fu">susie_get_lfsr</span><span class="op">(</span><span class="va">s</span><span class="op">)</span></span></span>
-<span class="r-err co"><span class="r-pr">#&gt;</span> <span class="error">Error in susie_get_lfsr(s):</span> could not find function "susie_get_lfsr"</span>
-<span class="r-in"><span></span></span>
-</code></pre></div>
-    </div>
   </div>
   <div class="col-md-3 hidden-xs hidden-sm" id="pkgdown-sidebar">
     <nav id="toc" data-toggle="toc" class="sticky-top"><h2 data-toc-skip>Contents</h2>

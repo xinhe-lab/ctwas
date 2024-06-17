@@ -33,7 +33,7 @@
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">ctwas</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">0.2.25</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">0.2.41</span>
       </span>
     </div>
 
@@ -93,7 +93,7 @@
       <h1 data-toc-skip>Post-processing cTWAS results</h1>
                         <h4 data-toc-skip class="author">Kaixuan Luo, Sheng Qian</h4>
             
-            <h4 data-toc-skip class="date">2024-06-06</h4>
+            <h4 data-toc-skip class="date">2024-06-17</h4>
       
       <small class="dont-index">Source: <a href="https://github.com/xinhe-lab/ctwas/blob/multigroup_test/vignettes/postprocessing_ctwas_results.Rmd" class="external-link"><code>vignettes/postprocessing_ctwas_results.Rmd</code></a></small>
       <div class="hidden name"><code>postprocessing_ctwas_results.Rmd</code></div>
@@ -182,16 +182,15 @@
 </h2>
 <p>LD mismatches between GWAS data and the reference LD could lead to false positives in fine-mapping. Diagnostic tools including <a href="https://stephenslab.github.io/susieR/articles/susierss_diagnostic.html" class="external-link">SuSiE-RSS</a>, and <a href="https://github.com/Yves-CHEN/DENTIST/" class="external-link">DENTIST</a>, have been developed to check possible LD mismatch.</p>
 <p>Here, we perform the LD mismatch diagnosis using <a href="https://stephenslab.github.io/susieR/articles/susierss_diagnostic.html" class="external-link">SuSiE-RSS</a> for selected regions. It is an optional step that users could run after finishing the main cTWAS analysis. Users could choose regions of interest, to be confident of the results.</p>
-<p>Here we check regions with total non-SNP PIPs &gt; 0.8:</p>
+<p>e.g. we could select regions with total non-SNP PIPs &gt; 0.8 to run LD mismatch diagnosis:</p>
 <div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">nonSNP_PIP_df</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/compute_region_nonSNP_PIPs.html">compute_region_nonSNP_PIPs</a></span><span class="op">(</span><span class="va">finemap_res</span><span class="op">)</span></span>
-<span><span class="va">selected_nonSNP_PIP_df</span> <span class="op">&lt;-</span> <span class="va">nonSNP_PIP_df</span><span class="op">[</span><span class="fu"><a href="https://rdrr.io/r/base/order.html" class="external-link">order</a></span><span class="op">(</span><span class="va">nonSNP_PIP_df</span><span class="op">$</span><span class="va">nonSNP_PIP</span>, decreasing <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span>,<span class="op">]</span></span>
-<span><span class="va">selected_region_ids</span> <span class="op">&lt;-</span> <span class="va">selected_nonSNP_PIP_df</span><span class="op">[</span><span class="va">selected_nonSNP_PIP_df</span><span class="op">$</span><span class="va">nonSNP_PIP</span></span>
-<span> <span class="op">&gt;</span> <span class="fl">0.8</span>, <span class="st">"region_id"</span><span class="op">]</span></span></code></pre></div>
+<code class="sourceCode R"><span><span class="va">nonSNP_PIPs</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/compute_region_nonSNP_PIPs.html">compute_region_nonSNP_PIPs</a></span><span class="op">(</span><span class="va">finemap_res</span><span class="op">)</span></span>
+<span><span class="va">selected_region_ids</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/names.html" class="external-link">names</a></span><span class="op">(</span><span class="va">nonSNP_PIPs</span><span class="op">[</span><span class="va">nonSNP_PIPs</span> <span class="op">&gt;=</span> <span class="fl">0.8</span><span class="op">]</span><span class="op">)</span></span></code></pre></div>
 <p>We perform LD mismatch diagnosis for these regions using SuSiE RSS to detect problematic SNPs. This returns a list of problematic SNPs (diagnostic test <code>p-value &lt; 5e-8</code> by default), flipped SNPs, and the test statistics of <code>kriging_rss</code> function from SuSiE-RSS.</p>
 <div class="sourceCode" id="cb6"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># perform LD mismatch diagnosis for the selected regions</span></span>
-<span><span class="va">res</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/diagnose_ld_mismatch_susie.html">diagnose_ld_mismatch_susie</a></span><span class="op">(</span><span class="va">z_snp</span>, <span class="va">region_ids</span>, <span class="va">LD_info</span>, <span class="va">snp_info</span>, <span class="va">gwas_n</span>, </span>
+<span><span class="va">res</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/diagnose_ld_mismatch_susie.html">diagnose_ld_mismatch_susie</a></span><span class="op">(</span><span class="va">z_snp</span>, <span class="va">selected_region_ids</span>, </span>
+<span>                                  <span class="va">LD_info</span>, <span class="va">snp_info</span>, <span class="va">gwas_n</span>, </span>
 <span>                                  ncore <span class="op">=</span> <span class="va">ncore</span>, p_diff_thresh <span class="op">=</span> <span class="fl">5e-8</span><span class="op">)</span></span>
 <span><span class="va">problematic_snps</span> <span class="op">&lt;-</span> <span class="va">res</span><span class="op">$</span><span class="va">problematic_snps</span></span>
 <span><span class="va">flipped_snps</span> <span class="op">&lt;-</span> <span class="va">res</span><span class="op">$</span><span class="va">flipped_snps</span></span>

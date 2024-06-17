@@ -17,7 +17,7 @@
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">ctwas</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">0.2.25</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">0.2.41</span>
       </span>
     </div>
 
@@ -84,7 +84,6 @@
 <span>  L <span class="op">=</span> <span class="fl">5</span>,</span>
 <span>  group_prior <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  group_prior_var <span class="op">=</span> <span class="cn">NULL</span>,</span>
-<span>  groups <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  use_null_weight <span class="op">=</span> <span class="cn">TRUE</span>,</span>
 <span>  coverage <span class="op">=</span> <span class="fl">0.95</span>,</span>
 <span>  min_abs_corr <span class="op">=</span> <span class="fl">0.5</span>,</span>
@@ -92,6 +91,8 @@
 <span>  force_compute_cor <span class="op">=</span> <span class="cn">FALSE</span>,</span>
 <span>  save_cor <span class="op">=</span> <span class="cn">FALSE</span>,</span>
 <span>  cor_dir <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  LD_format <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"rds"</span>, <span class="st">"rdata"</span>, <span class="st">"csv"</span>, <span class="st">"txt"</span>, <span class="st">"custom"</span><span class="op">)</span>,</span>
+<span>  LD_loader <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  include_cs_index <span class="op">=</span> <span class="cn">TRUE</span>,</span>
 <span>  verbose <span class="op">=</span> <span class="cn">FALSE</span>,</span>
 <span>  logfile <span class="op">=</span> <span class="cn">NULL</span>,</span>
@@ -122,7 +123,7 @@
 
 
 <dt>L</dt>
-<dd><p>the number of effects for susie during the fine mapping steps</p></dd>
+<dd><p>the number of effects or a vector of number of effects for each region.</p></dd>
 
 
 <dt>group_prior</dt>
@@ -131,10 +132,6 @@
 
 <dt>group_prior_var</dt>
 <dd><p>a vector of two prior variances for SNPs and gene effects.</p></dd>
-
-
-<dt>groups</dt>
-<dd><p>a vector of group names for group_prior and group_prior_var.</p></dd>
 
 
 <dt>use_null_weight</dt>
@@ -166,6 +163,19 @@ genotype data in genetic studies.</p></dd>
 
 <dt>cor_dir</dt>
 <dd><p>a string, the directory to store correlation (R) matrices</p></dd>
+
+
+<dt>LD_format</dt>
+<dd><p>file format for LD matrix. If "custom", use a user defined
+<code>LD_loader()</code> function to load LD matrix.</p></dd>
+
+
+<dt>LD_loader</dt>
+<dd><p>a user defined function to load LD matrix when <code>LD_format = "custom"</code>.</p></dd>
+
+
+<dt>include_cs_index</dt>
+<dd><p>TRUE/FALSE. If TRUE, add cs_index to finemapping results.</p></dd>
 
 
 <dt>verbose</dt>

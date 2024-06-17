@@ -33,7 +33,7 @@
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">ctwas</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">0.2.25</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">0.2.41</span>
       </span>
     </div>
 
@@ -93,7 +93,7 @@
       <h1 data-toc-skip>Simple cTWAS tutorial</h1>
                         <h4 data-toc-skip class="author">Kaixuan Luo, Sheng Qian</h4>
             
-            <h4 data-toc-skip class="date">2024-06-06</h4>
+            <h4 data-toc-skip class="date">2024-06-17</h4>
       
       <small class="dont-index">Source: <a href="https://github.com/xinhe-lab/ctwas/blob/multigroup_test/vignettes/simple_ctwas_tutorial.Rmd" class="external-link"><code>vignettes/simple_ctwas_tutorial.Rmd</code></a></small>
       <div class="hidden name"><code>simple_ctwas_tutorial.Rmd</code></div>
@@ -144,13 +144,12 @@
 <div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">example_chrom</span> <span class="op">&lt;-</span> <span class="fl">16</span></span>
 <span><span class="va">ref_snp_info_file</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/system.file.html" class="external-link">system.file</a></span><span class="op">(</span><span class="st">"extdata/sample_data"</span>, <span class="st">"ukb_b38_0.1_chr16_var_info.Rvar.gz"</span>, package <span class="op">=</span> <span class="st">"ctwas"</span><span class="op">)</span></span>
-<span><span class="va">ref_snp_info</span> <span class="op">&lt;-</span> <span class="fu">data.table</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/data.table/man/fread.html" class="external-link">fread</a></span><span class="op">(</span><span class="va">ref_snp_info_file</span>, sep <span class="op">=</span> <span class="st">"\t"</span><span class="op">)</span></span>
+<span><span class="va">ref_snp_info</span> <span class="op">&lt;-</span> <span class="fu">data.table</span><span class="fu">::</span><span class="fu"><a href="https://rdatatable.gitlab.io/data.table/reference/fread.html" class="external-link">fread</a></span><span class="op">(</span><span class="va">ref_snp_info_file</span>, sep <span class="op">=</span> <span class="st">"\t"</span><span class="op">)</span></span>
 <span></span>
 <span><span class="va">res</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/preprocess_region_LD_snp_info.html">preprocess_region_LD_snp_info</a></span><span class="op">(</span><span class="va">region_info</span>, </span>
 <span>                                     ref_snp_info <span class="op">=</span> <span class="va">ref_snp_info</span>, </span>
 <span>                                     chrom <span class="op">=</span> <span class="va">example_chrom</span>, </span>
-<span>                                     use_LD <span class="op">=</span> <span class="cn">FALSE</span>, </span>
-<span>                                     ncore <span class="op">=</span> <span class="fl">6</span><span class="op">)</span></span>
+<span>                                     use_LD <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span></span>
 <span><span class="va">region_info</span> <span class="op">&lt;-</span> <span class="va">res</span><span class="op">$</span><span class="va">region_info</span></span>
 <span><span class="va">snp_info</span> <span class="op">&lt;-</span> <span class="va">res</span><span class="op">$</span><span class="va">snp_info</span></span>
 <span></span>
@@ -174,14 +173,14 @@
 <span>                          <span class="va">snp_info</span>, </span>
 <span>                          drop_multiallelic <span class="op">=</span> <span class="cn">TRUE</span>, </span>
 <span>                          drop_strand_ambig <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span></code></pre></div>
-<pre><code><span><span class="co">## 2024-06-06 20:39:10 INFO::Preprocessing z_snp...</span></span>
-<span><span class="co">## 2024-06-06 20:39:11 INFO::z_snp has 407828 variants in total</span></span>
-<span><span class="co">## 2024-06-06 20:39:11 INFO::267361 variants left after filtering by snp_info</span></span>
-<span><span class="co">## 2024-06-06 20:39:11 INFO::Drop 30 multiallelic variants</span></span>
-<span><span class="co">## 2024-06-06 20:39:11 INFO::Harmonize 267331 variants in both GWAS and LD reference</span></span>
-<span><span class="co">## 2024-06-06 20:39:12 INFO::Flip signs for 267289 (99.98%) variants</span></span>
-<span><span class="co">## 2024-06-06 20:39:12 INFO::Remove 45738 strand ambiguous variants</span></span>
-<span><span class="co">## 2024-06-06 20:39:12 INFO::221593 variants left after preprocessing and harmonization.</span></span></code></pre>
+<pre><code><span><span class="co">## 2024-06-17 14:07:38 INFO::Preprocessing z_snp...</span></span>
+<span><span class="co">## 2024-06-17 14:07:38 INFO::z_snp has 407828 variants in total</span></span>
+<span><span class="co">## 2024-06-17 14:07:38 INFO::267361 variants left after filtering by snp_info</span></span>
+<span><span class="co">## 2024-06-17 14:07:38 INFO::Drop 30 multiallelic variants</span></span>
+<span><span class="co">## 2024-06-17 14:07:38 INFO::Harmonize 267331 variants in both GWAS and LD reference</span></span>
+<span><span class="co">## 2024-06-17 14:07:39 INFO::Flip signs for 267289 (99.98%) variants</span></span>
+<span><span class="co">## 2024-06-17 14:07:39 INFO::Remove 45738 strand ambiguous variants</span></span>
+<span><span class="co">## 2024-06-17 14:07:39 INFO::221593 variants left after preprocessing and harmonization.</span></span></code></pre>
 </div>
 <div class="section level3">
 <h3 id="harmonizing-prediction-models-and-the-reference-data">Harmonizing prediction models and the reference data<a class="anchor" aria-label="anchor" href="#harmonizing-prediction-models-and-the-reference-data"></a>
@@ -204,14 +203,14 @@
 <span>                                    scale_by_ld_variance <span class="op">=</span> <span class="cn">TRUE</span>,</span>
 <span>                                    load_predictdb_LD <span class="op">=</span> <span class="cn">TRUE</span>,</span>
 <span>                                    filter_protein_coding_genes <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span></code></pre></div>
-<pre><code><span><span class="co">## 2024-06-06 20:39:13 INFO::Load weight: /tmp/jobs/40126978/Rtmp2H5UrK/temp_libpath4b5b2313bcffe/ctwas/extdata/sample_data/expression_Liver.db</span></span>
-<span><span class="co">## 2024-06-06 20:39:13 INFO::type: expression</span></span>
-<span><span class="co">## 2024-06-06 20:39:13 INFO::context: liver</span></span>
-<span><span class="co">## 2024-06-06 20:39:13 INFO::Keep protein coding genes only</span></span>
-<span><span class="co">## 2024-06-06 20:39:13 INFO::Number of genes with weights provided: 11479 in expression_Liver</span></span>
-<span><span class="co">## 2024-06-06 20:39:13 INFO::Number of variants in weights: 16929</span></span>
-<span><span class="co">## 2024-06-06 20:39:13 INFO::529 variants and 410 genes left after intersecting with LD reference and GWAS z_snp</span></span>
-<span><span class="co">## 2024-06-06 20:39:13 INFO::Harmonizing weights with LD reference ...</span></span></code></pre>
+<pre><code><span><span class="co">## 2024-06-17 14:07:40 INFO::Load weight: /tmp/jobs/40519124/RtmpYbPq7Z/temp_libpathb64548bdfda/ctwas/extdata/sample_data/expression_Liver.db</span></span>
+<span><span class="co">## 2024-06-17 14:07:40 INFO::type: expression</span></span>
+<span><span class="co">## 2024-06-17 14:07:40 INFO::context: liver</span></span>
+<span><span class="co">## 2024-06-17 14:07:40 INFO::Keep protein coding genes only</span></span>
+<span><span class="co">## 2024-06-17 14:07:40 INFO::Number of genes with weights provided: 11479 in expression_Liver</span></span>
+<span><span class="co">## 2024-06-17 14:07:40 INFO::Number of variants in weights: 16929</span></span>
+<span><span class="co">## 2024-06-17 14:07:40 INFO::529 variants and 410 genes left after filtering by GWAS and reference SNPs</span></span>
+<span><span class="co">## 2024-06-17 14:07:40 INFO::Harmonizing weights with LD reference ...</span></span></code></pre>
 <div class="sourceCode" id="cb11"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">weight_adipose_file</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/system.file.html" class="external-link">system.file</a></span><span class="op">(</span><span class="st">"extdata/sample_data"</span>, <span class="st">"expression_Adipose_Subcutaneous.db"</span>, package <span class="op">=</span> <span class="st">"ctwas"</span><span class="op">)</span></span>
 <span></span>
@@ -227,14 +226,15 @@
 <span>                                      scale_by_ld_variance <span class="op">=</span> <span class="cn">TRUE</span>,</span>
 <span>                                      load_predictdb_LD <span class="op">=</span> <span class="cn">TRUE</span>,</span>
 <span>                                      filter_protein_coding_genes <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span></code></pre></div>
-<pre><code><span><span class="co">## 2024-06-06 20:39:14 INFO::Load weight: /tmp/jobs/40126978/Rtmp2H5UrK/temp_libpath4b5b2313bcffe/ctwas/extdata/sample_data/expression_Adipose_Subcutaneous.db</span></span>
-<span><span class="co">## 2024-06-06 20:39:14 INFO::type: expression</span></span>
-<span><span class="co">## 2024-06-06 20:39:14 INFO::context: adipose</span></span>
-<span><span class="co">## 2024-06-06 20:39:14 INFO::Keep protein coding genes only</span></span>
-<span><span class="co">## 2024-06-06 20:39:14 INFO::Number of genes with weights provided: 13102 in expression_Adipose_Subcutaneous</span></span>
-<span><span class="co">## 2024-06-06 20:39:14 INFO::Number of variants in weights: 23737</span></span>
-<span><span class="co">## 2024-06-06 20:39:14 INFO::720 variants and 484 genes left after intersecting with LD reference and GWAS z_snp</span></span>
-<span><span class="co">## 2024-06-06 20:39:14 INFO::Harmonizing weights with LD reference ...</span></span></code></pre>
+<pre><code><span><span class="co">## 2024-06-17 14:07:41 INFO::Load weight: /tmp/jobs/40519124/RtmpYbPq7Z/temp_libpathb64548bdfda/ctwas/extdata/sample_data/expression_Adipose_Subcutaneous.db</span></span>
+<span><span class="co">## 2024-06-17 14:07:41 INFO::type: expression</span></span>
+<span><span class="co">## 2024-06-17 14:07:41 INFO::context: adipose</span></span>
+<span><span class="co">## 2024-06-17 14:07:41 INFO::Keep protein coding genes only</span></span>
+<span><span class="co">## 2024-06-17 14:07:41 INFO::Number of genes with weights provided: 13102 in expression_Adipose_Subcutaneous</span></span>
+<span><span class="co">## 2024-06-17 14:07:41 INFO::Number of variants in weights: 23737</span></span>
+<span><span class="co">## 2024-06-17 14:07:41 INFO::720 variants and 484 genes left after filtering by GWAS and reference SNPs</span></span>
+<span><span class="co">## 2024-06-17 14:07:41 INFO::Harmonizing weights with LD reference ...</span></span>
+<span><span class="co">## 2024-06-17 14:07:43 INFO::Variant positions in ENSG00000153786.12 weights are different from positions in snp_info. Use the positions in snp_info instead.</span></span></code></pre>
 <div class="sourceCode" id="cb13"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># concatenate weights from different types or contexts</span></span>
 <span><span class="va">weights</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="va">weights_liver</span>, <span class="va">weights_adipose</span><span class="op">)</span></span></code></pre></div>
@@ -324,9 +324,9 @@
 <span><span class="va">ctwas_parameters</span><span class="op">$</span><span class="va">attributable_pve</span></span></code></pre></div>
 <pre><code><span><span class="co">##   expression|liver expression|adipose                SNP </span></span>
 <span><span class="co">##          0.6183502          0.2124807          0.1691691</span></span></code></pre>
-<p>Plot convergence</p>
+<p>Make convergence plots of estimated parameters</p>
 <div class="sourceCode" id="cb29"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">ctwas_parameters</span><span class="op">$</span><span class="va">convergence_plot</span></span></code></pre></div>
+<code class="sourceCode R"><span><span class="fu"><a href="../reference/make_convergence_plots.html">make_convergence_plots</a></span><span class="op">(</span><span class="va">param</span>, <span class="va">gwas_n</span><span class="op">)</span></span></code></pre></div>
 <div class="figure" style="text-align: center">
 <img src="simple_ctwas_tutorial_files/figure-html/convergence_plot-1.png" alt="&amp;nbsp;" width="840"><p class="caption">
  
@@ -337,79 +337,80 @@
 <div class="section level2">
 <h2 id="interpreting-ctwas-results">Interpreting cTWAS results<a class="anchor" aria-label="anchor" href="#interpreting-ctwas-results"></a>
 </h2>
-<p>We need gene annotations from the Ensembl database. We use <code>EnsDb.Hsapiens.v86</code> for the example data, please choose the Ensembl database for your specific data.</p>
+<p>To interpret and visualize the results, we first need to add gene annotations (gene names and gene types) to the finemapping result.</p>
+<p>We need a user defined data frame <code>gene_annot</code> that should contain the following columns: ‘chrom’, ‘start’, ‘end’, ‘gene_id’, ‘gene_name’ and ‘gene_type’ for each gene or molecular trait.</p>
+<p>If you only used gene expression data, you can use the following function to obtain the gene annotations from the Ensembl database. We use <code>EnsDb.Hsapiens.v86</code> for the example data, please choose the Ensembl database for your specific data.</p>
 <div class="sourceCode" id="cb30"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va">EnsDb.Hsapiens.v86</span><span class="op">)</span></span></code></pre></div>
-<p>To interpret the results, we add gene names (from Ensembl database) to the finemapping result, and use mid-points to represent gene positions.</p>
-<div class="sourceCode" id="cb31"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="co"># load gene info database</span></span>
+<code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va">EnsDb.Hsapiens.v86</span><span class="op">)</span></span>
 <span><span class="va">ens_db</span> <span class="op">&lt;-</span> <span class="va">EnsDb.Hsapiens.v86</span></span>
-<span></span>
-<span><span class="co"># add gene names and use gene mid-points to represent gene positions</span></span>
-<span><span class="va">finemap_res</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/anno_finemap_res.html">anno_finemap_res</a></span><span class="op">(</span><span class="va">finemap_res</span>, <span class="va">snp_info</span>, <span class="va">ens_db</span>, use_gene_pos <span class="op">=</span> <span class="st">"mid"</span><span class="op">)</span></span></code></pre></div>
+<span><span class="va">finemap_gene_res</span> <span class="op">&lt;-</span> <span class="va">finemap_res</span><span class="op">[</span><span class="va">finemap_res</span><span class="op">$</span><span class="va">type</span><span class="op">!=</span><span class="st">"SNP"</span>,<span class="op">]</span></span>
+<span><span class="va">gene_ids</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/unique.html" class="external-link">unique</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/lapply.html" class="external-link">sapply</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/strsplit.html" class="external-link">strsplit</a></span><span class="op">(</span><span class="va">finemap_gene_res</span><span class="op">$</span><span class="va">id</span>, split <span class="op">=</span> <span class="st">"[|]"</span><span class="op">)</span>, <span class="st">"[["</span>, <span class="fl">1</span><span class="op">)</span><span class="op">)</span></span>
+<span><span class="va">gene_annot</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/get_gene_annot_from_ens_db.html">get_gene_annot_from_ens_db</a></span><span class="op">(</span><span class="va">ens_db</span>, <span class="va">gene_ids</span><span class="op">)</span></span></code></pre></div>
+<p>We then use <code><a href="../reference/anno_finemap_res.html">anno_finemap_res()</a></code> function to add gene annotations to the finemapping result, and use gene mid-points to represent gene positions.</p>
+<div class="sourceCode" id="cb31"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="co"># add gene annotations and use gene mid-points to represent gene positions</span></span>
+<span><span class="va">finemap_res</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/anno_finemap_res.html">anno_finemap_res</a></span><span class="op">(</span><span class="va">finemap_res</span>, </span>
+<span>                                <span class="va">snp_info</span>,</span>
+<span>                                <span class="va">gene_annot</span>,</span>
+<span>                                use_gene_pos <span class="op">=</span> <span class="st">"mid"</span><span class="op">)</span></span></code></pre></div>
+<pre><code><span><span class="co">## 2024-06-17 14:07:47 INFO::Annotating ctwas finemapping result ...</span></span>
+<span><span class="co">## 2024-06-17 14:07:47 INFO::add gene_name and gene_type</span></span>
+<span><span class="co">## 2024-06-17 14:07:47 INFO::use gene mid positions</span></span>
+<span><span class="co">## 2024-06-17 14:07:47 INFO::add SNP positions from snp_info</span></span></code></pre>
 <p>We list all molecular traits with PIP &gt; 0.8, which is the threshold we used in the paper.</p>
-<div class="sourceCode" id="cb32"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb33"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># select PIP &gt; 0.8</span></span>
 <span><span class="va">sig_finemap_res</span> <span class="op">&lt;-</span> <span class="va">finemap_res</span><span class="op">[</span><span class="va">finemap_res</span><span class="op">$</span><span class="va">type</span><span class="op">!=</span><span class="st">"SNP"</span> <span class="op">&amp;</span> <span class="va">finemap_res</span><span class="op">$</span><span class="va">susie_pip</span> <span class="op">&gt;</span> <span class="fl">0.8</span>,<span class="op">]</span></span>
 <span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">head</a></span><span class="op">(</span><span class="va">sig_finemap_res</span><span class="op">[</span><span class="fu"><a href="https://rdrr.io/r/base/order.html" class="external-link">order</a></span><span class="op">(</span><span class="op">-</span><span class="va">sig_finemap_res</span><span class="op">$</span><span class="va">susie_pip</span><span class="op">)</span>,<span class="op">]</span><span class="op">)</span></span></code></pre></div>
-<pre><code><span><span class="co">##      chrom      pos                                                 id</span></span>
-<span><span class="co">## 5338    16 72070235                 ENSG00000261701.6|expression_Liver</span></span>
-<span><span class="co">## 36      16 56972848 ENSG00000087237.10|expression_Adipose_Subcutaneous</span></span>
-<span><span class="co">##            type context              group         z            region_id</span></span>
-<span><span class="co">## 5338 expression   liver   expression|liver -18.40315 16_71020125_72901251</span></span>
-<span><span class="co">## 36   expression adipose expression|adipose  13.74984 16_55869862_57630418</span></span>
-<span><span class="co">##      susie_pip      mu2         gene_id gene_name</span></span>
-<span><span class="co">## 5338         1 335.4591 ENSG00000261701       HPR</span></span>
-<span><span class="co">## 36           1 187.7014 ENSG00000087237      CETP</span></span></code></pre>
+<pre><code><span><span class="co">##    chrom      pos            gene_id gene_name      gene_type</span></span>
+<span><span class="co">## 56    16 72070235  ENSG00000261701.6       HPR protein_coding</span></span>
+<span><span class="co">## 36    16 56972848 ENSG00000087237.10      CETP protein_coding</span></span>
+<span><span class="co">##                                                    id       type context</span></span>
+<span><span class="co">## 56                 ENSG00000261701.6|expression_Liver expression   liver</span></span>
+<span><span class="co">## 36 ENSG00000087237.10|expression_Adipose_Subcutaneous expression adipose</span></span>
+<span><span class="co">##                 group         z            region_id susie_pip      mu2</span></span>
+<span><span class="co">## 56   expression|liver -18.40315 16_71020125_72901251         1 335.4591</span></span>
+<span><span class="co">## 36 expression|adipose  13.74984 16_55869862_57630418         1 187.7014</span></span></code></pre>
 <p>When we have multiple contexts (tissues), it is useful to evaluate the combined PIP for each molecular trait across contexts:</p>
-<div class="sourceCode" id="cb34"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="co"># combine PIPs across contexts (tissues)</span></span>
-<span><span class="va">combined_gene_pips</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/sum_pip_across_contexts.html">sum_pip_across_contexts</a></span><span class="op">(</span><span class="va">finemap_res</span><span class="op">)</span></span>
-<span></span>
-<span><span class="co"># select combined PIP &gt; 0.8</span></span>
-<span><span class="va">sig_gene_pips_df</span> <span class="op">&lt;-</span> <span class="va">combined_gene_pips</span><span class="op">[</span><span class="va">combined_gene_pips</span><span class="op">$</span><span class="va">combined_pip</span> <span class="op">&gt;</span> <span class="fl">0.8</span>, <span class="op">]</span></span>
-<span></span>
-<span><span class="co"># list genes with combined PIP &gt; 0.8 or top 20 genes with highest combined PIPs</span></span>
-<span><span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">head</a></span><span class="op">(</span><span class="va">combined_gene_pips</span>, <span class="fu"><a href="https://rdrr.io/r/base/Extremes.html" class="external-link">max</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/nrow.html" class="external-link">nrow</a></span><span class="op">(</span><span class="va">sig_gene_pips_df</span><span class="op">)</span>, <span class="fl">20</span><span class="op">)</span><span class="op">)</span></span></code></pre></div>
-<pre><code><span><span class="co">##            gene_id gene_name combined_pip    liver_pip adipose_pip</span></span>
-<span><span class="co">## 42 ENSG00000261701       HPR 1.000000e+00 1.000000e+00           0</span></span>
-<span><span class="co">## 3  ENSG00000087237      CETP 1.000000e+00 0.000000e+00           1</span></span>
-<span><span class="co">## 22 ENSG00000140853     NLRC5 1.238778e-10 1.238778e-10           0</span></span>
-<span><span class="co">## 1  ENSG00000005194   CIAPIN1 0.000000e+00 0.000000e+00           0</span></span>
-<span><span class="co">## 2  ENSG00000051108   HERPUD1 0.000000e+00 0.000000e+00           0</span></span>
-<span><span class="co">## 4  ENSG00000087250       MT3 0.000000e+00 0.000000e+00           0</span></span>
-<span><span class="co">## 5  ENSG00000087258     GNAO1 0.000000e+00 0.000000e+00           0</span></span>
-<span><span class="co">## 6  ENSG00000087263    OGFOD1 0.000000e+00           NA           0</span></span>
-<span><span class="co">## 7  ENSG00000088682      COQ9 0.000000e+00 0.000000e+00           0</span></span>
-<span><span class="co">## 8  ENSG00000102900     NUP93 0.000000e+00 0.000000e+00           0</span></span>
-<span><span class="co">## 9  ENSG00000102934      PLLP 0.000000e+00 0.000000e+00           0</span></span>
-<span><span class="co">## 10 ENSG00000102967     DHODH 0.000000e+00           NA           0</span></span>
-<span><span class="co">## 11 ENSG00000102970     CCL17 0.000000e+00 0.000000e+00          NA</span></span>
-<span><span class="co">## 12 ENSG00000102984    ZNF821 0.000000e+00 0.000000e+00           0</span></span>
-<span><span class="co">## 13 ENSG00000125124      BBS2 0.000000e+00 0.000000e+00           0</span></span>
-<span><span class="co">## 14 ENSG00000125144      MT1G 0.000000e+00           NA           0</span></span>
-<span><span class="co">## 15 ENSG00000125148      MT2A 0.000000e+00           NA           0</span></span>
-<span><span class="co">## 16 ENSG00000125170      DOK4 0.000000e+00 0.000000e+00           0</span></span>
-<span><span class="co">## 17 ENSG00000135736  CCDC102A 0.000000e+00 0.000000e+00           0</span></span>
-<span><span class="co">## 18 ENSG00000140829     DHX38 0.000000e+00           NA           0</span></span></code></pre>
+<div class="sourceCode" id="cb35"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="co"># combine gene PIPs by context</span></span>
+<span><span class="va">combined_pip_by_context</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/combine_gene_pips.html">combine_gene_pips</a></span><span class="op">(</span><span class="va">finemap_res</span>, </span>
+<span>                                             by <span class="op">=</span> <span class="st">"context"</span>,</span>
+<span>                                             filter_protein_coding_genes <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">head</a></span><span class="op">(</span><span class="va">combined_pip_by_context</span><span class="op">)</span></span></code></pre></div>
+<pre><code><span><span class="co">##    gene_name combined_pip liver_pip adipose_pip</span></span>
+<span><span class="co">## 22       HPR            1         1           0</span></span>
+<span><span class="co">## 9       CETP            1         0           1</span></span>
+<span><span class="co">## 33     NLRC5            0         0           0</span></span>
+<span><span class="co">## 1     ADGRG1            0        NA           0</span></span>
+<span><span class="co">## 2       AMFR            0         0          NA</span></span>
+<span><span class="co">## 3     ATXN1L            0         0           0</span></span></code></pre>
+<div class="sourceCode" id="cb37"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="co"># select combined PIP &gt; 0.8</span></span>
+<span><span class="va">sig_gene_pips_df</span> <span class="op">&lt;-</span> <span class="va">combined_pip_by_context</span><span class="op">[</span><span class="va">combined_pip_by_context</span><span class="op">$</span><span class="va">combined_pip</span> <span class="op">&gt;</span> <span class="fl">0.8</span>, <span class="op">]</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">head</a></span><span class="op">(</span><span class="va">sig_gene_pips_df</span><span class="op">)</span></span></code></pre></div>
+<pre><code><span><span class="co">##    gene_name combined_pip liver_pip adipose_pip</span></span>
+<span><span class="co">## 22       HPR            1         1           0</span></span>
+<span><span class="co">## 9       CETP            1         0           1</span></span></code></pre>
 </div>
 <div class="section level2">
 <h2 id="visualizing-ctwas-results">Visualizing cTWAS results<a class="anchor" aria-label="anchor" href="#visualizing-ctwas-results"></a>
 </h2>
-<p>We could make locus plots for regions of interest, and zoom in the region by specifying the <code>locus_range</code>.</p>
-<div class="sourceCode" id="cb36"><pre class="downlit sourceCode r">
+<p>We could make locus plots for regions of interest. We could zoom in the region by specifying the <code>locus_range</code>.</p>
+<div class="sourceCode" id="cb39"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="../reference/make_locusplot.html">make_locusplot</a></span><span class="op">(</span><span class="va">finemap_res</span>,</span>
 <span>               region_id <span class="op">=</span> <span class="st">"16_71020125_72901251"</span>,</span>
 <span>               weights <span class="op">=</span> <span class="va">weights</span>,</span>
 <span>               ens_db <span class="op">=</span> <span class="va">ens_db</span>,</span>
-<span>               use_LD <span class="op">=</span> <span class="cn">FALSE</span>,</span>
-<span>               pip_thresh <span class="op">=</span> <span class="fl">0.8</span>,</span>
-<span>               locus_range <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">71.6e6</span>,<span class="fl">72.4e6</span><span class="op">)</span><span class="op">)</span></span></code></pre></div>
-<pre><code><span><span class="co">## 2024-06-06 20:39:20 INFO::focus gene: HPR</span></span>
-<span><span class="co">## 2024-06-06 20:39:20 INFO::focus id: ENSG00000261701.6|expression_Liver</span></span>
-<span><span class="co">## 2024-06-06 20:39:20 INFO::locus_range: 71600000,72400000</span></span>
-<span><span class="co">## 2024-06-06 20:39:20 INFO::QTL positions: 72063820,72063928</span></span></code></pre>
+<span>               locus_range <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">71.6e6</span>,<span class="fl">72.4e6</span><span class="op">)</span>,</span>
+<span>               highlight_pip <span class="op">=</span> <span class="fl">0.8</span>,</span>
+<span>               legend.position <span class="op">=</span> <span class="st">"top"</span><span class="op">)</span></span></code></pre></div>
+<pre><code><span><span class="co">## 2024-06-17 14:07:47 INFO::focus gene: HPR</span></span>
+<span><span class="co">## 2024-06-17 14:07:47 INFO::focus id: ENSG00000261701.6|expression_Liver</span></span>
+<span><span class="co">## 2024-06-17 14:07:47 INFO::plot locus range: chr16 71600000,72400000</span></span>
+<span><span class="co">## 2024-06-17 14:07:47 INFO::HPR liver expression QTLs</span></span>
+<span><span class="co">## 2024-06-17 14:07:47 INFO::QTL positions: 72063820,72063928</span></span></code></pre>
 <div class="figure" style="text-align: center">
 <img src="simple_ctwas_tutorial_files/figure-html/locus_plot-1.png" alt="&amp;nbsp;" width="1200"><p class="caption">
  

@@ -17,7 +17,7 @@
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">ctwas</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">0.2.25</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">0.2.41</span>
       </span>
     </div>
 
@@ -84,7 +84,6 @@
 <span>  <span class="va">snp_info</span>,</span>
 <span>  LD_info <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  weight_format <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"PredictDB"</span>, <span class="st">"FUSION"</span><span class="op">)</span>,</span>
-<span>  ncore <span class="op">=</span> <span class="fl">1</span>,</span>
 <span>  drop_strand_ambig <span class="op">=</span> <span class="cn">TRUE</span>,</span>
 <span>  scale_by_ld_variance <span class="op">=</span> <span class="cn">FALSE</span>,</span>
 <span>  filter_protein_coding_genes <span class="op">=</span> <span class="cn">FALSE</span>,</span>
@@ -92,6 +91,9 @@
 <span>  method_FUSION <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"lasso"</span>, <span class="st">"enet"</span>, <span class="st">"top1"</span>, <span class="st">"blup"</span><span class="op">)</span>,</span>
 <span>  fusion_genome_version <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"b38"</span>, <span class="st">"b37"</span><span class="op">)</span>,</span>
 <span>  fusion_top_n_snps <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  LD_format <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"rds"</span>, <span class="st">"rdata"</span>, <span class="st">"csv"</span>, <span class="st">"txt"</span>, <span class="st">"custom"</span><span class="op">)</span>,</span>
+<span>  LD_loader <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  ncore <span class="op">=</span> <span class="fl">1</span>,</span>
 <span>  logfile <span class="op">=</span> <span class="cn">NULL</span></span>
 <span><span class="op">)</span></span></code></pre></div>
     </div>
@@ -135,6 +137,12 @@ with columns "chrom", "id", "pos", "alt", "ref", and "region_id".</p></dd>
 <dd><p>TRUE/FALSE, if TRUE remove strand ambiguous variants (A/T, G/C).</p></dd>
 
 
+<dt>scale_by_ld_variance</dt>
+<dd><p>TRUE/FALSE, if TRUE scale PredictDB weights by the variance.
+This is because PredictDB weights assume that variant genotypes are not
+standardized, but our implementation assumes standardized variant genotypes.</p></dd>
+
+
 <dt>filter_protein_coding_genes</dt>
 <dd><p>TRUE/FALSE. If TRUE, keep protein coding genes only. This option is only for PredictDB weights</p></dd>
 
@@ -153,6 +161,19 @@ with columns "chrom", "id", "pos", "alt", "ref", and "region_id".</p></dd>
 
 <dt>fusion_top_n_snps</dt>
 <dd><p>a number, specifying the top n weight SNPs included in FUSION models. If NULL, using all weight SNPs</p></dd>
+
+
+<dt>LD_format</dt>
+<dd><p>file format for LD matrix. If "custom", use a user defined
+<code>LD_loader()</code> function to load LD matrix.</p></dd>
+
+
+<dt>LD_loader</dt>
+<dd><p>a user defined function to load LD matrix when <code>LD_format = "custom"</code>.</p></dd>
+
+
+<dt>ncore</dt>
+<dd><p>The number of cores used to parallelize computation.</p></dd>
 
 
 <dt>logfile</dt>
