@@ -25,7 +25,7 @@
 #
 #' @importFrom logging loginfo
 #' @importFrom parallel mclapply
-EM_est_param <- function(
+fit_EM <- function(
     region_data,
     niter = 20,
     init_group_prior = NULL,

@@ -99,15 +99,15 @@ est_param <- function(
 
   # Run EM for a few (niter_prefit) iterations, getting rough estimates
   loginfo("Run EM (prefit) for %d iterations, getting rough estimates ...", niter_prefit)
-  EM_prefit_res <- EM_est_param(region_data,
-                                niter = niter_prefit,
-                                init_group_prior = init_group_prior,
-                                init_group_prior_var = init_group_prior_var,
-                                group_prior_var_structure = group_prior_var_structure,
-                                use_null_weight = use_null_weight,
-                                ncore = ncore,
-                                verbose = verbose,
-                                ...)
+  EM_prefit_res <- fit_EM(region_data,
+                          niter = niter_prefit,
+                          init_group_prior = init_group_prior,
+                          init_group_prior_var = init_group_prior_var,
+                          group_prior_var_structure = group_prior_var_structure,
+                          use_null_weight = use_null_weight,
+                          ncore = ncore,
+                          verbose = verbose,
+                          ...)
   loginfo("Roughly estimated group_prior {%s}: {%s} (thin = %s)", names(EM_prefit_res$group_prior), format(EM_prefit_res$group_prior, digits = 4), thin)
   loginfo("Roughly estimated group_prior_var {%s}: {%s}", names(EM_prefit_res$group_prior_var), format(EM_prefit_res$group_prior_var, digits = 4))
   group_size <- EM_prefit_res$group_size
@@ -121,15 +121,15 @@ est_param <- function(
 
   # Run EM for more (niter) iterations, getting rough estimates
   loginfo("Run EM for %d iterations, getting accurate estimates ...", niter)
-  EM_res <- EM_est_param(selected_region_data,
-                         niter = niter,
-                         init_group_prior = EM_prefit_res$group_prior,
-                         init_group_prior_var = EM_prefit_res$group_prior_var,
-                         group_prior_var_structure = group_prior_var_structure,
-                         use_null_weight = use_null_weight,
-                         ncore = ncore,
-                         verbose = verbose,
-                         ...)
+  EM_res <- fit_EM(selected_region_data,
+                   niter = niter,
+                   init_group_prior = EM_prefit_res$group_prior,
+                   init_group_prior_var = EM_prefit_res$group_prior_var,
+                   group_prior_var_structure = group_prior_var_structure,
+                   use_null_weight = use_null_weight,
+                   ncore = ncore,
+                   verbose = verbose,
+                   ...)
   group_prior <- EM_res$group_prior
   group_prior_var <- EM_res$group_prior_var
   group_prior_var_structure <- EM_res$group_prior_var_structure
