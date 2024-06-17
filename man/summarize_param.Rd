@@ -2,30 +2,18 @@
 % Please edit documentation in R/ctwas_summarize_parameters.R
 \name{summarize_param}
 \alias{summarize_param}
-\title{Summarizes and plots cTWAS parameter estimates}
+\title{Summarizes estimated parameters}
 \usage{
-summarize_param(
-  param,
-  gwas_n,
-  plot = TRUE,
-  title.size = 10,
-  legend.size = 8,
-  title.font = c("bold", "plain", "italic", "bold.italic")
-)
+summarize_param(param, gwas_n)
 }
 \arguments{
-\item{param}{a list of cTWAS parameter estimation result from \code{est_param}}
+\item{param}{a list of parameter estimation result from \code{est_param}}
 
 \item{gwas_n}{the sample size of the GWAS summary statistics}
-
-\item{plot}{if TRUE, return a plot of the estimated parameters}
-
-\item{title.size}{font size of the plot title}
-
-\item{legend.size}{font size of the plot legend title}
-
-\item{title.font}{font of the plot title}
+}
+\value{
+a list of summarized parameters
 }
 \description{
-Summarizes and plots cTWAS parameter estimates
+Summarizes estimated parameters
 }

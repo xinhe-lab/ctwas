@@ -1,43 +1,14 @@
-#' @title Summarizes and plots cTWAS parameter estimates
+#' @title Summarizes estimated parameters
 #'
-#' @param param a list of cTWAS parameter estimation result from \code{est_param}
+#' @param param a list of parameter estimation result from \code{est_param}
 #'
 #' @param gwas_n the sample size of the GWAS summary statistics
 #'
-#' @param plot if TRUE, return a plot of the estimated parameters
-#'
-#' @param title.size font size of the plot title
-#'
-#' @param legend.size font size of the plot legend title
-#'
-#' @param title.font font of the plot title
-#'
-#' @importFrom logging loginfo
-#' @importFrom ggplot2 ggplot
-#' @importFrom ggplot2 aes
-#' @importFrom ggplot2 geom_point
-#' @importFrom ggplot2 geom_line
-#' @importFrom ggplot2 xlab ylab ggtitle
-#' @importFrom ggplot2 expand_limits
-#' @importFrom ggplot2 theme
-#' @importFrom ggplot2 theme_bw
-#' @importFrom ggplot2 element_text
-#' @importFrom ggplot2 guides
-#' @importFrom ggplot2 guide_legend
-#' @importFrom ggplot2 scale_colour_discrete
-#' @importFrom cowplot plot_grid theme_cowplot
-#' @importFrom rlang .data
+#' @return a list of summarized parameters
 #'
 #' @export
 #'
-summarize_param <- function(param,
-                            gwas_n,
-                            plot = TRUE,
-                            title.size = 10,
-                            legend.size = 8,
-                            title.font = c("bold", "plain", "italic", "bold.italic")){
-
-  title.font <- match.arg(title.font)
+summarize_param <- function(param, gwas_n){
 
   group_prior <- param$group_prior
   # estimated group prior (all iterations)
@@ -60,92 +31,13 @@ summarize_param <- function(param,
     group_prior_iters[rownames(group_prior_iters)==x,]/group_prior_iters[rownames(group_prior_iters)=="SNP"]}))
   enrichment <- enrichment_iters[,ncol(enrichment_iters)]
 
-  outlist <- list(group_size = group_size,
-                  group_prior = group_prior,
-                  group_prior_var = group_prior_var,
-                  enrichment = enrichment,
-                  group_pve = group_pve,
-                  total_pve = sum(group_pve),
-                  attributable_pve = group_pve/sum(group_pve))
+  res <- list(group_size = group_size,
+              group_prior = group_prior,
+              group_prior_var = group_prior_var,
+              enrichment = enrichment,
+              group_pve = group_pve,
+              total_pve = sum(group_pve),
+              attributable_pve = group_pve/sum(group_pve))
 
-  if (plot){
-
-    # inclusion plot
-    df <- data.frame(niter = rep(1:ncol(group_prior_iters), nrow(group_prior_iters)),
-                     value = unlist(lapply(1:nrow(group_prior_iters), function(x){group_prior_iters[x,]})),
-                     group = rep(rownames(group_prior_iters), each=ncol(group_prior_iters)))
-    factor_levels <- c(setdiff(rownames(group_prior_iters), "SNP"), "SNP")
-    df$group <- factor(df$group, levels = factor_levels)
-
-    p_pi <- ggplot(df, aes(x=.data$niter, y=.data$value, group=.data$group, color=.data$group)) +
-      geom_line() +
-      geom_point() +
-      xlab("Iteration") + ylab(bquote(pi)) +
-      ggtitle("Proportion Causal") +
-      theme_cowplot() +
-      theme(plot.title=element_text(size=title.size)) +
-      expand_limits(y=0) +
-      guides(color = guide_legend(title = "Group")) +
-      theme(legend.title = element_text(size=legend.size, face=title.font),
-            legend.text = element_text(size=legend.size))
-
-    # effect size plot
-    df <- data.frame(niter = rep(1:ncol(group_prior_var_iters), nrow(group_prior_var_iters)),
-                     value = unlist(lapply(1:nrow(group_prior_var_iters), function(x){group_prior_var_iters[x,]})),
-                     group = rep(rownames(group_prior_var_iters), each=ncol(group_prior_var_iters)))
-    df$group <- factor(df$group, levels = factor_levels)
-
-    p_sigma2 <- ggplot(df, aes(x=.data$niter, y=.data$value, group=.data$group, color=.data$group)) +
-      geom_line() +
-      geom_point() +
-      xlab("Iteration") + ylab(bquote(sigma^2)) +
-      ggtitle("Effect Size") +
-      theme_cowplot() +
-      theme(plot.title=element_text(size=title.size)) +
-      expand_limits(y=0) +
-      guides(color = guide_legend(title = "Group")) +
-      theme(legend.title = element_text(size=legend.size, face=title.font),
-            legend.text = element_text(size=legend.size))
-
-    # PVE plot
-    df <- data.frame(niter = rep(1:ncol(group_pve_iters), nrow(group_pve_iters)),
-                     value = unlist(lapply(1:nrow(group_pve_iters), function(x){group_pve_iters[x,]})),
-                     group = rep(rownames(group_pve_iters), each=ncol(group_pve_iters)))
-    df$group <- factor(df$group, levels = factor_levels)
-
-    p_pve <- ggplot(df, aes(x=.data$niter, y=.data$value, group=.data$group, color=.data$group)) +
-      geom_line() +
-      geom_point() +
-      xlab("Iteration") + ylab(bquote(h[G]^2)) +
-      ggtitle("PVE") +
-      theme_cowplot() +
-      theme(plot.title=element_text(size=title.size)) +
-      expand_limits(y=0) +
-      guides(color = guide_legend(title = "Group")) +
-      theme(legend.title = element_text(size=legend.size, face=title.font),
-            legend.text = element_text(size=legend.size))
-
-    # enrichment plot
-    df <- data.frame(niter = rep(1:ncol(enrichment_iters), nrow(enrichment_iters)),
-                     value = unlist(lapply(1:nrow(enrichment_iters), function(x){enrichment_iters[x,]})),
-                     group = rep(rownames(enrichment_iters), each=ncol(enrichment_iters)))
-    df$group <- factor(df$group, levels = factor_levels[factor_levels!="SNP"])
-
-    p_enrich <- ggplot(df, aes(x=.data$niter, y=.data$value, group=.data$group, color=.data$group)) +
-      geom_line() +
-      geom_point() +
-      xlab("Iteration") + ylab(bquote(pi[G]/pi[S])) +
-      ggtitle("Enrichment") +
-      theme_cowplot() +
-      theme(plot.title=element_text(size=title.size)) +
-      expand_limits(y=0) +
-      guides(color = guide_legend(title = "Group")) +
-      theme(legend.title = element_text(size=legend.size, face=title.font),
-            legend.text = element_text(size=legend.size)) +
-      scale_colour_discrete(drop = FALSE)
-
-    outlist$convergence_plot <- plot_grid(p_pi, p_sigma2, p_enrich, p_pve)
-  }
-
-  return(outlist)
+  return(res)
 }

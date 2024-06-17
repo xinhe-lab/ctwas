@@ -5,7 +5,7 @@ test_that("summarize_param works", {
   param <- ctwas_res$param
   precomputed_ctwas_parameters <- readRDS(system.file("extdata/sample_data", "LDL_example.ctwas_parameters_no_plots.RDS", package = "ctwas"))
 
-  ctwas_parameters <- summarize_param(param, gwas_n, plot = FALSE)
+  ctwas_parameters <- summarize_param(param, gwas_n)
   expect_equal(ctwas_parameters, precomputed_ctwas_parameters)
 
 })

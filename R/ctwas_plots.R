@@ -238,7 +238,7 @@ make_locusplot <- function(finemap_res,
 
   # PIP panel
   p_pip <- ggplot(loc$data, aes(x=.data$pos/1e6, y=.data$susie_pip, shape=.data$type,
-                       size=.data$object_type, alpha=.data$object_type)) +
+                                size=.data$object_type, alpha=.data$object_type)) +
     geom_point(aes(color=.data$r2_levels, fill=.data$r2_levels)) +
     geom_text_repel(aes(label=.data$label), size=label.text.size, color="black") +
     scale_shape_manual(values = point.shapes) +
@@ -316,4 +316,140 @@ make_locusplot <- function(finemap_res,
 
   cowplot::plot_grid(p_pvalue, p_pip, p_qtl, p_genes, ncol = 1,
                      rel_heights = panel.heights, align = "v", axis="tblr")
+}
+
+#' @title Make convergence plots for the estimated parameters
+#'
+#' @param param a list of cTWAS parameter estimation result from \code{est_param}
+#'
+#' @param gwas_n the sample size of the GWAS summary statistics
+#'
+#' @param title.size font size of the plot title
+#'
+#' @param legend.size font size of the plot legend title
+#'
+#' @param colors colors for different groups, passed as the
+#'   \code{values} input to \code{\link[ggplot2]{scale_color_manual}}.
+#'   If fewer colors than "fits" are given, the colors are recycled.
+#'
+#' @param ncol number of columns in the output plot
+#'
+#' @importFrom ggplot2 ggplot
+#' @importFrom ggplot2 aes
+#' @importFrom ggplot2 geom_point
+#' @importFrom ggplot2 geom_line
+#' @importFrom ggplot2 xlab ylab ggtitle
+#' @importFrom ggplot2 expand_limits
+#' @importFrom ggplot2 theme
+#' @importFrom ggplot2 theme_bw
+#' @importFrom ggplot2 element_text
+#' @importFrom ggplot2 guides
+#' @importFrom ggplot2 guide_legend
+#' @importFrom ggplot2 scale_color_manual
+#' @importFrom cowplot plot_grid theme_cowplot
+#' @importFrom rlang .data
+#'
+#' @export
+make_convergence_plots <- function(param,
+                                   gwas_n,
+                                   title.size = 10,
+                                   legend.size = 8,
+                                   colors = c("#E69F00","#56B4E9","#009E73","#F0E442",
+                                              "#0072B2","#D55E00","#CC79A7", "#999999"),
+                                   ncol = 2){
+
+  # estimated group prior (all iterations)
+  group_prior_iters <- param$group_prior_iters
+  # estimated group prior variance (all iterations)
+  group_prior_var_iters <- param$group_prior_var_iters
+
+  # group size
+  group_size <- param$group_size[rownames(group_prior_iters)]
+
+  # estimated group PVE (all iterations)
+  group_pve_iters <- group_prior_var_iters*group_prior_iters*group_size/gwas_n
+  # estimated enrichment of genes (all iterations)
+  enrichment_iters <- t(sapply(rownames(group_prior_iters)[rownames(group_prior_iters)!="SNP"], function(x){
+    group_prior_iters[rownames(group_prior_iters)==x,]/group_prior_iters[rownames(group_prior_iters)=="SNP"]}))
+
+  # make convergence plots
+
+  # inclusion plot
+  df <- data.frame(niter = rep(1:ncol(group_prior_iters), nrow(group_prior_iters)),
+                   value = unlist(lapply(1:nrow(group_prior_iters), function(x){group_prior_iters[x,]})),
+                   group = rep(rownames(group_prior_iters), each=ncol(group_prior_iters)))
+  factor_levels <- c(setdiff(rownames(group_prior_iters), "SNP"), "SNP")
+  df$group <- factor(df$group, levels = factor_levels)
+
+  p_pi <- ggplot(df, aes(x=.data$niter, y=.data$value, group=.data$group, color=.data$group)) +
+    geom_line() +
+    geom_point() +
+    scale_color_manual(values = colors) +
+    xlab("Iteration") + ylab(bquote(pi)) +
+    ggtitle("Proportion Causal") +
+    theme_cowplot() +
+    theme(plot.title=element_text(size=title.size)) +
+    expand_limits(y=0) +
+    guides(color = guide_legend(title = "Group")) +
+    theme(legend.title = element_text(size=legend.size, face="bold"),
+          legend.text = element_text(size=legend.size))
+
+  # effect size plot
+  df <- data.frame(niter = rep(1:ncol(group_prior_var_iters), nrow(group_prior_var_iters)),
+                   value = unlist(lapply(1:nrow(group_prior_var_iters), function(x){group_prior_var_iters[x,]})),
+                   group = rep(rownames(group_prior_var_iters), each=ncol(group_prior_var_iters)))
+  df$group <- factor(df$group, levels = factor_levels)
+
+  p_sigma2 <- ggplot(df, aes(x=.data$niter, y=.data$value, group=.data$group, color=.data$group)) +
+    geom_line() +
+    geom_point() +
+    scale_color_manual(values = colors) +
+    xlab("Iteration") + ylab(bquote(sigma^2)) +
+    ggtitle("Effect Size") +
+    theme_cowplot() +
+    theme(plot.title=element_text(size=title.size)) +
+    expand_limits(y=0) +
+    guides(color = guide_legend(title = "Group")) +
+    theme(legend.title = element_text(size=legend.size, face="bold"),
+          legend.text = element_text(size=legend.size))
+
+  # PVE plot
+  df <- data.frame(niter = rep(1:ncol(group_pve_iters), nrow(group_pve_iters)),
+                   value = unlist(lapply(1:nrow(group_pve_iters), function(x){group_pve_iters[x,]})),
+                   group = rep(rownames(group_pve_iters), each=ncol(group_pve_iters)))
+  df$group <- factor(df$group, levels = factor_levels)
+
+  p_pve <- ggplot(df, aes(x=.data$niter, y=.data$value, group=.data$group, color=.data$group)) +
+    geom_line() +
+    geom_point() +
+    scale_color_manual(values = colors) +
+    xlab("Iteration") + ylab(bquote(h[G]^2)) +
+    ggtitle("PVE") +
+    theme_cowplot() +
+    theme(plot.title=element_text(size=title.size)) +
+    expand_limits(y=0) +
+    guides(color = guide_legend(title = "Group")) +
+    theme(legend.title = element_text(size=legend.size, face="bold"),
+          legend.text = element_text(size=legend.size))
+
+  # enrichment plot
+  df <- data.frame(niter = rep(1:ncol(enrichment_iters), nrow(enrichment_iters)),
+                   value = unlist(lapply(1:nrow(enrichment_iters), function(x){enrichment_iters[x,]})),
+                   group = rep(rownames(enrichment_iters), each=ncol(enrichment_iters)))
+  df$group <- factor(df$group, levels = factor_levels[factor_levels!="SNP"])
+
+  p_enrich <- ggplot(df, aes(x=.data$niter, y=.data$value, group=.data$group, color=.data$group)) +
+    geom_line() +
+    geom_point() +
+    scale_color_manual(values = colors) +
+    xlab("Iteration") + ylab(bquote(pi[G]/pi[S])) +
+    ggtitle("Enrichment") +
+    theme_cowplot() +
+    theme(plot.title=element_text(size=title.size)) +
+    expand_limits(y=0) +
+    guides(color = guide_legend(title = "Group")) +
+    theme(legend.title = element_text(size=legend.size, face="bold"),
+          legend.text = element_text(size=legend.size))
+
+  cowplot::plot_grid(p_pi, p_sigma2, p_enrich, p_pve, ncol = ncol)
 }

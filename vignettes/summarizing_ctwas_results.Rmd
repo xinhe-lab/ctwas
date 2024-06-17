@@ -92,11 +92,10 @@ ctwas_parameters$attributable_pve
 ```
 
 
-Plot convergence
+Make convergence plots of estimated parameters
 ```{r convergence_plot, fig.width = 7, fig.height=5}
-ctwas_parameters$convergence_plot
+make_convergence_plots(param, gwas_n)
 ```
-
 
 
 ## Summarizing cTWAS results
