@@ -25,6 +25,7 @@
 #' @importFrom readr parse_number
 #' @importFrom magrittr %>%
 #' @importFrom dplyr left_join mutate select group_by ungroup n
+#' @importFrom rlang .data
 #'
 #' @export
 #'
@@ -87,16 +88,16 @@ anno_finemap_res <- function(finemap_res,
     loginfo("add gene_name and gene_type")
     finemap_gene_res <- finemap_gene_res %>%
       left_join(gene_annot, by = "gene_id", multiple = "all") %>%
-      mutate(start = as.numeric(start), end = as.numeric(end)) %>%
-      mutate(chrom = parse_number(as.character(chrom))) %>%
+      mutate(start = as.numeric(.data$start), end = as.numeric(.data$end)) %>%
+      mutate(chrom = parse_number(as.character(.data$chrom))) %>%
       na.omit()
 
     # split PIPs for molecular traits (e.g. introns) mapped to multiple genes
     if (any(duplicated(finemap_gene_res$id))) {
       loginfo("split PIPs for traits mapped to multiple genes")
       finemap_gene_res <- finemap_gene_res %>%
-        group_by(id) %>%
-        mutate(susie_pip = ifelse(n() > 1, susie_pip / n(), susie_pip)) %>%
+        group_by(.data$id) %>%
+        mutate(susie_pip = ifelse(n() > 1, .data$susie_pip / n(), .data$susie_pip)) %>%
         ungroup()
     }
   }

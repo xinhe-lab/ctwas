@@ -156,7 +156,7 @@
 #' \item{Rr}{An p-vector of \code{t(X)} times fitted values, \code{X
 #'   \%*\% colSums(alpha*mu)}.}
 #'
-#' @export
+#' @keywords internal
 #'
 susie_rss = function (z, R, maf = NULL, maf_thresh = 0, z_ld_weight = 0,
                       L = 10, prior_variance = 50, residual_variance = NULL,

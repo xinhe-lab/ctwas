@@ -27,6 +27,12 @@ merge_region_data(
 
 \item{region_info}{a data frame of region definition and associated LD file names}
 
+\item{use_LD}{TRUE/FALSE. If TRUE, use LD for finemapping.}
+
+\item{LD_info}{a list of paths to LD matrices for each of the regions.}
+
+\item{snp_info}{a list of SNP info data frames for LD reference.}
+
 \item{z_snp}{A data frame with columns: "id", "z", giving the z-scores for SNPs.}
 
 \item{z_gene}{A data frame with columns: "id", "z", giving the z-scores for genes.}
@@ -45,7 +51,8 @@ or "z" (trim SNPs with lower |z|) See parameter `maxSNP` for more information.}
 \item{seed}{seed for random sampling}
 }
 \value{
-a list of merged region_data, and a data frame of merged region info
+a list of merged region data, merged region info, LD info, snp info,
+and merged region IDs.
 }
 \description{
 Merges region data for cross-boundary genes

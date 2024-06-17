@@ -25,7 +25,8 @@ ctwas_sumstats_noLD(
   outputdir = NULL,
   outname = "ctwas_noLD",
   logfile = NULL,
-  verbose = FALSE
+  verbose = FALSE,
+  ...
 )
 }
 \arguments{

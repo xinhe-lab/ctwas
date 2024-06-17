@@ -321,3 +321,4 @@ G. Wang, A. Sarkar, P. Carbonetto and M. Stephens (2020). A simple
 \seealso{
 \code{\link{susie_rss}}
 }
+\keyword{internal}

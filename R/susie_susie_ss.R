@@ -47,7 +47,7 @@
 #'   semidefinite; (2) check that \code{Xty} is in the space spanned by
 #'   the non-zero eigenvectors of \code{XtX}.
 #'
-#' @export
+#' @keywords internal
 #'
 susie_suff_stat = function (bhat, shat, R, n, var_y, XtX, Xty, yty,
                             maf = NULL, maf_thresh = 0, L = 10,
