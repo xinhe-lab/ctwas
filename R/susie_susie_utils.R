@@ -185,6 +185,7 @@ susie_get_posterior_samples <- function (susie_fit, num_samples) {
   return(list(b = b_samples,gamma = gamma_samples))
 }
 
+
 #' @rdname susie_get_methods
 #'
 #' @param X n by p matrix of values of the p variables (covariates) in
@@ -209,40 +210,20 @@ susie_get_posterior_samples <- function (susie_fit, num_samples) {
 #' @param squared If \code{squared = TRUE}, report min, mean and
 #' median of squared correlation instead of the absolute correlation.
 #'
-#' @param check_symmetric If \code{check_symmetric = TRUE}, perform a
-#'   check for symmetry of matrix \code{Xcorr} when \code{Xcorr} is
-#'   provided (not \code{NULL}).
-#'
-#' @param n_purity The maximum number of credible set (CS) variables
-#'   used in calculating the correlation (\dQuote{purity})
-#'   statistics. When the number of variables included in the CS is
-#'   greater than this number, the CS variables are randomly subsampled.
-#'
-#' @param use_rfast Use the Rfast package for the purity calculations.
-#'   By default \code{use_rfast = TRUE} if the Rfast package is
-#'   installed.
-#'
-#'
 #' @keywords internal
 #'
 susie_get_cs = function (res, X = NULL, Xcorr = NULL, coverage = 0.95,
-                         min_abs_corr = 0.5, dedup = TRUE, squared = FALSE,
-                         check_symmetric = TRUE, n_purity = 100, use_rfast) {
+                         min_abs_corr = 0.5, dedup = TRUE, squared = FALSE) {
   if (!is.null(X) && !is.null(Xcorr))
     stop("Only one of X or Xcorr should be specified")
-  if (check_symmetric) {
-    if (!is.null(Xcorr) && !is_symmetric_matrix(Xcorr)) {
-      warning_message("Xcorr is not symmetric; forcing Xcorr to be symmetric",
-                      "by replacing Xcorr with (Xcorr + t(Xcorr))/2")
-      Xcorr = Xcorr + t(Xcorr)
-      Xcorr = Xcorr/2
-    }
-  }
-
+  if (!is.null(Xcorr) && !is_symmetric_matrix(Xcorr))
+    stop("Xcorr matrix must be symmetric")
   null_index = 0
   include_idx = rep(TRUE,nrow(res$alpha))
   if (!is.null(res$null_index)) null_index = res$null_index
-  if (is.numeric(res$V)) include_idx = res$V > 1e-9
+  # different from susieR
+  # if (is.numeric(res$V)) include_idx = res$V > 1e-9
+
   # L x P binary matrix.
   status = in_CS(res$alpha,coverage)
 
@@ -265,24 +246,18 @@ susie_get_cs = function (res, X = NULL, Xcorr = NULL, coverage = 0.95,
   claimed_coverage = claimed_coverage[include_idx]
 
   # Compute and filter by "purity".
-  if (missing(use_rfast))
-    use_rfast = requireNamespace("Rfast",quietly = TRUE)
   if (is.null(Xcorr) && is.null(X)) {
     names(cs) = paste0("L",which(include_idx))
     return(list(cs = cs,
                 coverage = claimed_coverage,
                 requested_coverage = coverage))
   } else {
-    purity = NULL
-    for (i in 1:length(cs)) {
+    purity = data.frame(do.call(rbind,lapply(1:length(cs),function (i) {
       if (null_index > 0 && null_index %in% cs[[i]])
-        purity = rbind(purity,c(-9,-9,-9))
+        c(-9,-9,-9)
       else
-        purity =
-          rbind(purity,
-                matrix(get_purity(cs[[i]],X,Xcorr,squared,n_purity,use_rfast),1,3))
-    }
-    purity = as.data.frame(purity)
+        get_purity(cs[[i]],X,Xcorr,squared)
+    })))
     if (squared)
       colnames(purity) = c("min.sq.corr","mean.sq.corr","median.sq.corr")
     else
@@ -290,8 +265,8 @@ susie_get_cs = function (res, X = NULL, Xcorr = NULL, coverage = 0.95,
     threshold = ifelse(squared,min_abs_corr^2,min_abs_corr)
     is_pure = which(purity[,1] >= threshold)
     if (length(is_pure) > 0) {
-      cs        = cs[is_pure]
-      purity    = purity[is_pure,]
+      cs = cs[is_pure]
+      purity = purity[is_pure,]
       row_names = paste0("L",which(include_idx)[is_pure])
       names(cs) = row_names
       rownames(purity) = row_names
@@ -304,7 +279,7 @@ susie_get_cs = function (res, X = NULL, Xcorr = NULL, coverage = 0.95,
                   coverage = claimed_coverage[ordering],
                   requested_coverage=coverage))
     } else
-      return(list(cs = NULL,coverage = NULL,requested_coverage = coverage))
+      return(list(cs = NULL,coverage = NULL, requested_coverage = coverage))
   }
 }
 

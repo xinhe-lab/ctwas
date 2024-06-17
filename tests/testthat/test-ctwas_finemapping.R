@@ -15,14 +15,12 @@ test_that("finemap_regions works with no-LD", {
   rownames(precomputed_finemap_res) <- NULL
 
   capture.output({
-    finemap_res <- suppressWarnings({
-      finemap_regions(region_data = screened_region_data[region_id],
-                      use_LD = FALSE,
-                      L = 1,
-                      weights = weights,
-                      group_prior = group_prior,
-                      group_prior_var = group_prior_var)
-    })
+    finemap_res <- finemap_regions(region_data = screened_region_data[region_id],
+                                   use_LD = FALSE,
+                                   L = 1,
+                                   weights = weights,
+                                   group_prior = group_prior,
+                                   group_prior_var = group_prior_var)
   })
   expect_equal(finemap_res, precomputed_finemap_res)
 })
@@ -46,15 +44,16 @@ test_that("finemap_regions works with no-LD", {
 #   precomputed_finemap_res <- precomputed_finemap_res[precomputed_finemap_res$region_id == region_id,]
 #   rownames(precomputed_finemap_res) <- NULL
 #
-#   finemap_res <- suppressWarnings({
-#     finemap_regions(region_data = screened_region_data[region_id],
-#                     use_LD = TRUE,
-#                     LD_info = LD_info,
-#                     snp_info = snp_info,
-#                     weights = weights,
-#                     group_prior = group_prior,
-#                     group_prior_var = group_prior_var,
-#                     L = 5)
+#   capture.output({
+#     finemap_res <- finemap_regions(region_data = screened_region_data[region_id],
+#                                    use_LD = TRUE,
+#                                    LD_info = LD_info,
+#                                    snp_info = snp_info,
+#                                    weights = weights,
+#                                    group_prior = group_prior,
+#                                    group_prior_var = group_prior_var,
+#                                    L = 5)
 #   })
+#
 #   expect_equal(finemap_res, precomputed_finemap_res)
 # })
