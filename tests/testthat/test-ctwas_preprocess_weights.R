@@ -4,7 +4,7 @@ test_that("preprocess_weights works", {
   snp_info <- readRDS(system.file("extdata/sample_data", "LDL_example.snp_info.RDS", package = "ctwas"))
   z_snp <- readRDS(system.file("extdata/sample_data", "LDL_example.preprocessed.z_snp.RDS", package = "ctwas"))
 
-  precomputed_weights <- readRDS(system.file("extdata/sample_data", "LDL_example.preprocessed.liver.weights.RDS", package = "ctwas"))
+  precomputed_weights <- readRDS("LDL_example.preprocessed.liver.weights.RDS")
 
   weight_file <- system.file("extdata/sample_data", "expression_Liver.db", package = "ctwas")
   capture.output({

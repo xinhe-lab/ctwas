@@ -123,9 +123,9 @@ Running cTWAS without prediction models: often a researcher may have a list of s
 We could convert top QTLs into PredictDB format weights using the function below:
 
 QTL_data is a data frame for the genes, and top QTL and weight for each gene. gene_info is a data frame (optional) with information of the genes ("gene","genename","gene_type", etc.)
-It will create PredictDB format weights and save as `[weight_name].db` in the `output_dir` directory. 
+It will create PredictDB format weights and save as `[weight_name].db` in the `outputdir` directory. 
 ```{r, eval=FALSE}
-make_predictdb_weights_from_top_QTLs(QTL_data, gene_info, output_dir, weight_name)
+make_predictdb_weights_from_top_QTLs(QTL_data, gene_info, outputdir, weight_name)
 ```
 
 

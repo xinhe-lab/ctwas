@@ -23,7 +23,7 @@ jobs:
       - name: Install dependencies
         run: |
           install.packages(c("logging","mixsqp","rlang"))
-          install.packages(c("magrittr","tibble","dplyr","ggplot2","cowplot"))
+          install.packages(c("magrittr","dplyr","ggplot2","cowplot"))
           install.packages(c("ggrepel","readr","data.table"))
           install.packages(c("RSQLite","locuszoomr","pgenlibr","Rfast"))
           install.packages(c("knitr","rmarkdown","testthat","BiocManager"))

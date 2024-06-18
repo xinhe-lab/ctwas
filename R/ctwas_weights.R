@@ -67,6 +67,9 @@ load_predictdb_weights <- function(weight_file,
 
   # read the PredictDB weights
   stopifnot(file.exists(weight_file))
+
+  loginfo("Loading PredictDB weights ...")
+
   weight_name <- file_path_sans_ext(basename(weight_file))
   sqlite <- dbDriver("SQLite")
   db <- dbConnect(sqlite, weight_file)
@@ -119,8 +122,7 @@ load_predictdb_weights <- function(weight_file,
 #' @importFrom stats complete.cases
 #' @importFrom stats ave
 #' @importFrom magrittr %>%
-#' @importFrom tibble as_tibble
-#' @importFrom dplyr left_join mutate select
+#' @importFrom dplyr left_join
 #' @importFrom tools file_path_sans_ext
 #' @importFrom parallel mclapply
 #'
@@ -133,37 +135,37 @@ load_fusion_weights <- function(weight_file,
 
   fusion_method <- match.arg(fusion_method)
   fusion_genome_version <- match.arg(fusion_genome_version)
-
   stopifnot(file.exists(weight_file))
+
+  loginfo("Loading FUSION weights ...")
   weight_name <- file_path_sans_ext(basename(weight_file))
   wgt_dir <- dirname(weight_file)
   wgt_pos_file <- file.path(wgt_dir, paste0(basename(weight_file), ".pos"))
   wgt_pos <- read.table(wgt_pos_file, header = T, stringsAsFactors = F)
   wgt_pos$ID <-
     ifelse(duplicated(wgt_pos$ID) | duplicated(wgt_pos$ID,fromLast = TRUE),
-           paste(wgt_pos$ID,ave(wgt_pos$ID,wgt_pos$ID,FUN = seq_along),
-                 sep = "_ID"),
+           paste(wgt_pos$ID, ave(wgt_pos$ID,wgt_pos$ID,FUN = seq_along), sep="_ID"),
            wgt_pos$ID)
   wgt_pos <- wgt_pos[wgt_pos$ID!="NA_IDNA",] # filter NA genes
 
-  loginfo("Loading FUSION weights ...")
   weight_table <- NULL
   if (nrow(wgt_pos) > 0) {
     weight_table_list <- mclapply(1:nrow(wgt_pos), function(i){
+      # load weights, and snps info and
+      # and combine gene, snps, and weights
       load(file.path(wgt_dir, wgt_pos[i, "WGT"]))
       gname <- wgt_pos[i, "ID"]
+      snps <- as.data.frame(snps)
       colnames(snps) <- c("chrom", "rsid", "cm", "pos", "alt", "ref")
-      snps[is.na(snps$rsid),"rsid"] <- paste0("chr",snps[is.na(snps$rsid),"chrom"],
-                                              "_",snps[is.na(snps$rsid),"pos"],
-                                              "_",snps[is.na(snps$rsid),"ref"],
-                                              "_",snps[is.na(snps$rsid),"alt"],
-                                              "_",fusion_genome_version)
-
-      snps[,"varID"] <- paste0("chr",snps[,"chrom"],"_",snps[,"pos"],"_",
-                               snps[,"ref"],"_",snps[,"alt"],
-                               "_",fusion_genome_version)
+      snps$varID <- sprintf("chr%s_%s_%s_%s_%s",
+                            snps$chrom, snps$pos, snps$ref, snps$alt,
+                            fusion_genome_version)
+      # use varID for those missing rsIDs
+      snps[is.na(snps$rsid),"rsid"] <- snps[is.na(snps$rsid),"varID"]
+      snps <- snps[, c("chrom", "rsid", "varID", "pos", "ref", "alt")]
 
       rownames(wgt.matrix) <- snps$rsid
+
       g.method <- fusion_method
       # Ensure only top magnitude snp weight in the top1 wgt.matrix column
       if (g.method == "top1"){
@@ -172,13 +174,13 @@ load_fusion_weights <- function(weight_file,
       wgt.matrix <- wgt.matrix[abs(wgt.matrix[, g.method]) > 0, , drop = FALSE]
       wgt.matrix <- wgt.matrix[complete.cases(wgt.matrix), , drop = FALSE]
       if (nrow(wgt.matrix) > 0){
-        out_table <- as_tibble(wgt.matrix[,g.method]) %>%
-          mutate(rsid = rownames(wgt.matrix)) %>%
-          left_join(as_tibble(snps) %>% select(-"cm"), by = "rsid")
-        out_table$gene <- gname
-        out_table <- out_table[,c("gene","rsid","varID","ref","alt","value")]
-        colnames(out_table) <- c("gene","rsid","varID","ref_allele","eff_allele","weight")
-        out_table
+        gene_weight_table <- data.frame(gene = gname,
+                                        rsid = rownames(wgt.matrix),
+                                        weight = wgt.matrix[,g.method])
+        gene_weight_table <- gene_weight_table %>% left_join(snps, by = "rsid")
+        gene_weight_table <- gene_weight_table[,c("gene","rsid","varID","ref","alt","weight")]
+        colnames(gene_weight_table) <- c("gene","rsid","varID","ref_allele","eff_allele","weight")
+        gene_weight_table
       }
     })
     if (length(weight_table_list) != nrow(wgt_pos)) {
@@ -325,7 +327,7 @@ compute_weight_LD_from_ref <- function(weights,
 #' @param gene_info a data frame (optional) with information of the genes
 #' ("gene","genename","gene_type", etc.)
 #'
-#' @param output_dir output directory
+#' @param outputdir output directory
 #'
 #' @param weight_name name of the output weight files
 #'
@@ -337,11 +339,11 @@ compute_weight_LD_from_ref <- function(weights,
 #'
 make_predictdb_weights_from_top_QTLs <- function(QTL_data,
                                                  gene_info=NULL,
-                                                 output_dir = getwd(),
+                                                 outputdir = getwd(),
                                                  weight_name){
 
-  if (!dir.exists(output_dir))
-    dir.create(output_dir, showWarnings = FALSE, recursive = TRUE)
+  if (!dir.exists(outputdir))
+    dir.create(outputdir, showWarnings = FALSE, recursive = TRUE)
 
   # check and clean the QTL data
   required_cols <- c("gene", "varID", "weight")
@@ -355,7 +357,7 @@ make_predictdb_weights_from_top_QTLs <- function(QTL_data,
 
   # Create a database connection
   driver <- dbDriver('SQLite')
-  db <- dbConnect(drv = driver, file.path(output_dir, paste0(weight_name,".db")))
+  db <- dbConnect(drv = driver, file.path(outputdir, paste0(weight_name,".db")))
   # create weights table
   dbWriteTable(db, 'weights', QTL_data, overwrite = TRUE)
   # create extra table with gene info
@@ -371,6 +373,6 @@ make_predictdb_weights_from_top_QTLs <- function(QTL_data,
   colnames(covar_data) <- c("GENE","RSID1","RSID2")
   covar_data$VALUE <- 1
   write.table(covar_data,
-              file = gzfile(file.path(output_dir,paste0(weight_name,".txt.gz"))),
+              file = gzfile(file.path(outputdir,paste0(weight_name,".txt.gz"))),
               col.names = TRUE, row.names = FALSE, quote = FALSE, sep = "\t")
 }
