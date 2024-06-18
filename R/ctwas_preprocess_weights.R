@@ -28,7 +28,7 @@
 #' This is because PredictDB weights assume that variant genotypes are not
 #' standardized, but our implementation assumes standardized variant genotypes.
 #'
-#' @param method_FUSION a string, specifying the method to choose in FUSION models
+#' @param fusion_method a string, specifying the method to choose in FUSION models
 #'
 #' @param fusion_genome_version a string, specifying the genome version of FUSION models
 #'
@@ -67,7 +67,7 @@ preprocess_weights <- function(weight_file,
                                scale_by_ld_variance = FALSE,
                                filter_protein_coding_genes = FALSE,
                                load_predictdb_LD = FALSE,
-                               method_FUSION = c("lasso","enet","top1","blup"),
+                               fusion_method = c("lasso","enet","top1","blup"),
                                fusion_genome_version = c("b38","b37"),
                                fusion_top_n_snps = NULL,
                                LD_format = c("rds", "rdata", "csv", "txt", "custom"),
@@ -79,7 +79,7 @@ preprocess_weights <- function(weight_file,
   }
   # check input arguments
   weight_format <- match.arg(weight_format)
-  method_FUSION <- match.arg(method_FUSION)
+  fusion_method <- match.arg(fusion_method)
   fusion_genome_version <- match.arg(fusion_genome_version)
   LD_format <- match.arg(LD_format)
 
@@ -112,17 +112,17 @@ preprocess_weights <- function(weight_file,
   loginfo("context: %s", context)
 
   weights <- list()
-  loaded_weight <- load_weights(weight_file,
-                                weight_format,
-                                filter_protein_coding_genes = filter_protein_coding_genes,
-                                load_predictdb_LD = load_predictdb_LD,
-                                method_FUSION = method_FUSION,
-                                fusion_genome_version = fusion_genome_version,
-                                ncore=ncore)
+  loaded_weights <- load_weights(weight_file,
+                                 weight_format,
+                                 filter_protein_coding_genes = filter_protein_coding_genes,
+                                 load_predictdb_LD = load_predictdb_LD,
+                                 fusion_method = fusion_method,
+                                 fusion_genome_version = fusion_genome_version,
+                                 ncore=ncore)
 
-  weight_table <- loaded_weight$weight_table
-  weight_name <- loaded_weight$weight_name
-  R_wgt_all <- loaded_weight$R_wgt
+  weight_table <- loaded_weights$weight_table
+  weight_name <- loaded_weights$weight_name
+  R_wgt_all <- loaded_weights$R_wgt
   if (!is.null(R_wgt_all)) {
     weight_table <- weight_table[weight_table$gene %in% unique(R_wgt_all$GENE), ] #remove genes without predictdb LD
   }
@@ -207,7 +207,7 @@ preprocess_weights <- function(weight_file,
 
       # Add LD matrix of weights
       if(!is.null(R_wgt_all)){
-        R_wgt <- get_weight_LD(R_wgt_all,gname,rsid_varID)
+        R_wgt <- get_weight_LD(R_wgt_all, gname, rsid_varID)
         R_wgt <- R_wgt[snps$id, snps$id, drop=F]
       }
       else{
@@ -234,122 +234,4 @@ preprocess_weights <- function(weight_file,
   return(weights)
 }
 
-
-# gets pre-computed LD matrix from predictedDB weights
-#' @importFrom stats setNames
-get_weight_LD <- function (R_wgt_all, gname, rsid_varID){
-  R_wgt <- R_wgt_all[R_wgt_all$GENE == gname,]
-  #convert covariance to correlation
-  R_wgt_stdev <- R_wgt[R_wgt$RSID1==R_wgt$RSID2,]
-  R_wgt_stdev <- setNames(sqrt(R_wgt_stdev$VALUE), R_wgt_stdev$RSID1)
-  R_wgt$VALUE <- R_wgt$VALUE/(R_wgt_stdev[R_wgt$RSID1]*R_wgt_stdev[R_wgt$RSID2])
-
-  unique_id <- unique(c(R_wgt$RSID1, R_wgt$RSID2))
-
-  # Create an empty correlation matrix
-  n <- length(unique_id)
-  cor_matrix <- matrix(NA, nrow = n, ncol = n)
-
-  # Fill in the correlation values
-  for (i in 1:n) {
-    for (j in i:n) {  # Only iterate over half of the matrix
-      if (i == j) {
-        cor_matrix[i, j] <- 1  # Diagonal elements are 1
-      } else {
-        # Check if there are any matches for the RSID combination
-        matches <- R_wgt[R_wgt$RSID1 == unique_id[i] & R_wgt$RSID2 == unique_id[j], "VALUE"]
-        if (length(matches) > 0) {
-          cor_matrix[i, j] <- matches
-          cor_matrix[j, i] <- matches  # Set symmetric value
-        } else {
-          cor_matrix[i, j] <- NA  # No correlation value found
-          cor_matrix[j, i] <- NA  # No correlation value found
-        }
-      }
-    }
-  }
-
-  rownames(cor_matrix) <- rsid_varID$rsid[match(unique_id, rsid_varID$varID)]
-  colnames(cor_matrix) <- rsid_varID$rsid[match(unique_id, rsid_varID$varID)]
-
-  return(cor_matrix)
-}
-
-# compute LD for weight variants using reference LD
-#' @importFrom parallel mclapply
-#' @importFrom Matrix bdiag
-#' @importFrom logging loginfo
-compute_weight_LD_from_ref <- function(weights,
-                                       weight_name,
-                                       region_info,
-                                       LD_info,
-                                       snp_info,
-                                       LD_format = c("rds", "rdata", "csv", "txt", "custom"),
-                                       LD_loader = NULL,
-                                       ncore = 1) {
-
-  if (is.null(LD_info) || is.null(snp_info)) {
-    stop("LD_info and snp_info are required for computing LD")
-  }
-
-  LD_format <- match.arg(LD_format)
-
-  weight_info <- lapply(names(weights), function(x){
-    as.data.frame(weights[[x]][c("chrom", "p0","p1", "gene_name", "weight_name", "type","context")])})
-  weight_info <- do.call(rbind, weight_info)
-  weight_info$weight_id <- paste0(weight_info$gene_name, "|", weight_name)
-  # get the regions overlapping with each gene
-  for (k in 1:nrow(weight_info)) {
-    chrom <- weight_info[k, "chrom"]
-    p0 <- weight_info[k, "p0"]
-    p1 <- weight_info[k, "p1"]
-    idx <- which(region_info$chrom == chrom & region_info$start <= p1 & region_info$stop > p0)
-    weight_info[k, "region_id"] <- paste(sort(region_info[idx, "region_id"]), collapse = ";")
-  }
-
-  # compute LD for weight variants on each chromosome
-  chrs <- sort(unique(weight_info$chrom))
-  for (b in chrs) {
-    loginfo("Computing LD for weight variants on chr%s", b)
-    weightinfo <- weight_info[weight_info$chrom == b, ]
-    if (nrow(weightinfo) > 0) {
-      weight_region_ids <- names(sort(-table(weightinfo$region_id)))
-      weight_LD_list <- mclapply(weight_region_ids, function(x){
-        # load the R_snp and SNP info for the region
-        # and extract LD for the weight variants
-        curr_region_LD_list <- list()
-        curr_region_ids <- unlist(strsplit(x, ";"))
-        curr_region_idx <- match(curr_region_ids, LD_info$region_id)
-        LD_matrix_files <- LD_info$LD_matrix[curr_region_idx]
-        if (length(LD_matrix_files) > 1) {
-          R_snp <- lapply(LD_matrix_files, load_LD, format = LD_format, LD_loader = LD_loader)
-          R_snp <- suppressWarnings(as.matrix(bdiag(R_snp)))
-        } else {
-          R_snp <- load_LD(LD_matrix_files, format = LD_format, LD_loader = LD_loader)
-        }
-
-        snpinfo <- do.call(rbind, snp_info[curr_region_ids])
-        rownames(R_snp) <- snpinfo$id
-        colnames(R_snp) <- snpinfo$id
-
-        weight_ids <- weightinfo[weightinfo$region_id == x, "weight_id"]
-
-        for (weight_id in weight_ids) {
-          snpnames <- rownames(weights[[weight_id]]$wgt)
-          R_wgt <- R_snp[snpnames, snpnames, drop=F]
-          curr_region_LD_list[[weight_id]] <- R_wgt
-        }
-        curr_region_LD_list
-      })
-      if (length(weight_LD_list) != length(weight_region_ids)) {
-        stop("Not all cores returned results. Try rerun with bigger memory or fewer cores")
-      }
-      weight_LD_list <- unlist(weight_LD_list, recursive = FALSE)
-      for(weight_id in names(weight_LD_list)){
-        weights[[weight_id]][["R_wgt"]] <- weight_LD_list[[weight_id]]
-      }
-    }
-  }
-  return(weights)
-}
 

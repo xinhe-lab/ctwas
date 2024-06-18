@@ -17,7 +17,7 @@ preprocess_weights(
   scale_by_ld_variance = FALSE,
   filter_protein_coding_genes = FALSE,
   load_predictdb_LD = FALSE,
-  method_FUSION = c("lasso", "enet", "top1", "blup"),
+  fusion_method = c("lasso", "enet", "top1", "blup"),
   fusion_genome_version = c("b38", "b37"),
   fusion_top_n_snps = NULL,
   LD_format = c("rds", "rdata", "csv", "txt", "custom"),
@@ -54,7 +54,7 @@ standardized, but our implementation assumes standardized variant genotypes.}
 
 \item{load_predictdb_LD}{TRUE/FALSE. If TRUE, load pre-computed LD among weight SNPs. This option is only for PredictDB weights}
 
-\item{method_FUSION}{a string, specifying the method to choose in FUSION models}
+\item{fusion_method}{a string, specifying the method to choose in FUSION models}
 
 \item{fusion_genome_version}{a string, specifying the genome version of FUSION models}
 
