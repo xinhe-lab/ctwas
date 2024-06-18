@@ -319,8 +319,8 @@ compute_weight_LD_from_ref <- function(weights,
 #' Each gene (or molecular trait) has only one top QTL, defined by users,
 #' based on min p-value, max abs(weight), etc.
 #'
-#' @param QTL_data a data frame with required columns:
-#' "gene", "varID", "weight".
+#' @param QTL_data a data frame with required columns: "gene", "varID", "weight".
+#' for the genes, and top QTL and weight for each gene,
 #'
 #' @param gene_info a data frame (optional) with information of the genes
 #' ("gene","genename","gene_type", etc.)

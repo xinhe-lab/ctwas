@@ -12,8 +12,8 @@ make_predictdb_weights_from_top_QTLs(
 )
 }
 \arguments{
-\item{QTL_data}{a data frame with required columns:
-"gene", "varID", "weight".}
+\item{QTL_data}{a data frame with required columns: "gene", "varID", "weight".
+for the genes, and top QTL and weight for each gene,}
 
 \item{gene_info}{a data frame (optional) with information of the genes
 ("gene","genename","gene_type", etc.)}
