@@ -28,10 +28,10 @@ environment:
 # the package.
 build_script:
   - R -e install.packages(c('logging','mixsqp','rlang','magrittr','tibble','dplyr','ggplot2','cowplot','ggrepel','readr','data.table','RSQLite','locuszoomr','pgenlibr','Rfast','knitr','rmarkdown','testthat','BiocManager','crayon','rcmdcheck'),head(.libPaths(),1),'http://cran.wustl.edu')
-  - R -e BiocManager::install('enomeInfoDb',ask = FALSE)
-  - R -e BiocManager::install("ensembldb",ask = FALSE)
-  - R -e BiocManager::install("AnnotationFilter",ask = FALSE)
-  - R -e BiocManager::install("EnsDb.Hsapiens.v86",ask = FALSE)
+  - R -e BiocManager::install('GenomeInfoDb',ask = FALSE)
+  - R -e BiocManager::install('ensembldb',ask = FALSE)
+  - R -e BiocManager::install('AnnotationFilter',ask = FALSE)
+  - R -e BiocManager::install('EnsDb.Hsapiens.v86',ask = FALSE)
   
 test_script:
   - travis-tool.sh run_tests
