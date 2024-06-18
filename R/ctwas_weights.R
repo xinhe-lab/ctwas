@@ -59,6 +59,8 @@ load_weights <- function(weight_file,
 #' @importFrom tools file_path_sans_ext
 #' @importFrom RSQLite dbDriver dbConnect dbGetQuery dbDisconnect
 #'
+#' @export
+#'
 load_predictdb_weights <- function(weight_file,
                                    filter_protein_coding_genes = FALSE,
                                    load_predictdb_LD = FALSE){
