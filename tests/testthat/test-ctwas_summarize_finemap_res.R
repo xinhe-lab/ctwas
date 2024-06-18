@@ -5,9 +5,8 @@ test_that("anno_finemap_res works", {
   finemap_res <- ctwas_res$finemap_res
   gene_annot <- readRDS(system.file("extdata/sample_data", "LDL_example.gene_annot.RDS", package = "ctwas"))
 
-  expected_annotated_finemap_res <- readRDS(system.file("extdata/sample_data",
-                                                        "LDL_example.annotated_finemap_res.RDS",
-                                                        package = "ctwas"))
+  expected_annotated_finemap_res <- readRDS("LDL_example.annotated_finemap_res.RDS")
+
   capture.output({
     annotated_finemap_res <- anno_finemap_res(finemap_res,
                                               snp_info,

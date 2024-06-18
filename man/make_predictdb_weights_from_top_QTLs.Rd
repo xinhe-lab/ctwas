@@ -7,7 +7,7 @@
 make_predictdb_weights_from_top_QTLs(
   QTL_data,
   gene_info = NULL,
-  output_dir = getwd(),
+  outputdir = getwd(),
   weight_name
 )
 }
@@ -18,7 +18,7 @@ for the genes, and top QTL and weight for each gene,}
 \item{gene_info}{a data frame (optional) with information of the genes
 ("gene","genename","gene_type", etc.)}
 
-\item{output_dir}{output directory}
+\item{outputdir}{output directory}
 
 \item{weight_name}{name of the output weight files}
 }
