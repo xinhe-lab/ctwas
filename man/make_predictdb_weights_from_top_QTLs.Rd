@@ -5,22 +5,22 @@
 \title{Makes PredictDB weights from top QTLs}
 \usage{
 make_predictdb_weights_from_top_QTLs(
-  QTL_data,
-  gene_info = NULL,
+  weight_table,
+  extra_table = NULL,
   outputdir = getwd(),
-  weight_name
+  outname
 )
 }
 \arguments{
-\item{QTL_data}{a data frame with required columns: "gene", "varID", "weight".
-for the genes, and top QTL and weight for each gene,}
+\item{weight_table}{a data frame of the genes, QTLs and weights, with columns:
+"gene", "rsid", "varID", "ref_allele", "eff_allele", "weight".}
 
-\item{gene_info}{a data frame (optional) with information of the genes
-("gene","genename","gene_type", etc.)}
+\item{extra_table}{a data frame (optional) with information of the genes
+in \code{weight_table} ("gene","genename","gene_type", etc.)}
 
 \item{outputdir}{output directory}
 
-\item{weight_name}{name of the output weight files}
+\item{outname}{name of the output weight file}
 }
 \description{
 Make PredictDB weights from only top QTLs.

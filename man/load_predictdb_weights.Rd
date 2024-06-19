@@ -5,14 +5,13 @@
 \title{Loads weights in PredictDB format}
 \usage{
 load_predictdb_weights(
-  weight_file,
+  weight_path,
   filter_protein_coding_genes = FALSE,
   load_predictdb_LD = FALSE
 )
 }
 \arguments{
-\item{weight_file}{a string or a vector, pointing path to one or multiple
-sets of weights in PredictDB format.}
+\item{weight_path}{a string, pointing path to weights in PredictDB format.}
 
 \item{filter_protein_coding_genes}{TRUE/FALSE. If TRUE, keep protein coding
 genes only.}

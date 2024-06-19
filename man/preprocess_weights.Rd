@@ -5,7 +5,7 @@
 \title{Preprocess PredictDB/FUSION weights and harmonize with LD reference}
 \usage{
 preprocess_weights(
-  weight_file,
+  weight_path,
   region_info,
   gwas_snp_ids,
   type,
@@ -27,7 +27,8 @@ preprocess_weights(
 )
 }
 \arguments{
-\item{weight_file}{a string or a vector, pointing path to one or multiple sets of weights in PredictDB or FUSION format.}
+\item{weight_path}{path to the '.db' file for PredictDB weights;
+or the directory containing '.wgt.RDat' files for FUSION weights.}
 
 \item{region_info}{a data frame of region definition and associated file names.}
 
