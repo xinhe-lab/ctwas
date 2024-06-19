@@ -14,13 +14,15 @@ test_that("screen_regions and expand_region_data work", {
   expected_screened_region_data <- ctwas_res$screened_region_data
 
   capture.output({
-    screen_regions_res <- screen_regions(region_data,
-                                         use_LD = FALSE,
-                                         group_prior = group_prior,
-                                         group_prior_var = group_prior_var,
-                                         L = 1,
-                                         screen_method = "nonSNP_PIP",
-                                         min_nonSNP_PIP = 0.5)
+    suppressWarnings({
+      screen_regions_res <- screen_regions(region_data,
+                     use_LD = FALSE,
+                     group_prior = group_prior,
+                     group_prior_var = group_prior_var,
+                     L = 1,
+                     screen_method = "nonSNP_PIP",
+                     min_nonSNP_PIP = 0.5)
+      })
     screened_region_data <- screen_regions_res$screened_region_data
 
     # Expand screened region_data with all SNPs in the regions
@@ -30,7 +32,7 @@ test_that("screen_regions and expand_region_data work", {
                                                z_gene,
                                                trim_by = "z",
                                                maxSNP = 20000)
-  })
+    })
 
   expect_equal(screened_region_data, expected_screened_region_data)
-})
+  })

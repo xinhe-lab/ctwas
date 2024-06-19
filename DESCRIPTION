@@ -24,6 +24,7 @@ Depends: R (>= 3.5.0)
 License: MIT + file LICENSE
 Imports:
     utils,
+    R.utils,
     methods,
     stats,
     tools,
