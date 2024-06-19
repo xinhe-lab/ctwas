@@ -8,7 +8,7 @@ test_that("preprocess_region_LD_snp_info (no-LD version) works", {
 
   example_chrom <- 16
   ref_snp_info_file <- system.file("extdata/sample_data", "ukb_b38_0.1_chr16_var_info.Rvar.gz", package = "ctwas")
-  ref_snp_info <- data.table::fread(ref_snp_info_file, sep = "\t")
+  ref_snp_info <- read.table(gzfile(ref_snp_info_file), sep = "\t", header = TRUE, stringsAsFactors = FALSE)
 
   capture.output({
     res <- preprocess_region_LD_snp_info(region_info,
