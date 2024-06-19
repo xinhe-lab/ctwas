@@ -271,38 +271,45 @@ load_fusion_wgt_data <- function(wgt_rdata_file,
               cv.rsq = g.cv.rsq))
 }
 
-#' @title Makes PredictDB weights from top QTLs
-#'
-#' @description Make PredictDB weights from only top QTLs.
-#' Each gene (or molecular trait) has only one top QTL, defined by users,
-#' based on min p-value, max abs(weight), etc.
+#' @title Makes PredictDB weights from QTL data
 #'
 #' @param weight_table a data frame of the genes, QTLs and weights, with columns:
 #' "gene", "rsid", "varID", "ref_allele", "eff_allele", "weight".
 #'
 #' @param extra_table a data frame (optional) with information of the genes
-#' in \code{weight_table} ("gene","genename","gene_type", etc.)
+#' in \code{weight_table} ("gene","genename","gene_type", etc.).
+#' If NULL, create a simply extra_table based on weight_table
+#'
+#' @param covar_table a data frame of covariances between variants, with columns:
+#' "GENE","RSID1","RSID2", "VALUE".
+#' If NULL, do not create covariance files (.txg.gz), unless \code{use_top_QTL=TRUE}.
+#'
+#' @param use_top_QTL TRUE/FALSE. If TRUE, only keep the top QTL with
+#' the largest abs(weight) for each gene (molecular trait), and
+#' create a simple covar_table with covariance set to 1.
 #'
 #' @param outputdir output directory
 #'
 #' @param outname name of the output weight file
 #'
-#' @importFrom utils read.table write.table
 #' @importFrom stats complete.cases
-#' @importFrom RSQLite dbDriver dbConnect dbWriteTable dbDisconnect
 #' @importFrom magrittr %>%
 #' @importFrom dplyr group_by summarise n ungroup
 #' @importFrom rlang .data
 #'
 #' @export
 #'
-make_predictdb_weights_from_top_QTLs <- function(weight_table,
-                                                 extra_table=NULL,
-                                                 outputdir = getwd(),
-                                                 outname){
+make_predictdb_from_QTLs <- function(weight_table,
+                                     extra_table = NULL,
+                                     covar_table = NULL,
+                                     use_top_QTL = FALSE,
+                                     outputdir = getwd(),
+                                     outname){
 
   if (!dir.exists(outputdir))
     dir.create(outputdir, showWarnings = FALSE, recursive = TRUE)
+
+  loginfo("Makes PredictDB weights from QTL data")
 
   # check and clean the QTL data
   required_cols <- c("gene", "rsid", "varID", "ref_allele", "eff_allele", "weight")
@@ -310,16 +317,23 @@ make_predictdb_weights_from_top_QTLs <- function(weight_table,
     stop("QTL_data needs to contain the following columns: ",
          paste(required_cols, collapse = " "))
   }
+
+  # if use_top_QTL, select the top SNP with the max abs(weight) for each gene
+  if (use_top_QTL) {
+    loginfo("select the top SNP with the max abs(weight) for each gene")
+    weight_table <- weight_table[with(weight_table, order(gene, -abs(weight))),]
+    weight_table <- weight_table[!duplicated(weight_table$gene), ]
+  }
+
   weight_table <- weight_table[weight_table[, "weight"] != 0, ,drop = FALSE]
   weight_table <- weight_table[complete.cases(weight_table), ,drop = FALSE]
 
-  # create an empty extra table if NULL
+  # if NULL, create a simply extra_table based on weight_table
   if (is.null(extra_table)) {
-    extra_table <- weight_table %>% group_by(.data$gene) %>%
-      summarise(n.snps.in.model = n()) %>% ungroup()
-    if (any(extra_table$n.snps.in.model > 1)){
-      stop("each gene should have only one SNP as top QTL")
-    }
+    extra_table <- weight_table %>%
+      group_by(.data$gene) %>%
+      summarise(n.snps.in.model = n()) %>%
+      ungroup() %>% as.data.frame()
     extra_table$genename <- NA
     extra_table$gene_type <- NA
     extra_table$pred.perf.R2 <- NA
@@ -329,16 +343,19 @@ make_predictdb_weights_from_top_QTLs <- function(weight_table,
                                    "pred.perf.R2", "pred.perf.pval", "pred.perf.qval")]
   }
 
-  # write PredictDB '.db' file
-  write_predictdb(weight_table, extra_table, outputdir, outname)
+  if (use_top_QTL) {
+    if (any(extra_table$n.snps.in.model > 1)){
+      stop("each gene should have only one SNP when using top QTL only")
+    }
+    # set covariance to 1 as each gene only has one top QTL
+    covar_table <- weight_table[,c("gene","varID","varID")]
+    colnames(covar_table) <- c("GENE","RSID1","RSID2")
+    covar_table$VALUE <- 1
+  }
 
-  # set covariance to 1 as each gene only has one top QTL
-  covar_data <- weight_table[,c("gene","varID","varID")]
-  colnames(covar_data) <- c("GENE","RSID1","RSID2")
-  covar_data$VALUE <- 1
-  write.table(covar_data,
-              file = gzfile(file.path(outputdir,paste0(outname,".txt.gz"))),
-              col.names = TRUE, row.names = FALSE, quote = FALSE, sep = "\t")
+  # write PredictDB '.db' file
+  write_predictdb(weight_table, extra_table, covar_table, outputdir, outname)
+
 }
 
 #' @title Converts fusion weights to predictDB format
@@ -351,6 +368,10 @@ make_predictdb_weights_from_top_QTLs <- function(weight_table,
 #'
 #' @param make_extra_table TRUE/FALSE. If TRUE, make an extra table in predictDB format
 #'
+#' @param covar_table a data frame of covariances between variants, with columns:
+#' "GENE","RSID1","RSID2","VALUE".
+#' If NULL, do not create covariance files (.txg.gz).
+#'
 #' @param outputdir output directory
 #'
 #' @param outname name of the output weight file
@@ -362,6 +383,7 @@ convert_fusion_to_predictdb <- function(
     fusion_method = c("lasso","enet","top1","blup","bslmm","bestR2"),
     fusion_genome_version = c("b38","b37"),
     make_extra_table = TRUE,
+    covar_table = NULL,
     outputdir = getwd(),
     outname){
 
@@ -379,8 +401,8 @@ convert_fusion_to_predictdb <- function(
   if (missing(outname))
     outname <- weight_name
 
-  # write PredictDB '.db' file
-  write_predictdb(weight_table, extra_table, outputdir, outname)
+  # write PredictDB weights
+  write_predictdb(weight_table, extra_table, covar_table, outputdir, outname)
 
   return(list(weight_table=weight_table,
               extra_table=extra_table,
@@ -389,21 +411,54 @@ convert_fusion_to_predictdb <- function(
 
 
 # Makes PredictDB '.db' file from weight_table and extra_table
+#' @importFrom utils write.table
 #' @importFrom RSQLite dbDriver dbConnect dbWriteTable dbDisconnect
-write_predictdb <- function(weight_table, extra_table=NULL, outputdir, outname) {
+write_predictdb <- function(weight_table,
+                            extra_table = NULL,
+                            covar_table = NULL,
+                            outputdir,
+                            outname) {
+
+  # check required columns
+  required_cols <- c("gene", "rsid", "varID", "ref_allele", "eff_allele", "weight")
+  if (!all(required_cols %in% colnames(weight_table))){
+    stop("weight_table needs to contain the following columns: ",
+         paste(required_cols, collapse = " "))
+  }
+
   # Create a database connection
   driver <- dbDriver('SQLite')
   db <- dbConnect(drv = driver, file.path(outputdir, paste0(outname,".db")))
   # create weights table
   dbWriteTable(db, 'weights', weight_table, overwrite = TRUE)
+
   # create an empty extra table if NULL
   if (is.null(extra_table)) {
     extra_table <- data.frame(matrix(ncol = 7, nrow = 0))
     colnames(extra_table) <- c("gene", "genename", "gene_type", "n.snps.in.model",
                                "pred.perf.R2", "pred.perf.pval", "pred.perf.qval")
   }
+  # check required columns
+  required_cols <- c("gene", "genename", "gene_type")
+  if (!all(required_cols %in% colnames(extra_table))) {
+    stop("extra_table needs to contain the following columns: ",
+         paste(required_cols, collapse = " "))
+  }
   dbWriteTable(db, 'extra', extra_table, overwrite = TRUE)
   dbDisconnect(db)
+
+  if (!is.null(covar_table)) {
+    # check required columns
+    required_cols <- c("GENE", "RSID1", "RSID2", "VALUE")
+    if (!all(required_cols %in% colnames(covar_table))) {
+      stop("covar_table needs to contain the following columns: ",
+           paste(required_cols, collapse = " "))
+    }
+    write.table(covar_table,
+                file = gzfile(file.path(outputdir,paste0(outname,".txt.gz"))),
+                col.names = TRUE, row.names = FALSE, quote = FALSE, sep = "\t")
+  }
+
 }
 
 

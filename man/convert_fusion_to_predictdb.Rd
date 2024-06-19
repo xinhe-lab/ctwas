@@ -9,6 +9,7 @@ convert_fusion_to_predictdb(
   fusion_method = c("lasso", "enet", "top1", "blup", "bslmm", "bestR2"),
   fusion_genome_version = c("b38", "b37"),
   make_extra_table = TRUE,
+  covar_table = NULL,
   outputdir = getwd(),
   outname
 )
@@ -21,6 +22,10 @@ convert_fusion_to_predictdb(
 \item{fusion_genome_version}{a string, specifying the genome version of FUSION models}
 
 \item{make_extra_table}{TRUE/FALSE. If TRUE, make an extra table in predictDB format}
+
+\item{covar_table}{a data frame of covariances between variants, with columns:
+"GENE","RSID1","RSID2","VALUE".
+If NULL, do not create covariance files (.txg.gz).}
 
 \item{outputdir}{output directory}
 
