@@ -26,6 +26,12 @@ environment:
     R_BUILD_ARGS: --no-manual --no-build-vignettes
     R_CHECK_ARGS: --no-manual --as-cran --ignore-vignettes
 
+  matrix:
+    - R_VERSION: release 
+      R_ARCH: x64
+      GCC_PATH: mingw_64
+
+    
 # This is the minimal set of R packages needed to run "R CMD check" on
 # the package.
 build_script:
@@ -45,11 +51,6 @@ on_failure:
 
 on_success:
   - Rscript -e 'covr::codecov()'
-
-matrix:
-  - R_VERSION: release 
-    R_ARCH: x64
-    GCC_PATH: mingw_64
 
 artifacts:
   - path: '*.Rcheck\**\*.log'
