@@ -52,7 +52,7 @@ To run the full cTWAS, a few more tutorials including:
 
 You can [browse source code](https://github.com/xinhe-lab/ctwas/tree/multigroup_test) and [report a bug](https://github.com/xinhe-lab/ctwas/issues) here. 
 
-<img style="display:block;margin:auto" width="700" height="300" src="vignettes/workflow.png">
+<img style="display:block;margin:auto" width="700" height="300" src="man/figures/workflow.png">
 
 ## Citing this work
 

@@ -1,4 +1,4 @@
-#' @title Causal inference for TWAS using summary statistics
+#' @title cTWAS analysis using summary statistics
 #'
 #' @param z_snp A data frame with four columns: "id", "A1", "A2", "z".
 #' giving the z scores for snps. "A1" is effect allele. "A2" is the other allele.

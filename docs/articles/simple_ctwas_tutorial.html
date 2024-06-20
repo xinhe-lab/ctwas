@@ -33,7 +33,7 @@
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">ctwas</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">0.2.41</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">0.2.45</span>
       </span>
     </div>
 
@@ -93,7 +93,7 @@
       <h1 data-toc-skip>Simple cTWAS tutorial</h1>
                         <h4 data-toc-skip class="author">Kaixuan Luo, Sheng Qian</h4>
             
-            <h4 data-toc-skip class="date">2024-06-17</h4>
+            <h4 data-toc-skip class="date">2024-06-19</h4>
       
       <small class="dont-index">Source: <a href="https://github.com/xinhe-lab/ctwas/blob/multigroup_test/vignettes/simple_ctwas_tutorial.Rmd" class="external-link"><code>vignettes/simple_ctwas_tutorial.Rmd</code></a></small>
       <div class="hidden name"><code>simple_ctwas_tutorial.Rmd</code></div>
@@ -173,14 +173,14 @@
 <span>                          <span class="va">snp_info</span>, </span>
 <span>                          drop_multiallelic <span class="op">=</span> <span class="cn">TRUE</span>, </span>
 <span>                          drop_strand_ambig <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span></code></pre></div>
-<pre><code><span><span class="co">## 2024-06-17 14:07:38 INFO::Preprocessing z_snp...</span></span>
-<span><span class="co">## 2024-06-17 14:07:38 INFO::z_snp has 407828 variants in total</span></span>
-<span><span class="co">## 2024-06-17 14:07:38 INFO::267361 variants left after filtering by snp_info</span></span>
-<span><span class="co">## 2024-06-17 14:07:38 INFO::Drop 30 multiallelic variants</span></span>
-<span><span class="co">## 2024-06-17 14:07:38 INFO::Harmonize 267331 variants in both GWAS and LD reference</span></span>
-<span><span class="co">## 2024-06-17 14:07:39 INFO::Flip signs for 267289 (99.98%) variants</span></span>
-<span><span class="co">## 2024-06-17 14:07:39 INFO::Remove 45738 strand ambiguous variants</span></span>
-<span><span class="co">## 2024-06-17 14:07:39 INFO::221593 variants left after preprocessing and harmonization.</span></span></code></pre>
+<pre><code><span><span class="co">## 2024-06-19 19:04:03 INFO::Preprocessing z_snp...</span></span>
+<span><span class="co">## 2024-06-19 19:04:03 INFO::z_snp has 407828 variants in total</span></span>
+<span><span class="co">## 2024-06-19 19:04:04 INFO::267361 variants left after filtering by snp_info</span></span>
+<span><span class="co">## 2024-06-19 19:04:04 INFO::Drop 30 multiallelic variants</span></span>
+<span><span class="co">## 2024-06-19 19:04:04 INFO::Harmonize 267331 variants in both GWAS and LD reference</span></span>
+<span><span class="co">## 2024-06-19 19:04:05 INFO::Flip signs for 267289 (99.98%) variants</span></span>
+<span><span class="co">## 2024-06-19 19:04:05 INFO::Remove 45738 strand ambiguous variants</span></span>
+<span><span class="co">## 2024-06-19 19:04:05 INFO::221593 variants left after preprocessing and harmonization.</span></span></code></pre>
 </div>
 <div class="section level3">
 <h3 id="harmonizing-prediction-models-and-the-reference-data">Harmonizing prediction models and the reference data<a class="anchor" aria-label="anchor" href="#harmonizing-prediction-models-and-the-reference-data"></a>
@@ -203,14 +203,15 @@
 <span>                                    scale_by_ld_variance <span class="op">=</span> <span class="cn">TRUE</span>,</span>
 <span>                                    load_predictdb_LD <span class="op">=</span> <span class="cn">TRUE</span>,</span>
 <span>                                    filter_protein_coding_genes <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span></code></pre></div>
-<pre><code><span><span class="co">## 2024-06-17 14:07:40 INFO::Load weight: /tmp/jobs/40519124/RtmpYbPq7Z/temp_libpathb64548bdfda/ctwas/extdata/sample_data/expression_Liver.db</span></span>
-<span><span class="co">## 2024-06-17 14:07:40 INFO::type: expression</span></span>
-<span><span class="co">## 2024-06-17 14:07:40 INFO::context: liver</span></span>
-<span><span class="co">## 2024-06-17 14:07:40 INFO::Keep protein coding genes only</span></span>
-<span><span class="co">## 2024-06-17 14:07:40 INFO::Number of genes with weights provided: 11479 in expression_Liver</span></span>
-<span><span class="co">## 2024-06-17 14:07:40 INFO::Number of variants in weights: 16929</span></span>
-<span><span class="co">## 2024-06-17 14:07:40 INFO::529 variants and 410 genes left after filtering by GWAS and reference SNPs</span></span>
-<span><span class="co">## 2024-06-17 14:07:40 INFO::Harmonizing weights with LD reference ...</span></span></code></pre>
+<pre><code><span><span class="co">## 2024-06-19 19:04:05 INFO::Load weight: /tmp/jobs/40542501/RtmpIMuxoF/temp_libpath3f2a116bf85e/ctwas/extdata/sample_data/expression_Liver.db</span></span>
+<span><span class="co">## 2024-06-19 19:04:05 INFO::type: expression</span></span>
+<span><span class="co">## 2024-06-19 19:04:05 INFO::context: liver</span></span>
+<span><span class="co">## 2024-06-19 19:04:05 INFO::Loading PredictDB weights ...</span></span>
+<span><span class="co">## 2024-06-19 19:04:05 INFO::Keep protein coding genes only</span></span>
+<span><span class="co">## 2024-06-19 19:04:05 INFO::Number of genes with weights provided: 11479 in expression_Liver</span></span>
+<span><span class="co">## 2024-06-19 19:04:05 INFO::Number of variants in weights: 16929</span></span>
+<span><span class="co">## 2024-06-19 19:04:05 INFO::529 variants and 410 genes left after filtering by GWAS and reference SNPs</span></span>
+<span><span class="co">## 2024-06-19 19:04:05 INFO::Harmonizing weights with LD reference ...</span></span></code></pre>
 <div class="sourceCode" id="cb11"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">weight_adipose_file</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/system.file.html" class="external-link">system.file</a></span><span class="op">(</span><span class="st">"extdata/sample_data"</span>, <span class="st">"expression_Adipose_Subcutaneous.db"</span>, package <span class="op">=</span> <span class="st">"ctwas"</span><span class="op">)</span></span>
 <span></span>
@@ -226,15 +227,15 @@
 <span>                                      scale_by_ld_variance <span class="op">=</span> <span class="cn">TRUE</span>,</span>
 <span>                                      load_predictdb_LD <span class="op">=</span> <span class="cn">TRUE</span>,</span>
 <span>                                      filter_protein_coding_genes <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span></code></pre></div>
-<pre><code><span><span class="co">## 2024-06-17 14:07:41 INFO::Load weight: /tmp/jobs/40519124/RtmpYbPq7Z/temp_libpathb64548bdfda/ctwas/extdata/sample_data/expression_Adipose_Subcutaneous.db</span></span>
-<span><span class="co">## 2024-06-17 14:07:41 INFO::type: expression</span></span>
-<span><span class="co">## 2024-06-17 14:07:41 INFO::context: adipose</span></span>
-<span><span class="co">## 2024-06-17 14:07:41 INFO::Keep protein coding genes only</span></span>
-<span><span class="co">## 2024-06-17 14:07:41 INFO::Number of genes with weights provided: 13102 in expression_Adipose_Subcutaneous</span></span>
-<span><span class="co">## 2024-06-17 14:07:41 INFO::Number of variants in weights: 23737</span></span>
-<span><span class="co">## 2024-06-17 14:07:41 INFO::720 variants and 484 genes left after filtering by GWAS and reference SNPs</span></span>
-<span><span class="co">## 2024-06-17 14:07:41 INFO::Harmonizing weights with LD reference ...</span></span>
-<span><span class="co">## 2024-06-17 14:07:43 INFO::Variant positions in ENSG00000153786.12 weights are different from positions in snp_info. Use the positions in snp_info instead.</span></span></code></pre>
+<pre><code><span><span class="co">## 2024-06-19 19:04:06 INFO::Load weight: /tmp/jobs/40542501/RtmpIMuxoF/temp_libpath3f2a116bf85e/ctwas/extdata/sample_data/expression_Adipose_Subcutaneous.db</span></span>
+<span><span class="co">## 2024-06-19 19:04:06 INFO::type: expression</span></span>
+<span><span class="co">## 2024-06-19 19:04:06 INFO::context: adipose</span></span>
+<span><span class="co">## 2024-06-19 19:04:06 INFO::Loading PredictDB weights ...</span></span>
+<span><span class="co">## 2024-06-19 19:04:06 INFO::Keep protein coding genes only</span></span>
+<span><span class="co">## 2024-06-19 19:04:07 INFO::Number of genes with weights provided: 13102 in expression_Adipose_Subcutaneous</span></span>
+<span><span class="co">## 2024-06-19 19:04:07 INFO::Number of variants in weights: 23737</span></span>
+<span><span class="co">## 2024-06-19 19:04:07 INFO::720 variants and 484 genes left after filtering by GWAS and reference SNPs</span></span>
+<span><span class="co">## 2024-06-19 19:04:07 INFO::Harmonizing weights with LD reference ...</span></span></code></pre>
 <div class="sourceCode" id="cb13"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># concatenate weights from different types or contexts</span></span>
 <span><span class="va">weights</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="va">weights_liver</span>, <span class="va">weights_adipose</span><span class="op">)</span></span></code></pre></div>
@@ -353,10 +354,10 @@
 <span>                                <span class="va">snp_info</span>,</span>
 <span>                                <span class="va">gene_annot</span>,</span>
 <span>                                use_gene_pos <span class="op">=</span> <span class="st">"mid"</span><span class="op">)</span></span></code></pre></div>
-<pre><code><span><span class="co">## 2024-06-17 14:07:47 INFO::Annotating ctwas finemapping result ...</span></span>
-<span><span class="co">## 2024-06-17 14:07:47 INFO::add gene_name and gene_type</span></span>
-<span><span class="co">## 2024-06-17 14:07:47 INFO::use gene mid positions</span></span>
-<span><span class="co">## 2024-06-17 14:07:47 INFO::add SNP positions from snp_info</span></span></code></pre>
+<pre><code><span><span class="co">## 2024-06-19 19:04:12 INFO::Annotating ctwas finemapping result ...</span></span>
+<span><span class="co">## 2024-06-19 19:04:12 INFO::add gene_name and gene_type</span></span>
+<span><span class="co">## 2024-06-19 19:04:12 INFO::use gene mid positions</span></span>
+<span><span class="co">## 2024-06-19 19:04:12 INFO::add SNP positions from snp_info</span></span></code></pre>
 <p>We list all molecular traits with PIP &gt; 0.8, which is the threshold we used in the paper.</p>
 <div class="sourceCode" id="cb33"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># select PIP &gt; 0.8</span></span>
@@ -406,11 +407,11 @@
 <span>               locus_range <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">71.6e6</span>,<span class="fl">72.4e6</span><span class="op">)</span>,</span>
 <span>               highlight_pip <span class="op">=</span> <span class="fl">0.8</span>,</span>
 <span>               legend.position <span class="op">=</span> <span class="st">"top"</span><span class="op">)</span></span></code></pre></div>
-<pre><code><span><span class="co">## 2024-06-17 14:07:47 INFO::focus gene: HPR</span></span>
-<span><span class="co">## 2024-06-17 14:07:47 INFO::focus id: ENSG00000261701.6|expression_Liver</span></span>
-<span><span class="co">## 2024-06-17 14:07:47 INFO::plot locus range: chr16 71600000,72400000</span></span>
-<span><span class="co">## 2024-06-17 14:07:47 INFO::HPR liver expression QTLs</span></span>
-<span><span class="co">## 2024-06-17 14:07:47 INFO::QTL positions: 72063820,72063928</span></span></code></pre>
+<pre><code><span><span class="co">## 2024-06-19 19:04:13 INFO::focus gene: HPR</span></span>
+<span><span class="co">## 2024-06-19 19:04:13 INFO::focus id: ENSG00000261701.6|expression_Liver</span></span>
+<span><span class="co">## 2024-06-19 19:04:13 INFO::plot locus range: chr16 71600000,72400000</span></span>
+<span><span class="co">## 2024-06-19 19:04:13 INFO::HPR liver expression QTLs</span></span>
+<span><span class="co">## 2024-06-19 19:04:13 INFO::QTL positions: 72063820,72063928</span></span></code></pre>
 <div class="figure" style="text-align: center">
 <img src="simple_ctwas_tutorial_files/figure-html/locus_plot-1.png" alt="&amp;nbsp;" width="1200"><p class="caption">
  

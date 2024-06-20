@@ -2,10 +2,7 @@
 % Please edit documentation in R/ctwas_compute_region_cor.R
 \name{get_region_cor}
 \alias{get_region_cor}
-\title{Gets correlation matrices for a single region.
-Load precomputed correlation matrices if available in \code{cor_dir},
-otherwise, computes correlation matrices if no precomputed correlation matrices,
-or force_compute_cor = TRUE.}
+\title{Gets correlation matrices for a single region.}
 \usage{
 get_region_cor(
   region_id,
@@ -49,8 +46,7 @@ get_region_cor(
 a list of correlation matrices (R_snp, R_snp_gene and R_gene)
 }
 \description{
-Gets correlation matrices for a single region.
-Load precomputed correlation matrices if available in \code{cor_dir},
+Loads precomputed correlation matrices if available in \code{cor_dir},
 otherwise, computes correlation matrices if no precomputed correlation matrices,
 or force_compute_cor = TRUE.
 }

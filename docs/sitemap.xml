@@ -37,97 +37,31 @@
     <loc>/index.html</loc>
   </url>
   <url>
-    <loc>/reference/EM.html</loc>
-  </url>
-  <url>
-    <loc>/reference/EM_est_param.html</loc>
-  </url>
-  <url>
-    <loc>/reference/N2finemapping.html</loc>
-  </url>
-  <url>
-    <loc>/reference/add_z_to_region_data.html</loc>
-  </url>
-  <url>
-    <loc>/reference/add_z_to_regionlist.html</loc>
-  </url>
-  <url>
-    <loc>/reference/adjust_boundary.html</loc>
-  </url>
-  <url>
-    <loc>/reference/adjust_boundary_genes.html</loc>
-  </url>
-  <url>
     <loc>/reference/anno_finemap_res.html</loc>
-  </url>
-  <url>
-    <loc>/reference/anno_susie.html</loc>
   </url>
   <url>
     <loc>/reference/assemble_region_data.html</loc>
   </url>
   <url>
-    <loc>/reference/assign_region_ids.html</loc>
-  </url>
-  <url>
-    <loc>/reference/coef.susie.html</loc>
-  </url>
-  <url>
     <loc>/reference/combine_gene_pips.html</loc>
-  </url>
-  <url>
-    <loc>/reference/combine_z.html</loc>
-  </url>
-  <url>
-    <loc>/reference/compute_cor.html</loc>
   </url>
   <url>
     <loc>/reference/compute_gene_z.html</loc>
   </url>
   <url>
-    <loc>/reference/compute_region_condz.html</loc>
-  </url>
-  <url>
-    <loc>/reference/compute_region_cor.html</loc>
-  </url>
-  <url>
     <loc>/reference/compute_region_nonSNP_PIPs.html</loc>
   </url>
   <url>
-    <loc>/reference/compute_region_p_single_effect.html</loc>
-  </url>
-  <url>
-    <loc>/reference/compute_ss.html</loc>
+    <loc>/reference/convert_fusion_to_predictdb.html</loc>
   </url>
   <url>
     <loc>/reference/convert_geno_to_LD_matrix.html</loc>
-  </url>
-  <url>
-    <loc>/reference/ctwas_EM.html</loc>
-  </url>
-  <url>
-    <loc>/reference/ctwas_locus_plot.html</loc>
-  </url>
-  <url>
-    <loc>/reference/ctwas_locus_plot_genetrack.html</loc>
-  </url>
-  <url>
-    <loc>/reference/ctwas_summarize_parameters.html</loc>
   </url>
   <url>
     <loc>/reference/ctwas_sumstats.html</loc>
   </url>
   <url>
     <loc>/reference/ctwas_sumstats_noLD.html</loc>
-  </url>
-  <url>
-    <loc>/reference/ctwas_susie_rss.html</loc>
-  </url>
-  <url>
-    <loc>/reference/detect_ld_mismatch_susie.html</loc>
-  </url>
-  <url>
-    <loc>/reference/detect_ld_mismatch_susie_rss.html</loc>
   </url>
   <url>
     <loc>/reference/diagnose_ld_mismatch_susie.html</loc>
@@ -142,19 +76,10 @@
     <loc>/reference/expand_region_data.html</loc>
   </url>
   <url>
-    <loc>/reference/expand_regionlist.html</loc>
-  </url>
-  <url>
-    <loc>/reference/filter_regions.html</loc>
-  </url>
-  <url>
     <loc>/reference/finemap_region.html</loc>
   </url>
   <url>
     <loc>/reference/finemap_regions.html</loc>
-  </url>
-  <url>
-    <loc>/reference/finemap_regions_L1.html</loc>
   </url>
   <url>
     <loc>/reference/get_L.html</loc>
@@ -166,64 +91,22 @@
     <loc>/reference/get_gene_annot_from_ens_db.html</loc>
   </url>
   <url>
-    <loc>/reference/get_gene_info.html</loc>
-  </url>
-  <url>
-    <loc>/reference/get_gene_regions.html</loc>
-  </url>
-  <url>
-    <loc>/reference/get_merged_region_info.html</loc>
-  </url>
-  <url>
-    <loc>/reference/get_merged_regions.html</loc>
-  </url>
-  <url>
     <loc>/reference/get_problematic_genes.html</loc>
-  </url>
-  <url>
-    <loc>/reference/get_problematic_regions.html</loc>
   </url>
   <url>
     <loc>/reference/get_region_cor.html</loc>
   </url>
   <url>
-    <loc>/reference/get_region_idx.html</loc>
-  </url>
-  <url>
-    <loc>/reference/get_regionlist.html</loc>
-  </url>
-  <url>
-    <loc>/reference/harmonize_weights.html</loc>
-  </url>
-  <url>
-    <loc>/reference/harmonize_wgt_ld.html</loc>
-  </url>
-  <url>
-    <loc>/reference/harmonize_z.html</loc>
-  </url>
-  <url>
-    <loc>/reference/harmonize_z_ld.html</loc>
-  </url>
-  <url>
     <loc>/reference/index.html</loc>
-  </url>
-  <url>
-    <loc>/reference/index_region.html</loc>
-  </url>
-  <url>
-    <loc>/reference/initiate_group_priors.html</loc>
   </url>
   <url>
     <loc>/reference/kriging_rss.html</loc>
   </url>
   <url>
-    <loc>/reference/label_merged_regions.html</loc>
+    <loc>/reference/load_fusion_weights.html</loc>
   </url>
   <url>
-    <loc>/reference/label_overlapping_regions.html</loc>
-  </url>
-  <url>
-    <loc>/reference/load_LD.html</loc>
+    <loc>/reference/load_predictdb_weights.html</loc>
   </url>
   <url>
     <loc>/reference/load_weights.html</loc>
@@ -235,6 +118,9 @@
     <loc>/reference/make_locusplot.html</loc>
   </url>
   <url>
+    <loc>/reference/make_predictdb_from_QTLs.html</loc>
+  </url>
+  <url>
     <loc>/reference/map_snp_info_regions.html</loc>
   </url>
   <url>
@@ -244,85 +130,19 @@
     <loc>/reference/merge_region_data.html</loc>
   </url>
   <url>
-    <loc>/reference/predict.susie.html</loc>
-  </url>
-  <url>
-    <loc>/reference/prep_pgen.html</loc>
-  </url>
-  <url>
-    <loc>/reference/prep_pvar.html</loc>
-  </url>
-  <url>
     <loc>/reference/preprocess_region_LD_snp_info.html</loc>
   </url>
   <url>
     <loc>/reference/preprocess_weights.html</loc>
   </url>
   <url>
-    <loc>/reference/preprocess_wgt_ld.html</loc>
-  </url>
-  <url>
-    <loc>/reference/preprocess_z_ld.html</loc>
-  </url>
-  <url>
     <loc>/reference/preprocess_z_snp.html</loc>
-  </url>
-  <url>
-    <loc>/reference/read_LD.html</loc>
-  </url>
-  <url>
-    <loc>/reference/read_LD_SNP_file.html</loc>
-  </url>
-  <url>
-    <loc>/reference/read_LD_SNP_files.html</loc>
-  </url>
-  <url>
-    <loc>/reference/read_bim.html</loc>
-  </url>
-  <url>
-    <loc>/reference/read_exprvar.html</loc>
-  </url>
-  <url>
-    <loc>/reference/read_pgen.html</loc>
-  </url>
-  <url>
-    <loc>/reference/read_pvar.html</loc>
-  </url>
-  <url>
-    <loc>/reference/read_snp_info_file.html</loc>
-  </url>
-  <url>
-    <loc>/reference/read_snp_info_files.html</loc>
-  </url>
-  <url>
-    <loc>/reference/read_var_info.html</loc>
-  </url>
-  <url>
-    <loc>/reference/read_weights.html</loc>
-  </url>
-  <url>
-    <loc>/reference/region2core.html</loc>
-  </url>
-  <url>
-    <loc>/reference/rerun_finemap_regions_L1.html</loc>
   </url>
   <url>
     <loc>/reference/screen_regions.html</loc>
   </url>
   <url>
-    <loc>/reference/select_highPIP_regions.html</loc>
-  </url>
-  <url>
-    <loc>/reference/select_problematic_regions.html</loc>
-  </url>
-  <url>
-    <loc>/reference/select_single_effect_regions.html</loc>
-  </url>
-  <url>
     <loc>/reference/single_effect_regression.html</loc>
-  </url>
-  <url>
-    <loc>/reference/sum_pip_across_contexts.html</loc>
   </url>
   <url>
     <loc>/reference/summarize_param.html</loc>
@@ -334,19 +154,7 @@
     <loc>/reference/susie_get_methods.html</loc>
   </url>
   <url>
-    <loc>/reference/susie_init_coef.html</loc>
-  </url>
-  <url>
     <loc>/reference/susie_rss.html</loc>
-  </url>
-  <url>
-    <loc>/reference/trim_region_data.html</loc>
-  </url>
-  <url>
-    <loc>/reference/trim_regionlist.html</loc>
-  </url>
-  <url>
-    <loc>/reference/univariate_regression.html</loc>
   </url>
   <url>
     <loc>/reference/update_finemap_res.html</loc>

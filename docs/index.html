@@ -33,7 +33,7 @@
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="index.html">ctwas</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">0.2.41</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">0.2.45</span>
       </span>
     </div>
 
@@ -90,17 +90,34 @@
       </header><div class="row">
   <div class="contents col-md-9">
 <div class="section level1">
-<div class="page-header"><h1 id="ctwas-integrating-molecular-qtls-and-gwas-for-gene-discovery">cTWAS: integrating molecular QTLs and GWAS for gene discovery<a class="anchor" aria-label="anchor" href="#ctwas-integrating-molecular-qtls-and-gwas-for-gene-discovery"></a>
+<div class="page-header"><h1 id="ctwas-an-r-package-for-integrating-molecular-qtls-and-gwas-for-gene-discovery">ctwas: an R package for integrating molecular QTLs and GWAS for gene discovery<a class="anchor" aria-label="anchor" href="#ctwas-an-r-package-for-integrating-molecular-qtls-and-gwas-for-gene-discovery"></a>
 </h1></div>
-<p><a href="https://github.com/xinhe-lab/ctwas/actions/workflows/R-CMD-check.yaml" class="external-link"><img src="https://github.com/xinhe-lab/ctwas/actions/workflows/R-CMD-check.yaml/badge.svg" alt="R-CMD-check"></a></p>
-<p>Expression Quantitative Trait Loci (eQTLs) have often been used to nominate candidate genes from Genome-wide association studies (GWAS). However, commonly used methods are susceptible to false positives largely due to Linkage Disequilibrium of eQTLs with causal variants acting on the phenotype directly.</p>
-<p>Our method, causal-TWAS (cTWAS), addressed this challenge by borrowing ideas from statistical fine-mapping. It is a generalization of Transcriptome-wide association studies (TWAS), but when analyzing any gene, it adjusts for other nearby genes and all nearby genetic variants.</p>
+<p>Expression Quantitative Trait Loci (eQTLs) have often been used to nominate candidate genes from Genome-wide association studies (GWAS). However, commonly used methods are susceptible to false positives largely due to Linkage Disequilibrium (LD) of eQTLs with causal variants acting on the phenotype directly.</p>
+<p>Our method, “causal-TWAS” (cTWAS), addresses this challenge by borrowing ideas from statistical fine-mapping. It is a generalization of methods for transcriptome-wide association studies (TWAS), but when analyzing any gene, it adjusts for other nearby genes <em>and all nearby genetic variants.</em></p>
 <p>While the <a href="https://doi.org/10.1038/s41588-023-01648-9" class="external-link">published paper</a> analyzes a single eQTL dataset, the latest version of cTWAS extends the method to integrate multiple groups of prediction models, allowing for joint analysis of multiple types of molecular traits, across potentially different tissues, cell types or conditions.</p>
-<p>Running cTWAS involves four main steps: preparing input data, computing gene z-scores, estimating parameters, and fine-mapping. The output of cTWAS are posterior inclusion probabilities (PIPs) for all variants and molecular traits..</p>
-<p>We have included the following tutorials:</p>
-<ul>
-<li><p><a href="https://xinhe-lab.github.io/multigroup_ctwas/articles/simple_ctwas_tutorial.html" class="external-link">A minimum tutorial of how to run cTWAS without LD</a></p></li>
-<li>
+<div class="section level2">
+<h2 id="install-ctwas">Install ctwas<a class="anchor" aria-label="anchor" href="#install-ctwas"></a>
+</h2>
+<p>Use “remotes” to install the latest version of ctwas from GitHub:</p>
+<div class="sourceCode" id="cb1"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/utils/install.packages.html" class="external-link">install.packages</a></span><span class="op">(</span><span class="st">"remotes"</span><span class="op">)</span></span>
+<span><span class="fu">remotes</span><span class="fu">::</span><span class="fu"><a href="https://remotes.r-lib.org/reference/install_github.html" class="external-link">install_github</a></span><span class="op">(</span><span class="st">"xinhe-lab/ctwas"</span>,ref <span class="op">=</span> <span class="st">"multigroup_test"</span><span class="op">)</span></span></code></pre></div>
+<p>Currently, ctwas has only been tested on Linux systems.</p>
+<p>We recommend installing and running ctwas on a high-performance computing system.</p>
+</div>
+<div class="section level2">
+<h2 id="running-ctwas">Running ctwas<a class="anchor" aria-label="anchor" href="#running-ctwas"></a>
+</h2>
+<p>Running a cTWAS analysis involves four main steps:</p>
+<ol style="list-style-type: decimal">
+<li><p>Preparing the input data.</p></li>
+<li><p>Computing the gene z-scores.</p></li>
+<li><p>Estimating the model parameters.</p></li>
+<li><p>Fine-mapping.</p></li>
+</ol>
+<p>The outputs of cTWAS are posterior inclusion probabilities (PIPs) for all variants and molecular traits.</p>
+<p>To learn more about the ctwas R package, we recommend starting with this introductory tutorial:</p>
+<p><a href="https://xinhe-lab.github.io/multigroup_ctwas/articles/simple_ctwas_tutorial.html" class="external-link">A minimal tutorial of how to run cTWAS without LD</a></p>
 <p>To run the full cTWAS, a few more tutorials including:</p>
 <ul>
 <li><p><a href="https://xinhe-lab.github.io/multigroup_ctwas/articles/preparing_ctwas_input_data.html" class="external-link">Preparing input data</a></p></li>
@@ -109,23 +126,14 @@
 <li><p><a href="https://xinhe-lab.github.io/multigroup_ctwas/articles/summarizing_ctwas_results.html" class="external-link">Summarizing and visualizing cTWAS results</a></p></li>
 <li><p><a href="https://xinhe-lab.github.io/multigroup_ctwas/articles/postprocessing_ctwas_results.html" class="external-link">Post-processing cTWAS results</a></p></li>
 </ul>
-</li>
-</ul>
 <p>You can <a href="https://github.com/xinhe-lab/ctwas/tree/multigroup_test" class="external-link">browse source code</a> and <a href="https://github.com/xinhe-lab/ctwas/issues" class="external-link">report a bug</a> here.</p>
 <p><img style="display:block;margin:auto" width="700" height="300" src="reference/figures/workflow.png"></p>
-<div class="section level2">
-<h2 id="install">Install<a class="anchor" aria-label="anchor" href="#install"></a>
-</h2>
-<p>Install <code>ctwas</code>:</p>
-<pre><code><span><span class="co"># install.packages("remotes")</span></span>
-<span><span class="fu">remotes</span><span class="fu">::</span><span class="fu"><a href="https://remotes.r-lib.org/reference/install_github.html" class="external-link">install_github</a></span><span class="op">(</span><span class="st">"xinhe-lab/ctwas"</span>,ref <span class="op">=</span> <span class="st">"multigroup_test"</span><span class="op">)</span></span></code></pre>
-<p>Currently, <code>ctwas</code> has only been tested on linux systems. We recommend running <code>ctwas</code> on a High-Performance Computing system.</p>
 </div>
 <div class="section level2">
 <h2 id="citing-this-work">Citing this work<a class="anchor" aria-label="anchor" href="#citing-this-work"></a>
 </h2>
 <p>If you find the <code>ctwas</code> package or any of the source code in this repository useful for your work, please cite:</p>
-<blockquote><p>Zhao S, Crouse W, Qian S, Luo K, Stephens M, He X. Adjusting for genetic confounders in transcriptome-wide association studies improves discovery of risk genes of complex traits. Nat Genet (2024). <a href="https://doi.org/10.1038/s41588-023-01648-9" class="external-link uri">https://doi.org/10.1038/s41588-023-01648-9</a></p></blockquote>
+<blockquote><p>Zhao S, Crouse W, Qian S, Luo K, Stephens M, He X. Adjusting for genetic confounders in transcriptome-wide association studies improves discovery of risk genes of complex traits. Nature Genetics 56, 336–347 (2024). <a href="https://doi.org/10.1038/s41588-023-01648-9" class="external-link uri">https://doi.org/10.1038/s41588-023-01648-9</a></p></blockquote>
 </div>
 <div class="section level2">
 <h2 id="useful-resources">Useful resources<a class="anchor" aria-label="anchor" href="#useful-resources"></a>
@@ -135,9 +143,9 @@
 <p>cTWAS requires the expression prediction models, or weights, of genes. The pre-computed weights of GTEx expression and splicing traits can be downloaded from <a href="https://predictdb.org/post/2021/07/21/gtex-v8-models-on-eqtl-and-sqtl/" class="external-link">PredictDB</a>.</p>
 </div>
 <div class="section level2">
-<h2 id="acknowledgement">Acknowledgement<a class="anchor" aria-label="anchor" href="#acknowledgement"></a>
+<h2 id="acknowledgments">Acknowledgments<a class="anchor" aria-label="anchor" href="#acknowledgments"></a>
 </h2>
-<p>We acknowledge the authors of <code>susieR</code> package for using their codes.</p>
+<p>We thank the authors of <code>susieR</code> package for using their codes.</p>
 <p>Original <code>susieR</code> code obtained by:</p>
 <pre><code>git clone git@github.com:stephenslab/susieR.git
 git checkout c7934c0</code></pre>
