@@ -2,7 +2,7 @@
 % Please edit documentation in R/ctwas_sumstats.R
 \name{ctwas_sumstats}
 \alias{ctwas_sumstats}
-\title{Causal inference for TWAS using summary statistics}
+\title{cTWAS analysis using summary statistics}
 \usage{
 ctwas_sumstats(
   z_snp,
@@ -112,5 +112,5 @@ a list of estimated parameters, fine-mapping results, boundary genes,
 z_gene, region_data, and screened_region_data
 }
 \description{
-Causal inference for TWAS using summary statistics
+cTWAS analysis using summary statistics
 }

@@ -2,7 +2,7 @@
 #
 #   ctwas_res <- readRDS(system.file("extdata/sample_data", "LDL_example.ctwas_sumstats_noLD_res.RDS", package = "ctwas"))
 #   region_data <- ctwas_res$region_data
-#   estimated_param <- ctwas_res$param
+#   expected_param <- ctwas_res$param
 #
 #   capture.output({
 #     param <- suppressWarnings({
@@ -13,5 +13,5 @@
 #     })
 #   })
 #
-#   expect_equal(param, estimated_param)
+#   expect_equal(param, expected_param)
 # })

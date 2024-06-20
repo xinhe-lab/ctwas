@@ -17,7 +17,7 @@
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">ctwas</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">0.2.41</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">0.2.45</span>
       </span>
     </div>
 
@@ -76,7 +76,7 @@
 
     <div id="ref-usage">
     <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="fu">preprocess_weights</span><span class="op">(</span></span>
-<span>  <span class="va">weight_file</span>,</span>
+<span>  <span class="va">weight_path</span>,</span>
 <span>  <span class="va">region_info</span>,</span>
 <span>  <span class="va">gwas_snp_ids</span>,</span>
 <span>  <span class="va">type</span>,</span>
@@ -88,7 +88,7 @@
 <span>  scale_by_ld_variance <span class="op">=</span> <span class="cn">FALSE</span>,</span>
 <span>  filter_protein_coding_genes <span class="op">=</span> <span class="cn">FALSE</span>,</span>
 <span>  load_predictdb_LD <span class="op">=</span> <span class="cn">FALSE</span>,</span>
-<span>  method_FUSION <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"lasso"</span>, <span class="st">"enet"</span>, <span class="st">"top1"</span>, <span class="st">"blup"</span><span class="op">)</span>,</span>
+<span>  fusion_method <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"lasso"</span>, <span class="st">"enet"</span>, <span class="st">"top1"</span>, <span class="st">"blup"</span><span class="op">)</span>,</span>
 <span>  fusion_genome_version <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"b38"</span>, <span class="st">"b37"</span><span class="op">)</span>,</span>
 <span>  fusion_top_n_snps <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  LD_format <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"rds"</span>, <span class="st">"rdata"</span>, <span class="st">"csv"</span>, <span class="st">"txt"</span>, <span class="st">"custom"</span><span class="op">)</span>,</span>
@@ -100,8 +100,9 @@
 
     <div id="arguments">
     <h2>Arguments</h2>
-    <dl><dt>weight_file</dt>
-<dd><p>a string or a vector, pointing path to one or multiple sets of weights in PredictDB or FUSION format.</p></dd>
+    <dl><dt>weight_path</dt>
+<dd><p>path to the '.db' file for PredictDB weights;
+or the directory containing '.wgt.RDat' files for FUSION weights.</p></dd>
 
 
 <dt>region_info</dt>
@@ -151,7 +152,7 @@ standardized, but our implementation assumes standardized variant genotypes.</p>
 <dd><p>TRUE/FALSE. If TRUE, load pre-computed LD among weight SNPs. This option is only for PredictDB weights</p></dd>
 
 
-<dt>method_FUSION</dt>
+<dt>fusion_method</dt>
 <dd><p>a string, specifying the method to choose in FUSION models</p></dd>
 
 

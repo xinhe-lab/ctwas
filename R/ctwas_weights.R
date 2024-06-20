@@ -1,7 +1,8 @@
 
 #' @title Loads weights in PredictDB or FUSION format
 #'
-#' @param weight_file a string or a vector, pointing path to one or multiple sets of weights in PredictDB or FUSION format.
+#' @param weight_path path to the '.db' file for PredictDB weights;
+#' or the directory containing '.wgt.RDat' files for FUSION weights.
 #'
 #' @param weight_format a string or a vector, specifying format of each weight file, e.g. PredictDB, FUSION.
 #'
@@ -17,27 +18,26 @@
 #'
 #' @export
 #'
-load_weights <- function(weight_file,
+load_weights <- function(weight_path,
                          weight_format = c("PredictDB", "FUSION"),
                          filter_protein_coding_genes = FALSE,
                          load_predictdb_LD = FALSE,
-                         fusion_method = c("lasso","enet","top1","blup"),
+                         fusion_method = c("lasso","enet","top1","blup","bslmm","bestR2"),
                          fusion_genome_version = c("b38","b37"),
                          ncore = 1){
 
   weight_format <- match.arg(weight_format)
   fusion_method <- match.arg(fusion_method)
   fusion_genome_version <- match.arg(fusion_genome_version)
-  stopifnot(file.exists(weight_file))
 
   if (weight_format == "PredictDB") {
     res <- load_predictdb_weights(
-      weight_file,
+      weight_path,
       filter_protein_coding_genes = filter_protein_coding_genes,
       load_predictdb_LD = load_predictdb_LD)
   } else if (weight_format == "FUSION") {
     res <- load_fusion_weights(
-      weight_file,
+      weight_path,
       fusion_method = fusion_method,
       fusion_genome_version = fusion_genome_version,
       ncore = ncore)
@@ -47,8 +47,7 @@ load_weights <- function(weight_file,
 
 #' @title Loads weights in PredictDB format
 #'
-#' @param weight_file a string or a vector, pointing path to one or multiple
-#' sets of weights in PredictDB format.
+#' @param weight_path a string, pointing path to weights in PredictDB format.
 #'
 #' @param filter_protein_coding_genes TRUE/FALSE. If TRUE, keep protein coding
 #' genes only.
@@ -58,21 +57,22 @@ load_weights <- function(weight_file,
 #'
 #' @importFrom tools file_path_sans_ext
 #' @importFrom RSQLite dbDriver dbConnect dbGetQuery dbDisconnect
+#' @importFrom utils read.table
 #'
 #' @export
 #'
-load_predictdb_weights <- function(weight_file,
+load_predictdb_weights <- function(weight_path,
                                    filter_protein_coding_genes = FALSE,
                                    load_predictdb_LD = FALSE){
 
   # read the PredictDB weights
-  stopifnot(file.exists(weight_file))
+  stopifnot(file.exists(weight_path))
 
   loginfo("Loading PredictDB weights ...")
 
-  weight_name <- file_path_sans_ext(basename(weight_file))
+  weight_name <- file_path_sans_ext(basename(weight_path))
   sqlite <- dbDriver("SQLite")
-  db <- dbConnect(sqlite, weight_file)
+  db <- dbConnect(sqlite, weight_path)
   query <- function(...) dbGetQuery(db, ...)
   weight_table <- query("select * from weights")
   weight_table <- weight_table[weight_table$weight!=0,]
@@ -90,7 +90,7 @@ load_predictdb_weights <- function(weight_file,
 
   # load pre-computed LD from PredictDB LD file
   if (isTRUE(load_predictdb_LD)){
-    predictdb_LD_file <- paste0(file_path_sans_ext(weight_file), ".txt.gz")
+    predictdb_LD_file <- paste0(file_path_sans_ext(weight_path), ".txt.gz")
     if (!file.exists(predictdb_LD_file)){
       stop(paste("PredictDB LD file", predictdb_LD_file, "does not exist!"))
     }
@@ -109,86 +109,90 @@ load_predictdb_weights <- function(weight_file,
 
 #' @title Loads weights in FUSION format
 #'
-#' @param weight_file a string or a vector, pointing path to one or multiple
-#' sets of weights in FUSION format.
+#' @param weight_path the directory containing FUSION weights ('.wgt.RDat' files).
 #'
 #' @param fusion_method a string, specifying the method to choose in FUSION models.
 #'
 #' @param fusion_genome_version a string, specifying the genome version of FUSION models
 #'
+#' @param make_extra_table TRUE/FALSE. If TRUE, make an extra table in predictDB format
+#'
 #' @param ncore integer, number of cores for parallel computing.
 #'
 #' @importFrom utils read.table
-#' @importFrom stats complete.cases
 #' @importFrom stats ave
-#' @importFrom magrittr %>%
-#' @importFrom dplyr left_join
 #' @importFrom tools file_path_sans_ext
 #' @importFrom parallel mclapply
+#' @importFrom magrittr %>%
+#' @importFrom dplyr group_by summarise n ungroup
+#' @importFrom rlang .data
 #'
 #' @export
 #'
-load_fusion_weights <- function(weight_file,
-                                fusion_method = c("lasso","enet","top1","blup"),
+load_fusion_weights <- function(weight_path,
+                                fusion_method = c("lasso","enet","top1","blup","bslmm","bestR2"),
                                 fusion_genome_version = c("b38","b37"),
+                                make_extra_table = FALSE,
                                 ncore = 1) {
 
   fusion_method <- match.arg(fusion_method)
   fusion_genome_version <- match.arg(fusion_genome_version)
-  stopifnot(file.exists(weight_file))
+  stopifnot(dir.exists(weight_path))
 
   loginfo("Loading FUSION weights ...")
-  weight_name <- file_path_sans_ext(basename(weight_file))
-  wgt_dir <- dirname(weight_file)
-  wgt_pos_file <- file.path(wgt_dir, paste0(basename(weight_file), ".pos"))
-  wgt_pos <- read.table(wgt_pos_file, header = T, stringsAsFactors = F)
-  wgt_pos$ID <-
-    ifelse(duplicated(wgt_pos$ID) | duplicated(wgt_pos$ID,fromLast = TRUE),
-           paste(wgt_pos$ID, ave(wgt_pos$ID,wgt_pos$ID,FUN = seq_along), sep="_ID"),
-           wgt_pos$ID)
-  wgt_pos <- wgt_pos[wgt_pos$ID!="NA_IDNA",] # filter NA genes
+  weight_name <- file_path_sans_ext(basename(weight_path))
 
-  weight_table <- NULL
-  if (nrow(wgt_pos) > 0) {
-    weight_table_list <- mclapply(1:nrow(wgt_pos), function(i){
-      # load weights, and snps info and
-      # and combine gene, snps, and weights
-      load(file.path(wgt_dir, wgt_pos[i, "WGT"]))
-      gname <- wgt_pos[i, "ID"]
-      snps <- as.data.frame(snps)
-      colnames(snps) <- c("chrom", "rsid", "cm", "pos", "alt", "ref")
-      snps$varID <- sprintf("chr%s_%s_%s_%s_%s",
-                            snps$chrom, snps$pos, snps$ref, snps$alt,
-                            fusion_genome_version)
-      # use varID for those missing rsIDs
-      snps[is.na(snps$rsid),"rsid"] <- snps[is.na(snps$rsid),"varID"]
-      snps <- snps[, c("chrom", "rsid", "varID", "pos", "ref", "alt")]
-
-      rownames(wgt.matrix) <- snps$rsid
-
-      g.method <- fusion_method
-      # Ensure only top magnitude snp weight in the top1 wgt.matrix column
-      if (g.method == "top1"){
-        wgt.matrix[,"top1"][-which.max(wgt.matrix[,"top1"]^2)] <- 0
-      }
-      wgt.matrix <- wgt.matrix[abs(wgt.matrix[, g.method]) > 0, , drop = FALSE]
-      wgt.matrix <- wgt.matrix[complete.cases(wgt.matrix), , drop = FALSE]
-      if (nrow(wgt.matrix) > 0){
-        gene_weight_table <- data.frame(gene = gname,
-                                        rsid = rownames(wgt.matrix),
-                                        weight = wgt.matrix[,g.method])
-        gene_weight_table <- gene_weight_table %>% left_join(snps, by = "rsid")
-        gene_weight_table <- gene_weight_table[,c("gene","rsid","varID","ref","alt","weight")]
-        colnames(gene_weight_table) <- c("gene","rsid","varID","ref_allele","eff_allele","weight")
-        gene_weight_table
-      }
-    })
-    if (length(weight_table_list) != nrow(wgt_pos)) {
-      stop("Not all cores returned results. Try rerun with bigger memory or fewer cores")
-    }
-    weight_table <- do.call(rbind, weight_table_list)
+  # list FUSION weight Rdata files
+  wgt_dir <- dirname(weight_path)
+  wgt_pos_file <- file.path(wgt_dir, paste0(basename(weight_path), ".pos"))
+  if (file.exists(wgt_pos_file)) {
+    wgt_pos <- read.table(wgt_pos_file, header = TRUE, stringsAsFactors = FALSE)
+    wgt_pos$ID <-
+      ifelse(duplicated(wgt_pos$ID) | duplicated(wgt_pos$ID,fromLast = TRUE),
+             paste(wgt_pos$ID, ave(wgt_pos$ID,wgt_pos$ID,FUN = seq_along), sep="_ID"),
+             wgt_pos$ID)
+    wgt_pos <- wgt_pos[wgt_pos$ID!="NA_IDNA",] # filter NA genes
+    wgt_rdata_files <- file.path(wgt_dir, wgt_pos[, "WGT"])
+    wgt_IDs <- wgt_pos[, "ID"]
+  } else {
+    wgt_rdata_files <- list.files(weight_path, full.names = TRUE)
+    wgt_IDs <- gsub(".wgt.RDat", "", basename(wgt_rdata_files))
   }
-  extra_table <- NULL
+
+  # Get list of all files in weight_path
+  if (length(wgt_rdata_files) == 0) {
+    stop("No FUSION .wgt.RDat files found.")
+  }
+
+  loginfo("Loading %d .wgt.RDat files", length(wgt_rdata_files))
+  weight_table_list <- mclapply(1:length(wgt_rdata_files), function(i){
+    loaded_wgt_res <- load_fusion_wgt_data(
+      wgt_rdata_files[i],
+      wgt_IDs[i],
+      fusion_method = fusion_method,
+      fusion_genome_version = fusion_genome_version)
+    loaded_wgt_res$weight_table
+  }, mc.cores = ncore)
+
+  if (length(weight_table_list) != length(wgt_rdata_files)) {
+    stop("Not all cores returned results. Try rerun with bigger memory or fewer cores")
+  }
+  weight_table <- do.call(rbind, weight_table_list)
+
+  if (make_extra_table) {
+    extra_table <- weight_table %>% group_by(.data$gene) %>%
+      summarise(n.snps.in.model = n()) %>% ungroup()
+    extra_table$genename <- NA
+    extra_table$gene_type <- NA
+    extra_table$pred.perf.R2 <- NA
+    extra_table$pred.perf.pval <- NA
+    extra_table$pred.perf.qval <- NA
+    extra_table <- extra_table[, c("gene", "genename", "gene_type", "n.snps.in.model",
+                                   "pred.perf.R2", "pred.perf.pval", "pred.perf.qval")]
+  } else {
+    extra_table <- NULL
+  }
+
   R_wgt <- NULL
 
   return(list(weight_table=weight_table,
@@ -196,6 +200,267 @@ load_fusion_weights <- function(weight_file,
               weight_name=weight_name,
               R_wgt=R_wgt))
 }
+
+
+# load FUSION .wgt.RDat file
+#' @importFrom dplyr left_join
+load_fusion_wgt_data <- function(wgt_rdata_file,
+                                 wgt_ID,
+                                 fusion_method = c("lasso","enet","top1","blup","bslmm","bestR2"),
+                                 fusion_genome_version = c("b38","b37")){
+
+  fusion_method <- match.arg(fusion_method)
+  fusion_genome_version <- match.arg(fusion_genome_version)
+  stopifnot(file.exists(wgt_rdata_file))
+
+  # define the variables as NULL to binding the variables locally to the function.
+  snps <- wgt.matrix <- cv.performance <- NULL
+
+  # load FUSION wgt.RDat
+  load(wgt_rdata_file)
+
+  if (missing(wgt_ID)){
+    wgt_ID <- gsub(".wgt.RDat", "", basename(wgt_rdata_file))
+  }
+
+  snps <- as.data.frame(snps)
+  colnames(snps) <- c("chrom", "rsid", "cm", "pos", "alt", "ref")
+  snps$varID <- sprintf("chr%s_%s_%s_%s_%s",
+                        snps$chrom, snps$pos, snps$ref, snps$alt,
+                        fusion_genome_version)
+  # use varID for those missing rsIDs
+  snps[is.na(snps$rsid),"rsid"] <- snps[is.na(snps$rsid),"varID"]
+  snps <- snps[, c("chrom", "rsid", "varID", "pos", "ref", "alt")]
+
+  rownames(wgt.matrix) <- snps$rsid
+
+  # select FUSION method
+  cv.rsq <- cv.performance[1,]
+  if (fusion_method == "bestR2"){
+    g.method <- names(cv.rsq)[which.max(cv.rsq)]
+  } else{
+    g.method <- fusion_method
+  }
+
+  if (!g.method %in% colnames(wgt.matrix))
+    stop(paste(g.method, "not found in the columns of wgt.matrix"))
+
+  g.cv.rsq <- cv.rsq[g.method]
+
+  # for top1 method, only top magnitude SNP weight have non-zero weights
+  if(g.method == "top1"){
+    wgt.matrix[, "top1"][-which.max(abs(wgt.matrix[, "top1"]))] <- 0
+  }
+  wgt.matrix <- wgt.matrix[wgt.matrix[, g.method] != 0, , drop = FALSE]
+  wgt.matrix <- wgt.matrix[complete.cases(wgt.matrix), , drop = FALSE]
+  if (nrow(wgt.matrix) > 0){
+    weight_table <- data.frame(gene = wgt_ID,
+                               rsid = rownames(wgt.matrix),
+                               weight = wgt.matrix[,g.method])
+    weight_table <- weight_table %>% left_join(snps, by = "rsid")
+    weight_table <- weight_table[,c("gene","rsid","varID","ref","alt","weight")]
+    colnames(weight_table) <- c("gene","rsid","varID","ref_allele","eff_allele","weight")
+  } else {
+    weight_table <- data.frame(matrix(ncol = 6, nrow = 0))
+    colnames(weight_table) <- c("gene","rsid","varID","ref_allele","eff_allele","weight")
+  }
+
+  return(list(weight_table = weight_table,
+              fusion_method = g.method,
+              wgt_ID = wgt_ID,
+              cv.rsq = g.cv.rsq))
+}
+
+#' @title Makes PredictDB weights from QTL data
+#'
+#' @param weight_table a data frame of the genes, QTLs and weights, with columns:
+#' "gene", "rsid", "varID", "ref_allele", "eff_allele", "weight".
+#'
+#' @param extra_table a data frame (optional) with information of the genes
+#' in \code{weight_table} ("gene","genename","gene_type", etc.).
+#' If NULL, create a simply extra_table based on weight_table
+#'
+#' @param covar_table a data frame of covariances between variants, with columns:
+#' "GENE","RSID1","RSID2", "VALUE".
+#' If NULL, do not create covariance files (.txg.gz), unless \code{use_top_QTL=TRUE}.
+#'
+#' @param use_top_QTL TRUE/FALSE. If TRUE, only keep the top QTL with
+#' the largest abs(weight) for each gene (molecular trait), and
+#' create a simple covar_table with covariance set to 1.
+#'
+#' @param outputdir output directory
+#'
+#' @param outname name of the output weight file
+#'
+#' @importFrom stats complete.cases
+#' @importFrom magrittr %>%
+#' @importFrom dplyr group_by summarise n ungroup
+#' @importFrom rlang .data
+#'
+#' @export
+#'
+make_predictdb_from_QTLs <- function(weight_table,
+                                     extra_table = NULL,
+                                     covar_table = NULL,
+                                     use_top_QTL = FALSE,
+                                     outputdir = getwd(),
+                                     outname){
+
+  if (!dir.exists(outputdir))
+    dir.create(outputdir, showWarnings = FALSE, recursive = TRUE)
+
+  loginfo("Makes PredictDB weights from QTL data")
+
+  # check and clean the QTL data
+  required_cols <- c("gene", "rsid", "varID", "ref_allele", "eff_allele", "weight")
+  if (!all(required_cols %in% colnames(weight_table))){
+    stop("QTL_data needs to contain the following columns: ",
+         paste(required_cols, collapse = " "))
+  }
+
+  # if use_top_QTL, select the top SNP with the max abs(weight) for each gene
+  if (use_top_QTL) {
+    loginfo("select the top SNP with the max abs(weight) for each gene")
+    weight_table <- weight_table[with(weight_table, order(gene, -abs(weight))),]
+    weight_table <- weight_table[!duplicated(weight_table$gene), ]
+  }
+
+  weight_table <- weight_table[weight_table[, "weight"] != 0, ,drop = FALSE]
+  weight_table <- weight_table[complete.cases(weight_table), ,drop = FALSE]
+
+  # if NULL, create a simply extra_table based on weight_table
+  if (is.null(extra_table)) {
+    extra_table <- weight_table %>%
+      group_by(.data$gene) %>%
+      summarise(n.snps.in.model = n()) %>%
+      ungroup() %>% as.data.frame()
+    extra_table$genename <- NA
+    extra_table$gene_type <- NA
+    extra_table$pred.perf.R2 <- NA
+    extra_table$pred.perf.pval <- NA
+    extra_table$pred.perf.qval <- NA
+    extra_table <- extra_table[, c("gene", "genename", "gene_type", "n.snps.in.model",
+                                   "pred.perf.R2", "pred.perf.pval", "pred.perf.qval")]
+  }
+
+  if (use_top_QTL) {
+    if (any(extra_table$n.snps.in.model > 1)){
+      stop("each gene should have only one SNP when using top QTL only")
+    }
+    # set covariance to 1 as each gene only has one top QTL
+    covar_table <- weight_table[,c("gene","varID","varID")]
+    colnames(covar_table) <- c("GENE","RSID1","RSID2")
+    covar_table$VALUE <- 1
+  }
+
+  # write PredictDB '.db' file
+  write_predictdb(weight_table, extra_table, covar_table, outputdir, outname)
+
+}
+
+#' @title Converts fusion weights to predictDB format
+#'
+#' @param weight_path the directory containing FUSION weights ('.wgt.RDat' files).
+#'
+#' @param fusion_method a string, specifying the method to choose in FUSION models.
+#'
+#' @param fusion_genome_version a string, specifying the genome version of FUSION models
+#'
+#' @param make_extra_table TRUE/FALSE. If TRUE, make an extra table in predictDB format
+#'
+#' @param covar_table a data frame of covariances between variants, with columns:
+#' "GENE","RSID1","RSID2","VALUE".
+#' If NULL, do not create covariance files (.txg.gz).
+#'
+#' @param outputdir output directory
+#'
+#' @param outname name of the output weight file
+#'
+#' @export
+#'
+convert_fusion_to_predictdb <- function(
+    weight_path,
+    fusion_method = c("lasso","enet","top1","blup","bslmm","bestR2"),
+    fusion_genome_version = c("b38","b37"),
+    make_extra_table = TRUE,
+    covar_table = NULL,
+    outputdir = getwd(),
+    outname){
+
+  fusion_method <- match.arg(fusion_method)
+  fusion_genome_version <- match.arg(fusion_genome_version)
+
+  loaded_weights_res <- load_fusion_weights(weight_path,
+                                            fusion_method = fusion_method,
+                                            fusion_genome_version = fusion_genome_version,
+                                            make_extra_table = make_extra_table)
+  weight_name <- loaded_weights_res$weight_name
+  weight_table <- loaded_weights_res$weight_table
+  extra_table <- loaded_weights_res$extra_table
+
+  if (missing(outname))
+    outname <- weight_name
+
+  # write PredictDB weights
+  write_predictdb(weight_table, extra_table, covar_table, outputdir, outname)
+
+  return(list(weight_table=weight_table,
+              extra_table=extra_table,
+              weight_name=weight_name))
+}
+
+
+# Makes PredictDB '.db' file from weight_table and extra_table
+#' @importFrom utils write.table
+#' @importFrom RSQLite dbDriver dbConnect dbWriteTable dbDisconnect
+write_predictdb <- function(weight_table,
+                            extra_table = NULL,
+                            covar_table = NULL,
+                            outputdir,
+                            outname) {
+
+  # check required columns
+  required_cols <- c("gene", "rsid", "varID", "ref_allele", "eff_allele", "weight")
+  if (!all(required_cols %in% colnames(weight_table))){
+    stop("weight_table needs to contain the following columns: ",
+         paste(required_cols, collapse = " "))
+  }
+
+  # Create a database connection
+  driver <- dbDriver('SQLite')
+  db <- dbConnect(drv = driver, file.path(outputdir, paste0(outname,".db")))
+  # create weights table
+  dbWriteTable(db, 'weights', weight_table, overwrite = TRUE)
+
+  # create an empty extra table if NULL
+  if (is.null(extra_table)) {
+    extra_table <- data.frame(matrix(ncol = 7, nrow = 0))
+    colnames(extra_table) <- c("gene", "genename", "gene_type", "n.snps.in.model",
+                               "pred.perf.R2", "pred.perf.pval", "pred.perf.qval")
+  }
+  # check required columns
+  required_cols <- c("gene", "genename", "gene_type")
+  if (!all(required_cols %in% colnames(extra_table))) {
+    stop("extra_table needs to contain the following columns: ",
+         paste(required_cols, collapse = " "))
+  }
+  dbWriteTable(db, 'extra', extra_table, overwrite = TRUE)
+  dbDisconnect(db)
+
+  if (!is.null(covar_table)) {
+    # check required columns
+    required_cols <- c("GENE", "RSID1", "RSID2", "VALUE")
+    if (!all(required_cols %in% colnames(covar_table))) {
+      stop("covar_table needs to contain the following columns: ",
+           paste(required_cols, collapse = " "))
+    }
+    write.table(covar_table,
+                file = gzfile(file.path(outputdir,paste0(outname,".txt.gz"))),
+                col.names = TRUE, row.names = FALSE, quote = FALSE, sep = "\t")
+  }
+
+}
+
 
 # Gets pre-computed LD matrix from predictedDB weights
 #' @importFrom stats setNames
@@ -298,11 +563,11 @@ compute_weight_LD_from_ref <- function(weights,
 
         for (weight_id in weight_ids) {
           snpnames <- rownames(weights[[weight_id]]$wgt)
-          R_wgt <- R_snp[snpnames, snpnames, drop=F]
+          R_wgt <- R_snp[snpnames, snpnames, drop=FALSE]
           curr_region_LD_list[[weight_id]] <- R_wgt
         }
         curr_region_LD_list
-      })
+      }, mc.cores = ncore)
       if (length(weight_LD_list) != length(weight_region_ids)) {
         stop("Not all cores returned results. Try rerun with bigger memory or fewer cores")
       }
@@ -313,66 +578,4 @@ compute_weight_LD_from_ref <- function(weights,
     }
   }
   return(weights)
-}
-
-#' @title Makes PredictDB weights from top QTLs
-#'
-#' @description Make PredictDB weights from only top QTLs.
-#' Each gene (or molecular trait) has only one top QTL, defined by users,
-#' based on min p-value, max abs(weight), etc.
-#'
-#' @param QTL_data a data frame with required columns: "gene", "varID", "weight".
-#' for the genes, and top QTL and weight for each gene,
-#'
-#' @param gene_info a data frame (optional) with information of the genes
-#' ("gene","genename","gene_type", etc.)
-#'
-#' @param outputdir output directory
-#'
-#' @param weight_name name of the output weight files
-#'
-#' @importFrom utils read.table write.table
-#' @importFrom stats complete.cases
-#' @importFrom RSQLite dbDriver dbConnect dbWriteTable dbDisconnect
-#'
-#' @export
-#'
-make_predictdb_weights_from_top_QTLs <- function(QTL_data,
-                                                 gene_info=NULL,
-                                                 outputdir = getwd(),
-                                                 weight_name){
-
-  if (!dir.exists(outputdir))
-    dir.create(outputdir, showWarnings = FALSE, recursive = TRUE)
-
-  # check and clean the QTL data
-  required_cols <- c("gene", "varID", "weight")
-  if (!all(required_cols %in% colnames(QTL_data))){
-    stop("QTL_data needs to contain the following columns: ",
-         paste(required_cols, collapse = " "))
-  }
-  QTL_data <- QTL_data[abs(QTL_data[, "weight"]) > 0, ,drop = FALSE]
-  # remove missing values
-  QTL_data <- QTL_data[complete.cases(QTL_data), ,drop = FALSE]
-
-  # Create a database connection
-  driver <- dbDriver('SQLite')
-  db <- dbConnect(drv = driver, file.path(outputdir, paste0(weight_name,".db")))
-  # create weights table
-  dbWriteTable(db, 'weights', QTL_data, overwrite = TRUE)
-  # create extra table with gene info
-  if (is.null(gene_info)) {
-    gene_info <- data.frame(matrix(ncol = 3, nrow = 0))
-    colnames(gene_info) <- c("gene","genename","gene_type")
-  }
-  dbWriteTable(db, 'extra', gene_info, overwrite = TRUE)
-  dbDisconnect(db)
-
-  # set covariance to 1 as each gene only has one top QTL
-  covar_data <- QTL_data[,c("gene","varID","varID")]
-  colnames(covar_data) <- c("GENE","RSID1","RSID2")
-  covar_data$VALUE <- 1
-  write.table(covar_data,
-              file = gzfile(file.path(outputdir,paste0(weight_name,".txt.gz"))),
-              col.names = TRUE, row.names = FALSE, quote = FALSE, sep = "\t")
 }

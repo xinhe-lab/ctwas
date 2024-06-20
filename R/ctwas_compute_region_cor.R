@@ -89,7 +89,8 @@ compute_region_cor <- function(sids, gids, R_snp, LD_sids, weights) {
 }
 
 #' @title Gets correlation matrices for a single region.
-#' Load precomputed correlation matrices if available in \code{cor_dir},
+#'
+#' @description Loads precomputed correlation matrices if available in \code{cor_dir},
 #' otherwise, computes correlation matrices if no precomputed correlation matrices,
 #' or force_compute_cor = TRUE.
 #'

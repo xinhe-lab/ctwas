@@ -17,7 +17,7 @@
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">ctwas</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">0.2.41</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">0.2.45</span>
       </span>
     </div>
 
@@ -93,17 +93,21 @@
         </td>
         <td><p>Computes non-SNP PIPs for each region from finemapping result</p></td>
       </tr><tr><td>
+          <p><code><a href="convert_fusion_to_predictdb.html">convert_fusion_to_predictdb()</a></code> </p>
+        </td>
+        <td><p>Converts fusion weights to predictDB format</p></td>
+      </tr><tr><td>
           <p><code><a href="convert_geno_to_LD_matrix.html">convert_geno_to_LD_matrix()</a></code> </p>
         </td>
         <td><p>Converts PLINK genotype data to LD matrices and SNP info files, saves LD matrices as .RDS files and SNP info as .Rvar files</p></td>
       </tr><tr><td>
           <p><code><a href="ctwas_sumstats.html">ctwas_sumstats()</a></code> </p>
         </td>
-        <td><p>Causal inference for TWAS using summary statistics</p></td>
+        <td><p>cTWAS analysis using summary statistics</p></td>
       </tr><tr><td>
           <p><code><a href="ctwas_sumstats_noLD.html">ctwas_sumstats_noLD()</a></code> </p>
         </td>
-        <td><p>Runs cTWAS analysis with "no LD" version</p></td>
+        <td><p>cTWAS analysis using summary statistics with "no LD" version</p></td>
       </tr><tr><td>
           <p><code><a href="diagnose_ld_mismatch_susie.html">diagnose_ld_mismatch_susie()</a></code> </p>
         </td>
@@ -139,11 +143,19 @@
       </tr><tr><td>
           <p><code><a href="get_region_cor.html">get_region_cor()</a></code> </p>
         </td>
-        <td><p>Gets correlation matrices for a single region. Load precomputed correlation matrices if available in <code>cor_dir</code>, otherwise, computes correlation matrices if no precomputed correlation matrices, or force_compute_cor = TRUE.</p></td>
+        <td><p>Gets correlation matrices for a single region.</p></td>
+      </tr><tr><td>
+          <p><code><a href="load_fusion_weights.html">load_fusion_weights()</a></code> </p>
+        </td>
+        <td><p>Loads weights in FUSION format</p></td>
+      </tr><tr><td>
+          <p><code><a href="load_predictdb_weights.html">load_predictdb_weights()</a></code> </p>
+        </td>
+        <td><p>Loads weights in PredictDB format</p></td>
       </tr><tr><td>
           <p><code><a href="load_weights.html">load_weights()</a></code> </p>
         </td>
-        <td><p>Loads PredictDB or FUSION weights</p></td>
+        <td><p>Loads weights in PredictDB or FUSION format</p></td>
       </tr><tr><td>
           <p><code><a href="make_convergence_plots.html">make_convergence_plots()</a></code> </p>
         </td>
@@ -152,6 +164,10 @@
           <p><code><a href="make_locusplot.html">make_locusplot()</a></code> </p>
         </td>
         <td><p>Plots the cTWAS result for a single locus</p></td>
+      </tr><tr><td>
+          <p><code><a href="make_predictdb_from_QTLs.html">make_predictdb_from_QTLs()</a></code> </p>
+        </td>
+        <td><p>Makes PredictDB weights from QTL data</p></td>
       </tr><tr><td>
           <p><code><a href="map_snp_info_regions.html">map_snp_info_regions()</a></code> </p>
         </td>
