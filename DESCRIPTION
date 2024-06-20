@@ -59,8 +59,4 @@ LazyDataCompression: xz
 VignetteBuilder: knitr
 NeedsCompilation: no
 RoxygenNote: 7.3.1
-Remotes:
-    bioc::AnnotationFilter,
-    bioc::ensembldb,
-    bioc::EnsDb.Hsapiens.v86
 Config/testthat/edition: 3

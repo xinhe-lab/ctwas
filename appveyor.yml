@@ -7,6 +7,8 @@ init:
 branches:
   only:
     - master
+    - main
+    - multigroup_test
 
 install:
   ps: Bootstrap
@@ -25,11 +27,9 @@ environment:
 # This is the minimal set of R packages needed to run "R CMD check" on
 # the package.
 build_script:
-  - R -e install.packages(c('logging','mixsqp','rlang','magrittr','tibble','dplyr','ggplot2','cowplot','ggrepel','readr','data.table','RSQLite','locuszoomr','pgenlibr','Rfast','knitr','rmarkdown','testthat','BiocManager','crayon','rcmdcheck'),head(.libPaths(),1),'http://cran.wustl.edu')
-  - R -e BiocManager::install('GenomeInfoDb',ask=FALSE)
-  - R -e BiocManager::install('ensembldb',ask=FALSE)
-  - R -e BiocManager::install('AnnotationFilter',ask=FALSE)
-  - R -e BiocManager::install('EnsDb.Hsapiens.v86',ask=FALSE)
+  - travis-tool.sh install_deps
+  - travis-tool.sh github_package jimhester/covr r-lib/devtools
+  - travis-tool.sh install_bioc_deps
   
 test_script:
   - travis-tool.sh run_tests
