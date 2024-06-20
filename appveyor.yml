@@ -6,9 +6,7 @@ init:
 
 branches:
   only:
-    - main
     - master
-    - multigroup_test
 
 install:
   ps: Bootstrap
