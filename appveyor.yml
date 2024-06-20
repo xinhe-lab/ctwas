@@ -36,7 +36,6 @@ environment:
 # the package.
 build_script:
   - travis-tool.sh install_deps
-  - travis-tool.sh github_package jimhester/covr r-lib/devtools
   - travis-tool.sh install_bioc_deps
   
 test_script:
@@ -48,9 +47,6 @@ after_test:
 on_failure:
   - 7z a failure.zip *.Rcheck\*
   - appveyor PushArtifact failure.zip
-
-on_success:
-  - Rscript -e 'covr::codecov()'
 
 artifacts:
   - path: '*.Rcheck\**\*.log'
