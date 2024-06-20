@@ -1,8 +1,12 @@
+# Download script file from GitHub
 init:
   ps: |
         $ErrorActionPreference = "Stop"
         Invoke-WebRequest http://raw.github.com/krlmlr/r-appveyor/master/scripts/appveyor-tool.ps1 -OutFile "..\appveyor-tool.ps1"
         Import-Module '..\appveyor-tool.ps1'
+
+install:
+  ps: Bootstrap
 
 branches:
   only:
@@ -10,14 +14,12 @@ branches:
     - main
     - multigroup_test
 
-install:
-  ps: Bootstrap
-
 environment:
   global:
     R_REMOTES_NO_ERRORS_FROM_WARNINGS: true
-    _R_CHECK_FORCE_SUGGESTS_: false
-    USE_RTOOLS: yes
+    _R_CHECK_FORCE_SUGGESTS_: true
+    USE_RTOOLS: true
+    PKGTYPE: win.binary
     WARNINGS_ARE_ERRORS:
     R_VERSION: release
     R_ARCH: x64
@@ -34,9 +36,20 @@ build_script:
 test_script:
   - travis-tool.sh run_tests
 
+after_test:
+  - 7z a all-Rout.zip *.Rcheck\**\*.Rout *.Rcheck\**\*.fail
+
 on_failure:
   - 7z a failure.zip *.Rcheck\*
   - appveyor PushArtifact failure.zip
+
+on_success:
+  - Rscript -e 'covr::codecov()'
+
+matrix:
+  - R_VERSION: release 
+    R_ARCH: x64
+    GCC_PATH: mingw_64
 
 artifacts:
   - path: '*.Rcheck\**\*.log'
@@ -56,3 +69,9 @@ artifacts:
 
   - path: '\*_*.zip'
     name: Bits
+
+  - path: all-Rout.zip
+    name: AllRout
+
+cache:
+  - C:\RLibrary -> appveyor.yml
