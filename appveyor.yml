@@ -11,8 +11,6 @@ install:
 branches:
   only:
     - master
-    - main
-    - multigroup_test
 
 environment:
   global:
