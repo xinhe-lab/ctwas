@@ -14,12 +14,12 @@ preprocess_weights(
   LD_info = NULL,
   weight_format = c("PredictDB", "FUSION"),
   drop_strand_ambig = TRUE,
-  scale_by_ld_variance = FALSE,
+  scale_predictdb_weights = FALSE,
   filter_protein_coding_genes = FALSE,
   load_predictdb_LD = FALSE,
-  fusion_method = c("lasso", "enet", "top1", "blup"),
+  fusion_method = c("lasso", "enet", "top1", "blup", "bslmm", "bestR2"),
   fusion_genome_version = c("b38", "b37"),
-  fusion_top_n_snps = NULL,
+  fusion_top_n_snps,
   LD_format = c("rds", "rdata", "csv", "txt", "custom"),
   LD_loader = NULL,
   ncore = 1,
@@ -47,7 +47,7 @@ with columns "chrom", "id", "pos", "alt", "ref", and "region_id".}
 
 \item{drop_strand_ambig}{TRUE/FALSE, if TRUE remove strand ambiguous variants (A/T, G/C).}
 
-\item{scale_by_ld_variance}{TRUE/FALSE, if TRUE scale PredictDB weights by the variance.
+\item{scale_predictdb_weights}{TRUE/FALSE, if TRUE scale PredictDB weights by the variance.
 This is because PredictDB weights assume that variant genotypes are not
 standardized, but our implementation assumes standardized variant genotypes.}
 
@@ -59,7 +59,8 @@ standardized, but our implementation assumes standardized variant genotypes.}
 
 \item{fusion_genome_version}{a string, specifying the genome version of FUSION models}
 
-\item{fusion_top_n_snps}{a number, specifying the top n weight SNPs included in FUSION models. If NULL, using all weight SNPs}
+\item{fusion_top_n_snps}{a number, specifying the top n weight SNPs included in FUSION models.
+By default, use all weight SNPs.}
 
 \item{LD_format}{file format for LD matrix. If "custom", use a user defined
 \code{LD_loader()} function to load LD matrix.}

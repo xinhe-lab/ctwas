@@ -25,7 +25,7 @@
 #'
 #' @param drop_strand_ambig TRUE/FALSE, if TRUE remove strand ambiguous variants (A/T, G/C).
 #'
-#' @param scale_by_ld_variance TRUE/FALSE, if TRUE scale PredictDB weights by the variance.
+#' @param scale_predictdb_weights TRUE/FALSE, if TRUE scale PredictDB weights by the variance.
 #' This is because PredictDB weights assume that variant genotypes are not
 #' standardized, but our implementation assumes standardized variant genotypes.
 #'
@@ -33,7 +33,8 @@
 #'
 #' @param fusion_genome_version a string, specifying the genome version of FUSION models
 #'
-#' @param fusion_top_n_snps a number, specifying the top n weight SNPs included in FUSION models. If NULL, using all weight SNPs
+#' @param fusion_top_n_snps a number, specifying the top n weight SNPs included in FUSION models.
+#' By default, use all weight SNPs.
 #'
 #' @param LD_format file format for LD matrix. If "custom", use a user defined
 #' \code{LD_loader()} function to load LD matrix.
@@ -46,11 +47,10 @@
 #'
 #' @return a list of processed weights
 #'
-#' @importFrom utils head
 #' @importFrom logging addHandler loginfo writeToFile
 #' @importFrom data.table rbindlist
 #' @importFrom tools file_path_sans_ext
-#' @importFrom stats complete.cases
+#' @importFrom parallel mclapply
 #'
 #' @export
 #'
@@ -63,12 +63,12 @@ preprocess_weights <- function(weight_path,
                                LD_info = NULL,
                                weight_format = c("PredictDB", "FUSION"),
                                drop_strand_ambig = TRUE,
-                               scale_by_ld_variance = FALSE,
+                               scale_predictdb_weights = FALSE,
                                filter_protein_coding_genes = FALSE,
                                load_predictdb_LD = FALSE,
-                               fusion_method = c("lasso","enet","top1","blup"),
+                               fusion_method = c("lasso","enet","top1","blup","bslmm","bestR2"),
                                fusion_genome_version = c("b38","b37"),
-                               fusion_top_n_snps = NULL,
+                               fusion_top_n_snps,
                                LD_format = c("rds", "rdata", "csv", "txt", "custom"),
                                LD_loader = NULL,
                                ncore = 1,
@@ -88,10 +88,10 @@ preprocess_weights <- function(weight_path,
 
   # Check LD reference SNP info
   if (inherits(snp_info,"list")) {
-    snp_info_df <- as.data.frame(rbindlist(snp_info, idcol = "region_id"))
+    snp_info <- as.data.frame(rbindlist(snp_info, idcol = "region_id"))
   }
   target_header <- c("chrom", "id", "pos", "alt", "ref")
-  if (!all(target_header %in% colnames(snp_info_df))){
+  if (!all(target_header %in% colnames(snp_info))){
     stop("SNP info needs to contain the following columns: ",
          paste(target_header, collapse = " "))
   }
@@ -109,114 +109,56 @@ preprocess_weights <- function(weight_path,
   loginfo("type: %s", type)
   loginfo("context: %s", context)
 
-  weights <- list()
   loaded_weights_res <- load_weights(weight_path,
                                      weight_format,
                                      filter_protein_coding_genes = filter_protein_coding_genes,
                                      load_predictdb_LD = load_predictdb_LD,
                                      fusion_method = fusion_method,
                                      fusion_genome_version = fusion_genome_version,
-                                     ncore=ncore)
-  weight_table <- loaded_weights_res$weight_table
+                                     ncore = ncore)
   weight_name <- loaded_weights_res$weight_name
-  R_wgt_all <- loaded_weights_res$R_wgt
-  if (!is.null(R_wgt_all)) {
-    #remove genes without predictdb LD
-    weight_table <- weight_table[weight_table$gene %in% unique(R_wgt_all$GENE), ]
+  weight_table <- loaded_weights_res$weight_table
+  cov_table <- loaded_weights_res$cov_table
+  loginfo("weight_name: %s", weight_name)
+  if (!is.null(cov_table)) {
+    # remove genes without predictdb LD
+    genes_with_predictdb_LD <- unique(cov_table$GENE)
+    loginfo("Remove %d genes without predictdb LD", length(setdiff(weight_table$gene, genes_with_predictdb_LD)))
+    weight_table <- weight_table[weight_table$gene %in% genes_with_predictdb_LD, ]
   }
-  gnames <- unique(weight_table$gene)
-  loginfo("Number of genes with weights provided: %d in %s", length(gnames), weight_name)
-  # remove variants in weight table, but not in LD reference and GWAS
-  loginfo("Number of variants in weights: %d", length(unique(weight_table$rsid)))
-  # take the intersect of SNPs in weights, LD reference and SNPs in z_snp
-  snpnames <- Reduce(intersect, list(weight_table$rsid, snp_info_df$id, gwas_snp_ids))
+  gene_names <- unique(weight_table$gene)
+  loginfo("Number of genes with weights: %d", length(gene_names))
+  snpnames <- unique(weight_table$rsid)
+  loginfo("Number of variants in weights: %d", length(snpnames))
+  # take the intersect of SNPs in weights, LD reference and GWAS SNPs
+  snpnames <- Reduce(intersect, list(snpnames, snp_info$id, gwas_snp_ids))
   weight_table <- weight_table[weight_table$rsid %in% snpnames, ]
-  gnames <- unique(weight_table$gene)
-  loginfo("%d variants and %d genes left after filtering by GWAS and reference SNPs",
-          length(snpnames), length(gnames))
+  gene_names <- unique(weight_table$gene)
+  loginfo("%d genes and %d variants left after filtering by GWAS and LD reference",
+          length(snpnames), length(gene_names))
   # subset to variants in weight table
-  snp_info_wgt <- snp_info_df[snp_info_df$id %in% weight_table$rsid,]
+  snp_info <- snp_info[snp_info$id %in% weight_table$rsid,]
 
-  loginfo("Harmonizing weights with LD reference ...")
-  rsid_varID <- weight_table[,c("rsid", "varID")]
-  for (i in 1:length(gnames)) {
-    gname <- gnames[i]
-    wgt <- weight_table[weight_table$gene==gname,]
-    wgt.matrix <- as.matrix(wgt[, "weight", drop = F])
-    rownames(wgt.matrix) <- wgt$rsid
-    chrpos <- do.call(rbind, strsplit(wgt$varID, "_"))
-    chrom <- unique(as.integer(gsub("chr", "", chrpos[, 1])))
-    if (length(chrom) > 1) {
-      stop("More than one chrom in weight for %s!", gname)
-    }
-    snp_pos <- as.integer(chrpos[, 2])
-    wgt_ld_idx <- match(wgt$rsid, snp_info_wgt$id)
-    snp_info_pos <- as.integer(snp_info_wgt$pos[wgt_ld_idx])
-    if (any(snp_pos != snp_info_pos)) {
-      # loginfo("Positions in weights are different from those in snp_info for %s.
-      # Use the positions in snp_info.", gname)
-      snp_pos <- snp_info_pos
-    }
-    snps <- data.frame(chrom = chrom,
-                       id = wgt$rsid,
-                       cm = "0",
-                       pos = snp_pos,
-                       alt = wgt$eff_allele,
-                       ref = wgt$ref_allele,
-                       stringsAsFactors = F)
+  loginfo("Harmonizing and processing weights ...")
+  weights <- mclapply(gene_names, function(gene_name){
+    process_weight(gene_name,
+                   type = type,
+                   context = context,
+                   weight_name = weight_name,
+                   weight_table = weight_table,
+                   cov_table = cov_table,
+                   snp_info = snp_info,
+                   weight_format = weight_format,
+                   fusion_top_n_snps = fusion_top_n_snps,
+                   drop_strand_ambig = drop_strand_ambig,
+                   scale_predictdb_weights = scale_predictdb_weights)
+  }, mc.cores = ncore)
 
-    w <- harmonize_weights(wgt.matrix,
-                           snps,
-                           snp_info_wgt,
-                           drop_strand_ambig = drop_strand_ambig)
-
-    wgt.matrix <- w[["wgt"]]
-    snps <- w[["snps"]]
-    wgt.matrix <- wgt.matrix[wgt.matrix[, "weight"] != 0, , drop = F]
-    wgt.matrix <- wgt.matrix[complete.cases(wgt.matrix), , drop = F]
-
-    snpnames <- intersect(rownames(wgt.matrix), snp_info_wgt$id)
-    wgt.idx <- match(snpnames, rownames(wgt.matrix))
-    wgt <- wgt.matrix[wgt.idx, "weight", drop = F]
-
-    if (weight_format == "FUSION") {
-      wgt <- wgt[order(-abs(wgt[,"weight"])), , drop = F]
-      if (!is.null(fusion_top_n_snps)) {
-        wgt <- head(wgt,fusion_top_n_snps)
-      }
-      snpnames <- intersect(rownames(wgt), snp_info_wgt$id)
-    }
-
-    snps.idx <- match(snpnames, snps$id)
-    snps <- snps[snps.idx,]
-
-    if (scale_by_ld_variance){
-      snp_info_wgt.idx <- match(snpnames, snp_info_wgt$id)
-      wgt <- wgt*sqrt(snp_info_wgt$variance[snp_info_wgt.idx])
-    }
-
-    n_wgt <- nrow(wgt)
-    if (n_wgt > 0) {
-      p0 <- min(snps[snps[, "id"] %in% snpnames, "pos"])
-      p1 <- max(snps[snps[, "id"] %in% snpnames, "pos"])
-      # weight_id <- paste0(gname, "|", type, "|", context)
-      weight_id <- paste0(gname, "|", weight_name)
-
-      # Add LD matrix of weights
-      if(!is.null(R_wgt_all)){
-        R_wgt <- get_weight_LD(R_wgt_all, gname, rsid_varID)
-        R_wgt <- R_wgt[snps$id, snps$id, drop=F]
-      }
-      else{
-        R_wgt <- NULL
-      }
-      weights[[weight_id]] <- list(chrom=chrom, p0=p0, p1=p1,
-                                   wgt=wgt, R_wgt=R_wgt,
-                                   gene_name=gname, weight_name=weight_name,
-                                   type = type, context = context,
-                                   n_wgt=n_wgt)
-    }
+  if (length(weights) != length(gene_names)) {
+    stop("Not all cores returned results. Try rerun with bigger memory or fewer cores")
   }
+
+  names(weights) <- paste0(gene_names, "|", weight_name)
 
   if (!load_predictdb_LD) {
     loginfo("Computing LD among variants in weights ...")
@@ -233,4 +175,107 @@ preprocess_weights <- function(weight_path,
   return(weights)
 }
 
+# Process weights for a single gene
+#' @importFrom readr parse_number
+#' @importFrom stats complete.cases
+#' @importFrom utils head
+process_weight <- function(gene_name,
+                           type,
+                           context,
+                           weight_name,
+                           weight_table,
+                           cov_table,
+                           snp_info,
+                           weight_format = c("PredictDB", "FUSION"),
+                           fusion_top_n_snps = NULL,
+                           drop_strand_ambig = TRUE,
+                           scale_predictdb_weights = FALSE) {
 
+  # Check LD reference SNP info
+  if (inherits(snp_info,"list")) {
+    snp_info <- as.data.frame(rbindlist(snp_info, idcol = "region_id"))
+  }
+  target_header <- c("chrom", "id", "pos", "alt", "ref")
+  if (!all(target_header %in% colnames(snp_info))){
+    stop("SNP info needs to contain the following columns: ",
+         paste(target_header, collapse = " "))
+  }
+
+  g_weight_table <- weight_table[weight_table$gene==gene_name,]
+  wgt.matrix <- as.matrix(g_weight_table[, "weight", drop = FALSE])
+  rownames(wgt.matrix) <- g_weight_table$rsid
+  chrom <- sapply(strsplit(g_weight_table$varID, "_"), "[[", 1)
+  chrom <- unique(parse_number(chrom))
+  if (length(chrom) > 1) {
+    stop("More than one chrom in weight for %s!", gene_name)
+  }
+  snp_pos <- as.integer(sapply(strsplit(g_weight_table$varID, "_"), "[[", 2))
+  snp_info_pos <- as.integer(snp_info$pos[match(g_weight_table$rsid, snp_info$id)])
+  # check if the SNP positions in weight match with LD reference (snp_info)
+  # if Positions in weights are different from those in snp_info,
+  # use the positions in snp_info
+  if (any(snp_pos != snp_info_pos)) {
+    snp_pos <- snp_info_pos
+  }
+  snps <- data.frame(chrom = chrom,
+                     id = g_weight_table$rsid,
+                     cm = "0",
+                     pos = snp_pos,
+                     alt = g_weight_table$eff_allele,
+                     ref = g_weight_table$ref_allele,
+                     stringsAsFactors = FALSE)
+
+  harmonized_wgt_res <- harmonize_weights(wgt.matrix,
+                                          snps,
+                                          snp_info,
+                                          drop_strand_ambig = drop_strand_ambig)
+  wgt.matrix <- harmonized_wgt_res$wgt.matrix
+  snps <- harmonized_wgt_res$snps
+  wgt.matrix <- wgt.matrix[wgt.matrix[, "weight"] != 0, , drop = FALSE]
+  wgt.matrix <- wgt.matrix[complete.cases(wgt.matrix), , drop = FALSE]
+
+  snpnames <- intersect(rownames(wgt.matrix), snp_info$id)
+  wgt.idx <- match(snpnames, rownames(wgt.matrix))
+  wgt <- wgt.matrix[wgt.idx, "weight", drop = FALSE]
+
+  if (weight_format == "FUSION") {
+    wgt <- wgt[order(-abs(wgt[,"weight"])), , drop = FALSE]
+    if (!is.null(fusion_top_n_snps)) {
+      wgt <- head(wgt,fusion_top_n_snps)
+    }
+    snpnames <- rownames(wgt)
+  }
+
+  snps <- snps[match(snpnames, snps$id),]
+
+  if (scale_predictdb_weights){
+    wgt_snp_var <- snp_info$variance[match(snpnames, snp_info$id)]
+    wgt <- wgt*sqrt(wgt_snp_var)
+  }
+
+  n_wgt <- nrow(wgt)
+  if (n_wgt > 0) {
+    p0 <- min(snps[snps[, "id"] %in% snpnames, "pos"])
+    p1 <- max(snps[snps[, "id"] %in% snpnames, "pos"])
+    # Add LD matrix of weights
+    if (!is.null(cov_table)) {
+      # get pre-computed LD matrix from predictedDB weights
+      g_cov_table <- cov_table[cov_table$GENE == gene_name,]
+      R_wgt <- get_LD_matrix_from_predictdb(g_cov_table, g_weight_table,
+                                            convert_cov_to_cor = TRUE)
+      R_wgt <- R_wgt[snps$id, snps$id, drop=FALSE]
+    } else{
+      R_wgt <- NULL
+    }
+    return(list(chrom = chrom,
+                p0 = p0,
+                p1 = p1,
+                wgt = wgt,
+                R_wgt = R_wgt,
+                gene_name = gene_name,
+                weight_name = weight_name,
+                type = type,
+                context = context,
+                n_wgt=n_wgt))
+  }
+}

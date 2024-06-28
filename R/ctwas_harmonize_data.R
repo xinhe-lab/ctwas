@@ -42,7 +42,7 @@ harmonize_z <- function(z_snp, snp_info, drop_strand_ambig = TRUE){
 
     if (isTRUE(drop_strand_ambig) & any(ifremove)) {
       remove.idx <- z.idx[ifremove]
-      z_snp <- z_snp[-remove.idx, , drop = F]
+      z_snp <- z_snp[-remove.idx, , drop = FALSE]
       loginfo("Remove %s strand ambiguous variants", length(remove.idx))
     }
   }
@@ -52,11 +52,10 @@ harmonize_z <- function(z_snp, snp_info, drop_strand_ambig = TRUE){
 # Harmonize weight to match LD reference genotypes.
 # Flip signs when reverse complement matches, remove ambiguous variants from the prediction models
 #
-# @param wgt.matrix from FUSION weight .Rdat file
+# @param wgt.matrix a matrix of the weights
 #
-# @param snps from FUSION weight .Rdat file
-#  with columns "chrom", "id", "pos", "alt", "ref". The effect allele
-#  for FUSION is alt.
+# @param snps a data frame of the weight variants
+#  with columns "chrom", "id", "cm", "pos", "alt", "ref". "alt" is the effect allele.
 #
 # @param snp_info a list or data frame of SNP info for LD reference,
 #  with columns "chrom", "id", "pos", "alt", "ref".
@@ -95,11 +94,11 @@ harmonize_weights <- function (wgt.matrix, snps, snp_info, drop_strand_ambig = T
     if (isTRUE(drop_strand_ambig) && any(ifremove)){
       #if dropping ambiguous variants, or >2 ambiguous variants and 0 unambiguous variants, discard the ambiguous variants
       remove.idx <- snps.idx[ifremove]
-      snps <- snps[-remove.idx, , drop = F]
-      wgt.matrix <- wgt.matrix[-remove.idx, , drop = F]
+      snps <- snps[-remove.idx, , drop = FALSE]
+      wgt.matrix <- wgt.matrix[-remove.idx, , drop = FALSE]
     }
   }
-  return(list(wgt = wgt.matrix, snps = snps))
+  return(list(wgt.matrix = wgt.matrix, snps = snps))
 }
 
 # flip alleles

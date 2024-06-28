@@ -156,7 +156,7 @@ To run standard cTWAS analysis with LD, we need reference LD matrices for the pr
 We have precomputed reference LD matrices (`.RDS` files) and the variant information tables (`.Rvar` files) accompanying the LD matrices for both UKB and 1000G European Phase3 references. The complete LD matrices of European individuals from UK Biobank can be downloaded [here](https://uchicago.box.com/s/jqocacd2fulskmhoqnasrknbt59x3xkn). 
 On the University of Chicago RCC cluster, the b38 reference is available at `/project2/mstephens/wcrouse/UKB_LDR_0.1/` and the b37 reference is available at `/project2/mstephens/wcrouse/UKB_LDR_0.1_b37/`.
 
-The columns of the `.Rvar` file include information on chromosome, variant name, position in base pairs, and the alternative and reference alleles. The `variance` column is the variance of each variant prior to standardization; this is required for PredictDB weights but not FUSION weights. PredictDB weights should be scaled by the variance before imputing gene expression. This is because PredictDB weights assume that variant genotypes are not standardized before imputation, but our implementation assumes standardized variant genotypes. If variance information is missing, or if weights are in PredictDB format but are already on the standardized scale (e.g. if they were converted from FUSION to PredictDB format), this scaling can be turned off using the option `scale_by_ld_variance=FALSE` in the `preprocess_weights()` function. We've also included information on allele frequency in the variant info, but this is optional.
+The columns of the `.Rvar` file include information on chromosome, variant name, position in base pairs, and the alternative and reference alleles. The `variance` column is the variance of each variant prior to standardization; this is required for PredictDB weights but not FUSION weights. PredictDB weights should be scaled by the variance before imputing gene expression. This is because PredictDB weights assume that variant genotypes are not standardized before imputation, but our implementation assumes standardized variant genotypes. If variance information is missing, or if weights are in PredictDB format but are already on the standardized scale (e.g. if they were converted from FUSION to PredictDB format), this scaling can be turned off using the option `scale_predictdb_weights=FALSE` in the `preprocess_weights()` function. We've also included information on allele frequency in the variant info, but this is optional.
 
 The naming convention for the LD matrices is `[filestem]_chr[#].R_snp.[start]_[end].RDS`. 
 Each variant should be uniquely assigned to a region, and the regions should be left closed and right open, i.e. [start, stop). The positions of the LD matrices must match exactly the positions specified by the region file. Do not include invariant or multiallelic variants in the LD reference. 
@@ -300,7 +300,7 @@ The `preprocess_weight()` function harmonizes the PredictDB/FUSION prediction mo
 In this example, we use liver and subcutaneous adipose gene expression models. We preprocess each weight file separately and combine them in the end. 
 We specify PredictDB or FUSION format in `weight_format` and the specific method in FUSION by `method_FUSION`. 
 For the expression models, we limit to protein coding genes, by setting `filter_protein_coding_genes = TRUE`.
-We set `scale_by_ld_variance=TRUE` for PredictDB weights because PredictDB assumes the unstandardized genotypes (see the discussion in "Region info" section)
+We set `scale_predictdb_weights=TRUE` for PredictDB weights because PredictDB assumes the unstandardized genotypes (see the discussion in "Region info" section)
 For PredictDB models, we set `load_predictdb_LD=TRUE` to load pre-computed correlations (`.txt.gz` file) between weight variants. 
 For FUSION models, we set `load_predictdb_LD=FALSE` to calculate correlations between weight variants with LD reference. It takes a while to calculate correlations using LD reference, and we could set `ncore` to parallelize the computation.
 
@@ -329,7 +329,7 @@ weights_liver <- preprocess_weights(weight_liver_file,
                                     weight_format = "PredictDB",
                                     ncore = 6,
                                     drop_strand_ambig = TRUE,
-                                    scale_by_ld_variance = TRUE,
+                                    scale_predictdb_weights = TRUE,
                                     load_predictdb_LD = TRUE,
                                     filter_protein_coding_genes = TRUE)
 
@@ -343,7 +343,7 @@ weights_adipose <- preprocess_weights(weight_adipose_file,
                                       weight_format = "PredictDB",
                                       ncore = 6,
                                       drop_strand_ambig = TRUE,
-                                      scale_by_ld_variance = TRUE,
+                                      scale_predictdb_weights = TRUE,
                                       load_predictdb_LD = TRUE,
                                       filter_protein_coding_genes = TRUE)
 

@@ -23,8 +23,6 @@ navbar:
         href: articles/summarizing_ctwas_results.html
       - text: Post-processing cTWAS results
         href: articles/postprocessing_ctwas_results.html
-      - text: FAQ
-        href: articles/FAQ.html
     source:
       text: Source
       href: https://github.com/xinhe-lab/ctwas/tree/multigroup_test

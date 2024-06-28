@@ -134,14 +134,12 @@ weights_liver <- preprocess_weights(weight_liver_file,
                                     type = "expression",
                                     context = "liver",
                                     weight_format = "PredictDB",
-                                    ncore = 6,
                                     drop_strand_ambig = TRUE,
-                                    scale_by_ld_variance = TRUE,
+                                    scale_predictdb_weights = TRUE,
                                     load_predictdb_LD = TRUE,
                                     filter_protein_coding_genes = TRUE)
 
 weight_adipose_file <- system.file("extdata/sample_data", "expression_Adipose_Subcutaneous.db", package = "ctwas")
-
 weights_adipose <- preprocess_weights(weight_adipose_file,
                                       region_info,
                                       z_snp$id,
@@ -149,9 +147,8 @@ weights_adipose <- preprocess_weights(weight_adipose_file,
                                       type = "expression",
                                       context = "adipose",
                                       weight_format = "PredictDB",
-                                      ncore = 6,
                                       drop_strand_ambig = TRUE,
-                                      scale_by_ld_variance = TRUE,
+                                      scale_predictdb_weights = TRUE,
                                       load_predictdb_LD = TRUE,
                                       filter_protein_coding_genes = TRUE)
 

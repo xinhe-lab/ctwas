@@ -7,7 +7,7 @@
 make_predictdb_from_QTLs(
   weight_table,
   extra_table = NULL,
-  covar_table = NULL,
+  cov_table = NULL,
   use_top_QTL = FALSE,
   outputdir = getwd(),
   outname
@@ -21,13 +21,13 @@ make_predictdb_from_QTLs(
 in \code{weight_table} ("gene","genename","gene_type", etc.).
 If NULL, create a simply extra_table based on weight_table}
 
-\item{covar_table}{a data frame of covariances between variants, with columns:
+\item{cov_table}{a data frame of covariances between variants, with columns:
 "GENE","RSID1","RSID2", "VALUE".
 If NULL, do not create covariance files (.txg.gz), unless \code{use_top_QTL=TRUE}.}
 
 \item{use_top_QTL}{TRUE/FALSE. If TRUE, only keep the top QTL with
 the largest abs(weight) for each gene (molecular trait), and
-create a simple covar_table with covariance set to 1.}
+create a simple cov_table with covariance set to 1.}
 
 \item{outputdir}{output directory}
 

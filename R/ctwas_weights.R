@@ -88,23 +88,23 @@ load_predictdb_weights <- function(weight_path,
     }
   }
 
-  # load pre-computed LD from PredictDB LD file
+  # load pre-computed covariances from PredictDB LD file
   if (isTRUE(load_predictdb_LD)){
     predictdb_LD_file <- paste0(file_path_sans_ext(weight_path), ".txt.gz")
     if (!file.exists(predictdb_LD_file)){
       stop(paste("PredictDB LD file", predictdb_LD_file, "does not exist!"))
     }
-    R_wgt <- read.table(gzfile(predictdb_LD_file), header=T)
+    cov_table <- read.table(gzfile(predictdb_LD_file), header=T)
   }
   else{
-    R_wgt <- NULL
+    cov_table <- NULL
   }
   dbDisconnect(db)
 
-  return(list(weight_table=weight_table,
+  return(list(weight_name=weight_name,
+              weight_table=weight_table,
               extra_table=extra_table,
-              weight_name=weight_name,
-              R_wgt=R_wgt))
+              cov_table=cov_table))
 }
 
 #' @title Loads weights in FUSION format
@@ -193,12 +193,12 @@ load_fusion_weights <- function(weight_path,
     extra_table <- NULL
   }
 
-  R_wgt <- NULL
+  cov_table <- NULL
 
-  return(list(weight_table=weight_table,
+  return(list(weight_name=weight_name,
+              weight_table=weight_table,
               extra_table=extra_table,
-              weight_name=weight_name,
-              R_wgt=R_wgt))
+              cov_table=cov_table))
 }
 
 
@@ -280,13 +280,13 @@ load_fusion_wgt_data <- function(wgt_rdata_file,
 #' in \code{weight_table} ("gene","genename","gene_type", etc.).
 #' If NULL, create a simply extra_table based on weight_table
 #'
-#' @param covar_table a data frame of covariances between variants, with columns:
+#' @param cov_table a data frame of covariances between variants, with columns:
 #' "GENE","RSID1","RSID2", "VALUE".
 #' If NULL, do not create covariance files (.txg.gz), unless \code{use_top_QTL=TRUE}.
 #'
 #' @param use_top_QTL TRUE/FALSE. If TRUE, only keep the top QTL with
 #' the largest abs(weight) for each gene (molecular trait), and
-#' create a simple covar_table with covariance set to 1.
+#' create a simple cov_table with covariance set to 1.
 #'
 #' @param outputdir output directory
 #'
@@ -301,7 +301,7 @@ load_fusion_wgt_data <- function(wgt_rdata_file,
 #'
 make_predictdb_from_QTLs <- function(weight_table,
                                      extra_table = NULL,
-                                     covar_table = NULL,
+                                     cov_table = NULL,
                                      use_top_QTL = FALSE,
                                      outputdir = getwd(),
                                      outname){
@@ -348,13 +348,13 @@ make_predictdb_from_QTLs <- function(weight_table,
       stop("each gene should have only one SNP when using top QTL only")
     }
     # set covariance to 1 as each gene only has one top QTL
-    covar_table <- weight_table[,c("gene","varID","varID")]
-    colnames(covar_table) <- c("GENE","RSID1","RSID2")
-    covar_table$VALUE <- 1
+    cov_table <- weight_table[,c("gene","varID","varID")]
+    colnames(cov_table) <- c("GENE","RSID1","RSID2")
+    cov_table$VALUE <- 1
   }
 
   # write PredictDB '.db' file
-  write_predictdb(weight_table, extra_table, covar_table, outputdir, outname)
+  write_predictdb(weight_table, extra_table, cov_table, outputdir, outname)
 
 }
 
@@ -368,7 +368,7 @@ make_predictdb_from_QTLs <- function(weight_table,
 #'
 #' @param make_extra_table TRUE/FALSE. If TRUE, make an extra table in predictDB format
 #'
-#' @param covar_table a data frame of covariances between variants, with columns:
+#' @param cov_table a data frame of covariances between variants, with columns:
 #' "GENE","RSID1","RSID2","VALUE".
 #' If NULL, do not create covariance files (.txg.gz).
 #'
@@ -383,7 +383,7 @@ convert_fusion_to_predictdb <- function(
     fusion_method = c("lasso","enet","top1","blup","bslmm","bestR2"),
     fusion_genome_version = c("b38","b37"),
     make_extra_table = TRUE,
-    covar_table = NULL,
+    cov_table = NULL,
     outputdir = getwd(),
     outname){
 
@@ -402,11 +402,12 @@ convert_fusion_to_predictdb <- function(
     outname <- weight_name
 
   # write PredictDB weights
-  write_predictdb(weight_table, extra_table, covar_table, outputdir, outname)
+  write_predictdb(weight_table, extra_table, cov_table, outputdir, outname)
 
-  return(list(weight_table=weight_table,
+  return(list(weight_name=weight_name,
+              weight_table=weight_table,
               extra_table=extra_table,
-              weight_name=weight_name))
+              cov_table = cov_table))
 }
 
 
@@ -415,7 +416,7 @@ convert_fusion_to_predictdb <- function(
 #' @importFrom RSQLite dbDriver dbConnect dbWriteTable dbDisconnect
 write_predictdb <- function(weight_table,
                             extra_table = NULL,
-                            covar_table = NULL,
+                            cov_table = NULL,
                             outputdir,
                             outname) {
 
@@ -447,14 +448,14 @@ write_predictdb <- function(weight_table,
   dbWriteTable(db, 'extra', extra_table, overwrite = TRUE)
   dbDisconnect(db)
 
-  if (!is.null(covar_table)) {
+  if (!is.null(cov_table)) {
     # check required columns
     required_cols <- c("GENE", "RSID1", "RSID2", "VALUE")
-    if (!all(required_cols %in% colnames(covar_table))) {
-      stop("covar_table needs to contain the following columns: ",
+    if (!all(required_cols %in% colnames(cov_table))) {
+      stop("cov_table needs to contain the following columns: ",
            paste(required_cols, collapse = " "))
     }
-    write.table(covar_table,
+    write.table(cov_table,
                 file = gzfile(file.path(outputdir,paste0(outname,".txt.gz"))),
                 col.names = TRUE, row.names = FALSE, quote = FALSE, sep = "\t")
   }
@@ -462,44 +463,54 @@ write_predictdb <- function(weight_table,
 }
 
 
-# Gets pre-computed LD matrix from predictedDB weights
+# Gets LD for a gene from precomputed PredictDB covariances
 #' @importFrom stats setNames
-get_weight_LD <- function (R_wgt_all, gname, rsid_varID){
-  R_wgt <- R_wgt_all[R_wgt_all$GENE == gname,]
-  #convert covariance to correlation
-  R_wgt_stdev <- R_wgt[R_wgt$RSID1==R_wgt$RSID2,]
-  R_wgt_stdev <- setNames(sqrt(R_wgt_stdev$VALUE), R_wgt_stdev$RSID1)
-  R_wgt$VALUE <- R_wgt$VALUE/(R_wgt_stdev[R_wgt$RSID1]*R_wgt_stdev[R_wgt$RSID2])
+get_LD_matrix_from_predictdb <- function (R_table,
+                                          weight_table,
+                                          convert_cov_to_cor = TRUE){
 
-  unique_id <- unique(c(R_wgt$RSID1, R_wgt$RSID2))
+  # convert covariances to correlations
+  if (convert_cov_to_cor){
+    R_table <- convert_predictdb_cov_to_cor(R_table)
+  }
 
-  # Create an empty correlation matrix
-  n <- length(unique_id)
-  cor_matrix <- matrix(NA, nrow = n, ncol = n)
+  # convert correlation table to LD matrix
+  R_varIDs <- unique(c(R_table$RSID1, R_table$RSID2))
+  R_varIDs <- intersect(R_varIDs, weight_table$varID)
+  n <- length(R_varIDs)
+  R_wgt <- matrix(NA, nrow = n, ncol = n)
 
   # Fill in the correlation values
   for (i in 1:n) {
     for (j in i:n) {  # Only iterate over half of the matrix
       if (i == j) {
-        cor_matrix[i, j] <- 1  # Diagonal elements are 1
+        R_wgt[i, j] <- 1  # Diagonal elements have R = 1
       } else {
         # Check if there are any matches for the RSID combination
-        matches <- R_wgt[R_wgt$RSID1 == unique_id[i] & R_wgt$RSID2 == unique_id[j], "VALUE"]
-        if (length(matches) > 0) {
-          cor_matrix[i, j] <- matches
-          cor_matrix[j, i] <- matches  # Set symmetric value
+        match.idx <- which(R_table$RSID1 == R_varIDs[i] & R_table$RSID2 == R_varIDs[j])
+        if (length(match.idx) > 0) {
+          R_wgt[i, j] <- R_wgt[j, i] <- R_table[match.idx, "VALUE"]  # Set symmetric value
         } else {
-          cor_matrix[i, j] <- NA  # No correlation value found
-          cor_matrix[j, i] <- NA  # No correlation value found
+          R_wgt[i, j] <- R_wgt[j, i] <- NA  # No correlation value found
         }
       }
     }
   }
 
-  rownames(cor_matrix) <- rsid_varID$rsid[match(unique_id, rsid_varID$varID)]
-  colnames(cor_matrix) <- rsid_varID$rsid[match(unique_id, rsid_varID$varID)]
+  snp_idx <- match(R_varIDs, weight_table$varID)
+  rownames(R_wgt) <- weight_table$rsid[snp_idx]
+  colnames(R_wgt) <- weight_table$rsid[snp_idx]
 
-  return(cor_matrix)
+  return(R_wgt)
+}
+
+# Converts predictDB covariance to correlation
+convert_predictdb_cov_to_cor <- function(cov_table){
+  stdev_table <- cov_table[cov_table$RSID1==cov_table$RSID2,]
+  stdev_table <- setNames(sqrt(stdev_table$VALUE), stdev_table$RSID1)
+  R_table <- cov_table
+  R_table$VALUE <- cov_table$VALUE/(stdev_table[cov_table$RSID1]*stdev_table[cov_table$RSID2])
+  return(R_table)
 }
 
 # Computes LD for weight variants using reference LD
@@ -568,6 +579,7 @@ compute_weight_LD_from_ref <- function(weights,
         }
         curr_region_LD_list
       }, mc.cores = ncore)
+
       if (length(weight_LD_list) != length(weight_region_ids)) {
         stop("Not all cores returned results. Try rerun with bigger memory or fewer cores")
       }
