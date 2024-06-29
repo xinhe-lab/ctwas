@@ -246,12 +246,14 @@ process_weight <- function(gene_name,
     snpnames <- rownames(wgt)
   }
 
-  snps <- snps[match(snpnames, snps$id),]
-
-  if (scale_predictdb_weights){
-    wgt_snp_var <- snp_info$variance[match(snpnames, snp_info$id)]
-    wgt <- wgt*sqrt(wgt_snp_var)
+  if (weight_format == "PredictDB") {
+    if (scale_predictdb_weights){
+      wgt_snp_var <- snp_info$variance[match(snpnames, snp_info$id)]
+      wgt <- wgt*sqrt(wgt_snp_var)
+    }
   }
+
+  snps <- snps[match(snpnames, snps$id),]
 
   n_wgt <- nrow(wgt)
   if (n_wgt > 0) {
