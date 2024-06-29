@@ -33,7 +33,7 @@
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">ctwas</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">0.2.45</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">0.2.46</span>
       </span>
     </div>
 
@@ -67,9 +67,6 @@
     <li>
       <a href="../articles/postprocessing_ctwas_results.html">Post-processing cTWAS results</a>
     </li>
-    <li>
-      <a href="../articles/FAQ.html">FAQ</a>
-    </li>
   </ul>
 </li>
       </ul>
@@ -93,7 +90,7 @@
       <h1 data-toc-skip>Preparing cTWAS input data</h1>
                         <h4 data-toc-skip class="author">Kaixuan Luo, Sheng Qian</h4>
             
-            <h4 data-toc-skip class="date">2024-06-19</h4>
+            <h4 data-toc-skip class="date">2024-06-28</h4>
       
       <small class="dont-index">Source: <a href="https://github.com/xinhe-lab/ctwas/blob/multigroup_test/vignettes/preparing_ctwas_input_data.Rmd" class="external-link"><code>vignettes/preparing_ctwas_input_data.Rmd</code></a></small>
       <div class="hidden name"><code>preparing_ctwas_input_data.Rmd</code></div>
@@ -190,7 +187,7 @@
 </h3>
 <p>To run standard cTWAS analysis with LD, we need reference LD matrices for the predefined regions. By default, we need a LD matrix for each region (preferably in <code>.RDS</code> format) and a variant information table accompanying each LD matrix. The <code>.RDS</code> files store the LD correlation matrix for each region (a <span class="math inline">\(p \times p\)</span> matrix, <span class="math inline">\(p\)</span> is the number of variants in the region). The accompanying <code>.Rvar</code> files include variant information for the region, and the order of its rows should match the order of rows and columns in the <code>.RDS</code> file.</p>
 <p>We have precomputed reference LD matrices (<code>.RDS</code> files) and the variant information tables (<code>.Rvar</code> files) accompanying the LD matrices for both UKB and 1000G European Phase3 references. The complete LD matrices of European individuals from UK Biobank can be downloaded <a href="https://uchicago.box.com/s/jqocacd2fulskmhoqnasrknbt59x3xkn" class="external-link">here</a>. On the University of Chicago RCC cluster, the b38 reference is available at <code>/project2/mstephens/wcrouse/UKB_LDR_0.1/</code> and the b37 reference is available at <code>/project2/mstephens/wcrouse/UKB_LDR_0.1_b37/</code>.</p>
-<p>The columns of the <code>.Rvar</code> file include information on chromosome, variant name, position in base pairs, and the alternative and reference alleles. The <code>variance</code> column is the variance of each variant prior to standardization; this is required for PredictDB weights but not FUSION weights. PredictDB weights should be scaled by the variance before imputing gene expression. This is because PredictDB weights assume that variant genotypes are not standardized before imputation, but our implementation assumes standardized variant genotypes. If variance information is missing, or if weights are in PredictDB format but are already on the standardized scale (e.g. if they were converted from FUSION to PredictDB format), this scaling can be turned off using the option <code>scale_by_ld_variance=FALSE</code> in the <code><a href="../reference/preprocess_weights.html">preprocess_weights()</a></code> function. We’ve also included information on allele frequency in the variant info, but this is optional.</p>
+<p>The columns of the <code>.Rvar</code> file include information on chromosome, variant name, position in base pairs, and the alternative and reference alleles. The <code>variance</code> column is the variance of each variant prior to standardization; this is required for PredictDB weights but not FUSION weights. PredictDB weights should be scaled by the variance before imputing gene expression. This is because PredictDB weights assume that variant genotypes are not standardized before imputation, but our implementation assumes standardized variant genotypes. If variance information is missing, or if weights are in PredictDB format but are already on the standardized scale (e.g. if they were converted from FUSION to PredictDB format), this scaling can be turned off using the option <code>scale_predictdb_weights=FALSE</code> in the <code><a href="../reference/preprocess_weights.html">preprocess_weights()</a></code> function. We’ve also included information on allele frequency in the variant info, but this is optional.</p>
 <p>The naming convention for the LD matrices is <code>[filestem]_chr[#].R_snp.[start]_[end].RDS</code>. Each variant should be uniquely assigned to a region, and the regions should be left closed and right open, i.e. [start, stop). The positions of the LD matrices must match exactly the positions specified by the region file. Do not include invariant or multiallelic variants in the LD reference.</p>
 </div>
 <div class="section level3">
@@ -301,7 +298,7 @@
 <h3 id="harmonizing-prediction-models-and-the-reference-data">Harmonizing prediction models and the reference data<a class="anchor" aria-label="anchor" href="#harmonizing-prediction-models-and-the-reference-data"></a>
 </h3>
 <p>The <code>preprocess_weight()</code> function harmonizes the PredictDB/FUSION prediction models and LD reference.</p>
-<p>In this example, we use liver and subcutaneous adipose gene expression models. We preprocess each weight file separately and combine them in the end. We specify PredictDB or FUSION format in <code>weight_format</code> and the specific method in FUSION by <code>method_FUSION</code>. For the expression models, we limit to protein coding genes, by setting <code>filter_protein_coding_genes = TRUE</code>. We set <code>scale_by_ld_variance=TRUE</code> for PredictDB weights because PredictDB assumes the unstandardized genotypes (see the discussion in “Region info” section) For PredictDB models, we set <code>load_predictdb_LD=TRUE</code> to load pre-computed correlations (<code>.txt.gz</code> file) between weight variants. For FUSION models, we set <code>load_predictdb_LD=FALSE</code> to calculate correlations between weight variants with LD reference. It takes a while to calculate correlations using LD reference, and we could set <code>ncore</code> to parallelize the computation.</p>
+<p>In this example, we use liver and subcutaneous adipose gene expression models. We preprocess each weight file separately and combine them in the end. We specify PredictDB or FUSION format in <code>weight_format</code> and the specific method in FUSION by <code>method_FUSION</code>. For the expression models, we limit to protein coding genes, by setting <code>filter_protein_coding_genes = TRUE</code>. We set <code>scale_predictdb_weights=TRUE</code> for PredictDB weights because PredictDB assumes the unstandardized genotypes (see the discussion in “Region info” section) For PredictDB models, we set <code>load_predictdb_LD=TRUE</code> to load pre-computed correlations (<code>.txt.gz</code> file) between weight variants. For FUSION models, we set <code>load_predictdb_LD=FALSE</code> to calculate correlations between weight variants with LD reference. It takes a while to calculate correlations using LD reference, and we could set <code>ncore</code> to parallelize the computation.</p>
 <p>In this version of cTWAS, we allow the joint analysis of multiple groups of molecular traits. This could be: eQTL of multiple tissues; or eQTLs, splicing QTLs and other types of QTLs in a single tissue. In a more complex setting, multiple types of QTL data from multiple tissues/cell types. Each group is defined by its “type” (kind of molecular traits), and “context” (tissue, cell type, condition, etc.). So, we specify the <code>type</code> and <code>context</code> arguments for each weight file.</p>
 <p>In this example, we will use liver and subcutaneous adipose gene expression models trained on GTEx v8 in the PredictDB format. We can download both the prediction models (.db) and the covariances between variants in the prediction models (.txt.gz) from the link below. The covariances can optionally be used for computing LD.</p>
 <div class="sourceCode" id="cb13"><pre class="sourceCode bash"><code class="sourceCode bash"><span id="cb13-1"><a href="#cb13-1"></a><span class="co"># download the weights files</span></span>
@@ -320,7 +317,7 @@
 <span>                                    weight_format <span class="op">=</span> <span class="st">"PredictDB"</span>,</span>
 <span>                                    ncore <span class="op">=</span> <span class="fl">6</span>,</span>
 <span>                                    drop_strand_ambig <span class="op">=</span> <span class="cn">TRUE</span>,</span>
-<span>                                    scale_by_ld_variance <span class="op">=</span> <span class="cn">TRUE</span>,</span>
+<span>                                    scale_predictdb_weights <span class="op">=</span> <span class="cn">TRUE</span>,</span>
 <span>                                    load_predictdb_LD <span class="op">=</span> <span class="cn">TRUE</span>,</span>
 <span>                                    filter_protein_coding_genes <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span>
 <span></span>
@@ -334,13 +331,12 @@
 <span>                                      weight_format <span class="op">=</span> <span class="st">"PredictDB"</span>,</span>
 <span>                                      ncore <span class="op">=</span> <span class="fl">6</span>,</span>
 <span>                                      drop_strand_ambig <span class="op">=</span> <span class="cn">TRUE</span>,</span>
-<span>                                      scale_by_ld_variance <span class="op">=</span> <span class="cn">TRUE</span>,</span>
+<span>                                      scale_predictdb_weights <span class="op">=</span> <span class="cn">TRUE</span>,</span>
 <span>                                      load_predictdb_LD <span class="op">=</span> <span class="cn">TRUE</span>,</span>
 <span>                                      filter_protein_coding_genes <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span>
 <span></span>
 <span><span class="co"># concatenate weights from different types or contexts</span></span>
 <span><span class="va">weights</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="va">weights_liver</span>, <span class="va">weights_adipose</span><span class="op">)</span></span>
-<span></span>
 <span><span class="co"># saveRDS(weights, file.path(outputdir, paste0(outname, ".preprocessed.weights.RDS")))</span></span></code></pre></div>
 </div>
 </div>
@@ -352,10 +348,7 @@
 <p><em>Note: the software uses the term “gene”, but they could be any molecular trait.</em></p>
 <div class="sourceCode" id="cb15"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">z_gene</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/compute_gene_z.html">compute_gene_z</a></span><span class="op">(</span><span class="va">z_snp</span>, <span class="va">weights</span>, ncore <span class="op">=</span> <span class="fl">6</span><span class="op">)</span></span>
-<span></span>
-<span><span class="co"># saveRDS(z_gene, file = file.path(outputdir, paste0(outname, ".z_gene.RDS")))</span></span>
-<span></span>
-<span><span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">head</a></span><span class="op">(</span><span class="va">z_gene</span><span class="op">)</span></span></code></pre></div>
+<span><span class="co"># saveRDS(z_gene, file = file.path(outputdir, paste0(outname, ".z_gene.RDS")))</span></span></code></pre></div>
 </div>
   </div>
 

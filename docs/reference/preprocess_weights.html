@@ -17,7 +17,7 @@
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">ctwas</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">0.2.45</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">0.2.46</span>
       </span>
     </div>
 
@@ -48,9 +48,6 @@
     </li>
     <li>
       <a href="../articles/postprocessing_ctwas_results.html">Post-processing cTWAS results</a>
-    </li>
-    <li>
-      <a href="../articles/FAQ.html">FAQ</a>
     </li>
   </ul></li>
       </ul><ul class="nav navbar-nav navbar-right"><li>
@@ -85,12 +82,12 @@
 <span>  LD_info <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  weight_format <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"PredictDB"</span>, <span class="st">"FUSION"</span><span class="op">)</span>,</span>
 <span>  drop_strand_ambig <span class="op">=</span> <span class="cn">TRUE</span>,</span>
-<span>  scale_by_ld_variance <span class="op">=</span> <span class="cn">FALSE</span>,</span>
+<span>  scale_predictdb_weights <span class="op">=</span> <span class="cn">FALSE</span>,</span>
 <span>  filter_protein_coding_genes <span class="op">=</span> <span class="cn">FALSE</span>,</span>
 <span>  load_predictdb_LD <span class="op">=</span> <span class="cn">FALSE</span>,</span>
-<span>  fusion_method <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"lasso"</span>, <span class="st">"enet"</span>, <span class="st">"top1"</span>, <span class="st">"blup"</span><span class="op">)</span>,</span>
+<span>  fusion_method <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"lasso"</span>, <span class="st">"enet"</span>, <span class="st">"top1"</span>, <span class="st">"blup"</span>, <span class="st">"bslmm"</span>, <span class="st">"bestR2"</span><span class="op">)</span>,</span>
 <span>  fusion_genome_version <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"b38"</span>, <span class="st">"b37"</span><span class="op">)</span>,</span>
-<span>  fusion_top_n_snps <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  <span class="va">fusion_top_n_snps</span>,</span>
 <span>  LD_format <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"rds"</span>, <span class="st">"rdata"</span>, <span class="st">"csv"</span>, <span class="st">"txt"</span>, <span class="st">"custom"</span><span class="op">)</span>,</span>
 <span>  LD_loader <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  ncore <span class="op">=</span> <span class="fl">1</span>,</span>
@@ -138,7 +135,7 @@ with columns "chrom", "id", "pos", "alt", "ref", and "region_id".</p></dd>
 <dd><p>TRUE/FALSE, if TRUE remove strand ambiguous variants (A/T, G/C).</p></dd>
 
 
-<dt>scale_by_ld_variance</dt>
+<dt>scale_predictdb_weights</dt>
 <dd><p>TRUE/FALSE, if TRUE scale PredictDB weights by the variance.
 This is because PredictDB weights assume that variant genotypes are not
 standardized, but our implementation assumes standardized variant genotypes.</p></dd>
@@ -161,7 +158,8 @@ standardized, but our implementation assumes standardized variant genotypes.</p>
 
 
 <dt>fusion_top_n_snps</dt>
-<dd><p>a number, specifying the top n weight SNPs included in FUSION models. If NULL, using all weight SNPs</p></dd>
+<dd><p>a number, specifying the top n weight SNPs included in FUSION models.
+By default, use all weight SNPs.</p></dd>
 
 
 <dt>LD_format</dt>

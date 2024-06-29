@@ -17,7 +17,7 @@
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">ctwas</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">0.2.45</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">0.2.46</span>
       </span>
     </div>
 
@@ -49,9 +49,6 @@
     <li>
       <a href="../articles/postprocessing_ctwas_results.html">Post-processing cTWAS results</a>
     </li>
-    <li>
-      <a href="../articles/FAQ.html">FAQ</a>
-    </li>
   </ul></li>
       </ul><ul class="nav navbar-nav navbar-right"><li>
   <a href="https://github.com/xinhe-lab/ctwas/tree/multigroup_test" class="external-link">Source</a>
@@ -78,7 +75,7 @@
     <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="fu">make_predictdb_from_QTLs</span><span class="op">(</span></span>
 <span>  <span class="va">weight_table</span>,</span>
 <span>  extra_table <span class="op">=</span> <span class="cn">NULL</span>,</span>
-<span>  covar_table <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  cov_table <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  use_top_QTL <span class="op">=</span> <span class="cn">FALSE</span>,</span>
 <span>  outputdir <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/getwd.html" class="external-link">getwd</a></span><span class="op">(</span><span class="op">)</span>,</span>
 <span>  <span class="va">outname</span></span>
@@ -98,7 +95,7 @@ in <code>weight_table</code> ("gene","genename","gene_type", etc.).
 If NULL, create a simply extra_table based on weight_table</p></dd>
 
 
-<dt>covar_table</dt>
+<dt>cov_table</dt>
 <dd><p>a data frame of covariances between variants, with columns:
 "GENE","RSID1","RSID2", "VALUE".
 If NULL, do not create covariance files (.txg.gz), unless <code>use_top_QTL=TRUE</code>.</p></dd>
@@ -107,7 +104,7 @@ If NULL, do not create covariance files (.txg.gz), unless <code>use_top_QTL=TRUE
 <dt>use_top_QTL</dt>
 <dd><p>TRUE/FALSE. If TRUE, only keep the top QTL with
 the largest abs(weight) for each gene (molecular trait), and
-create a simple covar_table with covariance set to 1.</p></dd>
+create a simple cov_table with covariance set to 1.</p></dd>
 
 
 <dt>outputdir</dt>

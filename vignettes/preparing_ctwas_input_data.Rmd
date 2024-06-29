@@ -349,7 +349,6 @@ weights_adipose <- preprocess_weights(weight_adipose_file,
 
 # concatenate weights from different types or contexts
 weights <- c(weights_liver, weights_adipose)
-
 # saveRDS(weights, file.path(outputdir, paste0(outname, ".preprocessed.weights.RDS")))
 ```
 
@@ -365,10 +364,7 @@ The `compute_gene_z` function computes z-scores for the molecular traits using p
 
 ```{r compute_gene_z, eval=FALSE}
 z_gene <- compute_gene_z(z_snp, weights, ncore = 6)
-
 # saveRDS(z_gene, file = file.path(outputdir, paste0(outname, ".z_gene.RDS")))
-
-head(z_gene)
 ```
 
 
