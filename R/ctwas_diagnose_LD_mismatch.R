@@ -18,9 +18,9 @@
 #' with significant difference between observed z-scores and estimated values
 #'
 #' @param LD_format file format for LD matrix. If "custom", use a user defined
-#' \code{LD_loader()} function to load LD matrix.
+#' \code{LD_loader_fun()} function to load LD matrix.
 #'
-#' @param LD_loader a user defined function to load LD matrix when \code{LD_format = "custom"}.
+#' @param LD_loader_fun a user defined function to load LD matrix when \code{LD_format = "custom"}.
 #'
 #' @return a list of problematic SNPs, flipped SNPs,
 #' and test statistics from susie's `kriging_rss` function
@@ -38,15 +38,16 @@ diagnose_ld_mismatch_susie <- function(z_snp,
                                        gwas_n = NULL,
                                        ncore = 1,
                                        p_diff_thresh = 5e-8,
-                                       LD_format = c("rds", "rdata", "csv", "txt", "custom"),
-                                       LD_loader = NULL){
+                                       LD_format = c("rds", "rdata", "mtx", "csv", "txt", "custom"),
+                                       LD_loader_fun){
 
   loginfo("Perform LD mismatch diagnosis for %d regions", length(region_ids))
   LD_format <- match.arg(LD_format)
 
   condz_list <- mclapply(region_ids, function(region_id){
     compute_region_condz(region_id, LD_info, snp_info, z_snp, gwas_n,
-                         LD_format = LD_format, LD_loader = LD_loader)
+                         LD_format = LD_format,
+                         LD_loader_fun = LD_loader_fun)
   }, mc.cores = ncore)
   if (length(condz_list) != length(region_ids)) {
     stop("Not all cores returned results. Try rerun with bigger memory or fewer cores")
@@ -70,8 +71,8 @@ diagnose_ld_mismatch_susie <- function(z_snp,
 #' @importFrom stats pchisq
 #' @importFrom Matrix bdiag
 compute_region_condz <- function(region_id, LD_info, snp_info, z_snp, gwas_n,
-                                 LD_format = c("rds", "rdata", "csv", "txt", "custom"),
-                                 LD_loader = NULL){
+                                 LD_format = c("rds", "rdata", "mtx", "csv", "txt", "custom"),
+                                 LD_loader_fun){
 
   LD_format <- match.arg(LD_format)
 
@@ -79,10 +80,10 @@ compute_region_condz <- function(region_id, LD_info, snp_info, z_snp, gwas_n,
   LD_matrix_files <- unlist(strsplit(LD_info[LD_info$region_id == region_id, "LD_matrix"], split = ";"))
   stopifnot(all(file.exists(LD_matrix_files)))
   if (length(LD_matrix_files) > 1) {
-    R_snp <- lapply(LD_matrix_files, load_LD, format = LD_format, LD_loader = LD_loader)
+    R_snp <- lapply(LD_matrix_files, load_LD, format = LD_format, LD_loader_fun = LD_loader_fun)
     R_snp <- suppressWarnings(as.matrix(bdiag(R_snp)))
   } else {
-    R_snp <- load_LD(LD_matrix_files, format = LD_format, LD_loader = LD_loader)
+    R_snp <- load_LD(LD_matrix_files, format = LD_format, LD_loader_fun = LD_loader_fun)
   }
 
   # load SNP info

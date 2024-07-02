@@ -21,8 +21,8 @@ read_snp_info_files <- function (files){
 #' Load LD matrix
 #' @param file path to LD matrix
 #' @param format file format for LD matrix. If "custom", use a user defined
-#' \code{LD_loader()} function to load LD matrix.
-#' @param LD_loader a user defined function to load LD matrix
+#' \code{LD_loader_fun()} function to load LD matrix.
+#' @param LD_loader_fun a user defined function to load LD matrix
 #'
 #' @importFrom utils read.csv
 #' @importFrom Matrix readMM
@@ -31,7 +31,7 @@ read_snp_info_files <- function (files){
 #' @export
 load_LD <- function (file,
                      format = c("rds", "rdata", "mtx", "csv", "txt", "custom"),
-                     LD_loader) {
+                     LD_loader_fun) {
 
   format <- match.arg(format)
 
@@ -44,8 +44,8 @@ load_LD <- function (file,
   } else if (format %in% c("txt", "csv")){
     R <- fread(file)
   } else if (format == "custom") {
-    # use LD_loader() function to load LD matrix
-    R <- LD_loader(file)
+    # use LD_loader_fun() function to load LD matrix
+    R <- LD_loader_fun(file)
   }
 
   return(as.matrix(R))

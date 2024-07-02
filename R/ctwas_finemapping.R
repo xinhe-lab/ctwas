@@ -34,9 +34,9 @@
 #' @param cor_dir a string, the directory to store correlation (R) matrices
 #'
 #' @param LD_format file format for LD matrix. If "custom", use a user defined
-#' \code{LD_loader()} function to load LD matrix.
+#' \code{LD_loader_fun()} function to load LD matrix.
 #'
-#' @param LD_loader a user defined function to load LD matrix when \code{LD_format = "custom"}.
+#' @param LD_loader_fun a user defined function to load LD matrix when \code{LD_format = "custom"}.
 #'
 #' @param include_cs_index TRUE/FALSE. If TRUE, add cs_index to finemapping results.
 #'
@@ -67,7 +67,7 @@ finemap_region <- function(region_data,
                            save_cor = FALSE,
                            cor_dir = NULL,
                            LD_format = c("rds", "rdata", "mtx", "csv", "txt", "custom"),
-                           LD_loader,
+                           LD_loader_fun,
                            include_cs_index = TRUE,
                            verbose = FALSE,
                            ...){
@@ -134,7 +134,7 @@ finemap_region <- function(region_data,
                               save_cor = save_cor,
                               cor_dir = cor_dir,
                               LD_format = LD_format,
-                              LD_loader = LD_loader,
+                              LD_loader_fun = LD_loader_fun,
                               verbose = verbose)
     # gene first then SNPs
     R <- rbind(cbind(cor_res$R_gene, t(cor_res$R_snp_gene)),
@@ -210,9 +210,9 @@ finemap_region <- function(region_data,
 #' @param cor_dir a string, the directory to store correlation (R) matrices
 #'
 #' @param LD_format file format for LD matrix. If "custom", use a user defined
-#' \code{LD_loader()} function to load LD matrix.
+#' \code{LD_loader_fun()} function to load LD matrix.
 #'
-#' @param LD_loader a user defined function to load LD matrix when \code{LD_format = "custom"}.
+#' @param LD_loader_fun a user defined function to load LD matrix when \code{LD_format = "custom"}.
 #'
 #' @param include_cs_index TRUE/FALSE. If TRUE, add cs_index to finemapping results.
 #'
@@ -245,7 +245,7 @@ finemap_regions <- function(region_data,
                             save_cor = FALSE,
                             cor_dir = NULL,
                             LD_format = c("rds", "rdata", "mtx", "csv", "txt", "custom"),
-                            LD_loader,
+                            LD_loader_fun,
                             include_cs_index = TRUE,
                             verbose = FALSE,
                             logfile = NULL,
@@ -299,7 +299,7 @@ finemap_regions <- function(region_data,
                    save_cor = save_cor,
                    cor_dir = cor_dir,
                    LD_format = LD_format,
-                   LD_loader = LD_loader,
+                   LD_loader_fun = LD_loader_fun,
                    include_cs_index = include_cs_index,
                    verbose = verbose,
                    ...)

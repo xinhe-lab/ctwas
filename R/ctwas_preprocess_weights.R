@@ -37,9 +37,9 @@
 #' By default, use all weight SNPs.
 #'
 #' @param LD_format file format for LD matrix. If "custom", use a user defined
-#' \code{LD_loader()} function to load LD matrix.
+#' \code{LD_loader_fun()} function to load LD matrix.
 #'
-#' @param LD_loader a user defined function to load LD matrix when \code{LD_format = "custom"}.
+#' @param LD_loader_fun a user defined function to load LD matrix when \code{LD_format = "custom"}.
 #'
 #' @param ncore The number of cores used to parallelize computation.
 #'
@@ -70,7 +70,7 @@ preprocess_weights <- function(weight_path,
                                fusion_genome_version = c("b38","b37"),
                                fusion_top_n_snps,
                                LD_format = c("rds", "rdata", "csv", "txt", "custom"),
-                               LD_loader = NULL,
+                               LD_loader_fun = NULL,
                                ncore = 1,
                                logfile = NULL){
   if (!is.null(logfile)) {
@@ -168,7 +168,7 @@ preprocess_weights <- function(weight_path,
                                           LD_info = LD_info,
                                           snp_info = snp_info,
                                           LD_format = LD_format,
-                                          LD_loader = LD_loader,
+                                          LD_loader_fun = LD_loader_fun,
                                           ncore = ncore)
   }
 

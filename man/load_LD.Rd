@@ -7,16 +7,16 @@
 load_LD(
   file,
   format = c("rds", "rdata", "mtx", "csv", "txt", "custom"),
-  LD_loader
+  LD_loader_fun
 )
 }
 \arguments{
 \item{file}{path to LD matrix}
 
 \item{format}{file format for LD matrix. If "custom", use a user defined
-\code{LD_loader()} function to load LD matrix.}
+\code{LD_loader_fun()} function to load LD matrix.}
 
-\item{LD_loader}{a user defined function to load LD matrix}
+\item{LD_loader_fun}{a user defined function to load LD matrix}
 }
 \description{
 Load LD matrix

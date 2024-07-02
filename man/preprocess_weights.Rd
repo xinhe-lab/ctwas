@@ -21,7 +21,7 @@ preprocess_weights(
   fusion_genome_version = c("b38", "b37"),
   fusion_top_n_snps,
   LD_format = c("rds", "rdata", "csv", "txt", "custom"),
-  LD_loader = NULL,
+  LD_loader_fun = NULL,
   ncore = 1,
   logfile = NULL
 )
@@ -63,9 +63,9 @@ standardized, but our implementation assumes standardized variant genotypes.}
 By default, use all weight SNPs.}
 
 \item{LD_format}{file format for LD matrix. If "custom", use a user defined
-\code{LD_loader()} function to load LD matrix.}
+\code{LD_loader_fun()} function to load LD matrix.}
 
-\item{LD_loader}{a user defined function to load LD matrix when \code{LD_format = "custom"}.}
+\item{LD_loader_fun}{a user defined function to load LD matrix when \code{LD_format = "custom"}.}
 
 \item{ncore}{The number of cores used to parallelize computation.}
 

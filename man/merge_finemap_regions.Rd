@@ -25,6 +25,8 @@ merge_finemap_regions(
   force_compute_cor = FALSE,
   save_cor = FALSE,
   cor_dir = getwd(),
+  LD_format = c("rds", "rdata", "mtx", "csv", "txt", "custom"),
+  LD_loader_fun,
   ncore = 1,
   verbose = FALSE,
   ...

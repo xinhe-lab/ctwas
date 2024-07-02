@@ -21,7 +21,7 @@ finemap_region(
   save_cor = FALSE,
   cor_dir = NULL,
   LD_format = c("rds", "rdata", "mtx", "csv", "txt", "custom"),
-  LD_loader,
+  LD_loader_fun,
   include_cs_index = TRUE,
   verbose = FALSE,
   ...
@@ -62,9 +62,9 @@ genotype data in genetic studies.}
 \item{cor_dir}{a string, the directory to store correlation (R) matrices}
 
 \item{LD_format}{file format for LD matrix. If "custom", use a user defined
-\code{LD_loader()} function to load LD matrix.}
+\code{LD_loader_fun()} function to load LD matrix.}
 
-\item{LD_loader}{a user defined function to load LD matrix when \code{LD_format = "custom"}.}
+\item{LD_loader_fun}{a user defined function to load LD matrix when \code{LD_format = "custom"}.}
 
 \item{include_cs_index}{TRUE/FALSE. If TRUE, add cs_index to finemapping results.}
 

@@ -54,6 +54,11 @@
 #'   correlation of 0.25, which is a commonly used threshold for
 #'   genotype data in genetic studies.
 #'
+#' @param LD_format file format for LD matrix. If "custom", use a user defined
+#' \code{LD_loader_fun()} function to load LD matrix.
+#'
+#' @param LD_loader_fun a user defined function to load LD matrix when \code{LD_format = "custom"}.
+#'
 #' @param ncore The number of cores used to parallelize susie over regions
 #'
 #' @param save_cor TRUE/FALSE. If TRUE, save correlation (R) matrices to \code{cor_dir}
@@ -98,6 +103,8 @@ ctwas_sumstats <- function(
     use_null_weight = TRUE,
     coverage = 0.95,
     min_abs_corr = 0.5,
+    LD_format = c("rds", "rdata", "mtx", "csv", "txt", "custom"),
+    LD_loader_fun,
     ncore = 1,
     save_cor = FALSE,
     cor_dir = NULL,
@@ -176,6 +183,8 @@ ctwas_sumstats <- function(
                                        L = L,
                                        screen_method = screen_method,
                                        min_nonSNP_PIP = min_nonSNP_PIP,
+                                       LD_format = LD_format,
+                                       LD_loader_fun = LD_loader_fun,
                                        ncore = ncore,
                                        verbose = verbose,
                                        ...)
@@ -214,6 +223,8 @@ ctwas_sumstats <- function(
                                    min_abs_corr = min_abs_corr,
                                    save_cor = save_cor,
                                    cor_dir = cor_dir,
+                                   LD_format = LD_format,
+                                   LD_loader_fun = LD_loader_fun,
                                    ncore = ncore,
                                    verbose = verbose,
                                    ...)

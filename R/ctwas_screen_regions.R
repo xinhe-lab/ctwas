@@ -27,6 +27,11 @@
 #' regions with non-SNP PIP >= \code{min_nonSNP_PIP}
 #' will be selected to run finemapping using full SNPs.
 #'
+#' @param LD_format file format for LD matrix. If "custom", use a user defined
+#' \code{LD_loader_fun()} function to load LD matrix.
+#'
+#' @param LD_loader_fun a user defined function to load LD matrix when \code{LD_format = "custom"}.
+#'
 #' @param ncore The number of cores used to parallelize susie over regions
 #'
 #' @param logfile the log file, if NULL will print log info on screen
@@ -55,6 +60,8 @@ screen_regions <- function(
     mingene = 1,
     screen_method = c("nonSNP_PIP", "cs"),
     min_nonSNP_PIP = 0.5,
+    LD_format = c("rds", "rdata", "mtx", "csv", "txt", "custom"),
+    LD_loader_fun,
     ncore = 1,
     logfile = NULL,
     verbose = FALSE,
@@ -130,6 +137,8 @@ screen_regions <- function(
                                              group_prior = group_prior,
                                              group_prior_var = group_prior_var,
                                              include_cs_index = FALSE,
+                                             LD_format = LD_format,
+                                             LD_loader_fun = LD_loader_fun,
                                              ncore = ncore,
                                              verbose = verbose,
                                              ...)
@@ -154,6 +163,8 @@ screen_regions <- function(
                                              weights = weights,
                                              L = L,
                                              include_cs_index = TRUE,
+                                             LD_format = LD_format,
+                                             LD_loader_fun = LD_loader_fun,
                                              ncore = ncore,
                                              verbose = verbose,
                                              ...)
