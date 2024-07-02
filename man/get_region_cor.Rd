@@ -13,8 +13,8 @@ get_region_cor(
   force_compute_cor = FALSE,
   save_cor = FALSE,
   cor_dir = NULL,
-  LD_format = c("rds", "rdata", "csv", "txt", "custom"),
-  LD_loader = NULL,
+  LD_format = c("rds", "rdata", "mtx", "csv", "txt", "custom"),
+  LD_loader,
   verbose = FALSE
 )
 }

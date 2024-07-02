@@ -55,8 +55,12 @@ convert_geno_to_LD_matrix <- function(region_info,
   }
 
   if (is.character(region_info$chr)) {
-    region_info$chr <- readr::parse_number(region_info$chr)
+    region_info$chr <- parse_number(region_info$chr)
   }
+
+  region_info$start <- as.numeric(region_info$start)
+  region_info$stop <- as.numeric(region_info$stop)
+
   region_info <- region_info[order(region_info$chr, region_info$start), ]
   region_info[, "region_id"] <- paste0(region_info$chr, "_", region_info$start, "_", region_info$stop)
   region_info[, "LD_matrix"] <- NA
@@ -86,15 +90,19 @@ convert_geno_to_LD_matrix <- function(region_info,
 
     for (rn in 1:nrow(region_info_chr)) {
 
-      # loginfo("Region %s", rn)
+      loginfo("Region %s", rn)
+      browser()
+
       regioninfo <- region_info_chr[rn, ]
       region_id <- paste0(regioninfo$chr, "_", regioninfo$start, "_", regioninfo$stop)
       region_idx <- which(region_info$region_id == region_id)
       region_start <- regioninfo$start
       region_stop <- regioninfo$stop
 
-      LD_matrix_file <- file.path(outputdir, paste0(outname, "_chr", b, ".R_snp.", region_start, "_", region_stop, ".RDS"))
-      LD_Rvar_file <- file.path(outputdir, paste0(outname, "_chr", b, ".R_snp.", region_start, "_", region_stop, ".Rvar"))
+      LD_matrix_file <- file.path(outputdir,
+                                  paste0(outname, "_chr", b, ".R_snp.", region_start, "_", region_stop, ".RDS"))
+      LD_Rvar_file <- file.path(outputdir,
+                                paste0(outname, "_chr", b, ".R_snp.", region_start, "_", region_stop, ".Rvar"))
 
       outfile_temp <- paste0(LD_Rvar_file, "-temp")
 
@@ -107,8 +115,8 @@ convert_geno_to_LD_matrix <- function(region_info,
         sid_ldref <- ld_snpinfo_chr$id[sidx_ldref]
 
         # select snp ids available in LD reference
-        sidx <- which(snpinfo$id %in% sid_ldref)
-        sid <- snpinfo[sidx, "id"]
+        sid <- intersect(snpinfo$id, sid_ldref)
+        sidx <- match(sid, snpinfo$id)
 
         X.g <- read_pgen(pgen, variantidx = sidx)
         R_snp <- Rfast::cora(X.g)

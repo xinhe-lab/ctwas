@@ -66,8 +66,8 @@ finemap_region <- function(region_data,
                            force_compute_cor = FALSE,
                            save_cor = FALSE,
                            cor_dir = NULL,
-                           LD_format = c("rds", "rdata", "csv", "txt", "custom"),
-                           LD_loader = NULL,
+                           LD_format = c("rds", "rdata", "mtx", "csv", "txt", "custom"),
+                           LD_loader,
                            include_cs_index = TRUE,
                            verbose = FALSE,
                            ...){
@@ -244,8 +244,8 @@ finemap_regions <- function(region_data,
                             force_compute_cor = FALSE,
                             save_cor = FALSE,
                             cor_dir = NULL,
-                            LD_format = c("rds", "rdata", "csv", "txt", "custom"),
-                            LD_loader = NULL,
+                            LD_format = c("rds", "rdata", "mtx", "csv", "txt", "custom"),
+                            LD_loader,
                             include_cs_index = TRUE,
                             verbose = FALSE,
                             logfile = NULL,
@@ -263,6 +263,9 @@ finemap_regions <- function(region_data,
       stop("'weights' should be a list.")
     }
   }
+
+  LD_format <- match.arg(LD_format)
+
   if (!use_LD) {
     if (L != 1){
       loginfo("L has to be 1 for no-LD version. Set L = 1")

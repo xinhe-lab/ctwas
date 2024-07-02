@@ -18,49 +18,38 @@ read_snp_info_files <- function (files){
   return(snp_info)
 }
 
-# Load LD matrix
-# @param file path to LD matrix
-# @param format file format for LD matrix
-# @param LD_loader a user defined function to load LD matrix
+#' Load LD matrix
+#' @param file path to LD matrix
+#' @param format file format for LD matrix. If "custom", use a user defined
+#' \code{LD_loader()} function to load LD matrix.
+#' @param LD_loader a user defined function to load LD matrix
+#'
 #' @importFrom utils read.csv
+#' @importFrom Matrix readMM
 #' @importFrom data.table fread
 #' @importFrom tools file_ext
-load_LD <- function (file, format = c("rds", "rdata", "csv", "txt", "custom"), LD_loader = NULL) {
-  format <- match.arg(format)
+#' @export
+load_LD <- function (file,
+                     format = c("rds", "rdata", "mtx", "csv", "txt", "custom"),
+                     LD_loader) {
 
-  # if format is missing, try to guess format by file extension
-  if (missing(format)) {
-    file_ext_lower <- tolower(file_ext(file))
-    if (file_ext_lower == "rds"){
-      format <- "rds"
-    } else if (file_ext_lower %in% c("rdata", "rd", "rda", "rdat")){
-      format <- "rdata"
-    } else if (file_ext_lower %in% c("csv", "csv.gz")) {
-      format <- "csv"
-    } else if (file_ext_lower %in% c("txt", "txt.gz")){
-      format <- "txt"
-    } else {
-      # set format to "custom" if not matched with known formats
-      format <- "custom"
-    }
-  }
+  format <- match.arg(format)
 
   if (format == "rds"){
     R <- readRDS(file)
   } else if (format == "rdata"){
     R <- get(load(file))
-  } else if (format == "csv"){
-    R <- as.matrix(read.csv(file, sep=",", row.names=1))
-  } else if (format == "txt"){
-    R <- as.matrix(fread(file))
+  } else if (format == "mtx"){
+    R <- readMM(file)
+  } else if (format %in% c("txt", "csv")){
+    R <- fread(file)
   } else if (format == "custom") {
     # use LD_loader() function to load LD matrix
     R <- LD_loader(file)
   }
 
-  return(R)
+  return(as.matrix(R))
 }
-
 
 # Prepare .pvar file
 #

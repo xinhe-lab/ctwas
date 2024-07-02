@@ -21,6 +21,8 @@ compute_region_cor <- function(sids, gids, R_snp, LD_sids, weights) {
     stop("'weights' should be a list.")
   }
 
+  R_snp <- as.matrix(R_snp)
+
   # subset weights to genes in this region
   weights <- weights[gids]
 
@@ -53,9 +55,10 @@ compute_region_cor <- function(sids, gids, R_snp, LD_sids, weights) {
     if (length(gids) > 1){
       gene_pairs <- combn(length(gids), 2)
       wgtr <- wgtlist[gids]
-      gene_corrs <- apply(gene_pairs, 2, function(x){t(wgtr[[x[1]]])%*%R_snp[ldr[[x[1]]], ldr[[x[2]]]]%*%wgtr[[x[2]]]/(
-        sqrt(t(wgtr[[x[1]]])%*%R_snp[ldr[[x[1]]], ldr[[x[1]]]]%*%wgtr[[x[1]]]) *
-          sqrt(t(wgtr[[x[2]]])%*%R_snp[ldr[[x[2]]], ldr[[x[2]]]]%*%wgtr[[x[2]]]))})
+      gene_corrs <- apply(gene_pairs, 2, function(x){
+        t(wgtr[[x[1]]])%*%R_snp[ldr[[x[1]]], ldr[[x[2]]]]%*%wgtr[[x[2]]]/(
+          sqrt(t(wgtr[[x[1]]])%*%R_snp[ldr[[x[1]]], ldr[[x[1]]]]%*%wgtr[[x[1]]]) *
+            sqrt(t(wgtr[[x[2]]])%*%R_snp[ldr[[x[2]]], ldr[[x[2]]]]%*%wgtr[[x[2]]]))})
       R_gene[t(gene_pairs)] <- gene_corrs
       R_gene[t(gene_pairs[c(2,1),])] <- gene_corrs
     }
@@ -63,8 +66,8 @@ compute_region_cor <- function(sids, gids, R_snp, LD_sids, weights) {
 
   # subset R_snp and R_snp_gene by sidx
   sidx <- match(sids, LD_sids)
-  R_snp <- R_snp[sidx, sidx, drop = F]
-  R_snp_gene <- R_snp_gene[sidx, , drop = F]
+  R_snp <- R_snp[sidx, sidx, drop = FALSE]
+  R_snp_gene <- R_snp_gene[sidx, , drop = FALSE]
 
   # add rownames and colnames
   rownames(R_snp) <- sids
@@ -131,9 +134,11 @@ get_region_cor <- function(region_id,
                            force_compute_cor = FALSE,
                            save_cor = FALSE,
                            cor_dir = NULL,
-                           LD_format = c("rds", "rdata", "csv", "txt", "custom"),
-                           LD_loader = NULL,
+                           LD_format = c("rds", "rdata", "mtx", "csv", "txt", "custom"),
+                           LD_loader,
                            verbose = FALSE) {
+
+  LD_format <- match.arg(LD_format)
 
   if (!is.null(cor_dir)) {
     if (!dir.exists(cor_dir))
@@ -171,12 +176,14 @@ get_region_cor <- function(region_id,
     }
     LD_matrix_files <- unlist(strsplit(LD_info$LD_matrix[LD_info$region_id == region_id], split = ";"))
     stopifnot(all(file.exists(LD_matrix_files)))
+
     if (length(LD_matrix_files) > 1) {
       R_snp <- lapply(LD_matrix_files, load_LD, format = LD_format, LD_loader = LD_loader)
       R_snp <- suppressWarnings(as.matrix(bdiag(R_snp)))
     } else {
       R_snp <- load_LD(LD_matrix_files, format = LD_format, LD_loader = LD_loader)
     }
+
     # load SNP info of the region
     snpinfo <- snp_info[[region_id]]
 
