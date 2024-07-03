@@ -1,7 +1,7 @@
 destination: docs
 
 repo:
-    branch: multigroup_test
+    branch: single_group
 
 navbar:
   structure:
@@ -25,4 +25,4 @@ navbar:
         href: articles/postprocessing_ctwas_results.html
     source:
       text: Source
-      href: https://github.com/xinhe-lab/ctwas/tree/multigroup_test
+      href: https://github.com/xinhe-lab/ctwas/tree/single_group
