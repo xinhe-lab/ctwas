@@ -4,15 +4,13 @@ Expression Quantitative Trait Loci (eQTLs) have often been used to nominate cand
 
 Our method, "causal-TWAS" (cTWAS), addresses this challenge by borrowing ideas from statistical fine-mapping. It is a generalization of methods for transcriptome-wide association studies (TWAS), but when analyzing any gene, it adjusts for other nearby genes *and all nearby genetic variants.*
 
-While the [published paper](https://doi.org/10.1038/s41588-023-01648-9) analyzes a single eQTL dataset, the latest version of cTWAS extends the method to integrate multiple groups of prediction models, allowing for joint analysis of multiple types of molecular traits, across potentially different tissues, cell types or conditions.
-
 ## Install ctwas
 
 Use "remotes" to install the latest version of ctwas from GitHub: 
 
 ```r
 install.packages("remotes")
-remotes::install_github("xinhe-lab/ctwas",ref = "multigroup_test")
+remotes::install_github("xinhe-lab/ctwas",ref = "single_group")
 ```
 
 
@@ -50,7 +48,7 @@ To run the full cTWAS, a few more tutorials including:
 
 - [Post-processing cTWAS results](https://xinhe-lab.github.io/multigroup_ctwas/articles/postprocessing_ctwas_results.html)
 
-You can [browse source code](https://github.com/xinhe-lab/ctwas/tree/multigroup_test) and [report a bug](https://github.com/xinhe-lab/ctwas/issues) here. 
+You can [browse source code](https://github.com/xinhe-lab/ctwas/tree/single_group) and [report a bug](https://github.com/xinhe-lab/ctwas/issues) here. 
 
 <img style="display:block;margin:auto" width="700" height="300" src="man/figures/workflow.png">
 

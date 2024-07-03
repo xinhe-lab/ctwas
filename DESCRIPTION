@@ -54,8 +54,6 @@ Suggests:
 biocViews:
     Genetics,
     Software
-LazyData: true
-LazyDataCompression: xz
 VignetteBuilder: knitr
 NeedsCompilation: no
 RoxygenNote: 7.3.1
