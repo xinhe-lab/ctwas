@@ -7,7 +7,6 @@
 #   capture.output({
 #     param <- suppressWarnings({
 #       est_param(region_data,
-#                 group_prior_var_structure = "shared_type",
 #                 niter_prefit = 3,
 #                 niter = 30)
 #     })

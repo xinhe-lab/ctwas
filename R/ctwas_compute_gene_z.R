@@ -1,4 +1,4 @@
-#' @title Computes z-scores of molecular traits
+#' @title Computes gene z-scores.
 #'
 #' @param z_snp A data frame with columns: "id", "z", giving the z-scores for SNPs.
 #'
@@ -8,7 +8,7 @@
 #'
 #' @param logfile the log file, if NULL will print log info on screen
 #'
-#' @return a data frame of z-scores of molecular traits
+#' @return a data frame of gene z-scores,
 #'
 #' @importFrom logging addHandler loginfo writeToFile
 #' @importFrom parallel mclapply
@@ -30,14 +30,11 @@ compute_gene_z <- function (z_snp, weights, ncore = 1, logfile = NULL){
     wgt <- weights[[id]][["wgt"]]
     snpnames <- rownames(wgt)
     R.s <- weights[[id]][["R_wgt"]]
-    type <- weights[[id]][["type"]]
-    context <- weights[[id]][["context"]]
-    group <- paste0(type,"|",context)
     z.idx <- match(snpnames, z_snp$id)
     z.s <- as.matrix(z_snp$z[z.idx])
     z.g <- as.matrix(crossprod(wgt, z.s)/sqrt(t(wgt)%*%R.s%*% wgt))
     dimnames(z.g) <- NULL
-    data.frame(id = id, z = z.g, type = type, context = context, group = group)
+    data.frame(id = id, z = z.g)
   }, mc.cores = ncore)
   if (length(z_gene) != length(weights)) {
     stop("Not all cores returned results. Try rerun with bigger memory or fewer cores")
@@ -85,27 +82,15 @@ get_gene_regions <- function(gene_info, region_info){
 
 # Combines SNP and gene z-scores
 #
-# @param z_snp a data frame of SNP z-scores, with columns: "id", "A1", "A2", "z".
-# ("A1" and "A2" are optional)
+# @param z_snp a data frame of SNP z-scores, with columns: "id", "z".
 #
-# @param z_gene a data frame of gene z-scores, with columns: "id", "z", "type",
-# "context", "group".
+# @param z_gene a data frame of gene z-scores, with columns: "id", "z".
 #
 combine_z <- function(z_snp, z_gene){
-  z_snp$type <- "SNP"
-  z_snp$context <- "SNP"
   z_snp$group <- "SNP"
-  if (is.null(z_gene$type)){
-    z_gene$type <- "gene"
-  }
-  if (is.null(z_gene$context)){
-    z_gene$context <- "gene"
-  }
-  if (is.null(z_gene$group)){
-    z_gene$group <- "gene"
-  }
-  zdf <- rbind(z_snp[, c("id", "z", "type", "context", "group")],
-               z_gene[, c("id", "z", "type", "context", "group")])
+  z_gene$group <- "gene"
+  zdf <- rbind(z_snp[, c("id", "z", "group")],
+               z_gene[, c("id", "z", "group")])
   rownames(zdf) <- NULL
   return(zdf)
 }

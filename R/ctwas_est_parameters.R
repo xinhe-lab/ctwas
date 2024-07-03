@@ -6,13 +6,6 @@
 #'
 #' @param init_group_prior_var a vector of initial values of prior variances for SNPs and gene effects.
 #'
-#' @param group_prior_var_structure a string indicating the structure to put on the prior variance parameters.
-#' "shared_type" allows all groups in one molecular QTL type to share the same variance parameter.
-#' "shared_context" allows all groups in one context (tissue, cell type, condition) to share the same variance parameter.
-#' "shared_nonSNP" allows all non-SNP groups to share the same variance parameter.
-#' "shared_all" allows all groups to share the same variance parameter.
-#' "independent" allows all groups to have their own separate variance parameters.
-#'
 #' @param niter_prefit the number of iterations of the E-M algorithm to perform during the initial parameter estimation step
 #'
 #' @param niter the number of iterations of the E-M algorithm to perform during the complete parameter estimation step
@@ -44,7 +37,6 @@ est_param <- function(
     region_data,
     init_group_prior = NULL,
     init_group_prior_var = NULL,
-    group_prior_var_structure = c("shared_type", "shared_context", "shared_nonSNP", "shared_all", "independent"),
     niter_prefit = 3,
     niter = 30,
     p_single_effect = 0.8,
@@ -59,8 +51,6 @@ est_param <- function(
   if (!is.null(logfile)){
     addHandler(writeToFile, file= logfile, level='DEBUG')
   }
-
-  group_prior_var_structure <- match.arg(group_prior_var_structure)
 
   loginfo('Estimating parameters ... ')
 
@@ -103,7 +93,6 @@ est_param <- function(
                           niter = niter_prefit,
                           init_group_prior = init_group_prior,
                           init_group_prior_var = init_group_prior_var,
-                          group_prior_var_structure = group_prior_var_structure,
                           use_null_weight = use_null_weight,
                           ncore = ncore,
                           verbose = verbose,
@@ -125,7 +114,6 @@ est_param <- function(
                    niter = niter,
                    init_group_prior = EM_prefit_res$group_prior,
                    init_group_prior_var = EM_prefit_res$group_prior_var,
-                   group_prior_var_structure = group_prior_var_structure,
                    use_null_weight = use_null_weight,
                    ncore = ncore,
                    verbose = verbose,

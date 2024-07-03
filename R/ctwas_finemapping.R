@@ -91,16 +91,9 @@ finemap_region <- function(region_data,
   gids <- regiondata[["gid"]]
   z <- regiondata[["z"]]
   gs_group <- regiondata[["gs_group"]]
-  g_type <- regiondata[["g_type"]]
-  g_context <- regiondata[["g_context"]]
-  g_group <- regiondata[["g_group"]]
 
   # set pi_prior and V_prior based on group_prior and group_prior_var
-  if(!is.null(group_prior)){
-    groups <- names(group_prior)
-  }else{
-    groups <- unique(unlist(lapply(region_data, "[[", "gs_group")))
-  }
+  groups <- c("SNP", "gene")
   res <- initiate_group_priors(group_prior, group_prior_var, groups)
   pi_prior <- res$pi_prior
   V_prior <- res$V_prior
@@ -165,9 +158,6 @@ finemap_region <- function(region_data,
                              sids = sids,
                              region_id = region_id,
                              z = z,
-                             g_type = g_type,
-                             g_context = g_context,
-                             g_group = g_group,
                              include_cs_index = include_cs_index)
 
   return(susie_res_df)

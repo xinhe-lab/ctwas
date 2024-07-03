@@ -32,9 +32,9 @@
 #'
 #' @param label_QTLs If TRUE, label SNP IDs in the QTL panel.
 #'
-#' @param point.sizes size values for SNP and non-SNP data points in the scatter plots
+#' @param point.sizes size values for SNP and gene data points in the scatter plots
 #'
-#' @param point.alpha alpha values for SNP and non-SNP data points in the scatter plots
+#' @param point.alpha alpha values for SNP and gene data points in the scatter plots
 #'
 #' @param point.shapes shapes values for data points of different types in the scatter plots
 #'
@@ -114,9 +114,6 @@ make_locusplot <- function(finemap_res,
   finemap_region_res <- finemap_res[which(finemap_res$region_id==region_id), ]
   # convert z to -log10(pval)
   finemap_region_res$p <- (-log(2) - pnorm(abs(finemap_region_res$z), lower.tail=F, log.p=T))/log(10)
-  # add object_type to plot SNP and non-SNP categories with different sizes and alphas
-  finemap_region_res$object_type <- finemap_region_res$type
-  finemap_region_res$object_type[finemap_region_res$object_type!="SNP"] <- "non-SNP"
 
   if (!is.null(focus_gene)) {
     focus_gidx <- which(finemap_region_res$gene_name == focus_gene)
@@ -130,7 +127,7 @@ make_locusplot <- function(finemap_res,
     }
   } else{
     # if focus_gene is not specified, choose the top gene with highest PIP
-    finemap_region_gene_res <- finemap_region_res[finemap_region_res$type != "SNP",]
+    finemap_region_gene_res <- finemap_region_res[finemap_region_res$group == "gene",]
     focus_gidx <- which.max(finemap_region_gene_res$susie_pip)
     focus_gene <- finemap_region_gene_res$gene_name[focus_gidx]
     focus_gid <- finemap_region_gene_res$id[focus_gidx]
@@ -154,8 +151,8 @@ make_locusplot <- function(finemap_res,
   if (!is.null(R_gene) && !is.null(R_snp_gene)) {
     plot_r2 <- TRUE
     finemap_region_res$r2 <- NA
-    finemap_region_res$r2[finemap_region_res$type!="SNP"] <- R_gene[finemap_region_res$id[finemap_region_res$type!="SNP"], focus_gid]^2
-    finemap_region_res$r2[finemap_region_res$type=="SNP"] <- R_snp_gene[finemap_region_res$id[finemap_region_res$type=="SNP"], focus_gid]^2
+    finemap_region_res$r2[finemap_region_res$group=="gene"] <- R_gene[finemap_region_res$id[finemap_region_res$group=="gene"], focus_gid]^2
+    finemap_region_res$r2[finemap_region_res$group=="SNP"] <- R_snp_gene[finemap_region_res$id[finemap_region_res$group=="SNP"], focus_gid]^2
     finemap_region_res$r2[finemap_region_res$id == focus_gid] <- 100
     # r2 colors: lead gene: salmon, 0.4~1: purple, others "#7FC97F"
     r2_colors <- c("0-0.4" = "#7FC97F", "0.4-1" = "purple", "1" = "salmon")
@@ -176,14 +173,12 @@ make_locusplot <- function(finemap_res,
 
   # gene labels
   finemap_region_res$label <- paste0(finemap_region_res$gene_name, " (", finemap_region_res$context, ")")
-  finemap_region_res$label[finemap_region_res$type == "SNP"] <- NA
+  finemap_region_res$label[finemap_region_res$group == "SNP"] <- NA
 
   # set shapes, sizes, and alpha for data points
-  point.shapes <- point.shapes[1:length(unique(finemap_region_res$type))]
-  names(point.shapes) <- c("SNP", setdiff(unique(finemap_region_res$type), "SNP"))
-
-  point.alpha <- c("SNP"= point.alpha[1], "non-SNP"= point.alpha[2])
-  point.sizes <- c("SNP"= point.sizes[1], "non-SNP"= point.sizes[2])
+  point.shapes <- c("SNP"= point.shapes[1], "gene"= point.shapes[2])
+  point.alpha <- c("SNP"= point.alpha[1], "gene"= point.alpha[2])
+  point.sizes <- c("SNP"= point.sizes[1], "gene"= point.sizes[2])
 
   # create a locus object for plotting
   loc <- locus(
@@ -197,21 +192,19 @@ make_locusplot <- function(finemap_res,
   focus_gene_qtls <- rownames(weights[[focus_gid]]$wgt)
   finemap_qtl_res <- finemap_region_res[finemap_region_res$id %in% focus_gene_qtls, ]
   focus_gene_name <- finemap_region_res$gene_name[finemap_region_res$id == focus_gid]
-  focus_gene_context <- finemap_region_res$context[finemap_region_res$id == focus_gid]
-  focus_gene_type <- finemap_region_res$type[finemap_region_res$id == focus_gid]
-  loginfo("%s %s %s QTLs", focus_gene_name, focus_gene_context, focus_gene_type)
+  loginfo("gene: %s", focus_gene_name)
   loginfo("QTL positions: %s", finemap_qtl_res$pos)
 
   # p-value panel
-  p_pvalue <- ggplot(loc$data, aes(x=.data$pos/1e6, y=.data$p, shape=.data$type,
-                                   size=.data$object_type, alpha=.data$object_type)) +
+  p_pvalue <- ggplot(loc$data, aes(x=.data$pos/1e6, y=.data$p, shape=.data$group,
+                                   size=.data$group, alpha=.data$group)) +
     geom_point(aes(color=.data$r2_levels, fill=.data$r2_levels)) +
     geom_text_repel(aes(label=.data$label), size=label.text.size, color="black") +
     scale_shape_manual(values = point.shapes) +
     scale_alpha_manual(values = point.alpha, guide="none") +
     scale_size_manual(values = point.sizes, guide="none") +
     xlim(loc$xrange/1e6) +
-    labs(x = "", y = expression(-log[10]("p-value")), shape = "Type", color = expression(R^2)) +
+    labs(x = "", y = expression(-log[10]("p-value")), shape = "group", color = expression(R^2)) +
     theme_bw() +
     theme(legend.position = legend.position,
           legend.text = element_text(size=legend.text.size),
@@ -237,8 +230,8 @@ make_locusplot <- function(finemap_res,
   }
 
   # PIP panel
-  p_pip <- ggplot(loc$data, aes(x=.data$pos/1e6, y=.data$susie_pip, shape=.data$type,
-                                size=.data$object_type, alpha=.data$object_type)) +
+  p_pip <- ggplot(loc$data, aes(x=.data$pos/1e6, y=.data$susie_pip, shape=.data$group,
+                                size=.data$group, alpha=.data$group)) +
     geom_point(aes(color=.data$r2_levels, fill=.data$r2_levels)) +
     geom_text_repel(aes(label=.data$label), size=label.text.size, color="black") +
     scale_shape_manual(values = point.shapes) +
@@ -247,7 +240,7 @@ make_locusplot <- function(finemap_res,
     scale_color_manual(values = r2_colors) +
     scale_fill_manual(values = r2_colors, guide="none") +
     xlim(loc$xrange/1e6) +
-    labs(x = "", y = "PIP", shape = "Type", color = expression(R^2)) +
+    labs(x = "", y = "PIP", shape = "group", color = expression(R^2)) +
     theme_bw() +
     theme(legend.position = "none",
           axis.ticks.x = element_blank(),
@@ -266,8 +259,7 @@ make_locusplot <- function(finemap_res,
     geom_rect(aes(xmin=loc$xrange[1]/1e6, xmax=loc$xrange[2]/1e6, ymin=0, ymax=1),
               fill="gray90") +
     geom_segment(aes(x=.data$pos/1e6, xend=.data$pos/1e6, y=0, yend=1), color="salmon") +
-    labs(title = paste(focus_gene_name, focus_gene_context, focus_gene_type),
-         y = "QTL") +
+    labs(title = focus_gene_name, y = "QTL") +
     theme(
       axis.title.x = element_blank(),
       axis.text.x = element_blank(),

@@ -59,9 +59,9 @@ By default, limits to protein coding genes. If NULL, display all possible ones.}
 
 \item{label_QTLs}{If TRUE, label SNP IDs in the QTL panel.}
 
-\item{point.sizes}{size values for SNP and non-SNP data points in the scatter plots}
+\item{point.sizes}{size values for SNP and gene data points in the scatter plots}
 
-\item{point.alpha}{alpha values for SNP and non-SNP data points in the scatter plots}
+\item{point.alpha}{alpha values for SNP and gene data points in the scatter plots}
 
 \item{point.shapes}{shapes values for data points of different types in the scatter plots}
 

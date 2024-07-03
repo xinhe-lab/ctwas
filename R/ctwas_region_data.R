@@ -276,12 +276,7 @@ add_z_to_region_data <- function(region_data,
     region_zdf <- zdf[zdf$id %in% c(gid, sid), ]
     region_zdf <- region_zdf[match(c(gid, sid), region_zdf$id),]
     regiondata[["z"]] <- region_zdf$z
-    regiondata[["gs_type"]] <- region_zdf$type
-    regiondata[["gs_context"]] <- region_zdf$context
     regiondata[["gs_group"]] <- region_zdf$group
-    regiondata[["g_type"]] <- region_zdf$type[region_zdf$type != "SNP"]
-    regiondata[["g_context"]] <- region_zdf$context[region_zdf$type != "SNP"]
-    regiondata[["g_group"]] <- region_zdf$group[region_zdf$type != "SNP"]
     regiondata
   }, mc.cores = ncore)
   if (length(region_data2) != length(region_ids)) {

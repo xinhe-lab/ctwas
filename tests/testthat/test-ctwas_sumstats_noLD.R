@@ -16,7 +16,6 @@ test_that("ctwas_sumstats_noLD works", {
                           thin = 0.1,
                           niter_prefit = 3,
                           niter = 30,
-                          group_prior_var_structure = "shared_type",
                           maxSNP = 20000,
                           min_nonSNP_PIP = 0.5)
     })

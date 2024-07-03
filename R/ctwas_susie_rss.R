@@ -43,13 +43,10 @@ anno_susie <- function(susie_res,
                        sids,
                        region_id,
                        z = NULL,
-                       g_type = "gene",
-                       g_context = "gene",
-                       g_group = "gene",
                        include_cs_index = TRUE) {
 
-  gene_df <- data.frame(id = gids, type = g_type, context = g_context, group = g_group)
-  snp_df <- data.frame(id = sids, type = "SNP", context = "SNP", group = "SNP")
+  gene_df <- data.frame(id = gids, group = "gene")
+  snp_df <- data.frame(id = sids, group = "SNP")
   susie_res_df <- rbind(gene_df, snp_df)
 
   if (!is.null(z)) {
@@ -80,7 +77,9 @@ anno_susie <- function(susie_res,
 
 
 # set pi_prior and V_prior based on init_group_prior and init_group_prior_var
-initiate_group_priors <- function(group_prior = NULL, group_prior_var = NULL, group_names) {
+initiate_group_priors <- function(group_prior = NULL,
+                                  group_prior_var = NULL,
+                                  group_names = c("SNP", "gene")) {
 
   if (is.null(group_prior)){
     group_prior <- structure(as.numeric(rep(NA,length(group_names))), names=group_names)

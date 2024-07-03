@@ -8,13 +8,6 @@
 #
 # @param init_group_prior_var a vector of initial prior variances for SNPs and gene effects.
 #
-# @param group_prior_var_structure a string indicating the structure to put on the prior variance parameters.
-# "shared_type" allows all groups in one molecular QTL type to share the same variance parameter.
-# "shared_context" allows all groups in one context (tissue, cell type, condition) to share the same variance parameter.
-# "shared_nonSNP" allows all non-SNP groups to share the same variance parameter.
-# "shared_all" allows all groups to share the same variance parameter.
-# "independent" allows all groups to have their own separate variance parameters.
-#
 # @param use_null_weight TRUE/FALSE. If TRUE, allow for a probability of no effect in susie
 #
 # @param ncore The number of cores used to parallelize susie over regions
@@ -30,16 +23,12 @@ fit_EM <- function(
     niter = 20,
     init_group_prior = NULL,
     init_group_prior_var = NULL,
-    group_prior_var_structure = c("shared_type", "shared_context", "shared_nonSNP", "shared_all", "independent"),
     use_null_weight = TRUE,
     ncore = 1,
     verbose = FALSE,
     ...){
 
-  # get groups, types and contexts from region_data
-  groups <- unique(unlist(lapply(region_data, "[[", "gs_group")))
-  types <- unique(unlist(lapply(region_data, "[[", "gs_type")))
-  contexts <- unique(unlist(lapply(region_data, "[[", "gs_context")))
+  groups <- c("SNP", "gene")
 
   # set pi_prior and V_prior based on init_group_prior and init_group_prior_var
   res <- initiate_group_priors(init_group_prior, init_group_prior_var, groups)
@@ -89,39 +78,9 @@ fit_EM <- function(
     # X2 = 5*X
     # res2 = susie(X2,y,L=10)
     # res$mu2 is identical to res2$mu2 but coefficients are on diff scale.
-    if (group_prior_var_structure=="independent") {
-      V_prior <- sapply(names(V_prior),
-                        function(x){
-                          tmp_EM_susie_res <- EM_susie_res[EM_susie_res$group==x,];
-                          sum(tmp_EM_susie_res$susie_pip*tmp_EM_susie_res$mu2)/sum(tmp_EM_susie_res$susie_pip)})
-    } else if (group_prior_var_structure=="shared_nonSNP") {
-      tmp_EM_susie_res <- EM_susie_res[EM_susie_res$group=="SNP",]
-      V_prior["SNP"] <- sum(tmp_EM_susie_res$susie_pip*tmp_EM_susie_res$mu2)/sum(tmp_EM_susie_res$susie_pip)
-      tmp_EM_susie_res <- EM_susie_res[EM_susie_res$group!="SNP",]
-      V_prior[names(V_prior)!="SNP"] <- sum(tmp_EM_susie_res$susie_pip*tmp_EM_susie_res$mu2)/sum(tmp_EM_susie_res$susie_pip)
-    } else if (group_prior_var_structure=="shared_all") {
-      V_prior[names(V_prior)] <- sum(tmp_EM_susie_res$susie_pip*tmp_EM_susie_res$mu2)/sum(tmp_EM_susie_res$susie_pip)
-    } else if (group_prior_var_structure=="shared_type") {
-      tmp_EM_susie_res <- EM_susie_res[EM_susie_res$group=="SNP",]
-      V_prior["SNP"] <- sum(tmp_EM_susie_res$susie_pip*tmp_EM_susie_res$mu2)/sum(tmp_EM_susie_res$susie_pip)
-      nonSNP_types <- setdiff(types, "SNP")
-      for(type in nonSNP_types){
-        tmp_EM_susie_res <- EM_susie_res[EM_susie_res$type==type,]
-        V_prior[sapply(names(V_prior), function(x){
-          unlist(strsplit(x, "[|]"))[1]})==type] <-
-          sum(tmp_EM_susie_res$susie_pip*tmp_EM_susie_res$mu2)/sum(tmp_EM_susie_res$susie_pip)
-      }
-    } else if (group_prior_var_structure=="shared_context") {
-      tmp_EM_susie_res <- EM_susie_res[EM_susie_res$group=="SNP",]
-      V_prior["SNP"] <- sum(tmp_EM_susie_res$susie_pip*tmp_EM_susie_res$mu2)/sum(tmp_EM_susie_res$susie_pip)
-      nonSNP_contexts <- setdiff(contexts, "SNP")
-      for(context in nonSNP_contexts){
-        tmp_EM_susie_res <- EM_susie_res[EM_susie_res$context==context,]
-        V_prior[sapply(names(V_prior), function(x){
-          unlist(strsplit(x, "[|]"))[2]})==context] <-
-          sum(tmp_EM_susie_res$susie_pip*tmp_EM_susie_res$mu2)/sum(tmp_EM_susie_res$susie_pip)
-      }
-    }
+    V_prior <- sapply(names(V_prior), function(x){
+      tmp_EM_susie_res <- EM_susie_res[EM_susie_res$group==x,];
+      sum(tmp_EM_susie_res$susie_pip*tmp_EM_susie_res$mu2)/sum(tmp_EM_susie_res$susie_pip)})
     group_prior_var_iters[names(V_prior), iter] <- V_prior
 
     if (verbose){
@@ -150,9 +109,6 @@ ctwas_susie_region_L1 <- function(region_data, region_id,
   gid <- regiondata[["gid"]]
   z <- regiondata[["z"]]
   gs_group <- regiondata[["gs_group"]]
-  g_type <- regiondata[["g_type"]]
-  g_context <- regiondata[["g_context"]]
-  g_group <- regiondata[["g_group"]]
 
   if (length(z) < 2) {
     stop(paste(length(z), "variables in the region. At least two variables in a region are needed to run susie"))
@@ -181,9 +137,6 @@ ctwas_susie_region_L1 <- function(region_data, region_id,
   susie_res_df <- anno_susie(susie_res,
                              gids = gid,
                              sids = sid,
-                             g_type = g_type,
-                             g_context = g_context,
-                             g_group = g_group,
                              region_id = region_id,
                              include_cs_index = FALSE)
 
