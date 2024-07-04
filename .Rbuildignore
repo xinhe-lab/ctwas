@@ -6,4 +6,5 @@
 ^workflow\.png$
 ^docs$
 ^README\.md$
+^appveyor\.yml$
 ^development$
