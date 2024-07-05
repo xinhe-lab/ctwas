@@ -31,7 +31,8 @@ susie(
   verbose = FALSE,
   track_fit = FALSE,
   residual_variance_lowerbound = var(drop(Y))/10000,
-  refine = FALSE
+  refine = FALSE,
+  warn_converge_fail = TRUE
 )
 
 susie_suff_stat(
@@ -66,7 +67,8 @@ susie_suff_stat(
   verbose = FALSE,
   track_fit = FALSE,
   check_input = FALSE,
-  refine = FALSE
+  refine = FALSE,
+  warn_converge_fail = TRUE
 )
 }
 \arguments{
@@ -187,6 +189,9 @@ residual variance. It is only relevant when
 
 \item{refine}{If \code{refine = TRUE}, we use a procedure to help
 SuSiE get out of local optimum.}
+
+\item{warn_converge_fail}{If \code{warn_converge_fail = TRUE},
+prints a warning message when IBSS algorithm does not converge.}
 
 \item{bhat}{A p-vector of estimated effects.}
 

@@ -143,6 +143,9 @@
 #' @param refine If \code{refine = TRUE}, we use a procedure to help
 #'   SuSiE get out of local optimum.
 #'
+#' @param warn_converge_fail If \code{warn_converge_fail = TRUE},
+#'   prints a warning message when IBSS algorithm does not converge.
+#'
 #' @return A \code{"susie"} object with some or all of the following
 #'   elements:
 #'
@@ -231,7 +234,8 @@ susie <- function (X,Y,L = min(10,ncol(X)),
                    verbose = FALSE,
                    track_fit = FALSE,
                    residual_variance_lowerbound = var(drop(Y))/1e4,
-                   refine = FALSE) {
+                   refine = FALSE,
+                   warn_converge_fail = TRUE) {
 
   # Process input estimate_prior_method.
   estimate_prior_method = match.arg(estimate_prior_method)
@@ -331,7 +335,10 @@ susie <- function (X,Y,L = min(10,ncol(X)),
   s$niter = i
 
   if (is.null(s$converged)) {
-    warning(paste("IBSS algorithm did not converge in",max_iter,"iterations!"))
+    if (warn_converge_fail) {
+      warning(paste("IBSS algorithm did not converge in",max_iter,"iterations!
+                    Please check consistency between summary statistics and LD matrix."))
+    }
     s$converged = FALSE
   }
 

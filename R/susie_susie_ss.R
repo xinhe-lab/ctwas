@@ -47,6 +47,9 @@
 #'   semidefinite; (2) check that \code{Xty} is in the space spanned by
 #'   the non-zero eigenvectors of \code{XtX}.
 #'
+#' @param warn_converge_fail If \code{warn_converge_fail = TRUE},
+#'   prints a warning message when IBSS algorithm does not converge.
+#'
 #' @keywords internal
 #'
 susie_suff_stat = function (bhat, shat, R, n, var_y, XtX, Xty, yty,
@@ -62,7 +65,8 @@ susie_suff_stat = function (bhat, shat, R, n, var_y, XtX, Xty, yty,
                             max_iter = 100, s_init = NULL,
                             intercept_value = 0, coverage = 0.95,
                             min_abs_corr = 0.5, tol = 1e-3, verbose = FALSE,
-                            track_fit = FALSE, check_input = FALSE, refine = FALSE) {
+                            track_fit = FALSE, check_input = FALSE, refine = FALSE,
+                            warn_converge_fail = TRUE) {
 
   # Process input estimate_prior_method.
   estimate_prior_method = match.arg(estimate_prior_method)
@@ -252,8 +256,9 @@ susie_suff_stat = function (bhat, shat, R, n, var_y, XtX, Xty, yty,
   s$niter = i
 
   if (is.null(s$converged)) {
-    if (max_iter > 1){
-      warning(paste("IBSS algorithm did not converge in",max_iter,"iterations!"))
+    if (warn_converge_fail) {
+      warning(paste("IBSS algorithm did not converge in",max_iter,"iterations!
+                    Please check consistency between summary statistics and LD matrix."))
     }
     s$converged = FALSE
   }

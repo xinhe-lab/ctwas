@@ -143,7 +143,8 @@ fit_EM <- function(
 # run susie for one region with L = 1 without LD matrix
 ctwas_susie_region_L1 <- function(region_data, region_id,
                                   pi_prior, V_prior,
-                                  use_null_weight = TRUE, ...){
+                                  use_null_weight = TRUE,
+                                  ...){
   # load susie input data
   regiondata <- region_data[[region_id]]
   sid <- regiondata[["sid"]]
@@ -176,6 +177,7 @@ ctwas_susie_region_L1 <- function(region_data, region_id,
                                L = 1,
                                null_weight = null_weight,
                                max_iter = 1,
+                               warn_converge_fail = FALSE,
                                ...)
   # annotate susie result
   susie_res_df <- anno_susie(susie_res,
