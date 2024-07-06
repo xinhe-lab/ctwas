@@ -32,8 +32,9 @@
 #' "shared_all" allows all groups to share the same variance parameter.
 #' "independent" allows all groups to have their own separate variance parameters.
 #'
-#' @param screen_method screening regions by: "nonSNP_PIP" or
-#' "cs" (only available for "LD" version)
+#' @param filter_L If TRUE, screening regions with L > 0
+#'
+#' @param filter_nonSNP_PIP If TRUE, screening regions with total non-SNP PIP >= \code{min_nonSNP_PIP}
 #'
 #' @param maxSNP Inf or integer. Maximum number of SNPs in a region. Default is
 #' Inf, no limit. This can be useful if there are many SNPs in a region and you don't
@@ -96,7 +97,8 @@ ctwas_sumstats <- function(
     init_group_prior = NULL,
     init_group_prior_var = NULL,
     group_prior_var_structure = c("shared_type", "shared_context", "shared_nonSNP", "shared_all", "independent"),
-    screen_method = c("nonSNP_PIP", "cs"),
+    filter_L = TRUE,
+    filter_nonSNP_PIP = FALSE,
     maxSNP = 20000,
     min_nonSNP_PIP = 0.5,
     p_single_effect = 0.8,
@@ -181,7 +183,8 @@ ctwas_sumstats <- function(
                                        group_prior = group_prior,
                                        group_prior_var = group_prior_var,
                                        L = L,
-                                       screen_method = screen_method,
+                                       filter_L = filter_L,
+                                       filter_nonSNP_PIP = filter_nonSNP_PIP,
                                        min_nonSNP_PIP = min_nonSNP_PIP,
                                        LD_format = LD_format,
                                        LD_loader_fun = LD_loader_fun,
@@ -189,9 +192,7 @@ ctwas_sumstats <- function(
                                        verbose = verbose,
                                        ...)
   screened_region_data <- screen_regions_res$screened_region_data
-  if (screen_method == "cs") {
-    L <- screen_regions_res$estimated_L
-  }
+  L <- screen_regions_res$L
 
   # Expand screened region_data with all SNPs in the regions
   if (thin < 1){

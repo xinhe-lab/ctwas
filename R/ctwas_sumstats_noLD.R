@@ -145,8 +145,6 @@ ctwas_sumstats_noLD <- function(
                                        use_LD = FALSE,
                                        group_prior = group_prior,
                                        group_prior_var = group_prior_var,
-                                       L = 1,
-                                       screen_method = "nonSNP_PIP",
                                        min_nonSNP_PIP = min_nonSNP_PIP,
                                        ncore = ncore,
                                        verbose = verbose)

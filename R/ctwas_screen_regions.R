@@ -8,7 +8,7 @@
 #'
 #' @param snp_info a list of SNP info data frames for LD reference. Required when \code{use_LD = TRUE}.
 #'
-#' @param weights a list of weights for each gene
+#' @param weights a list of weights for each gene. Required when \code{use_LD = TRUE}.
 #'
 #' @param group_prior a vector of two prior inclusion probabilities for SNPs and genes.
 #'
@@ -20,11 +20,12 @@
 #'
 #' @param mingene minimum number of genes in a region
 #'
-#' @param screen_method screening regions by: "nonSNP_PIP" or
-#' "cs" (only available for "LD" version)
+#' @param filter_L If TRUE, screening regions with L > 0
 #'
-#' @param min_nonSNP_PIP If screening by "nonSNP_PIP",
-#' regions with non-SNP PIP >= \code{min_nonSNP_PIP}
+#' @param filter_nonSNP_PIP If TRUE, screening regions with total non-SNP PIP >= \code{min_nonSNP_PIP}
+#'
+#' @param min_nonSNP_PIP If screening by non-SNP PIPs,
+#' regions with total non-SNP PIP >= \code{min_nonSNP_PIP}
 #' will be selected to run finemapping using full SNPs.
 #'
 #' @param LD_format file format for LD matrix. If "custom", use a user defined
@@ -47,33 +48,31 @@
 #'
 #' @export
 #'
-screen_regions <- function(
-    region_data,
-    use_LD = TRUE,
-    LD_info = NULL,
-    snp_info = NULL,
-    weights = NULL,
-    group_prior = NULL,
-    group_prior_var = NULL,
-    L = 5,
-    minvar = 2,
-    mingene = 1,
-    screen_method = c("nonSNP_PIP", "cs"),
-    min_nonSNP_PIP = 0.5,
-    LD_format = c("rds", "rdata", "mtx", "csv", "txt", "custom"),
-    LD_loader_fun,
-    ncore = 1,
-    logfile = NULL,
-    verbose = FALSE,
-    ...){
+screen_regions <- function(region_data,
+                           use_LD = TRUE,
+                           LD_info = NULL,
+                           snp_info = NULL,
+                           weights = NULL,
+                           group_prior = NULL,
+                           group_prior_var = NULL,
+                           L = 5,
+                           minvar = 2,
+                           mingene = 1,
+                           filter_L = TRUE,
+                           filter_nonSNP_PIP = FALSE,
+                           min_nonSNP_PIP = 0.5,
+                           LD_format = c("rds", "rdata", "mtx", "csv", "txt", "custom"),
+                           LD_loader_fun,
+                           ncore = 1,
+                           logfile = NULL,
+                           verbose = FALSE,
+                           ...){
 
   if (!is.null(logfile)){
     addHandler(writeToFile, file=logfile, level='DEBUG')
   }
 
   loginfo("Screening regions ...")
-
-  screen_method <- match.arg(screen_method)
 
   # extract thin value from region_data
   thin <- unique(sapply(region_data, "[[", "thin"))
@@ -85,17 +84,6 @@ screen_regions <- function(
 
   if (thin <= 0 || thin > 1){
     stop("thin value needs to be in (0,1]")
-  }
-
-  if (!use_LD) {
-    if (L != 1){
-      loginfo("L has to be 1 for no-LD version. Set L = 1")
-      L <- 1
-    }
-    if (screen_method == "cs"){
-      loginfo("Screening by 'cs' is not available for no-LD version. Set screen_method = nonSNP_PIP")
-      screen_method <- "nonSNP_PIP"
-    }
   }
 
   # adjust to account for thin argument
@@ -123,12 +111,48 @@ screen_regions <- function(
     }
   }
 
-  # run finemapping for all regions containing thinned SNPs
-  loginfo("Run initial screening ...")
+  estimated_L <- NULL
+  # with-LD version: run finemapping for all regions containing thinned SNPs and estimate L for each region
+  # no-LD version: set L = 1
+  if (use_LD) {
+    if (filter_L) {
+      loginfo("Estimating L with uniform prior and screening regions with L > 0...")
+      finemap_unif_prior_res <- finemap_regions(region_data,
+                                                use_LD = TRUE,
+                                                LD_info = LD_info,
+                                                snp_info = snp_info,
+                                                weights = weights,
+                                                L = 5,
+                                                include_cs_index = TRUE,
+                                                LD_format = LD_format,
+                                                LD_loader_fun = LD_loader_fun,
+                                                ncore = ncore,
+                                                verbose = verbose,
+                                                ...)
+      estimated_L <- get_L(finemap_unif_prior_res)
+      screened_region_ids <- names(estimated_L[estimated_L > 0])
+      screened_region_data <- region_data[screened_region_ids]
+      loginfo("Number of regions selected with L > 0: %d", length(screened_region_data))
+      L <- estimated_L[screened_region_ids]
+    } else {
+      loginfo("L = %d", L)
+      screened_region_data <- region_data
+    }
 
-  if (screen_method == "nonSNP_PIP" || !use_LD ) {
-    loginfo("Finemapping and computing non-SNP PIPs for each region ...")
-    finemap_screening_res <- finemap_regions(region_data,
+  } else {
+    loginfo("Set L = 1 in no-LD version")
+    L <- 1
+    # use non-SNP PIP filtering in no-LD version
+    filter_nonSNP_PIP <- TRUE
+    screened_region_data <- region_data
+  }
+
+  nonSNP_PIPs <- NULL
+  if (filter_nonSNP_PIP) {
+    # if no-LD version: further filter regions by non-SNP PIP
+    # filter regions with non-SNP PIPs for the regions with L > 0
+    loginfo("Computing non-SNP PIPs and screening regions with non-SNP PIP >= %s", min_nonSNP_PIP)
+    finemap_screening_res <- finemap_regions(screened_region_data,
                                              use_LD = use_LD,
                                              LD_info = LD_info,
                                              snp_info = snp_info,
@@ -142,42 +166,20 @@ screen_regions <- function(
                                              ncore = ncore,
                                              verbose = verbose,
                                              ...)
-
     # select regions based on total non-SNP PIP of the region
     nonSNP_PIPs <- compute_region_nonSNP_PIPs(finemap_screening_res)
     screened_region_ids <- names(nonSNP_PIPs[nonSNP_PIPs >= min_nonSNP_PIP])
     screened_region_data <- region_data[screened_region_ids]
-    loginfo("Selected %d regions with non-SNP PIP >= %s", length(screened_region_data), min_nonSNP_PIP)
-
-    res <- list(screened_region_data = screened_region_data,
-                nonSNP_PIPs = nonSNP_PIPs)
-  } else {
-    # run finemapping using regular susie with uniform prior
-    # select regions with at least one credible set
-    # and estimate a different L for each region
-    loginfo("Estimating L for each region using uniform prior ...")
-    finemap_screening_res <- finemap_regions(region_data,
-                                             use_LD = TRUE,
-                                             LD_info = LD_info,
-                                             snp_info = snp_info,
-                                             weights = weights,
-                                             L = L,
-                                             include_cs_index = TRUE,
-                                             LD_format = LD_format,
-                                             LD_loader_fun = LD_loader_fun,
-                                             ncore = ncore,
-                                             verbose = verbose,
-                                             ...)
-    estimated_L <- get_L(finemap_screening_res)
-    screened_region_ids <- names(estimated_L[estimated_L > 0])
-    screened_region_data <- region_data[screened_region_ids]
-    loginfo("Selected %d regions with at least one credible set", length(screened_region_data))
-
-    res <- list(screened_region_data = screened_region_data,
-                estimated_L = estimated_L)
+    loginfo("Number of regions selected with non-SNP PIP >= %s: %d", min_nonSNP_PIP, length(screened_region_data))
+    if (length(L) > 1) {
+      L <- L[screened_region_ids]
+    }
   }
 
-  return(res)
+  return(list(screened_region_data = screened_region_data,
+              L = L,
+              estimated_L = estimated_L,
+              nonSNP_PIPs = nonSNP_PIPs))
 }
 
 

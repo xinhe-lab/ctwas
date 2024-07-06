@@ -15,7 +15,8 @@ screen_regions(
   L = 5,
   minvar = 2,
   mingene = 1,
-  screen_method = c("nonSNP_PIP", "cs"),
+  filter_L = TRUE,
+  filter_nonSNP_PIP = FALSE,
   min_nonSNP_PIP = 0.5,
   LD_format = c("rds", "rdata", "mtx", "csv", "txt", "custom"),
   LD_loader_fun,
@@ -34,7 +35,7 @@ screen_regions(
 
 \item{snp_info}{a list of SNP info data frames for LD reference. Required when \code{use_LD = TRUE}.}
 
-\item{weights}{a list of weights for each gene}
+\item{weights}{a list of weights for each gene. Required when \code{use_LD = TRUE}.}
 
 \item{group_prior}{a vector of two prior inclusion probabilities for SNPs and genes.}
 
@@ -46,11 +47,12 @@ screen_regions(
 
 \item{mingene}{minimum number of genes in a region}
 
-\item{screen_method}{screening regions by: "nonSNP_PIP" or
-"cs" (only available for "LD" version)}
+\item{filter_L}{If TRUE, screening regions with L > 0}
 
-\item{min_nonSNP_PIP}{If screening by "nonSNP_PIP",
-regions with non-SNP PIP >= \code{min_nonSNP_PIP}
+\item{filter_nonSNP_PIP}{If TRUE, screening regions with total non-SNP PIP >= \code{min_nonSNP_PIP}}
+
+\item{min_nonSNP_PIP}{If screening by non-SNP PIPs,
+regions with total non-SNP PIP >= \code{min_nonSNP_PIP}
 will be selected to run finemapping using full SNPs.}
 
 \item{LD_format}{file format for LD matrix. If "custom", use a user defined

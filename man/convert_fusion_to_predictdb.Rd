@@ -6,7 +6,7 @@
 \usage{
 convert_fusion_to_predictdb(
   weight_path,
-  fusion_method = c("lasso", "enet", "top1", "blup", "bslmm", "bestR2"),
+  fusion_method = c("lasso", "enet", "top1", "blup", "bslmm", "best.cv"),
   fusion_genome_version = c("b38", "b37"),
   make_extra_table = TRUE,
   cov_table = NULL,

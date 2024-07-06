@@ -23,7 +23,8 @@
 #                                   niter = 30,
 #                                   L = 5,
 #                                   group_prior_var_structure = "shared_type",
-#                                   screen_method = "nonSNP_PIP",
+#                                   filter_L = FALSE,
+#                                   filter_nonSNP_PIP = TRUE,
 #                                   maxSNP = 20000,
 #                                   min_nonSNP_PIP = 0.5)
 #     })

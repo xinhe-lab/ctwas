@@ -19,7 +19,8 @@ ctwas_sumstats(
   init_group_prior_var = NULL,
   group_prior_var_structure = c("shared_type", "shared_context", "shared_nonSNP",
     "shared_all", "independent"),
-  screen_method = c("nonSNP_PIP", "cs"),
+  filter_L = TRUE,
+  filter_nonSNP_PIP = FALSE,
   maxSNP = 20000,
   min_nonSNP_PIP = 0.5,
   p_single_effect = 0.8,
@@ -71,8 +72,9 @@ giving the z scores for snps. "A1" is effect allele. "A2" is the other allele.}
 "shared_all" allows all groups to share the same variance parameter.
 "independent" allows all groups to have their own separate variance parameters.}
 
-\item{screen_method}{screening regions by: "nonSNP_PIP" or
-"cs" (only available for "LD" version)}
+\item{filter_L}{If TRUE, screening regions with L > 0}
+
+\item{filter_nonSNP_PIP}{If TRUE, screening regions with total non-SNP PIP >= \code{min_nonSNP_PIP}}
 
 \item{maxSNP}{Inf or integer. Maximum number of SNPs in a region. Default is
 Inf, no limit. This can be useful if there are many SNPs in a region and you don't
