@@ -277,10 +277,10 @@ finemap_regions <- function(region_data,
 
   finemap_region_res_list <- mclapply(region_ids, function(region_id){
 
-    if (length(L) == length(region_data)) {
-      region_L <- L[region_id]
-    } else if (length(L) == 1){
+    if (length(L) == 1) {
       region_L <- L
+    } else if (length(L) > 1 && length(L) == length(region_data)) {
+      region_L <- L[region_id]
     } else{
       stop("L needs to an integer or a vector of the same length as region_data")
     }
