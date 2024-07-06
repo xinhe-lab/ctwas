@@ -6,8 +6,8 @@
 \usage{
 load_predictdb_weights(
   weight_path,
-  filter_protein_coding_genes = FALSE,
-  load_predictdb_LD = FALSE
+  filter_protein_coding_genes = TRUE,
+  load_predictdb_LD = TRUE
 )
 }
 \arguments{
