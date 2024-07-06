@@ -10,7 +10,8 @@
 #'
 #' @param load_predictdb_LD TRUE/FALSE. If TRUE, load pre-computed LD among weight SNPs. This option is only for PredictDB weights
 #'
-#' @param fusion_method a string, specifying the method to choose in FUSION models
+#' @param fusion_method a string, specifying the method to choose in FUSION models.
+#' "best.cv" option will use the best model (smallest p-value) under cross-validation.
 #'
 #' @param fusion_genome_version a string, specifying the genome version of FUSION models
 #'
@@ -20,9 +21,9 @@
 #'
 load_weights <- function(weight_path,
                          weight_format = c("PredictDB", "FUSION"),
-                         filter_protein_coding_genes = FALSE,
-                         load_predictdb_LD = FALSE,
-                         fusion_method = c("lasso","enet","top1","blup","bslmm","bestR2"),
+                         filter_protein_coding_genes = TRUE,
+                         load_predictdb_LD = TRUE,
+                         fusion_method = c("lasso","enet","top1","blup","bslmm","best.cv"),
                          fusion_genome_version = c("b38","b37"),
                          ncore = 1){
 
@@ -62,8 +63,8 @@ load_weights <- function(weight_path,
 #' @export
 #'
 load_predictdb_weights <- function(weight_path,
-                                   filter_protein_coding_genes = FALSE,
-                                   load_predictdb_LD = FALSE){
+                                   filter_protein_coding_genes = TRUE,
+                                   load_predictdb_LD = TRUE){
 
   # read the PredictDB weights
   stopifnot(file.exists(weight_path))
@@ -89,7 +90,7 @@ load_predictdb_weights <- function(weight_path,
   }
 
   # load pre-computed covariances from PredictDB LD file
-  if (isTRUE(load_predictdb_LD)){
+  if (load_predictdb_LD) {
     predictdb_LD_file <- paste0(file_path_sans_ext(weight_path), ".txt.gz")
     if (!file.exists(predictdb_LD_file)){
       stop(paste("PredictDB LD file", predictdb_LD_file, "does not exist!"))
@@ -112,6 +113,7 @@ load_predictdb_weights <- function(weight_path,
 #' @param weight_path the directory containing FUSION weights ('.wgt.RDat' files).
 #'
 #' @param fusion_method a string, specifying the method to choose in FUSION models.
+#' "best.cv" option will use the best model (smallest p-value) under cross-validation.
 #'
 #' @param fusion_genome_version a string, specifying the genome version of FUSION models
 #'
@@ -130,7 +132,7 @@ load_predictdb_weights <- function(weight_path,
 #' @export
 #'
 load_fusion_weights <- function(weight_path,
-                                fusion_method = c("lasso","enet","top1","blup","bslmm","bestR2"),
+                                fusion_method = c("lasso","enet","top1","blup","bslmm","best.cv"),
                                 fusion_genome_version = c("b38","b37"),
                                 make_extra_table = FALSE,
                                 ncore = 1) {
@@ -206,7 +208,7 @@ load_fusion_weights <- function(weight_path,
 #' @importFrom dplyr left_join
 load_fusion_wgt_data <- function(wgt_rdata_file,
                                  wgt_ID,
-                                 fusion_method = c("lasso","enet","top1","blup","bslmm","bestR2"),
+                                 fusion_method = c("lasso","enet","top1","blup","bslmm","best.cv"),
                                  fusion_genome_version = c("b38","b37")){
 
   fusion_method <- match.arg(fusion_method)
@@ -235,9 +237,16 @@ load_fusion_wgt_data <- function(wgt_rdata_file,
   rownames(wgt.matrix) <- snps$rsid
 
   # select FUSION method
-  cv.rsq <- cv.performance[1,]
-  if (fusion_method == "bestR2"){
-    g.method <- names(cv.rsq)[which.max(cv.rsq)]
+
+  # which rows have rsq
+  row.rsq <- grep("rsq" , rownames(cv.performance))
+  # which rows have p-values
+  row.pval <- grep("pval" , rownames(cv.performance))
+
+  cv.rsq <- cv.performance[row.rsq,]
+  if (fusion_method == "best.cv"){
+    best.idx <- which.min(apply(cv.performance[row.pval,,drop=FALSE],2,min,na.rm=TRUE))
+    g.method <- names(cv.performance)[best.idx]
   } else{
     g.method <- fusion_method
   }
@@ -363,6 +372,7 @@ make_predictdb_from_QTLs <- function(weight_table,
 #' @param weight_path the directory containing FUSION weights ('.wgt.RDat' files).
 #'
 #' @param fusion_method a string, specifying the method to choose in FUSION models.
+#' "best.cv" option will use the best model (smallest p-value) under cross-validation.
 #'
 #' @param fusion_genome_version a string, specifying the genome version of FUSION models
 #'
@@ -380,7 +390,7 @@ make_predictdb_from_QTLs <- function(weight_table,
 #'
 convert_fusion_to_predictdb <- function(
     weight_path,
-    fusion_method = c("lasso","enet","top1","blup","bslmm","bestR2"),
+    fusion_method = c("lasso","enet","top1","blup","bslmm","best.cv"),
     fusion_genome_version = c("b38","b37"),
     make_extra_table = TRUE,
     cov_table = NULL,

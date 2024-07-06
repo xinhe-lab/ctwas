@@ -6,7 +6,7 @@
 \usage{
 load_fusion_weights(
   weight_path,
-  fusion_method = c("lasso", "enet", "top1", "blup", "bslmm", "bestR2"),
+  fusion_method = c("lasso", "enet", "top1", "blup", "bslmm", "best.cv"),
   fusion_genome_version = c("b38", "b37"),
   make_extra_table = FALSE,
   ncore = 1
@@ -15,7 +15,8 @@ load_fusion_weights(
 \arguments{
 \item{weight_path}{the directory containing FUSION weights ('.wgt.RDat' files).}
 
-\item{fusion_method}{a string, specifying the method to choose in FUSION models.}
+\item{fusion_method}{a string, specifying the method to choose in FUSION models.
+"best.cv" option will use the best model (smallest p-value) under cross-validation.}
 
 \item{fusion_genome_version}{a string, specifying the genome version of FUSION models}
 

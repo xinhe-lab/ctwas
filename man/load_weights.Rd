@@ -7,9 +7,9 @@
 load_weights(
   weight_path,
   weight_format = c("PredictDB", "FUSION"),
-  filter_protein_coding_genes = FALSE,
-  load_predictdb_LD = FALSE,
-  fusion_method = c("lasso", "enet", "top1", "blup", "bslmm", "bestR2"),
+  filter_protein_coding_genes = TRUE,
+  load_predictdb_LD = TRUE,
+  fusion_method = c("lasso", "enet", "top1", "blup", "bslmm", "best.cv"),
   fusion_genome_version = c("b38", "b37"),
   ncore = 1
 )
@@ -24,7 +24,8 @@ or the directory containing '.wgt.RDat' files for FUSION weights.}
 
 \item{load_predictdb_LD}{TRUE/FALSE. If TRUE, load pre-computed LD among weight SNPs. This option is only for PredictDB weights}
 
-\item{fusion_method}{a string, specifying the method to choose in FUSION models}
+\item{fusion_method}{a string, specifying the method to choose in FUSION models.
+"best.cv" option will use the best model (smallest p-value) under cross-validation.}
 
 \item{fusion_genome_version}{a string, specifying the genome version of FUSION models}
 
