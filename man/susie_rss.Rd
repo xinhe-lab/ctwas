@@ -30,7 +30,8 @@ susie_rss(
   track_fit = FALSE,
   check_R = FALSE,
   r_tol = 1e-08,
-  refine = FALSE
+  refine = FALSE,
+  warn_converge_fail = TRUE
 )
 }
 \arguments{
@@ -138,6 +139,9 @@ semidefinite matrix of R.}
 
 \item{refine}{If \code{refine = TRUE}, we use a procedure to help
 SuSiE get out of local optimum.}
+
+\item{warn_converge_fail}{If \code{warn_converge_fail = TRUE},
+prints a warning message when IBSS algorithm does not converge.}
 }
 \value{
 A \code{"susie"} object with some or all of the following

@@ -112,6 +112,9 @@
 #' @param refine If \code{refine = TRUE}, we use a procedure to help
 #'   SuSiE get out of local optimum.
 #'
+#' @param warn_converge_fail If \code{warn_converge_fail = TRUE},
+#'   prints a warning message when IBSS algorithm does not converge.
+#'
 #' @return A \code{"susie"} object with some or all of the following
 #'   elements:
 #'
@@ -168,7 +171,8 @@ susie_rss = function (z, R, maf = NULL, maf_thresh = 0, z_ld_weight = 0,
                       max_iter = 100, s_init = NULL, intercept_value = 0,
                       coverage = 0.95, min_abs_corr = 0.5,
                       tol = 1e-03, verbose = FALSE, track_fit = FALSE,
-                      check_R = FALSE, r_tol = 1e-08, refine = FALSE) {
+                      check_R = FALSE, r_tol = 1e-08, refine = FALSE,
+                      warn_converge_fail = TRUE) {
 
   # Check input R.
   if (nrow(R) != length(z))
@@ -258,7 +262,7 @@ susie_rss = function (z, R, maf = NULL, maf_thresh = 0, z_ld_weight = 0,
                       max_iter = max_iter, s_init = s_init, intercept_value = intercept_value,
                       coverage = coverage, min_abs_corr = min_abs_corr,
                       tol = tol, verbose = verbose, track_fit = track_fit, check_input = FALSE,
-                      refine = refine)
+                      refine = refine, warn_converge_fail = warn_converge_fail)
   s$fitted = s$Xtfitted
   s$Rr = s$XtXr
   s$Xtfitted = s$XtXr = NULL
@@ -294,7 +298,8 @@ susie_rss_lambda = function(z, R, maf = NULL, maf_thresh = 0,
                             max_iter = 100, s_init = NULL, intercept_value = 0,
                             coverage = 0.95, min_abs_corr = 0.5,
                             tol = 1e-3, verbose = FALSE, track_fit = FALSE,
-                            check_R = TRUE, check_z = FALSE) {
+                            check_R = TRUE, check_z = FALSE,
+                            warn_converge_fail = TRUE) {
 
   # Check input R.
   if (nrow(R) != length(z))
@@ -453,7 +458,10 @@ susie_rss_lambda = function(z, R, maf = NULL, maf_thresh = 0,
   s$lambda = lambda
 
   if (is.null(s$converged)) {
-    warning(paste("IBSS algorithm did not converge in",max_iter,"iterations!"))
+    if (warn_converge_fail) {
+      warning(paste("IBSS algorithm did not converge in",max_iter,"iterations!
+                    Please check consistency between summary statistics and LD matrix."))
+    }
     s$converged = FALSE
   }
 

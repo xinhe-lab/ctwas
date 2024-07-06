@@ -9,6 +9,7 @@ ctwas_susie_rss <- function(z,
                             null_weight = NULL,
                             coverage = 0.95,
                             min_abs_corr = 0.5,
+                            warn_converge_fail = TRUE,
                             ...){
 
   if (missing(R)) {
@@ -31,6 +32,7 @@ ctwas_susie_rss <- function(z,
                          null_weight = null_weight,
                          coverage = coverage,
                          min_abs_corr = min_abs_corr,
+                         warn_converge_fail = warn_converge_fail,
                          ...)
 
   return(susie_res)
