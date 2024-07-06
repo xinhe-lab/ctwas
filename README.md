@@ -28,17 +28,17 @@ Running a cTWAS analysis involves four main steps:
 
 1. Preparing the input data. 
 
-2. Computing the gene z-scores. 
+2. Computing associations of molecular traits with the phenotype (Z-scores). 
 
 3. Estimating the model parameters. 
 
-4. Fine-mapping. 
+4. Fine-mapping causal molecular traits 
 
 The outputs of cTWAS are posterior inclusion probabilities (PIPs) for all variants and molecular traits.
 
 To learn more about the ctwas R package, we recommend starting with this introductory tutorial: 
 
-[A minimal tutorial of how to run cTWAS without LD](https://xinhe-lab.github.io/multigroup_ctwas/articles/simple_ctwas_tutorial.html) 
+[A minimal tutorial of how to run cTWAS without LD](https://xinhe-lab.github.io/multigroup_ctwas/articles/minimal_ctwas_tutorial.html) 
 
 To run the full cTWAS, a few more tutorials including:
     
