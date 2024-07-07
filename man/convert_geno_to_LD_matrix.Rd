@@ -13,12 +13,14 @@ convert_geno_to_LD_matrix(
   outputdir = getwd(),
   outname = "",
   include_variance = TRUE,
-  include_allele_freq = TRUE
+  include_allele_freq = TRUE,
+  show_progress_bar = TRUE,
+  verbose = FALSE
 )
 }
 \arguments{
-\item{region_info}{a data frame of region information, with columns:
-chr, start, stop positions}
+\item{region_info}{a data frame of region definitions, with columns:
+chrom, start, stop, and region_id}
 
 \item{genotype_files}{Reference genotype files in PLINK binary genotype data
 in .pgen or .bed format}
@@ -38,6 +40,10 @@ The output will use the genome positions in \code{varinfo_files}.}
 
 \item{include_allele_freq}{TRUE/FALSE, if TRUE, include allele frequency
 in .Rvar output}
+
+\item{show_progress_bar}{If TRUE, print progress bar}
+
+\item{verbose}{If TRUE, print detail messages}
 }
 \value{
 a data frame of updated region info, with paths of LD matrices and

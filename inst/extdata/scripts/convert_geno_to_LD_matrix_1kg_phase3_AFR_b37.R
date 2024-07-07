@@ -4,19 +4,18 @@ library(ctwas)
 # note: Rfast package is required for running the convert_geno_to_LD_matrix() function
 
 # specify LD reference
-ldref_dir <- "/gpfs/data/xhe-lab/ukb_LDR/genotype_data_0.1"
-genotype_files <- file.path(ldref_dir, paste0("ukb_chr", 1:22, ".pgen"))
-
-# the output Rvar files use the positions and allele information in varinfo_files
-varinfo_files <- "/gpfs/data/xhe-lab/ukb_LDR/neale_lab/neale_variants_hg38.bim"
+ldref_dir <- "/project2/xinhe/1kg/1000G_Phase3_plink/b37/1000G_AFR_phase3_b37"
+genotype_files <- file.path(ldref_dir, paste0("1000G_AFR_phase3_b37_chr", 1:22, ".bed"))
+# the output Rvar files will use the positions and allele information from these files
+varinfo_files <- file.path(ldref_dir, paste0("1000G_AFR_phase3_b37_chr", 1:22, ".bim"))
 
 # get region_info that match the population and genome build
-region_file <- system.file("extdata/ldetect", "EUR.b38.ldetect.regions.RDS", package = "ctwas")
+region_file <- system.file("extdata/ldetect", "AFR.b37.ldetect.regions.RDS", package = "ctwas")
 region_info <- readRDS(region_file)
 
 # specify output
-outputdir <- "/gpfs/data/xhe-lab/shared_data/ctwas/LDR/UKB_b38/"
-outname <- "ukb_b38_0.1"
+outputdir <- "/project2/xinhe/shared_data/ctwas/LDR/1000G_AFR_phase3_b37/"
+outname <- "1000G_AFR_phase3_b37"
 
 # convert genotype to LD matrix
 updated_region_info <- convert_geno_to_LD_matrix(region_info,

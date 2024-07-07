@@ -187,7 +187,7 @@ read_pvar <- function(pvarf){
 #' @importFrom data.table fread
 read_bim <- function(bimf) {
   bim <- fread(bimf)
-  colnames(bim) <- c("chr", "id", "cm", "pos", "alt", "ref")
+  colnames(bim) <- c("chrom", "id", "cm", "pos", "alt", "ref")
   return(bim)
 }
 

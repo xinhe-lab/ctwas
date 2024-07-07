@@ -190,23 +190,38 @@ ctwas_parameters <- summarize_param(param, gwas_n)
 ```
 
 
+Estimated prior inclusion probability
 ```{r}
-# Estimated prior inclusion probability
 ctwas_parameters$group_prior
+```
 
-# Estimated prior effect size:
+
+Estimated prior effect size
+```{r}
 ctwas_parameters$group_prior_var
+```
 
-# Estimated enrichment of molecular traits over variants:
+
+Estimated enrichment of molecular traits over variants
+```{r}
 ctwas_parameters$enrichment
+```
 
-# PVE explained by molecular traits and variants:
+
+PVE explained by molecular traits and variants
+```{r}
 ctwas_parameters$group_pve
+```
 
-# Total heritability (sum of PVE)
+
+Total heritability (sum of PVE)
+```{r}
 ctwas_parameters$total_pve
+```
 
-# Attributable heritability to variants in each group of molecular traits
+
+Attributable heritability to variants in each group of molecular traits
+```{r}
 ctwas_parameters$attributable_pve
 ```
 
@@ -240,17 +255,12 @@ gene_annot <- get_gene_annot_from_ens_db(ens_db, gene_ids)
 We then use the `anno_finemap_res()` function to add gene annotations to the fine-mapping result, and use gene mid-points to represent gene positions.
 
 ```{r add_gene_names}
-# add gene annotations and use gene mid-points to represent gene positions
-finemap_res <- anno_finemap_res(finemap_res, 
-                                snp_info,
-                                gene_annot,
-                                use_gene_pos = "mid")
+finemap_res <- anno_finemap_res(finemap_res, snp_info, gene_annot)
 ```
 
 
 We list all molecular traits with PIP > 0.8, which is the threshold we used in the paper.
 ```{r interpret_res}
-# select PIP > 0.8
 sig_finemap_res <- finemap_res[finemap_res$type!="SNP" & finemap_res$susie_pip > 0.8,]
 
 head(sig_finemap_res[order(-sig_finemap_res$susie_pip),])
@@ -261,13 +271,11 @@ head(sig_finemap_res[order(-sig_finemap_res$susie_pip),])
 When we have multiple contexts (tissues), it is useful to evaluate the total evidence of a gene being causal, combining evidence of all the molecular traits affecting this gene, across all types and contexts. This is done by summing up the PIPs of all these molecular traits of the same gene, expressed as the combined PIP of this gene. 
 
 ```{r combine_pips}
-# combine gene PIPs by context
 combined_pip_by_context <- combine_gene_pips(finemap_res, 
                                              by = "context",
                                              filter_protein_coding_genes = TRUE)
 head(combined_pip_by_context)
 
-# select combined PIP > 0.8
 sig_gene_pips_df <- combined_pip_by_context[combined_pip_by_context$combined_pip > 0.8, ]
 head(sig_gene_pips_df)
 ```

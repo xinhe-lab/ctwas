@@ -2,8 +2,8 @@
 #' @title Converts PLINK genotype data to LD matrices and SNP info files,
 #' saves LD matrices as .RDS files and SNP info as .Rvar files
 #'
-#' @param region_info a data frame of region information, with columns:
-#' chr, start, stop positions
+#' @param region_info a data frame of region definitions, with columns:
+#' chrom, start, stop, and region_id
 #'
 #' @param genotype_files Reference genotype files in PLINK binary genotype data
 #' in .pgen or .bed format
@@ -24,6 +24,10 @@
 #' @param include_allele_freq TRUE/FALSE, if TRUE, include allele frequency
 #' in .Rvar output
 #'
+#' @param show_progress_bar If TRUE, print progress bar
+
+#' @param verbose If TRUE, print detail messages
+#'
 #' @return a data frame of updated region info, with paths of LD matrices and
 #' variance information files
 #'
@@ -32,6 +36,7 @@
 #' @importFrom utils txtProgressBar
 #' @importFrom utils setTxtProgressBar
 #' @importFrom readr parse_number
+#' @importFrom data.table fwrite
 #'
 #' @export
 #'
@@ -42,7 +47,9 @@ convert_geno_to_LD_matrix <- function(region_info,
                                       outputdir = getwd(),
                                       outname = "",
                                       include_variance = TRUE,
-                                      include_allele_freq = TRUE) {
+                                      include_allele_freq = TRUE,
+                                      show_progress_bar = TRUE,
+                                      verbose = FALSE) {
 
   loginfo("Convert genotype data to LD matrices")
 
@@ -54,17 +61,21 @@ convert_geno_to_LD_matrix <- function(region_info,
     dir.create(outputdir, showWarnings=FALSE, recursive = TRUE)
   }
 
-  if (is.character(region_info$chr)) {
-    region_info$chr <- parse_number(region_info$chr)
+  if (is.character(region_info$chrom)) {
+    region_info$chrom <- parse_number(region_info$chrom)
   }
 
   region_info$start <- as.numeric(region_info$start)
   region_info$stop <- as.numeric(region_info$stop)
 
-  region_info <- region_info[order(region_info$chr, region_info$start), ]
-  region_info[, "region_id"] <- paste0(region_info$chr, "_", region_info$start, "_", region_info$stop)
-  region_info[, "LD_matrix"] <- NA
-  region_info[, "SNP_info"] <- NA
+  region_info <- region_info[order(region_info$chrom, region_info$start), ]
+
+  if (is.null(region_info$region_id)) {
+    region_info$region_id <- paste(region_info$chrom, region_info$start, region_info$stop, sep = "_")
+  }
+
+  region_info$LD_matrix <- NA
+  region_info$SNP_info <- NA
 
   # load variant positions from varinfo_files
   loginfo("Load variant information ...")
@@ -74,10 +85,11 @@ convert_geno_to_LD_matrix <- function(region_info,
   pvar_files <- sapply(genotype_files, prep_pvar, outputdir = outputdir)
 
   for (b in chrom){
-    region_info_chr <- region_info[region_info$chr == b, ]
+
+    region_info_chr <- region_info[region_info$chrom == b, ]
     loginfo("No. regions in chr%s: %d", b, nrow(region_info_chr))
 
-    ld_snpinfo_chr <- ld_snpinfo_all[ld_snpinfo_all$chr == b,]
+    ld_snpinfo_chr <- ld_snpinfo_all[ld_snpinfo_all$chrom == b,]
 
     pgen <- prep_pgen(genotype_files[b], pvar_files[b])
     snpinfo <- read_pvar(pvar_files[b])
@@ -86,16 +98,14 @@ convert_geno_to_LD_matrix <- function(region_info,
       stop("Input genotype file not split by chromosome or not in correct order")
     }
 
-    pb <- txtProgressBar(min = 0, max = nrow(region_info_chr), initial = 0, style = 3)
+    if (show_progress_bar) {
+      pb <- txtProgressBar(min = 0, max = nrow(region_info_chr), initial = 0, style = 3)
+    }
 
     for (rn in 1:nrow(region_info_chr)) {
-
-      loginfo("Region %s", rn)
-      browser()
-
       regioninfo <- region_info_chr[rn, ]
-      region_id <- paste0(regioninfo$chr, "_", regioninfo$start, "_", regioninfo$stop)
-      region_idx <- which(region_info$region_id == region_id)
+      region_id <- regioninfo$region_id
+
       region_start <- regioninfo$start
       region_stop <- regioninfo$stop
 
@@ -106,10 +116,15 @@ convert_geno_to_LD_matrix <- function(region_info,
 
       outfile_temp <- paste0(LD_Rvar_file, "-temp")
 
-      if (!(file.exists(LD_matrix_file)) | !(file.exists(LD_Rvar_file)) | file.exists(outfile_temp)){
+      if (!(file.exists(LD_matrix_file)) | !(file.exists(LD_Rvar_file)) | file.exists(outfile_temp)) {
+
+        if (verbose) {
+          loginfo("Processing region %s: %s ...", rn, region_id)
+        }
 
         file.create(outfile_temp)
 
+        # make LD matrix
         # use the snp positions and allele information in the region from the LD reference
         sidx_ldref <- which(ld_snpinfo_chr$pos >= region_start & ld_snpinfo_chr$pos < region_stop)
         sid_ldref <- ld_snpinfo_chr$id[sidx_ldref]
@@ -129,10 +144,10 @@ convert_geno_to_LD_matrix <- function(region_info,
         colnames(R_snp) <- NULL
         saveRDS(R_snp, file=LD_matrix_file)
 
-        R_var <- ld_snpinfo_chr[sidx_ldref, c("chr","id","pos","alt","ref")]
-        colnames(R_var) <- c("chrom","id","pos","alt","ref")
+        # make Rvar file
+        R_var <- ld_snpinfo_chr[sidx_ldref, c("chrom","id","pos","alt","ref")]
 
-        if (isTRUE(include_variance)) {
+        if (include_variance) {
           R_snp_variances <- Rfast::colVars(X.g)
           names(R_snp_variances) <- sid
           R_snp_variances <- R_snp_variances[sid_ldref]
@@ -140,7 +155,7 @@ convert_geno_to_LD_matrix <- function(region_info,
           R_var <- cbind(R_var, variance = R_snp_variances)
         }
 
-        if (isTRUE(include_allele_freq)){
+        if (include_allele_freq) {
           R_snp_AFs <- colSums(X.g)/(2*nrow(X.g))
           names(R_snp_AFs) <- sid
           R_snp_AFs <- R_snp_AFs[sid_ldref]
@@ -148,18 +163,23 @@ convert_geno_to_LD_matrix <- function(region_info,
           R_var <- cbind(R_var, allele_freq = R_snp_AFs)
         }
 
-        write.table(R_var, file=LD_Rvar_file, sep="\t", col.names=TRUE, row.names=FALSE, quote=FALSE)
+        fwrite(R_var, file=LD_Rvar_file, sep="\t", col.names=TRUE, row.names=FALSE)
 
         file.remove(outfile_temp)
       }
 
+      region_idx <- which(region_info$region_id == region_id)
       region_info[region_idx, "LD_matrix"] <- LD_matrix_file
       region_info[region_idx, "SNP_info"] <- LD_Rvar_file
 
-      setTxtProgressBar(pb, rn)
+      if (show_progress_bar) {
+        setTxtProgressBar(pb, rn)
+      }
     }
 
-    close(pb)
+    if (show_progress_bar) {
+      close(pb)
+    }
   }
 
   return(region_info)
