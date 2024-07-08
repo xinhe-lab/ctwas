@@ -447,10 +447,10 @@ muffled_corr = function (x)
 muffled_cov2cor = function (x)
   withCallingHandlers(cov2cor(x),
     warning = function(w) {
-      if (grepl("had 0 or NA entries; non-finite result is doubtful",
-                w$message))
+      if (grepl("non-finite result", w$message))
           invokeRestart("muffleWarning")
       })
+
 
 # Check for symmetric matrix.
 #' @keywords internal
