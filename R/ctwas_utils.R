@@ -209,4 +209,9 @@ read_var_info <- function(var_info_file){
   return(var_info)
 }
 
-
+# check mclapply result
+check_mc_res <- function(x){
+  if (any(sapply(x, is.null))) {
+    stop("Not all cores returned results. Try rerun with bigger memory or fewer cores")
+  }
+}

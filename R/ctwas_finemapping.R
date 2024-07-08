@@ -307,10 +307,8 @@ finemap_regions <- function(region_data,
                    ...)
 
   }, mc.cores = ncore)
+  check_mc_res(finemap_region_res_list)
 
-  if (length(finemap_region_res_list) != length(region_ids)) {
-    stop("Not all cores returned results. Try rerun with bigger memory or fewer cores")
-  }
   finemap_res <- do.call(rbind, finemap_region_res_list)
   rownames(finemap_res) <- NULL
 

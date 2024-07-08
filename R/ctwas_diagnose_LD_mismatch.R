@@ -49,9 +49,8 @@ diagnose_ld_mismatch_susie <- function(z_snp,
                          LD_format = LD_format,
                          LD_loader_fun = LD_loader_fun)
   }, mc.cores = ncore)
-  if (length(condz_list) != length(region_ids)) {
-    stop("Not all cores returned results. Try rerun with bigger memory or fewer cores")
-  }
+  check_mc_res(condz_list)
+
   names(condz_list) <- region_ids
   condz_stats <- rbindlist(condz_list, idcol = "region_id")
   rownames(condz_stats) <- NULL

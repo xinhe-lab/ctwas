@@ -154,11 +154,7 @@ preprocess_weights <- function(weight_path,
                    drop_strand_ambig = drop_strand_ambig,
                    scale_predictdb_weights = scale_predictdb_weights)
   }, mc.cores = ncore)
-
-  if (length(weights) != length(gene_names)) {
-    stop("Not all cores returned results. Try rerun with bigger memory or fewer cores")
-  }
-
+  check_mc_res(weights)
   names(weights) <- paste0(gene_names, "|", weight_name)
 
   if (!load_predictdb_LD) {
