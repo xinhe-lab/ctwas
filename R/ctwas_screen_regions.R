@@ -142,8 +142,6 @@ screen_regions <- function(region_data,
   } else {
     loginfo("Set L = 1 in no-LD version")
     L <- 1
-    # use non-SNP PIP filtering in no-LD version
-    filter_nonSNP_PIP <- TRUE
     screened_region_data <- region_data
   }
 
