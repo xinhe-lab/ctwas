@@ -31,7 +31,7 @@ fit_EM <- function(
   groups <- c("SNP", "gene")
 
   # set pi_prior and V_prior based on init_group_prior and init_group_prior_var
-  res <- initiate_group_priors(init_group_prior, init_group_prior_var, groups)
+  res <- initiate_group_priors(init_group_prior[groups], init_group_prior_var[groups], groups)
   pi_prior <- res$pi_prior
   V_prior <- res$V_prior
   rm(res)
@@ -57,9 +57,8 @@ fit_EM <- function(
                             use_null_weight = use_null_weight,
                             ...)
     }, mc.cores = ncore)
-    if (length(EM_susie_res_list) != length(region_ids)) {
-      stop("Not all cores returned results. Try rerun with bigger memory or fewer cores")
-    }
+    check_mc_res(EM_susie_res_list)
+
     EM_susie_res <- do.call(rbind, EM_susie_res_list)
 
     # update estimated group_prior from the current iteration

@@ -26,7 +26,7 @@ preprocess_region_LD_snp_info <- function(region_info = NULL,
     stop("region_info needs to contain the following columns: ",
          paste(target_header, collapse = " "))
   }
-  region_info$chrom <- readr::parse_number(as.character(region_info$chrom))
+  region_info$chrom <- parse_number(as.character(region_info$chrom))
   region_info$start <- as.numeric(region_info$start)
   region_info$stop <- as.numeric(region_info$stop)
 
@@ -111,9 +111,7 @@ map_snp_info_regions <- function(region_info,
     rownames(region_snp_info) <- NULL
     region_snp_info
   }, mc.cores = ncore)
-  if (length(snp_info) != length(region_ids)) {
-    stop("Not all cores returned results. Try rerun with bigger memory or fewer cores")
-  }
+  check_mc_res(snp_info)
   names(snp_info) <- region_ids
 
   return(snp_info)

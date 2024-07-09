@@ -175,10 +175,8 @@ load_fusion_weights <- function(weight_path,
       fusion_genome_version = fusion_genome_version)
     loaded_wgt_res$weight_table
   }, mc.cores = ncore)
+  check_mc_res(weight_table_list)
 
-  if (length(weight_table_list) != length(wgt_rdata_files)) {
-    stop("Not all cores returned results. Try rerun with bigger memory or fewer cores")
-  }
   weight_table <- do.call(rbind, weight_table_list)
 
   if (make_extra_table) {
@@ -590,9 +588,8 @@ compute_weight_LD_from_ref <- function(weights,
         curr_region_LD_list
       }, mc.cores = ncore)
 
-      if (length(weight_LD_list) != length(weight_region_ids)) {
-        stop("Not all cores returned results. Try rerun with bigger memory or fewer cores")
-      }
+      check_mc_res(weight_LD_list)
+
       weight_LD_list <- unlist(weight_LD_list, recursive = FALSE)
       for(weight_id in names(weight_LD_list)){
         weights[[weight_id]][["R_wgt"]] <- weight_LD_list[[weight_id]]

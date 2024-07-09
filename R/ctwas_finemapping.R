@@ -94,7 +94,7 @@ finemap_region <- function(region_data,
 
   # set pi_prior and V_prior based on group_prior and group_prior_var
   groups <- c("SNP", "gene")
-  res <- initiate_group_priors(group_prior, group_prior_var, groups)
+  res <- initiate_group_priors(group_prior[groups], group_prior_var[groups], groups)
   pi_prior <- res$pi_prior
   V_prior <- res$V_prior
   rm(res)
@@ -107,17 +107,11 @@ finemap_region <- function(region_data,
   rm(res)
 
   if (!use_LD) {
-    if (verbose){
-      loginfo("Fine-mapping using no-LD version ...")
-    }
     # use an identity matrix as R in no-LD version
     R <- diag(length(z))
     # do not include cs_index in no-LD version
     include_cs_index <- FALSE
   } else {
-    if (verbose){
-      loginfo("Fine-mapping using LD version ...")
-    }
     cor_res <- get_region_cor(region_id,
                               region_data = region_data,
                               LD_info = LD_info,
@@ -245,7 +239,11 @@ finemap_regions <- function(region_data,
     addHandler(writeToFile, file= logfile, level='DEBUG')
   }
 
-  loginfo('Fine-mapping %d regions ...', length(region_data))
+  if (use_LD){
+    loginfo("Fine-mapping %d regions using LD version ...", length(region_data))
+  } else {
+    loginfo("Fine-mapping %d regions using no-LD version ...", length(region_data))
+  }
 
   # check weights
   if (!is.null(weights)){
@@ -258,7 +256,7 @@ finemap_regions <- function(region_data,
 
   if (!use_LD) {
     if (L != 1){
-      loginfo("L has to be 1 for no-LD version. Set L = 1")
+      loginfo("Set L = 1 in no-LD version")
       L <- 1
     }
   }
@@ -267,10 +265,12 @@ finemap_regions <- function(region_data,
 
   finemap_region_res_list <- mclapply(region_ids, function(region_id){
 
-    if (length(L) > 1) {
-      region_L <- L[region_id]
-    } else {
+    if (length(L) == 1) {
       region_L <- L
+    } else if (length(L) > 1 && length(L) == length(region_data)) {
+      region_L <- L[region_id]
+    } else{
+      stop("L needs to an integer or a vector of the same length as region_data")
     }
 
     finemap_region(region_data = region_data,
@@ -295,10 +295,8 @@ finemap_regions <- function(region_data,
                    ...)
 
   }, mc.cores = ncore)
+  check_mc_res(finemap_region_res_list)
 
-  if (length(finemap_region_res_list) != length(region_ids)) {
-    stop("Not all cores returned results. Try rerun with bigger memory or fewer cores")
-  }
   finemap_res <- do.call(rbind, finemap_region_res_list)
   rownames(finemap_res) <- NULL
 

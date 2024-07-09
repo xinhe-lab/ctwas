@@ -187,7 +187,7 @@ read_pvar <- function(pvarf){
 #' @importFrom data.table fread
 read_bim <- function(bimf) {
   bim <- fread(bimf)
-  colnames(bim) <- c("chr", "id", "cm", "pos", "alt", "ref")
+  colnames(bim) <- c("chrom", "id", "cm", "pos", "alt", "ref")
   return(bim)
 }
 
@@ -209,4 +209,11 @@ read_var_info <- function(var_info_file){
   return(var_info)
 }
 
+
+# check mclapply result
+check_mc_res <- function(x){
+  if (any(sapply(x, is.null))) {
+    stop("Not all cores returned results. Try rerun with bigger memory or fewer cores")
+  }
+}
 
