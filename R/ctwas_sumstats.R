@@ -25,18 +25,19 @@
 #'
 #' @param init_group_prior_var a vector of initial values of prior variances for SNPs and gene effects.
 #'
-#' @param screen_method screening regions by: "nonSNP_PIP" or
-#' "cs" (only available for "LD" version)
+#' @param filter_L If TRUE, screening regions with L > 0
 #'
-#' @param maxSNP Inf or integer. Maximum number of SNPs in a region. Default is
-#' Inf, no limit. This can be useful if there are many SNPs in a region and you don't
-#' have enough memory to run the program. This applies to the finemapping step only.
+#' @param filter_nonSNP_PIP If TRUE, screening regions with total non-SNP PIP >= \code{min_nonSNP_PIP}
 #'
 #' @param min_nonSNP_PIP Regions with non-SNP PIP >= \code{min_nonSNP_PIP}
 #' will be selected to run finemapping using full SNPs.
 #'
 #' @param p_single_effect Regions with probability greater than \code{p_single_effect} of
 #' having 1 or fewer effects will be used for parameter estimation
+#'
+#' @param maxSNP Inf or integer. Maximum number of SNPs in a region. Default is
+#' Inf, no limit. This can be useful if there are many SNPs in a region and you don't
+#' have enough memory to run the program. This applies to the finemapping step only.
 #'
 #' @param use_null_weight TRUE/FALSE. If TRUE, allow for a probability of no effect in susie
 #'
@@ -88,10 +89,11 @@ ctwas_sumstats <- function(
     L = 5,
     init_group_prior = NULL,
     init_group_prior_var = NULL,
-    screen_method = c("nonSNP_PIP", "cs"),
-    maxSNP = 20000,
+    filter_L = TRUE,
+    filter_nonSNP_PIP = FALSE,
     min_nonSNP_PIP = 0.5,
     p_single_effect = 0.8,
+    maxSNP = 20000,
     use_null_weight = TRUE,
     coverage = 0.95,
     min_abs_corr = 0.5,
@@ -163,7 +165,7 @@ ctwas_sumstats <- function(
 
   # Screen regions
   #. fine-map all regions with thinned SNPs
-  #. select regions with strong non-SNP signals
+  #. select regions with L >= 1
   screen_regions_res <- screen_regions(region_data,
                                        use_LD = TRUE,
                                        LD_info = LD_info,
@@ -172,7 +174,8 @@ ctwas_sumstats <- function(
                                        group_prior = group_prior,
                                        group_prior_var = group_prior_var,
                                        L = L,
-                                       screen_method = screen_method,
+                                       filter_L = filter_L,
+                                       filter_nonSNP_PIP = filter_nonSNP_PIP,
                                        min_nonSNP_PIP = min_nonSNP_PIP,
                                        LD_format = LD_format,
                                        LD_loader_fun = LD_loader_fun,
@@ -180,9 +183,7 @@ ctwas_sumstats <- function(
                                        verbose = verbose,
                                        ...)
   screened_region_data <- screen_regions_res$screened_region_data
-  if (screen_method == "cs") {
-    L <- screen_regions_res$estimated_L
-  }
+  L <- screen_regions_res$L
 
   # Expand screened region_data with all SNPs in the regions
   if (thin < 1){
