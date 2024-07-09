@@ -17,7 +17,8 @@ test_that("screen_regions with no-LD version works", {
     screen_regions_res <- screen_regions(region_data,
                                          use_LD = FALSE,
                                          group_prior = group_prior,
-                                         group_prior_var = group_prior_var)
+                                         group_prior_var = group_prior_var,
+                                         filter_nonSNP_PIP = TRUE)
     screened_region_data <- screen_regions_res$screened_region_data
 
     # Expand screened region_data with all SNPs in the regions

@@ -73,7 +73,11 @@ finemap_region <- function(region_data,
                            ...){
 
   if (verbose){
-    loginfo("Fine-mapping region %s with L = %d", region_id, L)
+    if (use_LD){
+      loginfo("Fine-mapping region %s with L = %d using LD version", region_id, L)
+    } else {
+      loginfo("Fine-mapping region %s with L = %d using no-LD version", region_id, L)
+    }
   }
 
   # check weights
@@ -101,7 +105,7 @@ finemap_region <- function(region_data,
   }else{
     groups <- unique(unlist(lapply(region_data, "[[", "gs_group")))
   }
-  res <- initiate_group_priors(group_prior, group_prior_var, groups)
+  res <- initiate_group_priors(group_prior[groups], group_prior_var[groups], groups)
   pi_prior <- res$pi_prior
   V_prior <- res$V_prior
   rm(res)
@@ -114,17 +118,11 @@ finemap_region <- function(region_data,
   rm(res)
 
   if (!use_LD) {
-    if (verbose){
-      loginfo("Fine-mapping using no-LD version ...")
-    }
     # use an identity matrix as R in no-LD version
     R <- diag(length(z))
     # do not include cs_index in no-LD version
     include_cs_index <- FALSE
   } else {
-    if (verbose){
-      loginfo("Fine-mapping using LD version ...")
-    }
     cor_res <- get_region_cor(region_id,
                               region_data = region_data,
                               LD_info = LD_info,
@@ -255,7 +253,11 @@ finemap_regions <- function(region_data,
     addHandler(writeToFile, file= logfile, level='DEBUG')
   }
 
-  loginfo('Fine-mapping %d regions ...', length(region_data))
+  if (use_LD){
+    loginfo("Fine-mapping %d regions using LD version ...", length(region_data))
+  } else {
+    loginfo("Fine-mapping %d regions using no-LD version ...", length(region_data))
+  }
 
   # check weights
   if (!is.null(weights)){
@@ -268,7 +270,7 @@ finemap_regions <- function(region_data,
 
   if (!use_LD) {
     if (L != 1){
-      loginfo("L has to be 1 for no-LD version. Set L = 1")
+      loginfo("Set L = 1 in no-LD version")
       L <- 1
     }
   }
