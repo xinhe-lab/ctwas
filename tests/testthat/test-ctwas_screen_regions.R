@@ -19,8 +19,6 @@ test_that("screen_regions and expand_region_data work", {
                                            use_LD = FALSE,
                                            group_prior = group_prior,
                                            group_prior_var = group_prior_var,
-                                           L = 1,
-                                           screen_method = "nonSNP_PIP",
                                            min_nonSNP_PIP = 0.5)
     })
     screened_region_data <- screen_regions_res$screened_region_data

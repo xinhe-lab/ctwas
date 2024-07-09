@@ -8,8 +8,6 @@ preprocess_weights(
   weight_path,
   region_info,
   gwas_snp_ids,
-  type,
-  context,
   snp_info,
   LD_info = NULL,
   weight_format = c("PredictDB", "FUSION"),
@@ -33,10 +31,6 @@ or the directory containing '.wgt.RDat' files for FUSION weights.}
 \item{region_info}{a data frame of region definition and associated file names.}
 
 \item{gwas_snp_ids}{a vector of SNP IDs in GWAS summary statistics (z_snp$id).}
-
-\item{type}{a string, specifying QTL type of each weight file, e.g. expression, splicing, protein.}
-
-\item{context}{a string, specifying tissue/cell type/condition of each weight file, e.g. Liver, Lung, Brain.}
 
 \item{snp_info}{a list of SNP info data frames for LD reference,
 with columns "chrom", "id", "pos", "alt", "ref", and "region_id".}

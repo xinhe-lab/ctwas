@@ -5,10 +5,7 @@ test_that("preprocess_z_snp works", {
   preprocessed_z_snp <- readRDS(system.file("extdata/sample_data", "LDL_example.preprocessed.z_snp.RDS", package = "ctwas"))
 
   capture.output({
-    z_snp <- preprocess_z_snp(z_snp,
-                              snp_info,
-                              drop_multiallelic = TRUE,
-                              drop_strand_ambig = TRUE)
+    z_snp <- preprocess_z_snp(z_snp, snp_info)
   })
 
   expect_equal(z_snp, preprocessed_z_snp)
