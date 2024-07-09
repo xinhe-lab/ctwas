@@ -18,6 +18,7 @@
 #
 #' @importFrom logging loginfo
 #' @importFrom parallel mclapply
+#'
 fit_EM <- function(
     region_data,
     niter = 20,
@@ -28,7 +29,7 @@ fit_EM <- function(
     verbose = FALSE,
     ...){
 
-  groups <- c("SNP", "gene")
+  groups <- unique(unlist(lapply(region_data, "[[", "gs_group")))
 
   # set pi_prior and V_prior based on init_group_prior and init_group_prior_var
   res <- initiate_group_priors(init_group_prior[groups], init_group_prior_var[groups], groups)
@@ -94,7 +95,6 @@ fit_EM <- function(
               "group_prior_var" = V_prior,
               "group_prior_iters" = group_prior_iters,
               "group_prior_var_iters" = group_prior_var_iters,
-              "group_prior_var_structure" = group_prior_var_structure,
               "group_size" = group_size))
 }
 

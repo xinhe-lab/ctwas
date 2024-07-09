@@ -81,7 +81,7 @@ anno_susie <- function(susie_res,
 # set pi_prior and V_prior based on init_group_prior and init_group_prior_var
 initiate_group_priors <- function(group_prior = NULL,
                                   group_prior_var = NULL,
-                                  groups = c("SNP", "gene")) {
+                                  groups = c("gene", "SNP")) {
 
   if (is.null(group_prior)){
     group_prior <- structure(as.numeric(rep(NA,length(groups))), names=groups)

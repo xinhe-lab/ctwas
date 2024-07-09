@@ -13,10 +13,6 @@
 #'
 #' @param LD_info a list of paths to LD matrices for each of the regions. Required when \code{load_predictdb_LD = FALSE}.
 #'
-#' @param type a string, specifying QTL type of each weight file, e.g. expression, splicing, protein.
-#'
-#' @param context a string, specifying tissue/cell type/condition of each weight file, e.g. Liver, Lung, Brain.
-#'
 #' @param weight_format a string, specifying format of each weight file, e.g. PredictDB, FUSION.
 #'
 #' @param filter_protein_coding_genes TRUE/FALSE. If TRUE, keep protein coding genes only. This option is only for PredictDB weights
@@ -58,8 +54,6 @@
 preprocess_weights <- function(weight_path,
                                region_info,
                                gwas_snp_ids,
-                               type,
-                               context,
                                snp_info,
                                LD_info = NULL,
                                weight_format = c("PredictDB", "FUSION"),
@@ -97,18 +91,7 @@ preprocess_weights <- function(weight_path,
          paste(target_header, collapse = " "))
   }
 
-  # set default type and context
-  if (missing(type)) {
-    type <- "gene"
-  }
-
-  if (missing(context)) {
-    context <- file_path_sans_ext(basename(weight_path))
-  }
-
   loginfo("Load weight: %s", weight_path)
-  loginfo("type: %s", type)
-  loginfo("context: %s", context)
 
   loaded_weights_res <- load_weights(weight_path,
                                      weight_format,
@@ -143,8 +126,6 @@ preprocess_weights <- function(weight_path,
   loginfo("Harmonizing and processing weights ...")
   weights <- mclapply(gene_names, function(gene_name){
     process_weight(gene_name,
-                   type = type,
-                   context = context,
                    weight_name = weight_name,
                    weight_table = weight_table,
                    cov_table = cov_table,
@@ -178,8 +159,6 @@ preprocess_weights <- function(weight_path,
 #' @importFrom stats complete.cases
 #' @importFrom utils head
 process_weight <- function(gene_name,
-                           type,
-                           context,
                            weight_name,
                            weight_table,
                            cov_table,
@@ -274,8 +253,6 @@ process_weight <- function(gene_name,
                 R_wgt = R_wgt,
                 gene_name = gene_name,
                 weight_name = weight_name,
-                type = type,
-                context = context,
                 n_wgt=n_wgt))
   }
 }

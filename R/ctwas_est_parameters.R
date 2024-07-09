@@ -144,7 +144,6 @@ est_param <- function(
                 "group_prior_var" = group_prior_var,
                 "group_prior_iters" = group_prior_iters,
                 "group_prior_var_iters" = group_prior_var_iters,
-                "group_prior_var_structure" = group_prior_var_structure,
                 "group_size" = group_size)
 
   return(param)

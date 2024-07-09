@@ -140,7 +140,7 @@ screen_regions <- function(region_data,
     }
 
   } else {
-    loginfo("Set L = 1 and filter_nonSNP_PIP = TRUE in no-LD version")
+    loginfo("Set L = 1 in no-LD version")
     L <- 1
     filter_nonSNP_PIP <- TRUE
     screened_region_data <- region_data
@@ -194,7 +194,7 @@ compute_region_nonSNP_PIPs <- function(finemap_res){
   }
   nonSNP_PIPs <- sapply(region_ids, function(x){
     finemap_region_res <- finemap_res[finemap_res$region_id == x,]
-    nonSNP_PIP <- sum(finemap_region_res$susie_pip[finemap_region_res$type != "SNP"])
+    nonSNP_PIP <- sum(finemap_region_res$susie_pip[finemap_region_res$group != "SNP"])
     nonSNP_PIP[is.na(nonSNP_PIP)] <- 0 # 0 if nonSNP_PIP is NA
     nonSNP_PIP
   })

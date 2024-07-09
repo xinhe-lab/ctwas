@@ -541,7 +541,7 @@ compute_weight_LD_from_ref <- function(weights,
   LD_format <- match.arg(LD_format)
 
   weight_info <- lapply(names(weights), function(x){
-    as.data.frame(weights[[x]][c("chrom", "p0","p1", "gene_name", "weight_name", "type","context")])})
+    as.data.frame(weights[[x]][c("chrom", "p0","p1", "gene_name", "weight_name")])})
   weight_info <- do.call(rbind, weight_info)
   weight_info$weight_id <- paste0(weight_info$gene_name, "|", weight_name)
   # get the regions overlapping with each gene
