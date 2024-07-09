@@ -21,9 +21,9 @@ ctwas_sumstats(
     "shared_all", "independent"),
   filter_L = TRUE,
   filter_nonSNP_PIP = FALSE,
-  maxSNP = 20000,
   min_nonSNP_PIP = 0.5,
   p_single_effect = 0.8,
+  maxSNP = 20000,
   use_null_weight = TRUE,
   coverage = 0.95,
   min_abs_corr = 0.5,
@@ -76,15 +76,15 @@ giving the z scores for snps. "A1" is effect allele. "A2" is the other allele.}
 
 \item{filter_nonSNP_PIP}{If TRUE, screening regions with total non-SNP PIP >= \code{min_nonSNP_PIP}}
 
-\item{maxSNP}{Inf or integer. Maximum number of SNPs in a region. Default is
-Inf, no limit. This can be useful if there are many SNPs in a region and you don't
-have enough memory to run the program. This applies to the finemapping step only.}
-
 \item{min_nonSNP_PIP}{Regions with non-SNP PIP >= \code{min_nonSNP_PIP}
 will be selected to run finemapping using full SNPs.}
 
 \item{p_single_effect}{Regions with probability greater than \code{p_single_effect} of
 having 1 or fewer effects will be used for parameter estimation}
+
+\item{maxSNP}{Inf or integer. Maximum number of SNPs in a region. Default is
+Inf, no limit. This can be useful if there are many SNPs in a region and you don't
+have enough memory to run the program. This applies to the finemapping step only.}
 
 \item{use_null_weight}{TRUE/FALSE. If TRUE, allow for a probability of no effect in susie}
 
