@@ -47,7 +47,7 @@ screen_regions(
 
 \item{mingene}{minimum number of genes in a region}
 
-\item{filter_L}{If TRUE, screening regions with L > 0}
+\item{filter_L}{If TRUE, screening regions with L >= 1}
 
 \item{filter_nonSNP_PIP}{If TRUE, screening regions with total non-SNP PIP >= \code{min_nonSNP_PIP}}
 

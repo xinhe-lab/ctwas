@@ -25,7 +25,7 @@
 #'
 #' @param init_group_prior_var a vector of initial values of prior variances for SNPs and gene effects.
 #'
-#' @param filter_L If TRUE, screening regions with L > 0
+#' @param filter_L If TRUE, screening regions with L >= 1
 #'
 #' @param filter_nonSNP_PIP If TRUE, screening regions with total non-SNP PIP >= \code{min_nonSNP_PIP}
 #'
@@ -233,7 +233,8 @@ ctwas_sumstats <- function(
               "boundary_genes" = boundary_genes,
               "z_gene" = z_gene,
               "region_data" = region_data,
-              "screened_region_data" = screened_region_data))
+              "screened_region_data" = screened_region_data,
+              "L" = L))
 
 }
 

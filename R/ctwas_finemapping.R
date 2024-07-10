@@ -93,7 +93,11 @@ finemap_region <- function(region_data,
   gs_group <- regiondata[["gs_group"]]
 
   # set pi_prior and V_prior based on group_prior and group_prior_var
-  groups <- c("SNP", "gene")
+  if(!is.null(group_prior)){
+    groups <- names(group_prior)
+  }else{
+    groups <- unique(unlist(lapply(region_data, "[[", "gs_group")))
+  }
   res <- initiate_group_priors(group_prior[groups], group_prior_var[groups], groups)
   pi_prior <- res$pi_prior
   V_prior <- res$V_prior
@@ -243,6 +247,12 @@ finemap_regions <- function(region_data,
     loginfo("Fine-mapping %d regions using LD version ...", length(region_data))
   } else {
     loginfo("Fine-mapping %d regions using no-LD version ...", length(region_data))
+  }
+
+  if (use_LD) {
+    if (is.null(LD_info) || is.null(snp_info) || is.null(weights)) {
+      stop("LD_info, snp_info and weights are required when use_LD = TRUE")
+    }
   }
 
   # check weights

@@ -63,7 +63,7 @@ giving the z scores for snps. "A1" is effect allele. "A2" is the other allele.}
 
 \item{init_group_prior_var}{a vector of initial values of prior variances for SNPs and gene effects.}
 
-\item{filter_L}{If TRUE, screening regions with L > 0}
+\item{filter_L}{If TRUE, screening regions with L >= 1}
 
 \item{filter_nonSNP_PIP}{If TRUE, screening regions with total non-SNP PIP >= \code{min_nonSNP_PIP}}
 
