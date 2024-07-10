@@ -10,20 +10,17 @@ test_that("assemble_region_data works", {
   z_snp <- readRDS(system.file("extdata/sample_data", "LDL_example.preprocessed.z_snp.RDS", package = "ctwas"))
   # Load gene z-scores
   z_gene <- readRDS(system.file("extdata/sample_data", "LDL_example.z_gene.RDS", package = "ctwas"))
-  ctwas_res <- readRDS(system.file("extdata/sample_data", "LDL_example.ctwas_sumstats_noLD_res.RDS", package = "ctwas"))
+
+  ctwas_res <- readRDS("LDL_example.ctwas_sumstats_noLD_res.RDS")
   preassembled_region_data <- ctwas_res$region_data
   preassembled_boundary_genes <- ctwas_res$boundary_genes
 
-  thin <- 0.1
-  maxSNP <- 20000
   capture.output({
     res <- assemble_region_data(region_info = region_info,
                                 z_snp = z_snp,
                                 z_gene = z_gene,
                                 weights = weights,
-                                snp_info = snp_info,
-                                thin = thin, maxSNP = maxSNP,
-                                adjust_boundary_genes = TRUE)
+                                snp_info = snp_info)
   })
 
   region_data <- res$region_data
