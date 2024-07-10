@@ -15,7 +15,7 @@ ctwas_sumstats_noLD(
   niter = 30,
   init_group_prior = NULL,
   init_group_prior_var = NULL,
-  maxSNP = 20000,
+  maxSNP = Inf,
   min_nonSNP_PIP = 0.5,
   p_single_effect = 0.8,
   use_null_weight = TRUE,
@@ -51,7 +51,7 @@ giving the z scores for snps. "A1" is effect allele. "A2" is the other allele.}
 
 \item{maxSNP}{Inf or integer. Maximum number of SNPs in a region. Default is
 Inf, no limit. This can be useful if there are many SNPs in a region and you don't
-have enough memory to run the program. This applies to the finemapping step only.}
+have enough memory to run the program.}
 
 \item{min_nonSNP_PIP}{Regions with non-SNP PIP >= \code{min_nonSNP_PIP}
 will be selected to run finemapping using full SNPs.}

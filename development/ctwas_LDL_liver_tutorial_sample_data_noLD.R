@@ -11,16 +11,14 @@ gwas_n <- 343621
 ld_R_dir <- "/project2/mstephens/wcrouse/UKB_LDR_0.1/"
 weight_file <- "/project2/xinhe/shared_data/multigroup_ctwas/weights/expression_models/expression_Liver.db"
 thin <- 0.1
-max_snp_region <- 20000
-min_nonSNP_PIP <- 0.5
 ncore <- 6
-outputdir <- "/project2/xinhe/shared_data/singlegroup_ctwas/tutorial/LDL_liver_tutorial/sample_data/LDL_liver_chr16_noLD_example"
+outputdir <- "/project2/xinhe/shared_data/singlegroup_ctwas/tutorial/LDL_liver_tutorial/sample_data/LDL_liver_chr16_example"
 dir.create(outputdir, showWarnings=F, recursive=T)
 cor_dir <- file.path(outputdir, "/cor_matrix")
 outname <- "LDL_example"
 example_chrom <- 16
 
-multigroup_outputdir <- "/project2/xinhe/shared_data/multigroup_ctwas/tutorial/LDL_multitissue_tutorial/sample_data/LDL_liver_chr16_noLD_example"
+# multigroup_outputdir <- "/project2/xinhe/shared_data/multigroup_ctwas/tutorial/LDL_liver_tutorial/sample_data/LDL_liver_chr16_example"
 
 ##### LD region info #####
 region_info_file <- file.path(outputdir, paste0(outname, ".region_info.RDS"))
@@ -51,14 +49,13 @@ if (file.exists(region_info_file) && file.exists(snp_info_file)){
   saveRDS(snp_info, snp_info_file)
 }
 
-
-region_info_multigroup <- readRDS(file.path(multigroup_outputdir, paste0(outname, ".region_info.RDS")))
-snp_info_multigroup <- readRDS(file.path(multigroup_outputdir, paste0(outname, ".snp_info.RDS")))
-all.equal(region_info, region_info_multigroup)
-all.equal(snp_info, snp_info_multigroup)
+# region_info_multigroup <- readRDS(file.path(multigroup_outputdir, paste0(outname, ".region_info.RDS")))
+# snp_info_multigroup <- readRDS(file.path(multigroup_outputdir, paste0(outname, ".snp_info.RDS")))
+# all.equal(region_info, region_info_multigroup)
+# all.equal(snp_info, snp_info_multigroup)
 
 ##### Preprocess GWAS z-scores #####
-z_snp_outfile <- file.path(outputdir, paste0(gwas_name, ".z_snp.RDS"))
+z_snp_outfile <- file.path(outputdir, paste0(outname, ".z_snp.RDS"))
 
 if (!file.exists(z_snp_outfile)){
   # read the data using the VariantAnnotation package
@@ -98,8 +95,8 @@ if (file.exists(processed_z_snp_file)){
   loginfo("Preprocessing GWAS z-scores took %0.2f minutes\n",runtime["elapsed"]/60)
 }
 
-z_snp_multigroup <- readRDS(file.path(multigroup_outputdir, paste0(outname, ".preprocessed.z_snp.RDS")))
-all.equal(z_snp, z_snp_multigroup)
+# z_snp_multigroup <- readRDS(file.path(multigroup_outputdir, paste0(outname, ".preprocessed.z_snp.RDS")))
+# all.equal(z_snp, z_snp_multigroup)
 
 ##### Preprocess weights #####
 processed_weight_file <- file.path(outputdir, paste0(outname, ".preprocessed.weights.RDS"))
@@ -120,13 +117,13 @@ if (file.exists(processed_weight_file)){
   saveRDS(weights, file = processed_weight_file)
 }
 
-weights_multigroup <- readRDS(file.path(multigroup_outputdir, paste0(outname, ".preprocessed.weights.RDS")))
-for (i in 1:length(weights_multigroup)){
-  weights_multigroup[[i]]$type <- NULL
-  weights_multigroup[[i]]$context <- NULL
-}
-
-all.equal(weights, weights_multigroup)
+# weights_multigroup <- readRDS(file.path(multigroup_outputdir, paste0(outname, ".preprocessed.weights.RDS")))
+# for (i in 1:length(weights_multigroup)){
+#   weights_multigroup[[i]]$type <- NULL
+#   weights_multigroup[[i]]$context <- NULL
+# }
+#
+# all.equal(weights, weights_multigroup)
 
 ##### Compute gene z-scores #####
 cat("##### Computing gene z-scores ##### \n")
@@ -144,9 +141,9 @@ if( file.exists(gene_z_file) ){
   loginfo("Computing gene z-scores took %0.2f minutes\n",runtime["elapsed"]/60)
 }
 
-z_gene_multigroup <- readRDS(file.path(multigroup_outputdir, paste0(outname, ".z_gene.RDS")))
-z_gene_multigroup[, c("type", "context", "group")] <- NULL
-all.equal(z_gene, z_gene_multigroup)
+# z_gene_multigroup <- readRDS(file.path(multigroup_outputdir, paste0(outname, ".z_gene.RDS")))
+# z_gene_multigroup[, c("type", "context", "group")] <- NULL
+# all.equal(z_gene, z_gene_multigroup)
 
 ## Running cTWAS main function
 runtime <- system.time({
@@ -154,9 +151,9 @@ runtime <- system.time({
                                    weights,
                                    region_info,
                                    snp_info,
-                                   thin = 0.1,
+                                   z_gene,
+                                   thin = thin,
                                    maxSNP = 20000,
-                                   min_nonSNP_PIP = 0.5,
                                    ncore = ncore,
                                    outputdir = outputdir,
                                    outname = paste0(outname, ".ctwas_sumstats_noLD"),
@@ -165,7 +162,6 @@ runtime <- system.time({
 })
 saveRDS(ctwas_res, file.path(outputdir, paste0(outname, ".ctwas_sumstats_noLD_res.RDS")))
 loginfo("Running cTWAS main function took %0.2f minutes\n",runtime["elapsed"]/60)
-# 2024-05-16 15:21:19 INFO::Running cTWAS main function took 1.23 minutes
 
 ctwas_res <- readRDS(file.path(outputdir, paste0(outname, ".ctwas_sumstats_noLD_res.RDS")))
 
@@ -182,10 +178,9 @@ if (file.exists(region_data_file)) {
                                 z_gene,
                                 weights,
                                 snp_info,
-                                maxSNP = max_snp_region,
-                                trim_by = "random",
                                 thin = thin,
-                                adjust_boundary_genes = TRUE,
+                                maxSNP = 20000,
+                                trim_by = "random",
                                 ncore = ncore)
   })
   loginfo("Assembling region_data took %0.2f minutes\n",runtime["elapsed"]/60)
@@ -198,19 +193,19 @@ if (file.exists(region_data_file)) {
 all.equal(ctwas_res$region_data, region_data)
 all.equal(ctwas_res$boundary_genes, boundary_genes)
 
-region_data_multigroup <- readRDS(file.path(multigroup_outputdir, paste0(outname, ".region_data.thin", thin, ".RDS")))
-boundary_genes_multigroup <- readRDS(file.path(multigroup_outputdir, paste0(outname, ".boundary_genes.RDS")))
-for (i in 1:length(region_data_multigroup)){
-  region_data_multigroup[[i]]$g_type <- NULL
-  region_data_multigroup[[i]]$g_context <- NULL
-  region_data_multigroup[[i]]$g_group <- NULL
-  region_data_multigroup[[i]]$gs_type <- NULL
-  region_data_multigroup[[i]]$gs_context <- NULL
-  region_data_multigroup[[i]]$gs_group[region_data_multigroup[[i]]$gs_group!="SNP"] <- "gene"
-}
-
-all.equal(region_data, region_data_multigroup)
-all.equal(boundary_genes, boundary_genes_multigroup)
+# region_data_multigroup <- readRDS(file.path(multigroup_outputdir, paste0(outname, ".region_data.thin", thin, ".RDS")))
+# boundary_genes_multigroup <- readRDS(file.path(multigroup_outputdir, paste0(outname, ".boundary_genes.RDS")))
+# for (i in 1:length(region_data_multigroup)){
+#   region_data_multigroup[[i]]$g_type <- NULL
+#   region_data_multigroup[[i]]$g_context <- NULL
+#   region_data_multigroup[[i]]$g_group <- NULL
+#   region_data_multigroup[[i]]$gs_type <- NULL
+#   region_data_multigroup[[i]]$gs_context <- NULL
+#   region_data_multigroup[[i]]$gs_group[region_data_multigroup[[i]]$gs_group!="SNP"] <- "gene"
+# }
+#
+# all.equal(region_data, region_data_multigroup)
+# all.equal(boundary_genes, boundary_genes_multigroup)
 
 ##### Estimate parameters #####
 cat("##### Estimating parameters ##### \n")
@@ -234,25 +229,24 @@ group_size <- param$group_size
 
 all.equal(ctwas_res$param, param)
 
-param_multigroup <- readRDS(file.path(multigroup_outputdir, paste0(outname, ".param.RDS")))
-names(param_multigroup$group_prior) <- c("gene", "SNP")
-names(param_multigroup$group_prior_var) <- c("gene", "SNP")
-rownames(param_multigroup$group_prior_iters) <- c("gene", "SNP")
-rownames(param_multigroup$group_prior_var_iters) <- c("gene", "SNP")
-param_multigroup$group_prior_var_structure <- NULL
-names(param_multigroup$group_size) <- c("gene", "SNP")
-all.equal(param_multigroup, param)
+# param_multigroup <- readRDS(file.path(multigroup_outputdir, paste0(outname, ".param.RDS")))
+# names(param_multigroup$group_prior) <- c("gene", "SNP")
+# names(param_multigroup$group_prior_var) <- c("gene", "SNP")
+# rownames(param_multigroup$group_prior_iters) <- c("gene", "SNP")
+# rownames(param_multigroup$group_prior_var_iters) <- c("gene", "SNP")
+# param_multigroup$group_prior_var_structure <- NULL
+# names(param_multigroup$group_size) <- c("gene", "SNP")
+# all.equal(param_multigroup, param)
 
 ##### Assess parameter estimates #####
 ctwas_parameters <- summarize_param(param, gwas_n)
 saveRDS(ctwas_parameters, paste0(outputdir, "/", outname, ".ctwas_parameters.RDS"))
 ctwas_parameters
 
-ctwas_parameters_multigroup <- readRDS(file.path(multigroup_outputdir, paste0(outname, ".ctwas_parameters.RDS")))
-all.equal(ctwas_parameters, ctwas_parameters_multigroup)
-
 ##### Screen regions #####
-screen_regions_file <- file.path(outputdir, paste0(outname, ".screened_region_data.RDS"))
+cat("##### Screening regions ##### \n")
+
+screen_regions_file <- file.path(outputdir, paste0(outname, ".screened_region_data_noLD.RDS"))
 if (file.exists(screen_regions_file)) {
   screened_region_data <- readRDS(screen_regions_file)
 } else{
@@ -265,36 +259,34 @@ if (file.exists(screen_regions_file)) {
                                          min_nonSNP_PIP = min_nonSNP_PIP,
                                          ncore = ncore,
                                          verbose = FALSE,
-                                         logfile = file.path(outputdir, paste0(outname, ".screen_regions.log")))
+                                         logfile = file.path(outputdir, paste0(outname, ".screen_regions_noLD.log")))
   })
   loginfo("Screen regions took %0.2f minutes\n",runtime["elapsed"]/60)
   screened_region_data <- screen_regions_res$screened_region_data
 
   # Expand screened region_data with all SNPs in the regions
-  if (thin < 1){
-    screened_region_data <- expand_region_data(screened_region_data,
-                                               snp_info,
-                                               z_snp,
-                                               z_gene,
-                                               trim_by = "z",
-                                               maxSNP = max_snp_region,
-                                               ncore = ncore)
-  }
+  screened_region_data <- expand_region_data(screened_region_data,
+                                             snp_info,
+                                             z_snp,
+                                             z_gene,
+                                             trim_by = "z",
+                                             maxSNP = 20000,
+                                             ncore = ncore)
   saveRDS(screened_region_data, screen_regions_file)
 }
 
 all.equal(ctwas_res$screened_region_data, screened_region_data)
 
-screened_region_data_multigroup <- readRDS(file.path(multigroup_outputdir, paste0(outname, ".screened_region_data.RDS")))
-for (i in 1:length(screened_region_data_multigroup)){
-  screened_region_data_multigroup[[i]]$g_type <- NULL
-  screened_region_data_multigroup[[i]]$g_context <- NULL
-  screened_region_data_multigroup[[i]]$g_group <- NULL
-  screened_region_data_multigroup[[i]]$gs_type <- NULL
-  screened_region_data_multigroup[[i]]$gs_context <- NULL
-  screened_region_data_multigroup[[i]]$gs_group[screened_region_data_multigroup[[i]]$gs_group!="SNP"] <- "gene"
-}
-all.equal(screened_region_data, screened_region_data_multigroup)
+# screened_region_data_multigroup <- readRDS(file.path(multigroup_outputdir, paste0(outname, ".screened_region_data_noLD.RDS")))
+# for (i in 1:length(screened_region_data_multigroup)){
+#   screened_region_data_multigroup[[i]]$g_type <- NULL
+#   screened_region_data_multigroup[[i]]$g_context <- NULL
+#   screened_region_data_multigroup[[i]]$g_group <- NULL
+#   screened_region_data_multigroup[[i]]$gs_type <- NULL
+#   screened_region_data_multigroup[[i]]$gs_context <- NULL
+#   screened_region_data_multigroup[[i]]$gs_group[screened_region_data_multigroup[[i]]$gs_group!="SNP"] <- "gene"
+# }
+# all.equal(screened_region_data, screened_region_data_multigroup)
 
 ##### Finemapping #####
 cat("##### Finemapping screened regions ##### \n")
@@ -318,8 +310,8 @@ if (file.exists(finemap_regions_file)) {
 
 all.equal(finemap_res, ctwas_res$finemap_res)
 
-finemap_res_multigroup <- readRDS(file.path(multigroup_outputdir, paste0(outname, ".finemap_regions_noLD_res.RDS")))
-finemap_res_multigroup[,c("type", "context")] <- NULL
-finemap_res_multigroup$group[finemap_res_multigroup$group != "SNP"] <- "gene"
-all.equal(finemap_res, finemap_res_multigroup)
+# finemap_res_multigroup <- readRDS(file.path(multigroup_outputdir, paste0(outname, ".finemap_regions_noLD_res.RDS")))
+# finemap_res_multigroup[,c("type", "context")] <- NULL
+# finemap_res_multigroup$group[finemap_res_multigroup$group != "SNP"] <- "gene"
+# all.equal(finemap_res, finemap_res_multigroup)
 

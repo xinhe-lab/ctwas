@@ -21,7 +21,7 @@ ctwas_sumstats(
   filter_nonSNP_PIP = FALSE,
   min_nonSNP_PIP = 0.5,
   p_single_effect = 0.8,
-  maxSNP = 20000,
+  maxSNP = Inf,
   use_null_weight = TRUE,
   coverage = 0.95,
   min_abs_corr = 0.5,
@@ -75,7 +75,7 @@ having 1 or fewer effects will be used for parameter estimation}
 
 \item{maxSNP}{Inf or integer. Maximum number of SNPs in a region. Default is
 Inf, no limit. This can be useful if there are many SNPs in a region and you don't
-have enough memory to run the program. This applies to the finemapping step only.}
+have enough memory to run the program.}
 
 \item{use_null_weight}{TRUE/FALSE. If TRUE, allow for a probability of no effect in susie}
 
