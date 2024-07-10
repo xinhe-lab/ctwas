@@ -32,7 +32,7 @@
 #' "shared_all" allows all groups to share the same variance parameter.
 #' "independent" allows all groups to have their own separate variance parameters.
 #'
-#' @param filter_L If TRUE, screening regions with L > 0
+#' @param filter_L If TRUE, screening regions with L >= 1
 #'
 #' @param filter_nonSNP_PIP If TRUE, screening regions with total non-SNP PIP >= \code{min_nonSNP_PIP}
 #'

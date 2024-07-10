@@ -259,6 +259,12 @@ finemap_regions <- function(region_data,
     loginfo("Fine-mapping %d regions using no-LD version ...", length(region_data))
   }
 
+  if (use_LD) {
+    if (is.null(LD_info) || is.null(snp_info) || is.null(weights)) {
+      stop("LD_info, snp_info and weights are required when use_LD = TRUE")
+    }
+  }
+
   # check weights
   if (!is.null(weights)){
     if (!inherits(weights,"list")){

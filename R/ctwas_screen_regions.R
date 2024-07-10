@@ -20,7 +20,7 @@
 #'
 #' @param mingene minimum number of genes in a region
 #'
-#' @param filter_L If TRUE, screening regions with L > 0
+#' @param filter_L If TRUE, screening regions with L >= 1
 #'
 #' @param filter_nonSNP_PIP If TRUE, screening regions with total non-SNP PIP >= \code{min_nonSNP_PIP}
 #'
@@ -86,6 +86,12 @@ screen_regions <- function(region_data,
     stop("thin value needs to be in (0,1]")
   }
 
+  if (use_LD) {
+    if (is.null(LD_info) || is.null(snp_info) || is.null(weights)) {
+      stop("LD_info, snp_info and weights are required when use_LD = TRUE")
+    }
+  }
+
   # adjust to account for thin argument
   if (!is.null(group_prior)){
     group_prior["SNP"] <- group_prior["SNP"]/thin
@@ -116,7 +122,7 @@ screen_regions <- function(region_data,
   # no-LD version: set L = 1
   if (use_LD) {
     if (filter_L) {
-      loginfo("Estimating L with uniform prior and screening regions with L > 0...")
+      loginfo("Estimating L with uniform prior and screening regions with L >= 1...")
       finemap_unif_prior_res <- finemap_regions(region_data,
                                                 use_LD = TRUE,
                                                 LD_info = LD_info,
@@ -130,9 +136,9 @@ screen_regions <- function(region_data,
                                                 verbose = verbose,
                                                 ...)
       estimated_L <- get_L(finemap_unif_prior_res)
-      screened_region_ids <- names(estimated_L[estimated_L > 0])
+      screened_region_ids <- names(estimated_L[estimated_L >= 1])
       screened_region_data <- region_data[screened_region_ids]
-      loginfo("Number of regions selected with L > 0: %d", length(screened_region_data))
+      loginfo("Selected %d regions selected with L >= 1", length(screened_region_data))
       L <- estimated_L[screened_region_ids]
     } else {
       loginfo("L = %d", L)
@@ -169,7 +175,7 @@ screen_regions <- function(region_data,
     nonSNP_PIPs <- compute_region_nonSNP_PIPs(finemap_screening_res)
     screened_region_ids <- names(nonSNP_PIPs[nonSNP_PIPs >= min_nonSNP_PIP])
     screened_region_data <- region_data[screened_region_ids]
-    loginfo("Number of regions selected with non-SNP PIP >= %s: %d", min_nonSNP_PIP, length(screened_region_data))
+    loginfo("Selected %d regions selected with non-SNP PIP >= %s", length(screened_region_data), min_nonSNP_PIP)
     if (length(L) > 1) {
       L <- L[screened_region_ids]
     }

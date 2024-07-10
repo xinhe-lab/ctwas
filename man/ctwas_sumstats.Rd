@@ -72,7 +72,7 @@ giving the z scores for snps. "A1" is effect allele. "A2" is the other allele.}
 "shared_all" allows all groups to share the same variance parameter.
 "independent" allows all groups to have their own separate variance parameters.}
 
-\item{filter_L}{If TRUE, screening regions with L > 0}
+\item{filter_L}{If TRUE, screening regions with L >= 1}
 
 \item{filter_nonSNP_PIP}{If TRUE, screening regions with total non-SNP PIP >= \code{min_nonSNP_PIP}}
 
