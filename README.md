@@ -36,8 +36,7 @@ The outputs of cTWAS are posterior inclusion probabilities (PIPs) for all varian
 
 To learn more about the ctwas R package, we recommend starting with this introductory tutorial: 
 
-[A minimal tutorial of how to run cTWAS without LD](https://xinhe-lab.github.io/singlegroup_ctwas
-/articles/minimal_ctwas_tutorial.html) 
+[A minimal tutorial of how to run cTWAS without LD](https://xinhe-lab.github.io/singlegroup_ctwas/articles/minimal_ctwas_tutorial.html) 
 
 To run the full cTWAS, a few more tutorials including:
     
