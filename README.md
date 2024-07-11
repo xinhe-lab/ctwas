@@ -26,13 +26,13 @@ Running a cTWAS analysis involves four main steps:
 
 1. Preparing the input data. 
 
-2. Computing associations of molecular traits with the phenotype (Z-scores). 
+2. Computing associations of genes with the phenotype (Z-scores). 
 
 3. Estimating the model parameters. 
 
-4. Fine-mapping causal molecular traits 
+4. Fine-mapping causal genes 
 
-The outputs of cTWAS are posterior inclusion probabilities (PIPs) for all variants and molecular traits.
+The outputs of cTWAS are posterior inclusion probabilities (PIPs) for all variants and genes.
 
 To learn more about the ctwas R package, we recommend starting with this introductory tutorial: 
 
