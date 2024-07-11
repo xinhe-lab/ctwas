@@ -78,6 +78,11 @@ genotype data in genetic studies.}
 
 \item{cor_dir}{a string, the directory to store correlation (R) matrices}
 
+\item{LD_format}{file format for LD matrix. If "custom", use a user defined
+\code{LD_loader_fun()} function to load LD matrix.}
+
+\item{LD_loader_fun}{a user defined function to load LD matrix when \code{LD_format = "custom"}.}
+
 \item{ncore}{The number of cores used to parallelize computation over regions}
 
 \item{verbose}{TRUE/FALSE. If TRUE, print detail messages}

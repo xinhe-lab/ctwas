@@ -26,29 +26,30 @@ Running a cTWAS analysis involves four main steps:
 
 1. Preparing the input data. 
 
-2. Computing the gene z-scores. 
+2. Computing associations of molecular traits with the phenotype (Z-scores). 
 
 3. Estimating the model parameters. 
 
-4. Fine-mapping. 
+4. Fine-mapping causal molecular traits 
 
 The outputs of cTWAS are posterior inclusion probabilities (PIPs) for all variants and molecular traits.
 
 To learn more about the ctwas R package, we recommend starting with this introductory tutorial: 
 
-[A minimal tutorial of how to run cTWAS without LD](https://xinhe-lab.github.io/multigroup_ctwas/articles/simple_ctwas_tutorial.html) 
+[A minimal tutorial of how to run cTWAS without LD](https://xinhe-lab.github.io/singlegroup_ctwas
+/articles/minimal_ctwas_tutorial.html) 
 
 To run the full cTWAS, a few more tutorials including:
     
-- [Preparing input data](https://xinhe-lab.github.io/multigroup_ctwas/articles/preparing_ctwas_input_data.html) 
+- [Preparing input data](https://xinhe-lab.github.io/singlegroup_ctwas/articles/preparing_ctwas_input_data.html) 
 
-- [Running cTWAS main function](https://xinhe-lab.github.io/multigroup_ctwas/articles/ctwas_main_function.html)
+- [Running cTWAS main function](https://xinhe-lab.github.io/singlegroup_ctwas/articles/ctwas_main_function.html)
 
-- [Running cTWAS by modules](https://xinhe-lab.github.io/multigroup_ctwas/articles/ctwas_modules.html)
+- [Running cTWAS by modules](https://xinhe-lab.github.io/singlegroup_ctwas/articles/ctwas_modules.html)
 
-- [Summarizing and visualizing cTWAS results](https://xinhe-lab.github.io/multigroup_ctwas/articles/summarizing_ctwas_results.html)
+- [Summarizing and visualizing cTWAS results](https://xinhe-lab.github.io/singlegroup_ctwas/articles/summarizing_ctwas_results.html)
 
-- [Post-processing cTWAS results](https://xinhe-lab.github.io/multigroup_ctwas/articles/postprocessing_ctwas_results.html)
+- [Post-processing cTWAS results](https://xinhe-lab.github.io/singlegroup_ctwas/articles/postprocessing_ctwas_results.html)
 
 You can [browse source code](https://github.com/xinhe-lab/ctwas/tree/single_group) and [report a bug](https://github.com/xinhe-lab/ctwas/issues) here. 
 

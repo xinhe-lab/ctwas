@@ -21,7 +21,7 @@ knitr::opts_chunk$set(message = FALSE,
 ```
 
 
-In this document, we will show how to summarize and visualize cTWAS results.
+In this tutorial, we will show how to summarize and visualize cTWAS results.
 
 Load the packages.
 ```{r load_packages, message=FALSE}
@@ -29,7 +29,7 @@ library(ctwas)
 ```
 
 
-We also need gene annotations from the Ensembl database. We use `EnsDb.Hsapiens.v86` for the example data, please choose the Ensembl database for your specific data. 
+We need the Ensembl database `EnsDb.Hsapiens.v86` here in this tutorial, please choose the version of Ensembl database for your specific data. 
 ```{r load_ens_db, message=FALSE}
 library(EnsDb.Hsapiens.v86)
 ```
@@ -37,18 +37,17 @@ library(EnsDb.Hsapiens.v86)
 
 Load the cTWAS results
 ```{r load_ctwas_res}
-# GWAS sample size
 gwas_n <- 343621
-# Load weights
+
 weights <- readRDS(system.file("extdata/sample_data", "LDL_example.preprocessed.weights.RDS", package = "ctwas"))
 
 
-# Load region_info, snp_info and LD_info
 region_info <- readRDS(system.file("extdata/sample_data", "LDL_example.region_info.RDS", package = "ctwas"))
+
 snp_info <- readRDS(system.file("extdata/sample_data", "LDL_example.snp_info.RDS", package = "ctwas"))
+
 LD_info <- readRDS(system.file("extdata/sample_data", "LDL_example.LD_info.RDS", package = "ctwas"))
 
-# Load cTWAS results
 ctwas_res <- readRDS(system.file("extdata/sample_data", "LDL_example.ctwas_sumstats_res.RDS", package = "ctwas"))
 param <- ctwas_res$param
 finemap_res <- ctwas_res$finemap_res
@@ -57,37 +56,56 @@ z_gene <- ctwas_res$z_gene
 region_data <- ctwas_res$region_data
 screened_region_data <- ctwas_res$screened_region_data
 
-# directory with computed correlation matrices
 cor_dir <- system.file("extdata/sample_data", "cor_matrix", package = "ctwas")
 ```
 
 
 ### Assessing parameters and computing PVE
 
-We could use the `summarize_param()` function to assess the convergence of the estimated parameters and 
-to compute the proportion of variance explained (PVE) by variants and genes. 
+We could use the `summarize_param()` function to assess the convergence of the estimated parameters and to compute the proportion of variance explained (PVE) by genes and variants. 
 ```{r summarize_param}
 ctwas_parameters <- summarize_param(param, gwas_n)
 ```
 
 
+Estimated prior inclusion probability:
+
 ```{r}
-# Estimated prior inclusion probability
 ctwas_parameters$group_prior
+```
 
-# Estimated prior effect size:
+
+Estimated prior effect size for genes and variants:
+
+```{r}
 ctwas_parameters$group_prior_var
+```
 
-# Estimated enrichment of molecular traits over variants:
+
+Estimated enrichment of genes over variants:
+
+```{r}
 ctwas_parameters$enrichment
+```
 
-# PVE explained by molecular traits and variants:
+
+PVE explained by genes and variants:
+
+```{r}
 ctwas_parameters$group_pve
+```
 
-# Total heritability (sum of PVE)
+
+Total heritability (sum of PVE):
+
+```{r}
 ctwas_parameters$total_pve
+```
 
-# Attributable heritability
+
+Attributable heritability to variants in genes:
+
+```{r}
 ctwas_parameters$attributable_pve
 ```
 
@@ -98,80 +116,50 @@ make_convergence_plots(param, gwas_n)
 ```
 
 
+These plots show the estimated prior inclusion probability, and prior effect size, enrichment and PVE over the iterations of parameter estimation. In particular, genes have higher prior inclusion probability, enrichment and PVE than variants. 
+
 ## Summarizing cTWAS results
 
+To interpret and visualize the results, we first need to add gene annotations (gene names and gene types) to the fine-mapping result.
 
-To interpret and visualize the results, we first need to add gene annotations 
-(gene names and gene types) to the finemapping result.
+We need a user defined data frame `gene_annot` that should contain the following columns: 'chrom', 'start', 'end', 'gene_id', 'gene_name' and 'gene_type' for each gene.
 
-We need a user defined data frame `gene_annot` that should contain the following columns:
-'chrom', 'start', 'end', 'gene_id', 'gene_name' and 'gene_type' for each gene or molecular trait.
+If you only used gene expression data, you can use the following function to obtain the gene annotations from the Ensembl database. We use `EnsDb.Hsapiens.v86` for the example data, please choose the Ensembl database for your specific data. 
 
-If you only used gene expression data, you can use the following function 
-to obtain the gene annotations from the Ensembl database.
-```{r get_gene_annot, message=FALSE}
+```{r get_gene_annot_from_ens_db, message=FALSE}
 ens_db <- EnsDb.Hsapiens.v86
-finemap_gene_res <- finemap_res[finemap_res$type!="SNP",]
+finemap_gene_res <- subset(finemap_res, group == "gene")
 gene_ids <- unique(sapply(strsplit(finemap_gene_res$id, split = "[|]"), "[[", 1))
-gene_annot <- get_gene_annot_from_ens_db(ens_db = ens_db, gene_ids)
+gene_annot <- get_gene_annot_from_ens_db(ens_db, gene_ids)
 ```
 
 
-We then use `anno_finemap_res()` function to add gene annotations to the finemapping result,
-and use gene mid-points to represent gene positions.
+We then use the `anno_finemap_res()` function to add gene annotations to the finemapping result, and use gene mid-points to represent gene positions.
 ```{r anno_finemap_res}
-# add gene annotations and use gene mid-points to represent gene positions
-finemap_res <- anno_finemap_res(finemap_res, 
-                                snp_info,
-                                gene_annot,
+finemap_res <- anno_finemap_res(finemap_res, snp_info, gene_annot,
                                 use_gene_pos = "mid")
 ```
 
 
 ## Interpreting cTWAS results
 
-We list all molecular traits with PIP > 0.8, which is the threshold we used in the paper.
-```{r select_sig_res}
-# select gene PIP > 0.8
-sig_finemap_res <- finemap_res[finemap_res$type!="SNP" & finemap_res$susie_pip > 0.8,]
-head(sig_finemap_res[order(-sig_finemap_res$susie_pip),])
+We list all genes with PIP > 0.8, which is the threshold we used in the paper. 
+
+```{r interpret_res}
+sig_finemap_res <- subset(finemap_res, group == "gene" & susie_pip > 0.8)
+sig_finemap_res[order(sig_finemap_res$susie_pip,decreasing = TRUE),]
 ```
 
 
-When we have multiple contexts (e.g. tissues) or types (e.g. expression, splicing), it is useful to evaluate the combined PIP for each gene by contexts, types, or groups.
-We could further limit results in credible sets and/or protein coding genes.
-```{r combine_pips}
-# combine gene PIPs by context
-combined_pip_by_context <- combine_gene_pips(finemap_res, 
-                                             by = "context",
-                                             filter_protein_coding_genes = TRUE)
-head(combined_pip_by_context)
-
-# combine gene PIPs by type
-combined_pip_by_type <- combine_gene_pips(finemap_res, 
-                                          by = "type",
-                                          filter_protein_coding_genes = TRUE)
-
-# combine gene PIPs by group
-combined_pip_by_group <- combine_gene_pips(finemap_res, 
-                                            by = "group",
-                                            filter_protein_coding_genes = TRUE)
-
-# select combined PIP > 0.8
-sig_gene_pips_df <- combined_pip_by_context[combined_pip_by_context$combined_pip > 0.8, ]
-head(sig_gene_pips_df)
-```
-
-
+In this example, HPR is the only gene that satisfies this threshold.
 
 ## Visualizing cTWAS results
 
-We could make locus plots for regions of interest. 
-We could zoom in the region by specifying the `locus_range`.
+We could make locus plots for regions of interest, and zoom in the region by specifying the `locus_range`.
 
-If we want to show the correlations with the focus gene, we need correlation matrices of the region. 
-Because we have computed and saved correlation matrices during fine-mapping step,
+If we want to show the correlations with the focus gene, we need correlation matrices of the region. Because we have computed and saved correlation matrices during fine-mapping step,
 we could simply load those precomputed correlation matrices.
+
 ```{r get_region_cor_res}
 cor_res <- get_region_cor(region_id = "16_71020125_72901251", cor_dir = cor_dir)
 ```
@@ -188,4 +176,7 @@ make_locusplot(finemap_res,
                highlight_pip = 0.8,
                legend.position = "top")
 ```
+
+
+The locus plot shows several tracks in the example region in chromosome 6, including GWAS -log10(p-value), PIPs, QTLs of the focus gene (by default, the focus gene is the gene with the highest PIP), and the gene track. In this example, we zoomed in a locus (71.6 - 72.4 Mb) around the HPR gene, which has the highest PIP (PIP = 1), and the red dotted line shows the PIP cutoff of 0.8. 
 

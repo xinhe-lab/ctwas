@@ -45,6 +45,11 @@
 #'
 #' @param cor_dir a string, the directory to store correlation (R) matrices
 #'
+#' @param LD_format file format for LD matrix. If "custom", use a user defined
+#' \code{LD_loader_fun()} function to load LD matrix.
+#'
+#' @param LD_loader_fun a user defined function to load LD matrix when \code{LD_format = "custom"}.
+#'
 #' @param ncore The number of cores used to parallelize computation over regions
 #'
 #' @param verbose TRUE/FALSE. If TRUE, print detail messages

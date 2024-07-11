@@ -111,6 +111,8 @@ finemap_region <- function(region_data,
   rm(res)
 
   if (!use_LD) {
+    # set L = 1 in no-LD version
+    L <- 1
     # use an identity matrix as R in no-LD version
     R <- diag(length(z))
     # do not include cs_index in no-LD version

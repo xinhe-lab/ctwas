@@ -16,9 +16,7 @@ test_that("preprocess_region_LD_snp_info (no-LD version) works", {
   region_info <- res$region_info
   snp_info <- res$snp_info
 
-  # Load region info
   expected_region_info <- readRDS(system.file("extdata/sample_data", "LDL_example.region_info.RDS", package = "ctwas"))
-  # Load SNP info
   expected_snp_info <- readRDS(system.file("extdata/sample_data", "LDL_example.snp_info.RDS", package = "ctwas"))
 
   expect_equal(region_info, expected_region_info)

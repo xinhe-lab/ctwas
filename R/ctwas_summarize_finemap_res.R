@@ -70,7 +70,7 @@ anno_finemap_res <- function(finemap_res,
   }
 
   # extract gene ids
-  finemap_gene_res <- finemap_res[finemap_res$type!="SNP",]
+  finemap_gene_res <- finemap_res[finemap_res$group!="SNP",]
 
   if (is.null(finemap_gene_res$gene_id)) {
     finemap_gene_res$gene_id <- sapply(strsplit(finemap_gene_res$id, split = "[|]"), "[[", 1)
@@ -115,7 +115,7 @@ anno_finemap_res <- function(finemap_res,
 
   # add SNP positions
   loginfo("add SNP positions from snp_info")
-  finemap_snp_res <- finemap_res[finemap_res$type=="SNP",]
+  finemap_snp_res <- finemap_res[finemap_res$group=="SNP",]
   snp_idx <- match(finemap_snp_res$id, snp_info$id)
   finemap_snp_res$chrom <- snp_info$chrom[snp_idx]
   finemap_snp_res$chrom <- parse_number(as.character(finemap_snp_res$chrom))
@@ -142,6 +142,7 @@ anno_finemap_res <- function(finemap_res,
 #'
 #' @export
 get_gene_annot_from_ens_db <- function(ens_db, gene_ids) {
+
   gene_ids <- unique(na.omit(gene_ids))
   if (any(grep("[.]", gene_ids))) {
     gene_ids_trimmed <- sapply(strsplit(gene_ids, split = "[.]"), "[[", 1)
