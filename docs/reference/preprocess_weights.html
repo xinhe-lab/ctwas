@@ -17,7 +17,7 @@
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">ctwas</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">0.2.47</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">0.3.6</span>
       </span>
     </div>
 
@@ -32,7 +32,7 @@
     <span class="caret"></span>
   </a>
   <ul class="dropdown-menu" role="menu"><li>
-      <a href="../articles/simple_ctwas_tutorial.html">Simple cTWAS tutorial</a>
+      <a href="../articles/minimal_ctwas_tutorial.html">A minimal tutorial of running cTWAS without LD</a>
     </li>
     <li>
       <a href="../articles/preparing_ctwas_input_data.html">Preparing cTWAS input data</a>
@@ -51,7 +51,7 @@
     </li>
   </ul></li>
       </ul><ul class="nav navbar-nav navbar-right"><li>
-  <a href="https://github.com/xinhe-lab/ctwas/tree/multigroup_test" class="external-link">Source</a>
+  <a href="https://github.com/xinhe-lab/ctwas/tree/single_group" class="external-link">Source</a>
 </li>
       </ul></div><!--/.nav-collapse -->
   </div><!--/.container -->
@@ -63,7 +63,7 @@
   <div class="col-md-9 contents">
     <div class="page-header">
     <h1>Preprocess PredictDB/FUSION weights and harmonize with LD reference</h1>
-    <small class="dont-index">Source: <a href="https://github.com/xinhe-lab/ctwas/blob/multigroup_test/R/ctwas_preprocess_weights.R" class="external-link"><code>R/ctwas_preprocess_weights.R</code></a></small>
+    <small class="dont-index">Source: <a href="https://github.com/xinhe-lab/ctwas/blob/single_group/R/ctwas_preprocess_weights.R" class="external-link"><code>R/ctwas_preprocess_weights.R</code></a></small>
     <div class="hidden name"><code>preprocess_weights.Rd</code></div>
     </div>
 
@@ -76,20 +76,18 @@
 <span>  <span class="va">weight_path</span>,</span>
 <span>  <span class="va">region_info</span>,</span>
 <span>  <span class="va">gwas_snp_ids</span>,</span>
-<span>  <span class="va">type</span>,</span>
-<span>  <span class="va">context</span>,</span>
 <span>  <span class="va">snp_info</span>,</span>
 <span>  LD_info <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  weight_format <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"PredictDB"</span>, <span class="st">"FUSION"</span><span class="op">)</span>,</span>
 <span>  drop_strand_ambig <span class="op">=</span> <span class="cn">TRUE</span>,</span>
-<span>  scale_predictdb_weights <span class="op">=</span> <span class="cn">FALSE</span>,</span>
-<span>  filter_protein_coding_genes <span class="op">=</span> <span class="cn">FALSE</span>,</span>
-<span>  load_predictdb_LD <span class="op">=</span> <span class="cn">FALSE</span>,</span>
-<span>  fusion_method <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"lasso"</span>, <span class="st">"enet"</span>, <span class="st">"top1"</span>, <span class="st">"blup"</span>, <span class="st">"bslmm"</span>, <span class="st">"bestR2"</span><span class="op">)</span>,</span>
+<span>  scale_predictdb_weights <span class="op">=</span> <span class="cn">TRUE</span>,</span>
+<span>  filter_protein_coding_genes <span class="op">=</span> <span class="cn">TRUE</span>,</span>
+<span>  load_predictdb_LD <span class="op">=</span> <span class="cn">TRUE</span>,</span>
+<span>  fusion_method <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"lasso"</span>, <span class="st">"enet"</span>, <span class="st">"top1"</span>, <span class="st">"blup"</span>, <span class="st">"bslmm"</span>, <span class="st">"best.cv"</span><span class="op">)</span>,</span>
 <span>  fusion_genome_version <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"b38"</span>, <span class="st">"b37"</span><span class="op">)</span>,</span>
 <span>  <span class="va">fusion_top_n_snps</span>,</span>
 <span>  LD_format <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"rds"</span>, <span class="st">"rdata"</span>, <span class="st">"csv"</span>, <span class="st">"txt"</span>, <span class="st">"custom"</span><span class="op">)</span>,</span>
-<span>  LD_loader <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  LD_loader_fun <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  ncore <span class="op">=</span> <span class="fl">1</span>,</span>
 <span>  logfile <span class="op">=</span> <span class="cn">NULL</span></span>
 <span><span class="op">)</span></span></code></pre></div>
@@ -108,14 +106,6 @@ or the directory containing '.wgt.RDat' files for FUSION weights.</p></dd>
 
 <dt>gwas_snp_ids</dt>
 <dd><p>a vector of SNP IDs in GWAS summary statistics (z_snp$id).</p></dd>
-
-
-<dt>type</dt>
-<dd><p>a string, specifying QTL type of each weight file, e.g. expression, splicing, protein.</p></dd>
-
-
-<dt>context</dt>
-<dd><p>a string, specifying tissue/cell type/condition of each weight file, e.g. Liver, Lung, Brain.</p></dd>
 
 
 <dt>snp_info</dt>
@@ -150,7 +140,8 @@ standardized, but our implementation assumes standardized variant genotypes.</p>
 
 
 <dt>fusion_method</dt>
-<dd><p>a string, specifying the method to choose in FUSION models</p></dd>
+<dd><p>a string, specifying the method to choose in FUSION models.
+"best.cv" option will use the best model (smallest p-value) under cross-validation.</p></dd>
 
 
 <dt>fusion_genome_version</dt>
@@ -164,10 +155,10 @@ By default, use all weight SNPs.</p></dd>
 
 <dt>LD_format</dt>
 <dd><p>file format for LD matrix. If "custom", use a user defined
-<code>LD_loader()</code> function to load LD matrix.</p></dd>
+<code>LD_loader_fun()</code> function to load LD matrix.</p></dd>
 
 
-<dt>LD_loader</dt>
+<dt>LD_loader_fun</dt>
 <dd><p>a user defined function to load LD matrix when <code>LD_format = "custom"</code>.</p></dd>
 
 

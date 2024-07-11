@@ -17,7 +17,7 @@
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">ctwas</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">0.2.47</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">0.3.6</span>
       </span>
     </div>
 
@@ -32,7 +32,7 @@
     <span class="caret"></span>
   </a>
   <ul class="dropdown-menu" role="menu"><li>
-      <a href="../articles/simple_ctwas_tutorial.html">Simple cTWAS tutorial</a>
+      <a href="../articles/minimal_ctwas_tutorial.html">A minimal tutorial of running cTWAS without LD</a>
     </li>
     <li>
       <a href="../articles/preparing_ctwas_input_data.html">Preparing cTWAS input data</a>
@@ -51,7 +51,7 @@
     </li>
   </ul></li>
       </ul><ul class="nav navbar-nav navbar-right"><li>
-  <a href="https://github.com/xinhe-lab/ctwas/tree/multigroup_test" class="external-link">Source</a>
+  <a href="https://github.com/xinhe-lab/ctwas/tree/single_group" class="external-link">Source</a>
 </li>
       </ul></div><!--/.nav-collapse -->
   </div><!--/.container -->
@@ -63,7 +63,7 @@
   <div class="col-md-9 contents">
     <div class="page-header">
     <h1>cTWAS analysis using summary statistics with "no LD" version</h1>
-    <small class="dont-index">Source: <a href="https://github.com/xinhe-lab/ctwas/blob/multigroup_test/R/ctwas_sumstats_noLD.R" class="external-link"><code>R/ctwas_sumstats_noLD.R</code></a></small>
+    <small class="dont-index">Source: <a href="https://github.com/xinhe-lab/ctwas/blob/single_group/R/ctwas_sumstats_noLD.R" class="external-link"><code>R/ctwas_sumstats_noLD.R</code></a></small>
     <div class="hidden name"><code>ctwas_sumstats_noLD.Rd</code></div>
     </div>
 
@@ -83,9 +83,7 @@
 <span>  niter <span class="op">=</span> <span class="fl">30</span>,</span>
 <span>  init_group_prior <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  init_group_prior_var <span class="op">=</span> <span class="cn">NULL</span>,</span>
-<span>  group_prior_var_structure <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"shared_type"</span>, <span class="st">"shared_context"</span>, <span class="st">"shared_nonSNP"</span>,</span>
-<span>    <span class="st">"shared_all"</span>, <span class="st">"independent"</span><span class="op">)</span>,</span>
-<span>  maxSNP <span class="op">=</span> <span class="fl">20000</span>,</span>
+<span>  maxSNP <span class="op">=</span> <span class="cn">Inf</span>,</span>
 <span>  min_nonSNP_PIP <span class="op">=</span> <span class="fl">0.5</span>,</span>
 <span>  p_single_effect <span class="op">=</span> <span class="fl">0.8</span>,</span>
 <span>  use_null_weight <span class="op">=</span> <span class="cn">TRUE</span>,</span>
@@ -141,19 +139,10 @@ giving the z scores for snps. "A1" is effect allele. "A2" is the other allele.</
 <dd><p>a vector of initial values of prior variances for SNPs and gene effects.</p></dd>
 
 
-<dt>group_prior_var_structure</dt>
-<dd><p>a string indicating the structure to put on the prior variance parameters.
-"shared_type" allows all groups in one molecular QTL type to share the same variance parameter.
-"shared_context" allows all groups in one context (tissue, cell type, condition) to share the same variance parameter.
-"shared_nonSNP" allows all non-SNP groups to share the same variance parameter.
-"shared_all" allows all groups to share the same variance parameter.
-"independent" allows all groups to have their own separate variance parameters.</p></dd>
-
-
 <dt>maxSNP</dt>
 <dd><p>Inf or integer. Maximum number of SNPs in a region. Default is
 Inf, no limit. This can be useful if there are many SNPs in a region and you don't
-have enough memory to run the program. This applies to the finemapping step only.</p></dd>
+have enough memory to run the program.</p></dd>
 
 
 <dt>min_nonSNP_PIP</dt>

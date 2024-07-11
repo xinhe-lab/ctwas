@@ -19,7 +19,7 @@ or force_compute_cor = TRUE."><!-- mathjax --><script src="https://cdnjs.cloudfl
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">ctwas</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">0.2.47</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">0.3.6</span>
       </span>
     </div>
 
@@ -34,7 +34,7 @@ or force_compute_cor = TRUE."><!-- mathjax --><script src="https://cdnjs.cloudfl
     <span class="caret"></span>
   </a>
   <ul class="dropdown-menu" role="menu"><li>
-      <a href="../articles/simple_ctwas_tutorial.html">Simple cTWAS tutorial</a>
+      <a href="../articles/minimal_ctwas_tutorial.html">A minimal tutorial of running cTWAS without LD</a>
     </li>
     <li>
       <a href="../articles/preparing_ctwas_input_data.html">Preparing cTWAS input data</a>
@@ -53,7 +53,7 @@ or force_compute_cor = TRUE."><!-- mathjax --><script src="https://cdnjs.cloudfl
     </li>
   </ul></li>
       </ul><ul class="nav navbar-nav navbar-right"><li>
-  <a href="https://github.com/xinhe-lab/ctwas/tree/multigroup_test" class="external-link">Source</a>
+  <a href="https://github.com/xinhe-lab/ctwas/tree/single_group" class="external-link">Source</a>
 </li>
       </ul></div><!--/.nav-collapse -->
   </div><!--/.container -->
@@ -65,7 +65,7 @@ or force_compute_cor = TRUE."><!-- mathjax --><script src="https://cdnjs.cloudfl
   <div class="col-md-9 contents">
     <div class="page-header">
     <h1>Gets correlation matrices for a single region.</h1>
-    <small class="dont-index">Source: <a href="https://github.com/xinhe-lab/ctwas/blob/multigroup_test/R/ctwas_compute_region_cor.R" class="external-link"><code>R/ctwas_compute_region_cor.R</code></a></small>
+    <small class="dont-index">Source: <a href="https://github.com/xinhe-lab/ctwas/blob/single_group/R/ctwas_region_cor.R" class="external-link"><code>R/ctwas_region_cor.R</code></a></small>
     <div class="hidden name"><code>get_region_cor.Rd</code></div>
     </div>
 
@@ -85,8 +85,8 @@ or force_compute_cor = TRUE.</p>
 <span>  force_compute_cor <span class="op">=</span> <span class="cn">FALSE</span>,</span>
 <span>  save_cor <span class="op">=</span> <span class="cn">FALSE</span>,</span>
 <span>  cor_dir <span class="op">=</span> <span class="cn">NULL</span>,</span>
-<span>  LD_format <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"rds"</span>, <span class="st">"rdata"</span>, <span class="st">"csv"</span>, <span class="st">"txt"</span>, <span class="st">"custom"</span><span class="op">)</span>,</span>
-<span>  LD_loader <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  LD_format <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"rds"</span>, <span class="st">"rdata"</span>, <span class="st">"mtx"</span>, <span class="st">"csv"</span>, <span class="st">"txt"</span>, <span class="st">"custom"</span><span class="op">)</span>,</span>
+<span>  <span class="va">LD_loader_fun</span>,</span>
 <span>  verbose <span class="op">=</span> <span class="cn">FALSE</span></span>
 <span><span class="op">)</span></span></code></pre></div>
     </div>
@@ -127,10 +127,10 @@ or force_compute_cor = TRUE.</p>
 
 <dt>LD_format</dt>
 <dd><p>file format for LD matrix. If "custom", use a user defined
-<code>LD_loader()</code> function to load LD matrix.</p></dd>
+<code>LD_loader_fun()</code> function to load LD matrix.</p></dd>
 
 
-<dt>LD_loader</dt>
+<dt>LD_loader_fun</dt>
 <dd><p>a user defined function to load LD matrix when <code>LD_format = "custom"</code>.</p></dd>
 
 

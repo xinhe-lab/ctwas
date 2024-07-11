@@ -19,13 +19,13 @@
     <loc>/articles/index.html</loc>
   </url>
   <url>
+    <loc>/articles/minimal_ctwas_tutorial.html</loc>
+  </url>
+  <url>
     <loc>/articles/postprocessing_ctwas_results.html</loc>
   </url>
   <url>
     <loc>/articles/preparing_ctwas_input_data.html</loc>
-  </url>
-  <url>
-    <loc>/articles/simple_ctwas_tutorial.html</loc>
   </url>
   <url>
     <loc>/articles/summarizing_ctwas_results.html</loc>
@@ -41,9 +41,6 @@
   </url>
   <url>
     <loc>/reference/assemble_region_data.html</loc>
-  </url>
-  <url>
-    <loc>/reference/combine_gene_pips.html</loc>
   </url>
   <url>
     <loc>/reference/compute_gene_z.html</loc>
@@ -101,6 +98,9 @@
   </url>
   <url>
     <loc>/reference/kriging_rss.html</loc>
+  </url>
+  <url>
+    <loc>/reference/load_LD.html</loc>
   </url>
   <url>
     <loc>/reference/load_fusion_weights.html</loc>

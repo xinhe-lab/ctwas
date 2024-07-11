@@ -26,7 +26,7 @@
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">ctwas</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">0.2.47</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">0.3.6</span>
       </span>
     </div>
 
@@ -41,7 +41,7 @@
     <span class="caret"></span>
   </a>
   <ul class="dropdown-menu" role="menu"><li>
-      <a href="../articles/simple_ctwas_tutorial.html">Simple cTWAS tutorial</a>
+      <a href="../articles/minimal_ctwas_tutorial.html">A minimal tutorial of running cTWAS without LD</a>
     </li>
     <li>
       <a href="../articles/preparing_ctwas_input_data.html">Preparing cTWAS input data</a>
@@ -60,7 +60,7 @@
     </li>
   </ul></li>
       </ul><ul class="nav navbar-nav navbar-right"><li>
-  <a href="https://github.com/xinhe-lab/ctwas/tree/multigroup_test" class="external-link">Source</a>
+  <a href="https://github.com/xinhe-lab/ctwas/tree/single_group" class="external-link">Source</a>
 </li>
       </ul></div><!--/.nav-collapse -->
   </div><!--/.container -->
@@ -72,7 +72,7 @@
   <div class="col-md-9 contents">
     <div class="page-header">
     <h1>Sum of Single Effects (SuSiE) Regression</h1>
-    <small class="dont-index">Source: <a href="https://github.com/xinhe-lab/ctwas/blob/multigroup_test/R/susie_susie.R" class="external-link"><code>R/susie_susie.R</code></a>, <a href="https://github.com/xinhe-lab/ctwas/blob/multigroup_test/R/susie_susie_ss.R" class="external-link"><code>R/susie_susie_ss.R</code></a></small>
+    <small class="dont-index">Source: <a href="https://github.com/xinhe-lab/ctwas/blob/single_group/R/susie_susie.R" class="external-link"><code>R/susie_susie.R</code></a>, <a href="https://github.com/xinhe-lab/ctwas/blob/single_group/R/susie_susie_ss.R" class="external-link"><code>R/susie_susie_ss.R</code></a></small>
     <div class="hidden name"><code>susie.Rd</code></div>
     </div>
 
@@ -116,7 +116,8 @@
 <span>  verbose <span class="op">=</span> <span class="cn">FALSE</span>,</span>
 <span>  track_fit <span class="op">=</span> <span class="cn">FALSE</span>,</span>
 <span>  residual_variance_lowerbound <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/stats/cor.html" class="external-link">var</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/drop.html" class="external-link">drop</a></span><span class="op">(</span><span class="va">Y</span><span class="op">)</span><span class="op">)</span><span class="op">/</span><span class="fl">10000</span>,</span>
-<span>  refine <span class="op">=</span> <span class="cn">FALSE</span></span>
+<span>  refine <span class="op">=</span> <span class="cn">FALSE</span>,</span>
+<span>  warn_converge_fail <span class="op">=</span> <span class="cn">TRUE</span></span>
 <span><span class="op">)</span></span>
 <span></span>
 <span><span class="fu">susie_suff_stat</span><span class="op">(</span></span>
@@ -151,7 +152,8 @@
 <span>  verbose <span class="op">=</span> <span class="cn">FALSE</span>,</span>
 <span>  track_fit <span class="op">=</span> <span class="cn">FALSE</span>,</span>
 <span>  check_input <span class="op">=</span> <span class="cn">FALSE</span>,</span>
-<span>  refine <span class="op">=</span> <span class="cn">FALSE</span></span>
+<span>  refine <span class="op">=</span> <span class="cn">FALSE</span>,</span>
+<span>  warn_converge_fail <span class="op">=</span> <span class="cn">TRUE</span></span>
 <span><span class="op">)</span></span></code></pre></div>
     </div>
 
@@ -325,6 +327,11 @@ residual variance. It is only relevant when
 <dt>refine</dt>
 <dd><p>If <code>refine = TRUE</code>, we use a procedure to help
 SuSiE get out of local optimum.</p></dd>
+
+
+<dt>warn_converge_fail</dt>
+<dd><p>If <code>warn_converge_fail = TRUE</code>,
+prints a warning message when IBSS algorithm does not converge.</p></dd>
 
 
 <dt>bhat</dt>

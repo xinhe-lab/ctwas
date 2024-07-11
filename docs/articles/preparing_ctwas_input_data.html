@@ -33,7 +33,7 @@
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">ctwas</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">0.2.47</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">0.3.6</span>
       </span>
     </div>
 
@@ -50,7 +50,7 @@
   </a>
   <ul class="dropdown-menu" role="menu">
 <li>
-      <a href="../articles/simple_ctwas_tutorial.html">Simple cTWAS tutorial</a>
+      <a href="../articles/minimal_ctwas_tutorial.html">A minimal tutorial of running cTWAS without LD</a>
     </li>
     <li>
       <a href="../articles/preparing_ctwas_input_data.html">Preparing cTWAS input data</a>
@@ -72,7 +72,7 @@
       </ul>
 <ul class="nav navbar-nav navbar-right">
 <li>
-  <a href="https://github.com/xinhe-lab/ctwas/tree/multigroup_test" class="external-link">Source</a>
+  <a href="https://github.com/xinhe-lab/ctwas/tree/single_group" class="external-link">Source</a>
 </li>
       </ul>
 </div>
@@ -90,83 +90,64 @@
       <h1 data-toc-skip>Preparing cTWAS input data</h1>
                         <h4 data-toc-skip class="author">Kaixuan Luo, Sheng Qian</h4>
             
-            <h4 data-toc-skip class="date">2024-06-28</h4>
+            <h4 data-toc-skip class="date">2024-07-11</h4>
       
-      <small class="dont-index">Source: <a href="https://github.com/xinhe-lab/ctwas/blob/multigroup_test/vignettes/preparing_ctwas_input_data.Rmd" class="external-link"><code>vignettes/preparing_ctwas_input_data.Rmd</code></a></small>
+      <small class="dont-index">Source: <a href="https://github.com/xinhe-lab/ctwas/blob/single_group/vignettes/preparing_ctwas_input_data.Rmd" class="external-link"><code>vignettes/preparing_ctwas_input_data.Rmd</code></a></small>
       <div class="hidden name"><code>preparing_ctwas_input_data.Rmd</code></div>
 
     </div>
 
     
     
-<p>This tutorial shows how to prepare for the input data for running the summary statistics version of cTWAS.</p>
-<div class="section level2">
-<h2 id="installation">Installation<a class="anchor" aria-label="anchor" href="#installation"></a>
-</h2>
-<p>Install <code>cTWAS</code> package</p>
-<div class="sourceCode" id="cb1"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="fu">remotes</span><span class="fu">::</span><span class="fu"><a href="https://remotes.r-lib.org/reference/install_github.html" class="external-link">install_github</a></span><span class="op">(</span><span class="st">"xinhe-lab/ctwas"</span>, ref <span class="op">=</span> <span class="st">"multigroup_test"</span><span class="op">)</span></span></code></pre></div>
+<p>This tutorial shows how to prepare for the input data for running cTWAS with summary statistics.</p>
 <p>Load the package</p>
-<div class="sourceCode" id="cb2"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb1"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://github.com/xinhe-lab/ctwas/" class="external-link">ctwas</a></span><span class="op">)</span></span></code></pre></div>
 <p>We use <code>VariantAnnotation</code> and <code>gwasvcf</code> packages to read the VCF files, so please install those packages before running this tutorial.</p>
-<p>The inputs for the summary statistics version of cTWAS include GWAS summary statistics, prediction models of molecular traits (referred to as “weights” in the documents), and LD reference. Additionally, cTWAS partitions the genome into disjoint regions, assuming no LD across regions. So a user also needs to prepare the data defining these regions.</p>
+<p>The inputs for the summary statistics version of cTWAS include GWAS summary statistics, prediction models (referred to as “weights” in the documents), and LD reference. Additionally, cTWAS partitions the genome into disjoint regions, assuming no LD across regions. So a user also needs to prepare the data defining these regions.</p>
 <p>Note: It is possible to run cTWAS without using the LD reference. In that case, there is no need to prepare LD reference data.</p>
 <p>In the tutorial, we use sample data provided in the package.</p>
-<p>Let’s set the cTWAS output directory and output name:</p>
-<div class="sourceCode" id="cb3"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">outputdir</span> <span class="op">&lt;-</span> <span class="st">"./ctwas_output"</span></span>
-<span><span class="fu"><a href="https://rdrr.io/r/base/files2.html" class="external-link">dir.create</a></span><span class="op">(</span><span class="va">outputdir</span>, showWarnings<span class="op">=</span><span class="cn">F</span>, recursive<span class="op">=</span><span class="cn">T</span><span class="op">)</span></span>
-<span></span>
-<span><span class="va">outname</span> <span class="op">&lt;-</span> <span class="st">"LDL_example"</span></span></code></pre></div>
-</div>
 <div class="section level2">
-<h2 id="gwas-z-scores">GWAS z-scores<a class="anchor" aria-label="anchor" href="#gwas-z-scores"></a>
+<h2 id="gwas-z-scores">GWAS Z-scores<a class="anchor" aria-label="anchor" href="#gwas-z-scores"></a>
 </h2>
 <p>We will use summary statistics from a GWAS of LDL cholesterol in the UK Biobank.</p>
 <p>We can download the VCF from the IEU Open GWAS Project.</p>
-<div class="sourceCode" id="cb4"><pre class="sourceCode bash"><code class="sourceCode bash"><span id="cb4-1"><a href="#cb4-1"></a><span class="co"># download the summary statistics</span></span>
-<span id="cb4-2"><a href="#cb4-2"></a><span class="fu">wget</span> https://gwas.mrcieu.ac.uk/files/ukb-d-30780_irnt/ukb-d-30780_irnt.vcf.gz</span></code></pre></div>
-<p>cTWAS needs a data frame <code>z_snp</code> as input, with columns “id”, “A1”, “A2”, “z”. Each row has data of a variant. We use rsIDs as the variant IDs. The naming of variant IDs should be consistent between summary statistics, LD reference and weights. <code>A1</code> is the alternate allele, and <code>A2</code> is the reference allele. <code>z</code> is the z-scores of variants in GWAS. In the GWAS summary statistics VCF file we downloaded here, z-scores are not available, so we need to compute them from the effect sizes and standard errors.</p>
+<div class="sourceCode" id="cb2"><pre class="sourceCode bash"><code class="sourceCode bash"><span id="cb2-1"><a href="#cb2-1"></a><span class="fu">wget</span> https://gwas.mrcieu.ac.uk/files/ukb-d-30780_irnt/ukb-d-30780_irnt.vcf.gz</span></code></pre></div>
+<p>cTWAS needs a data frame <code>z_snp</code> as input, with columns “id”, “A1”, “A2”, “z”. Each row has data of a variant. We use rsIDs as the variant IDs. The naming of variant IDs should be consistent between summary statistics, LD reference and weights. <code>A1</code> is the alternate allele, and <code>A2</code> is the reference allele. <code>z</code> is the Z-scores of variants in GWAS. In the GWAS summary statistics VCF file we downloaded here, Z-scores are not available, so we need to compute them from the effect sizes and standard errors.</p>
 <p>Let us read the GWAS summary statistics and convert it to the <code>z_snp</code> data frame. We will also collect the sample size, which will be used later.</p>
-<div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="co"># read the VCF data using the VariantAnnotation and gwasvcf packages</span></span>
-<span><span class="va">z_snp</span> <span class="op">&lt;-</span> <span class="fu">VariantAnnotation</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/VariantAnnotation/man/readVcf-methods.html" class="external-link">readVcf</a></span><span class="op">(</span><span class="st">"ukb-d-30780_irnt.vcf.gz"</span><span class="op">)</span></span>
+<div class="sourceCode" id="cb3"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">z_snp</span> <span class="op">&lt;-</span> <span class="fu">VariantAnnotation</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/VariantAnnotation/man/readVcf-methods.html" class="external-link">readVcf</a></span><span class="op">(</span><span class="st">"ukb-d-30780_irnt.vcf.gz"</span><span class="op">)</span></span>
 <span><span class="va">gwas_name</span> <span class="op">&lt;-</span> <span class="st">"ukb-d-30780_irnt"</span></span>
 <span></span>
 <span><span class="va">z_snp</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/as.data.frame.html" class="external-link">as.data.frame</a></span><span class="op">(</span><span class="fu">gwasvcf</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/gwasvcf/man/vcf_to_tibble.html" class="external-link">vcf_to_tibble</a></span><span class="op">(</span><span class="va">z_snp</span><span class="op">)</span><span class="op">)</span></span>
-<span></span>
-<span><span class="co"># compute the z-scores</span></span>
 <span><span class="va">z_snp</span><span class="op">$</span><span class="va">Z</span> <span class="op">&lt;-</span> <span class="va">z_snp</span><span class="op">$</span><span class="va">ES</span><span class="op">/</span><span class="va">z_snp</span><span class="op">$</span><span class="va">SE</span></span>
 <span></span>
-<span><span class="co"># collect sample size (most frequent sample size for all variants)</span></span>
 <span><span class="va">gwas_n</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/numeric.html" class="external-link">as.numeric</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/names.html" class="external-link">names</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/sort.html" class="external-link">sort</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/table.html" class="external-link">table</a></span><span class="op">(</span><span class="va">z_snp</span><span class="op">$</span><span class="va">SS</span><span class="op">)</span>,decreasing<span class="op">=</span><span class="cn">TRUE</span><span class="op">)</span><span class="op">[</span><span class="fl">1</span><span class="op">]</span><span class="op">)</span><span class="op">)</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/cat.html" class="external-link">cat</a></span><span class="op">(</span><span class="st">"gwas_n="</span>, <span class="va">gwas_n</span>, <span class="st">"\n"</span><span class="op">)</span></span>
 <span></span>
-<span><span class="co"># subset the columns and format the column names</span></span>
-<span><span class="va">z_snp</span> <span class="op">&lt;-</span> <span class="va">z_snp</span><span class="op">[</span>,<span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"rsid"</span>, <span class="st">"ALT"</span>, <span class="st">"REF"</span>, <span class="st">"Z"</span><span class="op">)</span><span class="op">]</span></span>
-<span><span class="fu"><a href="https://rdrr.io/r/base/colnames.html" class="external-link">colnames</a></span><span class="op">(</span><span class="va">z_snp</span><span class="op">)</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"id"</span>, <span class="st">"A1"</span>, <span class="st">"A2"</span>, <span class="st">"z"</span><span class="op">)</span></span>
 <span></span>
-<span><span class="co"># saveRDS(z_snp, file.path(outputdir, paste0(gwas_name, ".z_snp.RDS")))</span></span></code></pre></div>
-<p>If your GWAS summary statistics is of other formats, please extract relevant columns (rsid, alternative allele, reference allele, z score) and convert it to the format shown above.</p>
+<span><span class="va">z_snp</span> <span class="op">&lt;-</span> <span class="va">z_snp</span><span class="op">[</span>,<span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"rsid"</span>, <span class="st">"ALT"</span>, <span class="st">"REF"</span>, <span class="st">"Z"</span><span class="op">)</span><span class="op">]</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/base/colnames.html" class="external-link">colnames</a></span><span class="op">(</span><span class="va">z_snp</span><span class="op">)</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"id"</span>, <span class="st">"A1"</span>, <span class="st">"A2"</span>, <span class="st">"z"</span><span class="op">)</span></span></code></pre></div>
+<p>If your GWAS summary statistics is of other formats, please extract relevant columns (rsid, alternative allele, reference allele, Z-score) and convert it to the format shown above.</p>
 </div>
 <div class="section level2">
 <h2 id="prediction-models">Prediction models<a class="anchor" aria-label="anchor" href="#prediction-models"></a>
 </h2>
-<p>Prediction models can be specified in either PredictDB or FUSION format. PredictDB is the recommended format, as it has information about correlations among SNPs included in the model. In this user guide, we focus on the PredictDB format, but will provide information on using FUSION format. We also note that it is possible to run cTWAS with only a list of QTLs, which is often the case in practice. See the section “Running cTWAS without prediction models” below.</p>
-<p>In terms of the choice of prediction models, cTWAS performs best when prediction models are sparse, i.e. they have relatively few variants per molecular trait. Dense weights may lead to a “cross-region” problem. Basically, if the variants in the prediction model span two regions, it would be unclear to cTWAS what region the gene should be assigned to. The problem becomes worse with dense weights. If this happens, cTWAS will attempt to assign the molecular trait to one of the two regions that contain most of the weights. Nevertheless, there will be a risk of cross-region LD which can lead to problems.. Given this consideration, we recommend choosing sparse prediction models such as Lasso. If using dense prediction models, we recommend removing variants with weights below a threshold from the prediction models.</p>
-<p>Note: cTWAS has implemented an option to address the “cross-region” problem. It performs “region merging” as a post-processing step. If any molecular trait has variants in the weights that span two regions, those regions will be merged, and cTWAS will rerun the analysis using the merged regions. See the tutorial “Post-processing cTWAS results” for details.</p>
+<p>Prediction models can be specified in either PredictDB or FUSION format. PredictDB is the recommended format, as it has information about correlations among variants included in the model, and also has extra information about the genes in the model. In this user guide, we focus on the PredictDB format, but will provide information on using FUSION format. We also note that it is possible to run cTWAS with only a list of QTLs, which is often the case in practice. See the section “Running cTWAS without prediction models” below.</p>
+<p>In terms of the choice of prediction models, cTWAS performs best when prediction models are sparse, i.e. they have relatively few variants per gene. Dense weights may lead to a “cross-region” problem. Basically, if the variants in the prediction model span two regions, it would be unclear to cTWAS what region the gene should be assigned to. The problem becomes worse with dense weights. If this happens, cTWAS will attempt to assign the gene to one of the two regions that contain most of the weights. Nevertheless, there will be a risk of cross-region LD which can lead to problems.. Given this consideration, we recommend choosing sparse prediction models such as Lasso. If using dense prediction models, we recommend removing variants with weights below a threshold from the prediction models.</p>
+<p>Note: we implemented an option to address the “cross-region” problem. It performs “region merging” as a post-processing step. If any gene has variants in the weights that span two regions, those regions will be merged, and cTWAS will rerun the analysis using the merged regions. See the tutorial “Post-processing cTWAS results” for details.</p>
 <p>Please check <a href="http://predictdb.org/" class="external-link">PredictDB</a> for the format of PredictDB weights. To specify weights in PredictDB format, provide the path to the <code>.db</code> file when running cTWAS.</p>
 <p>Please check <a href="http://gusevlab.org/projects/fusion/#compute-your-own-predictive-models" class="external-link">FUSION/TWAS</a> for the format of FUSION weights. To specify weights in FUSION format, provide the path to the folder that contains the <code>.wgt.RDat</code> files. The <code>.pos</code> file which points to the individual *.RDat weight files are assumed to be outside the folder. For more format details, check the FUSION website.</p>
 <div class="section level3">
 <h3 id="running-ctwas-without-prediction-models">Running cTWAS without prediction models<a class="anchor" aria-label="anchor" href="#running-ctwas-without-prediction-models"></a>
 </h3>
-<p>Running cTWAS without prediction models: often a researcher may have a list of significant eQTLs, but have not explicitly built prediction models. In such cases, it is possible to run cTWAS. One just needs to use the top eQTL per molecular trait as the prediction models. Running cTWAS in this way would be similar to colocalization analysis. Nevertheless, it still has some advantages over colocalization: it estimates the important parameters from data, and it analyzes multiple genes in a region simultaneously. See the Supplementary Note of the cTWAS paper for details.</p>
-<p>We could convert top QTLs into PredictDB format weights using the function below:</p>
-<p><code>weight_table</code> is a data frame with genes, top QTLs and weights for each gene. When <code>use_top_QTL=TRUE</code>, we assume only one SNP for each gene. If <code>weight_table</code> has more than one SNP per gene, it will select the top SNP with the largest abs(weight). <code>extra_table</code> is an optional data frame with information of the genes (“gene”, “genename”, “gene_type”, etc.) It will create PredictDB format weights and save to the <code>outputdir</code> directory.</p>
-<div class="sourceCode" id="cb6"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="fu"><a href="../reference/make_predictdb_from_QTLs.html">make_predictdb_from_QTLs</a></span><span class="op">(</span><span class="va">weight_table</span>, <span class="va">extra_table</span>, use_top_QTL <span class="op">=</span> <span class="cn">TRUE</span>,</span>
+<p>Running cTWAS without prediction models: often a researcher may have a list of significant eQTLs, but have not explicitly built prediction models. In such cases, it is possible to run cTWAS. One just needs to use the top eQTL per gene as the prediction models. Running cTWAS in this way would be similar to colocalization analysis. Nevertheless, it still has some advantages over colocalization: it estimates the important parameters from data, and it analyzes multiple genes in a region simultaneously. See the Supplementary Note of the cTWAS paper for details.</p>
+<p>We could convert top QTLs into PredictDB format weights using the function <code><a href="../reference/make_predictdb_from_QTLs.html">make_predictdb_from_QTLs()</a></code>. It will create PredictDB format weights, and save to the <code>outputdir</code> directory with <code>outname</code> as the file name.</p>
+<div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="fu"><a href="../reference/make_predictdb_from_QTLs.html">make_predictdb_from_QTLs</a></span><span class="op">(</span><span class="va">weight_table</span>, <span class="va">extra_table</span>, </span>
+<span>                         use_top_QTL <span class="op">=</span> <span class="cn">TRUE</span>,</span>
 <span>                         <span class="va">outputdir</span>, <span class="va">outname</span><span class="op">)</span></span></code></pre></div>
+<p><code>weight_table</code> is a data frame with genes, top QTLs and weights for each gene. When <code>use_top_QTL=TRUE</code>, we assume only one top SNP for each gene. If <code>weight_table</code> has more than one SNP per gene, it will select the top SNP with the largest <code>abs(weight)</code>. <code>extra_table</code> is an optional data frame with information of the genes (“gene”, “genename”, “gene_type”, etc.).</p>
 </div>
 </div>
 <div class="section level2">
@@ -187,88 +168,55 @@
 </h3>
 <p>To run standard cTWAS analysis with LD, we need reference LD matrices for the predefined regions. By default, we need a LD matrix for each region (preferably in <code>.RDS</code> format) and a variant information table accompanying each LD matrix. The <code>.RDS</code> files store the LD correlation matrix for each region (a <span class="math inline">\(p \times p\)</span> matrix, <span class="math inline">\(p\)</span> is the number of variants in the region). The accompanying <code>.Rvar</code> files include variant information for the region, and the order of its rows should match the order of rows and columns in the <code>.RDS</code> file.</p>
 <p>We have precomputed reference LD matrices (<code>.RDS</code> files) and the variant information tables (<code>.Rvar</code> files) accompanying the LD matrices for both UKB and 1000G European Phase3 references. The complete LD matrices of European individuals from UK Biobank can be downloaded <a href="https://uchicago.box.com/s/jqocacd2fulskmhoqnasrknbt59x3xkn" class="external-link">here</a>. On the University of Chicago RCC cluster, the b38 reference is available at <code>/project2/mstephens/wcrouse/UKB_LDR_0.1/</code> and the b37 reference is available at <code>/project2/mstephens/wcrouse/UKB_LDR_0.1_b37/</code>.</p>
-<p>The columns of the <code>.Rvar</code> file include information on chromosome, variant name, position in base pairs, and the alternative and reference alleles. The <code>variance</code> column is the variance of each variant prior to standardization; this is required for PredictDB weights but not FUSION weights. PredictDB weights should be scaled by the variance before imputing gene expression. This is because PredictDB weights assume that variant genotypes are not standardized before imputation, but our implementation assumes standardized variant genotypes. If variance information is missing, or if weights are in PredictDB format but are already on the standardized scale (e.g. if they were converted from FUSION to PredictDB format), this scaling can be turned off using the option <code>scale_predictdb_weights=FALSE</code> in the <code><a href="../reference/preprocess_weights.html">preprocess_weights()</a></code> function. We’ve also included information on allele frequency in the variant info, but this is optional.</p>
+<p>The columns of the <code>.Rvar</code> file include information on chromosome, variant name, position in base pairs, and the alternative and reference alleles. The <code>variance</code> column is the variance of each variant prior to standardization; this is required for PredictDB weights but not FUSION weights. PredictDB weights should be scaled by the variance before computing gene expression. This is because PredictDB weights assume that variant genotypes are not standardized before imputation, but our implementation assumes standardized variant genotypes. If variance information is missing, or if weights are in PredictDB format but are already on the standardized scale (e.g. if they were converted from FUSION to PredictDB format), this scaling can be turned off by setting <code>scale_predictdb_weights=FALSE</code> in the <code><a href="../reference/preprocess_weights.html">preprocess_weights()</a></code> function. We’ve also included information on allele frequency in the variant info, but this is optional.</p>
 <p>The naming convention for the LD matrices is <code>[filestem]_chr[#].R_snp.[start]_[end].RDS</code>. Each variant should be uniquely assigned to a region, and the regions should be left closed and right open, i.e. [start, stop). The positions of the LD matrices must match exactly the positions specified by the region file. Do not include invariant or multiallelic variants in the LD reference.</p>
 </div>
 <div class="section level3">
 <h3 id="region-info">Region info<a class="anchor" aria-label="anchor" href="#region-info"></a>
 </h3>
-<p>We require a data frame <code>region_info</code> containing the region definitions, with the following columns: “chrom”, “start”, “stop”, for the genomic coordinates of the regions, and “region_id” for the IDs of the regions (by default, we use [chrom_start_stop] as region IDs).</p>
-<p>Here we use the b38 European LDetect blocks, included in the package.</p>
-<div class="sourceCode" id="cb7"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">region_file</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/system.file.html" class="external-link">system.file</a></span><span class="op">(</span><span class="st">"extdata/ldetect"</span>, <span class="st">"EUR.b38.bed"</span>, package <span class="op">=</span> <span class="st">"ctwas"</span><span class="op">)</span></span>
-<span><span class="va">region_info</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/utils/read.table.html" class="external-link">read.table</a></span><span class="op">(</span><span class="va">region_file</span>, header <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span>
-<span><span class="fu"><a href="https://rdrr.io/r/base/colnames.html" class="external-link">colnames</a></span><span class="op">(</span><span class="va">region_info</span><span class="op">)</span><span class="op">[</span><span class="fl">1</span><span class="op">:</span><span class="fl">3</span><span class="op">]</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"chrom"</span>, <span class="st">"start"</span>, <span class="st">"stop"</span><span class="op">)</span></span>
-<span><span class="va">region_info</span><span class="op">$</span><span class="va">chrom</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/numeric.html" class="external-link">as.numeric</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/grep.html" class="external-link">gsub</a></span><span class="op">(</span><span class="st">"chr"</span>, <span class="st">""</span>, <span class="va">region_info</span><span class="op">$</span><span class="va">chrom</span><span class="op">)</span><span class="op">)</span></span>
-<span><span class="va">region_info</span><span class="op">$</span><span class="va">region_id</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/paste.html" class="external-link">paste0</a></span><span class="op">(</span><span class="va">region_info</span><span class="op">$</span><span class="va">chr</span>, <span class="st">"_"</span>, <span class="va">region_info</span><span class="op">$</span><span class="va">start</span>, <span class="st">"_"</span>, <span class="va">region_info</span><span class="op">$</span><span class="va">stop</span><span class="op">)</span></span></code></pre></div>
+<p>We require a data frame <code>region_info</code> containing the region definitions, with the following columns: “chrom”, “start”, “stop”, for the genomic coordinates of the regions, and “region_id” for the IDs of the regions (by default, we use the convention <chrom_start_stop> for the region IDs).</chrom_start_stop></p>
+<p>Here we use the b38 European LDetect blocks, which is again included in the R package.</p>
+<div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">region_file</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/system.file.html" class="external-link">system.file</a></span><span class="op">(</span><span class="st">"extdata/ldetect"</span>, <span class="st">"EUR.b38.ldetect.regions.RDS"</span>, package <span class="op">=</span> <span class="st">"ctwas"</span><span class="op">)</span></span>
+<span><span class="va">region_info</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/readRDS.html" class="external-link">readRDS</a></span><span class="op">(</span><span class="va">region_file</span><span class="op">)</span></span></code></pre></div>
 <p>When running with LD, we will also need to add the column: “LD_matrix”: “LD_matrix” stores the paths to the precomputed LD (R) matrices (<code>.RDS</code> files in our precomputed reference LD files) and corresponding variant information (<code>.Rvar</code> files).</p>
 <p>The following paths were from the University of Chicago RCC cluster, please replace them with your own paths.</p>
-<div class="sourceCode" id="cb8"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="co"># please change this to your own directory for LD matrices.</span></span>
-<span><span class="va">LD_dir</span> <span class="op">&lt;-</span> <span class="st">"/project2/mstephens/wcrouse/UKB_LDR_0.1/"</span></span>
-<span></span>
+<div class="sourceCode" id="cb6"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">LD_dir</span> <span class="op">&lt;-</span> <span class="st">"/project2/mstephens/wcrouse/UKB_LDR_0.1/"</span></span>
 <span><span class="va">genome_version</span> <span class="op">&lt;-</span> <span class="st">"b38"</span></span>
 <span><span class="va">LD_filestem</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/sprintf.html" class="external-link">sprintf</a></span><span class="op">(</span><span class="st">"ukb_%s_0.1_chr%s.R_snp.%s_%s"</span>, <span class="va">genome_version</span>, <span class="va">region_info</span><span class="op">$</span><span class="va">chrom</span>, <span class="va">region_info</span><span class="op">$</span><span class="va">start</span>, <span class="va">region_info</span><span class="op">$</span><span class="va">stop</span><span class="op">)</span></span>
 <span><span class="va">region_info</span><span class="op">$</span><span class="va">LD_matrix</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/file.path.html" class="external-link">file.path</a></span><span class="op">(</span><span class="va">LD_dir</span>, <span class="fu"><a href="https://rdrr.io/r/base/paste.html" class="external-link">paste0</a></span><span class="op">(</span><span class="va">LD_filestem</span>, <span class="st">".RDS"</span><span class="op">)</span><span class="op">)</span></span>
-<span><span class="va">region_info</span><span class="op">$</span><span class="va">SNP_info</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/file.path.html" class="external-link">file.path</a></span><span class="op">(</span><span class="va">LD_dir</span>, <span class="fu"><a href="https://rdrr.io/r/base/paste.html" class="external-link">paste0</a></span><span class="op">(</span><span class="va">LD_filestem</span>, <span class="st">".Rvar"</span><span class="op">)</span><span class="op">)</span></span>
-<span><span class="co"># stopifnot(all(file.exists(region_info$LD_matrix)))</span></span>
-<span><span class="co"># stopifnot(all(file.exists(region_info$SNP_info)))</span></span></code></pre></div>
+<span><span class="va">region_info</span><span class="op">$</span><span class="va">SNP_info</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/file.path.html" class="external-link">file.path</a></span><span class="op">(</span><span class="va">LD_dir</span>, <span class="fu"><a href="https://rdrr.io/r/base/paste.html" class="external-link">paste0</a></span><span class="op">(</span><span class="va">LD_filestem</span>, <span class="st">".Rvar"</span><span class="op">)</span><span class="op">)</span></span></code></pre></div>
 </div>
 <div class="section level3">
 <h3 id="create-ld-matrices-from-individual-level-genotype-data">Create LD matrices from individual level genotype data<a class="anchor" aria-label="anchor" href="#create-ld-matrices-from-individual-level-genotype-data"></a>
 </h3>
 <p>cTWAS provides a function, <code><a href="../reference/convert_geno_to_LD_matrix.html">convert_geno_to_LD_matrix()</a></code> to convert genotype files and definition of LD regions to the LD matrices (<code>.RDS</code> files) and corresponding variant information (<code>.Rvar</code> files).</p>
-<p>Below is an example of generating LD matrices in hg38 using UKB genotype data.</p>
-<div class="sourceCode" id="cb9"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="co"># specify LD reference</span></span>
-<span><span class="va">ldref_dir</span> <span class="op">&lt;-</span> <span class="st">"/gpfs/data/xhe-lab/ukb_LDR/genotype_data_0.1"</span></span>
-<span><span class="va">genotype_files</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/file.path.html" class="external-link">file.path</a></span><span class="op">(</span><span class="va">ldref_dir</span>, <span class="fu"><a href="https://rdrr.io/r/base/paste.html" class="external-link">paste0</a></span><span class="op">(</span><span class="st">"ukb_chr"</span>, <span class="fl">1</span><span class="op">:</span><span class="fl">22</span>, <span class="st">".pgen"</span><span class="op">)</span><span class="op">)</span></span>
-<span><span class="co"># the output Rvar files use the positions and allele information in varinfo_files</span></span>
-<span><span class="va">varinfo_files</span> <span class="op">&lt;-</span> <span class="st">"/gpfs/data/xhe-lab/ukb_LDR/neale_lab/neale_variants_hg38.bim"</span></span>
-<span><span class="co"># prepare a data frame region_info for LD regions with columns "chr", "start", and "stop"</span></span>
-<span><span class="co"># the positions should match those in varinfo_files</span></span>
-<span><span class="va">region_file</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/system.file.html" class="external-link">system.file</a></span><span class="op">(</span><span class="st">"extdata/ldetect"</span>, <span class="st">"EUR.b38.bed"</span>, package <span class="op">=</span> <span class="st">"ctwas"</span><span class="op">)</span></span>
-<span><span class="va">region_info</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/utils/read.table.html" class="external-link">read.table</a></span><span class="op">(</span><span class="va">region_file</span>, header <span class="op">=</span> <span class="cn">TRUE</span>, stringsAsFactors <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span></span>
-<span></span>
-<span><span class="co"># generate LD matrices (.RDS) and variant info (.Rvar)</span></span>
-<span><span class="co"># update region info with paths of LD matrices and variant info files</span></span>
-<span><span class="co"># we could run this for one chromosome or multiple chromosomes</span></span>
-<span><span class="va">updated_region_info</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/convert_geno_to_LD_matrix.html">convert_geno_to_LD_matrix</a></span><span class="op">(</span><span class="va">region_info</span>, </span>
-<span>                                                 <span class="va">genotype_files</span>, </span>
-<span>                                                 <span class="va">varinfo_files</span>,</span>
-<span>                                                 chrom <span class="op">=</span> <span class="fl">1</span><span class="op">:</span><span class="fl">22</span>,</span>
-<span>                              outputdir <span class="op">=</span> <span class="st">"/gpfs/data/xhe-lab/ctwas/LDR/UKB_b38/"</span>, </span>
-<span>                                                 outname <span class="op">=</span> <span class="st">"ukb_b38_0.1"</span><span class="op">)</span></span></code></pre></div>
-<p>We provide example R scripts to generate the LD matrices for UKB or 1KG European genotype files <a href="https://github.com/xinhe-lab/ctwas/tree/multigroup_test/inst/extdata/scripts" class="external-link">here</a></p>
+<p>We provide example R scripts to generate the LD matrices for UKB or 1000 genomes genotype files <a href="https://github.com/xinhe-lab/ctwas/tree/multigroup_test/inst/extdata/scripts" class="external-link">here</a></p>
 </div>
 <div class="section level3">
 <h3 id="ld-and-snp-info">LD and SNP info<a class="anchor" aria-label="anchor" href="#ld-and-snp-info"></a>
 </h3>
-<p>We need a list of variants as a “reference”, with the positions and allele information of these variants. We provide a function, <code><a href="../reference/preprocess_region_LD_snp_info.html">preprocess_region_LD_snp_info()</a></code> to preprocess region definitions in <code>region_info</code>, and map variants from the LD reference to regions.</p>
-<p>When running with LD, it takes input of <code>region_info</code>, which contains paths of LD matrices and variant information for each region, and returns processed <code>region_info</code>, <code>snp_info</code> and <code>LD_info</code>.</p>
+<p>We need a list of variants as a “reference”, with the positions and allele information of these variants. We provide a function, <code><a href="../reference/preprocess_region_LD_snp_info.html">preprocess_region_LD_snp_info()</a></code> to preprocess region definitions, and map variants from the LD reference to regions.</p>
+<p>When running with LD, it takes input of <code>region_info</code>, which contains region definitions, as well as paths to LD matrices and variant information for each region, and returns processed <code>region_info</code>, <code>snp_info</code> and <code>LD_info</code>.</p>
 <p>In this tutorial, we use chr16 as an example, so we specify <code>chrom = 16</code>. In real cTWAS analysis, you should run the entire genome.</p>
-<div class="sourceCode" id="cb10"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb7"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">res</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/preprocess_region_LD_snp_info.html">preprocess_region_LD_snp_info</a></span><span class="op">(</span><span class="va">region_info</span>, </span>
 <span>                                     chrom <span class="op">=</span> <span class="fl">16</span>, </span>
-<span>                                     use_LD <span class="op">=</span> <span class="cn">TRUE</span>, </span>
-<span>                                     ncore <span class="op">=</span> <span class="fl">6</span><span class="op">)</span></span>
+<span>                                     use_LD <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span>
 <span><span class="va">region_info</span> <span class="op">&lt;-</span> <span class="va">res</span><span class="op">$</span><span class="va">region_info</span></span>
 <span><span class="va">snp_info</span> <span class="op">&lt;-</span> <span class="va">res</span><span class="op">$</span><span class="va">snp_info</span></span>
-<span><span class="va">LD_info</span> <span class="op">&lt;-</span> <span class="va">res</span><span class="op">$</span><span class="va">LD_info</span></span>
-<span></span>
-<span><span class="co"># saveRDS(region_info, file.path(outputdir, paste0(outname, ".region_info.RDS")))</span></span>
-<span><span class="co"># saveRDS(snp_info, file.path(outputdir, paste0(outname, ".snp_info.RDS")))</span></span>
-<span><span class="co"># saveRDS(LD_info, file.path(outputdir, paste0(outname, ".LD_info.RDS")))</span></span></code></pre></div>
-<p>When running without LD, it takes input of <code>region_info</code> and a data frame <code>ref_snp_info</code> of variant information from the entire genome, and returns processed <code>region_info</code>, <code>snp_info</code>. We have the lists of reference variant information from all the LD matrices in the genome in <a href="https://uchicago.box.com/s/t089or92dkovv0epkrjvxq8r9db9ys99" class="external-link">hg38</a> and <a href="https://uchicago.box.com/s/ufko2gjagcb693dob4khccqubuztb9pz" class="external-link">hg19</a>.</p>
-<div class="sourceCode" id="cb11"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="co"># use reference SNP information for chr16 in hg38</span></span>
-<span><span class="va">ref_snp_info_file</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/system.file.html" class="external-link">system.file</a></span><span class="op">(</span><span class="st">"extdata/sample_data"</span>, <span class="st">"ukb_b38_0.1_chr16_var_info.Rvar.gz"</span>, package <span class="op">=</span> <span class="st">"ctwas"</span><span class="op">)</span></span>
-<span><span class="va">ref_snp_info</span> <span class="op">&lt;-</span> <span class="fu">data.table</span><span class="fu">::</span><span class="fu"><a href="https://rdatatable.gitlab.io/data.table/reference/fread.html" class="external-link">fread</a></span><span class="op">(</span><span class="va">ref_snp_info_file</span>, sep <span class="op">=</span> <span class="st">"\t"</span><span class="op">)</span></span>
+<span><span class="va">LD_info</span> <span class="op">&lt;-</span> <span class="va">res</span><span class="op">$</span><span class="va">LD_info</span></span></code></pre></div>
+<p>When running without LD, it takes input of <code>region_info</code> and a data frame <code>ref_snp_info</code>, which contains variant information from the entire genome, and returns processed <code>region_info</code>, <code>snp_info</code>.</p>
+<p>We have the lists of reference variant information from all the LD matrices in the genome in <a href="https://uchicago.box.com/s/t089or92dkovv0epkrjvxq8r9db9ys99" class="external-link">hg38</a> and <a href="https://uchicago.box.com/s/ufko2gjagcb693dob4khccqubuztb9pz" class="external-link">hg19</a>.</p>
+<div class="sourceCode" id="cb8"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">ref_snp_info_file</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/system.file.html" class="external-link">system.file</a></span><span class="op">(</span><span class="st">"extdata/sample_data"</span>, <span class="st">"ukb_b38_0.1_chr16_var_info.Rvar.gz"</span>, package <span class="op">=</span> <span class="st">"ctwas"</span><span class="op">)</span></span>
+<span><span class="va">ref_snp_info</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdatatable.gitlab.io/data.table/reference/fread.html" class="external-link">fread</a></span><span class="op">(</span><span class="va">ref_snp_info_file</span>, sep <span class="op">=</span> <span class="st">"\t"</span><span class="op">)</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/base/class.html" class="external-link">class</a></span><span class="op">(</span><span class="va">ref_snp_info</span><span class="op">)</span> <span class="op">&lt;-</span> <span class="st">"data.frame"</span></span>
 <span><span class="va">res</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/preprocess_region_LD_snp_info.html">preprocess_region_LD_snp_info</a></span><span class="op">(</span><span class="va">region_info</span>, </span>
-<span>                                     ref_snp_info <span class="op">=</span> <span class="va">ref_snp_info</span>, </span>
+<span>                                     <span class="va">ref_snp_info</span>, </span>
 <span>                                     chrom <span class="op">=</span> <span class="fl">16</span>, </span>
-<span>                                     use_LD <span class="op">=</span> <span class="cn">FALSE</span>, </span>
-<span>                                     ncore <span class="op">=</span> <span class="fl">6</span><span class="op">)</span></span>
+<span>                                     use_LD <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span></span>
 <span><span class="va">region_info</span> <span class="op">&lt;-</span> <span class="va">res</span><span class="op">$</span><span class="va">region_info</span></span>
 <span><span class="va">snp_info</span> <span class="op">&lt;-</span> <span class="va">res</span><span class="op">$</span><span class="va">snp_info</span></span></code></pre></div>
 </div>
@@ -282,73 +230,45 @@
 <div class="section level3">
 <h3 id="harmonizing-gwas-z-scores-and-the-reference-data">Harmonizing GWAS z-scores and the reference data<a class="anchor" aria-label="anchor" href="#harmonizing-gwas-z-scores-and-the-reference-data"></a>
 </h3>
-<p>The <code><a href="../reference/preprocess_z_snp.html">preprocess_z_snp()</a></code> function harmonizes GWAS z-scores and the reference data based on the included allele information. If <code>drop_multiallelic = TRUE</code>, it will drop multiallelic variants. If <code>drop_strand_ambig = TRUE</code>, it will drop strand ambiguous variants.</p>
-<div class="sourceCode" id="cb12"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="co"># load z_snp sample data</span></span>
-<span><span class="va">z_snp</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/readRDS.html" class="external-link">readRDS</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/system.file.html" class="external-link">system.file</a></span><span class="op">(</span><span class="st">"extdata/sample_data"</span>, <span class="st">"LDL_example.z_snp.RDS"</span>, package <span class="op">=</span> <span class="st">"ctwas"</span><span class="op">)</span><span class="op">)</span></span>
+<p>The <code><a href="../reference/preprocess_z_snp.html">preprocess_z_snp()</a></code> function harmonizes GWAS z-scores and the reference data based on the included allele information.</p>
+<div class="sourceCode" id="cb9"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">z_snp</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/readRDS.html" class="external-link">readRDS</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/system.file.html" class="external-link">system.file</a></span><span class="op">(</span><span class="st">"extdata/sample_data"</span>, <span class="st">"LDL_example.z_snp.RDS"</span>, package <span class="op">=</span> <span class="st">"ctwas"</span><span class="op">)</span><span class="op">)</span></span>
 <span></span>
-<span><span class="co"># preprocessing z_snp</span></span>
-<span><span class="va">z_snp</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/preprocess_z_snp.html">preprocess_z_snp</a></span><span class="op">(</span><span class="va">z_snp</span>, </span>
-<span>                          <span class="va">snp_info</span>, </span>
+<span><span class="va">z_snp</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/preprocess_z_snp.html">preprocess_z_snp</a></span><span class="op">(</span><span class="va">z_snp</span>, <span class="va">snp_info</span>, </span>
 <span>                          drop_multiallelic <span class="op">=</span> <span class="cn">TRUE</span>, </span>
-<span>                          drop_strand_ambig <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span>
-<span><span class="co"># saveRDS(z_snp, file.path(outputdir, paste0(outname, ".preprocessed.z_snp.RDS")))</span></span></code></pre></div>
+<span>                          drop_strand_ambig <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span></code></pre></div>
+<p>By default, it will drop multiallelic variants and strand ambiguous variants. You can change these by setting the options <code>drop_multiallelic</code> and <code>drop_strand_ambig</code>.</p>
 </div>
 <div class="section level3">
 <h3 id="harmonizing-prediction-models-and-the-reference-data">Harmonizing prediction models and the reference data<a class="anchor" aria-label="anchor" href="#harmonizing-prediction-models-and-the-reference-data"></a>
 </h3>
-<p>The <code>preprocess_weight()</code> function harmonizes the PredictDB/FUSION prediction models and LD reference.</p>
-<p>In this example, we use liver and subcutaneous adipose gene expression models. We preprocess each weight file separately and combine them in the end. We specify PredictDB or FUSION format in <code>weight_format</code> and the specific method in FUSION by <code>method_FUSION</code>. For the expression models, we limit to protein coding genes, by setting <code>filter_protein_coding_genes = TRUE</code>. We set <code>scale_predictdb_weights=TRUE</code> for PredictDB weights because PredictDB assumes the unstandardized genotypes (see the discussion in “Region info” section) For PredictDB models, we set <code>load_predictdb_LD=TRUE</code> to load pre-computed correlations (<code>.txt.gz</code> file) between weight variants. For FUSION models, we set <code>load_predictdb_LD=FALSE</code> to calculate correlations between weight variants with LD reference. It takes a while to calculate correlations using LD reference, and we could set <code>ncore</code> to parallelize the computation.</p>
-<p>In this version of cTWAS, we allow the joint analysis of multiple groups of molecular traits. This could be: eQTL of multiple tissues; or eQTLs, splicing QTLs and other types of QTLs in a single tissue. In a more complex setting, multiple types of QTL data from multiple tissues/cell types. Each group is defined by its “type” (kind of molecular traits), and “context” (tissue, cell type, condition, etc.). So, we specify the <code>type</code> and <code>context</code> arguments for each weight file.</p>
-<p>In this example, we will use liver and subcutaneous adipose gene expression models trained on GTEx v8 in the PredictDB format. We can download both the prediction models (.db) and the covariances between variants in the prediction models (.txt.gz) from the link below. The covariances can optionally be used for computing LD.</p>
-<div class="sourceCode" id="cb13"><pre class="sourceCode bash"><code class="sourceCode bash"><span id="cb13-1"><a href="#cb13-1"></a><span class="co"># download the weights files</span></span>
-<span id="cb13-2"><a href="#cb13-2"></a><span class="fu">wget</span> https://zenodo.org/record/3518299/files/mashr_eqtl.tar</span>
-<span id="cb13-3"><a href="#cb13-3"></a><span class="fu">tar</span> -xvf mashr_eqtl.tar</span></code></pre></div>
-<p>We get a list of processed weights for each weight file, and then we simply concatenate them to get a list of all processed weights from different types or contexts.</p>
-<div class="sourceCode" id="cb14"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">weight_liver_file</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/system.file.html" class="external-link">system.file</a></span><span class="op">(</span><span class="st">"extdata/sample_data"</span>, </span>
-<span><span class="st">"expression_Liver.db"</span>, package <span class="op">=</span> <span class="st">"ctwas"</span><span class="op">)</span></span>
-<span><span class="va">weights_liver</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/preprocess_weights.html">preprocess_weights</a></span><span class="op">(</span><span class="va">weight_liver_file</span>,</span>
+<p>We use the <code>preprocess_weight()</code> function to harmonize the PredictDB/FUSION prediction models and LD reference.</p>
+<p>In this example, we will use liver gene expression models trained on GTEx v8 in the PredictDB format. We can download both the prediction models (.db) and the covariances between variants in the prediction models (.txt.gz) from the link below. The covariances can optionally be used for computing LD.</p>
+<div class="sourceCode" id="cb10"><pre class="sourceCode bash"><code class="sourceCode bash"><span id="cb10-1"><a href="#cb10-1"></a><span class="fu">wget</span> https://zenodo.org/record/3518299/files/mashr_eqtl.tar</span>
+<span id="cb10-2"><a href="#cb10-2"></a><span class="fu">tar</span> -xvf mashr_eqtl.tar</span></code></pre></div>
+<div class="sourceCode" id="cb11"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">weight_file</span>   <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/system.file.html" class="external-link">system.file</a></span><span class="op">(</span><span class="st">"extdata/sample_data"</span>, <span class="st">"expression_Liver.db"</span>, package <span class="op">=</span> <span class="st">"ctwas"</span><span class="op">)</span></span>
+<span><span class="va">weights</span>       <span class="op">&lt;-</span> <span class="fu"><a href="../reference/preprocess_weights.html">preprocess_weights</a></span><span class="op">(</span><span class="va">weight_file</span>,</span>
 <span>                                    <span class="va">region_info</span>,</span>
 <span>                                    <span class="va">z_snp</span><span class="op">$</span><span class="va">id</span>,</span>
-<span>                                    <span class="va">snp_info</span>,</span>
-<span>                                    type <span class="op">=</span> <span class="st">"expression"</span>,</span>
-<span>                                    context <span class="op">=</span> <span class="st">"liver"</span>,</span>
+<span>                                    <span class="va">snp_info</span>,                                  </span>
 <span>                                    weight_format <span class="op">=</span> <span class="st">"PredictDB"</span>,</span>
 <span>                                    ncore <span class="op">=</span> <span class="fl">6</span>,</span>
 <span>                                    drop_strand_ambig <span class="op">=</span> <span class="cn">TRUE</span>,</span>
 <span>                                    scale_predictdb_weights <span class="op">=</span> <span class="cn">TRUE</span>,</span>
 <span>                                    load_predictdb_LD <span class="op">=</span> <span class="cn">TRUE</span>,</span>
-<span>                                    filter_protein_coding_genes <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span>
-<span></span>
-<span><span class="va">weight_adipose_file</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/system.file.html" class="external-link">system.file</a></span><span class="op">(</span><span class="st">"extdata/sample_data"</span>, <span class="st">"expression_Adipose_Subcutaneous.db"</span>, package <span class="op">=</span> <span class="st">"ctwas"</span><span class="op">)</span></span>
-<span><span class="va">weights_adipose</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/preprocess_weights.html">preprocess_weights</a></span><span class="op">(</span><span class="va">weight_adipose_file</span>,</span>
-<span>                                      <span class="va">region_info</span>,</span>
-<span>                                      <span class="va">z_snp</span><span class="op">$</span><span class="va">id</span>,</span>
-<span>                                      <span class="va">snp_info</span>,</span>
-<span>                                      type <span class="op">=</span> <span class="st">"expression"</span>,</span>
-<span>                                      context <span class="op">=</span> <span class="st">"adipose"</span>,</span>
-<span>                                      weight_format <span class="op">=</span> <span class="st">"PredictDB"</span>,</span>
-<span>                                      ncore <span class="op">=</span> <span class="fl">6</span>,</span>
-<span>                                      drop_strand_ambig <span class="op">=</span> <span class="cn">TRUE</span>,</span>
-<span>                                      scale_predictdb_weights <span class="op">=</span> <span class="cn">TRUE</span>,</span>
-<span>                                      load_predictdb_LD <span class="op">=</span> <span class="cn">TRUE</span>,</span>
-<span>                                      filter_protein_coding_genes <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span>
-<span></span>
-<span><span class="co"># concatenate weights from different types or contexts</span></span>
-<span><span class="va">weights</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="va">weights_liver</span>, <span class="va">weights_adipose</span><span class="op">)</span></span>
-<span><span class="co"># saveRDS(weights, file.path(outputdir, paste0(outname, ".preprocessed.weights.RDS")))</span></span></code></pre></div>
+<span>                                    filter_protein_coding_genes <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span></code></pre></div>
+<p>We get a list of processed weights for each weight file, and then we simply concatenate them to get a list of all processed weights from different types or contexts.</p>
+<p>We specify PredictDB or FUSION format in <code>weight_format</code> and the specific method in FUSION by <code>method_FUSION</code>. By default, it will drop strand ambiguous variants and limit to protein coding genes. We set <code>scale_predictdb_weights=TRUE</code> for PredictDB weights because PredictDB assumes the unstandardized genotypes (see the discussion in “Region info” section) For PredictDB models, we set <code>load_predictdb_LD=TRUE</code> to load pre-computed correlations (<code>.txt.gz</code> file) between weight variants. For FUSION models, we set <code>load_predictdb_LD=FALSE</code> to calculate correlations between weight variants with LD reference. We could set <code>ncore</code> to parallelize the computation.</p>
 </div>
 </div>
 <div class="section level2">
-<h2 id="computing-z-scores-of-molecular-traits">Computing z-scores of molecular traits<a class="anchor" aria-label="anchor" href="#computing-z-scores-of-molecular-traits"></a>
+<h2 id="computing-z-scores-of-genes">Computing Z-scores of genes<a class="anchor" aria-label="anchor" href="#computing-z-scores-of-genes"></a>
 </h2>
-<p>After we have done data preprocessing, we compute z-scores of molecular traits. This step basically performs Transcriptome-wide association studies (TWAS) on each molecular trait with a prediction model. The underlying calculation is based on <a href="https://www.nature.com/articles/s41467-018-03621-1" class="external-link">S-PrediXcan</a>.</p>
-<p>The <code>compute_gene_z</code> function computes z-scores for the molecular traits using preprocessed SNP z-scores (<code>z_snp</code>) and the preprocessed weights. We could set <code>ncore</code> to parallelize the computation.</p>
-<p><em>Note: the software uses the term “gene”, but they could be any molecular trait.</em></p>
-<div class="sourceCode" id="cb15"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">z_gene</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/compute_gene_z.html">compute_gene_z</a></span><span class="op">(</span><span class="va">z_snp</span>, <span class="va">weights</span>, ncore <span class="op">=</span> <span class="fl">6</span><span class="op">)</span></span>
-<span><span class="co"># saveRDS(z_gene, file = file.path(outputdir, paste0(outname, ".z_gene.RDS")))</span></span></code></pre></div>
+<p>After we have done data preprocessing, we compute Z-scores of genes. This step basically performs Transcriptome-wide association studies (TWAS) on each gene with a prediction model. The underlying calculation is based on <a href="https://www.nature.com/articles/s41467-018-03621-1" class="external-link">S-PrediXcan</a>.</p>
+<p>The <code>compute_gene_z</code> function computes Z-scores for the genes using preprocessed SNP Z-scores (<code>z_snp</code>) and the preprocessed weights (<code>weights</code>).</p>
+<div class="sourceCode" id="cb12"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">z_gene</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/compute_gene_z.html">compute_gene_z</a></span><span class="op">(</span><span class="va">z_snp</span>, <span class="va">weights</span><span class="op">)</span></span></code></pre></div>
 </div>
   </div>
 

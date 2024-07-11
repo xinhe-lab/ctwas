@@ -18,7 +18,7 @@ saves LD matrices as .RDS files and SNP info as .Rvar files"><!-- mathjax --><sc
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">ctwas</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">0.2.47</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">0.3.6</span>
       </span>
     </div>
 
@@ -33,7 +33,7 @@ saves LD matrices as .RDS files and SNP info as .Rvar files"><!-- mathjax --><sc
     <span class="caret"></span>
   </a>
   <ul class="dropdown-menu" role="menu"><li>
-      <a href="../articles/simple_ctwas_tutorial.html">Simple cTWAS tutorial</a>
+      <a href="../articles/minimal_ctwas_tutorial.html">A minimal tutorial of running cTWAS without LD</a>
     </li>
     <li>
       <a href="../articles/preparing_ctwas_input_data.html">Preparing cTWAS input data</a>
@@ -52,7 +52,7 @@ saves LD matrices as .RDS files and SNP info as .Rvar files"><!-- mathjax --><sc
     </li>
   </ul></li>
       </ul><ul class="nav navbar-nav navbar-right"><li>
-  <a href="https://github.com/xinhe-lab/ctwas/tree/multigroup_test" class="external-link">Source</a>
+  <a href="https://github.com/xinhe-lab/ctwas/tree/single_group" class="external-link">Source</a>
 </li>
       </ul></div><!--/.nav-collapse -->
   </div><!--/.container -->
@@ -64,7 +64,7 @@ saves LD matrices as .RDS files and SNP info as .Rvar files"><!-- mathjax --><sc
   <div class="col-md-9 contents">
     <div class="page-header">
     <h1>Converts PLINK genotype data to LD matrices and SNP info files, saves LD matrices as .RDS files and SNP info as .Rvar files</h1>
-    <small class="dont-index">Source: <a href="https://github.com/xinhe-lab/ctwas/blob/multigroup_test/R/ctwas_convert_geno_to_LD_matrix.R" class="external-link"><code>R/ctwas_convert_geno_to_LD_matrix.R</code></a></small>
+    <small class="dont-index">Source: <a href="https://github.com/xinhe-lab/ctwas/blob/single_group/R/ctwas_convert_geno_to_LD_matrix.R" class="external-link"><code>R/ctwas_convert_geno_to_LD_matrix.R</code></a></small>
     <div class="hidden name"><code>convert_geno_to_LD_matrix.Rd</code></div>
     </div>
 
@@ -82,15 +82,17 @@ saves LD matrices as .RDS files and SNP info as .Rvar files</p>
 <span>  outputdir <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/getwd.html" class="external-link">getwd</a></span><span class="op">(</span><span class="op">)</span>,</span>
 <span>  outname <span class="op">=</span> <span class="st">""</span>,</span>
 <span>  include_variance <span class="op">=</span> <span class="cn">TRUE</span>,</span>
-<span>  include_allele_freq <span class="op">=</span> <span class="cn">TRUE</span></span>
+<span>  include_allele_freq <span class="op">=</span> <span class="cn">TRUE</span>,</span>
+<span>  show_progress_bar <span class="op">=</span> <span class="cn">TRUE</span>,</span>
+<span>  verbose <span class="op">=</span> <span class="cn">FALSE</span></span>
 <span><span class="op">)</span></span></code></pre></div>
     </div>
 
     <div id="arguments">
     <h2>Arguments</h2>
     <dl><dt>region_info</dt>
-<dd><p>a data frame of region information, with columns:
-chr, start, stop positions</p></dd>
+<dd><p>a data frame of region definitions, with columns:
+chrom, start, stop, and region_id</p></dd>
 
 
 <dt>genotype_files</dt>
@@ -123,6 +125,14 @@ in .pgen or .bed format</p></dd>
 <dt>include_allele_freq</dt>
 <dd><p>TRUE/FALSE, if TRUE, include allele frequency
 in .Rvar output</p></dd>
+
+
+<dt>show_progress_bar</dt>
+<dd><p>If TRUE, print progress bar</p></dd>
+
+
+<dt>verbose</dt>
+<dd><p>If TRUE, print detail messages</p></dd>
 
 </dl></div>
     <div id="value">
