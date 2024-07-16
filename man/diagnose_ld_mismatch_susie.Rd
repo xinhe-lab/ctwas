@@ -7,8 +7,8 @@
 diagnose_ld_mismatch_susie(
   z_snp,
   region_ids,
-  LD_info,
-  snp_info,
+  LD_map,
+  snp_map,
   gwas_n = NULL,
   ncore = 1,
   p_diff_thresh = 5e-08,
@@ -22,9 +22,9 @@ snps. "A1" is effect allele. "A2" is the other allele.}
 
 \item{region_ids}{A vector of region IDs to run diagnosis}
 
-\item{LD_info}{a list of paths to LD matrices for each of the regions.}
+\item{LD_map}{a data frame with filenames of LD matrices for each of the regions.}
 
-\item{snp_info}{a list of SNP info data frames for LD reference.}
+\item{snp_map}{a list of data frames with SNP-to-region map for the reference.}
 
 \item{gwas_n}{integer, GWAS sample size.}
 

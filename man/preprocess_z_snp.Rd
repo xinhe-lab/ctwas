@@ -6,7 +6,7 @@
 \usage{
 preprocess_z_snp(
   z_snp,
-  snp_info,
+  snp_map,
   drop_multiallelic = TRUE,
   drop_strand_ambig = TRUE,
   logfile = NULL
@@ -16,8 +16,7 @@ preprocess_z_snp(
 \item{z_snp}{A data frame with two columns: "id", "A1", "A2", "z". giving the z scores for
 snps. "A1" is effect allele. "A2" is the other allele.}
 
-\item{snp_info}{a list of SNP info data frames for LD reference,
-with columns "chrom", "id", "pos", "alt", "ref", and "region_id".}
+\item{snp_map}{a list of data frames with SNP-to-region map for the reference.}
 
 \item{drop_multiallelic}{TRUE/FALSE. If TRUE, multiallelic variants will be dropped from the summary statistics.}
 

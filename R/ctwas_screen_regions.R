@@ -4,9 +4,9 @@
 #'
 #' @param use_LD TRUE/FALSE. If TRUE, use LD for finemapping. Otherwise, use "no-LD" version.
 #'
-#' @param LD_map a list of paths to LD matrices for each of the regions. Required when \code{use_LD = TRUE}.
+#' @param LD_map a data frame with filenames of LD matrices for each of the regions. Required when \code{use_LD = TRUE}.
 #'
-#' @param snp_map a list of SNP info data frames for LD reference. Required when \code{use_LD = TRUE}.
+#' @param snp_map aa list of data frames with SNP-to-region map for the reference. Required when \code{use_LD = TRUE}.
 #'
 #' @param weights a list of weights for each gene. Required when \code{use_LD = TRUE}.
 #'

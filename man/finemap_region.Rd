@@ -8,8 +8,8 @@ finemap_region(
   region_data,
   region_id,
   use_LD = TRUE,
-  LD_info = NULL,
-  snp_info = NULL,
+  LD_map = NULL,
+  snp_map = NULL,
   weights = NULL,
   L = 5,
   group_prior = NULL,
@@ -32,13 +32,13 @@ finemap_region(
 
 \item{region_id}{a character string of region id to be finemapped}
 
-\item{use_LD}{TRUE/FALSE. If TRUE, use LD for finemapping. Otherwise, use "no-LD" version.}
+\item{use_LD}{If TRUE, use LD for finemapping. Otherwise, use "no-LD" version.}
 
-\item{LD_info}{a list of paths to LD matrices for each of the regions. Required when \code{use_LD = TRUE}.}
+\item{LD_map}{a data frame with filenames of LD matrices for the regions. Required when \code{use_LD = TRUE}.}
 
-\item{snp_info}{a list of SNP info data frames for LD reference. Required when \code{use_LD = TRUE}.}
+\item{snp_map}{a list of SNP-to-region map for the reference. Required when \code{use_LD = TRUE}.}
 
-\item{weights}{a list of preprocessed weights}
+\item{weights}{a list of preprocessed weights.}
 
 \item{L}{the number of effects for susie during the fine mapping}
 
@@ -78,3 +78,4 @@ a data frame of finemapping results.
 \description{
 Runs cTWAS finemapping for a single region
 }
+\keyword{internal}

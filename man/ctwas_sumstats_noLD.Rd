@@ -8,7 +8,7 @@ ctwas_sumstats_noLD(
   z_snp,
   weights,
   region_info,
-  snp_info,
+  snp_map,
   z_gene = NULL,
   thin = 0.1,
   niter_prefit = 3,
@@ -33,9 +33,9 @@ giving the z scores for snps. "A1" is effect allele. "A2" is the other allele.}
 
 \item{weights}{a list of prediction weights}
 
-\item{region_info}{a data frame of region definition and associated LD file names}
+\item{region_info}{a data frame of region definitions.}
 
-\item{snp_info}{a list or data frame of reference SNP info.}
+\item{snp_map}{a list of data frames with SNP-to-region map for the reference.}
 
 \item{z_gene}{A data frame with columns: "id", "z", giving the z-scores for genes.}
 

@@ -18,11 +18,11 @@ test_that("get_region_cor correctly loads correlation matrices", {
 test_that("get_region_cor correctly computes correlation matrices", {
   region_id <- "16_71020125_72901251"
 
-  LD_info <- readRDS(system.file("extdata/sample_data", "LDL_example.LD_info.RDS", package = "ctwas"))
-  skip_if_no_LD_matrix(LD_info$LD_matrix)
+  LD_map <- readRDS(system.file("extdata/sample_data", "LDL_example.LD_map.RDS", package = "ctwas"))
+  skip_if_no_LD_matrix(LD_map$LD_matrix)
 
   region_info <- readRDS(system.file("extdata/sample_data", "LDL_example.region_info.RDS", package = "ctwas"))
-  snp_info <- readRDS(system.file("extdata/sample_data", "LDL_example.snp_info.RDS", package = "ctwas"))
+  snp_map <- readRDS(system.file("extdata/sample_data", "LDL_example.snp_map.RDS", package = "ctwas"))
   weights <- readRDS(system.file("extdata/sample_data", "LDL_example.preprocessed.weights.RDS", package = "ctwas"))
   ctwas_res <- readRDS(system.file("extdata/sample_data", "LDL_example.ctwas_sumstats_res.RDS", package = "ctwas"))
 
@@ -30,8 +30,8 @@ test_that("get_region_cor correctly computes correlation matrices", {
   # test computing the correlation matrices
   cor_res <- get_region_cor(region_id,
                             region_data = screened_region_data,
-                            LD_info = LD_info,
-                            snp_info = snp_info,
+                            LD_map = LD_map,
+                            snp_map = snp_map,
                             weights = weights)
 
   R_gene <- readRDS(system.file("extdata/sample_data/cor_matrix", paste0("region.", region_id, ".R_gene.RDS"), package = "ctwas"))

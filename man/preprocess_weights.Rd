@@ -8,8 +8,8 @@ preprocess_weights(
   weight_path,
   region_info,
   gwas_snp_ids,
-  snp_info,
-  LD_info = NULL,
+  snp_map,
+  LD_map = NULL,
   weight_format = c("PredictDB", "FUSION"),
   drop_strand_ambig = TRUE,
   scale_predictdb_weights = TRUE,
@@ -28,14 +28,14 @@ preprocess_weights(
 \item{weight_path}{path to the '.db' file for PredictDB weights;
 or the directory containing '.wgt.RDat' files for FUSION weights.}
 
-\item{region_info}{a data frame of region definition and associated file names.}
+\item{region_info}{a data frame of region definition.}
 
 \item{gwas_snp_ids}{a vector of SNP IDs in GWAS summary statistics (z_snp$id).}
 
-\item{snp_info}{a list of SNP info data frames for LD reference,
-with columns "chrom", "id", "pos", "alt", "ref", and "region_id".}
+\item{snp_map}{a list of data frames with SNP-to-region map for the reference.}
 
-\item{LD_info}{a list of paths to LD matrices for each of the regions. Required when \code{load_predictdb_LD = FALSE}.}
+\item{LD_map}{a data frame with filenames of LD matrices for each of the regions.
+Required when \code{load_predictdb_LD = FALSE}.}
 
 \item{weight_format}{a string, specifying format of each weight file, e.g. PredictDB, FUSION.}
 

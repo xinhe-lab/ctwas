@@ -1,7 +1,7 @@
 test_that("screen_regions (no-LD version) work", {
 
   region_info <- readRDS(system.file("extdata/sample_data", "LDL_example.region_info.RDS", package = "ctwas"))
-  snp_info <- readRDS(system.file("extdata/sample_data", "LDL_example.snp_info.RDS", package = "ctwas"))
+  snp_map <- readRDS(system.file("extdata/sample_data", "LDL_example.snp_map.RDS", package = "ctwas"))
   z_snp <- readRDS(system.file("extdata/sample_data", "LDL_example.preprocessed.z_snp.RDS", package = "ctwas"))
   z_gene <- readRDS(system.file("extdata/sample_data", "LDL_example.z_gene.RDS", package = "ctwas"))
 
@@ -23,7 +23,7 @@ test_that("screen_regions (no-LD version) work", {
 
     # Expand screened region_data with all SNPs in the regions
     screened_region_data <- expand_region_data(screened_region_data,
-                                               snp_info,
+                                               snp_map,
                                                z_snp,
                                                z_gene,
                                                trim_by = "z",
@@ -35,11 +35,11 @@ test_that("screen_regions (no-LD version) work", {
 
 test_that("screen_regions (LD version) work", {
 
-  LD_info <- readRDS(system.file("extdata/sample_data", "LDL_example.LD_info.RDS", package = "ctwas"))
-  skip_if_no_LD_matrix(LD_info$LD_matrix)
+  LD_map <- readRDS(system.file("extdata/sample_data", "LDL_example.LD_map.RDS", package = "ctwas"))
+  skip_if_no_LD_matrix(LD_map$LD_matrix)
 
   region_info <- readRDS(system.file("extdata/sample_data", "LDL_example.region_info.RDS", package = "ctwas"))
-  snp_info <- readRDS(system.file("extdata/sample_data", "LDL_example.snp_info.RDS", package = "ctwas"))
+  snp_map <- readRDS(system.file("extdata/sample_data", "LDL_example.snp_map.RDS", package = "ctwas"))
   weights <- readRDS(system.file("extdata/sample_data", "LDL_example.preprocessed.weights.RDS", package = "ctwas"))
 
   z_snp <- readRDS(system.file("extdata/sample_data", "LDL_example.preprocessed.z_snp.RDS", package = "ctwas"))
@@ -57,8 +57,8 @@ test_that("screen_regions (LD version) work", {
   capture.output({
     screen_regions_res <- screen_regions(region_data,
                                          use_LD = TRUE,
-                                         LD_info = LD_info,
-                                         snp_info = snp_info,
+                                         LD_map = LD_map,
+                                         snp_map = snp_map,
                                          weights = weights,
                                          group_prior = group_prior,
                                          group_prior_var = group_prior_var)
@@ -66,7 +66,7 @@ test_that("screen_regions (LD version) work", {
 
     # Expand screened region_data with all SNPs in the regions
     screened_region_data <- expand_region_data(screened_region_data,
-                                               snp_info,
+                                               snp_map,
                                                z_snp,
                                                z_gene,
                                                trim_by = "z",

@@ -8,7 +8,7 @@
 #'
 #' @param weights a list of preprocessed weights.
 #'
-#' @param snp_map a list of SNP info data frames for LD reference.
+#' @param snp_map a list of data frames with SNP-to-region map for the reference.
 #'
 #' @param thin The proportion of SNPs to be used for the parameter estimation and
 #' initial screening region steps.
@@ -317,7 +317,7 @@ adjust_boundary_genes <- function(boundary_genes,
 #'
 #' @param region_data a list of region gene IDs and SNP IDs and associated file names
 #'
-#' @param snp_map a list of SNP info data frames for LD reference.
+#' @param snp_map a list of data frames with SNP-to-region map for the reference.
 #'
 #' @param z_snp A data frame with columns: "id", "z", giving the z-scores for SNPs.
 #'

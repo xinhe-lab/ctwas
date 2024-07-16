@@ -6,9 +6,9 @@
 #'
 #' @param region_ids A vector of region IDs to run diagnosis
 #'
-#' @param LD_map a list of paths to LD matrices for each of the regions.
+#' @param LD_map a data frame with filenames of LD matrices for each of the regions.
 #'
-#' @param snp_map a list of SNP info data frames for LD reference.
+#' @param snp_map a list of data frames with SNP-to-region map for the reference.
 #'
 #' @param gwas_n integer, GWAS sample size.
 #'

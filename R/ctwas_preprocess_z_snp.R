@@ -4,7 +4,7 @@
 #' @param z_snp A data frame with two columns: "id", "A1", "A2", "z". giving the z scores for
 #' snps. "A1" is effect allele. "A2" is the other allele.
 #'
-#' @param snp_map a list of SNP-to-region map for the reference.
+#' @param snp_map a list of data frames with SNP-to-region map for the reference.
 #'
 #' @param drop_multiallelic TRUE/FALSE. If TRUE, multiallelic variants will be dropped from the summary statistics.
 #'

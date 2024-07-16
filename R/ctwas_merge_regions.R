@@ -12,11 +12,11 @@
 #'
 #' @param weights a list of weights for each gene
 #'
-#' @param use_LD TRUE/FALSE. If TRUE, use LD for finemapping.
+#' @param use_LD If TRUE, use LD for finemapping.
 #'
-#' @param LD_map a list of paths to LD matrices for each of the regions.
+#' @param LD_map a data frame with filenames of LD matrices for each of the regions
 #'
-#' @param snp_map a list of SNP info data frames for LD reference.
+#' @param snp_map a list of data frames with SNP-to-region map for the reference.
 #'
 #' @param maxSNP Inf or integer. Maximum number of SNPs in a region. Default is
 #' Inf, no limit. This can be useful if there are many SNPs in a region and you don't
@@ -237,11 +237,11 @@ create_merged_snp_LD_map <- function(boundary_genes,
 #'
 #' @param region_info a data frame of region definitions
 #'
-#' @param use_LD TRUE/FALSE. If TRUE, use LD for finemapping.
+#' @param use_LD If TRUE, use LD for finemapping.
 #'
-#' @param LD_map a list of paths to LD matrices for each of the regions.
+#' @param LD_map a data frame with filenames of LD matrices for each of the regions.
 #'
-#' @param snp_map a list of SNP info data frames for LD reference.
+#' @param snp_map a list of data frames with SNP-to-region map for the reference.
 #'
 #' @param z_snp A data frame with columns: "id", "z", giving the z-scores for SNPs.
 #'

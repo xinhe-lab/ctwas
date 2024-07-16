@@ -6,7 +6,7 @@
 \usage{
 anno_finemap_res(
   finemap_res,
-  snp_info,
+  snp_map,
   gene_annot = NULL,
   use_gene_pos = c("mid", "start", "end"),
   filter_protein_coding_genes = FALSE,
@@ -16,8 +16,7 @@ anno_finemap_res(
 \arguments{
 \item{finemap_res}{a data frame of cTWAS finemapping result}
 
-\item{snp_info}{a list or data frame of SNP info for LD reference,
-with columns "chrom", "id", "pos", "alt", "ref".}
+\item{snp_map}{a list of data frames with SNP-to-region map for the reference.}
 
 \item{gene_annot}{a data frame of gene annotations, with columns:
 "chrom", "start", "end", "gene_id", "gene_name", "gene_type.}

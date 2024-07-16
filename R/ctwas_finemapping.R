@@ -4,13 +4,13 @@
 #'
 #' @param region_id a character string of region id to be finemapped
 #'
-#' @param use_LD TRUE/FALSE. If TRUE, use LD for finemapping. Otherwise, use "no-LD" version.
+#' @param use_LD If TRUE, use LD for finemapping. Otherwise, use "no-LD" version.
 #'
-#' @param LD_map a list of paths to LD matrices for each of the regions. Required when \code{use_LD = TRUE}.
+#' @param LD_map a data frame with filenames of LD matrices for the regions. Required when \code{use_LD = TRUE}.
 #'
-#' @param snp_map a list of SNP info data frames for LD reference. Required when \code{use_LD = TRUE}.
+#' @param snp_map a list of SNP-to-region map for the reference. Required when \code{use_LD = TRUE}.
 #'
-#' @param weights a list of preprocessed weights
+#' @param weights a list of preprocessed weights.
 #'
 #' @param L the number of effects for susie during the fine mapping
 #'
@@ -49,7 +49,7 @@
 #' @importFrom logging loginfo
 #' @importFrom Matrix bdiag
 #'
-#' @export
+#' @keywords internal
 #'
 finemap_region <- function(region_data,
                            region_id,
@@ -168,13 +168,13 @@ finemap_region <- function(region_data,
 #'
 #' @param region_data region_data to be finemapped
 #'
-#' @param use_LD TRUE/FALSE. If TRUE, use LD for finemapping. Otherwise, use "no-LD" version.
+#' @param use_LD If TRUE, use LD for finemapping. Otherwise, use "no-LD" version.
 #'
-#' @param LD_map a list of paths to LD matrices for each of the regions. Required when \code{use_LD = TRUE}.
+#' @param LD_map a data frame with filenames of LD matrices for the regions. Required when \code{use_LD = TRUE}.
 #'
-#' @param snp_map a list of SNP info data frames for LD reference. Required when \code{use_LD = TRUE}.
+#' @param snp_map a list of SNP-to-region map for the reference. Required when \code{use_LD = TRUE}.
 #'
-#' @param weights a list of weights for each gene
+#' @param weights a list of preprocessed weights.
 #'
 #' @param L the number of effects or a vector of number of effects for each region.
 #'

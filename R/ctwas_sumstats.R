@@ -7,9 +7,9 @@
 #'
 #' @param region_info a data frame of region definitions.
 #'
-#' @param snp_map a list of reference SNP info for all regions
+#' @param snp_map a list of data frames with SNP-to-region map for the reference.
 #'
-#' @param LD_map a list of paths to LD matrices for each of the regions.
+#' @param LD_map a data frame with filenames of LD matrices for each of the regions.
 #'
 #' @param z_gene A data frame with columns: "id", "z", giving the z-scores for genes.
 #'

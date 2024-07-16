@@ -8,7 +8,7 @@
 #'
 #' @param gwas_snp_ids a vector of SNP IDs in GWAS summary statistics (z_snp$id).
 #'
-#' @param snp_map a list of SNP-to-region map for the reference.
+#' @param snp_map a list of data frames with SNP-to-region map for the reference.
 #'
 #' @param LD_map a data frame with filenames of LD matrices for each of the regions.
 #' Required when \code{load_predictdb_LD = FALSE}.
@@ -137,7 +137,7 @@ preprocess_weights <- function(weight_path,
                                           weight_name,
                                           region_info = region_info,
                                           LD_map = LD_map,
-                                          snp_info = snp_info,
+                                          snp_map = snp_map,
                                           LD_format = LD_format,
                                           LD_loader_fun = LD_loader_fun,
                                           ncore = ncore)
@@ -175,8 +175,7 @@ process_weight <- function(gene_name,
   if (length(chrom) > 1) {
     stop("More than one chrom in weight for %s!", gene_name)
   }
-  snp_pos$pos <- as.integer(snp_info$pos)
-  snp_pos <- snp_info$pos[match(g_weight_table$rsid, snp_info$id)]
+  snp_pos <- as.integer(snp_info$pos[match(g_weight_table$rsid, snp_info$id)])
 
   snps <- data.frame(chrom = chrom,
                      id = g_weight_table$rsid,

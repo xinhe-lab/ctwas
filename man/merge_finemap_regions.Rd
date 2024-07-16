@@ -12,8 +12,8 @@ merge_finemap_regions(
   z_gene,
   weights,
   use_LD = TRUE,
-  LD_info = NULL,
-  snp_info = NULL,
+  LD_map = NULL,
+  snp_map = NULL,
   maxSNP = Inf,
   expand = TRUE,
   L = 5,
@@ -45,11 +45,11 @@ merge_finemap_regions(
 
 \item{weights}{a list of weights for each gene}
 
-\item{use_LD}{TRUE/FALSE. If TRUE, use LD for finemapping.}
+\item{use_LD}{If TRUE, use LD for finemapping.}
 
-\item{LD_info}{a list of paths to LD matrices for each of the regions.}
+\item{LD_map}{a data frame with filenames of LD matrices for each of the regions}
 
-\item{snp_info}{a list of SNP info data frames for LD reference.}
+\item{snp_map}{a list of data frames with SNP-to-region map for the reference.}
 
 \item{maxSNP}{Inf or integer. Maximum number of SNPs in a region. Default is
 Inf, no limit. This can be useful if there are many SNPs in a region and you don't

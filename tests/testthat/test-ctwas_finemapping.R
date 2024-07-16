@@ -18,7 +18,6 @@ test_that("finemap_regions works with no-LD", {
   capture.output({
     finemap_res <- finemap_regions(region_data = screened_region_data[region_id],
                                    use_LD = FALSE,
-                                   L = 1,
                                    weights = weights,
                                    group_prior = group_prior,
                                    group_prior_var = group_prior_var)
@@ -29,10 +28,10 @@ test_that("finemap_regions works with no-LD", {
 test_that("finemap_regions works with LD", {
 
   # finemap a single region with LD
-  LD_info <- readRDS(system.file("extdata/sample_data", "LDL_example.LD_info.RDS", package = "ctwas"))
-  skip_if_no_LD_matrix(LD_info$LD_matrix)
+  LD_map <- readRDS(system.file("extdata/sample_data", "LDL_example.LD_map.RDS", package = "ctwas"))
+  skip_if_no_LD_matrix(LD_map$LD_matrix)
 
-  snp_info <- readRDS(system.file("extdata/sample_data", "LDL_example.snp_info.RDS", package = "ctwas"))
+  snp_map <- readRDS(system.file("extdata/sample_data", "LDL_example.snp_map.RDS", package = "ctwas"))
   weights <- readRDS(system.file("extdata/sample_data", "LDL_example.preprocessed.weights.RDS", package = "ctwas"))
 
   ctwas_res <- readRDS(system.file("extdata/sample_data", "LDL_example.ctwas_sumstats_res.RDS", package = "ctwas"))
@@ -51,8 +50,8 @@ test_that("finemap_regions works with LD", {
   capture.output({
     finemap_res <- finemap_regions(region_data = screened_region_data[region_id],
                                    use_LD = TRUE,
-                                   LD_info = LD_info,
-                                   snp_info = snp_info,
+                                   LD_map = LD_map,
+                                   snp_map = snp_map,
                                    weights = weights,
                                    group_prior = group_prior,
                                    group_prior_var = group_prior_var,

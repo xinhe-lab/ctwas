@@ -9,8 +9,8 @@ merge_region_data(
   region_data,
   region_info,
   use_LD = TRUE,
-  LD_info,
-  snp_info,
+  LD_map,
+  snp_map,
   z_snp,
   z_gene,
   expand = TRUE,
@@ -25,13 +25,13 @@ merge_region_data(
 
 \item{region_data}{a list of original region_data}
 
-\item{region_info}{a data frame of region definition and associated LD file names}
+\item{region_info}{a data frame of region definitions}
 
-\item{use_LD}{TRUE/FALSE. If TRUE, use LD for finemapping.}
+\item{use_LD}{If TRUE, use LD for finemapping.}
 
-\item{LD_info}{a list of paths to LD matrices for each of the regions.}
+\item{LD_map}{a data frame with filenames of LD matrices for each of the regions.}
 
-\item{snp_info}{a list of SNP info data frames for LD reference.}
+\item{snp_map}{a list of data frames with SNP-to-region map for the reference.}
 
 \item{z_snp}{A data frame with columns: "id", "z", giving the z-scores for SNPs.}
 

@@ -6,7 +6,7 @@
 \usage{
 expand_region_data(
   region_data,
-  snp_info,
+  snp_map,
   z_snp,
   z_gene,
   trim_by = c("z", "random"),
@@ -19,7 +19,7 @@ expand_region_data(
 \arguments{
 \item{region_data}{a list of region gene IDs and SNP IDs and associated file names}
 
-\item{snp_info}{a list of SNP info data frames for LD reference.}
+\item{snp_map}{a list of data frames with SNP-to-region map for the reference.}
 
 \item{z_snp}{A data frame with columns: "id", "z", giving the z-scores for SNPs.}
 

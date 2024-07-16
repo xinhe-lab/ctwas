@@ -19,16 +19,21 @@ read_snp_info_files <- function (files){
 }
 
 #' Load LD matrix
+#'
 #' @param file path to LD matrix
+#'
 #' @param format file format for LD matrix. If "custom", use a user defined
 #' \code{LD_loader_fun()} function to load LD matrix.
+#'
 #' @param LD_loader_fun a user defined function to load LD matrix
 #'
 #' @importFrom utils read.csv
 #' @importFrom Matrix readMM
 #' @importFrom data.table fread
 #' @importFrom tools file_ext
+#'
 #' @export
+#'
 load_LD <- function (file,
                      format = c("rds", "rdata", "mtx", "csv", "txt", "custom"),
                      LD_loader_fun) {

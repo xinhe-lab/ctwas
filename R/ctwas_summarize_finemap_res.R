@@ -3,7 +3,7 @@
 #'
 #' @param finemap_res a data frame of cTWAS finemapping result
 #'
-#' @param snp_map a list of reference SNP info for all regions
+#' @param snp_map a list of data frames with SNP-to-region map for the reference.
 #'
 #' @param gene_annot a data frame of gene annotations, with columns:
 #' "chrom", "start", "end", "gene_id", "gene_name", "gene_type.

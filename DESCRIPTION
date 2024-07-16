@@ -4,7 +4,7 @@ Type: Package
 Title: Adjusting for Genetic Confounders in Transcriptome-Wide Association
   Studies Improves Discovery of Risk Genes of Complex Traits
 Date: 2024-06-14
-Version: 0.3.6
+Version: 0.3.7
 Authors@R: c(person("Siming","Zhao",role="aut",email="siming.zhao06@gmail.com"),
              person("Wesley","Crouse",role="aut"),
              person("Sheng","Qian",role="aut",email="shengqian@uchicago.edu"),
@@ -30,7 +30,6 @@ Imports:
     Matrix,
     parallel,
     logging,
-    mixsqp,
     magrittr,
     dplyr,
     ggplot2,
@@ -41,8 +40,9 @@ Imports:
     readr,
     data.table,
     RSQLite,
-    locuszoomr,
+    mixsqp,
     pgenlibr,
+    locuszoomr,
     ensembldb,
     AnnotationFilter
 Suggests: 
@@ -56,5 +56,5 @@ biocViews:
     Software
 VignetteBuilder: knitr
 NeedsCompilation: no
-RoxygenNote: 7.3.1
+RoxygenNote: 7.3.2
 Config/testthat/edition: 3
