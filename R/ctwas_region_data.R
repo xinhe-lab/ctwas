@@ -124,7 +124,7 @@ assemble_region_data <- function(region_info,
     rownames(boundary_genes) <- NULL
     loginfo("Number of boundary genes: %d", nrow(boundary_genes))
     if (nrow(boundary_genes) > 0) {
-      region_data <- adjust_boundary_genes(boundary_genes, weights, region_data, snp_info)
+      region_data <- adjust_boundary_genes(boundary_genes, weights, region_data, snp_map)
     }
   }else{
     boundary_genes <- NULL

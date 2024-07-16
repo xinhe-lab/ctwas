@@ -1,8 +1,8 @@
 ## Libraries
-# library(ctwas)
+library(ctwas)
 library(logging)
 library(data.table)
-devtools::load_all("/home/kaixuan/projects/cTWAS_package/single_group/ctwas/")
+# devtools::load_all("/home/kaixuan/projects/cTWAS_package/single_group/ctwas/")
 
 ##### Settings #####
 gwas_name <- "ukb-d-30780_irnt"
@@ -18,11 +18,11 @@ cor_dir <- file.path(outputdir, "/cor_matrix")
 outname <- "LDL_example"
 example_chrom <- 16
 
-multigroup_outputdir <- "/project2/xinhe/shared_data/multigroup_ctwas/tutorial/LDL_liver_tutorial/sample_data/LDL_liver_chr16_example"
+# multigroup_outputdir <- "/project2/xinhe/shared_data/multigroup_ctwas/tutorial/LDL_liver_tutorial/sample_data/LDL_liver_chr16_example"
 
 ##### LD region info #####
 region_info_file <- file.path(outputdir, paste0(outname, ".region_info.RDS"))
-snp_map_file <- file.path(outputdir, paste0(outname, ".snp_info.RDS"))
+snp_map_file <- file.path(outputdir, paste0(outname, ".snp_map.RDS"))
 
 if (file.exists(region_info_file) && file.exists(snp_map_file)){
   cat(sprintf("Load preprocessed region_info: %s \n", region_info_file))
@@ -45,10 +45,10 @@ if (file.exists(region_info_file) && file.exists(snp_map_file)){
   saveRDS(snp_map, snp_map_file)
 }
 
-region_info_multigroup <- readRDS(file.path(multigroup_outputdir, paste0(outname, ".region_info.RDS")))
-snp_map_multigroup <- readRDS(file.path(multigroup_outputdir, paste0(outname, ".snp_info.RDS")))
-all.equal(region_info, region_info_multigroup)
-all.equal(snp_map, snp_map_multigroup)
+# region_info_multigroup <- readRDS(file.path(multigroup_outputdir, paste0(outname, ".region_info.RDS")))
+# snp_map_multigroup <- readRDS(file.path(multigroup_outputdir, paste0(outname, ".snp_map.RDS")))
+# all.equal(region_info, region_info_multigroup)
+# all.equal(snp_map, snp_map_multigroup)
 
 ##### Preprocess GWAS z-scores #####
 z_snp_outfile <- file.path(outputdir, paste0(outname, ".z_snp.RDS"))
@@ -91,8 +91,8 @@ if (file.exists(processed_z_snp_file)){
   loginfo("Preprocessing GWAS z-scores took %0.2f minutes\n",runtime["elapsed"]/60)
 }
 
-z_snp_multigroup <- readRDS(file.path(multigroup_outputdir, paste0(outname, ".preprocessed.z_snp.RDS")))
-all.equal(z_snp, z_snp_multigroup)
+# z_snp_multigroup <- readRDS(file.path(multigroup_outputdir, paste0(outname, ".preprocessed.z_snp.RDS")))
+# all.equal(z_snp, z_snp_multigroup)
 
 ##### Preprocess weights #####
 processed_weight_file <- file.path(outputdir, paste0(outname, ".preprocessed.weights.RDS"))
@@ -113,13 +113,13 @@ if (file.exists(processed_weight_file)){
   saveRDS(weights, file = processed_weight_file)
 }
 
-weights_multigroup <- readRDS(file.path(multigroup_outputdir, paste0(outname, ".preprocessed.weights.RDS")))
-for (i in 1:length(weights_multigroup)){
-  weights_multigroup[[i]]$type <- NULL
-  weights_multigroup[[i]]$context <- NULL
-}
-
-all.equal(weights, weights_multigroup)
+# weights_multigroup <- readRDS(file.path(multigroup_outputdir, paste0(outname, ".preprocessed.weights.RDS")))
+# for (i in 1:length(weights_multigroup)){
+#   weights_multigroup[[i]]$type <- NULL
+#   weights_multigroup[[i]]$context <- NULL
+# }
+#
+# all.equal(weights, weights_multigroup)
 
 ##### Compute gene z-scores #####
 cat("##### Computing gene z-scores ##### \n")
@@ -137,9 +137,9 @@ if( file.exists(gene_z_file) ){
   loginfo("Computing gene z-scores took %0.2f minutes\n",runtime["elapsed"]/60)
 }
 
-z_gene_multigroup <- readRDS(file.path(multigroup_outputdir, paste0(outname, ".z_gene.RDS")))
-z_gene_multigroup[, c("type", "context", "group")] <- NULL
-all.equal(z_gene, z_gene_multigroup)
+# z_gene_multigroup <- readRDS(file.path(multigroup_outputdir, paste0(outname, ".z_gene.RDS")))
+# z_gene_multigroup[, c("type", "context", "group")] <- NULL
+# all.equal(z_gene, z_gene_multigroup)
 
 ## Running cTWAS main function
 runtime <- system.time({
@@ -189,19 +189,19 @@ if (file.exists(region_data_file)) {
 all.equal(ctwas_res$region_data, region_data)
 all.equal(ctwas_res$boundary_genes, boundary_genes)
 
-region_data_multigroup <- readRDS(file.path(multigroup_outputdir, paste0(outname, ".region_data.thin", thin, ".RDS")))
-boundary_genes_multigroup <- readRDS(file.path(multigroup_outputdir, paste0(outname, ".boundary_genes.RDS")))
-for (i in 1:length(region_data_multigroup)){
-  region_data_multigroup[[i]]$g_type <- NULL
-  region_data_multigroup[[i]]$g_context <- NULL
-  region_data_multigroup[[i]]$g_group <- NULL
-  region_data_multigroup[[i]]$gs_type <- NULL
-  region_data_multigroup[[i]]$gs_context <- NULL
-  region_data_multigroup[[i]]$gs_group[region_data_multigroup[[i]]$gs_group!="SNP"] <- "gene"
-}
-
-all.equal(region_data, region_data_multigroup)
-all.equal(boundary_genes, boundary_genes_multigroup)
+# region_data_multigroup <- readRDS(file.path(multigroup_outputdir, paste0(outname, ".region_data.thin", thin, ".RDS")))
+# boundary_genes_multigroup <- readRDS(file.path(multigroup_outputdir, paste0(outname, ".boundary_genes.RDS")))
+# for (i in 1:length(region_data_multigroup)){
+#   region_data_multigroup[[i]]$g_type <- NULL
+#   region_data_multigroup[[i]]$g_context <- NULL
+#   region_data_multigroup[[i]]$g_group <- NULL
+#   region_data_multigroup[[i]]$gs_type <- NULL
+#   region_data_multigroup[[i]]$gs_context <- NULL
+#   region_data_multigroup[[i]]$gs_group[region_data_multigroup[[i]]$gs_group!="SNP"] <- "gene"
+# }
+#
+# all.equal(region_data, region_data_multigroup)
+# all.equal(boundary_genes, boundary_genes_multigroup)
 
 ##### Estimate parameters #####
 cat("##### Estimating parameters ##### \n")
@@ -251,9 +251,8 @@ if (file.exists(screen_regions_file)) {
                                          use_LD = FALSE,
                                          group_prior = group_prior,
                                          group_prior_var = group_prior_var,
-                                         min_nonSNP_PIP = min_nonSNP_PIP,
+                                         min_nonSNP_PIP = 0.5,
                                          ncore = ncore,
-                                         verbose = FALSE,
                                          logfile = file.path(outputdir, paste0(outname, ".screen_regions_noLD.log")))
   })
   loginfo("Screen regions took %0.2f minutes\n",runtime["elapsed"]/60)
