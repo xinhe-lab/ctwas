@@ -6,9 +6,9 @@
 #'
 #' @param use_LD TRUE/FALSE. If TRUE, use LD for finemapping. Otherwise, use "no-LD" version.
 #'
-#' @param LD_info a list of paths to LD matrices for each of the regions. Required when \code{use_LD = TRUE}.
+#' @param LD_map a list of paths to LD matrices for each of the regions. Required when \code{use_LD = TRUE}.
 #'
-#' @param snp_info a list of SNP info data frames for LD reference. Required when \code{use_LD = TRUE}.
+#' @param snp_map a list of SNP info data frames for LD reference. Required when \code{use_LD = TRUE}.
 #'
 #' @param weights a list of preprocessed weights
 #'
@@ -54,8 +54,8 @@
 finemap_region <- function(region_data,
                            region_id,
                            use_LD = TRUE,
-                           LD_info = NULL,
-                           snp_info = NULL,
+                           LD_map = NULL,
+                           snp_map = NULL,
                            weights = NULL,
                            L = 5,
                            group_prior = NULL,
@@ -120,8 +120,8 @@ finemap_region <- function(region_data,
   } else {
     cor_res <- get_region_cor(region_id,
                               region_data = region_data,
-                              LD_info = LD_info,
-                              snp_info = snp_info,
+                              LD_map = LD_map,
+                              snp_map = snp_map,
                               weights = weights,
                               force_compute_cor = force_compute_cor,
                               save_cor = save_cor,
@@ -170,9 +170,9 @@ finemap_region <- function(region_data,
 #'
 #' @param use_LD TRUE/FALSE. If TRUE, use LD for finemapping. Otherwise, use "no-LD" version.
 #'
-#' @param LD_info a list of paths to LD matrices for each of the regions. Required when \code{use_LD = TRUE}.
+#' @param LD_map a list of paths to LD matrices for each of the regions. Required when \code{use_LD = TRUE}.
 #'
-#' @param snp_info a list of SNP info data frames for LD reference. Required when \code{use_LD = TRUE}.
+#' @param snp_map a list of SNP info data frames for LD reference. Required when \code{use_LD = TRUE}.
 #'
 #' @param weights a list of weights for each gene
 #'
@@ -221,8 +221,8 @@ finemap_region <- function(region_data,
 #'
 finemap_regions <- function(region_data,
                             use_LD = TRUE,
-                            LD_info = NULL,
-                            snp_info = NULL,
+                            LD_map = NULL,
+                            snp_map = NULL,
                             weights = NULL,
                             L = 5,
                             group_prior = NULL,
@@ -252,8 +252,8 @@ finemap_regions <- function(region_data,
   }
 
   if (use_LD) {
-    if (is.null(LD_info) || is.null(snp_info) || is.null(weights)) {
-      stop("LD_info, snp_info and weights are required when use_LD = TRUE")
+    if (is.null(LD_map) || is.null(snp_map) || is.null(weights)) {
+      stop("LD_map, snp_map and weights are required when use_LD = TRUE")
     }
   }
 
@@ -288,8 +288,8 @@ finemap_regions <- function(region_data,
     finemap_region(region_data = region_data,
                    region_id = region_id,
                    use_LD = use_LD,
-                   LD_info = LD_info,
-                   snp_info = snp_info,
+                   LD_map = LD_map,
+                   snp_map = snp_map,
                    weights = weights,
                    L = region_L,
                    group_prior = group_prior,

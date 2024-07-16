@@ -5,9 +5,9 @@
 #'
 #' @param weights a list of prediction weights
 #'
-#' @param region_info a data frame of region definition and associated LD file names
+#' @param region_info a data frame of region definitions.
 #'
-#' @param snp_info a list or data frame of reference SNP info.
+#' @param snp_map a list of reference SNP info for all regions
 #'
 #' @param z_gene A data frame with columns: "id", "z", giving the z-scores for genes.
 #'
@@ -56,7 +56,7 @@ ctwas_sumstats_noLD <- function(
     z_snp,
     weights,
     region_info,
-    snp_info,
+    snp_map,
     z_gene = NULL,
     thin = 0.1,
     niter_prefit = 3,
@@ -98,7 +98,7 @@ ctwas_sumstats_noLD <- function(
                                           z_snp,
                                           z_gene,
                                           weights,
-                                          snp_info,
+                                          snp_map,
                                           thin = thin,
                                           maxSNP = maxSNP,
                                           trim_by = "random",
@@ -144,7 +144,7 @@ ctwas_sumstats_noLD <- function(
   # Expand screened region_data with all SNPs in the regions
   if (thin < 1){
     screened_region_data <- expand_region_data(screened_region_data,
-                                               snp_info,
+                                               snp_map,
                                                z_snp,
                                                z_gene,
                                                trim_by = "z",

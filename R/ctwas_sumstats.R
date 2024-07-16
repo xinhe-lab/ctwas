@@ -7,9 +7,9 @@
 #'
 #' @param region_info a data frame of region definitions.
 #'
-#' @param snp_info a list of SNP info data frames for LD reference.
+#' @param snp_map a list of reference SNP info for all regions
 #'
-#' @param LD_info a list of paths to LD matrices for each of the regions.
+#' @param LD_map a list of paths to LD matrices for each of the regions.
 #'
 #' @param z_gene A data frame with columns: "id", "z", giving the z-scores for genes.
 #'
@@ -80,8 +80,8 @@ ctwas_sumstats <- function(
     z_snp,
     weights,
     region_info,
-    snp_info,
-    LD_info,
+    snp_map,
+    LD_map,
     z_gene = NULL,
     thin = 0.1,
     niter_prefit = 3,
@@ -132,7 +132,7 @@ ctwas_sumstats <- function(
                                           z_snp,
                                           z_gene,
                                           weights,
-                                          snp_info,
+                                          snp_map,
                                           thin = thin,
                                           maxSNP = maxSNP,
                                           trim_by = "random",
@@ -168,8 +168,8 @@ ctwas_sumstats <- function(
   #. select regions with L >= 1
   screen_regions_res <- screen_regions(region_data,
                                        use_LD = TRUE,
-                                       LD_info = LD_info,
-                                       snp_info = snp_info,
+                                       LD_map = LD_map,
+                                       snp_map = snp_map,
                                        weights = weights,
                                        group_prior = group_prior,
                                        group_prior_var = group_prior_var,
@@ -188,7 +188,7 @@ ctwas_sumstats <- function(
   # Expand screened region_data with all SNPs in the regions
   if (thin < 1){
     screened_region_data <- expand_region_data(screened_region_data,
-                                               snp_info,
+                                               snp_map,
                                                z_snp,
                                                z_gene,
                                                trim_by = "z",
@@ -204,8 +204,8 @@ ctwas_sumstats <- function(
   if (length(screened_region_data) > 0){
     finemap_res <- finemap_regions(screened_region_data,
                                    use_LD = TRUE,
-                                   LD_info = LD_info,
-                                   snp_info = snp_info,
+                                   LD_map = LD_map,
+                                   snp_map = snp_map,
                                    weights = weights,
                                    group_prior = group_prior,
                                    group_prior_var = group_prior_var,

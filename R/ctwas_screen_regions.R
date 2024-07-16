@@ -4,9 +4,9 @@
 #'
 #' @param use_LD TRUE/FALSE. If TRUE, use LD for finemapping. Otherwise, use "no-LD" version.
 #'
-#' @param LD_info a list of paths to LD matrices for each of the regions. Required when \code{use_LD = TRUE}.
+#' @param LD_map a list of paths to LD matrices for each of the regions. Required when \code{use_LD = TRUE}.
 #'
-#' @param snp_info a list of SNP info data frames for LD reference. Required when \code{use_LD = TRUE}.
+#' @param snp_map a list of SNP info data frames for LD reference. Required when \code{use_LD = TRUE}.
 #'
 #' @param weights a list of weights for each gene. Required when \code{use_LD = TRUE}.
 #'
@@ -50,8 +50,8 @@
 #'
 screen_regions <- function(region_data,
                            use_LD = TRUE,
-                           LD_info = NULL,
-                           snp_info = NULL,
+                           LD_map = NULL,
+                           snp_map = NULL,
                            weights = NULL,
                            group_prior = NULL,
                            group_prior_var = NULL,
@@ -87,8 +87,8 @@ screen_regions <- function(region_data,
   }
 
   if (use_LD) {
-    if (is.null(LD_info) || is.null(snp_info) || is.null(weights)) {
-      stop("LD_info, snp_info and weights are required when use_LD = TRUE")
+    if (is.null(LD_map) || is.null(snp_map) || is.null(weights)) {
+      stop("LD_map, snp_map and weights are required when use_LD = TRUE")
     }
   }
 
@@ -125,8 +125,8 @@ screen_regions <- function(region_data,
       loginfo("Estimating L with uniform prior and screening regions with L >= 1...")
       finemap_unif_prior_res <- finemap_regions(region_data,
                                                 use_LD = TRUE,
-                                                LD_info = LD_info,
-                                                snp_info = snp_info,
+                                                LD_map = LD_map,
+                                                snp_map = snp_map,
                                                 weights = weights,
                                                 L = 5,
                                                 include_cs_index = TRUE,
@@ -159,8 +159,8 @@ screen_regions <- function(region_data,
     loginfo("Computing non-SNP PIPs and screening regions with non-SNP PIP >= %s", min_nonSNP_PIP)
     finemap_screening_res <- finemap_regions(screened_region_data,
                                              use_LD = use_LD,
-                                             LD_info = LD_info,
-                                             snp_info = snp_info,
+                                             LD_map = LD_map,
+                                             snp_map = snp_map,
                                              weights = weights,
                                              L = L,
                                              group_prior = group_prior,

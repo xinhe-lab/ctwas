@@ -14,7 +14,10 @@
 #' @importFrom parallel mclapply
 #'
 #' @export
-compute_gene_z <- function (z_snp, weights, ncore = 1, logfile = NULL){
+compute_gene_z <- function (z_snp,
+                            weights,
+                            ncore = 1,
+                            logfile = NULL){
   # check input data
   if (!inherits(weights,"list")){
     stop("'weights' should be a list.")

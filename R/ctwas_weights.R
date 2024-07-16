@@ -37,8 +37,7 @@ load_weights <- function(weight_path,
       filter_protein_coding_genes = filter_protein_coding_genes,
       load_predictdb_LD = load_predictdb_LD)
   } else if (weight_format == "FUSION") {
-    res <- load_fusion_weights(
-      weight_path,
+    res <- load_fusion_weights(weight_path,
       fusion_method = fusion_method,
       fusion_genome_version = fusion_genome_version,
       ncore = ncore)
@@ -528,14 +527,14 @@ convert_predictdb_cov_to_cor <- function(cov_table){
 compute_weight_LD_from_ref <- function(weights,
                                        weight_name,
                                        region_info,
-                                       LD_info,
-                                       snp_info,
+                                       LD_map,
+                                       snp_map,
                                        LD_format = c("rds", "rdata", "mtx", "csv", "txt", "custom"),
                                        LD_loader_fun,
                                        ncore = 1) {
 
-  if (is.null(LD_info) || is.null(snp_info)) {
-    stop("LD_info and snp_info are required for computing LD")
+  if (is.null(LD_map) || is.null(snp_map)) {
+    stop("LD_map and snp_map are required for computing LD")
   }
 
   LD_format <- match.arg(LD_format)
@@ -565,8 +564,8 @@ compute_weight_LD_from_ref <- function(weights,
         # and extract LD for the weight variants
         curr_region_LD_list <- list()
         curr_region_ids <- unlist(strsplit(x, ";"))
-        curr_region_idx <- match(curr_region_ids, LD_info$region_id)
-        LD_matrix_files <- LD_info$LD_matrix[curr_region_idx]
+        curr_region_idx <- match(curr_region_ids, LD_map$region_id)
+        LD_matrix_files <- LD_map$LD_matrix[curr_region_idx]
         if (length(LD_matrix_files) > 1) {
           R_snp <- lapply(LD_matrix_files, load_LD, format = LD_format, LD_loader_fun = LD_loader_fun)
           R_snp <- suppressWarnings(as.matrix(bdiag(R_snp)))
@@ -574,7 +573,7 @@ compute_weight_LD_from_ref <- function(weights,
           R_snp <- load_LD(LD_matrix_files, format = LD_format, LD_loader_fun = LD_loader_fun)
         }
 
-        snpinfo <- do.call(rbind, snp_info[curr_region_ids])
+        snpinfo <- do.call(rbind, snp_map[curr_region_ids])
         rownames(R_snp) <- snpinfo$id
         colnames(R_snp) <- snpinfo$id
 

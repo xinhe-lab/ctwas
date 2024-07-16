@@ -4,14 +4,14 @@
 #' @param weight_path path to the '.db' file for PredictDB weights;
 #' or the directory containing '.wgt.RDat' files for FUSION weights.
 #'
-#' @param region_info a data frame of region definition and associated file names.
+#' @param region_info a data frame of region definition.
 #'
 #' @param gwas_snp_ids a vector of SNP IDs in GWAS summary statistics (z_snp$id).
 #'
-#' @param snp_info a list of SNP info data frames for LD reference,
-#'  with columns "chrom", "id", "pos", "alt", "ref", and "region_id".
+#' @param snp_map a list of SNP-to-region map for the reference.
 #'
-#' @param LD_info a list of paths to LD matrices for each of the regions. Required when \code{load_predictdb_LD = FALSE}.
+#' @param LD_map a data frame with filenames of LD matrices for each of the regions.
+#' Required when \code{load_predictdb_LD = FALSE}.
 #'
 #' @param weight_format a string, specifying format of each weight file, e.g. PredictDB, FUSION.
 #'
@@ -54,8 +54,8 @@
 preprocess_weights <- function(weight_path,
                                region_info,
                                gwas_snp_ids,
-                               snp_info,
-                               LD_info = NULL,
+                               snp_map,
+                               LD_map = NULL,
                                weight_format = c("PredictDB", "FUSION"),
                                drop_strand_ambig = TRUE,
                                scale_predictdb_weights = TRUE,
@@ -81,15 +81,7 @@ preprocess_weights <- function(weight_path,
     stop("Please provide only one weight path in `weight_path`.")
   }
 
-  # Check LD reference SNP info
-  if (inherits(snp_info,"list")) {
-    snp_info <- as.data.frame(rbindlist(snp_info, idcol = "region_id"))
-  }
-  target_header <- c("chrom", "id", "pos", "alt", "ref")
-  if (!all(target_header %in% colnames(snp_info))){
-    stop("SNP info needs to contain the following columns: ",
-         paste(target_header, collapse = " "))
-  }
+  snp_info <- as.data.frame(rbindlist(snp_map, idcol = "region_id"))
 
   loginfo("Load weight: %s", weight_path)
 
@@ -144,7 +136,7 @@ preprocess_weights <- function(weight_path,
     weights <- compute_weight_LD_from_ref(weights,
                                           weight_name,
                                           region_info = region_info,
-                                          LD_info = LD_info,
+                                          LD_map = LD_map,
                                           snp_info = snp_info,
                                           LD_format = LD_format,
                                           LD_loader_fun = LD_loader_fun,
@@ -169,12 +161,9 @@ process_weight <- function(gene_name,
                            scale_predictdb_weights = TRUE) {
 
   # Check LD reference SNP info
-  if (inherits(snp_info,"list")) {
-    snp_info <- as.data.frame(rbindlist(snp_info, idcol = "region_id"))
-  }
   target_header <- c("chrom", "id", "pos", "alt", "ref")
   if (!all(target_header %in% colnames(snp_info))){
-    stop("SNP info needs to contain the following columns: ",
+    stop("snp_info needs to contain the following columns: ",
          paste(target_header, collapse = " "))
   }
 
@@ -186,17 +175,12 @@ process_weight <- function(gene_name,
   if (length(chrom) > 1) {
     stop("More than one chrom in weight for %s!", gene_name)
   }
-  snp_pos <- as.integer(sapply(strsplit(g_weight_table$varID, "_"), "[[", 2))
-  snp_info_pos <- as.integer(snp_info$pos[match(g_weight_table$rsid, snp_info$id)])
-  # check if the SNP positions in weight match with LD reference (snp_info)
-  # if Positions in weights are different from those in snp_info,
-  # use the positions in snp_info
-  if (any(snp_pos != snp_info_pos)) {
-    snp_pos <- snp_info_pos
-  }
+  snp_pos$pos <- as.integer(snp_info$pos)
+  snp_pos <- snp_info$pos[match(g_weight_table$rsid, snp_info$id)]
+
   snps <- data.frame(chrom = chrom,
                      id = g_weight_table$rsid,
-                     cm = "0",
+                     cm = 0,
                      pos = snp_pos,
                      alt = g_weight_table$eff_allele,
                      ref = g_weight_table$ref_allele,
