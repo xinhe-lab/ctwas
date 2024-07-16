@@ -176,10 +176,13 @@ label_overlapping_regions <- function(boundary_genes) {
   return(boundary_genes)
 }
 
-# Get merged region info
+# Get merged region_info, snp_map and LD_map
 #' @importFrom logging loginfo
-get_merged_region_info <- function(boundary_genes, region_info, use_LD = TRUE, LD_map, snp_map){
-
+create_merged_snp_LD_map <- function(boundary_genes,
+                                     region_info,
+                                     snp_map,
+                                     LD_map,
+                                     use_LD = TRUE){
   # Identify overlapping regions
   boundary_genes <- label_overlapping_regions(boundary_genes)
 
@@ -214,7 +217,7 @@ get_merged_region_info <- function(boundary_genes, region_info, use_LD = TRUE, L
       merged_region_idx <- match(merged_region_ids, LD_map$region_id)
       merged_LD_matrix_files <- paste(LD_map$LD_matrix[merged_region_idx], collapse = ";")
       merged_LD_map <- rbind(merged_LD_map,
-                              data.frame(region_id = new_region_id, LD_matrix = merged_LD_matrix_files))
+                             data.frame(region_id = new_region_id, LD_matrix = merged_LD_matrix_files))
     }
   }
 
@@ -280,7 +283,11 @@ merge_region_data <- function(boundary_genes,
 
   # Identify overlapping regions and get a list of regions to be merged
   loginfo("Identify overlapping regions and get region_info for merged regions.")
-  res <- get_merged_region_info(boundary_genes, region_info, use_LD, LD_map, snp_map)
+  res <- create_merged_snp_LD_map(boundary_genes,
+                                  region_info = region_info,
+                                  snp_map = snp_map,
+                                  LD_map = LD_map,
+                                  use_LD = use_LD)
   merged_region_info <- res$merged_region_info
   merged_LD_map <- res$merged_LD_map
   merged_snp_map <- res$merged_snp_map

@@ -296,7 +296,7 @@ adjust_boundary_genes <- function(boundary_genes,
     region_ids <- unlist(strsplit(boundary_genes[i, "region_id"], split = ";"))
     wgt <- weights[[gname]][["wgt"]]
 
-    region_r2 <- sapply(region_ids, function(x){
+    region_r2 <- sapply(region_ids, function(region_id){
       snpinfo <- snp_map[[region_id]]
       sum(wgt[which(rownames(wgt) %in% snpinfo$id)]^2)
     })
