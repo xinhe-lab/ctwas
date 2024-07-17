@@ -18,18 +18,28 @@ compute_gene_z <- function (z_snp,
                             weights,
                             ncore = 1,
                             logfile = NULL){
+
+  if (!is.null(logfile)) {
+    addHandler(writeToFile, file = logfile, level = "DEBUG")
+  }
+
   # check input data
   if (!inherits(weights,"list")){
     stop("'weights' should be a list.")
   }
-  if (!is.null(logfile)) {
-    addHandler(writeToFile, file = logfile, level = "DEBUG")
+
+  if (any(sapply(weights, is.null))) {
+    warning("weights contain NULL, remove empty weights.")
+    loginfo("Remove empty weights")
+    weights[which(sapply(weights, is.null))] <- NULL
   }
+
   loginfo("Computing gene z-scores ...")
+
   weight_snpnames <- unique(unlist(lapply(weights, function(x){rownames(x[["wgt"]])})))
   z_snp <- z_snp[z_snp$id %in% weight_snpnames, c("id", "z")]
 
-  z_gene <- mclapply(names(weights), function(id) {
+  z_gene <- mclapply_check(names(weights), function(id) {
     wgt <- weights[[id]][["wgt"]]
     snpnames <- rownames(wgt)
     R.s <- weights[[id]][["R_wgt"]]
@@ -40,10 +50,12 @@ compute_gene_z <- function (z_snp,
     data.frame(id = id, z = z.g)
   }, mc.cores = ncore)
 
-  check_mc_res(z_gene)
-
   z_gene <- do.call("rbind", z_gene)
   rownames(z_gene) <- NULL
+
+  if (anyNA(z_gene)){
+    stop("z_gene contains missing values!\n")
+  }
 
   return(z_gene)
 }

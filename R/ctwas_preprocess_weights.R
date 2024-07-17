@@ -116,7 +116,7 @@ preprocess_weights <- function(weight_path,
   snp_info <- snp_info[snp_info$id %in% weight_table$rsid,]
 
   loginfo("Harmonizing and processing weights ...")
-  weights <- mclapply(gene_names, function(gene_name){
+  weights <- mclapply_check(gene_names, function(gene_name){
     process_weight(gene_name,
                    weight_name = weight_name,
                    weight_table = weight_table,
@@ -127,9 +127,14 @@ preprocess_weights <- function(weight_path,
                    drop_strand_ambig = drop_strand_ambig,
                    scale_predictdb_weights = scale_predictdb_weights)
   }, mc.cores = ncore)
-  check_mc_res(weights)
 
   names(weights) <- paste0(gene_names, "|", weight_name)
+
+  empty_wgt_idx <- which(sapply(weights, "[[", "n_wgt") == 0)
+  if (any(empty_wgt_idx)) {
+    loginfo("Remove %d empty weights after harmonization", length(empty_wgt_idx))
+    weights[empty_wgt_idx] <- NULL
+  }
 
   if (!load_predictdb_LD) {
     loginfo("Computing LD among variants in weights ...")
@@ -142,6 +147,7 @@ preprocess_weights <- function(weight_path,
                                           LD_loader_fun = LD_loader_fun,
                                           ncore = ncore)
   }
+
 
   return(weights)
 }
@@ -229,13 +235,17 @@ process_weight <- function(gene_name,
     } else{
       R_wgt <- NULL
     }
-    return(list(chrom = chrom,
-                p0 = p0,
-                p1 = p1,
-                wgt = wgt,
-                R_wgt = R_wgt,
-                gene_name = gene_name,
-                weight_name = weight_name,
-                n_wgt=n_wgt))
+  } else {
+    p0 <- p1 <- NA
+    wgt <- R_wgt <- NULL
   }
+
+  return(list(chrom = chrom,
+              p0 = p0,
+              p1 = p1,
+              wgt = wgt,
+              R_wgt = R_wgt,
+              gene_name = gene_name,
+              weight_name = weight_name,
+              n_wgt = n_wgt))
 }
