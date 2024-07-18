@@ -6,9 +6,9 @@
 #'
 #' @param region_ids A vector of region IDs to run diagnosis
 #'
-#' @param LD_info a list of paths to LD matrices for each of the regions.
+#' @param snp_map a list of SNP-to-region map for the reference.
 #'
-#' @param snp_info a list of SNP info data frames for LD reference.
+#' @param LD_map a data frame with filenames of LD matrices for the regions.
 #'
 #' @param gwas_n integer, GWAS sample size.
 #'
@@ -22,6 +22,8 @@
 #'
 #' @param LD_loader_fun a user defined function to load LD matrix when \code{LD_format = "custom"}.
 #'
+#' @param logfile the log file, if NULL will print log info on screen
+#'
 #' @return a list of problematic SNPs, flipped SNPs,
 #' and test statistics from susie's `kriging_rss` function
 #'
@@ -33,23 +35,27 @@
 #'
 diagnose_ld_mismatch_susie <- function(z_snp,
                                        region_ids,
-                                       LD_info,
-                                       snp_info,
+                                       snp_map,
+                                       LD_map,
                                        gwas_n = NULL,
                                        ncore = 1,
                                        p_diff_thresh = 5e-8,
                                        LD_format = c("rds", "rdata", "mtx", "csv", "txt", "custom"),
-                                       LD_loader_fun){
+                                       LD_loader_fun,
+                                       logfile = NULL){
+
+  if (!is.null(logfile)){
+    addHandler(writeToFile, file=logfile, level='DEBUG')
+  }
 
   loginfo("Perform LD mismatch diagnosis for %d regions", length(region_ids))
   LD_format <- match.arg(LD_format)
 
-  condz_list <- mclapply(region_ids, function(region_id){
-    compute_region_condz(region_id, LD_info, snp_info, z_snp, gwas_n,
+  condz_list <- mclapply_check(region_ids, function(region_id){
+    compute_region_condz(region_id, LD_map, snp_map, z_snp, gwas_n,
                          LD_format = LD_format,
                          LD_loader_fun = LD_loader_fun)
   }, mc.cores = ncore)
-  check_mc_res(condz_list)
 
   names(condz_list) <- region_ids
   condz_stats <- rbindlist(condz_list, idcol = "region_id")
@@ -69,14 +75,18 @@ diagnose_ld_mismatch_susie <- function(z_snp,
 #
 #' @importFrom stats pchisq
 #' @importFrom Matrix bdiag
-compute_region_condz <- function(region_id, LD_info, snp_info, z_snp, gwas_n,
+compute_region_condz <- function(region_id,
+                                 snp_map,
+                                 LD_map,
+                                 z_snp,
+                                 gwas_n,
                                  LD_format = c("rds", "rdata", "mtx", "csv", "txt", "custom"),
                                  LD_loader_fun){
 
   LD_format <- match.arg(LD_format)
 
   # load LD matrix
-  LD_matrix_files <- unlist(strsplit(LD_info[LD_info$region_id == region_id, "LD_matrix"], split = ";"))
+  LD_matrix_files <- unlist(strsplit(LD_map[LD_map$region_id == region_id, "LD_matrix"], split = ";"))
   stopifnot(all(file.exists(LD_matrix_files)))
   if (length(LD_matrix_files) > 1) {
     R_snp <- lapply(LD_matrix_files, load_LD, format = LD_format, LD_loader_fun = LD_loader_fun)
@@ -86,7 +96,7 @@ compute_region_condz <- function(region_id, LD_info, snp_info, z_snp, gwas_n,
   }
 
   # load SNP info
-  snpinfo <- do.call(rbind, snp_info[region_id])
+  snpinfo <- do.call(rbind, snp_map[region_id])
 
   # Match GWAS sumstats with LD reference files. Only keep variants included in LD reference.
   region_z_snp <- z_snp[z_snp$id %in% snpinfo$id,]
@@ -122,7 +132,10 @@ compute_region_condz <- function(region_id, LD_info, snp_info, z_snp, gwas_n,
 #'
 #' @export
 #'
-get_problematic_genes <- function(problematic_snps, weights, z_gene, z_thresh = 3){
+get_problematic_genes <- function(problematic_snps,
+                                  weights,
+                                  z_gene,
+                                  z_thresh = 3){
 
   if (length(problematic_snps) == 0) {
     loginfo('No problematic SNPs')

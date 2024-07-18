@@ -62,13 +62,13 @@ fit_EM <- function(
       loginfo("Start EM iteration %d ...", iter)
     }
 
-    EM_susie_res_list <- mclapply(region_ids, function(region_id){
+    EM_susie_res_list <- mclapply_check(region_ids, function(region_id){
       ctwas_susie_region_L1(region_data, region_id,
                             pi_prior, V_prior,
                             use_null_weight = use_null_weight,
                             ...)
     }, mc.cores = ncore)
-    check_mc_res(EM_susie_res_list)
+
     EM_susie_res <- do.call(rbind, EM_susie_res_list)
 
     # update estimated group_prior from the current iteration

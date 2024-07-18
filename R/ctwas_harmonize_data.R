@@ -1,28 +1,28 @@
 
-# @title Harmonizes z scores from GWAS to match LD reference genotypes.
-# Flips signs when reverse complement matches, and removes strand ambiguous SNPs
-#
-# @param z_snp a data frame, with columns "id", "A1", "A2" and "z".
-#     Z scores for every SNP. "A1" is the effect allele.
-#
-# @param snp_info a list or data frame of SNP info for LD reference,
-#  with columns "chrom", "id", "pos", "alt", "ref".
-#
-# @param drop_strand_ambig TRUE/FALSE, if TRUE remove strand ambiguous variants (A/T, G/C).
-#
-# @return a data frame, z_snp with the "z" columns flipped to match LD reference.
-#
+#' @title Harmonizes z scores from GWAS to match LD reference genotypes.
+#' Flips signs when reverse complement matches, and removes strand ambiguous SNPs
+#'
+#' @param z_snp a data frame, with columns "id", "A1", "A2" and "z".
+#'     Z scores for every SNP. "A1" is the effect allele.
+#'
+#' @param snp_info a data frame of SNP info for the reference,
+#' with columns "chrom", "id", "pos", "alt", "ref".
+#'
+#' @param drop_strand_ambig TRUE/FALSE, if TRUE remove strand ambiguous variants (A/T, G/C).
+#'
+#' @return a data frame, z_snp with the "z" columns flipped to match LD reference.
+#'
 #' @importFrom logging loginfo
 #' @importFrom data.table rbindlist
+#'
+#' @keywords internal
+#'
 harmonize_z <- function(z_snp, snp_info, drop_strand_ambig = TRUE){
 
   # Check LD reference SNP info
-  if (inherits(snp_info,"list")) {
-    snp_info <- as.data.frame(rbindlist(snp_info, idcol = "region_id"))
-  }
   target_header <- c("chrom", "id", "pos", "alt", "ref")
   if (!all(target_header %in% colnames(snp_info))){
-    stop("SNP info needs to contain the following columns: ",
+    stop("snp_info needs to contain the following columns: ",
          paste(target_header, collapse = " "))
   }
 
@@ -49,35 +49,34 @@ harmonize_z <- function(z_snp, snp_info, drop_strand_ambig = TRUE){
   return(z_snp)
 }
 
-# Harmonize weight to match LD reference genotypes.
-# Flip signs when reverse complement matches, remove ambiguous variants from the prediction models
-#
-# @param wgt.matrix a matrix of the weights
-#
-# @param snps a data frame of the weight variants
-#  with columns "chrom", "id", "cm", "pos", "alt", "ref". "alt" is the effect allele.
-#
-# @param snp_info a list or data frame of SNP info for LD reference,
-#  with columns "chrom", "id", "pos", "alt", "ref".
-#
-# @param drop_strand_ambig TRUE/FALSE, if TRUE remove strand ambiguous variants (A/T, G/C).
-#
-# @return wgt.matrix and snps with alleles flipped to match
+#' Harmonize weight to match LD reference genotypes.
+#' Flip signs when reverse complement matches, remove ambiguous variants from the prediction models
+#'
+#' @param wgt.matrix a matrix of the weights
+#'
+#' @param snps a data frame of the weight variants
+#' with columns "chrom", "id", "cm", "pos", "alt", "ref". "alt" is the effect allele.
+#'
+#' @param snp_info a data frame of SNP info for the reference,
+#'  with columns "chrom", "id", "pos", "alt", "ref".
+#'
+#' @param drop_strand_ambig TRUE/FALSE, if TRUE remove strand ambiguous variants (A/T, G/C).
+#'
+#' @return wgt.matrix and snps with alleles flipped to match
 #
 #' @importFrom data.table rbindlist
+#'
+#' @keywords internal
+#'
 harmonize_weights <- function (wgt.matrix, snps, snp_info, drop_strand_ambig = TRUE){
 
   # Check LD reference SNP info
-  if (inherits(snp_info,"list")) {
-    snp_info <- as.data.frame(rbindlist(snp_info, idcol = "region_id"))
-  }
   target_header <- c("chrom", "id", "pos", "alt", "ref")
   if (!all(target_header %in% colnames(snp_info))){
-    stop("SNP info needs to contain the following columns: ",
+    stop("snp_info needs to contain the following columns: ",
          paste(target_header, collapse = " "))
   }
 
-  colnames(snps) <- c("chrom", "id", "cm", "pos", "alt", "ref")
   snps <- snps[match(rownames(wgt.matrix), snps$id), ]
   snpnames <- intersect(snps$id, snp_info$id)
 
@@ -91,8 +90,9 @@ harmonize_weights <- function (wgt.matrix, snps, snp_info, drop_strand_ambig = T
     snps[flip.idx, c("alt", "ref")] <- snps[flip.idx, c("ref", "alt")]
     wgt.matrix[flip.idx, ] <- -wgt.matrix[flip.idx, ]
 
-    if (isTRUE(drop_strand_ambig) && any(ifremove)){
-      #if dropping ambiguous variants, or >2 ambiguous variants and 0 unambiguous variants, discard the ambiguous variants
+    if (drop_strand_ambig && any(ifremove)){
+      # if dropping ambiguous variants, or >2 ambiguous variants and 0 unambiguous variants,
+      # discard the ambiguous variants
       remove.idx <- snps.idx[ifremove]
       snps <- snps[-remove.idx, , drop = FALSE]
       wgt.matrix <- wgt.matrix[-remove.idx, , drop = FALSE]

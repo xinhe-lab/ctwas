@@ -8,11 +8,11 @@ merge_region_data(
   boundary_genes,
   region_data,
   region_info,
-  use_LD = TRUE,
-  LD_info,
-  snp_info,
+  snp_map,
+  LD_map,
   z_snp,
   z_gene,
+  use_LD = TRUE,
   expand = TRUE,
   maxSNP = Inf,
   trim_by = c("random", "z"),
@@ -27,15 +27,15 @@ merge_region_data(
 
 \item{region_info}{a data frame of region definition and associated LD file names}
 
-\item{use_LD}{TRUE/FALSE. If TRUE, use LD for finemapping.}
+\item{snp_map}{a list of SNP info data frames for LD reference.}
 
-\item{LD_info}{a list of paths to LD matrices for each of the regions.}
-
-\item{snp_info}{a list of SNP info data frames for LD reference.}
+\item{LD_map}{a list of paths to LD matrices for each of the regions.}
 
 \item{z_snp}{A data frame with columns: "id", "z", giving the z-scores for SNPs.}
 
 \item{z_gene}{A data frame with columns: "id", "z", giving the z-scores for genes.}
+
+\item{use_LD}{TRUE/FALSE. If TRUE, use LD for finemapping.}
 
 \item{expand}{TRUE/FALSE. If TRUE, expand merged region_data with full SNPs}
 

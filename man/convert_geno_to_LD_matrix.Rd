@@ -15,7 +15,8 @@ convert_geno_to_LD_matrix(
   include_variance = TRUE,
   include_allele_freq = TRUE,
   show_progress_bar = TRUE,
-  verbose = FALSE
+  verbose = FALSE,
+  logfile = NULL
 )
 }
 \arguments{
@@ -26,9 +27,7 @@ chrom, start, stop, and region_id}
 in .pgen or .bed format}
 
 \item{varinfo_files}{Reference variant information files in PLINK
-.pvar or .bim format.
-
-The output will use the genome positions in \code{varinfo_files}.}
+.pvar or .bim format. The output will use the genome positions in \code{varinfo_files}.}
 
 \item{chrom}{a vector of chromosomes to process genotype data}
 
@@ -44,10 +43,12 @@ in .Rvar output}
 \item{show_progress_bar}{If TRUE, print progress bar}
 
 \item{verbose}{If TRUE, print detail messages}
+
+\item{logfile}{the log file, if NULL will print log info on screen}
 }
 \value{
-a data frame of updated region info, with paths of LD matrices and
-variance information files
+a data frame of region_metatable, with region definitions and
+filenames of LD matrices and variant information.
 }
 \description{
 Converts PLINK genotype data to LD matrices and SNP info files,

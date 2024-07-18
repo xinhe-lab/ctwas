@@ -7,9 +7,9 @@
 #'
 #' @param region_info a data frame of region definitions.
 #'
-#' @param snp_info a list of SNP info data frames for LD reference.
+#' @param snp_map a list of SNP-to-region map for the reference.
 #'
-#' @param LD_info a list of paths to LD matrices for each of the regions.
+#' @param LD_map a data frame with filenames of LD matrices for the regions.
 #'
 #' @param z_gene A data frame with columns: "id", "z", giving the z-scores for genes.
 #'
@@ -44,7 +44,7 @@
 #'
 #' @param maxSNP Inf or integer. Maximum number of SNPs in a region. Default is
 #' Inf, no limit. This can be useful if there are many SNPs in a region and you don't
-#' have enough memory to run the program. This applies to the finemapping step only.
+#' have enough memory to run the program.
 #'
 #' @param use_null_weight TRUE/FALSE. If TRUE, allow for a probability of no effect in susie
 #'
@@ -87,8 +87,8 @@ ctwas_sumstats <- function(
     z_snp,
     weights,
     region_info,
-    snp_info,
-    LD_info,
+    snp_map,
+    LD_map,
     z_gene = NULL,
     thin = 0.1,
     niter_prefit = 3,
@@ -101,7 +101,7 @@ ctwas_sumstats <- function(
     filter_nonSNP_PIP = FALSE,
     min_nonSNP_PIP = 0.5,
     p_single_effect = 0.8,
-    maxSNP = 20000,
+    maxSNP = Inf,
     use_null_weight = TRUE,
     coverage = 0.95,
     min_abs_corr = 0.5,
@@ -124,12 +124,32 @@ ctwas_sumstats <- function(
     dir.create(outputdir, showWarnings=FALSE, recursive=TRUE)
   }
 
+  if (anyNA(z_snp)){
+    stop("z_snp contains missing values!")
+  }
+
   # Compute gene z-scores
   if (is.null(z_gene)) {
     z_gene <- compute_gene_z(z_snp, weights, ncore = ncore)
     if (!is.null(outputdir)) {
       saveRDS(z_gene, file.path(outputdir, paste0(outname, ".z_gene.RDS")))
     }
+  }
+
+  if (anyNA(z_gene)){
+    stop("z_gene contains missing values!")
+  }
+
+  if (!inherits(weights,"list")){
+    stop("'weights' should be a list object.")
+  }
+
+  if (any(sapply(weights, is.null))) {
+    stop("weights contain NULL, remove empty weights!")
+  }
+
+  if (thin > 1 | thin <= 0){
+    stop("thin needs to be in (0,1]")
   }
 
   # Get region_data, which contains SNPs and genes assigned to each region
@@ -140,7 +160,7 @@ ctwas_sumstats <- function(
                                           z_snp,
                                           z_gene,
                                           weights,
-                                          snp_info,
+                                          snp_map,
                                           thin = thin,
                                           maxSNP = maxSNP,
                                           trim_by = "random",
@@ -177,8 +197,8 @@ ctwas_sumstats <- function(
   #. select regions with strong non-SNP signals
   screen_regions_res <- screen_regions(region_data,
                                        use_LD = TRUE,
-                                       LD_info = LD_info,
-                                       snp_info = snp_info,
+                                       LD_map = LD_map,
+                                       snp_map = snp_map,
                                        weights = weights,
                                        group_prior = group_prior,
                                        group_prior_var = group_prior_var,
@@ -197,7 +217,7 @@ ctwas_sumstats <- function(
   # Expand screened region_data with all SNPs in the regions
   if (thin < 1){
     screened_region_data <- expand_region_data(screened_region_data,
-                                               snp_info,
+                                               snp_map,
                                                z_snp,
                                                z_gene,
                                                trim_by = "z",
@@ -213,8 +233,8 @@ ctwas_sumstats <- function(
   if (length(screened_region_data) > 0){
     finemap_res <- finemap_regions(screened_region_data,
                                    use_LD = TRUE,
-                                   LD_info = LD_info,
-                                   snp_info = snp_info,
+                                   LD_map = LD_map,
+                                   snp_map = snp_map,
                                    weights = weights,
                                    group_prior = group_prior,
                                    group_prior_var = group_prior_var,

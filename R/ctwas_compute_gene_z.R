@@ -14,19 +14,33 @@
 #' @importFrom parallel mclapply
 #'
 #' @export
-compute_gene_z <- function (z_snp, weights, ncore = 1, logfile = NULL){
+compute_gene_z <- function (z_snp,
+                            weights,
+                            ncore = 1,
+                            logfile = NULL){
+
+  if (!is.null(logfile)) {
+    addHandler(writeToFile, file = logfile, level = "DEBUG")
+  }
+
   # check input data
   if (!inherits(weights,"list")){
     stop("'weights' should be a list.")
   }
-  if (!is.null(logfile)) {
-    addHandler(writeToFile, file = logfile, level = "DEBUG")
+
+  if (any(sapply(weights, is.null))) {
+    stop("weights contain NULL, remove empty weights!")
   }
+
+  if (anyNA(z_snp)){
+    stop("z_snp contains missing values!")
+  }
+
   loginfo("Computing gene z-scores ...")
   weight_snpnames <- unique(unlist(lapply(weights, function(x){rownames(x[["wgt"]])})))
   z_snp <- z_snp[z_snp$id %in% weight_snpnames, c("id", "z")]
 
-  z_gene <- mclapply(names(weights), function(id) {
+  z_gene <- mclapply_check(names(weights), function(id) {
     wgt <- weights[[id]][["wgt"]]
     snpnames <- rownames(wgt)
     R.s <- weights[[id]][["R_wgt"]]
@@ -39,10 +53,13 @@ compute_gene_z <- function (z_snp, weights, ncore = 1, logfile = NULL){
     dimnames(z.g) <- NULL
     data.frame(id = id, z = z.g, type = type, context = context, group = group)
   }, mc.cores = ncore)
-  check_mc_res(z_gene)
 
   z_gene <- do.call("rbind", z_gene)
   rownames(z_gene) <- NULL
+
+  if (anyNA(z_gene)){
+    stop("z_gene contains missing values!")
+  }
 
   return(z_gene)
 }
@@ -59,7 +76,6 @@ get_gene_info <- function(weights){
   gene_info$id <- names(weights)
   gene_info <- gene_info[, c("chrom", "id", "p0", "p1", "gene_name", "weight_name")]
   gene_info[, c("chrom","p0", "p1")] <- sapply(gene_info[, c("chrom","p0", "p1")], as.integer)
-  # gene_info <- gene_info[with(gene_info, order(chrom, p0)), ]
   rownames(gene_info) <- NULL
 
   return(gene_info)

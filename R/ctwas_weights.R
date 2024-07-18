@@ -1,7 +1,7 @@
 
 #' @title Loads weights in PredictDB or FUSION format
 #'
-#' @param weight_path path to the '.db' file for PredictDB weights;
+#' @param weight_file filename of the '.db' file for PredictDB weights;
 #' or the directory containing '.wgt.RDat' files for FUSION weights.
 #'
 #' @param weight_format a string or a vector, specifying format of each weight file, e.g. PredictDB, FUSION.
@@ -19,7 +19,7 @@
 #'
 #' @export
 #'
-load_weights <- function(weight_path,
+load_weights <- function(weight_file,
                          weight_format = c("PredictDB", "FUSION"),
                          filter_protein_coding_genes = TRUE,
                          load_predictdb_LD = TRUE,
@@ -32,23 +32,21 @@ load_weights <- function(weight_path,
   fusion_genome_version <- match.arg(fusion_genome_version)
 
   if (weight_format == "PredictDB") {
-    res <- load_predictdb_weights(
-      weight_path,
-      filter_protein_coding_genes = filter_protein_coding_genes,
-      load_predictdb_LD = load_predictdb_LD)
+    res <- load_predictdb_weights(weight_file,
+                                  filter_protein_coding_genes = filter_protein_coding_genes,
+                                  load_predictdb_LD = load_predictdb_LD)
   } else if (weight_format == "FUSION") {
-    res <- load_fusion_weights(
-      weight_path,
-      fusion_method = fusion_method,
-      fusion_genome_version = fusion_genome_version,
-      ncore = ncore)
+    res <- load_fusion_weights(weight_file,
+                               fusion_method = fusion_method,
+                               fusion_genome_version = fusion_genome_version,
+                               ncore = ncore)
   }
   return(res)
 }
 
 #' @title Loads weights in PredictDB format
 #'
-#' @param weight_path a string, pointing path to weights in PredictDB format.
+#' @param weight_file a string, pointing path to weights in PredictDB format.
 #'
 #' @param filter_protein_coding_genes TRUE/FALSE. If TRUE, keep protein coding
 #' genes only.
@@ -62,18 +60,18 @@ load_weights <- function(weight_path,
 #'
 #' @export
 #'
-load_predictdb_weights <- function(weight_path,
+load_predictdb_weights <- function(weight_file,
                                    filter_protein_coding_genes = TRUE,
                                    load_predictdb_LD = TRUE){
 
   # read the PredictDB weights
-  stopifnot(file.exists(weight_path))
+  stopifnot(file.exists(weight_file))
 
   loginfo("Loading PredictDB weights ...")
 
-  weight_name <- file_path_sans_ext(basename(weight_path))
+  weight_name <- file_path_sans_ext(basename(weight_file))
   sqlite <- dbDriver("SQLite")
-  db <- dbConnect(sqlite, weight_path)
+  db <- dbConnect(sqlite, weight_file)
   query <- function(...) dbGetQuery(db, ...)
   weight_table <- query("select * from weights")
   weight_table <- weight_table[weight_table$weight!=0,]
@@ -91,7 +89,7 @@ load_predictdb_weights <- function(weight_path,
 
   # load pre-computed covariances from PredictDB LD file
   if (load_predictdb_LD){
-    predictdb_LD_file <- paste0(file_path_sans_ext(weight_path), ".txt.gz")
+    predictdb_LD_file <- paste0(file_path_sans_ext(weight_file), ".txt.gz")
     if (!file.exists(predictdb_LD_file)){
       stop(paste("PredictDB LD file", predictdb_LD_file, "does not exist!"))
     }
@@ -110,7 +108,7 @@ load_predictdb_weights <- function(weight_path,
 
 #' @title Loads weights in FUSION format
 #'
-#' @param weight_path the directory containing FUSION weights ('.wgt.RDat' files).
+#' @param weight_dir the directory containing FUSION weights ('.wgt.RDat' files).
 #'
 #' @param fusion_method a string, specifying the method to choose in FUSION models.
 #' "best.cv" option will use the best model (smallest p-value) under cross-validation.
@@ -131,7 +129,7 @@ load_predictdb_weights <- function(weight_path,
 #'
 #' @export
 #'
-load_fusion_weights <- function(weight_path,
+load_fusion_weights <- function(weight_dir,
                                 fusion_method = c("lasso","enet","top1","blup","bslmm","best.cv"),
                                 fusion_genome_version = c("b38","b37"),
                                 make_extra_table = FALSE,
@@ -139,14 +137,14 @@ load_fusion_weights <- function(weight_path,
 
   fusion_method <- match.arg(fusion_method)
   fusion_genome_version <- match.arg(fusion_genome_version)
-  stopifnot(dir.exists(weight_path))
+  stopifnot(dir.exists(weight_dir))
 
   loginfo("Loading FUSION weights ...")
-  weight_name <- file_path_sans_ext(basename(weight_path))
+  weight_name <- file_path_sans_ext(basename(weight_dir))
 
   # list FUSION weight Rdata files
-  wgt_dir <- dirname(weight_path)
-  wgt_pos_file <- file.path(wgt_dir, paste0(basename(weight_path), ".pos"))
+  wgt_dir <- dirname(weight_dir)
+  wgt_pos_file <- file.path(wgt_dir, paste0(basename(weight_dir), ".pos"))
   if (file.exists(wgt_pos_file)) {
     wgt_pos <- read.table(wgt_pos_file, header = TRUE, stringsAsFactors = FALSE)
     wgt_pos$ID <-
@@ -157,17 +155,17 @@ load_fusion_weights <- function(weight_path,
     wgt_rdata_files <- file.path(wgt_dir, wgt_pos[, "WGT"])
     wgt_IDs <- wgt_pos[, "ID"]
   } else {
-    wgt_rdata_files <- list.files(weight_path, full.names = TRUE)
+    wgt_rdata_files <- list.files(weight_dir, full.names = TRUE)
     wgt_IDs <- gsub(".wgt.RDat", "", basename(wgt_rdata_files))
   }
 
-  # Get list of all files in weight_path
+  # Get list of all files in weight_dir
   if (length(wgt_rdata_files) == 0) {
     stop("No FUSION .wgt.RDat files found.")
   }
 
   loginfo("Loading %d .wgt.RDat files", length(wgt_rdata_files))
-  weight_table_list <- mclapply(1:length(wgt_rdata_files), function(i){
+  weight_table_list <- mclapply_check(1:length(wgt_rdata_files), function(i){
     loaded_wgt_res <- load_fusion_wgt_data(
       wgt_rdata_files[i],
       wgt_IDs[i],
@@ -175,8 +173,6 @@ load_fusion_weights <- function(weight_path,
       fusion_genome_version = fusion_genome_version)
     loaded_wgt_res$weight_table
   }, mc.cores = ncore)
-
-  check_mc_res(weight_table_list)
 
   weight_table <- do.call(rbind, weight_table_list)
 
@@ -328,7 +324,7 @@ make_predictdb_from_QTLs <- function(weight_table,
 
   # if use_top_QTL, select the top SNP with the max abs(weight) for each gene
   if (use_top_QTL) {
-    loginfo("select the top SNP with the max abs(weight) for each gene")
+    loginfo("Select the top SNP with the max abs(weight) for each gene")
     weight_table <- weight_table[with(weight_table, order(gene, -abs(weight))),]
     weight_table <- weight_table[!duplicated(weight_table$gene), ]
   }
@@ -368,7 +364,7 @@ make_predictdb_from_QTLs <- function(weight_table,
 
 #' @title Converts fusion weights to predictDB format
 #'
-#' @param weight_path the directory containing FUSION weights ('.wgt.RDat' files).
+#' @param weight_dir the directory containing FUSION weights ('.wgt.RDat' files).
 #'
 #' @param fusion_method a string, specifying the method to choose in FUSION models.
 #'
@@ -387,7 +383,7 @@ make_predictdb_from_QTLs <- function(weight_table,
 #' @export
 #'
 convert_fusion_to_predictdb <- function(
-    weight_path,
+    weight_dir,
     fusion_method = c("lasso","enet","top1","blup","bslmm","best.cv"),
     fusion_genome_version = c("b38","b37"),
     make_extra_table = TRUE,
@@ -398,7 +394,7 @@ convert_fusion_to_predictdb <- function(
   fusion_method <- match.arg(fusion_method)
   fusion_genome_version <- match.arg(fusion_genome_version)
 
-  loaded_weights_res <- load_fusion_weights(weight_path,
+  loaded_weights_res <- load_fusion_weights(weight_dir,
                                             fusion_method = fusion_method,
                                             fusion_genome_version = fusion_genome_version,
                                             make_extra_table = make_extra_table)
@@ -528,14 +524,14 @@ convert_predictdb_cov_to_cor <- function(cov_table){
 compute_weight_LD_from_ref <- function(weights,
                                        weight_name,
                                        region_info,
-                                       LD_info,
-                                       snp_info,
+                                       LD_map,
+                                       snp_map,
                                        LD_format = c("rds", "rdata", "mtx", "csv", "txt", "custom"),
                                        LD_loader_fun,
                                        ncore = 1) {
 
-  if (is.null(LD_info) || is.null(snp_info)) {
-    stop("LD_info and snp_info are required for computing LD")
+  if (is.null(LD_map) || is.null(snp_map)) {
+    stop("LD_map and snp_map are required for computing LD")
   }
 
   LD_format <- match.arg(LD_format)
@@ -560,13 +556,13 @@ compute_weight_LD_from_ref <- function(weights,
     weightinfo <- weight_info[weight_info$chrom == b, ]
     if (nrow(weightinfo) > 0) {
       weight_region_ids <- names(sort(-table(weightinfo$region_id)))
-      weight_LD_list <- mclapply(weight_region_ids, function(x){
+      weight_LD_list <- mclapply_check(weight_region_ids, function(x){
         # load the R_snp and SNP info for the region
         # and extract LD for the weight variants
         curr_region_LD_list <- list()
         curr_region_ids <- unlist(strsplit(x, ";"))
-        curr_region_idx <- match(curr_region_ids, LD_info$region_id)
-        LD_matrix_files <- LD_info$LD_matrix[curr_region_idx]
+        curr_region_idx <- match(curr_region_ids, LD_map$region_id)
+        LD_matrix_files <- LD_map$LD_matrix[curr_region_idx]
         if (length(LD_matrix_files) > 1) {
           R_snp <- lapply(LD_matrix_files, load_LD, format = LD_format, LD_loader_fun = LD_loader_fun)
           R_snp <- suppressWarnings(as.matrix(bdiag(R_snp)))
@@ -574,7 +570,7 @@ compute_weight_LD_from_ref <- function(weights,
           R_snp <- load_LD(LD_matrix_files, format = LD_format, LD_loader_fun = LD_loader_fun)
         }
 
-        snpinfo <- do.call(rbind, snp_info[curr_region_ids])
+        snpinfo <- do.call(rbind, snp_map[curr_region_ids])
         rownames(R_snp) <- snpinfo$id
         colnames(R_snp) <- snpinfo$id
 
@@ -587,8 +583,6 @@ compute_weight_LD_from_ref <- function(weights,
         }
         curr_region_LD_list
       }, mc.cores = ncore)
-
-      check_mc_res(weight_LD_list)
 
       weight_LD_list <- unlist(weight_LD_list, recursive = FALSE)
       for(weight_id in names(weight_LD_list)){

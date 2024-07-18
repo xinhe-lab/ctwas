@@ -4,8 +4,7 @@
 #' @param z_snp A data frame with two columns: "id", "A1", "A2", "z". giving the z scores for
 #' snps. "A1" is effect allele. "A2" is the other allele.
 #'
-#' @param snp_info a list of SNP info data frames for LD reference,
-#'  with columns "chrom", "id", "pos", "alt", "ref", and "region_id".
+#' @param snp_map a list of SNP-to-region map for the reference.
 #'
 #' @param drop_multiallelic TRUE/FALSE. If TRUE, multiallelic variants will be dropped from the summary statistics.
 #'
@@ -21,7 +20,7 @@
 #' @export
 #'
 preprocess_z_snp <- function(z_snp,
-                             snp_info,
+                             snp_map,
                              drop_multiallelic = TRUE,
                              drop_strand_ambig = TRUE,
                              logfile = NULL){
@@ -32,21 +31,13 @@ preprocess_z_snp <- function(z_snp,
 
   loginfo("Preprocessing z_snp...")
 
-  if (inherits(snp_info,"list")) {
-    snp_info <- as.data.frame(rbindlist(snp_info, idcol = "region_id"))
-  }
-
-  target_header <- c("chrom", "id", "pos", "alt", "ref")
-  if (!all(target_header %in% colnames(snp_info))){
-    stop("SNP info needs to contain the following columns: ",
-         paste(target_header, collapse = " "))
-  }
+  snp_info <- as.data.frame(rbindlist(snp_map, idcol = "region_id"))
 
   loginfo("z_snp has %d variants in total", length(z_snp$id))
 
   # remove SNPs not in LD reference
   z_snp <- z_snp[z_snp$id %in% snp_info$id,]
-  loginfo("%d variants left after filtering by snp_info", length(z_snp$id))
+  loginfo("%d variants left after filtering by snp_map", length(z_snp$id))
 
   # drop multiallelic variants (id not unique)
   if (drop_multiallelic) {

@@ -209,9 +209,14 @@ read_var_info <- function(var_info_file){
   return(var_info)
 }
 
-# check mclapply result
-check_mc_res <- function(x){
-  if (any(sapply(x, is.null))) {
-    stop("Not all cores returned results. Try rerun with bigger memory or fewer cores")
+# run mclapply and stop if not all cores delivered results
+#' @importFrom parallel mclapply
+mclapply_check <- function(X, FUN, mc.cores = 1){
+  tryCatch({
+    mclapply(X, FUN, mc.cores = mc.cores)
+  }, warning = function(w) {
+    if (grepl("not deliver results", w$message))
+      stop("Not all cores delivered results. Try rerun with bigger memory or fewer cores.")
   }
+  )
 }

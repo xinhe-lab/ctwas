@@ -7,13 +7,14 @@
 diagnose_ld_mismatch_susie(
   z_snp,
   region_ids,
-  LD_info,
-  snp_info,
+  snp_map,
+  LD_map,
   gwas_n = NULL,
   ncore = 1,
   p_diff_thresh = 5e-08,
   LD_format = c("rds", "rdata", "mtx", "csv", "txt", "custom"),
-  LD_loader_fun
+  LD_loader_fun,
+  logfile = NULL
 )
 }
 \arguments{
@@ -22,9 +23,9 @@ snps. "A1" is effect allele. "A2" is the other allele.}
 
 \item{region_ids}{A vector of region IDs to run diagnosis}
 
-\item{LD_info}{a list of paths to LD matrices for each of the regions.}
+\item{snp_map}{a list of SNP-to-region map for the reference.}
 
-\item{snp_info}{a list of SNP info data frames for LD reference.}
+\item{LD_map}{a data frame with filenames of LD matrices for the regions.}
 
 \item{gwas_n}{integer, GWAS sample size.}
 
@@ -37,6 +38,8 @@ with significant difference between observed z-scores and estimated values}
 \code{LD_loader_fun()} function to load LD matrix.}
 
 \item{LD_loader_fun}{a user defined function to load LD matrix when \code{LD_format = "custom"}.}
+
+\item{logfile}{the log file, if NULL will print log info on screen}
 }
 \value{
 a list of problematic SNPs, flipped SNPs,

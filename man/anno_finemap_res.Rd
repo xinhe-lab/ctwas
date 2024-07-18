@@ -6,7 +6,7 @@
 \usage{
 anno_finemap_res(
   finemap_res,
-  snp_info,
+  snp_map,
   gene_annot = NULL,
   use_gene_pos = c("mid", "start", "end"),
   filter_protein_coding_genes = FALSE,
@@ -16,8 +16,7 @@ anno_finemap_res(
 \arguments{
 \item{finemap_res}{a data frame of cTWAS finemapping result}
 
-\item{snp_info}{a list or data frame of SNP info for LD reference,
-with columns "chrom", "id", "pos", "alt", "ref".}
+\item{snp_map}{a list of SNP-to-region map for the reference.}
 
 \item{gene_annot}{a data frame of gene annotations, with columns:
 "chrom", "start", "end", "gene_id", "gene_name", "gene_type.}
@@ -25,9 +24,9 @@ with columns "chrom", "id", "pos", "alt", "ref".}
 \item{use_gene_pos}{use mid (midpoint), start or end positions to
 represent gene positions.}
 
-\item{filter_protein_coding_genes}{TRUE/FALSE. If TRUE, keep protein coding genes only.}
+\item{filter_protein_coding_genes}{If TRUE, keep protein coding genes only.}
 
-\item{filter_cs}{TRUE/FALSE. If TRUE, limits results in credible sets.}
+\item{filter_cs}{If TRUE, limits results in credible sets.}
 }
 \value{
 a data frame of cTWAS finemapping result including gene

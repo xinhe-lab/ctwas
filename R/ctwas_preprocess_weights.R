@@ -1,17 +1,17 @@
 
 #' @title Preprocess PredictDB/FUSION weights and harmonize with LD reference
 #'
-#' @param weight_path path to the '.db' file for PredictDB weights;
+#' @param weight_file filename of the '.db' file for PredictDB weights;
 #' or the directory containing '.wgt.RDat' files for FUSION weights.
 #'
-#' @param region_info a data frame of region definition and associated file names.
+#' @param region_info a data frame of region definitions.
 #'
 #' @param gwas_snp_ids a vector of SNP IDs in GWAS summary statistics (z_snp$id).
 #'
-#' @param snp_info a list of SNP info data frames for LD reference,
-#'  with columns "chrom", "id", "pos", "alt", "ref", and "region_id".
+#' @param snp_map a list of SNP-to-region map for the reference.
 #'
-#' @param LD_info a list of paths to LD matrices for each of the regions. Required when \code{load_predictdb_LD = FALSE}.
+#' @param LD_map a data frame with filenames of LD matrices for the regions.
+#' Required when \code{load_predictdb_LD = FALSE}.
 #'
 #' @param type a string, specifying QTL type of each weight file, e.g. expression, splicing, protein.
 #'
@@ -51,17 +51,16 @@
 #' @importFrom logging addHandler loginfo writeToFile
 #' @importFrom data.table rbindlist
 #' @importFrom tools file_path_sans_ext
-#' @importFrom parallel mclapply
 #'
 #' @export
 #'
-preprocess_weights <- function(weight_path,
+preprocess_weights <- function(weight_file,
                                region_info,
                                gwas_snp_ids,
                                type,
                                context,
-                               snp_info,
-                               LD_info = NULL,
+                               snp_map,
+                               LD_map,
                                weight_format = c("PredictDB", "FUSION"),
                                drop_strand_ambig = TRUE,
                                scale_predictdb_weights = TRUE,
@@ -77,25 +76,18 @@ preprocess_weights <- function(weight_path,
   if (!is.null(logfile)) {
     addHandler(writeToFile, file = logfile, level = "DEBUG")
   }
+
   # check input arguments
   weight_format <- match.arg(weight_format)
   fusion_method <- match.arg(fusion_method)
   fusion_genome_version <- match.arg(fusion_genome_version)
   LD_format <- match.arg(LD_format)
 
-  if (length(weight_path) != 1) {
-    stop("Please provide only one weight path in `weight_path`.")
+  if (length(weight_file) != 1) {
+    stop("Please provide only one weight path in `weight_file`.")
   }
 
-  # Check LD reference SNP info
-  if (inherits(snp_info,"list")) {
-    snp_info <- as.data.frame(rbindlist(snp_info, idcol = "region_id"))
-  }
-  target_header <- c("chrom", "id", "pos", "alt", "ref")
-  if (!all(target_header %in% colnames(snp_info))){
-    stop("SNP info needs to contain the following columns: ",
-         paste(target_header, collapse = " "))
-  }
+  snp_info <- as.data.frame(rbindlist(snp_map, idcol = "region_id"))
 
   # set default type and context
   if (missing(type)) {
@@ -103,14 +95,14 @@ preprocess_weights <- function(weight_path,
   }
 
   if (missing(context)) {
-    context <- file_path_sans_ext(basename(weight_path))
+    context <- file_path_sans_ext(basename(weight_file))
   }
 
-  loginfo("Load weight: %s", weight_path)
+  loginfo("Load weight: %s", weight_file)
   loginfo("type: %s", type)
   loginfo("context: %s", context)
 
-  loaded_weights_res <- load_weights(weight_path,
+  loaded_weights_res <- load_weights(weight_file,
                                      weight_format,
                                      filter_protein_coding_genes = filter_protein_coding_genes,
                                      load_predictdb_LD = load_predictdb_LD,
@@ -124,7 +116,10 @@ preprocess_weights <- function(weight_path,
   if (!is.null(cov_table)) {
     # remove genes without predictdb LD
     genes_with_predictdb_LD <- unique(cov_table$GENE)
-    loginfo("Remove %d genes without predictdb LD", length(setdiff(weight_table$gene, genes_with_predictdb_LD)))
+    genes_no_predictdb_LD <- setdiff(weight_table$gene, genes_with_predictdb_LD)
+    if (any(genes_no_predictdb_LD)) {
+      loginfo("Remove %d genes without predictdb LD", length(genes_no_predictdb_LD))
+    }
     weight_table <- weight_table[weight_table$gene %in% genes_with_predictdb_LD, ]
   }
   gene_names <- unique(weight_table$gene)
@@ -141,7 +136,8 @@ preprocess_weights <- function(weight_path,
   snp_info <- snp_info[snp_info$id %in% weight_table$rsid,]
 
   loginfo("Harmonizing and processing weights ...")
-  weights <- mclapply(gene_names, function(gene_name){
+
+  weights <- mclapply_check(gene_names, function(gene_name){
     process_weight(gene_name,
                    type = type,
                    context = context,
@@ -154,16 +150,22 @@ preprocess_weights <- function(weight_path,
                    drop_strand_ambig = drop_strand_ambig,
                    scale_predictdb_weights = scale_predictdb_weights)
   }, mc.cores = ncore)
-  check_mc_res(weights)
+
   names(weights) <- paste0(gene_names, "|", weight_name)
+
+  empty_wgt_idx <- which(sapply(weights, "[[", "n_wgt") == 0)
+  if (any(empty_wgt_idx)) {
+    loginfo("Remove %d empty weights after harmonization", length(empty_wgt_idx))
+    weights[empty_wgt_idx] <- NULL
+  }
 
   if (!load_predictdb_LD) {
     loginfo("Computing LD among variants in weights ...")
     weights <- compute_weight_LD_from_ref(weights,
                                           weight_name,
                                           region_info = region_info,
-                                          LD_info = LD_info,
-                                          snp_info = snp_info,
+                                          LD_map = LD_map,
+                                          snp_map = snp_map,
                                           LD_format = LD_format,
                                           LD_loader_fun = LD_loader_fun,
                                           ncore = ncore)
@@ -189,12 +191,9 @@ process_weight <- function(gene_name,
                            scale_predictdb_weights = TRUE) {
 
   # Check LD reference SNP info
-  if (inherits(snp_info,"list")) {
-    snp_info <- as.data.frame(rbindlist(snp_info, idcol = "region_id"))
-  }
   target_header <- c("chrom", "id", "pos", "alt", "ref")
   if (!all(target_header %in% colnames(snp_info))){
-    stop("SNP info needs to contain the following columns: ",
+    stop("snp_info needs to contain the following columns: ",
          paste(target_header, collapse = " "))
   }
 
@@ -206,17 +205,12 @@ process_weight <- function(gene_name,
   if (length(chrom) > 1) {
     stop("More than one chrom in weight for %s!", gene_name)
   }
-  snp_pos <- as.integer(sapply(strsplit(g_weight_table$varID, "_"), "[[", 2))
-  snp_info_pos <- as.integer(snp_info$pos[match(g_weight_table$rsid, snp_info$id)])
-  # check if the SNP positions in weight match with LD reference (snp_info)
-  # if Positions in weights are different from those in snp_info,
-  # use the positions in snp_info
-  if (any(snp_pos != snp_info_pos)) {
-    snp_pos <- snp_info_pos
-  }
+
+  snp_pos <- as.integer(snp_info$pos[match(g_weight_table$rsid, snp_info$id)])
+
   snps <- data.frame(chrom = chrom,
                      id = g_weight_table$rsid,
-                     cm = "0",
+                     cm = 0,
                      pos = snp_pos,
                      alt = g_weight_table$eff_allele,
                      ref = g_weight_table$ref_allele,
@@ -260,7 +254,8 @@ process_weight <- function(gene_name,
     if (!is.null(cov_table)) {
       # get pre-computed LD matrix from predictedDB weights
       g_cov_table <- cov_table[cov_table$GENE == gene_name,]
-      R_wgt <- get_LD_matrix_from_predictdb(g_cov_table, g_weight_table,
+      R_wgt <- get_LD_matrix_from_predictdb(g_cov_table,
+                                            g_weight_table,
                                             convert_cov_to_cor = TRUE)
       R_wgt <- R_wgt[snps$id, snps$id, drop=FALSE]
     } else{
@@ -275,6 +270,7 @@ process_weight <- function(gene_name,
                 weight_name = weight_name,
                 type = type,
                 context = context,
-                n_wgt=n_wgt))
+                n_wgt = n_wgt))
   }
+
 }
