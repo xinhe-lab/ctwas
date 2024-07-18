@@ -78,6 +78,23 @@ ctwas_sumstats_noLD <- function(
     addHandler(writeToFile, file=logfile, level='DEBUG')
   }
 
+  # check inputs
+  if (anyNA(z_snp)){
+    stop("z_snp contains missing values!")
+  }
+
+  if (!inherits(weights,"list")){
+    stop("'weights' should be a list object.")
+  }
+
+  if (any(sapply(weights, is.null))) {
+    stop("weights contain NULL, remove empty weights!")
+  }
+
+  if (thin > 1 | thin <= 0){
+    stop("thin needs to be in (0,1]")
+  }
+
   if (!is.null(outputdir)) {
     dir.create(outputdir, showWarnings=FALSE, recursive=TRUE)
   }
@@ -88,6 +105,10 @@ ctwas_sumstats_noLD <- function(
     if (!is.null(outputdir)) {
       saveRDS(z_gene, file.path(outputdir, paste0(outname, ".z_gene.RDS")))
     }
+  }
+
+  if (anyNA(z_gene)){
+    stop("z_gene contains missing values!")
   }
 
   # Get region_data, which contains SNPs and genes assigned to each region

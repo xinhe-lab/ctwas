@@ -29,9 +29,11 @@ compute_gene_z <- function (z_snp,
   }
 
   if (any(sapply(weights, is.null))) {
-    warning("weights contain NULL, remove empty weights.")
-    loginfo("Remove empty weights")
-    weights[which(sapply(weights, is.null))] <- NULL
+    stop("weights contain NULL, remove empty weights!")
+  }
+
+  if (anyNA(z_snp)){
+    stop("z_snp contains missing values!")
   }
 
   loginfo("Computing gene z-scores ...")
@@ -54,7 +56,7 @@ compute_gene_z <- function (z_snp,
   rownames(z_gene) <- NULL
 
   if (anyNA(z_gene)){
-    stop("z_gene contains missing values!\n")
+    stop("z_gene contains missing values!")
   }
 
   return(z_gene)

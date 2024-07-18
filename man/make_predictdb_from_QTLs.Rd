@@ -8,14 +8,17 @@ make_predictdb_from_QTLs(
   weight_table,
   extra_table = NULL,
   cov_table = NULL,
-  use_top_QTL = FALSE,
+  use_top_QTL = TRUE,
   outputdir = getwd(),
   outname
 )
 }
 \arguments{
 \item{weight_table}{a data frame of the genes, QTLs and weights, with columns:
-"gene", "rsid", "varID", "ref_allele", "eff_allele", "weight".}
+"gene", "rsid", "varID", "ref_allele", "eff_allele", "weight".
+If you want to use multiple eQTLs per gene, you can set \code{use_top_QTL=FALSE}.
+But we assume the weights of the eQTLs are learned from multiple regression
+(instead of marginal effect sizes).}
 
 \item{extra_table}{a data frame (optional) with information of the genes
 in \code{weight_table} ("gene","genename","gene_type", etc.).
@@ -25,7 +28,7 @@ If NULL, create a simply extra_table based on weight_table}
 "GENE","RSID1","RSID2", "VALUE".
 If NULL, do not create covariance files (.txg.gz), unless \code{use_top_QTL=TRUE}.}
 
-\item{use_top_QTL}{TRUE/FALSE. If TRUE, only keep the top QTL with
+\item{use_top_QTL}{If TRUE, only keep the top QTL with
 the largest abs(weight) for each gene (molecular trait), and
 create a simple cov_table with covariance set to 1.}
 

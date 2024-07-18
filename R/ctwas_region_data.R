@@ -35,6 +35,8 @@
 #'
 #' @param seed seed for random sampling
 #'
+#' @param logfile path to the log file, if NULL will print log info on screen.
+#'
 #' @return a list with region_data, updated weights, and cross-bounary genes
 #'
 #' @importFrom logging loginfo
@@ -54,13 +56,26 @@ assemble_region_data <- function(region_info,
                                  thin_gwas_snps = TRUE,
                                  add_z = TRUE,
                                  ncore = 1,
-                                 seed = 99) {
+                                 seed = 99,
+                                 logfile = NULL) {
 
-  # check arguments
+  # check inputs
   trim_by <- match.arg(trim_by)
+
+  if (anyNA(z_snp)){
+    stop("z_snp contains missing values!")
+  }
+
+  if (anyNA(z_gene)){
+    stop("z_gene contains missing values!")
+  }
 
   if (!inherits(weights,"list")){
     stop("'weights' should be a list object.")
+  }
+
+  if (any(sapply(weights, is.null))) {
+    stop("weights contain NULL, remove empty weights!")
   }
 
   if (thin > 1 | thin <= 0){
@@ -260,7 +275,7 @@ add_z_to_region_data <- function(region_data,
   zdf <- combine_z(z_snp, z_gene)
 
   region_ids <- names(region_data)
-  region_data2 <- mclapply(region_ids, function(region_id){
+  region_data2 <- mclapply_check(region_ids, function(region_id){
     # add z-scores and types of the region to the region_data
     regiondata <- region_data[[region_id]]
     gid <- regiondata[["gid"]]
@@ -271,7 +286,6 @@ add_z_to_region_data <- function(region_data,
     regiondata[["gs_group"]] <- region_zdf$group
     regiondata
   }, mc.cores = ncore)
-  check_mc_res(region_data2)
 
   names(region_data2) <- region_ids
 
@@ -356,12 +370,20 @@ expand_region_data <- function(region_data,
   # check arguments
   trim_by <- match.arg(trim_by)
 
+  if (anyNA(z_snp)){
+    stop("z_snp contains missing values!")
+  }
+
+  if (anyNA(z_gene)){
+    stop("z_gene contains missing values!")
+  }
+
   # update SNP IDs for each region
   thin <- sapply(region_data, "[[", "thin")
   loginfo("Expanding %d regions with full SNPs ...", length(which(thin < 1)))
 
   region_ids <- names(region_data)
-  region_data <- mclapply(region_ids, function(region_id){
+  region_data <- mclapply_check(region_ids, function(region_id){
     # add z-scores and types of the region to the region_data
     regiondata <- region_data[[region_id]]
     if (regiondata[["thin"]] < 1){
@@ -384,7 +406,6 @@ expand_region_data <- function(region_data,
     }
     regiondata
   }, mc.cores = ncore)
-  check_mc_res(region_data)
 
   names(region_data) <- region_ids
 

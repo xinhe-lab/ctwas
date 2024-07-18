@@ -33,7 +33,7 @@ screen_regions(
 
 \item{LD_map}{a data frame with filenames of LD matrices for each of the regions. Required when \code{use_LD = TRUE}.}
 
-\item{snp_map}{aa list of data frames with SNP-to-region map for the reference. Required when \code{use_LD = TRUE}.}
+\item{snp_map}{a list of data frames with SNP-to-region map for the reference. Required when \code{use_LD = TRUE}.}
 
 \item{weights}{a list of weights for each gene. Required when \code{use_LD = TRUE}.}
 
@@ -41,7 +41,7 @@ screen_regions(
 
 \item{group_prior_var}{a vector of two prior variances for SNPs and gene effects.}
 
-\item{L}{the number of effects for susie}
+\item{L}{the initial number of effects for screening regions}
 
 \item{minvar}{minimum number of variables (snps and genes) in a region}
 

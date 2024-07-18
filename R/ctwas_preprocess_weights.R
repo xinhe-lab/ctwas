@@ -137,7 +137,7 @@ preprocess_weights <- function(weight_path,
   }
 
   if (!load_predictdb_LD) {
-    loginfo("Computing LD among variants in weights ...")
+    loginfo("Computing LD for weights using the LD reference ...")
     weights <- compute_weight_LD_from_ref(weights,
                                           weight_name,
                                           region_info = region_info,
@@ -148,6 +148,11 @@ preprocess_weights <- function(weight_path,
                                           ncore = ncore)
   }
 
+  if (any(sapply(weights, is.null))) {
+    warning("weights contain NULL!")
+  }
+
+  loginfo("Number of genes with weights after preprocessing: %d", length(weights))
 
   return(weights)
 }

@@ -22,6 +22,8 @@
 #'
 #' @param LD_loader_fun a user defined function to load LD matrix when \code{LD_format = "custom"}.
 #'
+#' @param logfile the log file, if NULL will print log info on screen
+#'
 #' @return a list of problematic SNPs, flipped SNPs,
 #' and test statistics from susie's `kriging_rss` function
 #'
@@ -39,17 +41,21 @@ diagnose_ld_mismatch_susie <- function(z_snp,
                                        ncore = 1,
                                        p_diff_thresh = 5e-8,
                                        LD_format = c("rds", "rdata", "mtx", "csv", "txt", "custom"),
-                                       LD_loader_fun){
+                                       LD_loader_fun,
+                                       logfile = NULL){
+
+  if (!is.null(logfile)){
+    addHandler(writeToFile, file= logfile, level='DEBUG')
+  }
 
   loginfo("Perform LD mismatch diagnosis for %d regions", length(region_ids))
   LD_format <- match.arg(LD_format)
 
-  condz_list <- mclapply(region_ids, function(region_id){
+  condz_list <- mclapply_check(region_ids, function(region_id){
     compute_region_condz(region_id, LD_map, snp_map, z_snp, gwas_n,
                          LD_format = LD_format,
                          LD_loader_fun = LD_loader_fun)
   }, mc.cores = ncore)
-  check_mc_res(condz_list)
 
   names(condz_list) <- region_ids
   condz_stats <- rbindlist(condz_list, idcol = "region_id")

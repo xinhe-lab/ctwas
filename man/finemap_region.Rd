@@ -38,7 +38,7 @@ finemap_region(
 
 \item{snp_map}{a list of SNP-to-region map for the reference. Required when \code{use_LD = TRUE}.}
 
-\item{weights}{a list of preprocessed weights.}
+\item{weights}{a list of preprocessed weights. Required when \code{use_LD = TRUE}.}
 
 \item{L}{the number of effects for susie during the fine mapping}
 

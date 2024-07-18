@@ -20,7 +20,7 @@ example_chrom <- 16
 
 # multigroup_outputdir <- "/project2/xinhe/shared_data/multigroup_ctwas/tutorial/LDL_liver_tutorial/sample_data/LDL_liver_chr16_example"
 
-##### LD region info #####
+##### Prepare reference data #####
 region_info_file <- file.path(outputdir, paste0(outname, ".region_info.RDS"))
 snp_map_file <- file.path(outputdir, paste0(outname, ".snp_map.RDS"))
 
@@ -31,7 +31,7 @@ if (file.exists(region_info_file) && file.exists(snp_map_file)){
 }else{
   region_file <- system.file("extdata/ldetect", "EUR.b38.ldetect.regions.RDS", package = "ctwas")
   region_info <- readRDS(region_file)
-  region_info <- region_info[region_info$chrom == example_chrom, , drop = F]
+  region_info <- subset(region_info, chrom == example_chrom)
 
   ld_ref_dir <- "/project2/xinhe/shared_data/multigroup_ctwas/LD_reference/"
   filestem <- paste0("ukb_b38_0.1")

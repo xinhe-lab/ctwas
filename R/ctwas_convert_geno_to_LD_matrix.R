@@ -23,8 +23,10 @@
 #' in .Rvar output
 #'
 #' @param show_progress_bar If TRUE, print progress bar
-
+#'
 #' @param verbose If TRUE, print detail messages
+#'
+#' @param logfile the log file, if NULL will print log info on screen
 #'
 #' @return a data frame of region_metatable, with region definitions and
 #' filenames of LD matrices and variant information.
@@ -47,7 +49,12 @@ convert_geno_to_LD_matrix <- function(region_info,
                                       include_variance = TRUE,
                                       include_allele_freq = TRUE,
                                       show_progress_bar = TRUE,
-                                      verbose = FALSE) {
+                                      verbose = FALSE,
+                                      logfile = NULL) {
+
+  if (!is.null(logfile)){
+    addHandler(writeToFile, file= logfile, level='DEBUG')
+  }
 
   loginfo("Convert genotype data to LD matrices")
 

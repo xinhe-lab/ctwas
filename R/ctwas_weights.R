@@ -165,7 +165,7 @@ load_fusion_weights <- function(weight_dir,
   }
 
   loginfo("Loading %d .wgt.RDat files", length(wgt_rdata_files))
-  weight_table_list <- mclapply(1:length(wgt_rdata_files), function(i){
+  weight_table_list <- mclapply_check(1:length(wgt_rdata_files), function(i){
     loaded_wgt_res <- load_fusion_wgt_data(
       wgt_rdata_files[i],
       wgt_IDs[i],
@@ -173,7 +173,6 @@ load_fusion_weights <- function(weight_dir,
       fusion_genome_version = fusion_genome_version)
     loaded_wgt_res$weight_table
   }, mc.cores = ncore)
-  check_mc_res(weight_table_list)
 
   weight_table <- do.call(rbind, weight_table_list)
 
@@ -276,10 +275,13 @@ load_fusion_wgt_data <- function(wgt_rdata_file,
               cv.rsq = g.cv.rsq))
 }
 
-#' @title Makes PredictDB weights from QTL data
+#' Makes PredictDB weights from QTL data
 #'
 #' @param weight_table a data frame of the genes, QTLs and weights, with columns:
 #' "gene", "rsid", "varID", "ref_allele", "eff_allele", "weight".
+#' If you want to use multiple eQTLs per gene, you can set \code{use_top_QTL=FALSE}.
+#' But we assume the weights of the eQTLs are learned from multiple regression
+#' (instead of marginal effect sizes).
 #'
 #' @param extra_table a data frame (optional) with information of the genes
 #' in \code{weight_table} ("gene","genename","gene_type", etc.).
@@ -289,7 +291,7 @@ load_fusion_wgt_data <- function(wgt_rdata_file,
 #' "GENE","RSID1","RSID2", "VALUE".
 #' If NULL, do not create covariance files (.txg.gz), unless \code{use_top_QTL=TRUE}.
 #'
-#' @param use_top_QTL TRUE/FALSE. If TRUE, only keep the top QTL with
+#' @param use_top_QTL If TRUE, only keep the top QTL with
 #' the largest abs(weight) for each gene (molecular trait), and
 #' create a simple cov_table with covariance set to 1.
 #'
@@ -307,7 +309,7 @@ load_fusion_wgt_data <- function(wgt_rdata_file,
 make_predictdb_from_QTLs <- function(weight_table,
                                      extra_table = NULL,
                                      cov_table = NULL,
-                                     use_top_QTL = FALSE,
+                                     use_top_QTL = TRUE,
                                      outputdir = getwd(),
                                      outname){
 
@@ -558,7 +560,7 @@ compute_weight_LD_from_ref <- function(weights,
     weightinfo <- weight_info[weight_info$chrom == b, ]
     if (nrow(weightinfo) > 0) {
       weight_region_ids <- names(sort(-table(weightinfo$region_id)))
-      weight_LD_list <- mclapply(weight_region_ids, function(x){
+      weight_LD_list <- mclapply_check(weight_region_ids, function(x){
         # load the R_snp and SNP info for the region
         # and extract LD for the weight variants
         curr_region_LD_list <- list()
@@ -585,8 +587,6 @@ compute_weight_LD_from_ref <- function(weights,
         }
         curr_region_LD_list
       }, mc.cores = ncore)
-
-      check_mc_res(weight_LD_list)
 
       weight_LD_list <- unlist(weight_LD_list, recursive = FALSE)
       for(weight_id in names(weight_LD_list)){

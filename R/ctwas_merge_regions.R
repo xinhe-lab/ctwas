@@ -10,13 +10,14 @@
 #'
 #' @param z_gene A data frame with columns: "id", "z", giving the z-scores for genes.
 #'
-#' @param weights a list of weights for each gene
+#' @param snp_map a list of data frames with SNP-to-region map for the reference.
+#'
+#' @param LD_map a data frame with filenames of LD matrices for each of the regions.
+#' Required when \code{use_LD = TRUE}.
+#'
+#' @param weights a list of weights for each gene. Required when \code{use_LD = TRUE}.
 #'
 #' @param use_LD If TRUE, use LD for finemapping.
-#'
-#' @param LD_map a data frame with filenames of LD matrices for each of the regions
-#'
-#' @param snp_map a list of data frames with SNP-to-region map for the reference.
 #'
 #' @param maxSNP Inf or integer. Maximum number of SNPs in a region. Default is
 #' Inf, no limit. This can be useful if there are many SNPs in a region and you don't
@@ -54,6 +55,8 @@
 #'
 #' @param verbose TRUE/FALSE. If TRUE, print detail messages
 #'
+#' @param logfile the log file, if NULL will print log info on screen
+#'
 #' @param ... Additional arguments of \code{susie_rss}.
 #'
 #' @return a list of merged region data, merged region info,
@@ -68,10 +71,10 @@ merge_finemap_regions <- function(boundary_genes,
                                   region_info,
                                   z_snp,
                                   z_gene,
+                                  snp_map,
+                                  LD_map,
                                   weights,
                                   use_LD = TRUE,
-                                  LD_map = NULL,
-                                  snp_map = NULL,
                                   maxSNP = Inf,
                                   expand = TRUE,
                                   L = 5,
@@ -87,7 +90,12 @@ merge_finemap_regions <- function(boundary_genes,
                                   LD_loader_fun,
                                   ncore = 1,
                                   verbose = FALSE,
+                                  logfile = NULL,
                                   ...){
+
+  if (!is.null(logfile)){
+    addHandler(writeToFile, file= logfile, level='DEBUG')
+  }
 
   if (nrow(boundary_genes) == 0) {
     loginfo("No regions to merge")

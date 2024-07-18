@@ -20,43 +20,42 @@ example_chrom <- 16
 
 # multigroup_outputdir <- "/project2/xinhe/shared_data/multigroup_ctwas/tutorial/LDL_liver_tutorial/sample_data/LDL_liver_chr16_example"
 
-##### LD region info #####
+##### Prepare reference data #####
 region_info_file <- file.path(outputdir, paste0(outname, ".region_info.RDS"))
-snp_info_file <- file.path(outputdir, paste0(outname, ".snp_info.RDS"))
-LD_info_file <- file.path(outputdir, paste0(outname, ".LD_info.RDS"))
+snp_map_file <- file.path(outputdir, paste0(outname, ".snp_map.RDS"))
+LD_map_file <- file.path(outputdir, paste0(outname, ".LD_map.RDS"))
 
-if (file.exists(region_info_file) && file.exists(snp_info_file) && file.exists(LD_info_file) ){
+if (file.exists(region_info_file) && file.exists(snp_map_file) && file.exists(LD_map_file) ){
   cat(sprintf("Load preprocessed region_info: %s \n", region_info_file))
   region_info <- readRDS(region_info_file)
-  snp_info <- readRDS(snp_info_file)
-  LD_info <- readRDS(LD_info_file)
+  snp_map <- readRDS(snp_map_file)
+  LD_map <- readRDS(LD_map_file)
 }else{
   region_file <- system.file("extdata/ldetect", "EUR.b38.ldetect.regions.RDS", package = "ctwas")
-  region_info <- readRDS(region_file)
+  region_metatable <- readRDS(region_file)
+  region_metatable <- subset(region_metatable, chrom == example_chrom)
 
   filestem <- paste0("ukb_b38_0.1")
-  ld_filestem <- sprintf("%s_chr%s.R_snp.%s_%s", filestem, region_info$chrom, region_info$start, region_info$stop)
-  region_info$LD_matrix <- file.path(ld_R_dir, paste0(ld_filestem, ".RDS"))
-  region_info$SNP_info <- file.path(ld_R_dir, paste0(ld_filestem, ".Rvar"))
-  res <- preprocess_region_LD_snp_info(region_info,
-                                       chrom = example_chrom,
-                                       use_LD = TRUE,
-                                       ncore = ncore)
+  ld_filestem <- sprintf("%s_chr%s.R_snp.%s_%s", filestem,
+                         region_metatable$chrom, region_metatable$start, region_metatable$stop)
+  region_metatable$LD_matrix <- file.path(ld_R_dir, paste0(ld_filestem, ".RDS"))
+  region_metatable$SNP_info <- file.path(ld_R_dir, paste0(ld_filestem, ".Rvar"))
+  res <- create_snp_LD_map(region_metatable)
   region_info <- res$region_info
-  snp_info <- res$snp_info
-  LD_info <- res$LD_info
+  snp_map <- res$snp_map
+  LD_map <- res$LD_map
 
   saveRDS(region_info, region_info_file)
-  saveRDS(snp_info, snp_info_file)
-  saveRDS(LD_info, LD_info_file)
+  saveRDS(snp_map, snp_map_file)
+  saveRDS(LD_map, LD_map_file)
 }
 
 # region_info_multigroup <- readRDS(file.path(multigroup_outputdir, paste0(outname, ".region_info.RDS")))
-# snp_info_multigroup <- readRDS(file.path(multigroup_outputdir, paste0(outname, ".snp_info.RDS")))
-# LD_info_multigroup <- readRDS(file.path(multigroup_outputdir, paste0(outname, ".LD_info.RDS")))
+# snp_map_multigroup <- readRDS(file.path(multigroup_outputdir, paste0(outname, ".snp_map.RDS")))
+# LD_map_multigroup <- readRDS(file.path(multigroup_outputdir, paste0(outname, ".LD_map.RDS")))
 # all.equal(region_info, region_info_multigroup)
-# all.equal(snp_info, snp_info_multigroup)
-# all.equal(LD_info, LD_info_multigroup)
+# all.equal(snp_map, snp_map_multigroup)
+# all.equal(LD_map, LD_map_multigroup)
 
 ##### Preprocess GWAS z-scores #####
 z_snp_outfile <- file.path(outputdir, paste0(outname, ".z_snp.RDS"))
@@ -93,7 +92,7 @@ if (file.exists(processed_z_snp_file)){
 }else{
   z_snp <- readRDS(z_snp_outfile)
   runtime <- system.time({
-    z_snp <- preprocess_z_snp(z_snp, snp_info)
+    z_snp <- preprocess_z_snp(z_snp, snp_map)
   })
   saveRDS(z_snp, processed_z_snp_file)
   loginfo("Preprocessing GWAS z-scores took %0.2f minutes\n",runtime["elapsed"]/60)
@@ -112,7 +111,7 @@ if (file.exists(processed_weight_file)){
     weights <- preprocess_weights(weight_file,
                                   region_info = region_info,
                                   gwas_snp_ids = z_snp$id,
-                                  snp_info = snp_info,
+                                  snp_map = snp_map,
                                   weight_format = "PredictDB",
                                   ncore = ncore)
   })
@@ -154,8 +153,8 @@ runtime <- system.time({
   ctwas_res <- ctwas_sumstats(z_snp,
                               weights,
                               region_info,
-                              snp_info,
-                              LD_info,
+                              snp_map,
+                              LD_map,
                               thin = thin,
                               maxSNP = 20000,
                               ncore = ncore,
@@ -183,7 +182,7 @@ if (file.exists(region_data_file)) {
                                 z_snp,
                                 z_gene,
                                 weights,
-                                snp_info,
+                                snp_map,
                                 thin = thin,
                                 maxSNP = 20000,
                                 trim_by = "random",
@@ -259,8 +258,8 @@ if (file.exists(screen_regions_file)) {
   runtime <- system.time({
     screen_regions_res <- screen_regions(region_data,
                                          use_LD = TRUE,
-                                         LD_info = LD_info,
-                                         snp_info = snp_info,
+                                         LD_map = LD_map,
+                                         snp_map = snp_map,
                                          weights = weights,
                                          group_prior = group_prior,
                                          group_prior_var = group_prior_var,
@@ -273,7 +272,7 @@ if (file.exists(screen_regions_file)) {
 
   # Expand screened region_data with all SNPs in the regions
   screened_region_data <- expand_region_data(screened_region_data,
-                                             snp_info,
+                                             snp_map,
                                              z_snp,
                                              z_gene,
                                              maxSNP = 20000,
@@ -304,8 +303,8 @@ if (file.exists(finemap_regions_file)) {
   runtime <- system.time({
     finemap_res <- finemap_regions(screened_region_data,
                                    use_LD = TRUE,
-                                   LD_info = LD_info,
-                                   snp_info = snp_info,
+                                   LD_map = LD_map,
+                                   snp_map = snp_map,
                                    weights = weights,
                                    L = L,
                                    group_prior = group_prior,

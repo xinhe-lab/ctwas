@@ -46,7 +46,7 @@ create_snp_map <- function(region_info,
   ref_snp_info <- ref_snp_info[ref_snp_info$chrom %in% region_info$chrom, ]
 
   region_ids <- region_info$region_id
-  snp_map <- mclapply(region_ids, function(region_id){
+  snp_map <- mclapply_check(region_ids, function(region_id){
     regioninfo <- region_info[which(region_info$region_id == region_id), ]
     region_chrom <- regioninfo$chrom
     region_start <- regioninfo$start
@@ -56,7 +56,6 @@ create_snp_map <- function(region_info,
     rownames(region_snp_info) <- NULL
     region_snp_info
   }, mc.cores = ncore)
-  check_mc_res(snp_map)
   names(snp_map) <- region_ids
 
   return(list(region_info = region_info,

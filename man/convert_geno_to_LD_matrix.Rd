@@ -15,7 +15,8 @@ convert_geno_to_LD_matrix(
   include_variance = TRUE,
   include_allele_freq = TRUE,
   show_progress_bar = TRUE,
-  verbose = FALSE
+  verbose = FALSE,
+  logfile = NULL
 )
 }
 \arguments{
@@ -42,6 +43,8 @@ in .Rvar output}
 \item{show_progress_bar}{If TRUE, print progress bar}
 
 \item{verbose}{If TRUE, print detail messages}
+
+\item{logfile}{the log file, if NULL will print log info on screen}
 }
 \value{
 a data frame of region_metatable, with region definitions and

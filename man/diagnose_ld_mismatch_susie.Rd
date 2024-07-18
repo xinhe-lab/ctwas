@@ -13,7 +13,8 @@ diagnose_ld_mismatch_susie(
   ncore = 1,
   p_diff_thresh = 5e-08,
   LD_format = c("rds", "rdata", "mtx", "csv", "txt", "custom"),
-  LD_loader_fun
+  LD_loader_fun,
+  logfile = NULL
 )
 }
 \arguments{
@@ -37,6 +38,8 @@ with significant difference between observed z-scores and estimated values}
 \code{LD_loader_fun()} function to load LD matrix.}
 
 \item{LD_loader_fun}{a user defined function to load LD matrix when \code{LD_format = "custom"}.}
+
+\item{logfile}{the log file, if NULL will print log info on screen}
 }
 \value{
 a list of problematic SNPs, flipped SNPs,

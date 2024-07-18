@@ -17,7 +17,8 @@ assemble_region_data(
   thin_gwas_snps = TRUE,
   add_z = TRUE,
   ncore = 1,
-  seed = 99
+  seed = 99,
+  logfile = NULL
 )
 }
 \arguments{
@@ -55,6 +56,8 @@ Otherwise, apply thins to all SNPs.}
 \item{ncore}{The number of cores used to parallelize susie over regions}
 
 \item{seed}{seed for random sampling}
+
+\item{logfile}{path to the log file, if NULL will print log info on screen.}
 }
 \value{
 a list with region_data, updated weights, and cross-bounary genes

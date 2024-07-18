@@ -10,7 +10,7 @@
 #'
 #' @param snp_map a list of SNP-to-region map for the reference. Required when \code{use_LD = TRUE}.
 #'
-#' @param weights a list of preprocessed weights.
+#' @param weights a list of preprocessed weights. Required when \code{use_LD = TRUE}.
 #'
 #' @param L the number of effects for susie during the fine mapping
 #'
@@ -80,6 +80,10 @@ finemap_region <- function(region_data,
   if (!is.null(weights)){
     if (!inherits(weights,"list")){
       stop("'weights' should be a list.")
+    }
+
+    if (any(sapply(weights, is.null))) {
+      stop("weights contain NULL, remove empty weights!")
     }
   }
 
@@ -262,6 +266,10 @@ finemap_regions <- function(region_data,
     if (!inherits(weights,"list")){
       stop("'weights' should be a list.")
     }
+
+    if (any(sapply(weights, is.null))) {
+      stop("weights contain NULL, remove empty weights!")
+    }
   }
 
   LD_format <- match.arg(LD_format)
@@ -275,7 +283,7 @@ finemap_regions <- function(region_data,
 
   region_ids <- names(region_data)
 
-  finemap_region_res_list <- mclapply(region_ids, function(region_id){
+  finemap_region_res_list <- mclapply_check(region_ids, function(region_id){
 
     if (length(L) == 1) {
       region_L <- L
@@ -307,7 +315,6 @@ finemap_regions <- function(region_data,
                    ...)
 
   }, mc.cores = ncore)
-  check_mc_res(finemap_region_res_list)
 
   finemap_res <- do.call(rbind, finemap_region_res_list)
   rownames(finemap_res) <- NULL

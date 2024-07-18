@@ -10,10 +10,10 @@ merge_finemap_regions(
   region_info,
   z_snp,
   z_gene,
+  snp_map,
+  LD_map,
   weights,
   use_LD = TRUE,
-  LD_map = NULL,
-  snp_map = NULL,
   maxSNP = Inf,
   expand = TRUE,
   L = 5,
@@ -29,6 +29,7 @@ merge_finemap_regions(
   LD_loader_fun,
   ncore = 1,
   verbose = FALSE,
+  logfile = NULL,
   ...
 )
 }
@@ -43,13 +44,14 @@ merge_finemap_regions(
 
 \item{z_gene}{A data frame with columns: "id", "z", giving the z-scores for genes.}
 
-\item{weights}{a list of weights for each gene}
+\item{snp_map}{a list of data frames with SNP-to-region map for the reference.}
+
+\item{LD_map}{a data frame with filenames of LD matrices for each of the regions.
+Required when \code{use_LD = TRUE}.}
+
+\item{weights}{a list of weights for each gene. Required when \code{use_LD = TRUE}.}
 
 \item{use_LD}{If TRUE, use LD for finemapping.}
-
-\item{LD_map}{a data frame with filenames of LD matrices for each of the regions}
-
-\item{snp_map}{a list of data frames with SNP-to-region map for the reference.}
 
 \item{maxSNP}{Inf or integer. Maximum number of SNPs in a region. Default is
 Inf, no limit. This can be useful if there are many SNPs in a region and you don't
@@ -86,6 +88,8 @@ genotype data in genetic studies.}
 \item{ncore}{The number of cores used to parallelize computation over regions}
 
 \item{verbose}{TRUE/FALSE. If TRUE, print detail messages}
+
+\item{logfile}{the log file, if NULL will print log info on screen}
 
 \item{...}{Additional arguments of \code{susie_rss}.}
 }
