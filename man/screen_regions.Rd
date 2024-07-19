@@ -12,7 +12,7 @@ screen_regions(
   weights = NULL,
   group_prior = NULL,
   group_prior_var = NULL,
-  init_L = 5,
+  L = 5,
   minvar = 2,
   mingene = 1,
   filter_L = TRUE,
@@ -41,7 +41,7 @@ screen_regions(
 
 \item{group_prior_var}{a vector of two prior variances for SNPs and gene effects.}
 
-\item{init_L}{the initial number of effects for screening regions}
+\item{L}{the number of effects for screening regions}
 
 \item{minvar}{minimum number of variables (snps and genes) in a region}
 
