@@ -14,27 +14,8 @@ knitr::opts_chunk$set(message = FALSE,
                       warning = FALSE)
 ```
 
-## FAQ
+## Installation
 
-### Installation
+## Use custom format LD matrices
 
-Install `cTWAS` package
-
-```{r install_package, eval=FALSE}
-remotes::install_github("xinhe-lab/ctwas", ref = "multigroup_test")
-```
-
-Load the package
-```{r load_package}
-library(ctwas)
-```
-
-### Running cTWAS without LD matrices
-
-It is possible to run cTWAS without LD matrices. 
-To do this, simply set `use_LD = FALSE`, and `L = 1`. 
-
-### Memory and parallelization
-
-### How to use a different LD reference
-
+## Memory and parallelization
