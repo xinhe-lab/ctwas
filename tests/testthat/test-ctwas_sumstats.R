@@ -22,8 +22,7 @@ test_that("ctwas_sumstats filtering by L works", {
                                 thin = 0.1,
                                 maxSNP = 20000,
                                 filter_L = TRUE,
-                                filter_nonSNP_PIP = FALSE,
-                                ncore = 6)
+                                filter_nonSNP_PIP = FALSE)
   })
 
   expect_equal(ctwas_res, precomputed_ctwas_res)
@@ -56,8 +55,7 @@ test_that("ctwas_sumstats filtering by L works", {
 #                                 L = 5,
 #                                 filter_L = FALSE,
 #                                 filter_nonSNP_PIP = TRUE,
-#                                 min_nonSNP_PIP = 0.5,
-#                                 ncore = 6)
+#                                 min_nonSNP_PIP = 0.5)
 #   })
 #
 #   expect_equal(ctwas_res, precomputed_ctwas_res)
