@@ -1,7 +1,7 @@
 destination: docs
 
 repo:
-    branch: single_group
+    branch: singlegroup
 
 navbar:
   structure:
@@ -25,4 +25,4 @@ navbar:
         href: articles/postprocessing_ctwas_results.html
     source:
       text: Source
-      href: https://github.com/xinhe-lab/ctwas/tree/single_group
+      href: https://github.com/xinhe-lab/ctwas/tree/singlegroup
