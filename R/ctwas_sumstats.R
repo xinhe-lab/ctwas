@@ -266,7 +266,8 @@ ctwas_sumstats <- function(
               "boundary_genes" = boundary_genes,
               "z_gene" = z_gene,
               "region_data" = region_data,
-              "screened_region_data" = screened_region_data))
+              "screened_region_data" = screened_region_data,
+              "L" = L))
 
 }
 

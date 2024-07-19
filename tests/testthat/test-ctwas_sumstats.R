@@ -11,7 +11,9 @@ test_that("ctwas_sumstats filtering by L works", {
   # Load weights
   weights <- readRDS(system.file("extdata/sample_data", "LDL_example.preprocessed.weights.RDS", package = "ctwas"))
 
-  precomputed_ctwas_res <- readRDS(system.file("extdata/sample_data", "LDL_example.ctwas_sumstats_filter_L_res.RDS", package = "ctwas"))
+  precomputed_ctwas_res <- readRDS(system.file("extdata/sample_data", "LDL_example.ctwas_sumstats_res.RDS", package = "ctwas"))
+
+  set.seed(99)
 
   capture.output({
     ctwas_res <- ctwas_sumstats(z_snp = z_snp,
@@ -28,36 +30,3 @@ test_that("ctwas_sumstats filtering by L works", {
   expect_equal(ctwas_res, precomputed_ctwas_res)
 
 })
-#
-# test_that("ctwas_sumstats filtering by nonSNP_PIP works", {
-#   # Load region_info, snp_map, and LD_map
-#   LD_map <- readRDS(system.file("extdata/sample_data", "LDL_example.LD_map.RDS", package = "ctwas"))
-#   skip_if_no_LD_matrix(LD_map$LD_matrix)
-#
-#   region_info <- readRDS(system.file("extdata/sample_data", "LDL_example.region_info.RDS", package = "ctwas"))
-#   snp_map <- readRDS(system.file("extdata/sample_data", "LDL_example.snp_map.RDS", package = "ctwas"))
-#
-#   # Load z_snp
-#   z_snp <- readRDS(system.file("extdata/sample_data", "LDL_example.preprocessed.z_snp.RDS", package = "ctwas"))
-#   # Load weights
-#   weights <- readRDS(system.file("extdata/sample_data", "LDL_example.preprocessed.weights.RDS", package = "ctwas"))
-#
-#   precomputed_ctwas_res <- readRDS(system.file("extdata/sample_data", "LDL_example.ctwas_sumstats_res.RDS", package = "ctwas"))
-#
-#   capture.output({
-#     ctwas_res <- ctwas_sumstats(z_snp = z_snp,
-#                                 weights = weights,
-#                                 region_info = region_info,
-#                                 snp_map = snp_map,
-#                                 LD_map = LD_map,
-#                                 thin = 0.1,
-#                                 maxSNP = 20000,
-#                                 L = 5,
-#                                 filter_L = FALSE,
-#                                 filter_nonSNP_PIP = TRUE,
-#                                 min_nonSNP_PIP = 0.5)
-#   })
-#
-#   expect_equal(ctwas_res, precomputed_ctwas_res)
-#
-# })
