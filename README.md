@@ -14,7 +14,7 @@ Use "remotes" to install the latest version of ctwas from GitHub:
 
 ```r
 install.packages("remotes")
-remotes::install_github("xinhe-lab/ctwas",ref = "multigroup_test")
+remotes::install_github("xinhe-lab/ctwas",ref = "multigroup")
 ```
 
 
@@ -52,7 +52,7 @@ To run the full cTWAS, a few more tutorials including:
 
 - [Post-processing cTWAS results](https://xinhe-lab.github.io/multigroup_ctwas/articles/postprocessing_ctwas_results.html)
 
-You can [browse source code](https://github.com/xinhe-lab/ctwas/tree/multigroup_test) and [report a bug](https://github.com/xinhe-lab/ctwas/issues) here. 
+You can [browse source code](https://github.com/xinhe-lab/ctwas/tree/multigroup) and [report a bug](https://github.com/xinhe-lab/ctwas/issues) here. 
 
 <img style="display:block;margin:auto" width="700" height="300" src="man/figures/workflow.png">
 

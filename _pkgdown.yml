@@ -1,7 +1,7 @@
 destination: docs
 
 repo:
-    branch: multigroup_test
+    branch: multigroup
 
 navbar:
   structure:
@@ -12,17 +12,17 @@ navbar:
       text: Tutorial
       menu:
       - text: A minimal tutorial of running cTWAS without LD
-        href: articles/minimal_ctwas_tutorial.html
+        href: articles/minimal_tutorial.html
       - text: Preparing cTWAS input data
-        href: articles/preparing_ctwas_input_data.html
+        href: articles/preparing_input.html
       - text: Using cTWAS main function
-        href: articles/ctwas_main_function.html
+        href: articles/main_function.html
       - text: Using cTWAS modules
-        href: articles/ctwas_modules.html
+        href: articles/modules.html
       - text: Summarizing cTWAS results
-        href: articles/summarizing_ctwas_results.html
+        href: articles/summarizing_results.html
       - text: Post-processing cTWAS results
-        href: articles/postprocessing_ctwas_results.html
+        href: articles/postprocessing.html
     source:
       text: Source
-      href: https://github.com/xinhe-lab/ctwas/tree/multigroup_test
+      href: https://github.com/xinhe-lab/ctwas/tree/multigroup

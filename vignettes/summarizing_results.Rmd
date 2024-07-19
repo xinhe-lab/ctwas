@@ -1,0 +1,198 @@
+---
+title: "Summarizing and visualizing cTWAS results"
+author: "Kaixuan Luo, Sheng Qian"
+date: "`r Sys.Date()`"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{Summarizing and visualizing cTWAS results}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(message = FALSE,
+                      warning = FALSE,
+                      fig.width = 6,
+                      fig.height = 4,
+                      fig.align = "center",
+                      fig.cap = "&nbsp;",
+                      dpi = 120)
+```
+
+
+In this tutorial, we will show how to summarize and visualize cTWAS results.
+
+Load the packages.
+```{r load_packages, message=FALSE}
+library(ctwas)
+library(EnsDb.Hsapiens.v86)
+```
+
+
+We need the Ensembl database `EnsDb.Hsapiens.v86` here in this tutorial, please choose the version of Ensembl database for your specific data. 
+
+Let's first load the cTWAS input data needed to run this tutorial: 
+GWAS sample size (`gwas_n`), prediction models of molecular traits (`weights`), the reference data: including information about regions (`region_info`), reference variant list (`snp_map`) and reference LD (`LD_map`).
+
+```{r load_ctwas_input}
+gwas_n <- 343621
+
+weights <- readRDS(system.file("extdata/sample_data", "LDL_example.preprocessed.weights.RDS", package = "ctwas"))
+
+
+region_info <- readRDS(system.file("extdata/sample_data", "LDL_example.region_info.RDS", package = "ctwas"))
+
+snp_map <- readRDS(system.file("extdata/sample_data", "LDL_example.snp_map.RDS", package = "ctwas"))
+
+LD_map <- readRDS(system.file("extdata/sample_data", "LDL_example.LD_map.RDS", package = "ctwas"))
+```
+
+
+
+We then load the cTWAS result from running `ctwas_sumstats()` function with LD: 
+
+```{r load_ctwas_res}
+ctwas_res <- readRDS(system.file("extdata/sample_data", "LDL_example.ctwas_sumstats_res.RDS", package = "ctwas"))
+z_gene <- ctwas_res$z_gene
+param <- ctwas_res$param
+finemap_res <- ctwas_res$finemap_res
+boundary_genes <- ctwas_res$boundary_genes
+region_data <- ctwas_res$region_data
+screened_region_data <- ctwas_res$screened_region_data
+```
+
+
+`ctwas_sumstats()` returns several main output: 
+
++ `z_gene`: the Z-scores of molecular traits, 
+
++ `param`: the estimated parameters,
+ 
++ `finemap_res`: fine-mapping results,
+
+It also produces other output: 
+
++ `boundary_genes`: the molecular traits that cross region boundaries (we will need these in the post-processing step). 
+
++ `region_data`: assembled region data, including Z scores of SNPs and molecular traits, for all the regions,. Note that only data of the subset of SNPs used in screening regions are included. 
+
++ `screened_region_data`: the data of all SNPs and molecular traits of the selected regions. 
+
+## Assessing parameters and computing PVE
+
+First, we make plots using `use `make_convergence_plots()` to see how estimated parameters converge during the execution of the program:
+
+```{r convergence_plot, fig.width = 7, fig.height=5}
+make_convergence_plots(param, gwas_n)
+```
+
+
+These plots show the estimated prior inclusion probability, prior effect size variance, and enrichment over the iterations of parameter estimation, if cTWAS is run properly. The enrichment is defined as the ratio of the prior of molecular traits over the prior of variants. We generally expect molecular traits to have higher prior inclusion probability than variants. Enrichment values typically range from 20 -100 for eQTLs. 
+
+Then, we use `summarize_param()` to obtain estimated parameters (from the last iteration) and to compute the proportion of variance explained (PVE) by variants and molecular traits. These PVE values allow us to compute how heritability of the phenotype is partitioned among variants and groups of molecular traits. 
+
+```{r summarize_param}
+ctwas_parameters <- summarize_param(param, gwas_n)
+```
+
+
+## Interpreting the cTWAS results
+
+To interpret and visualize the results, we first need to add annotations of molecular traits to the fine-mapping result.
+
+For gene expression models, we use the `get_gene_annot_from_ens_db()` function to obtain the gene annotations (`gene_annot`) from the Ensembl database:
+
+```{r get_gene_annot_from_ens_db, message=FALSE}
+ens_db <- EnsDb.Hsapiens.v86
+finemap_gene_res <- subset(finemap_res, group != "SNP")
+gene_ids <- unique(sapply(strsplit(finemap_gene_res$id, split = "[|]"), "[[", 1))
+gene_annot <- get_gene_annot_from_ens_db(ens_db, gene_ids)
+```
+
+
+Note: we used the gene annotations from `EnsDb.Hsapiens.v86` for the example data, please choose the Ensembl database for your specific data. 
+
+If you have other molecular traits (e.g. splicing), you need to create your own `gene_annot`, a data frame that contains annotations for all the molecular traits. It should have the following columns: 'chrom', 'start', 'end', 'gene_id', 'gene_name' and 'gene_type'.
+
+We then use the `anno_finemap_res()` function to add gene annotations to the fine-mapping result, and use gene mid-points to represent gene positions.
+
+```{r add_gene_names}
+finemap_res <- anno_finemap_res(finemap_res, snp_map, gene_annot,
+                                use_gene_pos = "mid")
+```
+
+
+We list all molecular traits with PIP > 0.8, which is the threshold we used in the paper. 
+
+```{r interpret_res}
+sig_finemap_res <- subset(finemap_res, group != "SNP" & susie_pip > 0.8)
+sig_finemap_res[order(sig_finemap_res$susie_pip,decreasing = TRUE),]
+```
+
+
+In this example, HPR gene in liver, HP gene in adipose, and CETP gene in adipose are the only three genes that satisfy this threshold.
+
+When we have multiple contexts (tissues), it is useful to evaluate the total evidence of a gene being causal, *combining evidence of all the molecular traits affecting this gene across all types and contexts.* This is done by summing up the PIPs of all these molecular traits of the same gene, expressed as the combined PIP of this gene. 
+ 
+For example, we can combine PIPs of the same gene by context.  We could limit results in protein coding genes by setting `filter_protein_coding_genes = TRUE`, and limit results in credible sets by setting `filter_cs = TRUE`.
+
+```{r combine_pips_by_context}
+combined_pip_by_context <- combine_gene_pips(finemap_res, 
+                                             by = "context",
+                                             filter_protein_coding_genes = TRUE,    
+                                             filter_cs = TRUE)
+combined_pip_by_context
+```
+
+
+
+```{r show_sig_gene}
+subset(combined_pip_by_context, combined_pip > 0.8)
+```
+
+
+In this example, we can see the causal signal of HPR is specific in liver,  and the causal signals of HP and CETP gene are specific in adipose. 
+
+## Visualizing the cTWAS results
+
+It is often useful to visualize the results of cTWAS. This would help one understand the rationale of how cTWAS chooses a particular molecular trait and identify issues when cTWAS doesn’t behave properly. We could use the `make_locusplot()` function to make locus plots for regions of interest, and zoom in the region by specifying the `locus_range`. For example:
+
+If we have computed and saved correlation matrices to `cor_dir` when running cTWAS with LD, we could simply load those precomputed correlation matrices of the region (`R_snp_gene` and `R_gene`), and then make the locus plot. 
+
+```{r get_region_cor_res}
+cor_dir <- system.file("extdata/sample_data", "cor_matrix", package = "ctwas")
+cor_res <- get_region_cor(region_id = "16_71020125_72901251", cor_dir = cor_dir)
+```
+
+
+```{r locus_plot, fig.width=10, fig.height=8}
+make_locusplot(finemap_res,
+               region_id = "16_71020125_72901251",
+               weights = weights,
+               ens_db = ens_db, 
+               locus_range = c(71.6e6,72.4e6),
+               highlight_pip = 0.8,
+               R_snp_gene = cor_res$R_snp_gene,
+               R_gene = cor_res$R_gene)
+```
+
+
+The locus plot shows several tracks in the example region in chromosome 6 (71.6 - 72.4 Mb). The top one shows -log10(p-value) of the association of variants and molecular traits with the phenotype. The next track shows the PIPs of variants and molecular traits.  The data points are colored by the correlations with the focus gene or molecular trait (HPR in this locus). The red dotted line shows the PIP cutoff of 0.8. The next track shows the locations of QTLs of the focus gene (by default, the focus gene is the gene with the highest PIP). The bottom is the gene track.
+
+In this plot, one can see that there are several genes with good associations with the phenotype, but only HPR is selected by cTWAS (PIP = 1). This is because once HPR and other likely causal variants are selected by cTWAS, there is no remaining association left in other genes. This example thus illustrates how cTWAS selects likely causal molecular traits while controlling for nearby molecular traits and variants. 
+
+For the "no-LD" version, we could still make the locus plot without coloring the data points using the correlations to the focus gene.
+
+```{r locus_plot_noLD, fig.width=10, fig.height=8}
+make_locusplot(finemap_res,
+               region_id = "16_71020125_72901251",
+               weights = weights,
+               ens_db = ens_db,
+               locus_range = c(71.6e6,72.4e6),
+               highlight_pip = 0.8)
+```
+
+
+
+
