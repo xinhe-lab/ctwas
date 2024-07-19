@@ -116,10 +116,7 @@ preprocess_weights <- function(weight_file,
   if (!is.null(cov_table)) {
     # remove genes without predictdb LD
     genes_with_predictdb_LD <- unique(cov_table$GENE)
-    genes_no_predictdb_LD <- setdiff(weight_table$gene, genes_with_predictdb_LD)
-    if (any(genes_no_predictdb_LD)) {
-      loginfo("Remove %d genes without predictdb LD", length(genes_no_predictdb_LD))
-    }
+    loginfo("Remove %d genes without predictdb LD", length(setdiff(weight_table$gene, genes_with_predictdb_LD)))
     weight_table <- weight_table[weight_table$gene %in% genes_with_predictdb_LD, ]
   }
   gene_names <- unique(weight_table$gene)
@@ -170,6 +167,8 @@ preprocess_weights <- function(weight_file,
                                           LD_loader_fun = LD_loader_fun,
                                           ncore = ncore)
   }
+
+  loginfo("Number of genes with weights after preprocessing: %d", length(weights))
 
   return(weights)
 }

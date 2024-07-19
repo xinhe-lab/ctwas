@@ -1,35 +1,65 @@
-# test_that("ctwas_sumstats works", {
-#
-#   # Load z_snp
-#   z_snp <- readRDS(system.file("extdata/sample_data", "LDL_example.preprocessed.z_snp.RDS", package = "ctwas"))
-#   # Load weights
-#   weights <- readRDS(system.file("extdata/sample_data", "LDL_example.preprocessed.weights.RDS", package = "ctwas"))
-#   # Load region_info, snp_info, and LD_info
-#   region_info <- readRDS(system.file("extdata/sample_data", "LDL_example.region_info.RDS", package = "ctwas"))
-#   snp_info <- readRDS(system.file("extdata/sample_data", "LDL_example.snp_info.RDS", package = "ctwas"))
-#   LD_info <- readRDS(system.file("extdata/sample_data", "LDL_example.LD_info.RDS", package = "ctwas"))
-#
-#   precomputed_ctwas_res <- readRDS(system.file("extdata/sample_data", "LDL_example.ctwas_sumstats_res.RDS", package = "ctwas"))
-#
-#   capture.output({
-#     suppressWarnings({
-#       ctwas_res <- ctwas_sumstats(z_snp,
-#                                   weights,
-#                                   region_info,
-#                                   snp_info,
-#                                   LD_info,
-#                                   thin = 0.1,
-#                                   niter_prefit = 3,
-#                                   niter = 30,
-#                                   L = 5,
-#                                   group_prior_var_structure = "shared_type",
-#                                   filter_L = FALSE,
-#                                   filter_nonSNP_PIP = TRUE,
-#                                   maxSNP = 20000,
-#                                   min_nonSNP_PIP = 0.5)
-#     })
-#   })
-#
-#   expect_equal(ctwas_res, precomputed_ctwas_res)
-#
-# })
+test_that("ctwas_sumstats filtering by L works", {
+  # Load region_info, snp_map, and LD_map
+  LD_map <- readRDS(system.file("extdata/sample_data", "LDL_example.LD_map.RDS", package = "ctwas"))
+  skip_if_no_LD_matrix(LD_map$LD_matrix)
+
+  region_info <- readRDS(system.file("extdata/sample_data", "LDL_example.region_info.RDS", package = "ctwas"))
+  snp_map <- readRDS(system.file("extdata/sample_data", "LDL_example.snp_map.RDS", package = "ctwas"))
+
+  # Load z_snp
+  z_snp <- readRDS(system.file("extdata/sample_data", "LDL_example.preprocessed.z_snp.RDS", package = "ctwas"))
+  # Load weights
+  weights <- readRDS(system.file("extdata/sample_data", "LDL_example.preprocessed.weights.RDS", package = "ctwas"))
+
+  precomputed_ctwas_res <- readRDS(system.file("extdata/sample_data", "LDL_example.ctwas_sumstats_filter_L_res.RDS", package = "ctwas"))
+
+  capture.output({
+    ctwas_res <- ctwas_sumstats(z_snp = z_snp,
+                                weights = weights,
+                                region_info = region_info,
+                                snp_map = snp_map,
+                                LD_map = LD_map,
+                                thin = 0.1,
+                                maxSNP = 20000,
+                                filter_L = TRUE,
+                                filter_nonSNP_PIP = FALSE,
+                                ncore = 6)
+  })
+
+  expect_equal(ctwas_res, precomputed_ctwas_res)
+
+})
+
+test_that("ctwas_sumstats filtering by nonSNP_PIP works", {
+  # Load region_info, snp_map, and LD_map
+  LD_map <- readRDS(system.file("extdata/sample_data", "LDL_example.LD_map.RDS", package = "ctwas"))
+  skip_if_no_LD_matrix(LD_map$LD_matrix)
+
+  region_info <- readRDS(system.file("extdata/sample_data", "LDL_example.region_info.RDS", package = "ctwas"))
+  snp_map <- readRDS(system.file("extdata/sample_data", "LDL_example.snp_map.RDS", package = "ctwas"))
+
+  # Load z_snp
+  z_snp <- readRDS(system.file("extdata/sample_data", "LDL_example.preprocessed.z_snp.RDS", package = "ctwas"))
+  # Load weights
+  weights <- readRDS(system.file("extdata/sample_data", "LDL_example.preprocessed.weights.RDS", package = "ctwas"))
+
+  precomputed_ctwas_res <- readRDS(system.file("extdata/sample_data", "LDL_example.ctwas_sumstats_res.RDS", package = "ctwas"))
+
+  capture.output({
+    ctwas_res <- ctwas_sumstats(z_snp = z_snp,
+                                weights = weights,
+                                region_info = region_info,
+                                snp_map = snp_map,
+                                LD_map = LD_map,
+                                thin = 0.1,
+                                maxSNP = 20000,
+                                L = 5,
+                                filter_L = FALSE,
+                                filter_nonSNP_PIP = TRUE,
+                                min_nonSNP_PIP = 0.5,
+                                ncore = 6)
+  })
+
+  expect_equal(ctwas_res, precomputed_ctwas_res)
+
+})

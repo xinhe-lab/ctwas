@@ -85,6 +85,10 @@ finemap_region <- function(region_data,
     if (!inherits(weights,"list")){
       stop("'weights' should be a list.")
     }
+
+    if (any(sapply(weights, is.null))) {
+      stop("weights contain NULL, remove empty weights!")
+    }
   }
 
   LD_format <- match.arg(LD_format)
@@ -271,6 +275,10 @@ finemap_regions <- function(region_data,
   if (!is.null(weights)){
     if (!inherits(weights,"list")){
       stop("'weights' should be a list.")
+    }
+
+    if (any(sapply(weights, is.null))) {
+      stop("weights contain NULL, remove empty weights!")
     }
   }
 

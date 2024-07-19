@@ -381,6 +381,14 @@ expand_region_data <- function(region_data,
   # check arguments
   trim_by <- match.arg(trim_by)
 
+  if (anyNA(z_snp)){
+    stop("z_snp contains missing values!")
+  }
+
+  if (anyNA(z_gene)){
+    stop("z_gene contains missing values!")
+  }
+
   # update SNP IDs for each region
   thin <- sapply(region_data, "[[", "thin")
   loginfo("Expanding %d regions with full SNPs ...", length(which(thin < 1)))
