@@ -11,7 +11,10 @@ test_that("anno_finemap_res works", {
     annotated_finemap_res <- anno_finemap_res(finemap_res,
                                               snp_map,
                                               gene_annot,
-                                              use_gene_pos = "mid")
+                                              use_gene_pos = "mid",
+                                              drop_unannotated_genes = TRUE,
+                                              filter_protein_coding_genes = FALSE,
+                                              filter_cs = FALSE)
   })
 
   expect_equal(annotated_finemap_res, expected_annotated_finemap_res)

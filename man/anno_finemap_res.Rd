@@ -9,6 +9,7 @@ anno_finemap_res(
   snp_map,
   gene_annot = NULL,
   use_gene_pos = c("mid", "start", "end"),
+  drop_unannotated_genes = TRUE,
   filter_protein_coding_genes = FALSE,
   filter_cs = FALSE
 )
@@ -24,13 +25,15 @@ anno_finemap_res(
 \item{use_gene_pos}{use mid (midpoint), start or end positions to
 represent gene positions.}
 
+\item{drop_unannotated_genes}{If TRUE, remove unannotated genes.}
+
 \item{filter_protein_coding_genes}{If TRUE, keep protein coding genes only.}
 
 \item{filter_cs}{If TRUE, limits results in credible sets.}
 }
 \value{
 a data frame of cTWAS finemapping result including gene
-names, types and positions
+names, types and positions.
 }
 \description{
 Annotates cTWAS finemapping result with gene annotations
