@@ -11,9 +11,13 @@
 #' @param use_gene_pos use mid (midpoint), start or end positions to
 #' represent gene positions.
 #'
+#' @param drop_unannotated_genes If TRUE, remove unannotated genes.
+#'
 #' @param filter_protein_coding_genes TRUE/FALSE. If TRUE, keep protein coding genes only.
 #'
 #' @param filter_cs TRUE/FALSE. If TRUE, limits results in credible sets.
+#'
+#' @param na.rm If TRUE, remove missing values and unannotated genes.
 #'
 #' @return a data frame of cTWAS finemapping result including gene
 #' names, types and positions
@@ -32,6 +36,7 @@ anno_finemap_res <- function(finemap_res,
                              snp_map,
                              gene_annot = NULL,
                              use_gene_pos = c("mid", "start", "end"),
+                             drop_unannotated_genes = TRUE,
                              filter_protein_coding_genes = FALSE,
                              filter_cs = FALSE){
 
@@ -80,8 +85,12 @@ anno_finemap_res <- function(finemap_res,
     finemap_gene_res <- finemap_gene_res %>%
       left_join(gene_annot, by = "gene_id", multiple = "all") %>%
       mutate(start = as.numeric(.data$start), end = as.numeric(.data$end)) %>%
-      mutate(chrom = parse_number(as.character(.data$chrom))) %>%
-      na.omit()
+      mutate(chrom = parse_number(as.character(.data$chrom)))
+
+    if (drop_unannotated_genes) {
+      loginfo("Remove unannotated genes")
+      finemap_gene_res <- na.omit(finemap_gene_res)
+    }
 
     # split PIPs for molecular traits (e.g. introns) mapped to multiple genes
     if (any(duplicated(finemap_gene_res$id))) {
