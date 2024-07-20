@@ -1,7 +1,7 @@
 destination: docs
 
 repo:
-    branch: multigroup
+    branch: multigroup_test
 
 navbar:
   structure:
@@ -25,4 +25,4 @@ navbar:
         href: articles/postprocessing.html
     source:
       text: Source
-      href: https://github.com/xinhe-lab/ctwas/tree/multigroup
+      href: https://github.com/xinhe-lab/ctwas/tree/multigroup_test

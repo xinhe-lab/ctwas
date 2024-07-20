@@ -14,7 +14,7 @@ Use "remotes" to install the latest version of ctwas from GitHub:
 
 ```r
 install.packages("remotes")
-remotes::install_github("xinhe-lab/ctwas",ref = "multigroup")
+remotes::install_github("xinhe-lab/ctwas",ref = "multigroup_test")
 ```
 
 
