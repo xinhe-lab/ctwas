@@ -3,7 +3,7 @@
 <script src="https://oss.maxcdn.com/html5shiv/3.7.3/html5shiv.min.js"></script>
 <script src="https://oss.maxcdn.com/respond/1.4.2/respond.min.js"></script>
 <![endif]--></head><body data-spy="scroll" data-target="#toc">
-    
+
 
     <div class="container template-reference-topic">
       <header><div class="navbar navbar-default navbar-fixed-top" role="navigation">
@@ -17,7 +17,7 @@
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">ctwas</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">0.3.6</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">0.3.13</span>
       </span>
     </div>
 
@@ -28,42 +28,42 @@
 <li class="dropdown">
   <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
     Tutorial
-     
+
     <span class="caret"></span>
   </a>
   <ul class="dropdown-menu" role="menu"><li>
-      <a href="../articles/minimal_ctwas_tutorial.html">A minimal tutorial of running cTWAS without LD</a>
+      <a href="../articles/minimal_tutorial.html">A minimal tutorial of running cTWAS without LD</a>
     </li>
     <li>
-      <a href="../articles/preparing_ctwas_input_data.html">Preparing cTWAS input data</a>
+      <a href="../articles/preparing_input_data.html">Preparing cTWAS input data</a>
     </li>
     <li>
-      <a href="../articles/ctwas_main_function.html">Using cTWAS main function</a>
+      <a href="../articles/ctwas_analysis.html">Running cTWAS analysis</a>
     </li>
     <li>
-      <a href="../articles/ctwas_modules.html">Using cTWAS modules</a>
+      <a href="../articles/summarizing_results.html">Summarizing and visualizing cTWAS results</a>
     </li>
     <li>
-      <a href="../articles/summarizing_ctwas_results.html">Summarizing cTWAS results</a>
+      <a href="../articles/postprocessing.html">Post-processing cTWAS results</a>
     </li>
     <li>
-      <a href="../articles/postprocessing_ctwas_results.html">Post-processing cTWAS results</a>
+      <a href="../articles/utility_functions.html">cTWAS utility functions</a>
     </li>
   </ul></li>
       </ul><ul class="nav navbar-nav navbar-right"><li>
-  <a href="https://github.com/xinhe-lab/ctwas/tree/single_group" class="external-link">Source</a>
+  <a href="https://github.com/xinhe-lab/ctwas/tree/singlegroup" class="external-link">Source</a>
 </li>
       </ul></div><!--/.nav-collapse -->
   </div><!--/.container -->
 </div><!--/.navbar -->
 
-      
+
 
       </header><div class="row">
   <div class="col-md-9 contents">
     <div class="page-header">
     <h1>Estimates cTWAS parameters using EM</h1>
-    <small class="dont-index">Source: <a href="https://github.com/xinhe-lab/ctwas/blob/single_group/R/ctwas_est_parameters.R" class="external-link"><code>R/ctwas_est_parameters.R</code></a></small>
+    <small class="dont-index">Source: <a href="https://github.com/xinhe-lab/ctwas/blob/singlegroup/R/ctwas_est_parameters.R" class="external-link"><code>R/ctwas_est_parameters.R</code></a></small>
     <div class="hidden name"><code>est_param.Rd</code></div>
     </div>
 
@@ -91,64 +91,64 @@
 
     <div id="arguments">
     <h2>Arguments</h2>
-    <dl><dt>region_data</dt>
+
+
+<dl><dt id="arg-region-data">region_data<a class="anchor" aria-label="anchor" href="#arg-region-data"></a></dt>
 <dd><p>a list object indexing regions, variants and genes.</p></dd>
 
 
-<dt>init_group_prior</dt>
+<dt id="arg-init-group-prior">init_group_prior<a class="anchor" aria-label="anchor" href="#arg-init-group-prior"></a></dt>
 <dd><p>a vector of initial values of prior inclusion probabilities for SNPs and genes.</p></dd>
 
 
-<dt>init_group_prior_var</dt>
+<dt id="arg-init-group-prior-var">init_group_prior_var<a class="anchor" aria-label="anchor" href="#arg-init-group-prior-var"></a></dt>
 <dd><p>a vector of initial values of prior variances for SNPs and gene effects.</p></dd>
 
 
-<dt>niter_prefit</dt>
+<dt id="arg-niter-prefit">niter_prefit<a class="anchor" aria-label="anchor" href="#arg-niter-prefit"></a></dt>
 <dd><p>the number of iterations of the E-M algorithm to perform during the initial parameter estimation step</p></dd>
 
 
-<dt>niter</dt>
+<dt id="arg-niter">niter<a class="anchor" aria-label="anchor" href="#arg-niter"></a></dt>
 <dd><p>the number of iterations of the E-M algorithm to perform during the complete parameter estimation step</p></dd>
 
 
-<dt>p_single_effect</dt>
+<dt id="arg-p-single-effect">p_single_effect<a class="anchor" aria-label="anchor" href="#arg-p-single-effect"></a></dt>
 <dd><p>Regions with probability greater than <code>p_single_effect</code> of
 having at most one causal effect will be used selected for the complete parameter estimation step</p></dd>
 
 
-<dt>use_null_weight</dt>
+<dt id="arg-use-null-weight">use_null_weight<a class="anchor" aria-label="anchor" href="#arg-use-null-weight"></a></dt>
 <dd><p>TRUE/FALSE. If TRUE, allow for a probability of no effect in susie</p></dd>
 
 
-<dt>minvar</dt>
+<dt id="arg-minvar">minvar<a class="anchor" aria-label="anchor" href="#arg-minvar"></a></dt>
 <dd><p>minimum number of variables (snps and genes) in a region</p></dd>
 
 
-<dt>mingene</dt>
+<dt id="arg-mingene">mingene<a class="anchor" aria-label="anchor" href="#arg-mingene"></a></dt>
 <dd><p>minimum number of genes in a region</p></dd>
 
 
-<dt>ncore</dt>
+<dt id="arg-ncore">ncore<a class="anchor" aria-label="anchor" href="#arg-ncore"></a></dt>
 <dd><p>The number of cores used to parallelize computation over regions</p></dd>
 
 
-<dt>logfile</dt>
+<dt id="arg-logfile">logfile<a class="anchor" aria-label="anchor" href="#arg-logfile"></a></dt>
 <dd><p>the log file, if NULL will print log info on screen</p></dd>
 
 
-<dt>verbose</dt>
+<dt id="arg-verbose">verbose<a class="anchor" aria-label="anchor" href="#arg-verbose"></a></dt>
 <dd><p>TRUE/FALSE. If TRUE, print detail messages</p></dd>
 
 
-<dt>...</dt>
+<dt id="arg--">...<a class="anchor" aria-label="anchor" href="#arg--"></a></dt>
 <dd><p>Additional arguments of <code>susie_rss</code>.</p></dd>
 
 </dl></div>
     <div id="value">
     <h2>Value</h2>
-    
-
-<p>a list with estimated parameters</p>
+    <p>a list with estimated parameters</p>
     </div>
 
   </div>
@@ -163,15 +163,15 @@ having at most one causal effect will be used selected for the complete paramete
 </div>
 
 <div class="pkgdown">
-  <p></p><p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.0.9.</p>
+  <p></p><p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.1.0.</p>
 </div>
 
       </footer></div>
 
-  
 
 
-  
+
+
 
   </body></html>
 

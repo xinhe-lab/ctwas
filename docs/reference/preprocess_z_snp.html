@@ -3,7 +3,7 @@
 <script src="https://oss.maxcdn.com/html5shiv/3.7.3/html5shiv.min.js"></script>
 <script src="https://oss.maxcdn.com/respond/1.4.2/respond.min.js"></script>
 <![endif]--></head><body data-spy="scroll" data-target="#toc">
-    
+
 
     <div class="container template-reference-topic">
       <header><div class="navbar navbar-default navbar-fixed-top" role="navigation">
@@ -17,7 +17,7 @@
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">ctwas</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">0.3.6</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">0.3.13</span>
       </span>
     </div>
 
@@ -28,42 +28,42 @@
 <li class="dropdown">
   <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
     Tutorial
-     
+
     <span class="caret"></span>
   </a>
   <ul class="dropdown-menu" role="menu"><li>
-      <a href="../articles/minimal_ctwas_tutorial.html">A minimal tutorial of running cTWAS without LD</a>
+      <a href="../articles/minimal_tutorial.html">A minimal tutorial of running cTWAS without LD</a>
     </li>
     <li>
-      <a href="../articles/preparing_ctwas_input_data.html">Preparing cTWAS input data</a>
+      <a href="../articles/preparing_input_data.html">Preparing cTWAS input data</a>
     </li>
     <li>
-      <a href="../articles/ctwas_main_function.html">Using cTWAS main function</a>
+      <a href="../articles/ctwas_analysis.html">Running cTWAS analysis</a>
     </li>
     <li>
-      <a href="../articles/ctwas_modules.html">Using cTWAS modules</a>
+      <a href="../articles/summarizing_results.html">Summarizing and visualizing cTWAS results</a>
     </li>
     <li>
-      <a href="../articles/summarizing_ctwas_results.html">Summarizing cTWAS results</a>
+      <a href="../articles/postprocessing.html">Post-processing cTWAS results</a>
     </li>
     <li>
-      <a href="../articles/postprocessing_ctwas_results.html">Post-processing cTWAS results</a>
+      <a href="../articles/utility_functions.html">cTWAS utility functions</a>
     </li>
   </ul></li>
       </ul><ul class="nav navbar-nav navbar-right"><li>
-  <a href="https://github.com/xinhe-lab/ctwas/tree/single_group" class="external-link">Source</a>
+  <a href="https://github.com/xinhe-lab/ctwas/tree/singlegroup" class="external-link">Source</a>
 </li>
       </ul></div><!--/.nav-collapse -->
   </div><!--/.container -->
 </div><!--/.navbar -->
 
-      
+
 
       </header><div class="row">
   <div class="col-md-9 contents">
     <div class="page-header">
     <h1>Preprocess GWAS z-scores, harmonize GWAS z-scores with LD reference</h1>
-    <small class="dont-index">Source: <a href="https://github.com/xinhe-lab/ctwas/blob/single_group/R/ctwas_preprocess_z_snp.R" class="external-link"><code>R/ctwas_preprocess_z_snp.R</code></a></small>
+    <small class="dont-index">Source: <a href="https://github.com/xinhe-lab/ctwas/blob/singlegroup/R/ctwas_preprocess_z_snp.R" class="external-link"><code>R/ctwas_preprocess_z_snp.R</code></a></small>
     <div class="hidden name"><code>preprocess_z_snp.Rd</code></div>
     </div>
 
@@ -74,7 +74,7 @@
     <div id="ref-usage">
     <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="fu">preprocess_z_snp</span><span class="op">(</span></span>
 <span>  <span class="va">z_snp</span>,</span>
-<span>  <span class="va">snp_info</span>,</span>
+<span>  <span class="va">snp_map</span>,</span>
 <span>  drop_multiallelic <span class="op">=</span> <span class="cn">TRUE</span>,</span>
 <span>  drop_strand_ambig <span class="op">=</span> <span class="cn">TRUE</span>,</span>
 <span>  logfile <span class="op">=</span> <span class="cn">NULL</span></span>
@@ -83,33 +83,32 @@
 
     <div id="arguments">
     <h2>Arguments</h2>
-    <dl><dt>z_snp</dt>
+
+
+<dl><dt id="arg-z-snp">z_snp<a class="anchor" aria-label="anchor" href="#arg-z-snp"></a></dt>
 <dd><p>A data frame with two columns: "id", "A1", "A2", "z". giving the z scores for
 snps. "A1" is effect allele. "A2" is the other allele.</p></dd>
 
 
-<dt>snp_info</dt>
-<dd><p>a list of SNP info data frames for LD reference,
-with columns "chrom", "id", "pos", "alt", "ref", and "region_id".</p></dd>
+<dt id="arg-snp-map">snp_map<a class="anchor" aria-label="anchor" href="#arg-snp-map"></a></dt>
+<dd><p>a list of data frames with SNP-to-region map for the reference.</p></dd>
 
 
-<dt>drop_multiallelic</dt>
+<dt id="arg-drop-multiallelic">drop_multiallelic<a class="anchor" aria-label="anchor" href="#arg-drop-multiallelic"></a></dt>
 <dd><p>TRUE/FALSE. If TRUE, multiallelic variants will be dropped from the summary statistics.</p></dd>
 
 
-<dt>drop_strand_ambig</dt>
+<dt id="arg-drop-strand-ambig">drop_strand_ambig<a class="anchor" aria-label="anchor" href="#arg-drop-strand-ambig"></a></dt>
 <dd><p>TRUE/FALSE, if TRUE remove strand ambiguous variants (A/T, G/C).</p></dd>
 
 
-<dt>logfile</dt>
+<dt id="arg-logfile">logfile<a class="anchor" aria-label="anchor" href="#arg-logfile"></a></dt>
 <dd><p>the log file, if NULL will print log info on screen.</p></dd>
 
 </dl></div>
     <div id="value">
     <h2>Value</h2>
-    
-
-<p>a data frame preprocessed GWAS z-scores</p>
+    <p>a data frame preprocessed GWAS z-scores</p>
     </div>
 
   </div>
@@ -124,15 +123,15 @@ with columns "chrom", "id", "pos", "alt", "ref", and "region_id".</p></dd>
 </div>
 
 <div class="pkgdown">
-  <p></p><p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.0.9.</p>
+  <p></p><p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.1.0.</p>
 </div>
 
       </footer></div>
 
-  
 
 
-  
+
+
 
   </body></html>
 

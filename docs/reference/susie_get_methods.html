@@ -4,7 +4,7 @@
 <script src="https://oss.maxcdn.com/html5shiv/3.7.3/html5shiv.min.js"></script>
 <script src="https://oss.maxcdn.com/respond/1.4.2/respond.min.js"></script>
 <![endif]--></head><body data-spy="scroll" data-target="#toc">
-    
+
 
     <div class="container template-reference-topic">
       <header><div class="navbar navbar-default navbar-fixed-top" role="navigation">
@@ -18,7 +18,7 @@
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">ctwas</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">0.3.6</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">0.3.13</span>
       </span>
     </div>
 
@@ -29,42 +29,42 @@
 <li class="dropdown">
   <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
     Tutorial
-     
+
     <span class="caret"></span>
   </a>
   <ul class="dropdown-menu" role="menu"><li>
-      <a href="../articles/minimal_ctwas_tutorial.html">A minimal tutorial of running cTWAS without LD</a>
+      <a href="../articles/minimal_tutorial.html">A minimal tutorial of running cTWAS without LD</a>
     </li>
     <li>
-      <a href="../articles/preparing_ctwas_input_data.html">Preparing cTWAS input data</a>
+      <a href="../articles/preparing_input_data.html">Preparing cTWAS input data</a>
     </li>
     <li>
-      <a href="../articles/ctwas_main_function.html">Using cTWAS main function</a>
+      <a href="../articles/ctwas_analysis.html">Running cTWAS analysis</a>
     </li>
     <li>
-      <a href="../articles/ctwas_modules.html">Using cTWAS modules</a>
+      <a href="../articles/summarizing_results.html">Summarizing and visualizing cTWAS results</a>
     </li>
     <li>
-      <a href="../articles/summarizing_ctwas_results.html">Summarizing cTWAS results</a>
+      <a href="../articles/postprocessing.html">Post-processing cTWAS results</a>
     </li>
     <li>
-      <a href="../articles/postprocessing_ctwas_results.html">Post-processing cTWAS results</a>
+      <a href="../articles/utility_functions.html">cTWAS utility functions</a>
     </li>
   </ul></li>
       </ul><ul class="nav navbar-nav navbar-right"><li>
-  <a href="https://github.com/xinhe-lab/ctwas/tree/single_group" class="external-link">Source</a>
+  <a href="https://github.com/xinhe-lab/ctwas/tree/singlegroup" class="external-link">Source</a>
 </li>
       </ul></div><!--/.nav-collapse -->
   </div><!--/.container -->
 </div><!--/.navbar -->
 
-      
+
 
       </header><div class="row">
   <div class="col-md-9 contents">
     <div class="page-header">
     <h1>Inferences From Fitted SuSiE Model</h1>
-    <small class="dont-index">Source: <a href="https://github.com/xinhe-lab/ctwas/blob/single_group/R/susie_susie_utils.R" class="external-link"><code>R/susie_susie_utils.R</code></a></small>
+    <small class="dont-index">Source: <a href="https://github.com/xinhe-lab/ctwas/blob/singlegroup/R/susie_susie_utils.R" class="external-link"><code>R/susie_susie_utils.R</code></a></small>
     <div class="hidden name"><code>susie_get_methods.Rd</code></div>
     </div>
 
@@ -105,124 +105,104 @@
 
     <div id="arguments">
     <h2>Arguments</h2>
-    <dl><dt>res</dt>
+
+
+<dl><dt id="arg-res">res<a class="anchor" aria-label="anchor" href="#arg-res"></a></dt>
 <dd><p>A susie fit, typically an output from
 <code><a href="susie.html">susie</a></code> or one of its variants. For
 <code>susie_get_pip</code> and <code>susie_get_cs</code>, this may instead be
 the posterior inclusion probability matrix, <code>alpha</code>.</p></dd>
 
 
-<dt>last_only</dt>
+<dt id="arg-last-only">last_only<a class="anchor" aria-label="anchor" href="#arg-last-only"></a></dt>
 <dd><p>If <code>last_only = FALSE</code>, return the ELBO from
 all iterations; otherwise return the ELBO from the last iteration
 only.</p></dd>
 
 
-<dt>warning_tol</dt>
+<dt id="arg-warning-tol">warning_tol<a class="anchor" aria-label="anchor" href="#arg-warning-tol"></a></dt>
 <dd><p>Warn if ELBO is decreasing by this
 tolerance level.</p></dd>
 
 
-<dt>prior_tol</dt>
+<dt id="arg-prior-tol">prior_tol<a class="anchor" aria-label="anchor" href="#arg-prior-tol"></a></dt>
 <dd><p>Filter out effects having estimated prior variance
 smaller than this threshold.</p></dd>
 
 
-<dt>susie_fit</dt>
+<dt id="arg-susie-fit">susie_fit<a class="anchor" aria-label="anchor" href="#arg-susie-fit"></a></dt>
 <dd><p>A susie fit, an output from <code><a href="susie.html">susie</a></code>.</p></dd>
 
 
-<dt>num_samples</dt>
+<dt id="arg-num-samples">num_samples<a class="anchor" aria-label="anchor" href="#arg-num-samples"></a></dt>
 <dd><p>The number of draws from the posterior
 distribution.</p></dd>
 
 
-<dt>X</dt>
+<dt id="arg-x">X<a class="anchor" aria-label="anchor" href="#arg-x"></a></dt>
 <dd><p>n by p matrix of values of the p variables (covariates) in
 n samples. When provided, correlation between variables will be
 computed and used to remove CSs whose minimum correlation among
 variables is smaller than <code>min_abs_corr</code>.</p></dd>
 
 
-<dt>Xcorr</dt>
+<dt id="arg-xcorr">Xcorr<a class="anchor" aria-label="anchor" href="#arg-xcorr"></a></dt>
 <dd><p>p by p matrix of correlations between variables
 (covariates). When provided, it will be used to remove CSs whose
 minimum correlation among variables is smaller than
 <code>min_abs_corr</code>.</p></dd>
 
 
-<dt>coverage</dt>
+<dt id="arg-coverage">coverage<a class="anchor" aria-label="anchor" href="#arg-coverage"></a></dt>
 <dd><p>A number between 0 and 1 specifying desired
 coverage of each CS.</p></dd>
 
 
-<dt>min_abs_corr</dt>
+<dt id="arg-min-abs-corr">min_abs_corr<a class="anchor" aria-label="anchor" href="#arg-min-abs-corr"></a></dt>
 <dd><p>A "purity" threshold for the CS. Any CS that
 contains a pair of variables with correlation less than this
 threshold will be filtered out and not reported.</p></dd>
 
 
-<dt>dedup</dt>
+<dt id="arg-dedup">dedup<a class="anchor" aria-label="anchor" href="#arg-dedup"></a></dt>
 <dd><p>If <code>dedup = TRUE</code>, remove duplicate CSs.</p></dd>
 
 
-<dt>squared</dt>
+<dt id="arg-squared">squared<a class="anchor" aria-label="anchor" href="#arg-squared"></a></dt>
 <dd><p>If <code>squared = TRUE</code>, report min, mean and
 median of squared correlation instead of the absolute correlation.</p></dd>
 
 
-<dt>prune_by_cs</dt>
+<dt id="arg-prune-by-cs">prune_by_cs<a class="anchor" aria-label="anchor" href="#arg-prune-by-cs"></a></dt>
 <dd><p>Whether or not to ignore single effects not in
 a reported CS when calculating PIP.</p></dd>
 
 </dl></div>
     <div id="value">
     <h2>Value</h2>
-    
-
-<p><code>susie_get_objective</code> returns the evidence lower bound
+    <p><code>susie_get_objective</code> returns the evidence lower bound
 (ELBO) achieved by the fitted susie model and, optionally, at each
 iteration of the IBSS fitting procedure.</p>
-
-
 <p><code>susie_get_residual_variance</code> returns the (estimated or
 fixed) residual variance parameter.</p>
-
-
 <p><code>susie_get_prior_variance</code> returns the (estimated or fixed)
 prior variance parameters.</p>
-
-
 <p><code>susie_get_posterior_mean</code> returns the posterior mean for the
 regression coefficients of the fitted susie model.</p>
-
-
 <p><code>susie_get_posterior_sd</code> returns the posterior standard
 deviation for coefficients of the fitted susie model.</p>
-
-
 <p><code>susie_get_niter</code> returns the number of model fitting
 iterations performed.</p>
-
-
 <p><code>susie_get_pip</code> returns a vector containing the posterior
 inclusion probabilities (PIPs) for all variables.</p>
-
-
 <p><code>susie_get_lfsr</code> returns a vector containing the average lfsr
 across variables for each single-effect, weighted by the posterior
 inclusion probability (alpha).</p>
-
-
 <p><code>susie_get_posterior_samples</code> returns a list containing the
 effect sizes samples and causal status with two components: <code>b</code>,
 an <code>num_variables</code> x <code>num_samples</code> matrix of effect
-sizes; <code>gamma</code>, an <code>num_variables</code> x <code>num_samples</code></p>
-
-
-<p>matrix of causal status random draws.</p>
-
-
+sizes; <code>gamma</code>, an <code>num_variables</code> x <code>num_samples</code>
+matrix of causal status random draws.</p>
 <p><code>susie_get_cs</code> returns credible sets (CSs) from a susie fit,
 as well as summaries of correlation among the variables included in
 each CS. If desired, one can filter out CSs that do not meet a
@@ -262,15 +242,15 @@ elements:</p>
 </div>
 
 <div class="pkgdown">
-  <p></p><p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.0.9.</p>
+  <p></p><p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.1.0.</p>
 </div>
 
       </footer></div>
 
-  
 
 
-  
+
+
 
   </body></html>
 
