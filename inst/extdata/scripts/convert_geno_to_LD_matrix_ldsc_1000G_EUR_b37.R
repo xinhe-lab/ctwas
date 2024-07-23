@@ -5,19 +5,19 @@ library(Rfast)
 # note: Rfast package is required for running the convert_geno_to_LD_matrix() function
 
 # PLINK binary genotype data in .pgen or .bed format
-ldref_dir <- "/gpfs/data/xhe-lab/ukb_LDR/genotype_data_0.1"
-genotype_files <- file.path(ldref_dir, paste0("ukb_chr", 1:22, ".pgen"))
+ldref_dir <- "./1000G_EUR_Phase3_plink"
+genotype_files <- file.path(ldref_dir, paste0("1000G.EUR.QC.", 1:22, ".bed"))
 
 # PLINK reference variant information files in .pvar or .bim format.
-varinfo_files <- "/gpfs/data/xhe-lab/ukb_LDR/neale_lab/neale_variants.bim"
+varinfo_files <- file.path(ldref_dir, paste0("1000G.EUR.QC.", 1:22, ".bim"))
 
-# get region_info that match the population and genome build
+# get region_info matching the population and genome build
 region_file <- system.file("extdata/ldetect", "EUR.b37.ldetect.regions.RDS", package = "ctwas")
 region_info <- readRDS(region_file)
 
 # specify output
-outputdir <- "/gpfs/data/xhe-lab/shared_data/ctwas/LDR/UKB_b37/"
-outname <- "ukb_b37_0.1"
+outputdir <- "./ctwas_LD/1000G_EUR_Phase3_b37/"
+outname <- "1000G_EUR_Phase3_b37"
 
 # convert genotype to LD matrix
 region_metatable <- convert_geno_to_LD_matrix(region_info,
