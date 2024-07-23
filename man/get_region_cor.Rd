@@ -23,9 +23,9 @@ get_region_cor(
 
 \item{region_data}{a list object with data for the regions}
 
-\item{LD_map}{a data frame with filenames of LD matrices for the regions. Required when \code{use_LD = TRUE}.}
+\item{LD_map}{a data frame with filenames of LD matrices for each of the regions. Required when \code{use_LD = TRUE}.}
 
-\item{snp_map}{a list of SNP-to-region map for the reference. Required when \code{use_LD = TRUE}.}
+\item{snp_map}{list of data frames with SNP-to-region map for the reference. Required when \code{use_LD = TRUE}.}
 
 \item{weights}{a list of weights}
 

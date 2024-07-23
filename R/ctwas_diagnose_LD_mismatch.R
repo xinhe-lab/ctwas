@@ -6,9 +6,9 @@
 #'
 #' @param region_ids A vector of region IDs to run diagnosis
 #'
-#' @param snp_map a list of SNP-to-region map for the reference.
+#' @param LD_map a data frame with filenames of LD matrices for each of the regions.
 #'
-#' @param LD_map a data frame with filenames of LD matrices for the regions.
+#' @param snp_map a list of data frames with SNP-to-region map for the reference.
 #'
 #' @param gwas_n integer, GWAS sample size.
 #'
@@ -35,8 +35,8 @@
 #'
 diagnose_ld_mismatch_susie <- function(z_snp,
                                        region_ids,
-                                       snp_map,
                                        LD_map,
+                                       snp_map,
                                        gwas_n = NULL,
                                        ncore = 1,
                                        p_diff_thresh = 5e-8,
@@ -45,7 +45,7 @@ diagnose_ld_mismatch_susie <- function(z_snp,
                                        logfile = NULL){
 
   if (!is.null(logfile)){
-    addHandler(writeToFile, file=logfile, level='DEBUG')
+    addHandler(writeToFile, file= logfile, level='DEBUG')
   }
 
   loginfo("Perform LD mismatch diagnosis for %d regions", length(region_ids))
@@ -75,18 +75,14 @@ diagnose_ld_mismatch_susie <- function(z_snp,
 #
 #' @importFrom stats pchisq
 #' @importFrom Matrix bdiag
-compute_region_condz <- function(region_id,
-                                 snp_map,
-                                 LD_map,
-                                 z_snp,
-                                 gwas_n,
+compute_region_condz <- function(region_id, LD_map, snp_map, z_snp, gwas_n,
                                  LD_format = c("rds", "rdata", "mtx", "csv", "txt", "custom"),
                                  LD_loader_fun){
 
   LD_format <- match.arg(LD_format)
 
   # load LD matrix
-  LD_matrix_files <- unlist(strsplit(LD_map[LD_map$region_id == region_id, "LD_matrix"], split = ";"))
+  LD_matrix_files <- unlist(strsplit(LD_map[LD_map$region_id == region_id, "LD_file"], split = ";"))
   stopifnot(all(file.exists(LD_matrix_files)))
   if (length(LD_matrix_files) > 1) {
     R_snp <- lapply(LD_matrix_files, load_LD, format = LD_format, LD_loader_fun = LD_loader_fun)
@@ -132,10 +128,7 @@ compute_region_condz <- function(region_id,
 #'
 #' @export
 #'
-get_problematic_genes <- function(problematic_snps,
-                                  weights,
-                                  z_gene,
-                                  z_thresh = 3){
+get_problematic_genes <- function(problematic_snps, weights, z_gene, z_thresh = 3){
 
   if (length(problematic_snps) == 0) {
     loginfo('No problematic SNPs')
@@ -166,13 +159,7 @@ get_problematic_genes <- function(problematic_snps,
   return(problematic_genes)
 }
 
-#' @title Updates finemapping result
-#'
-#' @param finemap_res a data frame of original finemapping result
-#' @param new_finemap_res a data frame of new finemapping result
-#'
-#' @export
-#'
+# Updates finemapping result
 update_finemap_res <- function(finemap_res, new_finemap_res){
 
   if (!all(colnames(finemap_res) == colnames(new_finemap_res))) {
