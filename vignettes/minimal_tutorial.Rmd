@@ -31,7 +31,7 @@ First, install `ctwas` if you haven't already:
 
 ```{r install_ctwas, eval=FALSE}
 # install.packages("remotes")
-remotes::install_github("xinhe-lab/ctwas",ref = "single_group")
+remotes::install_github("xinhe-lab/ctwas",ref = "singlegroup")
 ```
 
 
