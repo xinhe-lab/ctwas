@@ -344,8 +344,6 @@ adjust_boundary_genes <- function(boundary_genes,
 #' Inf, no limit. This can be useful if there are many SNPs in a region and you don't
 #' have enough memory to run the program.
 #'
-#' @param add_z TRUE/FALSE, if TRUE, add z-scores to the region_data
-#'
 #' @param ncore The number of cores used to parallelize susie over regions
 #'
 #' @param seed seed for random sampling
@@ -364,7 +362,6 @@ expand_region_data <- function(region_data,
                                z_gene,
                                trim_by = c("z", "random"),
                                maxSNP = Inf,
-                               add_z = TRUE,
                                ncore = 1,
                                seed = 99) {
   # check arguments
@@ -414,10 +411,7 @@ expand_region_data <- function(region_data,
     region_data <- trim_region_data(region_data, z_snp, trim_by = trim_by, maxSNP = maxSNP, seed = seed)
 
     # add z-scores to region_data
-    if (add_z) {
-      region_data <- add_z_to_region_data(region_data, z_snp, z_gene, ncore = ncore)
-    }
-
+    region_data <- add_z_to_region_data(region_data, z_snp, z_gene, ncore = ncore)
   }
 
   return(region_data)

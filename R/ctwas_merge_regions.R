@@ -103,7 +103,7 @@ merge_region_data <- function(boundary_genes,
     minpos <- min(sapply(region_data[old_region_ids], "[[", "minpos"))
     maxpos <- max(sapply(region_data[old_region_ids], "[[", "maxpos"))
     thin <- min(sapply(region_data[old_region_ids], "[[", "thin"))
-    z <- unlist(lapply(region_data[old_region_ids], "[[", "z"))
+    z <- as.numeric(unlist(lapply(region_data[old_region_ids], "[[", "z")))
     gs_group <- as.character(unlist(lapply(region_data[old_region_ids], "[[", "gs_group")))
     merged_region_data[[region_id]] <- list("region_id" = region_id,
                                             "chrom" = chrom,
