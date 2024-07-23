@@ -30,7 +30,7 @@ When running cTWAS in this way, it is similar to colocalization analysis - see t
 First, install `ctwas` if you haven't already:
 
 ```{r install_ctwas, eval=FALSE}
-# install.packages("remotes")
+install.packages("remotes")
 remotes::install_github("xinhe-lab/ctwas",ref = "singlegroup")
 ```
 
@@ -44,7 +44,6 @@ Now load the `ctwas` package and a few other packages needed to perform the anal
 ```{r load_packages, message=FALSE}
 library(ctwas)
 library(data.table)
-library(EnsDb.Hsapiens.v86)
 ```
 
 
