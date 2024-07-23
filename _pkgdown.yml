@@ -17,11 +17,11 @@ navbar:
         href: articles/preparing_input_data.html
       - text: Running cTWAS analysis
         href: articles/ctwas_analysis.html
-      - text: Summarizing cTWAS results
+      - text: Summarizing and visualizing cTWAS results
         href: articles/summarizing_results.html
       - text: Post-processing cTWAS results
         href: articles/postprocessing.html
-      - text: Utility functions
+      - text: cTWAS utility functions
         href: articles/utility_functions.html
     source:
       text: Source
