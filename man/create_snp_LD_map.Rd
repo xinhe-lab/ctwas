@@ -8,7 +8,7 @@ create_snp_LD_map(region_metatable)
 }
 \arguments{
 \item{region_metatable}{a data frame of region meta table, with columns:
-"chrom", "start", "stop", "region_id", "LD_matrix", "SNP_info".}
+"chrom", "start", "stop", "region_id", "LD_file", "SNP_file".}
 }
 \description{
 Map SNPs to regions using region meta table.

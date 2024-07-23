@@ -87,8 +87,8 @@ convert_geno_to_LD_matrix <- function(region_info,
   pvar_files <- sapply(genotype_files, prep_pvar, outputdir = outputdir)
 
   region_metatable <- region_info
-  region_metatable$LD_matrix <- NA
-  region_metatable$SNP_info <- NA
+  region_metatable$LD_file <- NA
+  region_metatable$SNP_file <- NA
 
   for (chr in chrom){
 
@@ -175,8 +175,8 @@ convert_geno_to_LD_matrix <- function(region_info,
       }
 
       region_idx <- which(region_metatable$region_id == region_id)
-      region_metatable[region_idx, "LD_matrix"] <- LD_matrix_file
-      region_metatable[region_idx, "SNP_info"] <- LD_Rvar_file
+      region_metatable[region_idx, "LD_file"] <- LD_matrix_file
+      region_metatable[region_idx, "SNP_file"] <- LD_Rvar_file
 
       if (show_progress_bar) {
         setTxtProgressBar(pb, i)

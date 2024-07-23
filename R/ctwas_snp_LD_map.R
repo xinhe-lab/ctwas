@@ -66,7 +66,7 @@ create_snp_map <- function(region_info,
 #' @title Map SNPs to regions using region meta table.
 #'
 #' @param region_metatable a data frame of region meta table, with columns:
-#' "chrom", "start", "stop", "region_id", "LD_matrix", "SNP_info".
+#' "chrom", "start", "stop", "region_id", "LD_file", "SNP_file".
 #'
 #' @importFrom readr parse_number
 #'
@@ -81,12 +81,12 @@ create_snp_LD_map <- function(region_metatable) {
          paste(target_header, collapse = " "))
   }
 
-  if (is.null(region_metatable$LD_matrix)){
-    stop("Please provide filenames of LD matrices in the 'LD_matrix' column of region_metatable")
+  if (is.null(region_metatable$LD_file)){
+    stop("Please provide filenames of LD matrices in the 'LD_file' column of region_metatable")
   }
 
-  if (is.null(region_metatable$SNP_info)){
-    stop("Please provide filenames of variant info in the 'SNP_info' column of region_metatable")
+  if (is.null(region_metatable$SNP_file)){
+    stop("Please provide filenames of variant info in the 'SNP_file' column of region_metatable")
   }
 
   region_info <- region_metatable
@@ -102,16 +102,14 @@ create_snp_LD_map <- function(region_metatable) {
   region_info <- region_info[,c("chrom", "start", "stop", "region_id")]
 
   # map SNPs to regions
-  snp_info_files <- region_metatable$SNP_info
-  stopifnot(all(file.exists(snp_info_files)))
-  snp_map <- lapply(snp_info_files, read_snp_info_file)
-  names(snp_map) <- region_info$region_id
+  stopifnot(all(file.exists(region_metatable$SNP_file)))
+  snp_map <- lapply(region_metatable$SNP_file, read_snp_info_file)
+  names(snp_map) <- region_metatable$region_id
 
   # map LD to regions
-  LD_matrix_files <- region_metatable$LD_matrix
-  stopifnot(all(file.exists(LD_matrix_files)))
-  LD_map <- data.frame(region_id = region_info$region_id,
-                       LD_matrix = LD_matrix_files)
+  stopifnot(all(file.exists(region_metatable$LD_file)))
+  LD_map <- data.frame(region_id = region_metatable$region_id,
+                       LD_file = region_metatable$LD_file)
 
   return(list(region_info = region_info,
               snp_map = snp_map,

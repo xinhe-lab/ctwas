@@ -562,7 +562,7 @@ compute_weight_LD_from_ref <- function(weights,
         curr_region_LD_list <- list()
         curr_region_ids <- unlist(strsplit(x, ";"))
         curr_region_idx <- match(curr_region_ids, LD_map$region_id)
-        LD_matrix_files <- LD_map$LD_matrix[curr_region_idx]
+        LD_matrix_files <- LD_map$LD_file[curr_region_idx]
         if (length(LD_matrix_files) > 1) {
           R_snp <- lapply(LD_matrix_files, load_LD, format = LD_format, LD_loader_fun = LD_loader_fun)
           R_snp <- suppressWarnings(as.matrix(bdiag(R_snp)))

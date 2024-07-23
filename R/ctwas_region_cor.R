@@ -79,7 +79,7 @@ get_region_cor <- function(region_id,
     if (is.null(LD_map) || is.null(snp_map)) {
       stop("LD_map and snp_map are required for computing correlation matrices")
     }
-    LD_matrix_files <- unlist(strsplit(LD_map$LD_matrix[LD_map$region_id == region_id], split = ";"))
+    LD_matrix_files <- unlist(strsplit(LD_map$LD_file[LD_map$region_id == region_id], split = ";"))
     stopifnot(all(file.exists(LD_matrix_files)))
 
     if (length(LD_matrix_files) > 1) {

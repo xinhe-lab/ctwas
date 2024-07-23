@@ -82,7 +82,7 @@ compute_region_condz <- function(region_id, LD_map, snp_map, z_snp, gwas_n,
   LD_format <- match.arg(LD_format)
 
   # load LD matrix
-  LD_matrix_files <- unlist(strsplit(LD_map[LD_map$region_id == region_id, "LD_matrix"], split = ";"))
+  LD_matrix_files <- unlist(strsplit(LD_map[LD_map$region_id == region_id, "LD_file"], split = ";"))
   stopifnot(all(file.exists(LD_matrix_files)))
   if (length(LD_matrix_files) > 1) {
     R_snp <- lapply(LD_matrix_files, load_LD, format = LD_format, LD_loader_fun = LD_loader_fun)

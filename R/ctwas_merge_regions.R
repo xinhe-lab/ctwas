@@ -227,10 +227,10 @@ create_merged_snp_LD_map <- function(boundary_genes,
                                              old_region_ids = paste(old_region_ids, collapse = ";")))
 
     if (use_LD) {
-      old_LD_files <- paste(LD_map$LD_matrix[match(old_region_ids, LD_map$region_id)], collapse = ";")
+      old_LD_files <- paste(LD_map$LD_file[match(old_region_ids, LD_map$region_id)], collapse = ";")
       merged_LD_map <- rbind(merged_LD_map,
                              data.frame(region_id = new_region_id,
-                                        LD_matrix = old_LD_files))
+                                        LD_file = old_LD_files))
     }
   }
 
