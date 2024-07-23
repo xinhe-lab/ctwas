@@ -1,5 +1,5 @@
 
-skip_if_no_LD_matrix <- function(LD_matrix_files) {
+skip_if_no_LD_file <- function(LD_matrix_files) {
   if (any(!file.exists(LD_matrix_files))) {
     skip("LD matrix files not available")
   }

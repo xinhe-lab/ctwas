@@ -31,6 +31,7 @@ test_that("merge_region_data works", {
   expect_equal(merged_region_data, precomputed_merged_region_data)
 
 })
+
 test_that("merge_region_data and finemapping without LD works", {
 
   z_snp <- readRDS(system.file("extdata/sample_data", "LDL_example.preprocessed.z_snp.RDS", package = "ctwas"))
@@ -75,7 +76,7 @@ test_that("merge_region_data and finemapping without LD works", {
 test_that("merge_region_data and finemapping with LD works", {
 
   LD_map <- readRDS(system.file("extdata/sample_data", "LDL_example.LD_map.RDS", package = "ctwas"))
-  skip_if_no_LD_matrix(LD_map$LD_matrix)
+  skip_if_no_LD_file(LD_map$LD_file)
 
   z_snp <- readRDS(system.file("extdata/sample_data", "LDL_example.preprocessed.z_snp.RDS", package = "ctwas"))
   weights <- readRDS(system.file("extdata/sample_data", "LDL_example.preprocessed.weights.RDS", package = "ctwas"))
@@ -97,6 +98,7 @@ test_that("merge_region_data and finemapping with LD works", {
                              region_info = region_info,
                              snp_map = snp_map,
                              LD_map = LD_map,
+                             weights = weights,
                              z_snp = z_snp,
                              z_gene = z_gene,
                              use_LD = TRUE,

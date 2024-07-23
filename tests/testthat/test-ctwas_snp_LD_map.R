@@ -33,9 +33,9 @@ test_that("create_snp_LD_map works", {
   filestem <- paste0("ukb_b38_0.1")
   ld_filestem <- sprintf("%s_chr%s.R_snp.%s_%s",
                          filestem, region_metatable$chrom, region_metatable$start, region_metatable$stop)
-  region_metatable$LD_matrix <- file.path(ld_R_dir, paste0(ld_filestem, ".RDS"))
-  region_metatable$SNP_info <- file.path(ld_R_dir, paste0(ld_filestem, ".Rvar"))
-  skip_if_no_LD_matrix(region_metatable$LD_matrix)
+  region_metatable$LD_file <- file.path(ld_R_dir, paste0(ld_filestem, ".RDS"))
+  region_metatable$SNP_file <- file.path(ld_R_dir, paste0(ld_filestem, ".Rvar"))
+  skip_if_no_LD_file(region_metatable$LD_file)
 
   capture.output({
     res <- create_snp_LD_map(region_metatable)

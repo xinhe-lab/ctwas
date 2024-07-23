@@ -10,6 +10,7 @@ merge_region_data(
   region_info,
   snp_map,
   LD_map,
+  weights,
   z_snp,
   z_gene,
   use_LD = TRUE,
@@ -35,6 +36,12 @@ merge_region_data(
 \item{snp_map}{a list of data frames with SNP-to-region map for the reference.}
 
 \item{LD_map}{a data frame with filenames of LD matrices for each of the regions.}
+
+\item{weights}{a list of preprocessed weights.}
+
+\item{z_snp}{A data frame with columns: "id", "z", giving the z-scores for SNPs.}
+
+\item{z_gene}{A data frame with columns: "id", "z", giving the z-scores for genes.}
 
 \item{use_LD}{If TRUE, use LD, and creates \code{merged_LD_map}.}
 

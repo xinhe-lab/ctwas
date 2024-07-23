@@ -29,7 +29,7 @@ test_that("finemap_regions works with LD", {
 
   # finemap a single region with LD
   LD_map <- readRDS(system.file("extdata/sample_data", "LDL_example.LD_map.RDS", package = "ctwas"))
-  skip_if_no_LD_matrix(LD_map$LD_matrix)
+  skip_if_no_LD_file(LD_map$LD_file)
 
   snp_map <- readRDS(system.file("extdata/sample_data", "LDL_example.snp_map.RDS", package = "ctwas"))
   weights <- readRDS(system.file("extdata/sample_data", "LDL_example.preprocessed.weights.RDS", package = "ctwas"))

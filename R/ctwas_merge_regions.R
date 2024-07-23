@@ -11,6 +11,12 @@
 #'
 #' @param snp_map a list of data frames with SNP-to-region map for the reference.
 #'
+#' @param weights a list of preprocessed weights.
+#'
+#' @param z_snp A data frame with columns: "id", "z", giving the z-scores for SNPs.
+#'
+#' @param z_gene A data frame with columns: "id", "z", giving the z-scores for genes.
+#'
 #' @param use_LD If TRUE, use LD, and creates \code{merged_LD_map}.
 #'
 #' @param estimate_L If TRUE, estimate L for merged regions.
@@ -48,6 +54,7 @@ merge_region_data <- function(boundary_genes,
                               region_info,
                               snp_map,
                               LD_map,
+                              weights,
                               z_snp,
                               z_gene,
                               use_LD = TRUE,

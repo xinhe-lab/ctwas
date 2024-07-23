@@ -1,7 +1,7 @@
 test_that("ctwas_sumstats works", {
 
   LD_map <- readRDS(system.file("extdata/sample_data", "LDL_example.LD_map.RDS", package = "ctwas"))
-  skip_if_no_LD_matrix(LD_map$LD_matrix)
+  skip_if_no_LD_file(LD_map$LD_file)
 
   # Load z_snp
   z_snp <- readRDS(system.file("extdata/sample_data", "LDL_example.preprocessed.z_snp.RDS", package = "ctwas"))
