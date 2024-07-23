@@ -10,7 +10,7 @@ load_weights(
   filter_protein_coding_genes = TRUE,
   load_predictdb_LD = TRUE,
   fusion_method = c("lasso", "enet", "top1", "blup", "bslmm", "best.cv"),
-  fusion_genome_version = c("b38", "b37"),
+  fusion_genome_version = "b38",
   ncore = 1
 )
 }

@@ -41,13 +41,13 @@ screen_regions(
 
 \item{group_prior_var}{a vector of two prior variances for SNPs and gene effects.}
 
-\item{L}{the initial number of effects for screening regions}
+\item{L}{the number of effects for susie.}
 
 \item{minvar}{minimum number of variables (snps and genes) in a region}
 
 \item{mingene}{minimum number of genes in a region}
 
-\item{filter_L}{If TRUE, screening regions with L >= 1}
+\item{filter_L}{If TRUE, screening regions with estimated L > 0.}
 
 \item{filter_nonSNP_PIP}{If TRUE, screening regions with total non-SNP PIP >= \code{min_nonSNP_PIP}}
 

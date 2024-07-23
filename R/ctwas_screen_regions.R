@@ -14,13 +14,13 @@
 #'
 #' @param group_prior_var a vector of two prior variances for SNPs and gene effects.
 #'
-#' @param L the initial number of effects for screening regions
+#' @param L the number of effects for susie.
 #'
 #' @param minvar minimum number of variables (snps and genes) in a region
 #'
 #' @param mingene minimum number of genes in a region
 #'
-#' @param filter_L If TRUE, screening regions with L >= 1
+#' @param filter_L If TRUE, screening regions with estimated L > 0.
 #'
 #' @param filter_nonSNP_PIP If TRUE, screening regions with total non-SNP PIP >= \code{min_nonSNP_PIP}
 #'
@@ -73,6 +73,11 @@ screen_regions <- function(region_data,
   }
 
   loginfo("Screening regions ...")
+
+  # check input
+  if (!inherits(region_data,"list")){
+    stop("'region_data' should be a list.")
+  }
 
   # extract thin value from region_data
   thin <- unique(sapply(region_data, "[[", "thin"))
@@ -129,19 +134,15 @@ screen_regions <- function(region_data,
   } else {
     if (filter_L) {
       loginfo("Estimating L with uniform prior ...")
-      finemap_unif_prior_res <- finemap_regions(region_data,
-                                                use_LD = TRUE,
-                                                LD_map = LD_map,
-                                                snp_map = snp_map,
-                                                weights = weights,
-                                                L = L,
-                                                include_cs_index = TRUE,
-                                                LD_format = LD_format,
-                                                LD_loader_fun = LD_loader_fun,
-                                                ncore = ncore,
-                                                verbose = verbose,
-                                                ...)
-      all_estimated_L <- get_L(finemap_unif_prior_res)
+      all_estimated_L <- estimate_region_L(region_data = region_data,
+                                           LD_map = LD_map,
+                                           snp_map = snp_map,
+                                           weights = weights,
+                                           LD_format = LD_format,
+                                           LD_loader_fun = LD_loader_fun,
+                                           ncore = ncore,
+                                           verbose = verbose,
+                                           ...)
       screened_region_ids <- names(all_estimated_L[all_estimated_L >= 1])
       screened_region_data <- region_data[screened_region_ids]
       loginfo("Selected %d regions selected with L >= 1", length(screened_region_data))
@@ -191,24 +192,61 @@ screen_regions <- function(region_data,
 }
 
 
-#' @title Computes non-SNP PIPs for each region from finemapping result
+
+#' Estimate L for each region by running finemapping with uniform prior
 #'
-#' @param finemap_res a data frame of finemapping result
+#' @param region_data a list object indexing regions, variants and genes.
+#'
+#' @param use_LD TRUE/FALSE. If TRUE, use LD for finemapping. Otherwise, use "no-LD" version.
+#'
+#' @param LD_map a data frame with filenames of LD matrices for each of the regions. Required when \code{use_LD = TRUE}.
+#'
+#' @param snp_map a list of data frames with SNP-to-region map for the reference. Required when \code{use_LD = TRUE}.
+#'
+#' @param weights a list of weights for each gene. Required when \code{use_LD = TRUE}.
+#'
+#' @param LD_format file format for LD matrix. If "custom", use a user defined
+#' \code{LD_loader_fun()} function to load LD matrix.
+#'
+#' @param LD_loader_fun a user defined function to load LD matrix when \code{LD_format = "custom"}.
+#'
+#' @param ncore The number of cores used to parallelize susie over regions
+#'
+#' @param verbose TRUE/FALSE. If TRUE, print detail messages
+#'
+#' @param ... Additional arguments of \code{susie_rss}.
+#'
+#' @importFrom logging loginfo
+#'
+#' @return estimated L for each region
 #'
 #' @export
-compute_region_nonSNP_PIPs <- function(finemap_res){
-  region_ids <- unique(finemap_res$region_id)
-  if (length(region_ids) == 0) {
-    stop("no region_ids in finemap_res!")
-  }
-  nonSNP_PIPs <- sapply(region_ids, function(x){
-    finemap_region_res <- finemap_res[finemap_res$region_id == x,]
-    nonSNP_PIP <- sum(finemap_region_res$susie_pip[finemap_region_res$group != "SNP"])
-    nonSNP_PIP[is.na(nonSNP_PIP)] <- 0 # 0 if nonSNP_PIP is NA
-    nonSNP_PIP
-  })
-  names(nonSNP_PIPs) <- region_ids
-  return(nonSNP_PIPs)
+#'
+estimate_region_L <- function(region_data,
+                              LD_map,
+                              snp_map,
+                              weights,
+                              LD_format,
+                              LD_loader_fun,
+                              ncore,
+                              verbose,
+                              ...) {
+
+  finemap_unif_prior_res <- finemap_regions(region_data,
+                                            use_LD = TRUE,
+                                            LD_map = LD_map,
+                                            snp_map = snp_map,
+                                            weights = weights,
+                                            L = 5,
+                                            include_cs_index = TRUE,
+                                            LD_format = LD_format,
+                                            LD_loader_fun = LD_loader_fun,
+                                            ncore = ncore,
+                                            verbose = verbose,
+                                            ...)
+  all_estimated_L <- get_L(finemap_unif_prior_res)
+
+  return(all_estimated_L)
 }
 
 #' @title get L for each region from finemapping result
@@ -228,4 +266,25 @@ get_L <- function(finemap_res){
   })
   names(region_L) <- region_ids
   return(region_L)
+}
+
+
+#' @title Computes non-SNP PIPs for each region from finemapping result
+#'
+#' @param finemap_res a data frame of finemapping result
+#'
+#' @export
+compute_region_nonSNP_PIPs <- function(finemap_res){
+  region_ids <- unique(finemap_res$region_id)
+  if (length(region_ids) == 0) {
+    stop("no region_ids in finemap_res!")
+  }
+  nonSNP_PIPs <- sapply(region_ids, function(x){
+    finemap_region_res <- finemap_res[finemap_res$region_id == x,]
+    nonSNP_PIP <- sum(finemap_region_res$susie_pip[finemap_region_res$group != "SNP"])
+    nonSNP_PIP[is.na(nonSNP_PIP)] <- 0 # 0 if nonSNP_PIP is NA
+    nonSNP_PIP
+  })
+  names(nonSNP_PIPs) <- region_ids
+  return(nonSNP_PIPs)
 }

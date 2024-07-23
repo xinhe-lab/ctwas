@@ -54,6 +54,11 @@ est_param <- function(
 
   loginfo('Estimating parameters ... ')
 
+  # check inputs
+  if (!inherits(region_data,"list")){
+    stop("'region_data' should be a list.")
+  }
+
   # extract thin value from region_data
   thin <- unique(sapply(region_data, "[[", "thin"))
   if (length(thin) > 1) {

@@ -217,13 +217,19 @@ read_var_info <- function(var_info_file){
 
 # run mclapply and stop if not all cores delivered results
 mclapply_check <- function(X, FUN, mc.cores = 1){
-  tryCatch({
-    mclapply(X, FUN, mc.cores = mc.cores)
-  }, warning = function(w) {
-    if (grepl("not deliver results", w$message))
-      stop("Not all cores delivered results. Try rerun with bigger memory or fewer cores.")
+
+  if (length(X) <= 1 || mc.cores == 1) {
+    lapply(X, FUN)
+  } else {
+    tryCatch({
+      mclapply(X, FUN, mc.cores = mc.cores)
+    }, warning = function(w) {
+      if (grepl("not deliver results", w$message))
+        stop("Not all cores delivered results. Try rerun with bigger memory or fewer cores.")
+    }
+    )
   }
-  )
+
 }
 
 # # check mclapply result

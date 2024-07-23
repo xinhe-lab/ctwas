@@ -159,13 +159,7 @@ get_problematic_genes <- function(problematic_snps, weights, z_gene, z_thresh = 
   return(problematic_genes)
 }
 
-#' @title Updates finemapping result
-#'
-#' @param finemap_res a data frame of original finemapping result
-#' @param new_finemap_res a data frame of new finemapping result
-#'
-#' @export
-#'
+# Updates finemapping result
 update_finemap_res <- function(finemap_res, new_finemap_res){
 
   if (!all(colnames(finemap_res) == colnames(new_finemap_res))) {
