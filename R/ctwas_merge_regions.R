@@ -69,9 +69,12 @@ merge_region_data <- function(boundary_genes,
                               logfile = NULL,
                               ...) {
 
-  # Identify overlapping regions and get a list of regions to be merged
-  loginfo("Identify overlapping regions and get region_info for merged regions.")
+  if (!is.null(logfile)){
+    addHandler(writeToFile, file= logfile, level='DEBUG')
+  }
 
+  # Identify overlapping regions and get a list of regions to be merged
+  loginfo("Identify overlapping regions and create merged snp_map and LD_map.")
   res <- create_merged_snp_LD_map(boundary_genes,
                                   region_info = region_info,
                                   snp_map = snp_map,
