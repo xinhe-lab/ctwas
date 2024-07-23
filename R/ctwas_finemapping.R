@@ -80,7 +80,11 @@ finemap_region <- function(region_data,
     }
   }
 
-  # check weights
+  # check inputs
+  if (!inherits(region_data,"list")){
+    stop("'region_data' should be a list.")
+  }
+
   if (!is.null(weights)){
     if (!inherits(weights,"list")){
       stop("'weights' should be a list.")
@@ -271,7 +275,11 @@ finemap_regions <- function(region_data,
     }
   }
 
-  # check weights
+  # check inputs
+  if (!inherits(region_data,"list")){
+    stop("'region_data' should be a list.")
+  }
+
   if (!is.null(weights)){
     if (!inherits(weights,"list")){
       stop("'weights' should be a list.")

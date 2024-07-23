@@ -342,7 +342,7 @@ adjust_boundary_genes <- function(boundary_genes,
 #'
 #' @param region_data a list of region gene IDs and SNP IDs and associated file names
 #'
-#' @param snp_map a list of SNP-to-region map for the reference.
+#' @param snp_map a list of data frames with SNP-to-region map for the reference.
 #'
 #' @param z_snp A data frame with columns: "id", "z", giving the z-scores for SNPs.
 #'
@@ -375,7 +375,6 @@ expand_region_data <- function(region_data,
                                z_gene,
                                trim_by = c("z", "random"),
                                maxSNP = Inf,
-                               add_z = TRUE,
                                ncore = 1,
                                seed = 99) {
   # check arguments
@@ -393,39 +392,40 @@ expand_region_data <- function(region_data,
   thin <- sapply(region_data, "[[", "thin")
   loginfo("Expanding %d regions with full SNPs ...", length(which(thin < 1)))
 
-  region_ids <- names(region_data)
-  region_data <- mclapply_check(region_ids, function(region_id){
-    # add z-scores and types of the region to the region_data
-    regiondata <- region_data[[region_id]]
-    if (regiondata[["thin"]] < 1){
+  if (length(which(thin < 1)) > 0) {
+    region_ids <- names(region_data)
+    region_data <- mclapply_check(region_ids, function(region_id){
+      # add z-scores and types of the region to the region_data
+      regiondata <- region_data[[region_id]]
+      if (regiondata[["thin"]] < 1){
 
-      # load all SNPs in the region
-      snpinfo <- snp_map[[region_id]]
+        # load all SNPs in the region
+        snpinfo <- snp_map[[region_id]]
 
-      # update sid in the region
-      snpinfo$keep <- rep(1, nrow(snpinfo))
-      # remove SNPs not in z_snp
-      snpinfo$keep[!(snpinfo$id %in% z_snp$id)] <- 0
-      sid <- snpinfo$id[snpinfo$keep == 1]
-      sidx <- match(sid, snpinfo$id)
-      regiondata[["sid"]] <- sid
-      # update minpos and maxpos in the region
-      regiondata[["minpos"]] <- min(c(regiondata[["minpos"]], snpinfo$pos[sidx]))
-      regiondata[["maxpos"]] <- max(c(regiondata[["maxpos"]], snpinfo$pos[sidx]))
-      # set thin to 1 after expanding SNPs
-      regiondata[["thin"]] <- 1
-    }
-    regiondata
-  }, mc.cores = ncore)
+        # update sid in the region
+        snpinfo$keep <- rep(1, nrow(snpinfo))
+        # remove SNPs not in z_snp
+        snpinfo$keep[!(snpinfo$id %in% z_snp$id)] <- 0
+        sid <- snpinfo$id[snpinfo$keep == 1]
+        sidx <- match(sid, snpinfo$id)
+        regiondata[["sid"]] <- sid
+        # update minpos and maxpos in the region
+        regiondata[["minpos"]] <- min(c(regiondata[["minpos"]], snpinfo$pos[sidx]))
+        regiondata[["maxpos"]] <- max(c(regiondata[["maxpos"]], snpinfo$pos[sidx]))
+        # set thin to 1 after expanding SNPs
+        regiondata[["thin"]] <- 1
+      }
+      regiondata
+    }, mc.cores = ncore)
 
-  names(region_data) <- region_ids
+    names(region_data) <- region_ids
 
-  # Trim regions with SNPs more than maxSNP
-  region_data <- trim_region_data(region_data, z_snp, trim_by = trim_by, maxSNP = maxSNP, seed = seed)
+    # Trim regions with SNPs more than maxSNP
+    region_data <- trim_region_data(region_data, z_snp, trim_by = trim_by, maxSNP = maxSNP, seed = seed)
 
-  # add z-scores to region_data
-  if (add_z) {
+    # add z-scores to region_data
     region_data <- add_z_to_region_data(region_data, z_snp, z_gene, ncore = ncore)
+
   }
 
   return(region_data)

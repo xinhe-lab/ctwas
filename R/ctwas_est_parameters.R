@@ -60,9 +60,14 @@ est_param <- function(
     addHandler(writeToFile, file= logfile, level='DEBUG')
   }
 
+  loginfo('Estimating parameters ... ')
+
+  # check inputs
   group_prior_var_structure <- match.arg(group_prior_var_structure)
 
-  loginfo('Estimating parameters ... ')
+  if (!inherits(region_data,"list")){
+    stop("'region_data' should be a list.")
+  }
 
   # extract thin value from region_data
   thin <- unique(sapply(region_data, "[[", "thin"))

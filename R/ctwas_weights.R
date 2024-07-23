@@ -24,7 +24,7 @@ load_weights <- function(weight_file,
                          filter_protein_coding_genes = TRUE,
                          load_predictdb_LD = TRUE,
                          fusion_method = c("lasso","enet","top1","blup","bslmm","best.cv"),
-                         fusion_genome_version = c("b38","b37"),
+                         fusion_genome_version = "b38",
                          ncore = 1){
 
   weight_format <- match.arg(weight_format)
@@ -131,7 +131,7 @@ load_predictdb_weights <- function(weight_file,
 #'
 load_fusion_weights <- function(weight_dir,
                                 fusion_method = c("lasso","enet","top1","blup","bslmm","best.cv"),
-                                fusion_genome_version = c("b38","b37"),
+                                fusion_genome_version = "b38",
                                 make_extra_table = FALSE,
                                 ncore = 1) {
 
@@ -204,7 +204,7 @@ load_fusion_weights <- function(weight_dir,
 load_fusion_wgt_data <- function(wgt_rdata_file,
                                  wgt_ID,
                                  fusion_method = c("lasso","enet","top1","blup","bslmm","best.cv"),
-                                 fusion_genome_version = c("b38","b37")){
+                                 fusion_genome_version = "b38"){
 
   fusion_method <- match.arg(fusion_method)
   fusion_genome_version <- match.arg(fusion_genome_version)
@@ -275,20 +275,24 @@ load_fusion_wgt_data <- function(wgt_rdata_file,
               cv.rsq = g.cv.rsq))
 }
 
-#' @title Makes PredictDB weights from QTL data
+
+#' Creates weight files in PredictDB format from QTL data
 #'
 #' @param weight_table a data frame of the genes, QTLs and weights, with columns:
 #' "gene", "rsid", "varID", "ref_allele", "eff_allele", "weight".
+#' If you want to use multiple eQTLs per gene, you can set \code{use_top_QTL=FALSE}.
+#' But we assume the weights of the eQTLs are learned from multiple regression
+#' (instead of marginal effect sizes).
 #'
-#' @param extra_table a data frame (optional) with information of the genes
+#' @param gene_table a data frame (optional) with information of the genes
 #' in \code{weight_table} ("gene","genename","gene_type", etc.).
-#' If NULL, create a simply extra_table based on weight_table
+#' If NULL, create a simple gene_table based on the weight_table
 #'
 #' @param cov_table a data frame of covariances between variants, with columns:
 #' "GENE","RSID1","RSID2", "VALUE".
 #' If NULL, do not create covariance files (.txg.gz), unless \code{use_top_QTL=TRUE}.
 #'
-#' @param use_top_QTL TRUE/FALSE. If TRUE, only keep the top QTL with
+#' @param use_top_QTL If TRUE, only keep the top QTL with
 #' the largest abs(weight) for each gene (molecular trait), and
 #' create a simple cov_table with covariance set to 1.
 #'
@@ -303,12 +307,12 @@ load_fusion_wgt_data <- function(wgt_rdata_file,
 #'
 #' @export
 #'
-make_predictdb_from_QTLs <- function(weight_table,
-                                     extra_table = NULL,
-                                     cov_table = NULL,
-                                     use_top_QTL = FALSE,
-                                     outputdir = getwd(),
-                                     outname){
+create_predictdb_from_QTLs <- function(weight_table,
+                                       gene_annot = NULL,
+                                       cov_table = NULL,
+                                       use_top_QTL = TRUE,
+                                       outputdir = getwd(),
+                                       outname){
 
   if (!dir.exists(outputdir))
     dir.create(outputdir, showWarnings = FALSE, recursive = TRUE)
@@ -324,7 +328,7 @@ make_predictdb_from_QTLs <- function(weight_table,
 
   # if use_top_QTL, select the top SNP with the max abs(weight) for each gene
   if (use_top_QTL) {
-    loginfo("Select the top SNP with the max abs(weight) for each gene")
+    loginfo("select the top SNP with the max abs(weight) for each gene")
     weight_table <- weight_table[with(weight_table, order(gene, -abs(weight))),]
     weight_table <- weight_table[!duplicated(weight_table$gene), ]
   }
@@ -333,22 +337,22 @@ make_predictdb_from_QTLs <- function(weight_table,
   weight_table <- weight_table[complete.cases(weight_table), ,drop = FALSE]
 
   # if NULL, create a simply extra_table based on weight_table
-  if (is.null(extra_table)) {
-    extra_table <- weight_table %>%
+  if (is.null(gene_table)) {
+    gene_table <- weight_table %>%
       group_by(.data$gene) %>%
       summarise(n.snps.in.model = n()) %>%
       ungroup() %>% as.data.frame()
-    extra_table$genename <- NA
-    extra_table$gene_type <- NA
-    extra_table$pred.perf.R2 <- NA
-    extra_table$pred.perf.pval <- NA
-    extra_table$pred.perf.qval <- NA
-    extra_table <- extra_table[, c("gene", "genename", "gene_type", "n.snps.in.model",
-                                   "pred.perf.R2", "pred.perf.pval", "pred.perf.qval")]
+    gene_table$genename <- NA
+    gene_table$gene_type <- NA
+    gene_table$pred.perf.R2 <- NA
+    gene_table$pred.perf.pval <- NA
+    gene_table$pred.perf.qval <- NA
+    gene_table <- gene_table[, c("gene", "genename", "gene_type", "n.snps.in.model",
+                                 "pred.perf.R2", "pred.perf.pval", "pred.perf.qval")]
   }
 
   if (use_top_QTL) {
-    if (any(extra_table$n.snps.in.model > 1)){
+    if (any(gene_table$n.snps.in.model > 1)){
       stop("each gene should have only one SNP when using top QTL only")
     }
     # set covariance to 1 as each gene only has one top QTL
@@ -358,7 +362,7 @@ make_predictdb_from_QTLs <- function(weight_table,
   }
 
   # write PredictDB '.db' file
-  write_predictdb(weight_table, extra_table, cov_table, outputdir, outname)
+  write_predictdb(weight_table, gene_table, cov_table, outputdir, outname)
 
 }
 
@@ -385,7 +389,7 @@ make_predictdb_from_QTLs <- function(weight_table,
 convert_fusion_to_predictdb <- function(
     weight_dir,
     fusion_method = c("lasso","enet","top1","blup","bslmm","best.cv"),
-    fusion_genome_version = c("b38","b37"),
+    fusion_genome_version = "b38",
     make_extra_table = TRUE,
     cov_table = NULL,
     outputdir = getwd(),

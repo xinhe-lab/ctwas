@@ -19,15 +19,18 @@
 #'
 #' @param weight_format a string, specifying format of each weight file, e.g. PredictDB, FUSION.
 #'
-#' @param filter_protein_coding_genes TRUE/FALSE. If TRUE, keep protein coding genes only. This option is only for PredictDB weights
+#' @param drop_strand_ambig If TRUE remove strand ambiguous variants (A/T, G/C).
 #'
-#' @param load_predictdb_LD TRUE/FALSE. If TRUE, load pre-computed LD among weight SNPs. This option is only for PredictDB weights
+#' @param filter_protein_coding_genes If TRUE, keep protein coding genes only.
+#' This option is only for PredictDB weights.
 #'
-#' @param drop_strand_ambig TRUE/FALSE, if TRUE remove strand ambiguous variants (A/T, G/C).
-#'
-#' @param scale_predictdb_weights TRUE/FALSE, if TRUE scale PredictDB weights by the variance.
+#' @param scale_predictdb_weights If TRUE, scale PredictDB weights by the variance.
 #' This is because PredictDB weights assume that variant genotypes are not
 #' standardized, but our implementation assumes standardized variant genotypes.
+#' This option is only for PredictDB weights.
+#'
+#' @param load_predictdb_LD If TRUE, load pre-computed LD among weight SNPs.
+#' This option is only for PredictDB weights.
 #'
 #' @param fusion_method a string, specifying the method to choose in FUSION models.
 #' "best.cv" option will use the best model (smallest p-value) under cross-validation.
@@ -63,11 +66,11 @@ preprocess_weights <- function(weight_file,
                                LD_map,
                                weight_format = c("PredictDB", "FUSION"),
                                drop_strand_ambig = TRUE,
-                               scale_predictdb_weights = TRUE,
                                filter_protein_coding_genes = TRUE,
+                               scale_predictdb_weights = TRUE,
                                load_predictdb_LD = TRUE,
                                fusion_method = c("lasso","enet","top1","blup","bslmm","best.cv"),
-                               fusion_genome_version = c("b38","b37"),
+                               fusion_genome_version = "b38",
                                fusion_top_n_snps,
                                LD_format = c("rds", "rdata", "csv", "txt", "custom"),
                                LD_loader_fun = NULL,
@@ -84,7 +87,13 @@ preprocess_weights <- function(weight_file,
   LD_format <- match.arg(LD_format)
 
   if (length(weight_file) != 1) {
-    stop("Please provide only one weight path in `weight_file`.")
+    stop("Please provide only one weight file in `weight_file`.")
+  }
+
+  if (weight_format != "PredictDB") {
+    load_predictdb_LD <- FALSE
+    filter_protein_coding_genes <- FALSE
+    scale_predictdb_weights <- FALSE
   }
 
   snp_info <- as.data.frame(rbindlist(snp_map, idcol = "region_id"))
@@ -166,6 +175,10 @@ preprocess_weights <- function(weight_file,
                                           LD_format = LD_format,
                                           LD_loader_fun = LD_loader_fun,
                                           ncore = ncore)
+  }
+
+  if (any(sapply(weights, is.null))) {
+    warning("weights contain NULL!")
   }
 
   loginfo("Number of genes with weights after preprocessing: %d", length(weights))

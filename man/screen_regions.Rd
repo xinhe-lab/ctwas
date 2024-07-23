@@ -31,23 +31,23 @@ screen_regions(
 
 \item{use_LD}{TRUE/FALSE. If TRUE, use LD for finemapping. Otherwise, use "no-LD" version.}
 
-\item{LD_map}{a data frame with filenames of LD matrices for the regions. Required when \code{use_LD = TRUE}.}
+\item{LD_map}{a data frame with filenames of LD matrices for each of the regions. Required when \code{use_LD = TRUE}.}
 
-\item{snp_map}{a list of SNP-to-region map for the reference. Required when \code{use_LD = TRUE}.}
+\item{snp_map}{a list of data frames with SNP-to-region map for the reference. Required when \code{use_LD = TRUE}.}
 
-\item{weights}{a list of preprocessed weights. Required when \code{use_LD = TRUE}.}
+\item{weights}{a list of weights for each gene. Required when \code{use_LD = TRUE}.}
 
 \item{group_prior}{a vector of two prior inclusion probabilities for SNPs and genes.}
 
 \item{group_prior_var}{a vector of two prior variances for SNPs and gene effects.}
 
-\item{L}{the number of effects for screening regions}
+\item{L}{the number of effects for susie.}
 
 \item{minvar}{minimum number of variables (snps and genes) in a region}
 
 \item{mingene}{minimum number of genes in a region}
 
-\item{filter_L}{If TRUE, screening regions with L >= 1}
+\item{filter_L}{If TRUE, screening regions with estimated L > 0.}
 
 \item{filter_nonSNP_PIP}{If TRUE, screening regions with total non-SNP PIP >= \code{min_nonSNP_PIP}}
 

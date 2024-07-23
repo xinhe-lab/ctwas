@@ -11,7 +11,6 @@ expand_region_data(
   z_gene,
   trim_by = c("z", "random"),
   maxSNP = Inf,
-  add_z = TRUE,
   ncore = 1,
   seed = 99
 )
@@ -19,7 +18,7 @@ expand_region_data(
 \arguments{
 \item{region_data}{a list of region gene IDs and SNP IDs and associated file names}
 
-\item{snp_map}{a list of SNP-to-region map for the reference.}
+\item{snp_map}{a list of data frames with SNP-to-region map for the reference.}
 
 \item{z_snp}{A data frame with columns: "id", "z", giving the z-scores for SNPs.}
 
@@ -32,11 +31,11 @@ or "z" (trim SNPs with lower |z|) See parameter `maxSNP` for more information.}
 Inf, no limit. This can be useful if there are many SNPs in a region and you don't
 have enough memory to run the program.}
 
-\item{add_z}{TRUE/FALSE, if TRUE, add z-scores to the region_data}
-
 \item{ncore}{The number of cores used to parallelize susie over regions}
 
 \item{seed}{seed for random sampling}
+
+\item{add_z}{TRUE/FALSE, if TRUE, add z-scores to the region_data}
 }
 \value{
 updated region_data with full SNPs

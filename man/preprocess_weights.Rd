@@ -14,11 +14,11 @@ preprocess_weights(
   LD_map,
   weight_format = c("PredictDB", "FUSION"),
   drop_strand_ambig = TRUE,
-  scale_predictdb_weights = TRUE,
   filter_protein_coding_genes = TRUE,
+  scale_predictdb_weights = TRUE,
   load_predictdb_LD = TRUE,
   fusion_method = c("lasso", "enet", "top1", "blup", "bslmm", "best.cv"),
-  fusion_genome_version = c("b38", "b37"),
+  fusion_genome_version = "b38",
   fusion_top_n_snps,
   LD_format = c("rds", "rdata", "csv", "txt", "custom"),
   LD_loader_fun = NULL,
@@ -45,15 +45,18 @@ Required when \code{load_predictdb_LD = FALSE}.}
 
 \item{weight_format}{a string, specifying format of each weight file, e.g. PredictDB, FUSION.}
 
-\item{drop_strand_ambig}{TRUE/FALSE, if TRUE remove strand ambiguous variants (A/T, G/C).}
+\item{drop_strand_ambig}{If TRUE remove strand ambiguous variants (A/T, G/C).}
 
-\item{scale_predictdb_weights}{TRUE/FALSE, if TRUE scale PredictDB weights by the variance.
+\item{filter_protein_coding_genes}{If TRUE, keep protein coding genes only.
+This option is only for PredictDB weights.}
+
+\item{scale_predictdb_weights}{If TRUE, scale PredictDB weights by the variance.
 This is because PredictDB weights assume that variant genotypes are not
-standardized, but our implementation assumes standardized variant genotypes.}
+standardized, but our implementation assumes standardized variant genotypes.
+This option is only for PredictDB weights.}
 
-\item{filter_protein_coding_genes}{TRUE/FALSE. If TRUE, keep protein coding genes only. This option is only for PredictDB weights}
-
-\item{load_predictdb_LD}{TRUE/FALSE. If TRUE, load pre-computed LD among weight SNPs. This option is only for PredictDB weights}
+\item{load_predictdb_LD}{If TRUE, load pre-computed LD among weight SNPs.
+This option is only for PredictDB weights.}
 
 \item{fusion_method}{a string, specifying the method to choose in FUSION models.
 "best.cv" option will use the best model (smallest p-value) under cross-validation.}
