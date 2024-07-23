@@ -26,10 +26,8 @@
 #'
 #' @param adjust_boundary_genes identify cross-boundary genes, adjust region_data
 #'
-#' @param thin_gwas_snps TRUE/FALSE, if TRUE, only apply thin to GWAS SNPs.
+#' @param thin_gwas_snps If TRUE, only apply thin to GWAS SNPs.
 #' Otherwise, apply thins to all SNPs.
-#'
-#' @param add_z TRUE/FALSE, if TRUE, add z-scores to the region_data
 #'
 #' @param ncore The number of cores used to parallelize susie over regions
 #'
@@ -54,7 +52,6 @@ assemble_region_data <- function(region_info,
                                  trim_by = c("random", "z"),
                                  adjust_boundary_genes = TRUE,
                                  thin_gwas_snps = TRUE,
-                                 add_z = TRUE,
                                  ncore = 1,
                                  seed = 99,
                                  logfile = NULL) {
@@ -149,9 +146,7 @@ assemble_region_data <- function(region_info,
   region_data <- trim_region_data(region_data, z_snp, trim_by = trim_by, maxSNP = maxSNP, seed = seed)
 
   # add z-scores to region_data
-  if (add_z) {
-    region_data <- add_z_to_region_data(region_data, z_snp, z_gene, ncore = ncore)
-  }
+  region_data <- add_z_to_region_data(region_data, z_snp, z_gene, ncore = ncore)
 
   return(list(region_data=region_data, boundary_genes=boundary_genes))
 }

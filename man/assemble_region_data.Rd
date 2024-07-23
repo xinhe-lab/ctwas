@@ -15,7 +15,6 @@ assemble_region_data(
   trim_by = c("random", "z"),
   adjust_boundary_genes = TRUE,
   thin_gwas_snps = TRUE,
-  add_z = TRUE,
   ncore = 1,
   seed = 99,
   logfile = NULL
@@ -48,10 +47,8 @@ See parameter `maxSNP` for more information.}
 
 \item{adjust_boundary_genes}{identify cross-boundary genes, adjust region_data}
 
-\item{thin_gwas_snps}{TRUE/FALSE, if TRUE, only apply thin to GWAS SNPs.
+\item{thin_gwas_snps}{If TRUE, only apply thin to GWAS SNPs.
 Otherwise, apply thins to all SNPs.}
-
-\item{add_z}{TRUE/FALSE, if TRUE, add z-scores to the region_data}
 
 \item{ncore}{The number of cores used to parallelize susie over regions}
 
