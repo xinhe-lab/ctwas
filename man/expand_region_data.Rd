@@ -34,8 +34,6 @@ have enough memory to run the program.}
 \item{ncore}{The number of cores used to parallelize susie over regions}
 
 \item{seed}{seed for random sampling}
-
-\item{add_z}{TRUE/FALSE, if TRUE, add z-scores to the region_data}
 }
 \value{
 updated region_data with full SNPs
