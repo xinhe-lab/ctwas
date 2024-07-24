@@ -12,7 +12,7 @@ make_locusplot(
   R_snp_gene = NULL,
   R_gene = NULL,
   locus_range = NULL,
-  focus_gene = NULL,
+  focal_gene = NULL,
   filter_genetrack_biotype = "protein_coding",
   highlight_pval = NULL,
   highlight_pip = 0.8,
@@ -38,14 +38,14 @@ make_locusplot(
 
 \item{R_snp_gene}{SNP-gene correlation matrix of the region.
 If both R_snp_gene and R_gene are available,
-color data points with correlations with the focus gene.}
+color data points with correlations with the focal gene.}
 
 \item{R_gene}{gene-gene correlation matrix of the region}
 
 \item{locus_range}{a vector of start and end positions to define the region boundary to be plotted.
 If NULL, the entire region will be plotted (with 100 bp flanks on both sides).}
 
-\item{focus_gene}{the gene name to focus the plot.
+\item{focal_gene}{the focal gene name.
 If NULL, choose the gene with the highest PIP.}
 
 \item{filter_genetrack_biotype}{biotype to be displayed in gene tracks.

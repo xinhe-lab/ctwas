@@ -11,14 +11,14 @@
 #'
 #' @param R_snp_gene SNP-gene correlation matrix of the region.
 #' If both R_snp_gene and R_gene are available,
-#' color data points with correlations with the focus gene.
+#' color data points with correlations with the focal gene.
 #'
 #' @param R_gene gene-gene correlation matrix of the region
 #'
 #' @param locus_range a vector of start and end positions to define the region boundary to be plotted.
 #' If NULL, the entire region will be plotted (with 100 bp flanks on both sides).
 #'
-#' @param focus_gene the gene name to focus the plot.
+#' @param focal_gene the focal gene name.
 #' If NULL, choose the gene with the highest PIP.
 #'
 #' @param filter_genetrack_biotype biotype to be displayed in gene tracks.
@@ -82,7 +82,7 @@ make_locusplot <- function(finemap_res,
                            R_snp_gene = NULL,
                            R_gene = NULL,
                            locus_range = NULL,
-                           focus_gene = NULL,
+                           focal_gene = NULL,
                            filter_genetrack_biotype = "protein_coding",
                            highlight_pval = NULL,
                            highlight_pip = 0.8,
@@ -118,25 +118,25 @@ make_locusplot <- function(finemap_res,
   finemap_region_res$object_type <- finemap_region_res$type
   finemap_region_res$object_type[finemap_region_res$object_type!="SNP"] <- "non-SNP"
 
-  if (!is.null(focus_gene)) {
-    focus_gidx <- which(finemap_region_res$gene_name == focus_gene)
-    if (length(focus_gidx) == 0){
-      stop("can't find focus_gene in the fine-mapping result of the region")
-    } else if (length(focus_gidx) > 1){
-      finemap_region_gene_res <- finemap_region_res[focus_gidx,]
-      focus_gid <- finemap_region_gene_res$id[which.max(finemap_region_gene_res$susie_pip)]
+  if (!is.null(focal_gene)) {
+    focal_gidx <- which(finemap_region_res$gene_name == focal_gene)
+    if (length(focal_gidx) == 0){
+      stop("can't find focal_gene in the fine-mapping result of the region")
+    } else if (length(focal_gidx) > 1){
+      finemap_region_gene_res <- finemap_region_res[focal_gidx,]
+      focal_gid <- finemap_region_gene_res$id[which.max(finemap_region_gene_res$susie_pip)]
     } else{
-      focus_gid <- finemap_region_res$id[focus_gidx]
+      focal_gid <- finemap_region_res$id[focal_gidx]
     }
   } else{
-    # if focus_gene is not specified, choose the top gene with highest PIP
+    # if focal_gene is not specified, choose the top gene with highest PIP
     finemap_region_gene_res <- finemap_region_res[finemap_region_res$type != "SNP",]
-    focus_gidx <- which.max(finemap_region_gene_res$susie_pip)
-    focus_gene <- finemap_region_gene_res$gene_name[focus_gidx]
-    focus_gid <- finemap_region_gene_res$id[focus_gidx]
+    focal_gidx <- which.max(finemap_region_gene_res$susie_pip)
+    focal_gene <- finemap_region_gene_res$gene_name[focal_gidx]
+    focal_gid <- finemap_region_gene_res$id[focal_gidx]
   }
-  loginfo("focus gene: %s", focus_gene)
-  loginfo("focus id: %s", focus_gid)
+  loginfo("focal gene: %s", focal_gene)
+  loginfo("focal id: %s", focal_gid)
 
   if (!is.null(locus_range)){
     if (is.null(finemap_region_res$pos)){
@@ -154,9 +154,9 @@ make_locusplot <- function(finemap_res,
   if (!is.null(R_gene) && !is.null(R_snp_gene)) {
     plot_r2 <- TRUE
     finemap_region_res$r2 <- NA
-    finemap_region_res$r2[finemap_region_res$type!="SNP"] <- R_gene[finemap_region_res$id[finemap_region_res$type!="SNP"], focus_gid]^2
-    finemap_region_res$r2[finemap_region_res$type=="SNP"] <- R_snp_gene[finemap_region_res$id[finemap_region_res$type=="SNP"], focus_gid]^2
-    finemap_region_res$r2[finemap_region_res$id == focus_gid] <- 100
+    finemap_region_res$r2[finemap_region_res$type!="SNP"] <- R_gene[finemap_region_res$id[finemap_region_res$type!="SNP"], focal_gid]^2
+    finemap_region_res$r2[finemap_region_res$type=="SNP"] <- R_snp_gene[finemap_region_res$id[finemap_region_res$type=="SNP"], focal_gid]^2
+    finemap_region_res$r2[finemap_region_res$id == focal_gid] <- 100
     # r2 colors: lead gene: salmon, 0.4~1: purple, others "#7FC97F"
     r2_colors <- c("0-0.4" = "#7FC97F", "0.4-1" = "purple", "1" = "salmon")
     finemap_region_res$r2_levels <- cut(finemap_region_res$r2,
@@ -167,7 +167,7 @@ make_locusplot <- function(finemap_res,
     plot_r2 <- FALSE
     r2_colors <- c("0-1" = "gray50", "1" = "salmon")
     finemap_region_res$r2 <- 0.1
-    finemap_region_res$r2[finemap_region_res$id == focus_gid] <- 100
+    finemap_region_res$r2[finemap_region_res$id == focal_gid] <- 100
     finemap_region_res$r2_levels <- cut(finemap_region_res$r2,
                                         breaks = c(0, 1, Inf),
                                         labels = names(r2_colors))
@@ -193,13 +193,13 @@ make_locusplot <- function(finemap_res,
     ens_db = ens_db,
     labs = "id")
 
-  # get QTLs for the focus gene
-  focus_gene_qtls <- rownames(weights[[focus_gid]]$wgt)
-  finemap_qtl_res <- finemap_region_res[finemap_region_res$id %in% focus_gene_qtls, ]
-  focus_gene_name <- finemap_region_res$gene_name[finemap_region_res$id == focus_gid]
-  focus_gene_context <- finemap_region_res$context[finemap_region_res$id == focus_gid]
-  focus_gene_type <- finemap_region_res$type[finemap_region_res$id == focus_gid]
-  loginfo("%s %s %s QTLs", focus_gene_name, focus_gene_context, focus_gene_type)
+  # get QTLs for the focal gene
+  focal_gene_qtls <- rownames(weights[[focal_gid]]$wgt)
+  finemap_qtl_res <- finemap_region_res[finemap_region_res$id %in% focal_gene_qtls, ]
+  focal_gene_name <- finemap_region_res$gene_name[finemap_region_res$id == focal_gid]
+  focal_gene_context <- finemap_region_res$context[finemap_region_res$id == focal_gid]
+  focal_gene_type <- finemap_region_res$type[finemap_region_res$id == focal_gid]
+  loginfo("%s %s %s QTLs", focal_gene_name, focal_gene_context, focal_gene_type)
   loginfo("QTL positions: %s", finemap_qtl_res$pos)
 
   # p-value panel
@@ -266,7 +266,7 @@ make_locusplot <- function(finemap_res,
     geom_rect(aes(xmin=loc$xrange[1]/1e6, xmax=loc$xrange[2]/1e6, ymin=0, ymax=1),
               fill="gray90") +
     geom_segment(aes(x=.data$pos/1e6, xend=.data$pos/1e6, y=0, yend=1), color="salmon") +
-    labs(title = paste(focus_gene_name, focus_gene_context, focus_gene_type),
+    labs(title = paste(focal_gene_name, focal_gene_context, focal_gene_type),
          y = "QTL") +
     theme(
       axis.title.x = element_blank(),
