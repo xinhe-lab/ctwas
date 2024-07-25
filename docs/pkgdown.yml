@@ -2,11 +2,11 @@ pandoc: 2.7.3
 pkgdown: 2.1.0
 pkgdown_sha: ~
 articles:
-  ctwas_analysis: ctwas_analysis.html
   FAQ: FAQ.html
   minimal_tutorial: minimal_tutorial.html
   postprocessing: postprocessing.html
   preparing_input_data: preparing_input_data.html
+  running_ctwas_analysis: running_ctwas_analysis.html
   summarizing_results: summarizing_results.html
   utility_functions: utility_functions.html
-last_built: 2024-07-25T03:54Z
+last_built: 2024-07-25T12:55Z

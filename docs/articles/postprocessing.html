@@ -32,7 +32,7 @@
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">ctwas</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">0.3.14</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">0.3.15</span>
       </span>
     </div>
 
@@ -55,7 +55,7 @@
       <a href="../articles/preparing_input_data.html">Preparing cTWAS input data</a>
     </li>
     <li>
-      <a href="../articles/ctwas_analysis.html">Running cTWAS analysis</a>
+      <a href="../articles/running_ctwas_analysis.html">Running cTWAS analysis</a>
     </li>
     <li>
       <a href="../articles/summarizing_results.html">Summarizing and visualizing cTWAS results</a>
@@ -89,7 +89,7 @@
       <h1 data-toc-skip>Post-processing cTWAS results</h1>
                         <h4 data-toc-skip class="author">Kaixuan Luo, Sheng Qian</h4>
             
-            <h4 data-toc-skip class="date">2024-07-24</h4>
+            <h4 data-toc-skip class="date">2024-07-25</h4>
       
       <small class="dont-index">Source: <a href="https://github.com/xinhe-lab/ctwas/blob/singlegroup/vignettes/postprocessing.Rmd" class="external-link"><code>vignettes/postprocessing.Rmd</code></a></small>
       <div class="hidden name"><code>postprocessing.Rmd</code></div>
@@ -209,7 +209,7 @@
 <span><span class="va">problematic_region_ids</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/unique.html" class="external-link">unique</a></span><span class="op">(</span><span class="va">finemap_res</span><span class="op">[</span><span class="va">finemap_res</span><span class="op">$</span><span class="va">id</span> <span class="op"><a href="https://rdrr.io/r/base/match.html" class="external-link">%in%</a></span> <span class="va">problematic_genes</span>, <span class="st">"region_id"</span><span class="op">]</span><span class="op">)</span></span></code></pre></div>
 <p>We then rerun the fine-mapping without LD information for the problematic regions, setting <code>use_LD = FALSE</code> in the <code>finemap_regions</code> function:</p>
 <div class="sourceCode" id="cb11"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="kw">if</span> <span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/any.html" class="external-link">any</a></span><span class="op">(</span><span class="va">problematic_region_ids</span><span class="op">)</span><span class="op">)</span><span class="op">{</span></span>
+<code class="sourceCode R"><span><span class="kw">if</span> <span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/any.html" class="external-link">any</a></span><span class="op">(</span><span class="va">problematic_region_ids</span><span class="op">)</span><span class="op">)</span> <span class="op">{</span></span>
 <span>  <span class="va">rerun_region_data</span> <span class="op">&lt;-</span> <span class="va">screened_region_data</span><span class="op">[</span><span class="va">problematic_region_ids</span><span class="op">]</span></span>
 <span>  <span class="va">finemap_rerun_region_res</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/finemap_regions.html">finemap_regions</a></span><span class="op">(</span><span class="va">rerun_region_data</span>, </span>
 <span>                                              use_LD <span class="op">=</span> <span class="cn">FALSE</span>, </span>

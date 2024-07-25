@@ -17,7 +17,7 @@
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">ctwas</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">0.3.14</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">0.3.15</span>
       </span>
     </div>
 
@@ -38,7 +38,7 @@
       <a href="../articles/preparing_input_data.html">Preparing cTWAS input data</a>
     </li>
     <li>
-      <a href="../articles/ctwas_analysis.html">Running cTWAS analysis</a>
+      <a href="../articles/running_ctwas_analysis.html">Running cTWAS analysis</a>
     </li>
     <li>
       <a href="../articles/summarizing_results.html">Summarizing and visualizing cTWAS results</a>
@@ -76,7 +76,6 @@
 <span>  <span class="va">region_data</span>,</span>
 <span>  <span class="va">snp_map</span>,</span>
 <span>  <span class="va">z_snp</span>,</span>
-<span>  <span class="va">z_gene</span>,</span>
 <span>  trim_by <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"z"</span>, <span class="st">"random"</span><span class="op">)</span>,</span>
 <span>  maxSNP <span class="op">=</span> <span class="cn">Inf</span>,</span>
 <span>  ncore <span class="op">=</span> <span class="fl">1</span>,</span>
@@ -100,10 +99,6 @@
 <dd><p>A data frame with columns: "id", "z", giving the z-scores for SNPs.</p></dd>
 
 
-<dt id="arg-z-gene">z_gene<a class="anchor" aria-label="anchor" href="#arg-z-gene"></a></dt>
-<dd><p>A data frame with columns: "id", "z", giving the z-scores for genes.</p></dd>
-
-
 <dt id="arg-trim-by">trim_by<a class="anchor" aria-label="anchor" href="#arg-trim-by"></a></dt>
 <dd><p>remove SNPs if the total number of SNPs exceeds limit, options: "random",
 or "z" (trim SNPs with lower |z|) See parameter `maxSNP` for more information.</p></dd>
@@ -121,6 +116,10 @@ have enough memory to run the program.</p></dd>
 
 <dt id="arg-seed">seed<a class="anchor" aria-label="anchor" href="#arg-seed"></a></dt>
 <dd><p>seed for random sampling</p></dd>
+
+
+<dt id="arg-z-gene">z_gene<a class="anchor" aria-label="anchor" href="#arg-z-gene"></a></dt>
+<dd><p>A data frame with columns: "id", "z", giving the z-scores for genes.</p></dd>
 
 </dl></div>
     <div id="value">

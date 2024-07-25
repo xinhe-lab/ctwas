@@ -179,7 +179,7 @@ problematic_region_ids <- unique(finemap_res[finemap_res$id %in% problematic_gen
 We then rerun the fine-mapping without LD information for the problematic regions, setting `use_LD = FALSE` in the `finemap_regions` function:
  
 ```{r rerun_finemap_problematic_regions, eval=FALSE}
-if (any(problematic_region_ids)){
+if (any(problematic_region_ids)) {
   rerun_region_data <- screened_region_data[problematic_region_ids]
   finemap_rerun_region_res <- finemap_regions(rerun_region_data, 
                                               use_LD = FALSE, 
