@@ -304,7 +304,7 @@ load_fusion_wgt_data <- function(wgt_rdata_file,
 #' @export
 #'
 create_predictdb_from_QTLs <- function(weight_table,
-                                       gene_annot = NULL,
+                                       gene_table = NULL,
                                        cov_table = NULL,
                                        use_top_QTL = TRUE,
                                        outputdir = getwd(),
