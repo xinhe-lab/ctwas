@@ -29,7 +29,6 @@ load_weights <- function(weight_file,
 
   weight_format <- match.arg(weight_format)
   fusion_method <- match.arg(fusion_method)
-  fusion_genome_version <- match.arg(fusion_genome_version)
 
   if (weight_format == "PredictDB") {
     res <- load_predictdb_weights(weight_file,
@@ -88,7 +87,7 @@ load_predictdb_weights <- function(weight_file,
   }
 
   # load pre-computed covariances from PredictDB LD file
-  if (load_predictdb_LD){
+  if (load_predictdb_LD) {
     predictdb_LD_file <- paste0(file_path_sans_ext(weight_file), ".txt.gz")
     if (!file.exists(predictdb_LD_file)){
       stop(paste("PredictDB LD file", predictdb_LD_file, "does not exist!"))
@@ -136,7 +135,6 @@ load_fusion_weights <- function(weight_dir,
                                 ncore = 1) {
 
   fusion_method <- match.arg(fusion_method)
-  fusion_genome_version <- match.arg(fusion_genome_version)
   stopifnot(dir.exists(weight_dir))
 
   loginfo("Loading FUSION weights ...")
@@ -207,7 +205,6 @@ load_fusion_wgt_data <- function(wgt_rdata_file,
                                  fusion_genome_version = "b38"){
 
   fusion_method <- match.arg(fusion_method)
-  fusion_genome_version <- match.arg(fusion_genome_version)
   stopifnot(file.exists(wgt_rdata_file))
 
   # define the variables as NULL to binding the variables locally to the function.
@@ -275,7 +272,6 @@ load_fusion_wgt_data <- function(wgt_rdata_file,
               cv.rsq = g.cv.rsq))
 }
 
-
 #' Creates weight files in PredictDB format from QTL data
 #'
 #' @param weight_table a data frame of the genes, QTLs and weights, with columns:
@@ -308,7 +304,7 @@ load_fusion_wgt_data <- function(wgt_rdata_file,
 #' @export
 #'
 create_predictdb_from_QTLs <- function(weight_table,
-                                       gene_annot = NULL,
+                                       gene_table = NULL,
                                        cov_table = NULL,
                                        use_top_QTL = TRUE,
                                        outputdir = getwd(),
@@ -348,7 +344,7 @@ create_predictdb_from_QTLs <- function(weight_table,
     gene_table$pred.perf.pval <- NA
     gene_table$pred.perf.qval <- NA
     gene_table <- gene_table[, c("gene", "genename", "gene_type", "n.snps.in.model",
-                                 "pred.perf.R2", "pred.perf.pval", "pred.perf.qval")]
+                                   "pred.perf.R2", "pred.perf.pval", "pred.perf.qval")]
   }
 
   if (use_top_QTL) {
@@ -371,6 +367,7 @@ create_predictdb_from_QTLs <- function(weight_table,
 #' @param weight_dir the directory containing FUSION weights ('.wgt.RDat' files).
 #'
 #' @param fusion_method a string, specifying the method to choose in FUSION models.
+#' "best.cv" option will use the best model (smallest p-value) under cross-validation.
 #'
 #' @param fusion_genome_version a string, specifying the genome version of FUSION models
 #'
@@ -396,7 +393,6 @@ convert_fusion_to_predictdb <- function(
     outname){
 
   fusion_method <- match.arg(fusion_method)
-  fusion_genome_version <- match.arg(fusion_genome_version)
 
   loaded_weights_res <- load_fusion_weights(weight_dir,
                                             fusion_method = fusion_method,
