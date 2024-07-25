@@ -16,7 +16,7 @@ navbar:
       - text: Preparing cTWAS input data
         href: articles/preparing_input_data.html
       - text: Running cTWAS analysis
-        href: articles/ctwas_analysis.html
+        href: articles/running_ctwas_analysis.html
       - text: Summarizing and visualizing cTWAS results
         href: articles/summarizing_results.html
       - text: Post-processing cTWAS results

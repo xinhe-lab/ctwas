@@ -22,5 +22,8 @@ test_that("ctwas_sumstats works", {
   })
 
   expect_equal(ctwas_res, precomputed_ctwas_res)
-
+  # expect_equal(ctwas_res$z_gene, precomputed_ctwas_res$z_gene)
+  # expect_equal(ctwas_res$param, precomputed_ctwas_res$param)
+  # expect_equal(ctwas_res$finemap_res, precomputed_ctwas_res$finemap_res)
+  # expect_equal(ctwas_res$boundary_genes, precomputed_ctwas_res$boundary_genes)
 })

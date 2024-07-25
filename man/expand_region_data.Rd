@@ -8,7 +8,6 @@ expand_region_data(
   region_data,
   snp_map,
   z_snp,
-  z_gene,
   trim_by = c("z", "random"),
   maxSNP = Inf,
   ncore = 1,
@@ -22,8 +21,6 @@ expand_region_data(
 
 \item{z_snp}{A data frame with columns: "id", "z", giving the z-scores for SNPs.}
 
-\item{z_gene}{A data frame with columns: "id", "z", giving the z-scores for genes.}
-
 \item{trim_by}{remove SNPs if the total number of SNPs exceeds limit, options: "random",
 or "z" (trim SNPs with lower |z|) See parameter `maxSNP` for more information.}
 
@@ -34,6 +31,8 @@ have enough memory to run the program.}
 \item{ncore}{The number of cores used to parallelize susie over regions}
 
 \item{seed}{seed for random sampling}
+
+\item{z_gene}{A data frame with columns: "id", "z", giving the z-scores for genes.}
 }
 \value{
 updated region_data with all SNPs

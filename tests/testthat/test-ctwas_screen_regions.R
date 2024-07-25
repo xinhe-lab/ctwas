@@ -24,7 +24,6 @@ test_that("screen_regions (no-LD version) work", {
     screened_region_data <- expand_region_data(screened_region_data,
                                                snp_map,
                                                z_snp,
-                                               z_gene,
                                                trim_by = "z",
                                                maxSNP = 20000)
   })
@@ -70,7 +69,6 @@ test_that("screen_regions (LD version, filter by L) work", {
     screened_region_data <- expand_region_data(screened_region_data,
                                                snp_map,
                                                z_snp,
-                                               z_gene,
                                                trim_by = "z",
                                                maxSNP = 20000)
   })

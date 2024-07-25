@@ -29,7 +29,6 @@ test_that("merge_region_data works", {
   })
 
   expect_equal(merged_region_data, precomputed_merged_region_data)
-
 })
 
 test_that("merge_region_data and finemapping without LD works", {

@@ -147,7 +147,7 @@ screen_regions <- function(region_data,
                                            ...)
       screened_region_ids <- names(all_estimated_L[all_estimated_L >= 1])
       screened_region_data <- region_data[screened_region_ids]
-      loginfo("Selected %d regions selected with L >= 1", length(screened_region_data))
+      loginfo("Selected %d regions with L >= 1", length(screened_region_data))
       L <- all_estimated_L[screened_region_ids]
     } else {
       L <- L
@@ -178,7 +178,7 @@ screen_regions <- function(region_data,
     all_nonSNP_PIPs <- compute_region_nonSNP_PIPs(finemap_screening_res)
     screened_region_ids <- names(all_nonSNP_PIPs[all_nonSNP_PIPs >= min_nonSNP_PIP])
     screened_region_data <- region_data[screened_region_ids]
-    loginfo("Selected %d regions selected with non-SNP PIP >= %s", length(screened_region_data), min_nonSNP_PIP)
+    loginfo("Selected %d regions with non-SNP PIP >= %s", length(screened_region_data), min_nonSNP_PIP)
     if (length(L) > 1) {
       L <- L[screened_region_ids]
     }

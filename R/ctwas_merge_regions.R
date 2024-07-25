@@ -112,12 +112,12 @@ merge_region_data <- function(boundary_genes,
                                                 "stop" = new_stop,
                                                 "minpos" = new_minpos,
                                                 "maxpos" = new_maxpos,
+                                                "thin" = new_thin,
                                                 "gid" = new_gid,
-                                                "sid" = new_sid,
-                                                "thin" = new_thin)
+                                                "sid" = new_sid)
   }
 
-  merged_region_data <- add_z_to_region_data(merged_region_data, z_snp, z_gene, ncore = ncore)
+  merged_region_data <- update_region_z(merged_region_data, z_snp, z_gene, ncore = ncore)
 
   loginfo("%d regions in merged_region_data", length(merged_region_data))
 
@@ -147,7 +147,6 @@ merge_region_data <- function(boundary_genes,
     merged_region_data <- expand_region_data(merged_region_data,
                                              merged_snp_map,
                                              z_snp = z_snp,
-                                             z_gene = z_gene,
                                              maxSNP = maxSNP,
                                              ncore = ncore)
   }

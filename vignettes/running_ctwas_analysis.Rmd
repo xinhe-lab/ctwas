@@ -201,7 +201,6 @@ After selecting regions, we expand the screened regions with all SNPs for final 
 screened_region_data <- expand_region_data(screened_region_data,
                                            snp_map,
                                            z_snp,
-                                           z_gene,
                                            maxSNP = 20000,
                                            ncore = ncore)
 ```
@@ -257,7 +256,6 @@ region_id <-16_71020125_72901251"
 selected_region_data <- expand_region_data(region_data[region_id],
                                            snp_map,
                                            z_snp,
-                                           z_gene,
                                            maxSNP = 20000)
 
 selected_region_L <- screen_region_res$L[region_id]
