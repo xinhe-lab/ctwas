@@ -88,9 +88,9 @@ make_locusplot <- function(finemap_res,
                            highlight_pip = 0.8,
                            highlight_pos = NULL,
                            label_QTLs = TRUE,
-                           point.sizes = c(1, 3.5),
-                           point.alpha = c(0.4, 0.6),
-                           point.shapes = c(21:25),
+                           point.sizes = c(1.5, 3.5),
+                           point.alpha = c(0.4, 0.7),
+                           point.shapes = c(16, 15),
                            label.text.size = 2.5,
                            legend.text.size = 10,
                            legend.position = "top",
@@ -172,7 +172,7 @@ make_locusplot <- function(finemap_res,
   }
 
   # gene labels
-  finemap_region_res$label <- paste0(finemap_region_res$gene_name, " (", finemap_region_res$context, ")")
+  finemap_region_res$label <- finemap_region_res$gene_name
   finemap_region_res$label[finemap_region_res$group == "SNP"] <- NA
 
   # set shapes, sizes, and alpha for data points
@@ -203,8 +203,9 @@ make_locusplot <- function(finemap_res,
     scale_shape_manual(values = point.shapes) +
     scale_alpha_manual(values = point.alpha, guide="none") +
     scale_size_manual(values = point.sizes, guide="none") +
+    guides(shape = guide_legend(override.aes = list(size = c(2,3.5)))) +
     xlim(loc$xrange/1e6) +
-    labs(x = "", y = expression(-log[10]("p-value")), shape = "group", color = expression(R^2)) +
+    labs(x = "", y = expression(-log[10]("p-value")), shape = "Group", color = expression(R^2)) +
     theme_bw() +
     theme(legend.position = legend.position,
           legend.text = element_text(size=legend.text.size),
