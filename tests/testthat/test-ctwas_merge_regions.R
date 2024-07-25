@@ -4,7 +4,7 @@ test_that("merge_region_data works", {
   weights <- readRDS(system.file("extdata/sample_data", "LDL_example.preprocessed.weights.RDS", package = "ctwas"))
   region_info <- readRDS(system.file("extdata/sample_data", "LDL_example.region_info.RDS", package = "ctwas"))
   snp_map <- readRDS(system.file("extdata/sample_data", "LDL_example.snp_map.RDS", package = "ctwas"))
-  ctwas_res <- readRDS("LDL_example.ctwas_sumstats_noLD_res.RDS")
+  ctwas_res <- readRDS(system.file("extdata/sample_data", "LDL_example.ctwas_sumstats_noLD_res.RDS", package = "ctwas"))
   z_gene <- ctwas_res$z_gene
   boundary_genes <- ctwas_res$boundary_genes
   region_data <- ctwas_res$region_data
@@ -38,7 +38,7 @@ test_that("merge_region_data and finemapping without LD works", {
   weights <- readRDS(system.file("extdata/sample_data", "LDL_example.preprocessed.weights.RDS", package = "ctwas"))
   region_info <- readRDS(system.file("extdata/sample_data", "LDL_example.region_info.RDS", package = "ctwas"))
   snp_map <- readRDS(system.file("extdata/sample_data", "LDL_example.snp_map.RDS", package = "ctwas"))
-  ctwas_res <- readRDS("LDL_example.ctwas_sumstats_noLD_res.RDS")
+  ctwas_res <- readRDS(system.file("extdata/sample_data", "LDL_example.ctwas_sumstats_noLD_res.RDS", package = "ctwas"))
   z_gene <- ctwas_res$z_gene
   boundary_genes <- ctwas_res$boundary_genes
   region_data <- ctwas_res$region_data
@@ -82,7 +82,7 @@ test_that("merge_region_data and finemapping with LD works", {
   weights <- readRDS(system.file("extdata/sample_data", "LDL_example.preprocessed.weights.RDS", package = "ctwas"))
   region_info <- readRDS(system.file("extdata/sample_data", "LDL_example.region_info.RDS", package = "ctwas"))
   snp_map <- readRDS(system.file("extdata/sample_data", "LDL_example.snp_map.RDS", package = "ctwas"))
-  ctwas_res <- readRDS("LDL_example.ctwas_sumstats_res.RDS")
+  ctwas_res <- readRDS(system.file("extdata/sample_data", "LDL_example.ctwas_sumstats_res.RDS", package = "ctwas"))
   z_gene <- ctwas_res$z_gene
   boundary_genes <- ctwas_res$boundary_genes
   region_data <- ctwas_res$region_data

@@ -6,7 +6,7 @@ test_that("assemble_region_data works", {
   z_snp <- readRDS(system.file("extdata/sample_data", "LDL_example.preprocessed.z_snp.RDS", package = "ctwas"))
   z_gene <- readRDS(system.file("extdata/sample_data", "LDL_example.z_gene.RDS", package = "ctwas"))
 
-  ctwas_res <- readRDS("LDL_example.ctwas_sumstats_noLD_res.RDS")
+  ctwas_res <- readRDS(system.file("extdata/sample_data", "LDL_example.ctwas_sumstats_noLD_res.RDS", package = "ctwas"))
   preassembled_region_data <- ctwas_res$region_data
   preassembled_boundary_genes <- ctwas_res$boundary_genes
 
