@@ -1,10 +1,10 @@
 test_that("summarize_param works", {
 
   gwas_n <- 343621
-  ctwas_res <- readRDS(system.file("extdata/sample_data", "LDL_example.ctwas_sumstats_noLD_res.RDS", package = "ctwas"))
+  ctwas_res <- readRDS("LDL_example.ctwas_sumstats_noLD_res.RDS")
   param <- ctwas_res$param
 
-  precomputed_ctwas_parameters <- readRDS(system.file("extdata/sample_data", "LDL_example.ctwas_parameters.RDS", package = "ctwas"))
+  precomputed_ctwas_parameters <- readRDS("LDL_example.ctwas_parameters.RDS")
 
   ctwas_parameters <- summarize_param(param, gwas_n)
 

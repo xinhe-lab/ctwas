@@ -251,10 +251,10 @@ ctwas_sumstats <- function(
     finemap_res <- NULL
   }
 
-  return(list("param" = param,
+  return(list("z_gene" = z_gene,
+              "param" = param,
               "finemap_res" = finemap_res,
               "boundary_genes" = boundary_genes,
-              "z_gene" = z_gene,
               "region_data" = region_data,
               "screened_region_data" = screened_region_data,
               "L" = L))

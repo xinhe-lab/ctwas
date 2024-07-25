@@ -29,7 +29,7 @@ fit_EM <- function(
     verbose = FALSE,
     ...){
 
-  groups <- unique(unlist(lapply(region_data, "[[", "gs_group")))
+  groups <- unique(unlist(lapply(region_data, "[[", "groups")))
 
   # set pi_prior and V_prior based on init_group_prior and init_group_prior_var
   res <- initiate_group_priors(init_group_prior[groups], init_group_prior_var[groups], groups)
@@ -53,8 +53,7 @@ fit_EM <- function(
     }
 
     EM_susie_res_list <- mclapply_check(region_ids, function(region_id){
-      ctwas_susie_region_L1(region_data, region_id,
-                            pi_prior, V_prior,
+      ctwas_susie_region_L1(region_data, region_id, pi_prior, V_prior,
                             use_null_weight = use_null_weight,
                             ...)
     }, mc.cores = ncore)
@@ -102,12 +101,12 @@ ctwas_susie_region_L1 <- function(region_data, region_id,
                                   pi_prior, V_prior,
                                   use_null_weight = TRUE,
                                   ...){
-  # load susie input data
-  regiondata <- region_data[[region_id]]
-  sid <- regiondata[["sid"]]
-  gid <- regiondata[["gid"]]
-  z <- regiondata[["z"]]
-  gs_group <- regiondata[["gs_group"]]
+  # load region data
+  regiondata <- extract_region_data(region_data, region_id)
+  gids <- regiondata$gid
+  sids <- regiondata$sid
+  z <- regiondata$z
+  gs_group <- regiondata$gs_group
 
   if (length(z) < 2) {
     stop(paste(length(z), "variables in the region. At least two variables in a region are needed to run susie"))
@@ -135,8 +134,8 @@ ctwas_susie_region_L1 <- function(region_data, region_id,
                                ...)
   # annotate susie result
   susie_res_df <- anno_susie(susie_res,
-                             gids = gid,
-                             sids = sid,
+                             gids = gids,
+                             sids = sids,
                              region_id = region_id,
                              include_cs_index = FALSE)
 

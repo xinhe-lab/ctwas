@@ -75,6 +75,8 @@ screen_regions <- function(region_data,
   loginfo("Screening regions ...")
 
   # check input
+  LD_format <- match.arg(LD_format)
+
   if (!inherits(region_data,"list")){
     stop("'region_data' should be a list.")
   }
@@ -104,7 +106,7 @@ screen_regions <- function(region_data,
 
   # remove regions with fewer than minvar variables
   if (minvar > 0) {
-    n.var <- sapply(region_data, function(x){length(x[["z"]])})
+    n.var <- sapply(region_data, function(x){length(x$gid) + length(x$sid)})
     drop.idx <- which(n.var < minvar)
     if (length(drop.idx) > 0){
       loginfo("Remove %d regions with number of variables < %d.", length(drop.idx), minvar)
@@ -114,7 +116,7 @@ screen_regions <- function(region_data,
 
   # remove regions with fewer than mingene genes
   if (mingene > 0) {
-    n.gid <- sapply(region_data, function(x){length(x[["gid"]])})
+    n.gid <- sapply(region_data, function(x){length(x$gid)})
     drop.idx <- which(n.gid < mingene)
     if (length(drop.idx) > 0){
       loginfo("Remove %d regions with number of genes < %d.", length(drop.idx), mingene)
@@ -226,11 +228,13 @@ estimate_region_L <- function(region_data,
                               LD_map,
                               snp_map,
                               weights,
-                              LD_format,
+                              LD_format = c("rds", "rdata", "mtx", "csv", "txt", "custom"),
                               LD_loader_fun,
-                              ncore,
-                              verbose,
+                              ncore = 1,
+                              verbose = FALSE,
                               ...) {
+
+  LD_format <- match.arg(LD_format)
 
   finemap_unif_prior_res <- finemap_regions(region_data,
                                             use_LD = TRUE,
@@ -249,15 +253,11 @@ estimate_region_L <- function(region_data,
   return(all_estimated_L)
 }
 
-#' @title get L for each region from finemapping result
-#'
-#' @param finemap_res a data frame of finemapping result
-#'
-#' @export
+# get L for each region from finemapping result
 get_L <- function(finemap_res){
   region_ids <- unique(finemap_res$region_id)
   if (length(region_ids) == 0) {
-    stop("no region_ids in finemap_res!")
+    stop("No region_ids in finemap_res!")
   }
   # get L for each region
   region_L <- sapply(region_ids, function(x){
@@ -277,7 +277,7 @@ get_L <- function(finemap_res){
 compute_region_nonSNP_PIPs <- function(finemap_res){
   region_ids <- unique(finemap_res$region_id)
   if (length(region_ids) == 0) {
-    stop("no region_ids in finemap_res!")
+    stop("No region_ids in finemap_res!")
   }
   nonSNP_PIPs <- sapply(region_ids, function(x){
     finemap_region_res <- finemap_res[finemap_res$region_id == x,]

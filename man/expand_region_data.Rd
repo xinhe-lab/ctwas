@@ -2,7 +2,7 @@
 % Please edit documentation in R/ctwas_region_data.R
 \name{expand_region_data}
 \alias{expand_region_data}
-\title{Expands region_data with full SNPs}
+\title{Expands region_data with all SNPs}
 \usage{
 expand_region_data(
   region_data,
@@ -36,8 +36,8 @@ have enough memory to run the program.}
 \item{seed}{seed for random sampling}
 }
 \value{
-updated region_data with full SNPs
+updated region_data with all SNPs
 }
 \description{
-Expands region_data with full SNPs
+Expands region_data with all SNPs
 }

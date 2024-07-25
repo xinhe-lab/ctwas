@@ -94,17 +94,17 @@ finemap_region <- function(region_data,
   LD_format <- match.arg(LD_format)
 
   # load input data for the region
-  regiondata <- region_data[[region_id]]
-  sids <- regiondata[["sid"]]
-  gids <- regiondata[["gid"]]
-  z <- regiondata[["z"]]
-  gs_group <- regiondata[["gs_group"]]
+  regiondata <- extract_region_data(region_data, region_id)
+  gids <- regiondata$gid
+  sids <- regiondata$sid
+  z <- regiondata$z
+  gs_group <- regiondata$gs_group
 
   # set pi_prior and V_prior based on group_prior and group_prior_var
   if(!is.null(group_prior)){
     groups <- names(group_prior)
   }else{
-    groups <- unique(unlist(lapply(region_data, "[[", "gs_group")))
+    groups <- unique(unlist(lapply(region_data, "[[", "groups")))
   }
   res <- initiate_group_priors(group_prior[groups], group_prior_var[groups], groups)
   pi_prior <- res$pi_prior

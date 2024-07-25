@@ -86,37 +86,39 @@ merge_region_data <- function(boundary_genes,
   merged_region_id_map <- res$merged_region_id_map
 
   # Merge region data
-  loginfo("Merging region_data ...")
+  loginfo("Merging region data ...")
   merged_region_data <- list()
   for (i in 1:nrow(merged_region_info)){
     merged_regioninfo <- merged_region_info[i,]
-    region_id <- merged_regioninfo$region_id
-    chrom <- merged_regioninfo$chrom
-    start <- merged_regioninfo$start
-    stop <- merged_regioninfo$stop
-    old_region_ids <- merged_region_id_map$old_region_ids[merged_region_id_map$region_id == region_id]
+    new_region_id <- merged_regioninfo$region_id
+
+    old_region_ids <- merged_region_id_map$old_region_ids[merged_region_id_map$region_id == new_region_id]
     old_region_ids <- unlist(strsplit(old_region_ids, ";"))
 
+    new_chrom <- merged_regioninfo$chrom
+    new_start <- merged_regioninfo$start
+    new_stop <- merged_regioninfo$stop
+
     # merge gids and sids from the old region_data
-    gid <- as.character(unlist(lapply(region_data[old_region_ids], "[[", "gid")))
-    sid <- as.character(unlist(lapply(region_data[old_region_ids], "[[", "sid")))
-    minpos <- min(sapply(region_data[old_region_ids], "[[", "minpos"))
-    maxpos <- max(sapply(region_data[old_region_ids], "[[", "maxpos"))
-    thin <- min(sapply(region_data[old_region_ids], "[[", "thin"))
-    z <- as.numeric(unlist(lapply(region_data[old_region_ids], "[[", "z")))
-    gs_group <- as.character(unlist(lapply(region_data[old_region_ids], "[[", "gs_group")))
-    merged_region_data[[region_id]] <- list("region_id" = region_id,
-                                            "chrom" = chrom,
-                                            "start" = start,
-                                            "stop" = stop,
-                                            "minpos" = minpos,
-                                            "maxpos" = maxpos,
-                                            "gid" = gid,
-                                            "sid" = sid,
-                                            "thin" = thin,
-                                            "z" = z,
-                                            "gs_group" = gs_group)
+    new_gid <- as.character(unlist(lapply(region_data[old_region_ids], "[[", "gid")))
+    new_sid <- as.character(unlist(lapply(region_data[old_region_ids], "[[", "sid")))
+    new_minpos <- min(sapply(region_data[old_region_ids], "[[", "minpos"))
+    new_maxpos <- max(sapply(region_data[old_region_ids], "[[", "maxpos"))
+    new_thin <- min(sapply(region_data[old_region_ids], "[[", "thin"))
+    new_groups <- unique(as.character(sapply(region_data[old_region_ids], "[[", "groups")))
+    merged_region_data[[new_region_id]] <- list("region_id" = new_region_id,
+                                                "chrom" = new_chrom,
+                                                "start" = new_start,
+                                                "stop" = new_stop,
+                                                "minpos" = new_minpos,
+                                                "maxpos" = new_maxpos,
+                                                "gid" = new_gid,
+                                                "sid" = new_sid,
+                                                "thin" = new_thin)
   }
+
+  merged_region_data <- add_z_to_region_data(merged_region_data, z_snp, z_gene, ncore = ncore)
+
   loginfo("%d regions in merged_region_data", length(merged_region_data))
 
   if (!use_LD) {

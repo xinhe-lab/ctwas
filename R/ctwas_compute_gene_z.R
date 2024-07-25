@@ -104,10 +104,10 @@ get_gene_regions <- function(gene_info, region_info){
 # @param z_gene a data frame of gene z-scores, with columns: "id", "z".
 #
 combine_z <- function(z_snp, z_gene){
-  z_snp$group <- "SNP"
   z_gene$group <- "gene"
-  zdf <- rbind(z_snp[, c("id", "z", "group")],
-               z_gene[, c("id", "z", "group")])
-  rownames(zdf) <- NULL
-  return(zdf)
+  z_snp$group <- "SNP"
+  z_df <- rbind(z_gene[, c("id", "z", "group")],
+                z_snp[, c("id", "z", "group")])
+  rownames(z_df) <- NULL
+  return(z_df)
 }
