@@ -9,7 +9,8 @@ kriging_rss(
   R,
   n,
   r_tol = 1e-08,
-  s = estimate_s_rss(z, R, n, r_tol, method = "null-mle")
+  s = estimate_s_rss(z, R, n, r_tol, method = "null-mle"),
+  plot = FALSE
 )
 }
 \arguments{
@@ -24,6 +25,8 @@ matrix.}
 semidefinite matrix of R.}
 
 \item{s}{an estimated s from \code{estimate_s_rss}}
+
+\item{plot}{If TRUE, plot observed z score vs the expected value.}
 }
 \value{
 a list containing a ggplot2 plot object and a table. The plot

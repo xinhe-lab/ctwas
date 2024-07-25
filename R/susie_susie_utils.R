@@ -652,6 +652,8 @@ estimate_s_rss = function (z, R, n, r_tol = 1e-08, method = "null-mle") {
 #'
 #' @param s an estimated s from \code{estimate_s_rss}
 #'
+#' @param plot If TRUE, plot observed z score vs the expected value.
+#'
 #' @return a list containing a ggplot2 plot object and a table. The plot
 #'   compares observed z score vs the expected value. The possible allele
 #'   switched variants are labeled as red points (log LR > 2 and abs(z) > 2).
@@ -673,7 +675,8 @@ estimate_s_rss = function (z, R, n, r_tol = 1e-08, method = "null-mle") {
 #' @keywords internal
 #'
 kriging_rss = function (z, R, n, r_tol = 1e-08,
-                        s = estimate_s_rss(z,R,n,r_tol,method = "null-mle")) {
+                        s = estimate_s_rss(z,R,n,r_tol,method = "null-mle"),
+                        plot = FALSE) {
 
   # Check and process input arguments z, R.
   z[is.na(z)] = 0
@@ -753,15 +756,21 @@ kriging_rss = function (z, R, n, r_tol = 1e-08,
                    condvar = condvar,
                    z_std_diff = z_std_diff,
                    logLR = logLRmix)
-  p = ggplot(res,aes_string(y = "z",x = "condmean")) +
-    geom_point() +
-    labs(y = "Observed z scores", x = "Expected value") +
-    geom_abline(intercept = 0, slope = 1) +
-    theme_bw()
-  idx = which(logLRmix > 2 & abs(z) > 2)
-  if (length(idx) > 0)
-    p = p + geom_point(data = res[idx,],
-                       aes_string(y = "z", x = "condmean"),col = "red")
+
+  if (plot) {
+    p = ggplot(res,aes_string(y = "z",x = "condmean")) +
+      geom_point() +
+      labs(y = "Observed z scores", x = "Expected value") +
+      geom_abline(intercept = 0, slope = 1) +
+      theme_bw()
+    idx = which(logLRmix > 2 & abs(z) > 2)
+    if (length(idx) > 0)
+      p = p + geom_point(data = res[idx,],
+                         aes_string(y = "z", x = "condmean"),col = "red")
+  } else {
+    p = NULL
+  }
+
   return(list(plot = p,conditional_dist = res))
 }
 
