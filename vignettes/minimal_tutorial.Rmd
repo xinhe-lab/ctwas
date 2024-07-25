@@ -30,7 +30,7 @@ When running cTWAS in this way, it is similar to colocalization analysis - see t
 First, install `ctwas` if you haven't already:
 
 ```{r install_ctwas, eval=FALSE}
-install.packages("remotes")
+# install.packages("remotes")
 remotes::install_github("xinhe-lab/ctwas",ref = "singlegroup")
 ```
 
@@ -171,11 +171,11 @@ It also produces other output:
 
 + `boundary_genes`: the genes whose weights cross region boundaries (we will need these in the post-processing step). 
 
-+ `region_data`: assembled region data, including Z scores of SNPs and genes, for all the regions,. Note that only data of the subset of SNPs used in screening regions are included. 
++ `region_data`: assembled region data, including Z scores of SNPs and genes, for all the regions. Note that only data of the subset of SNPs used in screening regions are included. 
 
 + `screened_region_data`: the data of all SNPs and genes of the selected regions. 
 
-*Note:*, we used sample data (from chr16) in this example, however, in real data analysis, we should use data from the *entire genome* to estimate parameters.
+*Note*, we used sample data (from chr16) in this example, however, in real data analysis, we should use data from the *entire genome* to estimate parameters.
 
 To interpret and visualize the results, please see the tutorial "Summarizing and visualizing cTWAS results" for details.
 
