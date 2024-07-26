@@ -9,7 +9,6 @@ test_that("finemap_regions works with no-LD", {
   param <- ctwas_res$param
   group_prior <- param$group_prior
   group_prior_var <- param$group_prior_var
-  rm(ctwas_res)
 
   region_id <- sample(names(screened_region_data),1)
   precomputed_finemap_res <- precomputed_finemap_res[precomputed_finemap_res$region_id == region_id,]

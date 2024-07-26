@@ -14,8 +14,14 @@ test_that("ctwas_sumstats_noLD works", {
                                      snp_map = snp_map,
                                      thin = 0.1,
                                      maxSNP = 20000,
-                                     min_nonSNP_PIP = 0.5)
+                                     min_nonSNP_PIP = 0.5,
+                                     ncore = 4)
   })
 
   expect_equal(ctwas_res, precomputed_ctwas_res)
+  # expect_equal(ctwas_res$z_gene, precomputed_ctwas_res$z_gene)
+  # expect_equal(ctwas_res$param, precomputed_ctwas_res$param)
+  # expect_equal(ctwas_res$finemap_res, precomputed_ctwas_res$finemap_res)
+  # expect_equal(ctwas_res$boundary_genes, precomputed_ctwas_res$boundary_genes)
+
 })

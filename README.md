@@ -2,7 +2,7 @@
 
 [![R-CMD-check](https://github.com/xinhe-lab/ctwas/actions/workflows/R-CMD-check.yaml/badge.svg)](https://github.com/xinhe-lab/ctwas/actions/workflows/R-CMD-check.yaml)
 
-Expression Quantitative Trait Loci (eQTLs) have often been used to nominate candidate genes from Genome-wide association studies (GWAS). However, commonly used methods are susceptible to false positives largely due to Linkage Disequilibrium (LD) of eQTLs with causal variants acting on the phenotype directly. 
+Expression quantitative trait loci (eQTLs) have often been used to nominate candidate genes from genome-wide association studies (GWAS). However, commonly used methods are susceptible to false positives largely due to linkage disequilibrium (LD) of eQTLs with causal variants acting on the phenotype directly. 
 
 Our method, "causal-TWAS" (cTWAS), addresses this challenge by borrowing ideas from statistical fine-mapping. It is a generalization of methods for transcriptome-wide association studies (TWAS), but when analyzing any gene, it adjusts for other nearby genes *and all nearby genetic variants.*
 
@@ -14,7 +14,7 @@ Use "remotes" to install the latest version of ctwas from GitHub:
 
 ```r
 install.packages("remotes")
-remotes::install_github("xinhe-lab/ctwas",ref = "multigroup_test")
+remotes::install_github("xinhe-lab/ctwas",ref = "multigroup")
 ```
 
 
@@ -28,29 +28,31 @@ Running a cTWAS analysis involves four main steps:
 
 1. Preparing the input data. 
 
-2. Computing associations of molecular traits with the phenotype (Z-scores). 
+2. Computing associations of genes with the phenotype (Z-scores). 
 
 3. Estimating the model parameters. 
 
-4. Fine-mapping causal molecular traits 
+4. Fine-mapping causal genes 
 
-The outputs of cTWAS are posterior inclusion probabilities (PIPs) for all variants and molecular traits.
+The outputs of cTWAS are posterior inclusion probabilities (PIPs) for all variants and genes.
 
 To learn more about the ctwas R package, we recommend starting with this introductory tutorial: 
 
-[A minimal tutorial of how to run cTWAS without LD](https://xinhe-lab.github.io/multigroup_ctwas/articles/minimal_ctwas_tutorial.html) 
+[A minimal tutorial of how to run cTWAS without LD](https://xinhe-lab.github.io/multigroup_ctwas/articles/minimal_tutorial.html) 
 
-To run the full cTWAS, a few more tutorials including:
+To run the full cTWAS, follow these tutorials:
     
-- [Preparing input data](https://xinhe-lab.github.io/multigroup_ctwas/articles/preparing_ctwas_input_data.html) 
+- [Preparing input data](https://xinhe-lab.github.io/multigroup_ctwas/articles/preparing_input_data.html) 
 
-- [Running cTWAS main function](https://xinhe-lab.github.io/multigroup_ctwas/articles/ctwas_main_function.html)
+- [Running cTWAS analysis](https://xinhe-lab.github.io/multigroup_ctwas/articles/ctwas_analysis.html)
 
-- [Running cTWAS by modules](https://xinhe-lab.github.io/multigroup_ctwas/articles/ctwas_modules.html)
+- [Summarizing and visualizing cTWAS results](https://xinhe-lab.github.io/multigroup_ctwas/articles/summarizing_results.html)
 
-- [Summarizing and visualizing cTWAS results](https://xinhe-lab.github.io/multigroup_ctwas/articles/summarizing_ctwas_results.html)
+- [Post-processing cTWAS results](https://xinhe-lab.github.io/multigroup_ctwas/articles/postprocessing.html)
 
-- [Post-processing cTWAS results](https://xinhe-lab.github.io/multigroup_ctwas/articles/postprocessing_ctwas_results.html)
+In addition, we have some useful functions to help run cTWAS, e.g. for creating your own reference LD data:
+
+- [cTWAS utility functions](https://xinhe-lab.github.io/singlegroup_ctwas/articles/utility_functions.html)
 
 You can [browse source code](https://github.com/xinhe-lab/ctwas/tree/multigroup) and [report a bug](https://github.com/xinhe-lab/ctwas/issues) here. 
 
