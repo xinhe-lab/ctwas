@@ -89,7 +89,7 @@ It also produces other output:
 
 First, we make plots using `use `make_convergence_plots()` to see how estimated parameters converge during the execution of the program:
 
-```{r convergence_plot, fig.width = 7, fig.height=5}
+```{r convergence_plot, fig.width=10, fig.height=5}
 make_convergence_plots(param, gwas_n)
 ```
 

@@ -265,7 +265,7 @@ Here we show an example for fine mapping a single region "16_71020125_72901251".
 We first expand the region of interest with the full set of SNPs using the assembled `region_data`. We also need the number of causal signals (`L`) for this region. This is obtained from the output of the earlier `screen_regions()` function.
 
 ```{r example_region, eval=FALSE}
-region_id <-16_71020125_72901251"
+region_id <- "16_71020125_72901251"
 selected_region_data <- expand_region_data(region_data[region_id],
                                            snp_map,
                                            z_snp,
