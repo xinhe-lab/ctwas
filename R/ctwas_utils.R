@@ -217,7 +217,7 @@ mclapply_check <- function(X, FUN, mc.cores = 1, stop_if_missing = TRUE){
     res <- lapply(X, FUN)
   } else {
     res <- mclapply(X, FUN, mc.cores = mc.cores)
-    if (length(res) < length(X)) {
+    if (any(sapply(res, is.null))) {
       if (stop_if_missing) {
         stop("mclapply returned NULL or incomplete results. Try bigger memory or fewer cores.")
       } else {
