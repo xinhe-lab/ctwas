@@ -32,7 +32,7 @@
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">ctwas</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">0.3.15</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">0.3.16</span>
       </span>
     </div>
 
@@ -188,9 +188,9 @@
 <div class="sourceCode" id="cb8"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">nonSNP_PIPs</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/compute_region_nonSNP_PIPs.html">compute_region_nonSNP_PIPs</a></span><span class="op">(</span><span class="va">finemap_res</span><span class="op">)</span></span>
 <span><span class="va">selected_region_ids</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/names.html" class="external-link">names</a></span><span class="op">(</span><span class="va">nonSNP_PIPs</span><span class="op">[</span><span class="va">nonSNP_PIPs</span> <span class="op">&gt;</span> <span class="fl">0.8</span><span class="op">]</span><span class="op">)</span></span></code></pre></div>
-<p>We use the function <code><a href="../reference/diagnose_ld_mismatch_susie.html">diagnose_ld_mismatch_susie()</a></code> to perform LD mismatch diagnosis for these regions. This function uses SuSiE RSS to detect problematic SNPs among all variants in a region. Basically, it infers the expected statistic of a variant, based on the statistics of nearby variants and their LD from the reference, and compares this with the observed statistic. Inconsistency between the two would suggest potential LD mismatch.</p>
+<p>We use the function <code>diagnose_ld_mismatch_susie()</code> to perform LD mismatch diagnosis for these regions. This function uses SuSiE RSS to detect problematic SNPs among all variants in a region. Basically, it infers the expected statistic of a variant, based on the statistics of nearby variants and their LD from the reference, and compares this with the observed statistic. Inconsistency between the two would suggest potential LD mismatch.</p>
 <div class="sourceCode" id="cb9"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">res</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/diagnose_ld_mismatch_susie.html">diagnose_ld_mismatch_susie</a></span><span class="op">(</span><span class="va">z_snp</span>, </span>
+<code class="sourceCode R"><span><span class="va">res</span> <span class="op">&lt;-</span> <span class="fu">diagnose_ld_mismatch_susie</span><span class="op">(</span><span class="va">z_snp</span>, </span>
 <span>                                  <span class="va">selected_region_ids</span>, </span>
 <span>                                  <span class="va">LD_map</span>, </span>
 <span>                                  <span class="va">snp_map</span>, </span>

@@ -17,7 +17,7 @@
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">ctwas</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">0.3.15</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">0.3.16</span>
       </span>
     </div>
 
@@ -74,7 +74,7 @@
     <div id="ref-usage">
     <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="fu">create_predictdb_from_QTLs</span><span class="op">(</span></span>
 <span>  <span class="va">weight_table</span>,</span>
-<span>  gene_annot <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  gene_table <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  cov_table <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  use_top_QTL <span class="op">=</span> <span class="cn">TRUE</span>,</span>
 <span>  outputdir <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/getwd.html" class="external-link">getwd</a></span><span class="op">(</span><span class="op">)</span>,</span>
@@ -92,6 +92,12 @@
 If you want to use multiple eQTLs per gene, you can set <code>use_top_QTL=FALSE</code>.
 But we assume the weights of the eQTLs are learned from multiple regression
 (instead of marginal effect sizes).</p></dd>
+
+
+<dt id="arg-gene-table">gene_table<a class="anchor" aria-label="anchor" href="#arg-gene-table"></a></dt>
+<dd><p>a data frame (optional) with information of the genes
+in <code>weight_table</code> ("gene","genename","gene_type", etc.).
+If NULL, create a simple gene_table based on the weight_table</p></dd>
 
 
 <dt id="arg-cov-table">cov_table<a class="anchor" aria-label="anchor" href="#arg-cov-table"></a></dt>
@@ -112,12 +118,6 @@ create a simple cov_table with covariance set to 1.</p></dd>
 
 <dt id="arg-outname">outname<a class="anchor" aria-label="anchor" href="#arg-outname"></a></dt>
 <dd><p>name of the output weight file</p></dd>
-
-
-<dt id="arg-gene-table">gene_table<a class="anchor" aria-label="anchor" href="#arg-gene-table"></a></dt>
-<dd><p>a data frame (optional) with information of the genes
-in <code>weight_table</code> ("gene","genename","gene_type", etc.).
-If NULL, create a simple gene_table based on the weight_table</p></dd>
 
 </dl></div>
 

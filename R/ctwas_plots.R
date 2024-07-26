@@ -176,10 +176,15 @@ make_locusplot <- function(finemap_res,
   finemap_region_res$label <- finemap_region_res$gene_name
   finemap_region_res$label[finemap_region_res$group == "SNP"] <- NA
 
+  # group levels
+  finemap_region_res$group <- factor(finemap_region_res$group, levels = c("gene", "SNP"))
+
   # set shapes, sizes, and alpha for data points
-  point.shapes <- c("SNP"= point.shapes[1], "gene"= point.shapes[2])
-  point.alpha <- c("SNP"= point.alpha[1], "gene"= point.alpha[2])
-  point.sizes <- c("SNP"= point.sizes[1], "gene"= point.sizes[2])
+  point.shapes <- c("gene"= point.shapes[2], "SNP"= point.shapes[1])
+  point.alpha <- c("gene"= point.alpha[2], "SNP"= point.alpha[1])
+  point.sizes <- c("gene"= point.sizes[2], "SNP"= point.sizes[1])
+
+  legend.sizes <- c("gene"= 3.5, "SNP"= 2)
 
   # create a locus object for plotting
   loc <- locus(
@@ -220,12 +225,12 @@ make_locusplot <- function(finemap_res,
   if (plot_r2) {
     p_pvalue <- p_pvalue +
       scale_color_manual(values = r2_colors) +
-      guides(shape = guide_legend(order = 1, override.aes = list(size = c(2,3.5))),
+      guides(shape = guide_legend(order = 1, override.aes = list(size = legend.sizes)),
              color = guide_legend(order = 2))
   } else {
     p_pvalue <- p_pvalue +
       scale_color_manual(values = r2_colors, guide="none") +
-      guides(shape = guide_legend(override.aes = list(size = c(2,3.5))))
+      guides(shape = guide_legend(override.aes = list(size = legend.sizes)))
   }
 
   if (!is.null(highlight_pval)) {
@@ -242,7 +247,6 @@ make_locusplot <- function(finemap_res,
     scale_alpha_manual(values = point.alpha, guide="none") +
     scale_size_manual(values = point.sizes, guide="none") +
     scale_color_manual(values = r2_colors) +
-    scale_fill_manual(values = r2_colors, guide="none") +
     xlim(loc$xrange/1e6) +
     labs(x = "", y = "PIP", shape = "", color = expression(R^2)) +
     theme_bw() +

@@ -32,7 +32,7 @@
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">ctwas</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">0.3.15</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">0.3.16</span>
       </span>
     </div>
 
@@ -110,6 +110,7 @@
 <span></span>
 <span><span class="va">weights</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/readRDS.html" class="external-link">readRDS</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/system.file.html" class="external-link">system.file</a></span><span class="op">(</span><span class="st">"extdata/sample_data"</span>, <span class="st">"LDL_example.preprocessed.weights.RDS"</span>, package <span class="op">=</span> <span class="st">"ctwas"</span><span class="op">)</span><span class="op">)</span></span>
 <span></span>
+<span></span>
 <span><span class="va">region_info</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/readRDS.html" class="external-link">readRDS</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/system.file.html" class="external-link">system.file</a></span><span class="op">(</span><span class="st">"extdata/sample_data"</span>, <span class="st">"LDL_example.region_info.RDS"</span>, package <span class="op">=</span> <span class="st">"ctwas"</span><span class="op">)</span><span class="op">)</span></span>
 <span></span>
 <span><span class="va">snp_map</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/readRDS.html" class="external-link">readRDS</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/system.file.html" class="external-link">system.file</a></span><span class="op">(</span><span class="st">"extdata/sample_data"</span>, <span class="st">"LDL_example.snp_map.RDS"</span>, package <span class="op">=</span> <span class="st">"ctwas"</span><span class="op">)</span><span class="op">)</span></span>
@@ -128,7 +129,7 @@
 <ul>
 <li><p><code>z_gene</code>: the Z-scores of genes,</p></li>
 <li><p><code>param</code>: the estimated parameters,</p></li>
-<li><p><code>finemap_res</code>: fine-mapping results, a data frame of genes and variants, including the IDs, Z-scores, PIPs, credible set indices, as well as region IDs.</p></li>
+<li><p><code>finemap_res</code>: fine-mapping results, a data frame of genes and variants, including their IDs, the regions they belong to (<code>region_id</code>), Z-scores (<code>z</code>), PIPs (<code>susie_pip</code>), credible set indices (<code>cs_index</code>), and estimated effect size variance (<code>mu2</code>).</p></li>
 </ul>
 <div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">head</a></span><span class="op">(</span><span class="va">finemap_res</span><span class="op">)</span></span></code></pre></div>
@@ -164,9 +165,10 @@
 </p>
 </div>
 <p>These plots show the estimated prior inclusion probability, prior effect size variance, and enrichment over the iterations of parameter estimation. The enrichment is defined as the ratio of the prior of genes over the prior of variants. We generally expect genes to have higher prior inclusion probability than variants. Enrichment values typically range from 20 -100 for expresion traits.</p>
-<p>Then, we use <code><a href="../reference/summarize_param.html">summarize_param()</a></code> to obtain estimated parameters (from the last iteration) and to compute the proportion of variance explained (PVE) by variants and genes. These PVE values allow us to compute how heritability of the phenotype is partitioned among variants and groups of genes.</p>
+<p>Then, we use <code><a href="../reference/summarize_param.html">summarize_param()</a></code> to obtain estimated parameters (from the last iteration). We can compute the proportion of variance explained (PVE) by variants and genes.. These PVE values allow us to compute how heritability of the phenotype is partitioned among variants and genes.</p>
 <div class="sourceCode" id="cb7"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">ctwas_parameters</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/summarize_param.html">summarize_param</a></span><span class="op">(</span><span class="va">param</span>, <span class="va">gwas_n</span><span class="op">)</span></span></code></pre></div>
+<p>Note, we used sample data (from chr16) here in the tutorial, but in real data analysis, parameter estimation should be done using data from the entire genome. From our experience, genes typically explain around 5-15% of the total heritability of the trait. So if your number is much higher or lower, it may suggest some problems.</p>
 </div>
 <div class="section level2">
 <h2 id="inspecting-the-ctwas-results">Inspecting the cTWAS results<a class="anchor" aria-label="anchor" href="#inspecting-the-ctwas-results"></a>
@@ -199,11 +201,11 @@
 <div class="sourceCode" id="cb13"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">finemap_res</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/anno_finemap_res.html">anno_finemap_res</a></span><span class="op">(</span><span class="va">finemap_res</span>, <span class="va">snp_map</span>, <span class="va">gene_annot</span>,</span>
 <span>                                use_gene_pos <span class="op">=</span> <span class="st">"mid"</span><span class="op">)</span></span></code></pre></div>
-<pre><code><span><span class="co">## 2024-07-25 08:04:03 INFO::Annotating ctwas finemapping result ...</span></span>
-<span><span class="co">## 2024-07-25 08:04:05 INFO::add gene_name and gene_type</span></span>
-<span><span class="co">## 2024-07-25 08:04:05 INFO::Remove unannotated genes</span></span>
-<span><span class="co">## 2024-07-25 08:04:05 INFO::use gene mid positions</span></span>
-<span><span class="co">## 2024-07-25 08:04:05 INFO::add SNP positions</span></span></code></pre>
+<pre><code><span><span class="co">## 2024-07-25 20:51:18 INFO::Annotating ctwas finemapping result ...</span></span>
+<span><span class="co">## 2024-07-25 20:51:19 INFO::add gene_name and gene_type</span></span>
+<span><span class="co">## 2024-07-25 20:51:19 INFO::Remove unannotated genes</span></span>
+<span><span class="co">## 2024-07-25 20:51:19 INFO::use gene mid positions</span></span>
+<span><span class="co">## 2024-07-25 20:51:19 INFO::add SNP positions</span></span></code></pre>
 <p>You can now run the command at the beginning of this section to view the genes with additional information. In this example, HPR is the only gene that satisfies PIP &gt; 0.8.</p>
 </div>
 <div class="section level2">
@@ -223,11 +225,11 @@
 <span>               highlight_pip <span class="op">=</span> <span class="fl">0.8</span>,</span>
 <span>               R_snp_gene <span class="op">=</span> <span class="va">cor_res</span><span class="op">$</span><span class="va">R_snp_gene</span>,</span>
 <span>               R_gene <span class="op">=</span> <span class="va">cor_res</span><span class="op">$</span><span class="va">R_gene</span><span class="op">)</span></span></code></pre></div>
-<pre><code><span><span class="co">## 2024-07-25 08:04:07 INFO::focal gene: HPR</span></span>
-<span><span class="co">## 2024-07-25 08:04:07 INFO::focal id: ENSG00000261701.6|expression_Liver</span></span>
-<span><span class="co">## 2024-07-25 08:04:07 INFO::plot locus range: chr16 71600000,72400000</span></span>
-<span><span class="co">## 2024-07-25 08:04:08 INFO::gene: HPR</span></span>
-<span><span class="co">## 2024-07-25 08:04:08 INFO::QTL positions: 72063820,72063928</span></span></code></pre>
+<pre><code><span><span class="co">## 2024-07-25 20:51:21 INFO::focal gene: HPR</span></span>
+<span><span class="co">## 2024-07-25 20:51:21 INFO::focal id: ENSG00000261701.6|expression_Liver</span></span>
+<span><span class="co">## 2024-07-25 20:51:21 INFO::plot locus range: chr16 71600000,72400000</span></span>
+<span><span class="co">## 2024-07-25 20:51:21 INFO::gene: HPR</span></span>
+<span><span class="co">## 2024-07-25 20:51:21 INFO::QTL positions: 72063820,72063928</span></span></code></pre>
 <div class="figure" style="text-align: center">
 <img src="summarizing_results_files/figure-html/locus_plot-1.png" alt="&amp;nbsp;" width="1200"><p class="caption">
  
@@ -243,11 +245,11 @@
 <span>               ens_db <span class="op">=</span> <span class="va">ens_db</span>,</span>
 <span>               locus_range <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">71.6e6</span>,<span class="fl">72.4e6</span><span class="op">)</span>,</span>
 <span>               highlight_pip <span class="op">=</span> <span class="fl">0.8</span><span class="op">)</span></span></code></pre></div>
-<pre><code><span><span class="co">## 2024-07-25 08:04:10 INFO::focal gene: HPR</span></span>
-<span><span class="co">## 2024-07-25 08:04:10 INFO::focal id: ENSG00000261701.6|expression_Liver</span></span>
-<span><span class="co">## 2024-07-25 08:04:10 INFO::plot locus range: chr16 71600000,72400000</span></span>
-<span><span class="co">## 2024-07-25 08:04:10 INFO::gene: HPR</span></span>
-<span><span class="co">## 2024-07-25 08:04:10 INFO::QTL positions: 72063820,72063928</span></span></code></pre>
+<pre><code><span><span class="co">## 2024-07-25 20:51:23 INFO::focal gene: HPR</span></span>
+<span><span class="co">## 2024-07-25 20:51:23 INFO::focal id: ENSG00000261701.6|expression_Liver</span></span>
+<span><span class="co">## 2024-07-25 20:51:23 INFO::plot locus range: chr16 71600000,72400000</span></span>
+<span><span class="co">## 2024-07-25 20:51:23 INFO::gene: HPR</span></span>
+<span><span class="co">## 2024-07-25 20:51:23 INFO::QTL positions: 72063820,72063928</span></span></code></pre>
 <div class="figure" style="text-align: center">
 <img src="summarizing_results_files/figure-html/locus_plot_noLD-1.png" alt="&amp;nbsp;" width="1200"><p class="caption">
  

@@ -183,4 +183,3 @@ make_locusplot(finemap_res,
                highlight_pip = 0.8)
 ```
 
-
