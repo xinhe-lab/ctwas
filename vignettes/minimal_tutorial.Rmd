@@ -179,3 +179,4 @@ It also produces other output:
 
 To interpret and visualize the results, please see the tutorial "Summarizing and visualizing cTWAS results" for details.
 
+One potential issue of cTWAS is the “cross-region” genes. These are genes whose variants in the weight models span two LD regions. Under the current setting of running cTWAS without LD, this is likely not a concern. Nevertheless, it might be helpful to check the tutorial “Post-processing cTWAS results” - see the section “Cross-region LD”. We note that “LD mismatch” is not an issue when running without LD.

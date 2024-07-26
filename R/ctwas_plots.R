@@ -72,6 +72,7 @@
 #' @importFrom ggplot2 margin
 #' @importFrom ggrepel geom_text_repel
 #' @importFrom rlang .data
+#' @importFrom grid unit
 #'
 #' @export
 #'
@@ -196,18 +197,19 @@ make_locusplot <- function(finemap_res,
   loginfo("QTL positions: %s", finemap_qtl_res$pos)
 
   # p-value panel
+  # browser()
   p_pvalue <- ggplot(loc$data, aes(x=.data$pos/1e6, y=.data$p, shape=.data$group,
                                    size=.data$group, alpha=.data$group)) +
-    geom_point(aes(color=.data$r2_levels, fill=.data$r2_levels)) +
+    geom_point(aes(color=.data$r2_levels)) +
     geom_text_repel(aes(label=.data$label), size=label.text.size, color="black") +
     scale_shape_manual(values = point.shapes) +
     scale_alpha_manual(values = point.alpha, guide="none") +
     scale_size_manual(values = point.sizes, guide="none") +
-    guides(shape = guide_legend(override.aes = list(size = c(2,3.5)))) +
     xlim(loc$xrange/1e6) +
-    labs(x = "", y = expression(-log[10]("p-value")), shape = "Group", color = expression(R^2)) +
+    labs(x = "", y = expression(-log[10]("p-value")), shape = "", color = expression(R^2)) +
     theme_bw() +
     theme(legend.position = legend.position,
+          legend.spacing.x = grid::unit(1.0, 'cm'),
           legend.text = element_text(size=legend.text.size),
           axis.ticks.x = element_blank(),
           axis.text.x = element_blank(),
@@ -218,11 +220,12 @@ make_locusplot <- function(finemap_res,
   if (plot_r2) {
     p_pvalue <- p_pvalue +
       scale_color_manual(values = r2_colors) +
-      scale_fill_manual(values = r2_colors, guide="none")
+      guides(shape = guide_legend(order = 1, override.aes = list(size = c(2,3.5))),
+             color = guide_legend(order = 2))
   } else {
     p_pvalue <- p_pvalue +
       scale_color_manual(values = r2_colors, guide="none") +
-      scale_fill_manual(values = r2_colors, guide="none")
+      guides(shape = guide_legend(override.aes = list(size = c(2,3.5))))
   }
 
   if (!is.null(highlight_pval)) {
@@ -233,7 +236,7 @@ make_locusplot <- function(finemap_res,
   # PIP panel
   p_pip <- ggplot(loc$data, aes(x=.data$pos/1e6, y=.data$susie_pip, shape=.data$group,
                                 size=.data$group, alpha=.data$group)) +
-    geom_point(aes(color=.data$r2_levels, fill=.data$r2_levels)) +
+    geom_point(aes(color=.data$r2_levels)) +
     geom_text_repel(aes(label=.data$label), size=label.text.size, color="black") +
     scale_shape_manual(values = point.shapes) +
     scale_alpha_manual(values = point.alpha, guide="none") +
@@ -241,7 +244,7 @@ make_locusplot <- function(finemap_res,
     scale_color_manual(values = r2_colors) +
     scale_fill_manual(values = r2_colors, guide="none") +
     xlim(loc$xrange/1e6) +
-    labs(x = "", y = "PIP", shape = "group", color = expression(R^2)) +
+    labs(x = "", y = "PIP", shape = "", color = expression(R^2)) +
     theme_bw() +
     theme(legend.position = "none",
           axis.ticks.x = element_blank(),
@@ -371,7 +374,7 @@ make_convergence_plots <- function(param,
   df <- data.frame(niter = rep(1:ncol(group_prior_iters), nrow(group_prior_iters)),
                    value = unlist(lapply(1:nrow(group_prior_iters), function(x){group_prior_iters[x,]})),
                    group = rep(rownames(group_prior_iters), each=ncol(group_prior_iters)))
-  factor_levels <- c(setdiff(rownames(group_prior_iters), "SNP"), "SNP")
+  factor_levels <- c("gene", "SNP")
   df$group <- factor(df$group, levels = factor_levels)
 
   p_pi <- ggplot(df, aes(x=.data$niter, y=.data$value, group=.data$group, color=.data$group)) +
@@ -383,7 +386,7 @@ make_convergence_plots <- function(param,
     theme_cowplot() +
     theme(plot.title=element_text(size=title.size)) +
     expand_limits(y=0) +
-    guides(color = guide_legend(title = "Group")) +
+    guides(color = guide_legend(title = "")) +
     theme(legend.title = element_text(size=legend.size, face="bold"),
           legend.text = element_text(size=legend.size))
 
@@ -402,7 +405,7 @@ make_convergence_plots <- function(param,
     theme_cowplot() +
     theme(plot.title=element_text(size=title.size)) +
     expand_limits(y=0) +
-    guides(color = guide_legend(title = "Group")) +
+    guides(color = guide_legend(title = "")) +
     theme(legend.title = element_text(size=legend.size, face="bold"),
           legend.text = element_text(size=legend.size))
 
@@ -421,7 +424,7 @@ make_convergence_plots <- function(param,
     theme_cowplot() +
     theme(plot.title=element_text(size=title.size)) +
     expand_limits(y=0) +
-    guides(color = guide_legend(title = "Group")) +
+    guides(color = guide_legend(title = "")) +
     theme(legend.title = element_text(size=legend.size, face="bold"),
           legend.text = element_text(size=legend.size))
 
@@ -440,7 +443,7 @@ make_convergence_plots <- function(param,
     theme_cowplot() +
     theme(plot.title=element_text(size=title.size)) +
     expand_limits(y=0) +
-    guides(color = guide_legend(title = "Group")) +
+    guides(color = guide_legend(title = "")) +
     theme(legend.title = element_text(size=legend.size, face="bold"),
           legend.text = element_text(size=legend.size))
 

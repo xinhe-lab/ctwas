@@ -60,14 +60,17 @@ test_that("merge_region_data and finemapping without LD works", {
     merged_region_info <- res$merged_region_info
     merged_snp_map <- res$merged_snp_map
     merged_region_id_map <- res$merged_region_id_map
+  })
 
+  expect_equal(merged_region_data, precomputed_merged_region_data)
+
+  capture.output({
     finemap_merged_regions_res <- finemap_regions(merged_region_data,
                                                   use_LD = FALSE,
                                                   group_prior = group_prior,
                                                   group_prior_var = group_prior_var)
   })
 
-  expect_equal(merged_region_data, precomputed_merged_region_data)
   expect_equal(finemap_merged_regions_res, precomputed_finemap_merged_regions_res)
 
 })

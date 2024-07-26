@@ -48,6 +48,8 @@ To run the full cTWAS, follow these tutorials:
 
 - [Post-processing cTWAS results](https://xinhe-lab.github.io/singlegroup_ctwas/articles/postprocessing.html)
 
+In addition, we have some useful functions to help run cTWAS, e.g. for creating your own reference LD data:
+
 - [cTWAS utility functions](https://xinhe-lab.github.io/singlegroup_ctwas/articles/utility_functions.html)
 
 You can [browse source code](https://github.com/xinhe-lab/ctwas/tree/singlegroup) and [report a bug](https://github.com/xinhe-lab/ctwas/issues) here. 

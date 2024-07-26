@@ -17,7 +17,7 @@ test_that("assemble_region_data works", {
                                 weights,
                                 snp_map,
                                 thin = 0.1,
-                                maxSNP = Inf)
+                                maxSNP = 20000)
   })
   region_data <- res$region_data
   boundary_genes <- res$boundary_genes

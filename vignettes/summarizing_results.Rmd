@@ -40,6 +40,7 @@ gwas_n <- 343621
 
 weights <- readRDS(system.file("extdata/sample_data", "LDL_example.preprocessed.weights.RDS", package = "ctwas"))
 
+
 region_info <- readRDS(system.file("extdata/sample_data", "LDL_example.region_info.RDS", package = "ctwas"))
 
 snp_map <- readRDS(system.file("extdata/sample_data", "LDL_example.snp_map.RDS", package = "ctwas"))
@@ -68,12 +69,11 @@ screened_region_data <- ctwas_res$screened_region_data
 
 + `param`: the estimated parameters,
  
-+ `finemap_res`: fine-mapping results, a data frame of genes and variants, including the IDs, Z-scores, PIPs, credible set indices, as well as region IDs.
++ `finemap_res`: fine-mapping results, a data frame of genes and variants, including their IDs, the regions they belong to (`region_id`), Z-scores (`z`), PIPs (`susie_pip`), credible set indices (`cs_index`), and estimated effect size variance (`mu2`).
 
-```{r show_result}
+```{r show_finemap_res}
 head(finemap_res)
 ```
-
 
 
 It also produces other output: 
@@ -96,12 +96,14 @@ make_convergence_plots(param, gwas_n)
 
 These plots show the estimated prior inclusion probability, prior effect size variance, and enrichment over the iterations of parameter estimation. The enrichment is defined as the ratio of the prior of genes over the prior of variants. We generally expect genes to have higher prior inclusion probability than variants. Enrichment values typically range from 20 -100 for expresion traits. 
 
-Then, we use `summarize_param()` to obtain estimated parameters (from the last iteration) and to compute the proportion of variance explained (PVE) by variants and genes. These PVE values allow us to compute how heritability of the phenotype is partitioned among variants and groups of genes. 
+Then, we use `summarize_param()` to obtain estimated parameters (from the last iteration). We can compute the proportion of variance explained (PVE) by variants and genes.. These PVE values allow us to compute how heritability of the phenotype is partitioned among variants and genes.
 
 ```{r summarize_param}
 ctwas_parameters <- summarize_param(param, gwas_n)
 ```
 
+
+Note, we used sample data (from chr16) here in the tutorial, but in real data analysis, parameter estimation should be done using data from the entire genome.  From our experience, genes typically explain around 5-15% of the total heritability of the trait. So if your number is much higher or lower, it may suggest some problems.
 
 ## Inspecting the cTWAS results
 
