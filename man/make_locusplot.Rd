@@ -20,7 +20,7 @@ make_locusplot(
   label_QTLs = TRUE,
   point.sizes = c(1, 3.5),
   point.alpha = c(0.4, 0.6),
-  point.shapes = c(21:25),
+  point.shapes = c(16, 15, 18, 17),
   label.text.size = 2.5,
   legend.text.size = 10,
   legend.position = "top",
