@@ -44,7 +44,7 @@ To run the full cTWAS, follow these tutorials:
     
 - [Preparing input data](https://xinhe-lab.github.io/multigroup_ctwas/articles/preparing_input_data.html) 
 
-- [Running cTWAS analysis](https://xinhe-lab.github.io/multigroup_ctwas/articles/ctwas_analysis.html)
+- [Running cTWAS analysis](https://xinhe-lab.github.io/multigroup_ctwas/articles/running_ctwas_analysis.html)
 
 - [Summarizing and visualizing cTWAS results](https://xinhe-lab.github.io/multigroup_ctwas/articles/summarizing_results.html)
 
@@ -52,7 +52,7 @@ To run the full cTWAS, follow these tutorials:
 
 In addition, we have some useful functions to help run cTWAS, e.g. for creating your own reference LD data:
 
-- [cTWAS utility functions](https://xinhe-lab.github.io/singlegroup_ctwas/articles/utility_functions.html)
+- [cTWAS utility functions](https://xinhe-lab.github.io/multigroup_ctwas/articles/utility_functions.html)
 
 You can [browse source code](https://github.com/xinhe-lab/ctwas/tree/multigroup) and [report a bug](https://github.com/xinhe-lab/ctwas/issues) here. 
 
