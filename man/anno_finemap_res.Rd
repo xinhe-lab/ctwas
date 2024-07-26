@@ -17,7 +17,7 @@ anno_finemap_res(
 \arguments{
 \item{finemap_res}{a data frame of cTWAS finemapping result}
 
-\item{snp_map}{a list of SNP-to-region map for the reference.}
+\item{snp_map}{a list of data frames with SNP-to-region map for the reference.}
 
 \item{gene_annot}{a data frame of gene annotations, with columns:
 "chrom", "start", "end", "gene_id", "gene_name", "gene_type.}
@@ -27,13 +27,15 @@ represent gene positions.}
 
 \item{drop_unannotated_genes}{If TRUE, remove unannotated genes.}
 
-\item{filter_protein_coding_genes}{If TRUE, keep protein coding genes only.}
+\item{filter_protein_coding_genes}{TRUE/FALSE. If TRUE, keep protein coding genes only.}
 
-\item{filter_cs}{If TRUE, limits results in credible sets.}
+\item{filter_cs}{TRUE/FALSE. If TRUE, limits results in credible sets.}
+
+\item{na.rm}{If TRUE, remove missing values and unannotated genes.}
 }
 \value{
 a data frame of cTWAS finemapping result including gene
-names, types and positions.
+names, types and positions
 }
 \description{
 Annotates cTWAS finemapping result with gene annotations

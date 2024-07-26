@@ -9,10 +9,10 @@ estimate_region_L(
   LD_map,
   snp_map,
   weights,
-  LD_format,
+  LD_format = c("rds", "rdata", "mtx", "csv", "txt", "custom"),
   LD_loader_fun,
-  ncore,
-  verbose,
+  ncore = 1,
+  verbose = FALSE,
   ...
 )
 }

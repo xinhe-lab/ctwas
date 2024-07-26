@@ -14,7 +14,6 @@ assemble_region_data(
   maxSNP = Inf,
   trim_by = c("random", "z"),
   adjust_boundary_genes = TRUE,
-  thin_gwas_snps = TRUE,
   ncore = 1,
   seed = 99,
   logfile = NULL
@@ -29,7 +28,7 @@ assemble_region_data(
 
 \item{weights}{a list of preprocessed weights.}
 
-\item{snp_map}{a list of SNP-to-region map for the reference.}
+\item{snp_map}{a list of data frames with SNP-to-region map for the reference.}
 
 \item{thin}{The proportion of SNPs to be used for the parameter estimation and
 initial screening region steps.
@@ -47,17 +46,17 @@ See parameter `maxSNP` for more information.}
 
 \item{adjust_boundary_genes}{identify cross-boundary genes, adjust region_data}
 
-\item{thin_gwas_snps}{TRUE/FALSE, if TRUE, only apply thin to GWAS SNPs.
-Otherwise, apply thins to all SNPs.}
-
 \item{ncore}{The number of cores used to parallelize susie over regions}
 
 \item{seed}{seed for random sampling}
 
 \item{logfile}{path to the log file, if NULL will print log info on screen.}
+
+\item{thin_gwas_snps}{If TRUE, only apply thin to GWAS SNPs.
+Otherwise, apply thins to all SNPs.}
 }
 \value{
-a list with region_data, and cross-boundary genes
+a list with region_data, updated weights, and cross-bounary genes
 }
 \description{
 Assembles data for all the regions

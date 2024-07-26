@@ -6,7 +6,7 @@
 \usage{
 create_predictdb_from_QTLs(
   weight_table,
-  gene_annot = NULL,
+  gene_table = NULL,
   cov_table = NULL,
   use_top_QTL = TRUE,
   outputdir = getwd(),
@@ -20,6 +20,10 @@ If you want to use multiple eQTLs per gene, you can set \code{use_top_QTL=FALSE}
 But we assume the weights of the eQTLs are learned from multiple regression
 (instead of marginal effect sizes).}
 
+\item{gene_table}{a data frame (optional) with information of the genes
+in \code{weight_table} ("gene","genename","gene_type", etc.).
+If NULL, create a simple gene_table based on the weight_table}
+
 \item{cov_table}{a data frame of covariances between variants, with columns:
 "GENE","RSID1","RSID2", "VALUE".
 If NULL, do not create covariance files (.txg.gz), unless \code{use_top_QTL=TRUE}.}
@@ -31,10 +35,6 @@ create a simple cov_table with covariance set to 1.}
 \item{outputdir}{output directory}
 
 \item{outname}{name of the output weight file}
-
-\item{gene_table}{a data frame (optional) with information of the genes
-in \code{weight_table} ("gene","genename","gene_type", etc.).
-If NULL, create a simple gene_table based on the weight_table}
 }
 \description{
 Creates weight files in PredictDB format from QTL data

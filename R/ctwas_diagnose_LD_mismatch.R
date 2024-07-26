@@ -1,5 +1,5 @@
 
-#' @title Diagnose LD mismatches using SuSiE RSS
+#' @title Diagnose LD mismatch using SuSiE RSS
 #'
 #' @param z_snp A data frame with two columns: "id", "A1", "A2", "z". giving the z scores for
 #' snps. "A1" is effect allele. "A2" is the other allele.
@@ -12,8 +12,6 @@
 #'
 #' @param gwas_n integer, GWAS sample size.
 #'
-#' @param ncore integer, number of cores for parallel computing.
-#'
 #' @param p_diff_thresh numeric, p-value threshold for identifying problematic SNPs
 #' with significant difference between observed z-scores and estimated values
 #'
@@ -21,6 +19,8 @@
 #' \code{LD_loader_fun()} function to load LD matrix.
 #'
 #' @param LD_loader_fun a user defined function to load LD matrix when \code{LD_format = "custom"}.
+#'
+#' @param ncore integer, number of cores for parallel computing.
 #'
 #' @param logfile the log file, if NULL will print log info on screen
 #'
@@ -33,22 +33,22 @@
 #'
 #' @export
 #'
-diagnose_ld_mismatch_susie <- function(z_snp,
+diagnose_LD_mismatch_susie <- function(z_snp,
                                        region_ids,
                                        LD_map,
                                        snp_map,
-                                       gwas_n = NULL,
-                                       ncore = 1,
+                                       gwas_n,
                                        p_diff_thresh = 5e-8,
                                        LD_format = c("rds", "rdata", "mtx", "csv", "txt", "custom"),
                                        LD_loader_fun,
+                                       ncore = 1,
                                        logfile = NULL){
 
   if (!is.null(logfile)){
     addHandler(writeToFile, file= logfile, level='DEBUG')
   }
 
-  loginfo("Perform LD mismatch diagnosis for %d regions", length(region_ids))
+  loginfo("Performing LD mismatch diagnosis for %d regions", length(region_ids))
   LD_format <- match.arg(LD_format)
 
   condz_list <- mclapply_check(region_ids, function(region_id){
@@ -138,9 +138,8 @@ get_problematic_genes <- function(problematic_snps, weights, z_gene, z_thresh = 
 
     # find high |z| genes with problematic SNPs in its weights
     selected_gids <- z_gene[abs(z_gene$z) > z_thresh, "id"]
-    # subset weights to high |z| genes
     selected_weights <- weights[selected_gids]
-    # extract snp ids in weights
+    # extract snp ids in weights, and find genes with problematic SNPs in weights
     problematic_genes <- c()
     if (length(selected_weights) > 0){
       for (i in 1:length(selected_weights)){
@@ -155,7 +154,6 @@ get_problematic_genes <- function(problematic_snps, weights, z_gene, z_thresh = 
     loginfo('Number of large effect genes with problematic SNPs in weights: %d', length(problematic_genes))
   }
 
-  # return problematic gene ids
   return(problematic_genes)
 }
 
