@@ -8,16 +8,22 @@ merge_region_data(
   boundary_genes,
   region_data,
   region_info,
-  use_LD = TRUE,
-  LD_info,
-  snp_info,
+  snp_map,
+  LD_map,
+  weights,
   z_snp,
   z_gene,
+  use_LD = TRUE,
+  estimate_L = TRUE,
   expand = TRUE,
+  L = 5,
   maxSNP = Inf,
-  trim_by = c("random", "z"),
+  LD_format = c("rds", "rdata", "mtx", "csv", "txt", "custom"),
+  LD_loader_fun,
   ncore = 1,
-  seed = 99
+  verbose = FALSE,
+  logfile = NULL,
+  ...
 )
 }
 \arguments{
@@ -25,33 +31,45 @@ merge_region_data(
 
 \item{region_data}{a list of original region_data}
 
-\item{region_info}{a data frame of region definition and associated LD file names}
+\item{region_info}{a data frame of region definitions}
 
-\item{use_LD}{TRUE/FALSE. If TRUE, use LD for finemapping.}
+\item{snp_map}{a list of data frames with SNP-to-region map for the reference.}
 
-\item{LD_info}{a list of paths to LD matrices for each of the regions.}
+\item{LD_map}{a data frame with filenames of LD matrices for each of the regions.}
 
-\item{snp_info}{a list of SNP info data frames for LD reference.}
+\item{weights}{a list of preprocessed weights.}
 
 \item{z_snp}{A data frame with columns: "id", "z", giving the z-scores for SNPs.}
 
 \item{z_gene}{A data frame with columns: "id", "z", giving the z-scores for genes.}
 
-\item{expand}{TRUE/FALSE. If TRUE, expand merged region_data with full SNPs}
+\item{use_LD}{If TRUE, use LD, and creates \code{merged_LD_map}.}
+
+\item{estimate_L}{If TRUE, estimate L for merged regions.}
+
+\item{expand}{If TRUE, expand merged region_data with full SNPs}
+
+\item{L}{the number of effects for susie. This is only used when \code{estimate_L = FALSE}.}
 
 \item{maxSNP}{Inf or integer. Maximum number of SNPs in a region. Default is
 Inf, no limit. This can be useful if there are many SNPs in a region and you don't
 have enough memory to run the program.}
 
-\item{trim_by}{remove SNPs if the total number of SNPs exceeds limit, options: "random",
-or "z" (trim SNPs with lower |z|) See parameter `maxSNP` for more information.}
+\item{LD_format}{file format for LD matrix. If "custom", use a user defined
+\code{LD_loader_fun()} function to load LD matrix.}
+
+\item{LD_loader_fun}{a user defined function to load LD matrix when \code{LD_format = "custom"}.}
 
 \item{ncore}{The number of cores used to parallelize susie over regions}
 
-\item{seed}{seed for random sampling}
+\item{verbose}{TRUE/FALSE. If TRUE, print detail messages}
+
+\item{logfile}{the log file, if NULL will print log info on screen}
+
+\item{...}{Additional arguments of \code{susie_rss}.}
 }
 \value{
-a list of merged region data, merged region info, LD info, snp info,
+a list of merged region data, merged region info, snp_map, LD_map,
 and merged region IDs.
 }
 \description{

@@ -11,7 +11,7 @@
 <script src="https://oss.maxcdn.com/html5shiv/3.7.3/html5shiv.min.js"></script>
 <script src="https://oss.maxcdn.com/respond/1.4.2/respond.min.js"></script>
 <![endif]--></head><body data-spy="scroll" data-target="#toc">
-    
+
 
     <div class="container template-reference-topic">
       <header><div class="navbar navbar-default navbar-fixed-top" role="navigation">
@@ -25,7 +25,7 @@
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">ctwas</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">0.2.47</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">0.4.2</span>
       </span>
     </div>
 
@@ -36,42 +36,42 @@
 <li class="dropdown">
   <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
     Tutorial
-     
+
     <span class="caret"></span>
   </a>
   <ul class="dropdown-menu" role="menu"><li>
-      <a href="../articles/simple_ctwas_tutorial.html">Simple cTWAS tutorial</a>
+      <a href="../articles/minimal_tutorial.html">A minimal tutorial of running cTWAS without LD</a>
     </li>
     <li>
-      <a href="../articles/preparing_ctwas_input_data.html">Preparing cTWAS input data</a>
+      <a href="../articles/preparing_input_data.html">Preparing cTWAS input data</a>
     </li>
     <li>
-      <a href="../articles/ctwas_main_function.html">Using cTWAS main function</a>
+      <a href="../articles/running_ctwas_analysis.html">Running cTWAS analysis</a>
     </li>
     <li>
-      <a href="../articles/ctwas_modules.html">Using cTWAS modules</a>
+      <a href="../articles/summarizing_results.html">Summarizing and visualizing cTWAS results</a>
     </li>
     <li>
-      <a href="../articles/summarizing_ctwas_results.html">Summarizing cTWAS results</a>
+      <a href="../articles/postprocessing.html">Post-processing cTWAS results</a>
     </li>
     <li>
-      <a href="../articles/postprocessing_ctwas_results.html">Post-processing cTWAS results</a>
+      <a href="../articles/utility_functions.html">cTWAS utility functions</a>
     </li>
   </ul></li>
       </ul><ul class="nav navbar-nav navbar-right"><li>
-  <a href="https://github.com/xinhe-lab/ctwas/tree/multigroup_test" class="external-link">Source</a>
+  <a href="https://github.com/xinhe-lab/ctwas/tree/multigroup" class="external-link">Source</a>
 </li>
       </ul></div><!--/.nav-collapse -->
   </div><!--/.container -->
 </div><!--/.navbar -->
 
-      
+
 
       </header><div class="row">
   <div class="col-md-9 contents">
     <div class="page-header">
     <h1>Compute Distribution of z-scores of Variant j Given Other z-scores, and Detect Possible Allele Switch Issue</h1>
-    <small class="dont-index">Source: <a href="https://github.com/xinhe-lab/ctwas/blob/multigroup_test/R/susie_susie_utils.R" class="external-link"><code>R/susie_susie_utils.R</code></a></small>
+    <small class="dont-index">Source: <a href="https://github.com/xinhe-lab/ctwas/blob/multigroup/R/susie_susie_utils.R" class="external-link"><code>R/susie_susie_utils.R</code></a></small>
     <div class="hidden name"><code>kriging_rss.Rd</code></div>
     </div>
 
@@ -93,39 +93,44 @@
 <span>  <span class="va">R</span>,</span>
 <span>  <span class="va">n</span>,</span>
 <span>  r_tol <span class="op">=</span> <span class="fl">1e-08</span>,</span>
-<span>  s <span class="op">=</span> <span class="fu"><a href="estimate_s_rss.html">estimate_s_rss</a></span><span class="op">(</span><span class="va">z</span>, <span class="va">R</span>, <span class="va">n</span>, <span class="va">r_tol</span>, method <span class="op">=</span> <span class="st">"null-mle"</span><span class="op">)</span></span>
+<span>  s <span class="op">=</span> <span class="fu"><a href="estimate_s_rss.html">estimate_s_rss</a></span><span class="op">(</span><span class="va">z</span>, <span class="va">R</span>, <span class="va">n</span>, <span class="va">r_tol</span>, method <span class="op">=</span> <span class="st">"null-mle"</span><span class="op">)</span>,</span>
+<span>  plot <span class="op">=</span> <span class="cn">FALSE</span></span>
 <span><span class="op">)</span></span></code></pre></div>
     </div>
 
     <div id="arguments">
     <h2>Arguments</h2>
-    <dl><dt>z</dt>
+
+
+<dl><dt id="arg-z">z<a class="anchor" aria-label="anchor" href="#arg-z"></a></dt>
 <dd><p>A p-vector of z scores.</p></dd>
 
 
-<dt>R</dt>
+<dt id="arg-r">R<a class="anchor" aria-label="anchor" href="#arg-r"></a></dt>
 <dd><p>A p by p symmetric, positive semidefinite correlation
 matrix.</p></dd>
 
 
-<dt>n</dt>
+<dt id="arg-n">n<a class="anchor" aria-label="anchor" href="#arg-n"></a></dt>
 <dd><p>The sample size. (Optional, but highly recommended.)</p></dd>
 
 
-<dt>r_tol</dt>
+<dt id="arg-r-tol">r_tol<a class="anchor" aria-label="anchor" href="#arg-r-tol"></a></dt>
 <dd><p>Tolerance level for eigenvalue check of positive
 semidefinite matrix of R.</p></dd>
 
 
-<dt>s</dt>
+<dt id="arg-s">s<a class="anchor" aria-label="anchor" href="#arg-s"></a></dt>
 <dd><p>an estimated s from <code>estimate_s_rss</code></p></dd>
+
+
+<dt id="arg-plot">plot<a class="anchor" aria-label="anchor" href="#arg-plot"></a></dt>
+<dd><p>If TRUE, plot observed z score vs the expected value.</p></dd>
 
 </dl></div>
     <div id="value">
     <h2>Value</h2>
-    
-
-<p>a list containing a ggplot2 plot object and a table. The plot
+    <p>a list containing a ggplot2 plot object and a table. The plot
   compares observed z score vs the expected value. The possible allele
   switched variants are labeled as red points (log LR &gt; 2 and abs(z) &gt; 2).
   The table summarizes the conditional distribution for each variant
@@ -147,15 +152,15 @@ semidefinite matrix of R.</p></dd>
 </div>
 
 <div class="pkgdown">
-  <p></p><p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.0.9.</p>
+  <p></p><p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.1.0.</p>
 </div>
 
       </footer></div>
 
-  
 
 
-  
+
+
 
   </body></html>
 

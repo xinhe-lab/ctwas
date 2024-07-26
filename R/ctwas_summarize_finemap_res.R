@@ -3,8 +3,7 @@
 #'
 #' @param finemap_res a data frame of cTWAS finemapping result
 #'
-#' @param snp_info a list or data frame of SNP info for LD reference,
-#'  with columns "chrom", "id", "pos", "alt", "ref".
+#' @param snp_map a list of data frames with SNP-to-region map for the reference.
 #'
 #' @param gene_annot a data frame of gene annotations, with columns:
 #' "chrom", "start", "end", "gene_id", "gene_name", "gene_type.
@@ -12,9 +11,13 @@
 #' @param use_gene_pos use mid (midpoint), start or end positions to
 #' represent gene positions.
 #'
+#' @param drop_unannotated_genes If TRUE, remove unannotated genes.
+#'
 #' @param filter_protein_coding_genes TRUE/FALSE. If TRUE, keep protein coding genes only.
 #'
 #' @param filter_cs TRUE/FALSE. If TRUE, limits results in credible sets.
+#'
+#' @param na.rm If TRUE, remove missing values and unannotated genes.
 #'
 #' @return a data frame of cTWAS finemapping result including gene
 #' names, types and positions
@@ -30,9 +33,10 @@
 #' @export
 #'
 anno_finemap_res <- function(finemap_res,
-                             snp_info,
+                             snp_map,
                              gene_annot = NULL,
                              use_gene_pos = c("mid", "start", "end"),
+                             drop_unannotated_genes = TRUE,
                              filter_protein_coding_genes = FALSE,
                              filter_cs = FALSE){
 
@@ -40,15 +44,7 @@ anno_finemap_res <- function(finemap_res,
 
   use_gene_pos <- match.arg(use_gene_pos)
 
-  # Check LD reference SNP info
-  if (inherits(snp_info,"list")) {
-    snp_info <- as.data.frame(rbindlist(snp_info, idcol = "region_id"))
-  }
-  target_header <- c("chrom", "id", "pos", "alt", "ref")
-  if (!all(target_header %in% colnames(snp_info))){
-    stop("snp_info needs to contain the following columns: ",
-         paste(target_header, collapse = " "))
-  }
+  snp_info <- as.data.frame(rbindlist(snp_map, idcol = "region_id"))
 
   # Check required columns for gene_annot
   annot_cols <- c("gene_id", "gene_name", "gene_type", "start", "end")
@@ -70,7 +66,7 @@ anno_finemap_res <- function(finemap_res,
   }
 
   # extract gene ids
-  finemap_gene_res <- finemap_res[finemap_res$type!="SNP",]
+  finemap_gene_res <- finemap_res[finemap_res$group!="SNP",]
 
   if (is.null(finemap_gene_res$gene_id)) {
     finemap_gene_res$gene_id <- sapply(strsplit(finemap_gene_res$id, split = "[|]"), "[[", 1)
@@ -89,8 +85,12 @@ anno_finemap_res <- function(finemap_res,
     finemap_gene_res <- finemap_gene_res %>%
       left_join(gene_annot, by = "gene_id", multiple = "all") %>%
       mutate(start = as.numeric(.data$start), end = as.numeric(.data$end)) %>%
-      mutate(chrom = parse_number(as.character(.data$chrom))) %>%
-      na.omit()
+      mutate(chrom = parse_number(as.character(.data$chrom)))
+
+    if (drop_unannotated_genes) {
+      loginfo("Remove unannotated genes")
+      finemap_gene_res <- na.omit(finemap_gene_res)
+    }
 
     # split PIPs for molecular traits (e.g. introns) mapped to multiple genes
     if (any(duplicated(finemap_gene_res$id))) {
@@ -114,8 +114,8 @@ anno_finemap_res <- function(finemap_res,
   }
 
   # add SNP positions
-  loginfo("add SNP positions from snp_info")
-  finemap_snp_res <- finemap_res[finemap_res$type=="SNP",]
+  loginfo("add SNP positions")
+  finemap_snp_res <- finemap_res[finemap_res$group=="SNP",]
   snp_idx <- match(finemap_snp_res$id, snp_info$id)
   finemap_snp_res$chrom <- snp_info$chrom[snp_idx]
   finemap_snp_res$chrom <- parse_number(as.character(finemap_snp_res$chrom))
@@ -142,6 +142,7 @@ anno_finemap_res <- function(finemap_res,
 #'
 #' @export
 get_gene_annot_from_ens_db <- function(ens_db, gene_ids) {
+
   gene_ids <- unique(na.omit(gene_ids))
   if (any(grep("[.]", gene_ids))) {
     gene_ids_trimmed <- sapply(strsplit(gene_ids, split = "[.]"), "[[", 1)
@@ -164,7 +165,6 @@ get_gene_annot_from_ens_db <- function(ens_db, gene_ids) {
   gene_annot <- gene_annot[, c("chrom", "start", "end", "gene_id", "gene_name", "gene_type")]
   return(gene_annot)
 }
-
 
 #' @title Combines gene PIPs by context, type or group
 #'

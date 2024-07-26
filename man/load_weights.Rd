@@ -5,17 +5,17 @@
 \title{Loads weights in PredictDB or FUSION format}
 \usage{
 load_weights(
-  weight_path,
+  weight_file,
   weight_format = c("PredictDB", "FUSION"),
   filter_protein_coding_genes = TRUE,
   load_predictdb_LD = TRUE,
   fusion_method = c("lasso", "enet", "top1", "blup", "bslmm", "best.cv"),
-  fusion_genome_version = c("b38", "b37"),
+  fusion_genome_version = "b38",
   ncore = 1
 )
 }
 \arguments{
-\item{weight_path}{path to the '.db' file for PredictDB weights;
+\item{weight_file}{filename of the '.db' file for PredictDB weights;
 or the directory containing '.wgt.RDat' files for FUSION weights.}
 
 \item{weight_format}{a string or a vector, specifying format of each weight file, e.g. PredictDB, FUSION.}

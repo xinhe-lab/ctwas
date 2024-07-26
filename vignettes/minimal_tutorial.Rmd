@@ -1,0 +1,201 @@
+---
+title: "A minimal tutorial of running cTWAS without LD"
+author: "Kaixuan Luo, Sheng Qian"
+date: "`r Sys.Date()`"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{A minimal tutorial of running cTWAS without LD}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(message = FALSE,
+                      warning = FALSE,
+                      fig.align = "center",
+                      fig.cap = "&nbsp;",
+                      dpi = 120)
+```
+
+
+
+This document demonstrates how to run a simple analysis using cTWAS with GWAS summary statistics.  
+
+One common challenge of using cTWAS is the use of LD matrices. The LD data are often large, creating challenges in data storage and sharing, and in running the analysis (e.g. not all data can be fit into memory). It is possible to run the entire cTWAS analysis without using LD data if one assumes at most one causal signal per LD region. The downside is that cTWAS may miss causal genes/molecular traits in some regions. Nevertheless, this may be a worthy trade-off, especially as the first pass. This tutorial shows how to perform a simpler analysis without LD.
+
+When running cTWAS in this way, it is similar to colocalization analysis - see the Supplementary Notes of the cTWAS paper. Compared to commonly used method coloc, running cTWAS without LD has several benefits: the important parameters of colocalization are estimated from data; cTWAS jointly analyzes 
+multiple molecular traits; and each molecular trait is allowed to have multiple QTL variants. 
+
+First, install `ctwas` if you haven't already:
+
+```{r install_ctwas, eval=FALSE}
+install.packages("remotes")
+remotes::install_github("xinhe-lab/ctwas",ref = "multigroup")
+```
+
+
+Currently, `ctwas` has only been tested on Linux systems.
+ 
+We recommend running `ctwas` on a High-Performance Computing system.
+
+Now load the `ctwas` package and a few other packages needed to perform the analysis in the tutorial:
+
+```{r load_packages, message=FALSE}
+library(ctwas)
+library(data.table)
+```
+
+
+## Preparing the input data
+
+The "no-LD" version of cTWAS requires several input datasets: (i) GWAS summary statistics; (ii) prediction models (called "weights" in our documentation) and (iii) the reference data, including information about all the variants; and the definition of the genomic regions. We describe below the steps for data preparation and preprocessing before running cTWAS. More details about data preparation, including preparing the LD data, which is required for full cTWAS, are given in the tutorial, "Preparing cTWAS input data".
+
+For GWAS summary statistics, we use sample GWAS data of LDL on chromosome 16. These data are provided in the R package. 
+
+Here we assume the `z_snp` (a data frame of GWAS summary statistics) is available. Please see the section "GWAS Z-score"  in the "Preparing cTWAS input data" tutorial for details. 
+
+```{r load_z_snp}
+z_snp <- readRDS(system.file("extdata/sample_data", "LDL_example.z_snp.RDS", package = "ctwas"))
+```
+
+
+We also need the GWAS sample size for summarizing the cTWAS result.
+```{r gwas_n}
+gwas_n <- 343621
+```
+
+
+### Reference data
+
+cTWAS assumes that the genome is partitioned into approximately independent LD regions. The definitions of these regions need to be provided. You will also need to have a list of SNPs as a “reference”, with the information of these SNPs.  This is similar to LD reference data, needed in fine-mapping GWAS loci with summary statistics. Also similar to fine-mapping, the variant reference should match in the population of GWAS samples. 
+
+It is critical that the genome build (e.g. hg38) of the reference match the genome build used to train the prediction models. By contrast, the genome build of the GWAS summary statistics does not matter because variant positions are determined by the reference.
+
+We require a data frame `region_info` containing the region definitions, with the following columns: "chrom", "start", "stop", for the genomic coordinates of the regions, and "region_id" for the IDs of the regions (by default, we use the convention <chrom_start_stop> for the region IDs).
+
+Here we use the b38 European LDetect blocks, which is again included in the R package.
+
+```{r region_info}
+region_file <- system.file("extdata/ldetect", "EUR.b38.ldetect.regions.RDS", package = "ctwas")
+region_info <- readRDS(region_file)
+```
+
+
+Additionally, we require `ref_snp_info` as a “reference” of the variants. `ref_snp_info` is a data frame, containing the positions and allele information of all the variants from the entire genome. This reference data needs to be mapped to the regions, i.e. we will need a structure to store the information of which variants are located in which regions. To do this, we provide a function, `create_snp_map()`.  It takes input of `region_info` and `ref_snp_info`. It maps variants to regions based on the variant locations, and returns the result as `snp_map`. In addition, the function checks the format of `region_info` to ensure that it matches the format required by cTWAS (e.g. adding `region_id` column if not available), and returns the output as updated `region_info`. 
+
+We have the lists of reference variant information from UK Biobank European population from all the LD regions in the genome in [hg38](https://uchicago.box.com/s/t089or92dkovv0epkrjvxq8r9db9ys99) and [hg19](https://uchicago.box.com/s/ufko2gjagcb693dob4khccqubuztb9pz). They are also available on the University of Chicago RCC cluster at `/project2/xinhe/shared_data/multigroup_ctwas/LD_reference/`. 
+
+In this tutorial, we use chr16 as an example, so we specify `chrom = 16`. In real cTWAS analysis, you should run the entire genome. 
+
+```{r create_snp_map}
+example_chrom <- 16
+
+ref_snp_info_file <- system.file("extdata/sample_data", "ukb_b38_0.1_chr16_var_info.Rvar.gz", package = "ctwas")
+
+ref_snp_info <- fread(ref_snp_info_file, sep = "\t")
+class(ref_snp_info) <- "data.frame"
+region_info <- subset(region_info, chrom == example_chrom)
+
+res <- create_snp_map(region_info, ref_snp_info)
+region_info <- res$region_info
+snp_map <- res$snp_map
+
+head(region_info)
+```
+
+
+
+### Harmonizing GWAS summary statistics 
+
+The GWAS summary statistics needs to be “harmonized” before use. This means, for example, the allele definitions need to be consistent with the reference SNP data in `snp_map`. Harmonization is achieved through the `preprocess_z_snp()` function. We filter out multiallelic variants and strand-ambiguous variants by default.
+
+```{r preprocess_z_snp}
+z_snp <- preprocess_z_snp(z_snp, snp_map)
+```
+
+
+###  Prediction models of molecular traits 
+
+We need a list `weights` which contains preprocessed weights. The weights can be in the PredictDB (default, used in this tutorial) or FUSION format. In this tutorial, we used the weights from GTEx liver eQTL data from PredictDB. We provide a function `preprocess_weight()` to harmonize the prediction models and LD reference. 
+
+In this version of cTWAS, we allow the joint analysis of multiple groups of molecular traits. This could be: eQTLs of multiple tissues; or eQTLs, splicing QTLs and other types of QTLs in a single tissue. In a more complex setting, multiple types of QTL data from multiple tissues/cell types. Each group is defined by its “type” (kind of molecular traits), and “context” (tissue, cell type, condition, etc.).  So, we specify the `type` and `context` arguments for each weight file. 
+
+In this example, we use liver and subcutaneous adipose gene expression models. We specify the `type` and `context` arguments for each weight file. We preprocess each of the weight files, and then simply concatenate them to get a list of all processed weights from different types or contexts.
+
+
+```{r preprocess_weights}
+weight_liver_file <- system.file("extdata/sample_data", "expression_Liver.db", package = "ctwas")
+weights_liver <- preprocess_weights(weight_liver_file,
+                                    region_info,
+                                    z_snp$id,
+                                    snp_map,
+                                    type = "expression",
+                                    context = "liver")
+
+weight_adipose_file <- system.file("extdata/sample_data", "expression_Adipose_Subcutaneous.db", package = "ctwas")
+weights_adipose <- preprocess_weights(weight_adipose_file,
+                                      region_info,
+                                      z_snp$id,
+                                      snp_map,
+                                      type = "expression",
+                                      context = "adipose")
+
+weights <- c(weights_liver, weights_adipose)
+```
+
+
+## Running the cTWAS analysis 
+
+We use the function `ctwas_sumstats_noLD()` to run cTWAS analysis without LD. It takes as input preprocessed GWAS z-scores (`z_snp`), `weights`, `region_info`, `snp_map`, and will perform the main steps: (i) computing Z-scores of molecular traits - effectively performing TWAS; (i) estimating model parameters; (iii) screening regions potentially containing causal molecular traits, and (iv) fine-mapping those regions. Note that cTWAS uses a strategy to speed up computation. It initially estimates parameters in step (ii), using a fraction of SNPs (by default, we use `thin = 0.1`, i.e. 10% of the SNPs) , and then in step (iii) select regions likely containing signals. After that, it includes all SNPs in the selected regions to do full fine-mapping analysis in step (iv). 
+
+```{r ctwas_sumstats_noLD, eval=FALSE}
+ctwas_res <- ctwas_sumstats_noLD(z_snp,
+                                 weights,
+                                 region_info,
+                                 snp_map,
+                                 thin = 0.1)
+```
+
+
+
+We load the pre-computed results from running cTWAS without LD: 
+
+```{r, include=FALSE}
+ctwas_res <- readRDS(system.file("extdata/sample_data", "LDL_example.ctwas_sumstats_noLD_res.RDS", package = "ctwas"))
+```
+
+
+```{r ctwas_sumstats_noLD_part2}
+z_gene <- ctwas_res$z_gene
+param <- ctwas_res$param
+finemap_res <- ctwas_res$finemap_res
+boundary_genes <- ctwas_res$boundary_genes
+region_data <- ctwas_res$region_data
+screened_region_data <- ctwas_res$screened_region_data
+```
+
+
+ctwas_sumstats_noLD() returns several main output: 
+
++ `z_gene`: the Z-scores of molecular traits, 
+
++ `param`: the estimated parameters,
+ 
++ `finemap_res`: fine-mapping results,
+
+It also produces other output: 
+
++ `boundary_genes`: the genes/molecular traits whose weights cross region boundaries (we will need these in the post-processing step). 
+
++ `region_data`: assembled region data, including Z scores of SNPs and molecular traits, for all the regions,. Note that only data of the subset of SNPs used in screening regions are included. 
+
++ `screened_region_data`: the data of all SNPs and molecular traits of the selected regions. 
+
+*Note:*, we used sample data (from chr16) in this example, however, in real data analysis, we should use data from the *entire genome* to estimate parameters.
+
+To interpret and visualize the results, please see the tutorial "Summarizing and visualizing cTWAS results" for details.
+
+One potential issue of cTWAS is the “cross-region” genes. These are genes whose variants in the weight models span two LD regions. Under the current setting of running cTWAS without LD, this is likely not a concern. Nevertheless, it might be helpful to check the tutorial “Post-processing cTWAS results” - see the section “Cross-region LD”. We note that “LD mismatch” is not an issue when running without LD.
+

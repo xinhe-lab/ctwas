@@ -1,18 +1,16 @@
 
-#' @title Diagnose LD mismatches using SuSiE RSS
+#' @title Diagnose LD mismatch using SuSiE RSS
 #'
 #' @param z_snp A data frame with two columns: "id", "A1", "A2", "z". giving the z scores for
 #' snps. "A1" is effect allele. "A2" is the other allele.
 #'
 #' @param region_ids A vector of region IDs to run diagnosis
 #'
-#' @param LD_info a list of paths to LD matrices for each of the regions.
+#' @param LD_map a data frame with filenames of LD matrices for each of the regions.
 #'
-#' @param snp_info a list of SNP info data frames for LD reference.
+#' @param snp_map a list of data frames with SNP-to-region map for the reference.
 #'
 #' @param gwas_n integer, GWAS sample size.
-#'
-#' @param ncore integer, number of cores for parallel computing.
 #'
 #' @param p_diff_thresh numeric, p-value threshold for identifying problematic SNPs
 #' with significant difference between observed z-scores and estimated values
@@ -21,6 +19,10 @@
 #' \code{LD_loader_fun()} function to load LD matrix.
 #'
 #' @param LD_loader_fun a user defined function to load LD matrix when \code{LD_format = "custom"}.
+#'
+#' @param ncore integer, number of cores for parallel computing.
+#'
+#' @param logfile the log file, if NULL will print log info on screen
 #'
 #' @return a list of problematic SNPs, flipped SNPs,
 #' and test statistics from susie's `kriging_rss` function
@@ -31,25 +33,29 @@
 #'
 #' @export
 #'
-diagnose_ld_mismatch_susie <- function(z_snp,
+diagnose_LD_mismatch_susie <- function(z_snp,
                                        region_ids,
-                                       LD_info,
-                                       snp_info,
-                                       gwas_n = NULL,
-                                       ncore = 1,
+                                       LD_map,
+                                       snp_map,
+                                       gwas_n,
                                        p_diff_thresh = 5e-8,
                                        LD_format = c("rds", "rdata", "mtx", "csv", "txt", "custom"),
-                                       LD_loader_fun){
+                                       LD_loader_fun,
+                                       ncore = 1,
+                                       logfile = NULL){
 
-  loginfo("Perform LD mismatch diagnosis for %d regions", length(region_ids))
+  if (!is.null(logfile)){
+    addHandler(writeToFile, file= logfile, level='DEBUG')
+  }
+
+  loginfo("Performing LD mismatch diagnosis for %d regions", length(region_ids))
   LD_format <- match.arg(LD_format)
 
-  condz_list <- mclapply(region_ids, function(region_id){
-    compute_region_condz(region_id, LD_info, snp_info, z_snp, gwas_n,
+  condz_list <- mclapply_check(region_ids, function(region_id){
+    compute_region_condz(region_id, LD_map, snp_map, z_snp, gwas_n,
                          LD_format = LD_format,
                          LD_loader_fun = LD_loader_fun)
   }, mc.cores = ncore)
-  check_mc_res(condz_list)
 
   names(condz_list) <- region_ids
   condz_stats <- rbindlist(condz_list, idcol = "region_id")
@@ -69,14 +75,14 @@ diagnose_ld_mismatch_susie <- function(z_snp,
 #
 #' @importFrom stats pchisq
 #' @importFrom Matrix bdiag
-compute_region_condz <- function(region_id, LD_info, snp_info, z_snp, gwas_n,
+compute_region_condz <- function(region_id, LD_map, snp_map, z_snp, gwas_n,
                                  LD_format = c("rds", "rdata", "mtx", "csv", "txt", "custom"),
                                  LD_loader_fun){
 
   LD_format <- match.arg(LD_format)
 
   # load LD matrix
-  LD_matrix_files <- unlist(strsplit(LD_info[LD_info$region_id == region_id, "LD_matrix"], split = ";"))
+  LD_matrix_files <- unlist(strsplit(LD_map[LD_map$region_id == region_id, "LD_file"], split = ";"))
   stopifnot(all(file.exists(LD_matrix_files)))
   if (length(LD_matrix_files) > 1) {
     R_snp <- lapply(LD_matrix_files, load_LD, format = LD_format, LD_loader_fun = LD_loader_fun)
@@ -86,7 +92,7 @@ compute_region_condz <- function(region_id, LD_info, snp_info, z_snp, gwas_n,
   }
 
   # load SNP info
-  snpinfo <- do.call(rbind, snp_info[region_id])
+  snpinfo <- do.call(rbind, snp_map[region_id])
 
   # Match GWAS sumstats with LD reference files. Only keep variants included in LD reference.
   region_z_snp <- z_snp[z_snp$id %in% snpinfo$id,]
@@ -132,9 +138,8 @@ get_problematic_genes <- function(problematic_snps, weights, z_gene, z_thresh = 
 
     # find high |z| genes with problematic SNPs in its weights
     selected_gids <- z_gene[abs(z_gene$z) > z_thresh, "id"]
-    # subset weights to high |z| genes
     selected_weights <- weights[selected_gids]
-    # extract snp ids in weights
+    # extract snp ids in weights, and find genes with problematic SNPs in weights
     problematic_genes <- c()
     if (length(selected_weights) > 0){
       for (i in 1:length(selected_weights)){
@@ -149,17 +154,10 @@ get_problematic_genes <- function(problematic_snps, weights, z_gene, z_thresh = 
     loginfo('Number of large effect genes with problematic SNPs in weights: %d', length(problematic_genes))
   }
 
-  # return problematic gene ids
   return(problematic_genes)
 }
 
-#' @title Updates finemapping result
-#'
-#' @param finemap_res a data frame of original finemapping result
-#' @param new_finemap_res a data frame of new finemapping result
-#'
-#' @export
-#'
+# Updates finemapping result
 update_finemap_res <- function(finemap_res, new_finemap_res){
 
   if (!all(colnames(finemap_res) == colnames(new_finemap_res))) {

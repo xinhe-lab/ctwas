@@ -3,7 +3,7 @@
 <script src="https://oss.maxcdn.com/html5shiv/3.7.3/html5shiv.min.js"></script>
 <script src="https://oss.maxcdn.com/respond/1.4.2/respond.min.js"></script>
 <![endif]--></head><body data-spy="scroll" data-target="#toc">
-    
+
 
     <div class="container template-reference-topic">
       <header><div class="navbar navbar-default navbar-fixed-top" role="navigation">
@@ -17,7 +17,7 @@
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">ctwas</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">0.2.47</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">0.4.2</span>
       </span>
     </div>
 
@@ -28,42 +28,42 @@
 <li class="dropdown">
   <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
     Tutorial
-     
+
     <span class="caret"></span>
   </a>
   <ul class="dropdown-menu" role="menu"><li>
-      <a href="../articles/simple_ctwas_tutorial.html">Simple cTWAS tutorial</a>
+      <a href="../articles/minimal_tutorial.html">A minimal tutorial of running cTWAS without LD</a>
     </li>
     <li>
-      <a href="../articles/preparing_ctwas_input_data.html">Preparing cTWAS input data</a>
+      <a href="../articles/preparing_input_data.html">Preparing cTWAS input data</a>
     </li>
     <li>
-      <a href="../articles/ctwas_main_function.html">Using cTWAS main function</a>
+      <a href="../articles/running_ctwas_analysis.html">Running cTWAS analysis</a>
     </li>
     <li>
-      <a href="../articles/ctwas_modules.html">Using cTWAS modules</a>
+      <a href="../articles/summarizing_results.html">Summarizing and visualizing cTWAS results</a>
     </li>
     <li>
-      <a href="../articles/summarizing_ctwas_results.html">Summarizing cTWAS results</a>
+      <a href="../articles/postprocessing.html">Post-processing cTWAS results</a>
     </li>
     <li>
-      <a href="../articles/postprocessing_ctwas_results.html">Post-processing cTWAS results</a>
+      <a href="../articles/utility_functions.html">cTWAS utility functions</a>
     </li>
   </ul></li>
       </ul><ul class="nav navbar-nav navbar-right"><li>
-  <a href="https://github.com/xinhe-lab/ctwas/tree/multigroup_test" class="external-link">Source</a>
+  <a href="https://github.com/xinhe-lab/ctwas/tree/multigroup" class="external-link">Source</a>
 </li>
       </ul></div><!--/.nav-collapse -->
   </div><!--/.container -->
 </div><!--/.navbar -->
 
-      
+
 
       </header><div class="row">
   <div class="col-md-9 contents">
     <div class="page-header">
     <h1>Combines gene PIPs by context, type or group</h1>
-    <small class="dont-index">Source: <a href="https://github.com/xinhe-lab/ctwas/blob/multigroup_test/R/ctwas_summarize_finemap_res.R" class="external-link"><code>R/ctwas_summarize_finemap_res.R</code></a></small>
+    <small class="dont-index">Source: <a href="https://github.com/xinhe-lab/ctwas/blob/multigroup/R/ctwas_summarize_finemap_res.R" class="external-link"><code>R/ctwas_summarize_finemap_res.R</code></a></small>
     <div class="hidden name"><code>combine_gene_pips.Rd</code></div>
     </div>
 
@@ -84,35 +84,35 @@
 
     <div id="arguments">
     <h2>Arguments</h2>
-    <dl><dt>finemap_res</dt>
+
+
+<dl><dt id="arg-finemap-res">finemap_res<a class="anchor" aria-label="anchor" href="#arg-finemap-res"></a></dt>
 <dd><p>a data frame of annotated cTWAS finemapping result</p></dd>
 
 
-<dt>by</dt>
+<dt id="arg-by">by<a class="anchor" aria-label="anchor" href="#arg-by"></a></dt>
 <dd><p>sum gene PIPs by "context", "type", or "group".</p></dd>
 
 
-<dt>filter_protein_coding_genes</dt>
+<dt id="arg-filter-protein-coding-genes">filter_protein_coding_genes<a class="anchor" aria-label="anchor" href="#arg-filter-protein-coding-genes"></a></dt>
 <dd><p>TRUE/FALSE. If TRUE, keep protein coding genes only.</p></dd>
 
 
-<dt>filter_cs</dt>
+<dt id="arg-filter-cs">filter_cs<a class="anchor" aria-label="anchor" href="#arg-filter-cs"></a></dt>
 <dd><p>TRUE/FALSE. If TRUE, limits results in credible sets.</p></dd>
 
 
-<dt>replace_NA</dt>
+<dt id="arg-replace-na">replace_NA<a class="anchor" aria-label="anchor" href="#arg-replace-na"></a></dt>
 <dd><p>values to replace NAs with.</p></dd>
 
 
-<dt>digits</dt>
+<dt id="arg-digits">digits<a class="anchor" aria-label="anchor" href="#arg-digits"></a></dt>
 <dd><p>digits to round combined PIPs</p></dd>
 
 </dl></div>
     <div id="value">
     <h2>Value</h2>
-    
-
-<p>a data frame of combined gene PIPs for each context, type or group</p>
+    <p>a data frame of combined gene PIPs for each context, type or group</p>
     </div>
 
   </div>
@@ -127,15 +127,15 @@
 </div>
 
 <div class="pkgdown">
-  <p></p><p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.0.9.</p>
+  <p></p><p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.1.0.</p>
 </div>
 
       </footer></div>
 
-  
 
 
-  
+
+
 
   </body></html>
 

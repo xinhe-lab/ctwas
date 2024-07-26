@@ -19,7 +19,7 @@
 <![endif]-->
 </head>
 <body data-spy="scroll" data-target="#toc">
-    
+
 
     <div class="container template-home">
       <header><div class="navbar navbar-default navbar-fixed-top" role="navigation">
@@ -33,7 +33,7 @@
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="index.html">ctwas</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">0.2.47</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">0.4.2</span>
       </span>
     </div>
 
@@ -45,34 +45,34 @@
 <li class="dropdown">
   <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
     Tutorial
-     
+
     <span class="caret"></span>
   </a>
   <ul class="dropdown-menu" role="menu">
 <li>
-      <a href="articles/simple_ctwas_tutorial.html">Simple cTWAS tutorial</a>
+      <a href="articles/minimal_tutorial.html">A minimal tutorial of running cTWAS without LD</a>
     </li>
     <li>
-      <a href="articles/preparing_ctwas_input_data.html">Preparing cTWAS input data</a>
+      <a href="articles/preparing_input_data.html">Preparing cTWAS input data</a>
     </li>
     <li>
-      <a href="articles/ctwas_main_function.html">Using cTWAS main function</a>
+      <a href="articles/running_ctwas_analysis.html">Running cTWAS analysis</a>
     </li>
     <li>
-      <a href="articles/ctwas_modules.html">Using cTWAS modules</a>
+      <a href="articles/summarizing_results.html">Summarizing and visualizing cTWAS results</a>
     </li>
     <li>
-      <a href="articles/summarizing_ctwas_results.html">Summarizing cTWAS results</a>
+      <a href="articles/postprocessing.html">Post-processing cTWAS results</a>
     </li>
     <li>
-      <a href="articles/postprocessing_ctwas_results.html">Post-processing cTWAS results</a>
+      <a href="articles/utility_functions.html">cTWAS utility functions</a>
     </li>
   </ul>
 </li>
       </ul>
 <ul class="nav navbar-nav navbar-right">
 <li>
-  <a href="https://github.com/xinhe-lab/ctwas/tree/multigroup_test" class="external-link">Source</a>
+  <a href="https://github.com/xinhe-lab/ctwas/tree/multigroup" class="external-link">Source</a>
 </li>
       </ul>
 </div>
@@ -82,14 +82,15 @@
 </div>
 <!--/.navbar -->
 
-      
+
 
       </header><div class="row">
   <div class="contents col-md-9">
 <div class="section level1">
 <div class="page-header"><h1 id="ctwas-an-r-package-for-integrating-molecular-qtls-and-gwas-for-gene-discovery">ctwas: an R package for integrating molecular QTLs and GWAS for gene discovery<a class="anchor" aria-label="anchor" href="#ctwas-an-r-package-for-integrating-molecular-qtls-and-gwas-for-gene-discovery"></a>
 </h1></div>
-<p>Expression Quantitative Trait Loci (eQTLs) have often been used to nominate candidate genes from Genome-wide association studies (GWAS). However, commonly used methods are susceptible to false positives largely due to Linkage Disequilibrium (LD) of eQTLs with causal variants acting on the phenotype directly.</p>
+<p><a href="https://github.com/xinhe-lab/ctwas/actions/workflows/R-CMD-check.yaml" class="external-link"><img src="https://github.com/xinhe-lab/ctwas/actions/workflows/R-CMD-check.yaml/badge.svg" alt="R-CMD-check"></a></p>
+<p>Expression quantitative trait loci (eQTLs) have often been used to nominate candidate genes from genome-wide association studies (GWAS). However, commonly used methods are susceptible to false positives largely due to linkage disequilibrium (LD) of eQTLs with causal variants acting on the phenotype directly.</p>
 <p>Our method, “causal-TWAS” (cTWAS), addresses this challenge by borrowing ideas from statistical fine-mapping. It is a generalization of methods for transcriptome-wide association studies (TWAS), but when analyzing any gene, it adjusts for other nearby genes <em>and all nearby genetic variants.</em></p>
 <p>While the <a href="https://doi.org/10.1038/s41588-023-01648-9" class="external-link">published paper</a> analyzes a single eQTL dataset, the latest version of cTWAS extends the method to integrate multiple groups of prediction models, allowing for joint analysis of multiple types of molecular traits, across potentially different tissues, cell types or conditions.</p>
 <div class="section level2">
@@ -98,7 +99,7 @@
 <p>Use “remotes” to install the latest version of ctwas from GitHub:</p>
 <div class="sourceCode" id="cb1"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/utils/install.packages.html" class="external-link">install.packages</a></span><span class="op">(</span><span class="st">"remotes"</span><span class="op">)</span></span>
-<span><span class="fu">remotes</span><span class="fu">::</span><span class="fu"><a href="https://remotes.r-lib.org/reference/install_github.html" class="external-link">install_github</a></span><span class="op">(</span><span class="st">"xinhe-lab/ctwas"</span>,ref <span class="op">=</span> <span class="st">"multigroup_test"</span><span class="op">)</span></span></code></pre></div>
+<span><span class="fu">remotes</span><span class="fu">::</span><span class="fu"><a href="https://remotes.r-lib.org/reference/install_github.html" class="external-link">install_github</a></span><span class="op">(</span><span class="st">"xinhe-lab/ctwas"</span>,ref <span class="op">=</span> <span class="st">"multigroup"</span><span class="op">)</span></span></code></pre></div>
 <p>Currently, ctwas has only been tested on Linux systems.</p>
 <p>We recommend installing and running ctwas on a high-performance computing system.</p>
 </div>
@@ -108,22 +109,23 @@
 <p>Running a cTWAS analysis involves four main steps:</p>
 <ol style="list-style-type: decimal">
 <li><p>Preparing the input data.</p></li>
-<li><p>Computing the gene z-scores.</p></li>
+<li><p>Computing associations of genes with the phenotype (Z-scores).</p></li>
 <li><p>Estimating the model parameters.</p></li>
-<li><p>Fine-mapping.</p></li>
+<li><p>Fine-mapping causal genes</p></li>
 </ol>
-<p>The outputs of cTWAS are posterior inclusion probabilities (PIPs) for all variants and molecular traits.</p>
+<p>The outputs of cTWAS are posterior inclusion probabilities (PIPs) for all variants and genes.</p>
 <p>To learn more about the ctwas R package, we recommend starting with this introductory tutorial:</p>
-<p><a href="https://xinhe-lab.github.io/multigroup_ctwas/articles/simple_ctwas_tutorial.html" class="external-link">A minimal tutorial of how to run cTWAS without LD</a></p>
-<p>To run the full cTWAS, a few more tutorials including:</p>
+<p><a href="https://xinhe-lab.github.io/multigroup_ctwas/articles/minimal_tutorial.html" class="external-link">A minimal tutorial of how to run cTWAS without LD</a></p>
+<p>To run the full cTWAS, follow these tutorials:</p>
 <ul>
-<li><p><a href="https://xinhe-lab.github.io/multigroup_ctwas/articles/preparing_ctwas_input_data.html" class="external-link">Preparing input data</a></p></li>
-<li><p><a href="https://xinhe-lab.github.io/multigroup_ctwas/articles/ctwas_main_function.html" class="external-link">Running cTWAS main function</a></p></li>
-<li><p><a href="https://xinhe-lab.github.io/multigroup_ctwas/articles/ctwas_modules.html" class="external-link">Running cTWAS by modules</a></p></li>
-<li><p><a href="https://xinhe-lab.github.io/multigroup_ctwas/articles/summarizing_ctwas_results.html" class="external-link">Summarizing and visualizing cTWAS results</a></p></li>
-<li><p><a href="https://xinhe-lab.github.io/multigroup_ctwas/articles/postprocessing_ctwas_results.html" class="external-link">Post-processing cTWAS results</a></p></li>
+<li><p><a href="https://xinhe-lab.github.io/multigroup_ctwas/articles/preparing_input_data.html" class="external-link">Preparing input data</a></p></li>
+<li><p><a href="https://xinhe-lab.github.io/multigroup_ctwas/articles/ctwas_analysis.html" class="external-link">Running cTWAS analysis</a></p></li>
+<li><p><a href="https://xinhe-lab.github.io/multigroup_ctwas/articles/summarizing_results.html" class="external-link">Summarizing and visualizing cTWAS results</a></p></li>
+<li><p><a href="https://xinhe-lab.github.io/multigroup_ctwas/articles/postprocessing.html" class="external-link">Post-processing cTWAS results</a></p></li>
 </ul>
-<p>You can <a href="https://github.com/xinhe-lab/ctwas/tree/multigroup_test" class="external-link">browse source code</a> and <a href="https://github.com/xinhe-lab/ctwas/issues" class="external-link">report a bug</a> here.</p>
+<p>In addition, we have some useful functions to help run cTWAS, e.g. for creating your own reference LD data:</p>
+<ul><li><a href="https://xinhe-lab.github.io/singlegroup_ctwas/articles/utility_functions.html" class="external-link">cTWAS utility functions</a></li></ul>
+<p>You can <a href="https://github.com/xinhe-lab/ctwas/tree/multigroup" class="external-link">browse source code</a> and <a href="https://github.com/xinhe-lab/ctwas/issues" class="external-link">report a bug</a> here.</p>
 <p><img style="display:block;margin:auto" width="700" height="300" src="reference/figures/workflow.png"></p>
 </div>
 <div class="section level2">
@@ -202,16 +204,16 @@ git checkout c7934c0</code></pre>
 
 <div class="pkgdown">
   <p></p>
-<p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.0.9.</p>
+<p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.1.0.</p>
 </div>
 
       </footer>
 </div>
 
-  
 
 
-  
+
+
 
   </body>
 </html>

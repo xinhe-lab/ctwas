@@ -9,9 +9,9 @@
 #'
 #' @param region_data a list object with data for the regions
 #'
-#' @param LD_info a list of paths to LD matrices for each of the regions. Required when \code{use_LD = TRUE}.
+#' @param LD_map a data frame with filenames of LD matrices for each of the regions. Required when \code{use_LD = TRUE}.
 #'
-#' @param snp_info a list of SNP info data frames for LD reference. Required when \code{use_LD = TRUE}.
+#' @param snp_map  list of data frames with SNP-to-region map for the reference. Required when \code{use_LD = TRUE}.
 #'
 #' @param weights a list of weights
 #'
@@ -36,8 +36,8 @@
 #' @export
 get_region_cor <- function(region_id,
                            region_data = NULL,
-                           LD_info = NULL,
-                           snp_info = NULL,
+                           LD_map = NULL,
+                           snp_map = NULL,
                            weights = NULL,
                            force_compute_cor = FALSE,
                            save_cor = FALSE,
@@ -76,10 +76,10 @@ get_region_cor <- function(region_id,
       stop("region_data is needed for computing correlation matrices")
     }
     # load LD matrix of the region
-    if (is.null(LD_info) || is.null(snp_info)) {
-      stop("LD_info and snp_info are required for computing correlation matrices")
+    if (is.null(LD_map) || is.null(snp_map)) {
+      stop("LD_map and snp_map are required for computing correlation matrices")
     }
-    LD_matrix_files <- unlist(strsplit(LD_info$LD_matrix[LD_info$region_id == region_id], split = ";"))
+    LD_matrix_files <- unlist(strsplit(LD_map$LD_file[LD_map$region_id == region_id], split = ";"))
     stopifnot(all(file.exists(LD_matrix_files)))
 
     if (length(LD_matrix_files) > 1) {
@@ -90,7 +90,7 @@ get_region_cor <- function(region_id,
     }
 
     # load SNP info of the region
-    snpinfo <- snp_info[[region_id]]
+    snpinfo <- snp_map[[region_id]]
 
     # compute correlation matrices
     sids <- region_data[[region_id]]$sid

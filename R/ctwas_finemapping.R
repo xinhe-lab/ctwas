@@ -4,13 +4,13 @@
 #'
 #' @param region_id a character string of region id to be finemapped
 #'
-#' @param use_LD TRUE/FALSE. If TRUE, use LD for finemapping. Otherwise, use "no-LD" version.
+#' @param use_LD If TRUE, use LD for finemapping. Otherwise, use "no-LD" version.
 #'
-#' @param LD_info a list of paths to LD matrices for each of the regions. Required when \code{use_LD = TRUE}.
+#' @param LD_map a data frame with filenames of LD matrices for the regions. Required when \code{use_LD = TRUE}.
 #'
-#' @param snp_info a list of SNP info data frames for LD reference. Required when \code{use_LD = TRUE}.
+#' @param snp_map a list of SNP-to-region map for the reference. Required when \code{use_LD = TRUE}.
 #'
-#' @param weights a list of preprocessed weights
+#' @param weights a list of preprocessed weights.
 #'
 #' @param L the number of effects for susie during the fine mapping
 #'
@@ -49,14 +49,14 @@
 #' @importFrom logging loginfo
 #' @importFrom Matrix bdiag
 #'
-#' @export
+#' @keywords internal
 #'
 finemap_region <- function(region_data,
                            region_id,
+                           snp_map,
+                           LD_map,
+                           weights,
                            use_LD = TRUE,
-                           LD_info = NULL,
-                           snp_info = NULL,
-                           weights = NULL,
                            L = 5,
                            group_prior = NULL,
                            group_prior_var = NULL,
@@ -74,25 +74,33 @@ finemap_region <- function(region_data,
 
   if (verbose){
     if (use_LD){
-      loginfo("Fine-mapping region %s with L = %d using LD version", region_id, L)
+      loginfo("Fine-mapping region %s using L = %d with LD ...", region_id, L)
     } else {
-      loginfo("Fine-mapping region %s with L = %d using no-LD version", region_id, L)
+      loginfo("Fine-mapping region %s using L = %d without LD ...", region_id, L)
     }
   }
 
-  # check weights
+  # check inputs
+  if (!inherits(region_data,"list")){
+    stop("'region_data' should be a list.")
+  }
+
   if (!is.null(weights)){
     if (!inherits(weights,"list")){
       stop("'weights' should be a list.")
+    }
+
+    if (any(sapply(weights, is.null))) {
+      stop("weights contain NULL, remove empty weights!")
     }
   }
 
   LD_format <- match.arg(LD_format)
 
   # load input data for the region
-  regiondata <- region_data[[region_id]]
-  sids <- regiondata[["sid"]]
+  regiondata <- extract_region_data(region_data, region_id)
   gids <- regiondata[["gid"]]
+  sids <- regiondata[["sid"]]
   z <- regiondata[["z"]]
   gs_group <- regiondata[["gs_group"]]
   g_type <- regiondata[["g_type"]]
@@ -103,7 +111,7 @@ finemap_region <- function(region_data,
   if(!is.null(group_prior)){
     groups <- names(group_prior)
   }else{
-    groups <- unique(unlist(lapply(region_data, "[[", "gs_group")))
+    groups <- unique(unlist(lapply(region_data, "[[", "groups")))
   }
   res <- initiate_group_priors(group_prior[groups], group_prior_var[groups], groups)
   pi_prior <- res$pi_prior
@@ -118,6 +126,8 @@ finemap_region <- function(region_data,
   rm(res)
 
   if (!use_LD) {
+    # set L = 1 in no-LD version
+    L <- 1
     # use an identity matrix as R in no-LD version
     R <- diag(length(z))
     # do not include cs_index in no-LD version
@@ -125,8 +135,8 @@ finemap_region <- function(region_data,
   } else {
     cor_res <- get_region_cor(region_id,
                               region_data = region_data,
-                              LD_info = LD_info,
-                              snp_info = snp_info,
+                              LD_map = LD_map,
+                              snp_map = snp_map,
                               weights = weights,
                               force_compute_cor = force_compute_cor,
                               save_cor = save_cor,
@@ -176,13 +186,13 @@ finemap_region <- function(region_data,
 #'
 #' @param region_data region_data to be finemapped
 #'
-#' @param use_LD TRUE/FALSE. If TRUE, use LD for finemapping. Otherwise, use "no-LD" version.
+#' @param use_LD If TRUE, use LD for finemapping. Otherwise, use "no-LD" version.
 #'
-#' @param LD_info a list of paths to LD matrices for each of the regions. Required when \code{use_LD = TRUE}.
+#' @param LD_map a data frame with filenames of LD matrices for the regions. Required when \code{use_LD = TRUE}.
 #'
-#' @param snp_info a list of SNP info data frames for LD reference. Required when \code{use_LD = TRUE}.
+#' @param snp_map a list of SNP-to-region map for the reference. Required when \code{use_LD = TRUE}.
 #'
-#' @param weights a list of weights for each gene
+#' @param weights a list of preprocessed weights.
 #'
 #' @param L the number of effects or a vector of number of effects for each region.
 #'
@@ -229,8 +239,8 @@ finemap_region <- function(region_data,
 #'
 finemap_regions <- function(region_data,
                             use_LD = TRUE,
-                            LD_info = NULL,
-                            snp_info = NULL,
+                            LD_map = NULL,
+                            snp_map = NULL,
                             weights = NULL,
                             L = 5,
                             group_prior = NULL,
@@ -254,21 +264,29 @@ finemap_regions <- function(region_data,
   }
 
   if (use_LD){
-    loginfo("Fine-mapping %d regions using LD version ...", length(region_data))
+    loginfo("Fine-mapping %d regions with LD ...", length(region_data))
   } else {
-    loginfo("Fine-mapping %d regions using no-LD version ...", length(region_data))
+    loginfo("Fine-mapping %d regions without LD ...", length(region_data))
   }
 
   if (use_LD) {
-    if (is.null(LD_info) || is.null(snp_info) || is.null(weights)) {
-      stop("LD_info, snp_info and weights are required when use_LD = TRUE")
+    if (is.null(LD_map) || is.null(snp_map) || is.null(weights)) {
+      stop("LD_map, snp_map and weights are required when use_LD = TRUE")
     }
   }
 
-  # check weights
+  # check inputs
+  if (!inherits(region_data,"list")){
+    stop("'region_data' should be a list.")
+  }
+
   if (!is.null(weights)){
     if (!inherits(weights,"list")){
       stop("'weights' should be a list.")
+    }
+
+    if (any(sapply(weights, is.null))) {
+      stop("weights contain NULL, remove empty weights!")
     }
   }
 
@@ -283,7 +301,7 @@ finemap_regions <- function(region_data,
 
   region_ids <- names(region_data)
 
-  finemap_region_res_list <- mclapply(region_ids, function(region_id){
+  finemap_region_res_list <- mclapply_check(region_ids, function(region_id){
 
     if (length(L) == 1) {
       region_L <- L
@@ -296,8 +314,8 @@ finemap_regions <- function(region_data,
     finemap_region(region_data = region_data,
                    region_id = region_id,
                    use_LD = use_LD,
-                   LD_info = LD_info,
-                   snp_info = snp_info,
+                   LD_map = LD_map,
+                   snp_map = snp_map,
                    weights = weights,
                    L = region_L,
                    group_prior = group_prior,
@@ -315,7 +333,6 @@ finemap_regions <- function(region_data,
                    ...)
 
   }, mc.cores = ncore)
-  check_mc_res(finemap_region_res_list)
 
   finemap_res <- do.call(rbind, finemap_region_res_list)
   rownames(finemap_res) <- NULL

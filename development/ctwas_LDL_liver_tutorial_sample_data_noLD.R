@@ -2,7 +2,6 @@
 library(ctwas)
 library(logging)
 library(data.table)
-devtools::load_all("/home/kaixuan/projects/cTWAS_package/multigroup_test/ctwas/")
 
 ##### Settings #####
 gwas_name <- "ukb-d-30780_irnt"
@@ -20,33 +19,29 @@ cor_dir <- file.path(outputdir, "cor_matrix")
 outname <- "LDL_example"
 example_chrom <- 16
 
-##### LD region info #####
+##### Prepare reference data #####
 region_info_file <- file.path(outputdir, paste0(outname, ".region_info.RDS"))
-snp_info_file <- file.path(outputdir, paste0(outname, ".snp_info.RDS"))
+snp_map_file <- file.path(outputdir, paste0(outname, ".snp_map.RDS"))
 
-if (file.exists(region_info_file) && file.exists(snp_info_file)){
+if (file.exists(region_info_file) && file.exists(snp_map_file)){
   cat(sprintf("Load preprocessed region_info: %s \n", region_info_file))
   region_info <- readRDS(region_info_file)
-  snp_info <- readRDS(snp_info_file)
+  snp_map <- readRDS(snp_map_file)
 }else{
   region_file <- system.file("extdata/ldetect", "EUR.b38.ldetect.regions.RDS", package = "ctwas")
   region_info <- readRDS(region_file)
+  region_info <- subset(region_info, chrom == example_chrom)
 
   ld_ref_dir <- "/project2/xinhe/shared_data/multigroup_ctwas/LD_reference/"
   filestem <- paste0("ukb_b38_0.1")
   ref_snp_info <- data.table::fread(file.path(ld_ref_dir, paste0(filestem, "_var_info.Rvar.gz")), sep = "\t")
-  ref_snp_info <- ref_snp_info[ref_snp_info$chrom == example_chrom, , drop = F]
-  write.table(ref_snp_info, gzfile(file.path(outputdir, paste0(filestem, "_chr16_var_info.Rvar.gz"))),
-              quote = F, col.names = T, row.names = F, sep = "\t")
-  res <- preprocess_region_LD_snp_info(region_info,
-                                       ref_snp_info = ref_snp_info,
-                                       chrom = example_chrom,
-                                       use_LD = FALSE,
-                                       ncore = 1)
+  # write.table(ref_snp_info, gzfile(file.path(outputdir, paste0(filestem, "_chr16_var_info.Rvar.gz"))),
+  #             quote = F, col.names = T, row.names = F, sep = "\t")
+  res <- create_snp_map(region_info, ref_snp_info)
   region_info <- res$region_info
-  snp_info <- res$snp_info
+  snp_map <- res$snp_map
   saveRDS(region_info, region_info_file)
-  saveRDS(snp_info, snp_info_file)
+  saveRDS(snp_map, snp_map_file)
 }
 
 
