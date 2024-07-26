@@ -74,9 +74,9 @@ finemap_region <- function(region_data,
 
   if (verbose){
     if (use_LD){
-      loginfo("Fine-mapping region %s with L = %d using LD version", region_id, L)
+      loginfo("Fine-mapping region %s using L = %d with LD ...", region_id, L)
     } else {
-      loginfo("Fine-mapping region %s with L = %d using no-LD version", region_id, L)
+      loginfo("Fine-mapping region %s using L = %d without LD ...", region_id, L)
     }
   }
 
@@ -98,9 +98,9 @@ finemap_region <- function(region_data,
   LD_format <- match.arg(LD_format)
 
   # load input data for the region
-  regiondata <- region_data[[region_id]]
-  sids <- regiondata[["sid"]]
+  regiondata <- extract_region_data(region_data, region_id)
   gids <- regiondata[["gid"]]
+  sids <- regiondata[["sid"]]
   z <- regiondata[["z"]]
   gs_group <- regiondata[["gs_group"]]
   g_type <- regiondata[["g_type"]]
@@ -111,7 +111,7 @@ finemap_region <- function(region_data,
   if(!is.null(group_prior)){
     groups <- names(group_prior)
   }else{
-    groups <- unique(unlist(lapply(region_data, "[[", "gs_group")))
+    groups <- unique(unlist(lapply(region_data, "[[", "groups")))
   }
   res <- initiate_group_priors(group_prior[groups], group_prior_var[groups], groups)
   pi_prior <- res$pi_prior
@@ -264,9 +264,9 @@ finemap_regions <- function(region_data,
   }
 
   if (use_LD){
-    loginfo("Fine-mapping %d regions using LD version ...", length(region_data))
+    loginfo("Fine-mapping %d regions with LD ...", length(region_data))
   } else {
-    loginfo("Fine-mapping %d regions using no-LD version ...", length(region_data))
+    loginfo("Fine-mapping %d regions without LD ...", length(region_data))
   }
 
   if (use_LD) {

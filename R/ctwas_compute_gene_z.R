@@ -107,9 +107,7 @@ get_gene_regions <- function(gene_info, region_info){
 # "context", "group".
 #
 combine_z <- function(z_snp, z_gene){
-  z_snp$type <- "SNP"
-  z_snp$context <- "SNP"
-  z_snp$group <- "SNP"
+
   if (is.null(z_gene$type)){
     z_gene$type <- "gene"
   }
@@ -119,8 +117,13 @@ combine_z <- function(z_snp, z_gene){
   if (is.null(z_gene$group)){
     z_gene$group <- "gene"
   }
-  zdf <- rbind(z_snp[, c("id", "z", "type", "context", "group")],
-               z_gene[, c("id", "z", "type", "context", "group")])
-  rownames(zdf) <- NULL
-  return(zdf)
+
+  z_snp$type <- "SNP"
+  z_snp$context <- "SNP"
+  z_snp$group <- "SNP"
+
+  z_df <- rbind(z_gene[, c("id", "z", "type", "context", "group")],
+               z_snp[, c("id", "z", "type", "context", "group")])
+  rownames(z_df) <- NULL
+  return(z_df)
 }

@@ -37,9 +37,9 @@ fit_EM <- function(
     ...){
 
   # get groups, types and contexts from region_data
-  groups <- unique(unlist(lapply(region_data, "[[", "gs_group")))
-  types <- unique(unlist(lapply(region_data, "[[", "gs_type")))
-  contexts <- unique(unlist(lapply(region_data, "[[", "gs_context")))
+  groups <- unique(unlist(lapply(region_data, "[[", "groups")))
+  types <- unique(unlist(lapply(region_data, "[[", "types")))
+  contexts <- unique(unlist(lapply(region_data, "[[", "contexts")))
 
   # set pi_prior and V_prior based on init_group_prior and init_group_prior_var
   res <- initiate_group_priors(init_group_prior[groups], init_group_prior_var[groups], groups)
@@ -143,10 +143,10 @@ ctwas_susie_region_L1 <- function(region_data, region_id,
                                   pi_prior, V_prior,
                                   use_null_weight = TRUE,
                                   ...){
-  # load susie input data
-  regiondata <- region_data[[region_id]]
-  sid <- regiondata[["sid"]]
-  gid <- regiondata[["gid"]]
+  # load region data
+  regiondata <- extract_region_data(region_data, region_id)
+  gids <- regiondata[["gid"]]
+  sids <- regiondata[["sid"]]
   z <- regiondata[["z"]]
   gs_group <- regiondata[["gs_group"]]
   g_type <- regiondata[["g_type"]]
@@ -179,8 +179,8 @@ ctwas_susie_region_L1 <- function(region_data, region_id,
                                ...)
   # annotate susie result
   susie_res_df <- anno_susie(susie_res,
-                             gids = gid,
-                             sids = sid,
+                             gids = gids,
+                             sids = sids,
                              g_type = g_type,
                              g_context = g_context,
                              g_group = g_group,

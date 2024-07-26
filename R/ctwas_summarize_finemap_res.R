@@ -3,7 +3,7 @@
 #'
 #' @param finemap_res a data frame of cTWAS finemapping result
 #'
-#' @param snp_map a list of SNP-to-region map for the reference.
+#' @param snp_map a list of data frames with SNP-to-region map for the reference.
 #'
 #' @param gene_annot a data frame of gene annotations, with columns:
 #' "chrom", "start", "end", "gene_id", "gene_name", "gene_type.
@@ -13,12 +13,14 @@
 #'
 #' @param drop_unannotated_genes If TRUE, remove unannotated genes.
 #'
-#' @param filter_protein_coding_genes If TRUE, keep protein coding genes only.
+#' @param filter_protein_coding_genes TRUE/FALSE. If TRUE, keep protein coding genes only.
 #'
-#' @param filter_cs If TRUE, limits results in credible sets.
+#' @param filter_cs TRUE/FALSE. If TRUE, limits results in credible sets.
+#'
+#' @param na.rm If TRUE, remove missing values and unannotated genes.
 #'
 #' @return a data frame of cTWAS finemapping result including gene
-#' names, types and positions.
+#' names, types and positions
 #'
 #' @importFrom stats na.omit
 #' @importFrom logging loginfo
@@ -38,7 +40,7 @@ anno_finemap_res <- function(finemap_res,
                              filter_protein_coding_genes = FALSE,
                              filter_cs = FALSE){
 
-  loginfo("Annotating ctwas fine-mapping result ...")
+  loginfo("Annotating ctwas finemapping result ...")
 
   use_gene_pos <- match.arg(use_gene_pos)
 
@@ -53,18 +55,18 @@ anno_finemap_res <- function(finemap_res,
 
   # limit to protein coding genes
   if (filter_protein_coding_genes) {
-    loginfo("Limit to protein coding genes")
+    loginfo("keep only protein coding genes")
     gene_annot <- gene_annot[gene_annot$gene_type=="protein_coding",]
   }
 
   # limit to credible sets
   if (filter_cs) {
-    loginfo("Limit to results in credible sets")
+    loginfo("keep only results in credible sets")
     finemap_res <- finemap_res[finemap_res$cs_index!=0,]
   }
 
   # extract gene ids
-  finemap_gene_res <- finemap_res[finemap_res$type!="SNP",]
+  finemap_gene_res <- finemap_res[finemap_res$group!="SNP",]
 
   if (is.null(finemap_gene_res$gene_id)) {
     finemap_gene_res$gene_id <- sapply(strsplit(finemap_gene_res$id, split = "[|]"), "[[", 1)
@@ -79,7 +81,7 @@ anno_finemap_res <- function(finemap_res,
     }
 
     # add gene annotations
-    loginfo("Add gene annotations")
+    loginfo("add gene_name and gene_type")
     finemap_gene_res <- finemap_gene_res %>%
       left_join(gene_annot, by = "gene_id", multiple = "all") %>%
       mutate(start = as.numeric(.data$start), end = as.numeric(.data$end)) %>%
@@ -92,7 +94,7 @@ anno_finemap_res <- function(finemap_res,
 
     # split PIPs for molecular traits (e.g. introns) mapped to multiple genes
     if (any(duplicated(finemap_gene_res$id))) {
-      loginfo("Split PIPs for traits mapped to multiple genes")
+      loginfo("split PIPs for traits mapped to multiple genes")
       finemap_gene_res <- finemap_gene_res %>%
         group_by(.data$id) %>%
         mutate(susie_pip = ifelse(n() > 1, .data$susie_pip / n(), .data$susie_pip)) %>%
@@ -101,7 +103,7 @@ anno_finemap_res <- function(finemap_res,
   }
 
   # update gene position info
-  loginfo("Use gene %s positions", use_gene_pos)
+  loginfo("use gene %s positions", use_gene_pos)
   if (use_gene_pos == "mid"){
     # use the midpoint as gene position
     finemap_gene_res$pos <- round((finemap_gene_res$start+finemap_gene_res$end)/2)
@@ -112,8 +114,8 @@ anno_finemap_res <- function(finemap_res,
   }
 
   # add SNP positions
-  loginfo("Add SNP positions")
-  finemap_snp_res <- finemap_res[finemap_res$type=="SNP",]
+  loginfo("add SNP positions")
+  finemap_snp_res <- finemap_res[finemap_res$group=="SNP",]
   snp_idx <- match(finemap_snp_res$id, snp_info$id)
   finemap_snp_res$chrom <- snp_info$chrom[snp_idx]
   finemap_snp_res$chrom <- parse_number(as.character(finemap_snp_res$chrom))
@@ -140,6 +142,7 @@ anno_finemap_res <- function(finemap_res,
 #'
 #' @export
 get_gene_annot_from_ens_db <- function(ens_db, gene_ids) {
+
   gene_ids <- unique(na.omit(gene_ids))
   if (any(grep("[.]", gene_ids))) {
     gene_ids_trimmed <- sapply(strsplit(gene_ids, split = "[.]"), "[[", 1)
@@ -162,7 +165,6 @@ get_gene_annot_from_ens_db <- function(ens_db, gene_ids) {
   gene_annot <- gene_annot[, c("chrom", "start", "end", "gene_id", "gene_name", "gene_type")]
   return(gene_annot)
 }
-
 
 #' @title Combines gene PIPs by context, type or group
 #'

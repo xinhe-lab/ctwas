@@ -84,7 +84,7 @@ est_param <- function(
 
   # remove regions with fewer than minvar variables
   if (minvar > 0) {
-    n.var <- sapply(region_data, function(x){length(x[["z"]])})
+    n.var <- sapply(region_data, function(x){length(x$gid) + length(x$sid)})
     drop.idx <- which(n.var < minvar)
     if (length(drop.idx) > 0){
       loginfo("Remove %d regions with number of variables < %d.", length(drop.idx), minvar)
@@ -94,7 +94,7 @@ est_param <- function(
 
   # remove regions with fewer than mingene genes
   if (mingene > 0) {
-    n.gid <- sapply(region_data, function(x){length(x[["gid"]])})
+    n.gid <- sapply(region_data, function(x){length(x$gid)})
     drop.idx <- which(n.gid < mingene)
     if (length(drop.idx) > 0){
       loginfo("Remove %d regions with number of genes < %d.", length(drop.idx), mingene)
@@ -171,17 +171,17 @@ est_param <- function(
 # Select single effect regions
 compute_region_p_single_effect <- function(region_data, group_prior){
   region_ids <- names(region_data)
-  if (length(region_ids) == 0) {
-    stop("no region_ids in region_data!")
-  }
-  p_single_effect <- sapply(region_ids, function(x){
-    group_size <- table(region_data[[x]][["gs_group"]])
-    group_size <- group_size[names(group_prior)]
+  if (length(region_ids) == 0)
+    stop("No region_ids in region_data!")
+
+  p_single_effect <- sapply(region_ids, function(region_id){
+    res <- extract_region_data(region_data, region_id)
+    gs_group <- res$gs_group
+    group_size <- table(gs_group)[names(group_prior)]
     group_size[is.na(group_size)] <- 0
     p1 <- prod((1-group_prior)^group_size) * (1 + sum(group_size*(group_prior/(1-group_prior))))
     p1
   })
   return(data.frame(region_id = region_ids, p_single_effect = p_single_effect))
-
 }
 
