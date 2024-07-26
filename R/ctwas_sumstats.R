@@ -124,21 +124,23 @@ ctwas_sumstats <- function(
   group_prior_var_structure <- match.arg(group_prior_var_structure)
   LD_format <- match.arg(LD_format)
 
-  if (anyNA(z_snp)){
+  if (anyNA(z_snp))
     stop("z_snp contains missing values!")
-  }
 
-  if (!inherits(weights,"list")){
+  if (!inherits(weights,"list"))
     stop("'weights' should be a list object.")
-  }
 
-  if (any(sapply(weights, is.null))) {
+  if (any(sapply(weights, is.null)))
     stop("weights contain NULL, remove empty weights!")
-  }
 
-  if (thin > 1 | thin <= 0){
+  if (!inherits(LD_map,"list"))
+    stop("'LD_map' should be a list.")
+
+  if (!inherits(snp_map,"list"))
+    stop("'snp_map' should be a list.")
+
+  if (thin > 1 | thin <= 0)
     stop("thin needs to be in (0,1]")
-  }
 
   if (!is.null(outputdir)) {
     dir.create(outputdir, showWarnings=FALSE, recursive=TRUE)
@@ -152,9 +154,8 @@ ctwas_sumstats <- function(
     }
   }
 
-  if (anyNA(z_gene)){
+  if (anyNA(z_gene))
     stop("z_gene contains missing values!")
-  }
 
   # Get region_data, which contains SNPs and genes assigned to each region
   #. downsample SNPs if thin < 1

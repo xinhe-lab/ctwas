@@ -73,6 +73,9 @@ assemble_region_data <- function(region_info,
   if (thin > 1 | thin <= 0)
     stop("thin needs to be in (0,1]")
 
+  if (!inherits(snp_map,"list")){
+    stop("'snp_map' should be a list object.")
+  }
   snp_info <- as.data.frame(rbindlist(snp_map, idcol = "region_id"))
 
   # begin assembling region_data
@@ -215,6 +218,10 @@ trim_region_data <- function(region_data,
 
   trim_by <- match.arg(trim_by)
 
+  if (!inherits(region_data,"list")){
+    stop("'region_data' should be a list.")
+  }
+
   if (maxSNP < Inf){
     if (trim_by == "z") {
       # trim SNPs with lower |z|
@@ -254,6 +261,10 @@ update_region_z <- function(region_data,
                             ncore = 1){
 
   update <- match.arg(update)
+
+  if (!inherits(region_data,"list")){
+    stop("'region_data' should be a list.")
+  }
 
   # combine z_snp, z_gene and group information
   if (update == "snps") {
@@ -308,6 +319,14 @@ adjust_boundary_genes <- function(boundary_genes,
 
   if (!inherits(weights,"list")){
     stop("'weights' should be a list.")
+  }
+
+  if (!inherits(region_data,"list")){
+    stop("'region_data' should be a list.")
+  }
+
+  if (!inherits(snp_map,"list")){
+    stop("'snp_map' should be a list.")
   }
 
   for (i in 1:nrow(boundary_genes)){
@@ -371,6 +390,14 @@ expand_region_data <- function(region_data,
   # check arguments
   trim_by <- match.arg(trim_by)
 
+  if (!inherits(region_data,"list")){
+    stop("'region_data' should be a list.")
+  }
+
+  if (!inherits(snp_map,"list")){
+    stop("'snp_map' should be a list object.")
+  }
+
   if (anyNA(z_snp)){
     stop("z_snp contains missing values!")
   }
@@ -415,6 +442,10 @@ expand_region_data <- function(region_data,
 
 # extract data for a region from region_data
 extract_region_data <- function(region_data, region_id){
+
+  if (!inherits(region_data,"list")){
+    stop("'region_data' should be a list.")
+  }
 
   regiondata <- region_data[[region_id]]
 

@@ -77,10 +77,6 @@ screen_regions <- function(region_data,
   # check input
   LD_format <- match.arg(LD_format)
 
-  if (!inherits(region_data,"list")){
-    stop("'region_data' should be a list.")
-  }
-
   # extract thin value from region_data
   thin <- unique(sapply(region_data, "[[", "thin"))
   if (length(thin) > 1) {
@@ -93,9 +89,24 @@ screen_regions <- function(region_data,
     stop("thin value needs to be in (0,1]")
   }
 
+  if (!inherits(region_data,"list"))
+    stop("'region_data' should be a list.")
+
   if (use_LD) {
-    if (is.null(LD_map) || is.null(snp_map) || is.null(weights)) {
+    if (is.null(LD_map) || is.null(snp_map) || is.null(weights))
       stop("LD_map, snp_map and weights are required when use_LD = TRUE")
+
+    if (!inherits(snp_map,"list"))
+      stop("'snp_map' should be a list.")
+
+    if (!inherits(LD_map,"data.frame"))
+      stop("'LD_map' should be a data frame")
+
+    if (!inherits(weights,"list"))
+      stop("'weights' should be a list.")
+
+    if (any(sapply(weights, is.null))) {
+      stop("weights contain NULL, remove empty weights!")
     }
   }
 
@@ -124,16 +135,15 @@ screen_regions <- function(region_data,
     }
   }
 
-  # with-LD version: run finemapping for all regions containing thinned SNPs and estimate L for each region
   # no-LD version: set L = 1
   if (!use_LD) {
-    loginfo("No-LD version: Set L = 1")
     L <- 1
     filter_nonSNP_PIP <- TRUE
     filter_L <- FALSE
     screened_region_data <- region_data
     all_estimated_L <- NULL
   } else {
+    # with-LD version: run finemapping for all regions containing thinned SNPs and estimate L for each region
     if (filter_L) {
       loginfo("Estimating L with uniform prior ...")
       all_estimated_L <- estimate_region_L(region_data = region_data,
@@ -235,6 +245,22 @@ estimate_region_L <- function(region_data,
                               ...) {
 
   LD_format <- match.arg(LD_format)
+
+  if (!inherits(region_data,"list"))
+    stop("'region_data' should be a list.")
+
+  if (!inherits(snp_map,"list"))
+    stop("'snp_map' should be a list.")
+
+  if (!inherits(LD_map,"data.frame"))
+    stop("'LD_map' should be a data frame")
+
+  if (!inherits(weights,"list"))
+    stop("'weights' should be a list.")
+
+  if (any(sapply(weights, is.null))) {
+    stop("weights contain NULL, remove empty weights!")
+  }
 
   finemap_unif_prior_res <- finemap_regions(region_data,
                                             use_LD = TRUE,

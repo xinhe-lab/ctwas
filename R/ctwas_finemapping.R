@@ -81,21 +81,34 @@ finemap_region <- function(region_data,
   }
 
   # check inputs
+  LD_format <- match.arg(LD_format)
+
   if (!inherits(region_data,"list")){
     stop("'region_data' should be a list.")
   }
 
-  if (!is.null(weights)){
-    if (!inherits(weights,"list")){
+  if (use_LD) {
+    if (is.null(LD_map) || is.null(snp_map) || is.null(weights))
+      stop("LD_map, snp_map and weights are required when use_LD = TRUE")
+
+    if (!inherits(snp_map,"list"))
+      stop("'snp_map' should be a list.")
+
+    if (!inherits(LD_map,"data.frame"))
+      stop("'LD_map' should be a data frame")
+
+    if (!inherits(weights,"list"))
       stop("'weights' should be a list.")
-    }
 
     if (any(sapply(weights, is.null))) {
       stop("weights contain NULL, remove empty weights!")
     }
   }
 
-  LD_format <- match.arg(LD_format)
+  # Set L = 1 in no-LD version
+  if (!use_LD) {
+    L <- 1
+  }
 
   # load input data for the region
   regiondata <- extract_region_data(region_data, region_id)
@@ -126,9 +139,7 @@ finemap_region <- function(region_data,
   rm(res)
 
   if (!use_LD) {
-    # set L = 1 in no-LD version
-    L <- 1
-    # use an identity matrix as R in no-LD version
+    # use an identity R matrix in no-LD version
     R <- diag(length(z))
     # do not include cs_index in no-LD version
     include_cs_index <- FALSE
@@ -269,47 +280,52 @@ finemap_regions <- function(region_data,
     loginfo("Fine-mapping %d regions without LD ...", length(region_data))
   }
 
-  if (use_LD) {
-    if (is.null(LD_map) || is.null(snp_map) || is.null(weights)) {
-      stop("LD_map, snp_map and weights are required when use_LD = TRUE")
-    }
-  }
-
   # check inputs
+  LD_format <- match.arg(LD_format)
+
   if (!inherits(region_data,"list")){
     stop("'region_data' should be a list.")
   }
 
-  if (!is.null(weights)){
-    if (!inherits(weights,"list")){
+  if (use_LD) {
+    if (is.null(LD_map) || is.null(snp_map) || is.null(weights))
+      stop("LD_map, snp_map and weights are required when use_LD = TRUE")
+
+    if (!inherits(snp_map,"list"))
+      stop("'snp_map' should be a list.")
+
+    if (!inherits(LD_map,"data.frame"))
+      stop("'LD_map' should be a data frame")
+
+    if (!inherits(weights,"list"))
       stop("'weights' should be a list.")
-    }
 
     if (any(sapply(weights, is.null))) {
       stop("weights contain NULL, remove empty weights!")
     }
   }
 
-  LD_format <- match.arg(LD_format)
-
+  # set L = 1 in no-LD version
   if (!use_LD) {
-    if (L != 1){
-      loginfo("Set L = 1 in no-LD version")
-      L <- 1
+    L <- 1
+  }
+
+  if (length(L) == 1) {
+    L <- rep(L, length(region_data))
+    names(L) <- names(region_data)
+  } else if (length(L) == length(region_data)) {
+    if (!all.equal(names(L), names(region_data))){
+      stop("the names of L do not match with region_data!")
     }
+  } else {
+    stop("L needs to an integer or a vector of the same length as region_data!")
   }
 
   region_ids <- names(region_data)
 
-  finemap_region_res_list <- mclapply_check(region_ids, function(region_id){
+  finemap_res_list <- mclapply_check(region_ids, function(region_id){
 
-    if (length(L) == 1) {
-      region_L <- L
-    } else if (length(L) > 1 && length(L) == length(region_data)) {
-      region_L <- L[region_id]
-    } else{
-      stop("L needs to an integer or a vector of the same length as region_data")
-    }
+    region_L <- L[region_id]
 
     finemap_region(region_data = region_data,
                    region_id = region_id,
@@ -334,7 +350,7 @@ finemap_regions <- function(region_data,
 
   }, mc.cores = ncore)
 
-  finemap_res <- do.call(rbind, finemap_region_res_list)
+  finemap_res <- do.call(rbind, finemap_res_list)
   rownames(finemap_res) <- NULL
 
   return(finemap_res)
