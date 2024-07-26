@@ -202,7 +202,6 @@ make_locusplot <- function(finemap_res,
   loginfo("QTL positions: %s", finemap_qtl_res$pos)
 
   # p-value panel
-  # browser()
   p_pvalue <- ggplot(loc$data, aes(x=.data$pos/1e6, y=.data$p, shape=.data$group,
                                    size=.data$group, alpha=.data$group)) +
     geom_point(aes(color=.data$r2_levels)) +

@@ -266,13 +266,14 @@
 <p>We could also run fine-mapping for a single region (or several regions of interest) with precomputed parameters. This is particularly useful to perform a deep analysis on genes/regions of interest.</p>
 <p>Here we show an example for fine mapping a single region “16_71020125_72901251”.</p>
 <p>We first expand the region of interest with the full set of SNPs using the assembled <code>region_data</code>. We also need the number of causal signals (<code>L</code>) for this region. This is obtained from the output of the earlier <code><a href="../reference/screen_regions.html">screen_regions()</a></code> function.</p>
-<div class="sourceCode" id="cb12"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb12-1"><a href="#cb12-1"></a>region_id &lt;-<span class="dv">16</span>_<span class="dv">71020125</span>_<span class="dv">72901251</span><span class="st">"</span></span>
-<span id="cb12-2"><a href="#cb12-2"></a><span class="st">selected_region_data &lt;- expand_region_data(region_data[region_id],</span></span>
-<span id="cb12-3"><a href="#cb12-3"></a><span class="st">                                           snp_map,</span></span>
-<span id="cb12-4"><a href="#cb12-4"></a><span class="st">                                           z_snp,</span></span>
-<span id="cb12-5"><a href="#cb12-5"></a><span class="st">                                           maxSNP = 20000)</span></span>
-<span id="cb12-6"><a href="#cb12-6"></a></span>
-<span id="cb12-7"><a href="#cb12-7"></a><span class="st">selected_region_L &lt;- screen_region_res$L[region_id]</span></span></code></pre></div>
+<div class="sourceCode" id="cb12"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">region_id</span> <span class="op">&lt;-</span> <span class="st">"16_71020125_72901251"</span></span>
+<span><span class="va">selected_region_data</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/expand_region_data.html">expand_region_data</a></span><span class="op">(</span><span class="va">region_data</span><span class="op">[</span><span class="va">region_id</span><span class="op">]</span>,</span>
+<span>                                           <span class="va">snp_map</span>,</span>
+<span>                                           <span class="va">z_snp</span>,</span>
+<span>                                           maxSNP <span class="op">=</span> <span class="fl">20000</span><span class="op">)</span></span>
+<span></span>
+<span><span class="va">selected_region_L</span> <span class="op">&lt;-</span> <span class="va">screen_region_res</span><span class="op">$</span><span class="va">L</span><span class="op">[</span><span class="va">region_id</span><span class="op">]</span></span></code></pre></div>
 <p>We could then perform fine-mapping for this region of interest:</p>
 <div class="sourceCode" id="cb13"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">finemap_region_res</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/finemap_regions.html">finemap_regions</a></span><span class="op">(</span><span class="va">selected_region_data</span>,</span>
