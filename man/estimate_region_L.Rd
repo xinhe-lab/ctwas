@@ -35,8 +35,6 @@ estimate_region_L(
 \item{verbose}{TRUE/FALSE. If TRUE, print detail messages}
 
 \item{...}{Additional arguments of \code{susie_rss}.}
-
-\item{use_LD}{TRUE/FALSE. If TRUE, use LD for finemapping. Otherwise, use "no-LD" version.}
 }
 \value{
 estimated L for each region

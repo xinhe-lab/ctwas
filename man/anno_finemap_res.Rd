@@ -30,8 +30,6 @@ represent gene positions.}
 \item{filter_protein_coding_genes}{TRUE/FALSE. If TRUE, keep protein coding genes only.}
 
 \item{filter_cs}{TRUE/FALSE. If TRUE, limits results in credible sets.}
-
-\item{na.rm}{If TRUE, remove missing values and unannotated genes.}
 }
 \value{
 a data frame of cTWAS finemapping result including gene

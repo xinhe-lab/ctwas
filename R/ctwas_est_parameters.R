@@ -170,6 +170,11 @@ est_param <- function(
 
 # Select single effect regions
 compute_region_p_single_effect <- function(region_data, group_prior){
+
+  if (!inherits(region_data,"list")){
+    stop("'region_data' should be a list.")
+  }
+
   region_ids <- names(region_data)
   if (length(region_ids) == 0)
     stop("No region_ids in region_data!")

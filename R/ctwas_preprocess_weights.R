@@ -60,10 +60,10 @@
 preprocess_weights <- function(weight_file,
                                region_info,
                                gwas_snp_ids,
-                               type,
-                               context,
                                snp_map,
                                LD_map,
+                               type,
+                               context,
                                weight_format = c("PredictDB", "FUSION"),
                                drop_strand_ambig = TRUE,
                                filter_protein_coding_genes = TRUE,
@@ -94,6 +94,10 @@ preprocess_weights <- function(weight_file,
     load_predictdb_LD <- FALSE
     filter_protein_coding_genes <- FALSE
     scale_predictdb_weights <- FALSE
+  }
+
+  if (!inherits(snp_map,"list")){
+    stop("'snp_map' should be a list object.")
   }
 
   snp_info <- as.data.frame(rbindlist(snp_map, idcol = "region_id"))
@@ -266,23 +270,25 @@ process_weight <- function(gene_name,
     if (!is.null(cov_table)) {
       # get pre-computed LD matrix from predictedDB weights
       g_cov_table <- cov_table[cov_table$GENE == gene_name,]
-      R_wgt <- get_LD_matrix_from_predictdb(g_cov_table,
-                                            g_weight_table,
+      R_wgt <- get_LD_matrix_from_predictdb(g_cov_table, g_weight_table,
                                             convert_cov_to_cor = TRUE)
       R_wgt <- R_wgt[snps$id, snps$id, drop=FALSE]
     } else{
       R_wgt <- NULL
     }
-    return(list(chrom = chrom,
-                p0 = p0,
-                p1 = p1,
-                wgt = wgt,
-                R_wgt = R_wgt,
-                gene_name = gene_name,
-                weight_name = weight_name,
-                type = type,
-                context = context,
-                n_wgt = n_wgt))
+  } else {
+    p0 <- p1 <- NA
+    wgt <- R_wgt <- NULL
   }
 
+  return(list(chrom = chrom,
+              p0 = p0,
+              p1 = p1,
+              wgt = wgt,
+              R_wgt = R_wgt,
+              gene_name = gene_name,
+              weight_name = weight_name,
+              type = type,
+              context = context,
+              n_wgt = n_wgt))
 }

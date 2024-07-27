@@ -62,7 +62,7 @@ test_that("screen_regions (LD version) filtering by L work", {
                                          group_prior_var = group_prior_var,
                                          filter_L = TRUE,
                                          filter_nonSNP_PIP = FALSE,
-                                         ncore = 4)
+                                         ncore = 2)
     screened_region_data <- screen_regions_res$screened_region_data
 
     # Expand screened region_data with all SNPs in the regions
@@ -108,7 +108,7 @@ test_that("screen_regions (LD version) filtering by nonSNP_PIP work", {
                                          filter_L = FALSE,
                                          filter_nonSNP_PIP = TRUE,
                                          min_nonSNP_PIP = 0.5,
-                                         ncore = 4)
+                                         ncore = 2)
     screened_region_data <- screen_regions_res$screened_region_data
 
     # Expand screened region_data with all SNPs in the regions

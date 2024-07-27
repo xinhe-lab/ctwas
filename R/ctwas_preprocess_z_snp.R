@@ -31,6 +31,10 @@ preprocess_z_snp <- function(z_snp,
 
   loginfo("Preprocessing z_snp...")
 
+  if (!inherits(snp_map,"list")){
+    stop("'snp_map' should be a list object.")
+  }
+
   snp_info <- as.data.frame(rbindlist(snp_map, idcol = "region_id"))
 
   loginfo("z_snp has %d variants in total", length(z_snp$id))
