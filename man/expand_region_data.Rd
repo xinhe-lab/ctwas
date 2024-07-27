@@ -31,8 +31,6 @@ have enough memory to run the program.}
 \item{ncore}{The number of cores used to parallelize susie over regions}
 
 \item{seed}{seed for random sampling}
-
-\item{z_gene}{A data frame with columns: "id", "z", giving the z-scores for genes.}
 }
 \value{
 updated region_data with all SNPs

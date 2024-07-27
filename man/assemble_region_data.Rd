@@ -44,16 +44,14 @@ have enough memory to run the program. This applies to the last rerun step
 options: "random", or "z" (trim SNPs with lower |z|).
 See parameter `maxSNP` for more information.}
 
-\item{adjust_boundary_genes}{identify cross-boundary genes, adjust region_data}
+\item{adjust_boundary_genes}{If TRUE, identify cross-boundary genes, and
+adjust region_data}
 
 \item{ncore}{The number of cores used to parallelize susie over regions}
 
 \item{seed}{seed for random sampling}
 
 \item{logfile}{path to the log file, if NULL will print log info on screen.}
-
-\item{thin_gwas_snps}{If TRUE, only apply thin to GWAS SNPs.
-Otherwise, apply thins to all SNPs.}
 }
 \value{
 a list with region_data, updated weights, and cross-bounary genes

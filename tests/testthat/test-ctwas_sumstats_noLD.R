@@ -15,7 +15,7 @@ test_that("ctwas_sumstats_noLD works", {
                                      thin = 0.1,
                                      maxSNP = 20000,
                                      min_nonSNP_PIP = 0.5,
-                                     ncore = 4)
+                                     ncore = 2)
   })
 
   expect_equal(ctwas_res, precomputed_ctwas_res)

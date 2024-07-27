@@ -24,10 +24,8 @@
 #' options: "random", or "z" (trim SNPs with lower |z|).
 #' See parameter `maxSNP` for more information.
 #'
-#' @param adjust_boundary_genes identify cross-boundary genes, adjust region_data
-#'
-#' @param thin_gwas_snps If TRUE, only apply thin to GWAS SNPs.
-#' Otherwise, apply thins to all SNPs.
+#' @param adjust_boundary_genes If TRUE, identify cross-boundary genes, and
+#' adjust region_data
 #'
 #' @param ncore The number of cores used to parallelize susie over regions
 #'
@@ -90,11 +88,11 @@ assemble_region_data <- function(region_info,
   gene_info <- get_gene_info(weights)
 
   # remove SNPs not in z_snp
-  snp_info <- subset(snp_info, id %in% z_snp$id)
+  snp_info <- snp_info[snp_info$id %in% z_snp$id, , drop=FALSE]
 
   # remove genes not in z_gene
   if (nrow(gene_info) > 0){
-    gene_info <- subset(gene_info, id %in% z_gene$id)
+    gene_info <- gene_info[gene_info$id %in% z_gene$id, , drop=FALSE]
   }
 
   region_data <- list()
@@ -283,7 +281,7 @@ update_region_z <- function(region_data,
     regiondata <- region_data[[region_id]]
     gid <- regiondata[["gid"]]
     sid <- regiondata[["sid"]]
-    region_z_df <- subset(z_df, id %in% c(gid, sid))
+    region_z_df <- z_df[z_df$id %in% c(gid, sid), , drop=FALSE]
 
     if (update == "genes" || update == "all") {
       region_z_gene <- region_z_df[match(gid, region_z_df$id), ]
@@ -359,8 +357,6 @@ adjust_boundary_genes <- function(boundary_genes,
 #'
 #' @param z_snp A data frame with columns: "id", "z", giving the z-scores for SNPs.
 #'
-#' @param z_gene A data frame with columns: "id", "z", giving the z-scores for genes.
-#'
 #' @param trim_by remove SNPs if the total number of SNPs exceeds limit, options: "random",
 #' or "z" (trim SNPs with lower |z|) See parameter `maxSNP` for more information.
 #'
@@ -415,7 +411,7 @@ expand_region_data <- function(region_data,
         # load all SNPs in the region
         snpinfo <- snp_map[[region_id]]
         # remove SNPs not in z_snp
-        snpinfo <- subset(snpinfo, id %in% z_snp$id)
+        snpinfo <- snpinfo[snpinfo$id %in% z_snp$id, ,drop=FALSE]
         # update minpos and maxpos in the region
         regiondata[["minpos"]] <- min(c(regiondata[["minpos"]], snpinfo$pos))
         regiondata[["maxpos"]] <- max(c(regiondata[["maxpos"]], snpinfo$pos))

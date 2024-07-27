@@ -17,8 +17,6 @@
 #'
 #' @param filter_cs TRUE/FALSE. If TRUE, limits results in credible sets.
 #'
-#' @param na.rm If TRUE, remove missing values and unannotated genes.
-#'
 #' @return a data frame of cTWAS finemapping result including gene
 #' names, types and positions
 #'
@@ -88,8 +86,10 @@ anno_finemap_res <- function(finemap_res,
       mutate(chrom = parse_number(as.character(.data$chrom)))
 
     if (drop_unannotated_genes) {
-      loginfo("Remove unannotated genes")
-      finemap_gene_res <- na.omit(finemap_gene_res)
+      n.all.genes <- length(unique(finemap_gene_res$gene_id))
+      n.filtered.genes <- length(unique(finemap_gene_res$gene_id[!is.na(finemap_gene_res$gene_name)]))
+      # loginfo("Drop unannotated genes: %d -> %d genes", n.all.genes, n.filtered.genes)
+      finemap_gene_res <- finemap_gene_res[!is.na(finemap_gene_res$gene_name), , drop=FALSE]
     }
 
     # split PIPs for molecular traits (e.g. introns) mapped to multiple genes

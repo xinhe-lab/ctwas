@@ -190,7 +190,7 @@ make_locusplot <- function(finemap_res,
                                     levels = c(setdiff(unique(finemap_region_res$context), "SNP"), "SNP"))
 
   finemap_region_res$object_type <- factor(finemap_region_res$object_type,
-                                           level = c("non-SNP", "SNP"))
+                                           levels = c("non-SNP", "SNP"))
 
   # set shapes, sizes, and alpha for data points
   point.shapes <- point.shapes[1:length(unique(finemap_region_res$type))]
