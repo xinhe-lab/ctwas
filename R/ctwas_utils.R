@@ -209,21 +209,40 @@ read_var_info <- function(var_info_file){
   return(var_info)
 }
 
-
 # run mclapply and stop if not all cores delivered results
 #' @importFrom parallel mclapply
-mclapply_check <- function(X, FUN, mc.cores = 1, stop_if_missing = TRUE){
+#' @importFrom logging loginfo logwarn logerror
+mclapply_check <- function(X, FUN, mc.cores = 1, stop_if_missing = TRUE) {
   if (length(X) <= 1 || mc.cores == 1) {
     res <- lapply(X, FUN)
+    return(res)
   } else {
-    res <- mclapply(X, FUN, mc.cores = mc.cores)
-    if (any(sapply(res, is.null))) {
-      if (stop_if_missing) {
-        stop("mclapply returned NULL or incomplete results. Try bigger memory or fewer cores.")
-      } else {
-        warning("mclapply returned NULL or incomplete results.")
+    tryCatch( {
+      logging::loginfo("Running with %d cores. ", mc.cores)
+      res <- mclapply(X, FUN, mc.cores = mc.cores)
+      if (any(sapply(res, is.null))) {
+        warning("Results include NULL!")
       }
-    }
+      return(res)
+    },
+    warning = function(w) {
+      warning(w)
+      if (grepl("did not deliver results|jobs will be affected", w$message)) {
+        mclapply_message <- "mclapply failed, probably due to insufficent memory!"
+        if (stop_if_missing) {
+          stop(mclapply_message)
+        } else {
+          logging::logwarn(mclapply_message)
+        }
+      }
+      return(res)
+    },
+    error = function(e) {
+      logging::logerror(e$message)
+      stop(e)
+    })
   }
-  return(res)
 }
+
+
+
