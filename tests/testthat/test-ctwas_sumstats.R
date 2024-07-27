@@ -27,14 +27,14 @@ test_that("ctwas_sumstats works", {
   })
 
   expect_equal(ctwas_res, precomputed_ctwas_res)
-  expect_equal(ctwas_res$z_gene, precomputed_ctwas_res$z_gene)
-  expect_equal(ctwas_res$param, precomputed_ctwas_res$param)
-  expect_equal(ctwas_res$finemap_res, precomputed_ctwas_res$finemap_res)
-  expect_equal(ctwas_res$boundary_genes, precomputed_ctwas_res$boundary_genes)
+  # expect_equal(ctwas_res$z_gene, precomputed_ctwas_res$z_gene)
+  # expect_equal(ctwas_res$param, precomputed_ctwas_res$param)
+  # expect_equal(ctwas_res$finemap_res, precomputed_ctwas_res$finemap_res)
+  # expect_equal(ctwas_res$boundary_genes, precomputed_ctwas_res$boundary_genes)
 
 })
 
-test_that("ctwas_sumstats works", {
+test_that("ctwas_sumstats with nonSNP_PIP filtering works", {
 
   LD_map <- readRDS(system.file("extdata/sample_data", "LDL_example.LD_map.RDS", package = "ctwas"))
   skip_if_no_LD_file(LD_map$LD_file)

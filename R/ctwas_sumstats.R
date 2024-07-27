@@ -127,17 +127,17 @@ ctwas_sumstats <- function(
   if (anyNA(z_snp))
     stop("z_snp contains missing values!")
 
+  if (!inherits(snp_map,"list"))
+    stop("'snp_map' should be a list.")
+
+  if (!inherits(LD_map,"data.frame"))
+    stop("'LD_map' should be a data frame")
+
   if (!inherits(weights,"list"))
-    stop("'weights' should be a list object.")
+    stop("'weights' should be a list.")
 
   if (any(sapply(weights, is.null)))
     stop("weights contain NULL, remove empty weights!")
-
-  if (!inherits(LD_map,"list"))
-    stop("'LD_map' should be a list.")
-
-  if (!inherits(snp_map,"list"))
-    stop("'snp_map' should be a list.")
 
   if (thin > 1 | thin <= 0)
     stop("thin needs to be in (0,1]")

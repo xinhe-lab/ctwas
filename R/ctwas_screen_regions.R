@@ -105,9 +105,8 @@ screen_regions <- function(region_data,
     if (!inherits(weights,"list"))
       stop("'weights' should be a list.")
 
-    if (any(sapply(weights, is.null))) {
+    if (any(sapply(weights, is.null)))
       stop("weights contain NULL, remove empty weights!")
-    }
   }
 
   # adjust to account for thin argument
@@ -258,9 +257,8 @@ estimate_region_L <- function(region_data,
   if (!inherits(weights,"list"))
     stop("'weights' should be a list.")
 
-  if (any(sapply(weights, is.null))) {
+  if (any(sapply(weights, is.null)))
     stop("weights contain NULL, remove empty weights!")
-  }
 
   finemap_unif_prior_res <- finemap_regions(region_data,
                                             use_LD = TRUE,
