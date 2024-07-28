@@ -211,7 +211,7 @@ read_var_info <- function(var_info_file){
 
 # run mclapply and stop if not all cores delivered results
 #' @importFrom parallel mclapply
-#' @importFrom logging loginfo logwarn logerror
+#' @importFrom logging logwarn
 mclapply_check <- function(X, FUN, mc.cores = 1, stop_if_missing = TRUE) {
   if (length(X) <= 1 || mc.cores == 1) {
     res <- lapply(X, FUN)
@@ -220,7 +220,7 @@ mclapply_check <- function(X, FUN, mc.cores = 1, stop_if_missing = TRUE) {
     tryCatch( {
       res <- mclapply(X, FUN, mc.cores = mc.cores)
       if (any(sapply(res, is.null))) {
-        warning("Results include NULL!")
+        logwarn("mclapply returns NULL in the output!")
       }
       return(res)
     },
@@ -231,13 +231,12 @@ mclapply_check <- function(X, FUN, mc.cores = 1, stop_if_missing = TRUE) {
         if (stop_if_missing) {
           stop(mclapply_message)
         } else {
-          logging::logwarn(mclapply_message)
+          logwarn(mclapply_message)
         }
       }
       return(res)
     },
     error = function(e) {
-      logging::logerror(e$message)
       stop(e)
     })
   }
