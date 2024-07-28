@@ -218,7 +218,6 @@ mclapply_check <- function(X, FUN, mc.cores = 1, stop_if_missing = TRUE) {
     return(res)
   } else {
     tryCatch( {
-      logging::loginfo("Running with %d cores. ", mc.cores)
       res <- mclapply(X, FUN, mc.cores = mc.cores)
       if (any(sapply(res, is.null))) {
         warning("Results include NULL!")
