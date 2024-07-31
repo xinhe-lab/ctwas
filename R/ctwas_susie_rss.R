@@ -47,8 +47,18 @@ anno_susie <- function(susie_res,
                        z = NULL,
                        include_cs_index = TRUE) {
 
-  gene_df <- data.frame(id = gids, group = "gene")
-  snp_df <- data.frame(id = sids, group = "SNP")
+  if (length(gids) > 0) {
+    gene_df <- data.frame(id = gids, group = "gene")
+  } else {
+    gene_df <- NULL
+  }
+
+  if (length(sids) > 0) {
+    snp_df <- data.frame(id = sids, group = "SNP")
+  } else {
+    snp_df <- NULL
+  }
+
   susie_res_df <- rbind(gene_df, snp_df)
 
   if (!is.null(z)) {
