@@ -32,8 +32,8 @@
 #' @param min_nonSNP_PIP Regions with non-SNP PIP >= \code{min_nonSNP_PIP}
 #' will be selected to run finemapping using full SNPs.
 #'
-#' @param p_single_effect Regions with probability greater than \code{p_single_effect} of
-#' having 1 or fewer effects will be used for parameter estimation
+#' @param min_p_single_effect Regions with probability >= \code{min_p_single_effect}
+#' of having at most one causal effect will be selected for the final EM step.
 #'
 #' @param maxSNP Inf or integer. Maximum number of SNPs in a region. Default is
 #' Inf, no limit. This can be useful if there are many SNPs in a region and you don't
@@ -176,7 +176,7 @@ ctwas_sumstats <- function(
                      init_group_prior_var = init_group_prior_var,
                      niter_prefit = niter_prefit,
                      niter = niter,
-                     p_single_effect = p_single_effect,
+                     min_p_single_effect = min_p_single_effect,
                      ncore = ncore,
                      verbose = verbose,
                      ...)

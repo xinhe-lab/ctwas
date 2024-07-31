@@ -6,14 +6,16 @@
 #'
 #' @param init_group_prior_var a vector of initial values of prior variances for SNPs and gene effects.
 #'
-#' @param niter_prefit the number of iterations of the E-M algorithm to perform during the initial parameter estimation step
+#' @param niter_prefit the number of iterations of the E-M algorithm to perform
+#' during the initial parameter estimation step
 #'
-#' @param niter the number of iterations of the E-M algorithm to perform during the complete parameter estimation step
+#' @param niter the number of iterations of the E-M algorithm to perform during
+#' the complete parameter estimation step
 #'
-#' @param p_single_effect Regions with probability greater than \code{p_single_effect} of
-#' having at most one causal effect will be used selected for the complete parameter estimation step
+#' @param min_p_single_effect Regions with probability >= \code{min_p_single_effect}
+#' of having at most one causal effect will be selected for the final EM step.
 #'
-#' @param use_null_weight TRUE/FALSE. If TRUE, allow for a probability of no effect in susie
+#' @param use_null_weight If TRUE, allow for a probability of no effect in susie
 #'
 #' @param minvar minimum number of variables (snps and genes) in a region
 #'
@@ -23,7 +25,7 @@
 #'
 #' @param logfile the log file, if NULL will print log info on screen
 #'
-#' @param verbose TRUE/FALSE. If TRUE, print detail messages
+#' @param verbose If TRUE, print detail messages
 #'
 #' @param ... Additional arguments of \code{susie_rss}.
 #'
@@ -39,7 +41,7 @@ est_param <- function(
     init_group_prior_var = NULL,
     niter_prefit = 3,
     niter = 30,
-    p_single_effect = 0.8,
+    min_p_single_effect = 0.8,
     use_null_weight = TRUE,
     minvar = 2,
     mingene = 1,
@@ -72,23 +74,27 @@ est_param <- function(
     init_group_prior["SNP"] <- init_group_prior["SNP"]/thin
   }
 
-  # remove regions with fewer than minvar variables
-  if (minvar > 0) {
-    n.var <- sapply(region_data, function(x){length(x$gid) + length(x$sid)})
-    drop.idx <- which(n.var < minvar)
-    if (length(drop.idx) > 0){
-      loginfo("Remove %d regions with number of variables < %d.", length(drop.idx), minvar)
-      region_data[drop.idx] <- NULL
+  region_ids <- names(region_data)
+  n_gids <- sapply(region_data, function(x){length(x$gid)})
+  n_sids <- sapply(region_data, function(x){length(x$sid)})
+  p_single_effect_df <- data.frame(region_id = region_ids,
+                                   p_single_effect = NA)
+
+  # skip regions with fewer than mingene genes
+  if (mingene > 0) {
+    skip_region_ids <- region_ids[n_gids < mingene]
+    if (length(skip_region_ids) > 0){
+      loginfo("Skip %d regions with number of genes < %d.", length(skip_region_ids), mingene)
+      region_data[skip_region_ids] <- NULL
     }
   }
 
-  # remove regions with fewer than mingene genes
-  if (mingene > 0) {
-    n.gid <- sapply(region_data, function(x){length(x$gid)})
-    drop.idx <- which(n.gid < mingene)
-    if (length(drop.idx) > 0){
-      loginfo("Remove %d regions with number of genes < %d.", length(drop.idx), mingene)
-      region_data[drop.idx] <- NULL
+  # skip regions with fewer than minvar variables
+  if (minvar > 0) {
+    skip_region_ids <- region_ids[(n_gids + n_sids) < minvar]
+    if (length(skip_region_ids) > 0){
+      loginfo("Skip %d regions with number of variables < %d.", length(skip_region_ids), minvar)
+      region_data[skip_region_ids] <- NULL
     }
   }
 
@@ -102,16 +108,21 @@ est_param <- function(
                           ncore = ncore,
                           verbose = verbose,
                           ...)
-  loginfo("Roughly estimated group_prior {%s}: {%s} (thin = %s)", names(EM_prefit_res$group_prior), format(EM_prefit_res$group_prior, digits = 4), thin)
-  loginfo("Roughly estimated group_prior_var {%s}: {%s}", names(EM_prefit_res$group_prior_var), format(EM_prefit_res$group_prior_var, digits = 4))
+  adjusted_EM_prefit_group_prior <- EM_prefit_res$group_prior
+  adjusted_EM_prefit_group_prior["SNP"] <- EM_prefit_res$group_prior["SNP"] * thin
+  loginfo("Roughly estimated group_prior {%s}: {%s}",
+          names(EM_prefit_res$group_prior), format(adjusted_EM_prefit_group_prior, digits = 4))
+  loginfo("Roughly estimated group_prior_var {%s}: {%s}",
+          names(EM_prefit_res$group_prior_var), format(EM_prefit_res$group_prior_var, digits = 4))
   group_size <- EM_prefit_res$group_size
 
   # Select regions with single effect
-  region_single_effect_df <- compute_region_p_single_effect(region_data, EM_prefit_res$group_prior)
-  region_single_effect_df <- region_single_effect_df[region_single_effect_df$p_single_effect >= p_single_effect, ]
-  selected_region_ids <- region_single_effect_df$region_id
-  loginfo("Selected %d regions with P(single effect) >= %s", length(selected_region_ids), p_single_effect)
+  p_single_effect <- compute_p_single_effect(region_data, EM_prefit_res$group_prior)
+  selected_region_ids <- names(p_single_effect)[p_single_effect >= min_p_single_effect]
+  loginfo("Selected %d regions with p(single effect) >= %s", length(selected_region_ids), min_p_single_effect)
   selected_region_data <- region_data[selected_region_ids]
+  idx <- match(names(p_single_effect), p_single_effect_df$region_id)
+  p_single_effect_df$p_single_effect[idx] <- p_single_effect
 
   # Run EM for more (niter) iterations, getting rough estimates
   loginfo("Run EM for %d iterations, getting accurate estimates ...", niter)
@@ -125,51 +136,52 @@ est_param <- function(
                    ...)
   group_prior <- EM_res$group_prior
   group_prior_var <- EM_res$group_prior_var
-  group_prior_var_structure <- EM_res$group_prior_var_structure
-  loginfo("Estimated group_prior {%s}: {%s} (thin = %s)", names(group_prior), format(group_prior, digits = 4), thin)
-  loginfo("Estimated group_prior_var {%s}: {%s}", names(group_prior_var), format(group_prior_var, digits = 4))
 
   # record estimated parameters from all iterations
   group_prior_iters <- EM_res$group_prior_iters
   group_prior_var_iters <- EM_res$group_prior_var_iters
 
   # adjust parameters to account for thin
-  if (thin != 1){
-    loginfo("Adjust parameters to account for thin (thin = %s)", thin)
+  if (thin < 1){
     group_prior["SNP"] <- group_prior["SNP"] * thin
     group_prior_iters["SNP",] <- group_prior_iters["SNP",] * thin
     group_size["SNP"] <- group_size["SNP"] / thin
   }
   group_size <- group_size[names(group_prior)]
+
   loginfo("Estimated group_prior {%s}: {%s}", names(group_prior), format(group_prior, digits = 4))
   loginfo("Estimated group_prior_var {%s}: {%s}", names(group_prior_var), format(group_prior_var, digits = 4))
-  loginfo("Estimated group_size {%s}: {%s}", names(group_size), group_size)
+  loginfo("group_size {%s}: {%s}", names(group_size), group_size)
 
   param <- list("group_prior" = group_prior,
                 "group_prior_var" = group_prior_var,
                 "group_prior_iters" = group_prior_iters,
                 "group_prior_var_iters" = group_prior_var_iters,
-                "group_size" = group_size)
+                "group_size" = group_size,
+                "p_single_effect" = p_single_effect_df)
 
   return(param)
 }
 
 
-# Select single effect regions
-compute_region_p_single_effect <- function(region_data, group_prior){
+# compute p(single effect)
+compute_p_single_effect <- function(region_data, group_prior){
+
+  if (!inherits(region_data,"list"))
+    stop("'region_data' should be a list.")
+
   region_ids <- names(region_data)
   if (length(region_ids) == 0)
     stop("No region_ids in region_data!")
 
   p_single_effect <- sapply(region_ids, function(region_id){
-    res <- extract_region_data(region_data, region_id)
-    gs_group <- res$gs_group
+    gs_group <- extract_region_data(region_data, region_id)$gs_group
     group_size <- table(gs_group)[names(group_prior)]
     group_size[is.na(group_size)] <- 0
     p1 <- prod((1-group_prior)^group_size) * (1 + sum(group_size*(group_prior/(1-group_prior))))
     p1
   })
-  return(data.frame(region_id = region_ids, p_single_effect = p_single_effect))
-
+  names(p_single_effect) <- region_ids
+  return(p_single_effect)
 }
 
