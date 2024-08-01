@@ -52,8 +52,8 @@
 merge_region_data <- function(boundary_genes,
                               region_data,
                               region_info,
-                              snp_map,
                               LD_map,
+                              snp_map,
                               weights,
                               z_snp,
                               z_gene,
@@ -126,7 +126,7 @@ merge_region_data <- function(boundary_genes,
     merged_region_L <- 1
   } else {
     if (estimate_L) {
-      loginfo("Estimating L with uniform prior ...")
+      loginfo("Estimating L ...")
       merged_region_L <- estimate_region_L(region_data = merged_region_data,
                                            LD_map = merged_LD_map,
                                            snp_map = merged_snp_map,
@@ -151,12 +151,12 @@ merge_region_data <- function(boundary_genes,
                                              ncore = ncore)
   }
 
-  return(list(merged_region_data = merged_region_data,
-              merged_region_info = merged_region_info,
-              merged_LD_map = merged_LD_map,
-              merged_snp_map = merged_snp_map,
-              merged_region_id_map = merged_region_id_map,
-              merged_region_L = merged_region_L))
+  return(list("merged_region_data" = merged_region_data,
+              "merged_region_info" = merged_region_info,
+              "merged_LD_map" = merged_LD_map,
+              "merged_snp_map" = merged_snp_map,
+              "merged_region_id_map" = merged_region_id_map,
+              "merged_region_L" = merged_region_L))
 }
 
 # Identify overlapping regions
@@ -196,6 +196,7 @@ label_overlapping_regions <- function(boundary_genes) {
 
   boundary_genes <- do.call(rbind, boundary_genes_list)
   rownames(boundary_genes) <- NULL
+
   return(boundary_genes)
 }
 
@@ -247,10 +248,10 @@ create_merged_snp_LD_map <- function(boundary_genes,
 
   loginfo("Merged %d boundary genes into %d regions", nrow(boundary_genes), nrow(merged_region_info))
 
-  return(list(merged_region_info = merged_region_info,
-              merged_LD_map = merged_LD_map,
-              merged_snp_map = merged_snp_map,
-              merged_region_id_map = merged_region_id_map))
+  return(list("merged_region_info" = merged_region_info,
+              "merged_LD_map" = merged_LD_map,
+              "merged_snp_map" = merged_snp_map,
+              "merged_region_id_map" = merged_region_id_map))
 }
 
 

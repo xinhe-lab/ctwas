@@ -7,9 +7,10 @@
 screen_regions(
   region_data,
   use_LD = TRUE,
-  LD_map = NULL,
-  snp_map = NULL,
-  weights = NULL,
+  LD_map,
+  snp_map,
+  weights,
+  z_snp,
   group_prior = NULL,
   group_prior_var = NULL,
   L = 5,
@@ -18,6 +19,8 @@ screen_regions(
   filter_L = TRUE,
   filter_nonSNP_PIP = FALSE,
   min_nonSNP_PIP = 0.5,
+  expand = TRUE,
+  maxSNP = Inf,
   LD_format = c("rds", "rdata", "mtx", "csv", "txt", "custom"),
   LD_loader_fun,
   ncore = 1,
@@ -37,6 +40,8 @@ screen_regions(
 
 \item{weights}{a list of weights for each gene. Required when \code{use_LD = TRUE}.}
 
+\item{z_snp}{A data frame with columns: "id", "z", giving the z-scores for SNPs.}
+
 \item{group_prior}{a vector of two prior inclusion probabilities for SNPs and genes.}
 
 \item{group_prior_var}{a vector of two prior variances for SNPs and gene effects.}
@@ -54,6 +59,12 @@ screen_regions(
 \item{min_nonSNP_PIP}{If screening by non-SNP PIPs,
 regions with total non-SNP PIP >= \code{min_nonSNP_PIP}
 will be selected to run finemapping using full SNPs.}
+
+\item{expand}{If TRUE, expand screened region data with all SNPs}
+
+\item{maxSNP}{Inf or integer. Maximum number of SNPs in a region. Default is
+Inf, no limit. This can be useful if there are many SNPs in a region and you don't
+have enough memory to run the program.}
 
 \item{LD_format}{file format for LD matrix. If "custom", use a user defined
 \code{LD_loader_fun()} function to load LD matrix.}

@@ -8,9 +8,9 @@ finemap_region(
   region_data,
   region_id,
   use_LD = TRUE,
-  LD_map = NULL,
-  snp_map = NULL,
-  weights = NULL,
+  LD_map,
+  snp_map,
+  weights,
   L = 5,
   group_prior = NULL,
   group_prior_var = NULL,
@@ -46,7 +46,7 @@ finemap_region(
 
 \item{group_prior_var}{a vector of two prior variances for SNPs and gene effects.}
 
-\item{use_null_weight}{TRUE/FALSE. If TRUE, allow for a probability of no effect in susie}
+\item{use_null_weight}{If TRUE, allow for a probability of no effect in susie}
 
 \item{coverage}{A number between 0 and 1 specifying the \dQuote{coverage} of the estimated confidence sets}
 
@@ -55,9 +55,9 @@ credible set. The default, 0.5, corresponds to a squared
 correlation of 0.25, which is a commonly used threshold for
 genotype data in genetic studies.}
 
-\item{force_compute_cor}{TRUE/FALSE. If TRUE, force computing correlation (R) matrices}
+\item{force_compute_cor}{If TRUE, force computing correlation (R) matrices}
 
-\item{save_cor}{TRUE/FALSE. If TRUE, save correlation (R) matrices to \code{cor_dir}}
+\item{save_cor}{If TRUE, save correlation (R) matrices to \code{cor_dir}}
 
 \item{cor_dir}{a string, the directory to store correlation (R) matrices}
 
@@ -66,9 +66,9 @@ genotype data in genetic studies.}
 
 \item{LD_loader_fun}{a user defined function to load LD matrix when \code{LD_format = "custom"}.}
 
-\item{include_cs_index}{TRUE/FALSE. If TRUE, add cs_index to finemapping results.}
+\item{include_cs_index}{If TRUE, add cs_index to finemapping results.}
 
-\item{verbose}{TRUE/FALSE. If TRUE, print detail messages}
+\item{verbose}{If TRUE, print detail messages}
 
 \item{...}{Additional arguments of \code{susie_rss}.}
 }

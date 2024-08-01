@@ -8,8 +8,8 @@ merge_region_data(
   boundary_genes,
   region_data,
   region_info,
-  snp_map,
   LD_map,
+  snp_map,
   weights,
   z_snp,
   z_gene,
@@ -33,9 +33,9 @@ merge_region_data(
 
 \item{region_info}{a data frame of region definitions}
 
-\item{snp_map}{a list of data frames with SNP-to-region map for the reference.}
-
 \item{LD_map}{a data frame with filenames of LD matrices for each of the regions.}
+
+\item{snp_map}{a list of data frames with SNP-to-region map for the reference.}
 
 \item{weights}{a list of preprocessed weights.}
 

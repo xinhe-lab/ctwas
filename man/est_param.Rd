@@ -10,7 +10,7 @@ est_param(
   init_group_prior_var = NULL,
   niter_prefit = 3,
   niter = 30,
-  p_single_effect = 0.8,
+  min_p_single_effect = 0.8,
   use_null_weight = TRUE,
   minvar = 2,
   mingene = 1,
@@ -27,14 +27,16 @@ est_param(
 
 \item{init_group_prior_var}{a vector of initial values of prior variances for SNPs and gene effects.}
 
-\item{niter_prefit}{the number of iterations of the E-M algorithm to perform during the initial parameter estimation step}
+\item{niter_prefit}{the number of iterations of the E-M algorithm to perform
+during the initial parameter estimation step}
 
-\item{niter}{the number of iterations of the E-M algorithm to perform during the complete parameter estimation step}
+\item{niter}{the number of iterations of the E-M algorithm to perform during
+the complete parameter estimation step}
 
-\item{p_single_effect}{Regions with probability greater than \code{p_single_effect} of
-having at most one causal effect will be used selected for the complete parameter estimation step}
+\item{min_p_single_effect}{Regions with probability >= \code{min_p_single_effect}
+of having at most one causal effect will be selected for the final EM step.}
 
-\item{use_null_weight}{TRUE/FALSE. If TRUE, allow for a probability of no effect in susie}
+\item{use_null_weight}{If TRUE, allow for a probability of no effect in susie}
 
 \item{minvar}{minimum number of variables (snps and genes) in a region}
 
@@ -44,7 +46,7 @@ having at most one causal effect will be used selected for the complete paramete
 
 \item{logfile}{the log file, if NULL will print log info on screen}
 
-\item{verbose}{TRUE/FALSE. If TRUE, print detail messages}
+\item{verbose}{If TRUE, print detail messages}
 
 \item{...}{Additional arguments of \code{susie_rss}.}
 }

@@ -215,19 +215,25 @@ read_var_info <- function(var_info_file){
 }
 
 
-# run mclapply and stop if not all cores delivered results
-mclapply_check <- function(X, FUN, mc.cores = 1){
+# run mclapply and check to see if NULL was found in mclapply output.
+#' @importFrom parallel mclapply
+#' @importFrom logging logwarn
+mclapply_check <- function(X, FUN, mc.cores = 1, stop_if_missing = FALSE){
   if (length(X) <= 1 || mc.cores == 1) {
-    lapply(X, FUN)
+    res <- lapply(X, FUN)
   } else {
-    tryCatch({
-      mclapply(X, FUN, mc.cores = mc.cores)
-    }, warning = function(w) {
-      if (grepl("not deliver results", w$message))
-        stop("Not all cores delivered results. Try rerun with bigger memory or fewer cores.")
+    res <- mclapply(X, FUN, mc.cores = mc.cores)
+    if (any(sapply(res, is.null))) {
+      msg <- paste("'NULL' found in mclapply output. Results may be incomplete.",
+                   "Try rerun with ncore = 1 or more memory!")
+      if (stop_if_missing) {
+        stop(msg)
+      } else {
+        logwarn(msg)
+      }
     }
-    )
   }
+  return(res)
 }
 
 

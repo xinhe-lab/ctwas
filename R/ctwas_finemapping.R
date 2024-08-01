@@ -1,3 +1,170 @@
+#' @title Runs cTWAS fine-mapping for regions
+#'
+#' @param region_data region_data to be finemapped
+#'
+#' @param use_LD If TRUE, use LD for finemapping. Otherwise, use "no-LD" version.
+#'
+#' @param LD_map a data frame with filenames of LD matrices for the regions. Required when \code{use_LD = TRUE}.
+#'
+#' @param snp_map a list of SNP-to-region map for the reference. Required when \code{use_LD = TRUE}.
+#'
+#' @param weights a list of preprocessed weights.
+#'
+#' @param L the number of effects or a vector of number of effects for each region.
+#'
+#' @param group_prior a vector of two prior inclusion probabilities for SNPs and genes.
+#'
+#' @param group_prior_var a vector of two prior variances for SNPs and gene effects.
+#'
+#' @param use_null_weight If TRUE, allow for a probability of no effect in susie
+#'
+#' @param coverage A number between 0 and 1 specifying the \dQuote{coverage} of the estimated confidence sets
+#'
+#' @param min_abs_corr Minimum absolute correlation allowed in a
+#'   credible set. The default, 0.5, corresponds to a squared
+#'   correlation of 0.25, which is a commonly used threshold for
+#'   genotype data in genetic studies.
+#'
+#' @param force_compute_cor If TRUE, force computing correlation (R) matrices
+#'
+#' @param save_cor If TRUE, save correlation (R) matrices to \code{cor_dir}
+#'
+#' @param cor_dir a string, the directory to store correlation (R) matrices
+#'
+#' @param LD_format file format for LD matrix. If "custom", use a user defined
+#' \code{LD_loader_fun()} function to load LD matrix.
+#'
+#' @param LD_loader_fun a user defined function to load LD matrix when \code{LD_format = "custom"}.
+#'
+#' @param include_cs_index If TRUE, add cs_index to finemapping results.
+#'
+#' @param ncore The number of cores used to parallelize computation over regions
+#'
+#' @param verbose If TRUE, print detail messages
+#'
+#' @param logfile the log file, if NULL will print log info on screen
+#'
+#' @param ... Additional arguments of \code{susie_rss}.
+#'
+#' @return a data frame of cTWAS finemapping results.
+#'
+#' @importFrom logging addHandler loginfo writeToFile
+#' @importFrom parallel mclapply
+#'
+#' @export
+#'
+finemap_regions <- function(region_data,
+                            use_LD = TRUE,
+                            LD_map,
+                            snp_map,
+                            weights,
+                            L = 5,
+                            group_prior = NULL,
+                            group_prior_var = NULL,
+                            use_null_weight = TRUE,
+                            coverage = 0.95,
+                            min_abs_corr = 0.5,
+                            force_compute_cor = FALSE,
+                            save_cor = FALSE,
+                            cor_dir = NULL,
+                            LD_format = c("rds", "rdata", "mtx", "csv", "txt", "custom"),
+                            LD_loader_fun,
+                            include_cs_index = TRUE,
+                            ncore = 1,
+                            verbose = FALSE,
+                            logfile = NULL,
+                            ...){
+
+  if (!is.null(logfile)){
+    addHandler(writeToFile, file=logfile, level='DEBUG')
+  }
+
+  if (use_LD){
+    loginfo("Fine-mapping %d regions using LD version ...", length(region_data))
+  } else {
+    loginfo("Fine-mapping %d regions using no-LD version ...", length(region_data))
+  }
+
+  # check inputs
+  LD_format <- match.arg(LD_format)
+
+  if (!inherits(region_data,"list"))
+    stop("'region_data' should be a list.")
+
+  if (use_LD) {
+    if (missing(LD_map) || missing(snp_map) || missing(weights))
+      stop("'LD_map', 'snp_map' and 'weights' are required when use_LD = TRUE")
+
+    if (!inherits(LD_map,"data.frame"))
+      stop("'LD_map' should be a data frame")
+
+    if (!inherits(snp_map,"list"))
+      stop("'snp_map' should be a list.")
+
+    if (!inherits(weights,"list"))
+      stop("'weights' should be a list.")
+
+    if (any(sapply(weights, is.null)))
+      stop("'weights' contain NULL, remove empty weights!")
+  }
+
+  # set L = 1 in no-LD version
+  if (!use_LD){
+    L <- 1
+  }
+
+  if (length(L) == 1) {
+    L <- rep(L, length(region_data))
+    names(L) <- names(region_data)
+  } else if (length(L) == length(region_data)) {
+    if (!all.equal(names(L), names(region_data)))
+      stop("the names of L do not match with region_data!")
+  } else {
+    stop("L needs to an integer or a vector of the same length as region_data!")
+  }
+
+  if (verbose) {
+    if (is.null(group_prior)) {
+      loginfo("Use uniform prior")
+    } else {
+      loginfo("group_prior {%s}: {%s}", names(group_prior), format(group_prior, digits = 4))
+      loginfo("group_prior_var {%s}: {%s}", names(group_prior_var), format(group_prior_var, digits = 4))
+    }
+  }
+
+  region_ids <- names(region_data)
+
+  finemap_res_list <- mclapply_check(region_ids, function(region_id){
+
+    finemap_region(region_data = region_data,
+                   region_id = region_id,
+                   use_LD = use_LD,
+                   LD_map = LD_map,
+                   snp_map = snp_map,
+                   weights = weights,
+                   L = L[region_id],
+                   group_prior = group_prior,
+                   group_prior_var = group_prior_var,
+                   use_null_weight = use_null_weight,
+                   coverage = coverage,
+                   min_abs_corr = min_abs_corr,
+                   force_compute_cor = force_compute_cor,
+                   save_cor = save_cor,
+                   cor_dir = cor_dir,
+                   LD_format = LD_format,
+                   LD_loader_fun = LD_loader_fun,
+                   include_cs_index = include_cs_index,
+                   verbose = verbose,
+                   ...)
+
+  }, mc.cores = ncore, stop_if_missing = TRUE)
+
+  finemap_res <- do.call(rbind, finemap_res_list)
+  rownames(finemap_res) <- NULL
+
+  return(finemap_res)
+}
+
 #' @title Runs cTWAS finemapping for a single region
 #'
 #' @param region_data a list object with data for the regions
@@ -18,7 +185,7 @@
 #'
 #' @param group_prior_var a vector of two prior variances for SNPs and gene effects.
 #'
-#' @param use_null_weight TRUE/FALSE. If TRUE, allow for a probability of no effect in susie
+#' @param use_null_weight If TRUE, allow for a probability of no effect in susie
 #'
 #' @param coverage A number between 0 and 1 specifying the \dQuote{coverage} of the estimated confidence sets
 #'
@@ -27,9 +194,9 @@
 #'   correlation of 0.25, which is a commonly used threshold for
 #'   genotype data in genetic studies.
 #'
-#' @param force_compute_cor TRUE/FALSE. If TRUE, force computing correlation (R) matrices
+#' @param force_compute_cor If TRUE, force computing correlation (R) matrices
 #'
-#' @param save_cor TRUE/FALSE. If TRUE, save correlation (R) matrices to \code{cor_dir}
+#' @param save_cor If TRUE, save correlation (R) matrices to \code{cor_dir}
 #'
 #' @param cor_dir a string, the directory to store correlation (R) matrices
 #'
@@ -38,9 +205,9 @@
 #'
 #' @param LD_loader_fun a user defined function to load LD matrix when \code{LD_format = "custom"}.
 #'
-#' @param include_cs_index TRUE/FALSE. If TRUE, add cs_index to finemapping results.
+#' @param include_cs_index If TRUE, add cs_index to finemapping results.
 #'
-#' @param verbose TRUE/FALSE. If TRUE, print detail messages
+#' @param verbose If TRUE, print detail messages
 #'
 #' @param ... Additional arguments of \code{susie_rss}.
 #'
@@ -54,9 +221,9 @@
 finemap_region <- function(region_data,
                            region_id,
                            use_LD = TRUE,
-                           LD_map = NULL,
-                           snp_map = NULL,
-                           weights = NULL,
+                           LD_map,
+                           snp_map,
+                           weights,
                            L = 5,
                            group_prior = NULL,
                            group_prior_var = NULL,
@@ -77,21 +244,33 @@ finemap_region <- function(region_data,
   }
 
   # check inputs
+  LD_format <- match.arg(LD_format)
+
   if (!inherits(region_data,"list")){
     stop("'region_data' should be a list.")
   }
 
-  if (!is.null(weights)){
-    if (!inherits(weights,"list")){
-      stop("'weights' should be a list.")
-    }
+  if (use_LD) {
+    if (missing(LD_map) || missing(snp_map) || missing(weights))
+      stop("'LD_map', 'snp_map' and 'weights' are required when use_LD = TRUE")
 
-    if (any(sapply(weights, is.null))) {
-      stop("weights contain NULL, remove empty weights!")
-    }
+    if (!inherits(LD_map,"data.frame"))
+      stop("'LD_map' should be a data frame")
+
+    if (!inherits(snp_map,"list"))
+      stop("'snp_map' should be a list.")
+
+    if (!inherits(weights,"list"))
+      stop("'weights' should be a list.")
+
+    if (any(sapply(weights, is.null)))
+      stop("'weights' contain NULL, remove empty weights!")
   }
 
-  LD_format <- match.arg(LD_format)
+  # Set L = 1 in no-LD version
+  if (!use_LD){
+    L <- 1
+  }
 
   # load input data for the region
   regiondata <- extract_region_data(region_data, region_id)
@@ -99,13 +278,14 @@ finemap_region <- function(region_data,
   sids <- regiondata$sid
   z <- regiondata$z
   gs_group <- regiondata$gs_group
+  groups <- regiondata$groups
+  rm(regiondata)
+
+  if (verbose){
+    loginfo("%d genes, %d SNPs in the region", length(gids), length(sids))
+  }
 
   # set pi_prior and V_prior based on group_prior and group_prior_var
-  if(!is.null(group_prior)){
-    groups <- names(group_prior)
-  }else{
-    groups <- unique(unlist(lapply(region_data, "[[", "groups")))
-  }
   res <- initiate_group_priors(group_prior[groups], group_prior_var[groups], groups)
   pi_prior <- res$pi_prior
   V_prior <- res$V_prior
@@ -119,8 +299,6 @@ finemap_region <- function(region_data,
   rm(res)
 
   if (!use_LD) {
-    # set L = 1 in no-LD version
-    L <- 1
     # use an identity matrix as R in no-LD version
     R <- diag(length(z))
     # do not include cs_index in no-LD version
@@ -172,160 +350,3 @@ finemap_region <- function(region_data,
 
 }
 
-#' @title Runs cTWAS finemapping for multiple regions
-#'
-#' @param region_data region_data to be finemapped
-#'
-#' @param use_LD If TRUE, use LD for finemapping. Otherwise, use "no-LD" version.
-#'
-#' @param LD_map a data frame with filenames of LD matrices for the regions. Required when \code{use_LD = TRUE}.
-#'
-#' @param snp_map a list of SNP-to-region map for the reference. Required when \code{use_LD = TRUE}.
-#'
-#' @param weights a list of preprocessed weights.
-#'
-#' @param L the number of effects or a vector of number of effects for each region.
-#'
-#' @param group_prior a vector of two prior inclusion probabilities for SNPs and genes.
-#'
-#' @param group_prior_var a vector of two prior variances for SNPs and gene effects.
-#'
-#' @param use_null_weight TRUE/FALSE. If TRUE, allow for a probability of no effect in susie
-#'
-#' @param coverage A number between 0 and 1 specifying the \dQuote{coverage} of the estimated confidence sets
-#'
-#' @param min_abs_corr Minimum absolute correlation allowed in a
-#'   credible set. The default, 0.5, corresponds to a squared
-#'   correlation of 0.25, which is a commonly used threshold for
-#'   genotype data in genetic studies.
-#'
-#' @param ncore The number of cores used to parallelize computation over regions
-#'
-#' @param force_compute_cor TRUE/FALSE. If TRUE, force computing correlation (R) matrices
-#'
-#' @param save_cor TRUE/FALSE. If TRUE, save correlation (R) matrices to \code{cor_dir}
-#'
-#' @param cor_dir a string, the directory to store correlation (R) matrices
-#'
-#' @param LD_format file format for LD matrix. If "custom", use a user defined
-#' \code{LD_loader_fun()} function to load LD matrix.
-#'
-#' @param LD_loader_fun a user defined function to load LD matrix when \code{LD_format = "custom"}.
-#'
-#' @param include_cs_index TRUE/FALSE. If TRUE, add cs_index to finemapping results.
-#'
-#' @param verbose TRUE/FALSE. If TRUE, print detail messages
-#'
-#' @param logfile the log file, if NULL will print log info on screen
-#'
-#' @param ... Additional arguments of \code{susie_rss}.
-#'
-#' @return a data frame of cTWAS finemapping results.
-#'
-#' @importFrom logging addHandler loginfo writeToFile
-#' @importFrom parallel mclapply
-#'
-#' @export
-#'
-finemap_regions <- function(region_data,
-                            use_LD = TRUE,
-                            LD_map = NULL,
-                            snp_map = NULL,
-                            weights = NULL,
-                            L = 5,
-                            group_prior = NULL,
-                            group_prior_var = NULL,
-                            use_null_weight = TRUE,
-                            coverage = 0.95,
-                            min_abs_corr = 0.5,
-                            ncore = 1,
-                            force_compute_cor = FALSE,
-                            save_cor = FALSE,
-                            cor_dir = NULL,
-                            LD_format = c("rds", "rdata", "mtx", "csv", "txt", "custom"),
-                            LD_loader_fun,
-                            include_cs_index = TRUE,
-                            verbose = FALSE,
-                            logfile = NULL,
-                            ...){
-
-  if (!is.null(logfile)){
-    addHandler(writeToFile, file= logfile, level='DEBUG')
-  }
-
-  if (use_LD){
-    loginfo("Fine-mapping %d regions using LD version ...", length(region_data))
-  } else {
-    loginfo("Fine-mapping %d regions using no-LD version ...", length(region_data))
-  }
-
-  if (use_LD) {
-    if (is.null(LD_map) || is.null(snp_map) || is.null(weights)) {
-      stop("LD_map, snp_map and weights are required when use_LD = TRUE")
-    }
-  }
-
-  # check inputs
-  if (!inherits(region_data,"list")){
-    stop("'region_data' should be a list.")
-  }
-
-  if (!is.null(weights)){
-    if (!inherits(weights,"list")){
-      stop("'weights' should be a list.")
-    }
-
-    if (any(sapply(weights, is.null))) {
-      stop("weights contain NULL, remove empty weights!")
-    }
-  }
-
-  LD_format <- match.arg(LD_format)
-
-  if (!use_LD) {
-    if (L != 1){
-      loginfo("Set L = 1 in no-LD version")
-      L <- 1
-    }
-  }
-
-  region_ids <- names(region_data)
-
-  finemap_region_res_list <- mclapply_check(region_ids, function(region_id){
-
-    if (length(L) == 1) {
-      region_L <- L
-    } else if (length(L) > 1 && length(L) == length(region_data)) {
-      region_L <- L[region_id]
-    } else{
-      stop("L needs to an integer or a vector of the same length as region_data")
-    }
-
-    finemap_region(region_data = region_data,
-                   region_id = region_id,
-                   use_LD = use_LD,
-                   LD_map = LD_map,
-                   snp_map = snp_map,
-                   weights = weights,
-                   L = region_L,
-                   group_prior = group_prior,
-                   group_prior_var = group_prior_var,
-                   use_null_weight = use_null_weight,
-                   coverage = coverage,
-                   min_abs_corr = min_abs_corr,
-                   force_compute_cor = force_compute_cor,
-                   save_cor = save_cor,
-                   cor_dir = cor_dir,
-                   LD_format = LD_format,
-                   LD_loader_fun = LD_loader_fun,
-                   include_cs_index = include_cs_index,
-                   verbose = verbose,
-                   ...)
-
-  }, mc.cores = ncore)
-
-  finemap_res <- do.call(rbind, finemap_region_res_list)
-  rownames(finemap_res) <- NULL
-
-  return(finemap_res)
-}

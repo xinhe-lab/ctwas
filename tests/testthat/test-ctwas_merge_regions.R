@@ -19,6 +19,7 @@ test_that("merge_region_data works", {
                              z_snp = z_snp,
                              z_gene = z_gene,
                              use_LD = FALSE,
+                             expand = TRUE,
                              maxSNP = 20000)
     merged_region_data <- res$merged_region_data
     merged_region_info <- res$merged_region_info
@@ -55,6 +56,7 @@ test_that("merge_region_data and finemapping without LD works", {
                              z_snp = z_snp,
                              z_gene = z_gene,
                              use_LD = FALSE,
+                             expand = TRUE,
                              maxSNP = 20000)
     merged_region_data <- res$merged_region_data
     merged_region_info <- res$merged_region_info
@@ -105,6 +107,7 @@ test_that("merge_region_data and finemapping with LD works", {
                                           z_snp = z_snp,
                                           z_gene = z_gene,
                                           use_LD = TRUE,
+                                          expand = TRUE,
                                           maxSNP = 20000)
     merged_region_data <- merge_region_res$merged_region_data
     merged_region_info <- merge_region_res$merged_region_info

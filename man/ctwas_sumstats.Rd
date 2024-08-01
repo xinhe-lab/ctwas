@@ -8,9 +8,9 @@ ctwas_sumstats(
   z_snp,
   weights,
   region_info,
-  snp_map,
   LD_map,
-  z_gene = NULL,
+  snp_map,
+  z_gene,
   thin = 0.1,
   niter_prefit = 3,
   niter = 30,
@@ -20,7 +20,7 @@ ctwas_sumstats(
   filter_L = TRUE,
   filter_nonSNP_PIP = FALSE,
   min_nonSNP_PIP = 0.5,
-  p_single_effect = 0.8,
+  min_p_single_effect = 0.8,
   maxSNP = Inf,
   use_null_weight = TRUE,
   coverage = 0.95,
@@ -45,9 +45,9 @@ giving the z scores for snps. "A1" is effect allele. "A2" is the other allele.}
 
 \item{region_info}{a data frame of region definitions.}
 
-\item{snp_map}{a list of data frames with SNP-to-region map for the reference.}
-
 \item{LD_map}{a data frame with filenames of LD matrices for each of the regions.}
+
+\item{snp_map}{a list of data frames with SNP-to-region map for the reference.}
 
 \item{z_gene}{A data frame with columns: "id", "z", giving the z-scores for genes.}
 
@@ -70,8 +70,8 @@ giving the z scores for snps. "A1" is effect allele. "A2" is the other allele.}
 \item{min_nonSNP_PIP}{Regions with non-SNP PIP >= \code{min_nonSNP_PIP}
 will be selected to run finemapping using full SNPs.}
 
-\item{p_single_effect}{Regions with probability greater than \code{p_single_effect} of
-having 1 or fewer effects will be used for parameter estimation}
+\item{min_p_single_effect}{Regions with probability >= \code{min_p_single_effect}
+of having at most one causal effect will be selected for the final EM step.}
 
 \item{maxSNP}{Inf or integer. Maximum number of SNPs in a region. Default is
 Inf, no limit. This can be useful if there are many SNPs in a region and you don't

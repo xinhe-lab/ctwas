@@ -55,7 +55,7 @@ diagnose_LD_mismatch_susie <- function(z_snp,
     compute_region_condz(region_id, LD_map, snp_map, z_snp, gwas_n,
                          LD_format = LD_format,
                          LD_loader_fun = LD_loader_fun)
-  }, mc.cores = ncore)
+  }, mc.cores = ncore, stop_if_missing = TRUE)
 
   names(condz_list) <- region_ids
   condz_stats <- rbindlist(condz_list, idcol = "region_id")
@@ -75,7 +75,11 @@ diagnose_LD_mismatch_susie <- function(z_snp,
 #
 #' @importFrom stats pchisq
 #' @importFrom Matrix bdiag
-compute_region_condz <- function(region_id, LD_map, snp_map, z_snp, gwas_n,
+compute_region_condz <- function(region_id,
+                                 LD_map,
+                                 snp_map,
+                                 z_snp,
+                                 gwas_n,
                                  LD_format = c("rds", "rdata", "mtx", "csv", "txt", "custom"),
                                  LD_loader_fun){
 
@@ -98,9 +102,6 @@ compute_region_condz <- function(region_id, LD_map, snp_map, z_snp, gwas_n,
   region_z_snp <- z_snp[z_snp$id %in% snpinfo$id,]
   sidx <- match(region_z_snp$id, snpinfo$id)
   region_R_snp <- R_snp[sidx, sidx]
-
-  # # Estimate lambda (consistency) between the z-scores and LD matrix
-  # lambda <- estimate_s_rss(z = z.locus$z, R = R.locus, n = gwas_n)
 
   # Compute expected z-scores based on conditional distribution of z-scores
   condz_stats <- kriging_rss(z = region_z_snp$z, R = region_R_snp, n = gwas_n)$conditional_dist
@@ -128,7 +129,10 @@ compute_region_condz <- function(region_id, LD_map, snp_map, z_snp, gwas_n,
 #'
 #' @export
 #'
-get_problematic_genes <- function(problematic_snps, weights, z_gene, z_thresh = 3){
+get_problematic_genes <- function(problematic_snps,
+                                  weights,
+                                  z_gene,
+                                  z_thresh = 3){
 
   if (length(problematic_snps) == 0) {
     loginfo('No problematic SNPs')

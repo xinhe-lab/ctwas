@@ -9,6 +9,7 @@ estimate_region_L(
   LD_map,
   snp_map,
   weights,
+  init_L = 5,
   LD_format = c("rds", "rdata", "mtx", "csv", "txt", "custom"),
   LD_loader_fun,
   ncore = 1,

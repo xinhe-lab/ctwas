@@ -7,9 +7,9 @@
 #'
 #' @param region_info a data frame of region definitions.
 #'
-#' @param snp_map a list of data frames with SNP-to-region map for the reference.
-#'
 #' @param LD_map a data frame with filenames of LD matrices for each of the regions.
+#'
+#' @param snp_map a list of data frames with SNP-to-region map for the reference.
 #'
 #' @param z_gene A data frame with columns: "id", "z", giving the z-scores for genes.
 #'
@@ -80,9 +80,9 @@ ctwas_sumstats <- function(
     z_snp,
     weights,
     region_info,
-    snp_map,
     LD_map,
-    z_gene = NULL,
+    snp_map,
+    z_gene,
     thin = 0.1,
     niter_prefit = 3,
     niter = 30,
@@ -92,7 +92,7 @@ ctwas_sumstats <- function(
     filter_L = TRUE,
     filter_nonSNP_PIP = FALSE,
     min_nonSNP_PIP = 0.5,
-    p_single_effect = 0.8,
+    min_p_single_effect = 0.8,
     maxSNP = Inf,
     use_null_weight = TRUE,
     coverage = 0.95,
@@ -115,37 +115,39 @@ ctwas_sumstats <- function(
   # check inputs
   LD_format <- match.arg(LD_format)
 
-  if (anyNA(z_snp)){
+  if (anyNA(z_snp))
     stop("z_snp contains missing values!")
-  }
 
-  if (!inherits(weights,"list")){
-    stop("'weights' should be a list object.")
-  }
+  if (!inherits(LD_map,"data.frame"))
+    stop("'LD_map' should be a data frame")
 
-  if (any(sapply(weights, is.null))) {
+  if (!inherits(snp_map,"list"))
+    stop("'snp_map' should be a list.")
+
+  if (!inherits(weights,"list"))
+    stop("'weights' should be a list.")
+
+  if (any(sapply(weights, is.null)))
     stop("weights contain NULL, remove empty weights!")
-  }
 
-  if (thin > 1 | thin <= 0){
+  if (thin > 1 | thin <= 0)
     stop("thin needs to be in (0,1]")
-  }
 
-  if (!is.null(outputdir)) {
+
+  if (!is.null(outputdir))
     dir.create(outputdir, showWarnings=FALSE, recursive=TRUE)
-  }
 
   # Compute gene z-scores
-  if (is.null(z_gene)) {
+  if (missing(z_gene)) {
     z_gene <- compute_gene_z(z_snp, weights, ncore = ncore)
     if (!is.null(outputdir)) {
       saveRDS(z_gene, file.path(outputdir, paste0(outname, ".z_gene.RDS")))
     }
   }
 
-  if (anyNA(z_gene)){
+  if (anyNA(z_gene))
     stop("z_gene contains missing values!")
-  }
+
 
   # Get region_data, which contains SNPs and genes assigned to each region
   #. downsample SNPs if thin < 1
@@ -188,18 +190,22 @@ ctwas_sumstats <- function(
 
   # Screen regions
   #. fine-map all regions with thinned SNPs
-  #. select regions with L >= 1
+  #. select regions with L > 0 or with high non-SNP PIP
+  #. expand selected regions with all SNPs
   screen_regions_res <- screen_regions(region_data,
                                        use_LD = TRUE,
                                        LD_map = LD_map,
                                        snp_map = snp_map,
                                        weights = weights,
+                                       z_snp = z_snp,
                                        group_prior = group_prior,
                                        group_prior_var = group_prior_var,
                                        L = L,
                                        filter_L = filter_L,
                                        filter_nonSNP_PIP = filter_nonSNP_PIP,
                                        min_nonSNP_PIP = min_nonSNP_PIP,
+                                       expand = TRUE,
+                                       maxSNP = maxSNP,
                                        LD_format = LD_format,
                                        LD_loader_fun = LD_loader_fun,
                                        ncore = ncore,
@@ -207,19 +213,10 @@ ctwas_sumstats <- function(
                                        ...)
   screened_region_data <- screen_regions_res$screened_region_data
   L <- screen_regions_res$L
+  screen_summary <- screen_regions_res$screen_summary
 
-  # Expand screened region_data with all SNPs in the regions
-  if (thin < 1){
-    screened_region_data <- expand_region_data(screened_region_data,
-                                               snp_map,
-                                               z_snp,
-                                               z_gene,
-                                               trim_by = "z",
-                                               maxSNP = maxSNP,
-                                               ncore = ncore)
-  }
   if (!is.null(outputdir)) {
-    saveRDS(screened_region_data, file.path(outputdir, paste0(outname, ".screened_region_data.RDS")))
+    saveRDS(screen_regions_res, file.path(outputdir, paste0(outname, ".screen_regions_res.RDS")))
   }
 
   # Run fine-mapping for regions with strong gene signals using full SNPs
@@ -253,11 +250,10 @@ ctwas_sumstats <- function(
 
   return(list("z_gene" = z_gene,
               "param" = param,
-              "finemap_res" = finemap_res,
-              "boundary_genes" = boundary_genes,
               "region_data" = region_data,
-              "screened_region_data" = screened_region_data,
-              "L" = L))
+              "boundary_genes" = boundary_genes,
+              "screen_regions_res" = screen_regions_res,
+              "finemap_res" = finemap_res))
 
 }
 

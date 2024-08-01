@@ -79,21 +79,20 @@ ctwas_sumstats_noLD <- function(
   }
 
   # check inputs
-  if (anyNA(z_snp)){
+  if (anyNA(z_snp))
     stop("z_snp contains missing values!")
-  }
 
-  if (!inherits(weights,"list")){
+  if (!inherits(weights,"list"))
     stop("'weights' should be a list object.")
-  }
 
-  if (any(sapply(weights, is.null))) {
+  if (any(sapply(weights, is.null)))
     stop("weights contain NULL, remove empty weights!")
-  }
 
-  if (thin > 1 | thin <= 0){
+  if (!inherits(snp_map,"list"))
+    stop("'snp_map' should be a list.")
+
+  if (thin > 1 | thin <= 0)
     stop("thin needs to be in (0,1]")
-  }
 
   if (!is.null(outputdir)) {
     dir.create(outputdir, showWarnings=FALSE, recursive=TRUE)
@@ -154,26 +153,22 @@ ctwas_sumstats_noLD <- function(
   #. fine-map all regions with thinned SNPs
   #. select regions with strong non-SNP signals
   screen_regions_res <- screen_regions(region_data,
-                                       use_LD = FALSE,
-                                       group_prior = group_prior,
-                                       group_prior_var = group_prior_var,
-                                       min_nonSNP_PIP = min_nonSNP_PIP,
-                                       ncore = ncore,
-                                       verbose = verbose)
-  screened_region_data <- screen_regions_res$screened_region_data
+                                      use_LD = FALSE,
+                                      snp_map = snp_map,
+                                      z_snp = z_snp,
+                                      group_prior = group_prior,
+                                      group_prior_var = group_prior_var,
+                                      min_nonSNP_PIP = min_nonSNP_PIP,
+                                      expand = TRUE,
+                                      maxSNP = maxSNP,
+                                      ncore = ncore,
+                                      verbose = verbose,
+                                      ...)
 
-  # Expand screened region_data with all SNPs in the regions
-  if (thin < 1){
-    screened_region_data <- expand_region_data(screened_region_data,
-                                               snp_map,
-                                               z_snp,
-                                               z_gene,
-                                               trim_by = "z",
-                                               maxSNP = maxSNP,
-                                               ncore = ncore)
-  }
+  screened_region_data <- screen_regions_res$screened_region_data
+  screen_summary <- screen_regions_res$screen_summary
   if (!is.null(outputdir)) {
-    saveRDS(screened_region_data, file.path(outputdir, paste0(outname, ".screened_region_data.RDS")))
+    saveRDS(screen_regions_res, file.path(outputdir, paste0(outname, ".screen_regions_noLD_res.RDS")))
   }
 
   # Run fine-mapping for regions with strong gene signals using full SNPs
@@ -183,14 +178,13 @@ ctwas_sumstats_noLD <- function(
                                    use_LD = FALSE,
                                    group_prior = group_prior,
                                    group_prior_var = group_prior_var,
-                                   L = 1,
                                    use_null_weight = use_null_weight,
                                    include_cs_index = FALSE,
                                    ncore = ncore,
                                    verbose = verbose,
                                    ...)
     if (!is.null(outputdir)) {
-      saveRDS(finemap_res, file.path(outputdir, paste0(outname, ".finemap_res.RDS")))
+      saveRDS(finemap_res, file.path(outputdir, paste0(outname, ".finemap_noLD_res.RDS")))
     }
   } else {
     warning("No regions selected for finemapping.")
@@ -199,10 +193,10 @@ ctwas_sumstats_noLD <- function(
 
   return(list("z_gene" = z_gene,
               "param" = param,
-              "finemap_res" = finemap_res,
-              "boundary_genes" = boundary_genes,
               "region_data" = region_data,
-              "screened_region_data" = screened_region_data))
+              "boundary_genes" = boundary_genes,
+              "screen_regions_res" = screen_regions_res,
+              "finemap_res" = finemap_res))
 
 }
 

@@ -99,7 +99,7 @@ est_param <- function(
   }
 
   # Run EM for a few (niter_prefit) iterations, getting rough estimates
-  loginfo("Run EM (prefit) for %d iterations, getting rough estimates ...", niter_prefit)
+  loginfo("Run EM for %d iterations (prefit), getting rough estimates ...", niter_prefit)
   EM_prefit_res <- fit_EM(region_data,
                           niter = niter_prefit,
                           init_group_prior = init_group_prior,

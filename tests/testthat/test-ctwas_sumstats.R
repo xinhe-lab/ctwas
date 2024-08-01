@@ -14,16 +14,19 @@ test_that("ctwas_sumstats works", {
     ctwas_res <- ctwas_sumstats(z_snp,
                                 weights,
                                 region_info,
-                                snp_map,
                                 LD_map,
+                                snp_map,
                                 thin = 0.1,
                                 maxSNP = 20000,
-                                ncore = 6)
+                                ncore = 2)
   })
 
   expect_equal(ctwas_res, precomputed_ctwas_res)
   # expect_equal(ctwas_res$z_gene, precomputed_ctwas_res$z_gene)
   # expect_equal(ctwas_res$param, precomputed_ctwas_res$param)
-  # expect_equal(ctwas_res$finemap_res, precomputed_ctwas_res$finemap_res)
+  # expect_equal(ctwas_res$region_data, precomputed_ctwas_res$region_data)
   # expect_equal(ctwas_res$boundary_genes, precomputed_ctwas_res$boundary_genes)
+  # expect_equal(ctwas_res$finemap_res, precomputed_ctwas_res$finemap_res)
+  # expect_equal(ctwas_res$screen_regions_res$screened_region_data, precomputed_ctwas_res$screened_region_data)
+
 })

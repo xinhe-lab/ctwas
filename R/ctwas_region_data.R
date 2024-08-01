@@ -26,9 +26,6 @@
 #'
 #' @param adjust_boundary_genes identify cross-boundary genes, adjust region_data
 #'
-#' @param thin_gwas_snps If TRUE, only apply thin to GWAS SNPs.
-#' Otherwise, apply thins to all SNPs.
-#'
 #' @param ncore The number of cores used to parallelize susie over regions
 #'
 #' @param seed seed for random sampling
@@ -73,6 +70,9 @@ assemble_region_data <- function(region_info,
   if (thin > 1 | thin <= 0)
     stop("thin needs to be in (0,1]")
 
+  if (!inherits(snp_map,"list"))
+    stop("'snp_map' should be a list object.")
+
   snp_info <- as.data.frame(rbindlist(snp_map, idcol = "region_id"))
 
   # begin assembling region_data
@@ -87,11 +87,11 @@ assemble_region_data <- function(region_info,
   gene_info <- get_gene_info(weights)
 
   # remove SNPs not in z_snp
-  snp_info <- subset(snp_info, id %in% z_snp$id)
+  snp_info <- snp_info[snp_info$id %in% z_snp$id, , drop=FALSE]
 
   # remove genes not in z_gene
   if (nrow(gene_info) > 0){
-    gene_info <- subset(gene_info, id %in% z_gene$id)
+    gene_info <- gene_info[gene_info$id %in% z_gene$id, , drop=FALSE]
   }
 
   region_data <- list()
@@ -140,8 +140,8 @@ assemble_region_data <- function(region_info,
   # add z-scores to region_data
   region_data <- update_region_z(region_data, z_snp, z_gene, ncore = ncore)
 
-  return(list(region_data = region_data,
-              boundary_genes = boundary_genes))
+  return(list("region_data" = region_data,
+              "boundary_genes" = boundary_genes))
 }
 
 assign_region_data <- function(region_info,
@@ -254,6 +254,10 @@ update_region_z <- function(region_data,
 
   update <- match.arg(update)
 
+  if (!inherits(region_data,"list")){
+    stop("'region_data' should be a list.")
+  }
+
   # combine z_snp, z_gene and group information
   if (update == "snps") {
     z_snp$group <- "SNP"
@@ -270,7 +274,7 @@ update_region_z <- function(region_data,
     regiondata <- region_data[[region_id]]
     gid <- regiondata[["gid"]]
     sid <- regiondata[["sid"]]
-    region_z_df <- subset(z_df, id %in% c(gid, sid))
+    region_z_df <- z_df[z_df$id %in% c(gid, sid), , drop=FALSE]
 
     if (update == "genes" || update == "all") {
       region_z_gene <- region_z_df[match(gid, region_z_df$id), ]
@@ -299,24 +303,31 @@ adjust_boundary_genes <- function(boundary_genes,
                                   weights,
                                   region_data,
                                   snp_map){
-  loginfo("Adjusting for boundary genes ...")
+  loginfo("Adjust region assignment for boundary genes")
 
   if (!inherits(weights,"list")){
     stop("'weights' should be a list.")
   }
 
+  if (!inherits(region_data,"list")){
+    stop("'region_data' should be a list.")
+  }
+
+  if (!inherits(snp_map,"list")){
+    stop("'snp_map' should be a list.")
+  }
+
+  # assign boundary gene to the region with max weights
   for (i in 1:nrow(boundary_genes)){
     gname <- boundary_genes[i, "id"]
     region_ids <- unlist(strsplit(boundary_genes[i, "region_id"], split = ";"))
     wgt <- weights[[gname]][["wgt"]]
 
-    region_r2 <- sapply(region_ids, function(region_id){
+    region_sum_wgt <- sapply(region_ids, function(region_id){
       snpinfo <- snp_map[[region_id]]
-      sum(wgt[which(rownames(wgt) %in% snpinfo$id)]^2)
+      sum(abs(wgt)[which(rownames(wgt) %in% snpinfo$id)])
     })
-
-    # assign boundary gene to the region with max r2, and remove it from other regions
-    selected_region_id <- region_ids[which.max(region_r2)]
+    selected_region_id <- region_ids[which.max(region_sum_wgt)]
     unselected_region_ids <- setdiff(region_ids, selected_region_id)
     region_data[[selected_region_id]][["gid"]] <- union(region_data[[selected_region_id]][["gid"]], gname)
     for(unselected_region_id in unselected_region_ids){
@@ -337,16 +348,11 @@ adjust_boundary_genes <- function(boundary_genes,
 #'
 #' @param z_gene A data frame with columns: "id", "z", giving the z-scores for genes.
 #'
-#' @param trim_by remove SNPs if the total number of SNPs exceeds limit, options: "random",
-#' or "z" (trim SNPs with lower |z|) See parameter `maxSNP` for more information.
-#'
 #' @param maxSNP Inf or integer. Maximum number of SNPs in a region. Default is
 #' Inf, no limit. This can be useful if there are many SNPs in a region and you don't
 #' have enough memory to run the program.
 #'
 #' @param ncore The number of cores used to parallelize susie over regions
-#'
-#' @param seed seed for random sampling
 #'
 #' @return updated region_data with all SNPs
 #'
@@ -359,16 +365,17 @@ adjust_boundary_genes <- function(boundary_genes,
 expand_region_data <- function(region_data,
                                snp_map,
                                z_snp,
-                               trim_by = c("z", "random"),
                                maxSNP = Inf,
-                               ncore = 1,
-                               seed = 99) {
-  # check arguments
-  trim_by <- match.arg(trim_by)
+                               ncore = 1) {
+  # check inputs
+  if (!inherits(region_data,"list"))
+    stop("'region_data' should be a list.")
 
-  if (anyNA(z_snp)){
+  if (!inherits(snp_map,"list"))
+    stop("'snp_map' should be a list object.")
+
+  if (anyNA(z_snp))
     stop("z_snp contains missing values!")
-  }
 
   # update SNP IDs for each region
   thin <- sapply(region_data, "[[", "thin")
@@ -383,7 +390,7 @@ expand_region_data <- function(region_data,
         # load all SNPs in the region
         snpinfo <- snp_map[[region_id]]
         # remove SNPs not in z_snp
-        snpinfo <- subset(snpinfo, id %in% z_snp$id)
+        snpinfo <- snpinfo[snpinfo$id %in% z_snp$id, ,drop=FALSE]
         # update minpos and maxpos in the region
         regiondata[["minpos"]] <- min(c(regiondata[["minpos"]], snpinfo$pos))
         regiondata[["maxpos"]] <- max(c(regiondata[["maxpos"]], snpinfo$pos))
@@ -398,7 +405,7 @@ expand_region_data <- function(region_data,
     names(region_data) <- region_ids
 
     # Trim regions with SNPs more than maxSNP
-    region_data <- trim_region_data(region_data, z_snp, trim_by = trim_by, maxSNP = maxSNP, seed = seed)
+    region_data <- trim_region_data(region_data, z_snp, trim_by = "z", maxSNP = maxSNP)
 
     # add z-scores to region_data
     region_data <- update_region_z(region_data, z_snp, update = "snps", ncore = ncore)
@@ -409,22 +416,55 @@ expand_region_data <- function(region_data,
 }
 
 # extract data for a region from region_data
-extract_region_data <- function(region_data, region_id){
+extract_region_data <- function(region_data,
+                                region_id,
+                                keep_snps_only = FALSE){
+
+  if (!inherits(region_data,"list"))
+    stop("'region_data' should be a list.")
 
   regiondata <- region_data[[region_id]]
 
-  if (is.null(regiondata$z)){
-    regiondata$z <- c(regiondata$z_gene$z, regiondata$z_snp$z)
-  }
+  stopifnot(all.equal(regiondata$sid, regiondata$z_snp$id))
+  stopifnot(all.equal(regiondata$gid, regiondata$z_gene$id))
 
-  if (is.null(regiondata$gs_group)){
-    regiondata$gs_group <- c(regiondata$z_gene$group, regiondata$z_snp$group)
-  }
+  if (keep_snps_only) {
+    regiondata$gid <- NULL
+    regiondata$z_gene <- NULL
+    regiondata$z <- regiondata$z_snp$z
+    regiondata$gs_group <- regiondata$z_snp$group
+    regiondata$groups <- "SNP"
+  } else {
+    if (is.null(regiondata$z))
+      regiondata$z <- c(regiondata$z_gene$z, regiondata$z_snp$z)
 
-  if (is.null(regiondata$groups)){
-    regiondata$groups <- unique(regiondata$gs_group)
+    if (is.null(regiondata$gs_group))
+      regiondata$gs_group <- c(regiondata$z_gene$group, regiondata$z_snp$group)
+
+    if (is.null(regiondata$groups))
+      regiondata$groups <- unique(regiondata$gs_group)
   }
 
   return(regiondata)
 }
 
+# create fine-mapping input region data of the earlier version
+create_finemap_input_region_data <- function(region_data,
+                                             keep_snps_only = FALSE){
+
+  if (!inherits(region_data,"list"))
+    stop("'region_data' should be a list.")
+
+  if (keep_snps_only)
+    loginfo("Keep SNPs only")
+
+  region_ids <- names(region_data)
+
+  region_data2 <- lapply(region_ids, function(region_id){
+    regiondata <- extract_region_data(region_data, region_id,
+                                      keep_snps_only = keep_snps_only)
+  })
+  names(region_data2) <- region_ids
+
+  return(region_data2)
+}
