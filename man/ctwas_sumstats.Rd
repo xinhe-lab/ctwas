@@ -2,7 +2,7 @@
 % Please edit documentation in R/ctwas_sumstats.R
 \name{ctwas_sumstats}
 \alias{ctwas_sumstats}
-\title{cTWAS analysis using summary statistics}
+\title{run cTWAS analysis using summary statistics}
 \usage{
 ctwas_sumstats(
   z_snp,
@@ -28,6 +28,8 @@ ctwas_sumstats(
   LD_format = c("rds", "rdata", "mtx", "csv", "txt", "custom"),
   LD_loader_fun,
   ncore = 1,
+  ncore_LD = max(ncore - 1, 1),
+  force_compute_cor = FALSE,
   save_cor = FALSE,
   cor_dir = NULL,
   outputdir = NULL,
@@ -41,7 +43,7 @@ ctwas_sumstats(
 \item{z_snp}{A data frame with four columns: "id", "A1", "A2", "z".
 giving the z scores for snps. "A1" is effect allele. "A2" is the other allele.}
 
-\item{weights}{a list of prediction weights}
+\item{weights}{a list of pre-processed prediction weights}
 
 \item{region_info}{a data frame of region definitions.}
 
@@ -91,7 +93,12 @@ have enough memory to run the program.}
 
 \item{LD_loader_fun}{a user defined function to load LD matrix when \code{LD_format = "custom"}.}
 
-\item{ncore}{The number of cores used to parallelize susie over regions}
+\item{ncore}{The number of cores used to parallelize computing over regions.}
+
+\item{ncore_LD}{The number of cores used to parallelize computing correlation matrices,
+in screening regions and fine-mapping steps with LD.}
+
+\item{force_compute_cor}{If TRUE, force computing correlation (R) matrices}
 
 \item{save_cor}{TRUE/FALSE. If TRUE, save correlation (R) matrices to \code{cor_dir}}
 
@@ -108,9 +115,9 @@ have enough memory to run the program.}
 \item{...}{Additional arguments of \code{susie_rss}.}
 }
 \value{
-a list of estimated parameters, fine-mapping results, boundary genes,
-z_gene, region_data, and screened_region_data
+a list, include z_gene, estimated parameters, region_data,
+cross-boundary genes, screening region results, and fine-mapping results.
 }
 \description{
-cTWAS analysis using summary statistics
+run cTWAS analysis using summary statistics
 }

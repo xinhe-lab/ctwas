@@ -1,9 +1,9 @@
-#' @title cTWAS analysis using summary statistics
+#' @title run cTWAS analysis using summary statistics
 #'
 #' @param z_snp A data frame with four columns: "id", "A1", "A2", "z".
 #' giving the z scores for snps. "A1" is effect allele. "A2" is the other allele.
 #'
-#' @param weights a list of prediction weights
+#' @param weights a list of pre-processed prediction weights
 #'
 #' @param region_info a data frame of region definitions.
 #'
@@ -53,7 +53,12 @@
 #'
 #' @param LD_loader_fun a user defined function to load LD matrix when \code{LD_format = "custom"}.
 #'
-#' @param ncore The number of cores used to parallelize susie over regions
+#' @param ncore The number of cores used to parallelize computing over regions.
+#'
+#' @param ncore_LD The number of cores used to parallelize computing correlation matrices,
+#' in screening regions and fine-mapping steps with LD.
+#'
+#' @param force_compute_cor If TRUE, force computing correlation (R) matrices
 #'
 #' @param save_cor TRUE/FALSE. If TRUE, save correlation (R) matrices to \code{cor_dir}
 #'
@@ -70,9 +75,10 @@
 #' @param ... Additional arguments of \code{susie_rss}.
 #'
 #' @importFrom logging addHandler loginfo writeToFile
+#' @importFrom utils packageVersion
 #'
-#' @return a list of estimated parameters, fine-mapping results, boundary genes,
-#' z_gene, region_data, and screened_region_data
+#' @return a list, include z_gene, estimated parameters, region_data,
+#' cross-boundary genes, screening region results, and fine-mapping results.
 #'
 #' @export
 #'
@@ -100,6 +106,8 @@ ctwas_sumstats <- function(
     LD_format = c("rds", "rdata", "mtx", "csv", "txt", "custom"),
     LD_loader_fun,
     ncore = 1,
+    ncore_LD = max(ncore-1,1),
+    force_compute_cor = FALSE,
     save_cor = FALSE,
     cor_dir = NULL,
     outputdir = NULL,
@@ -112,17 +120,14 @@ ctwas_sumstats <- function(
     addHandler(writeToFile, file=logfile, level='DEBUG')
   }
 
+  loginfo("Begin cTWAS analysis ...")
+  loginfo("ctwas version: %s", packageVersion("ctwas"))
+
   # check inputs
   LD_format <- match.arg(LD_format)
 
   if (anyNA(z_snp))
     stop("z_snp contains missing values!")
-
-  if (!inherits(LD_map,"data.frame"))
-    stop("'LD_map' should be a data frame")
-
-  if (!inherits(snp_map,"list"))
-    stop("'snp_map' should be a list.")
 
   if (!inherits(weights,"list"))
     stop("'weights' should be a list.")
@@ -130,12 +135,20 @@ ctwas_sumstats <- function(
   if (any(sapply(weights, is.null)))
     stop("weights contain NULL, remove empty weights!")
 
+  if (!inherits(LD_map,"data.frame"))
+    stop("'LD_map' should be a data frame")
+
+  if (!inherits(snp_map,"list"))
+    stop("'snp_map' should be a list.")
+
   if (thin > 1 | thin <= 0)
     stop("thin needs to be in (0,1]")
 
-
   if (!is.null(outputdir))
     dir.create(outputdir, showWarnings=FALSE, recursive=TRUE)
+
+  loginfo("ncore = %d", ncore)
+  loginfo("ncore_LD = %d", ncore_LD)
 
   # Compute gene z-scores
   if (missing(z_gene)) {
@@ -147,7 +160,6 @@ ctwas_sumstats <- function(
 
   if (anyNA(z_gene))
     stop("z_gene contains missing values!")
-
 
   # Get region_data, which contains SNPs and genes assigned to each region
   #. downsample SNPs if thin < 1
@@ -169,6 +181,7 @@ ctwas_sumstats <- function(
     saveRDS(region_data, file.path(outputdir, paste0(outname, ".region_data.thin", thin, ".RDS")))
     saveRDS(boundary_genes, file.path(outputdir, paste0(outname, ".boundary_genes.RDS")))
   }
+  rm(region_data_res)
 
   # Estimate parameters
   #. get region_data for all the regions
@@ -208,28 +221,24 @@ ctwas_sumstats <- function(
                                        maxSNP = maxSNP,
                                        LD_format = LD_format,
                                        LD_loader_fun = LD_loader_fun,
-                                       ncore = ncore,
+                                       ncore = ncore_LD,
                                        verbose = verbose,
                                        ...)
-  screened_region_data <- screen_regions_res$screened_region_data
-  L <- screen_regions_res$L
-  screen_summary <- screen_regions_res$screen_summary
-
   if (!is.null(outputdir)) {
     saveRDS(screen_regions_res, file.path(outputdir, paste0(outname, ".screen_regions_res.RDS")))
   }
 
   # Run fine-mapping for regions with strong gene signals using full SNPs
   #. save correlation matrices if save_cor is TRUE
-  if (length(screened_region_data) > 0){
-    finemap_res <- finemap_regions(screened_region_data,
+  if (length(screen_regions_res$screened_region_data) > 0){
+    finemap_res <- finemap_regions(screen_regions_res$screened_region_data,
                                    use_LD = TRUE,
                                    LD_map = LD_map,
                                    snp_map = snp_map,
                                    weights = weights,
                                    group_prior = group_prior,
                                    group_prior_var = group_prior_var,
-                                   L = L,
+                                   L = screen_regions_res$L,
                                    use_null_weight = use_null_weight,
                                    coverage = coverage,
                                    min_abs_corr = min_abs_corr,
@@ -237,7 +246,7 @@ ctwas_sumstats <- function(
                                    cor_dir = cor_dir,
                                    LD_format = LD_format,
                                    LD_loader_fun = LD_loader_fun,
-                                   ncore = ncore,
+                                   ncore = ncore_LD,
                                    verbose = verbose,
                                    ...)
     if (!is.null(outputdir)) {

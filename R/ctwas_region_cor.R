@@ -9,11 +9,11 @@
 #'
 #' @param region_data a list object with data for the regions
 #'
-#' @param LD_map a data frame with filenames of LD matrices for each of the regions. Required when \code{use_LD = TRUE}.
+#' @param LD_map a data frame with filenames of LD matrices for each of the regions.
 #'
-#' @param snp_map  list of data frames with SNP-to-region map for the reference. Required when \code{use_LD = TRUE}.
+#' @param snp_map  list of data frames with SNP-to-region map for the reference.
 #'
-#' @param weights a list of weights
+#' @param weights a list of preprocessed weights
 #'
 #' @param force_compute_cor TRUE/FALSE. If TRUE, force computing correlation (R) matrices
 #'
@@ -35,10 +35,10 @@
 #'
 #' @export
 get_region_cor <- function(region_id,
-                           region_data = NULL,
-                           LD_map = NULL,
+                           region_data,
+                           LD_map,
                            snp_map = NULL,
-                           weights = NULL,
+                           weights,
                            force_compute_cor = FALSE,
                            save_cor = FALSE,
                            cor_dir = NULL,
@@ -48,9 +48,15 @@ get_region_cor <- function(region_id,
 
   LD_format <- match.arg(LD_format)
 
+  if (save_cor) {
+    if (is.null(cor_dir))
+      stop("cor_dir is required for saving correlation matrices")
+  }
+
   if (!is.null(cor_dir)) {
     if (!dir.exists(cor_dir))
-      dir.create(cor_dir, recursive = TRUE)
+      dir.create(cor_dir, showWarnings = FALSE, recursive = TRUE)
+
     R_sg_file <- file.path(cor_dir, paste0("region.", region_id, ".R_snp_gene.RDS"))
     R_g_file <- file.path(cor_dir, paste0("region.", region_id, ".R_gene.RDS"))
     R_s_file <- file.path(cor_dir, paste0("region.", region_id, ".R_snp.RDS"))
@@ -59,9 +65,9 @@ get_region_cor <- function(region_id,
   cor_files_exist <- isTRUE(!is.null(cor_dir) && file.exists(R_sg_file) && file.exists(R_g_file) && file.exists(R_s_file))
 
   if (cor_files_exist && !force_compute_cor) {
-    if (verbose){
+    if (verbose)
       loginfo("Load correlation matrices for region %s", region_id)
-    }
+
     # load precomputed correlation matrices
     R_snp_gene <- load_LD(R_sg_file)
     R_gene <- load_LD(R_g_file)
@@ -69,16 +75,16 @@ get_region_cor <- function(region_id,
   } else {
     # if no precomputed correlation matrices, or force_compute_cor = TRUE,
     # compute correlation matrices
-    if (verbose){
+    if (verbose)
       loginfo("Compute correlation matrices for region %s", region_id)
-    }
-    if (is.null(region_data)) {
-      stop("region_data is needed for computing correlation matrices")
-    }
+
+    if (missing(region_data))
+      stop("region_data is required for computing correlation matrices")
+
     # load LD matrix of the region
-    if (is.null(LD_map) || is.null(snp_map)) {
-      stop("LD_map and snp_map are required for computing correlation matrices")
-    }
+    if (missing(LD_map))
+      stop("LD_map is required for computing correlation matrices")
+
     LD_matrix_files <- unlist(strsplit(LD_map$LD_file[LD_map$region_id == region_id], split = ";"))
     stopifnot(all(file.exists(LD_matrix_files)))
 
@@ -90,7 +96,17 @@ get_region_cor <- function(region_id,
     }
 
     # load SNP info of the region
-    snpinfo <- snp_map[[region_id]]
+    if (!is.null(snp_map)) {
+      # load snp_info from snp_map
+      snpinfo <- snp_map[[region_id]]
+    } else if (!is.null(LD_map$SNP_file)) {
+      # load snp_info from LD_map
+      SNP_info_files <- unlist(strsplit(LD_map$SNP_file[LD_map$region_id == region_id], split = ";"))
+      stopifnot(all(file.exists(SNP_info_files)))
+      snpinfo <- read_snp_info_files(SNP_info_files)
+    } else {
+      stop("'snp_map' or 'SNP_file' column of 'LD_map' is required for computing correlation matrices")
+    }
 
     # compute correlation matrices
     sids <- region_data[[region_id]]$sid

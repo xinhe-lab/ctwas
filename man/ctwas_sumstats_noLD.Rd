@@ -2,7 +2,7 @@
 % Please edit documentation in R/ctwas_sumstats_noLD.R
 \name{ctwas_sumstats_noLD}
 \alias{ctwas_sumstats_noLD}
-\title{cTWAS analysis using summary statistics with "no LD" version}
+\title{run cTWAS analysis using summary statistics with "no LD" version}
 \usage{
 ctwas_sumstats_noLD(
   z_snp,
@@ -31,7 +31,7 @@ ctwas_sumstats_noLD(
 \item{z_snp}{A data frame with four columns: "id", "A1", "A2", "z".
 giving the z scores for snps. "A1" is effect allele. "A2" is the other allele.}
 
-\item{weights}{a list of prediction weights}
+\item{weights}{a list of pre-processed prediction weights}
 
 \item{region_info}{a data frame of region definitions.}
 
@@ -78,5 +78,5 @@ a list of estimated parameters, fine-mapping results, boundary genes,
 z_gene, region_data, and screened_region_data
 }
 \description{
-cTWAS analysis using summary statistics with "no LD" version
+run cTWAS analysis using summary statistics with "no LD" version
 }

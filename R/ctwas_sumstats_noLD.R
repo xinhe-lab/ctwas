@@ -1,9 +1,9 @@
-#' @title cTWAS analysis using summary statistics with "no LD" version
+#' @title run cTWAS analysis using summary statistics with "no LD" version
 #'
 #' @param z_snp A data frame with four columns: "id", "A1", "A2", "z".
 #' giving the z scores for snps. "A1" is effect allele. "A2" is the other allele.
 #'
-#' @param weights a list of prediction weights
+#' @param weights a list of pre-processed prediction weights
 #'
 #' @param region_info a data frame of region definitions.
 #'
@@ -46,6 +46,7 @@
 #' @param ... Additional arguments of \code{susie_rss}.
 #'
 #' @importFrom logging addHandler loginfo writeToFile
+#' @importFrom utils packageVersion
 #'
 #' @return a list of estimated parameters, fine-mapping results, boundary genes,
 #' z_gene, region_data, and screened_region_data
@@ -77,6 +78,9 @@ ctwas_sumstats_noLD <- function(
   if (!is.null(logfile)) {
     addHandler(writeToFile, file=logfile, level='DEBUG')
   }
+
+  loginfo("Begin cTWAS analysis ...")
+  loginfo("ctwas version: %s", packageVersion("ctwas"))
 
   # check inputs
   if (anyNA(z_snp))

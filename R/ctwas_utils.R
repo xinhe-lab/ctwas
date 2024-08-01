@@ -5,7 +5,7 @@ read_snp_info_file <- function (file){
   snp_info <- as.data.frame(fread(file, header = TRUE))
   target_header <- c("chrom", "id", "pos", "alt", "ref")
   if (!all(target_header %in% colnames(snp_info))){
-    stop("The SNP info file needs to contain the following columns: ",
+    stop("The SNP file needs to contain the following columns: ",
          paste(target_header, collapse = " "))
   }
   return(snp_info)
@@ -224,8 +224,8 @@ mclapply_check <- function(X, FUN, mc.cores = 1, stop_if_missing = FALSE){
   } else {
     res <- mclapply(X, FUN, mc.cores = mc.cores)
     if (any(sapply(res, is.null))) {
-      msg <- paste("'NULL' found in mclapply output. Results may be incomplete.",
-                   "Try rerun with ncore = 1 or more memory!")
+      msg <- paste("'NULL' found in mclapply output. Results may be incomplete!",
+                   "Try more memory or ncore = 1.")
       if (stop_if_missing) {
         stop(msg)
       } else {

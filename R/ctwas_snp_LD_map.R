@@ -17,6 +17,7 @@ create_snp_map <- function(region_info,
                            ncore = 1) {
 
   # check inputs
+  region_info <- as.data.frame(region_info)
   target_header <- c("chrom", "start", "stop")
   if (!all(target_header %in% colnames(region_info))){
     stop("region_info needs to contain the following columns: ",
@@ -75,6 +76,7 @@ create_snp_map <- function(region_info,
 create_snp_LD_map <- function(region_metatable) {
 
   # check inputs
+  region_metatable <- as.data.frame(region_metatable)
   target_header <- c("chrom", "start", "stop")
   if (!all(target_header %in% colnames(region_metatable))){
     stop("region_metatable needs to contain the following columns: ",
@@ -109,7 +111,8 @@ create_snp_LD_map <- function(region_metatable) {
   # map LD to regions
   stopifnot(all(file.exists(region_metatable$LD_file)))
   LD_map <- data.frame(region_id = region_metatable$region_id,
-                       LD_file = region_metatable$LD_file)
+                       LD_file = region_metatable$LD_file,
+                       SNP_file = region_metatable$SNP_file)
 
   return(list(region_info = region_info,
               snp_map = snp_map,

@@ -6,9 +6,10 @@
 #'
 #' @param LD_map a data frame with filenames of LD matrices for the regions. Required when \code{use_LD = TRUE}.
 #'
-#' @param snp_map a list of SNP-to-region map for the reference. Required when \code{use_LD = TRUE}.
+#' @param snp_map a list of SNP-to-region map for the reference.
+#' If \code{snp_map = NULL}, load SNP info from the 'SNP_file' column of 'LD_map'.
 #'
-#' @param weights a list of preprocessed weights.
+#' @param weights a list of preprocessed weights. Required when \code{use_LD = TRUE}.
 #'
 #' @param L the number of effects or a vector of number of effects for each region.
 #'
@@ -56,7 +57,7 @@
 finemap_regions <- function(region_data,
                             use_LD = TRUE,
                             LD_map,
-                            snp_map,
+                            snp_map = NULL,
                             weights,
                             L = 5,
                             group_prior = NULL,
@@ -92,14 +93,14 @@ finemap_regions <- function(region_data,
     stop("'region_data' should be a list.")
 
   if (use_LD) {
-    if (missing(LD_map) || missing(snp_map) || missing(weights))
-      stop("'LD_map', 'snp_map' and 'weights' are required when use_LD = TRUE")
+    if (missing(LD_map))
+      stop("'LD_map' is required when use_LD = TRUE")
 
     if (!inherits(LD_map,"data.frame"))
       stop("'LD_map' should be a data frame")
 
-    if (!inherits(snp_map,"list"))
-      stop("'snp_map' should be a list.")
+    if (missing(weights))
+      stop("'weights' is required when use_LD = TRUE")
 
     if (!inherits(weights,"list"))
       stop("'weights' should be a list.")
@@ -175,7 +176,8 @@ finemap_regions <- function(region_data,
 #'
 #' @param LD_map a data frame with filenames of LD matrices for the regions. Required when \code{use_LD = TRUE}.
 #'
-#' @param snp_map a list of SNP-to-region map for the reference. Required when \code{use_LD = TRUE}.
+#' @param snp_map a list of SNP-to-region map for the reference.
+#' If \code{snp_map = NULL}, load SNP info from the 'SNP_file' column of 'LD_map'.
 #'
 #' @param weights a list of preprocessed weights. Required when \code{use_LD = TRUE}.
 #'
@@ -222,7 +224,7 @@ finemap_region <- function(region_data,
                            region_id,
                            use_LD = TRUE,
                            LD_map,
-                           snp_map,
+                           snp_map = NULL,
                            weights,
                            L = 5,
                            group_prior = NULL,
@@ -234,7 +236,7 @@ finemap_region <- function(region_data,
                            save_cor = FALSE,
                            cor_dir = NULL,
                            LD_format = c("rds", "rdata", "mtx", "csv", "txt", "custom"),
-                           LD_loader_fun,
+                           LD_loader_fun = NULL,
                            include_cs_index = TRUE,
                            verbose = FALSE,
                            ...){
@@ -251,14 +253,14 @@ finemap_region <- function(region_data,
   }
 
   if (use_LD) {
-    if (missing(LD_map) || missing(snp_map) || missing(weights))
-      stop("'LD_map', 'snp_map' and 'weights' are required when use_LD = TRUE")
+    if (missing(LD_map))
+      stop("'LD_map' is required when use_LD = TRUE")
 
     if (!inherits(LD_map,"data.frame"))
       stop("'LD_map' should be a data frame")
 
-    if (!inherits(snp_map,"list"))
-      stop("'snp_map' should be a list.")
+    if (missing(weights))
+      stop("'weights' is required when use_LD = TRUE")
 
     if (!inherits(weights,"list"))
       stop("'weights' should be a list.")

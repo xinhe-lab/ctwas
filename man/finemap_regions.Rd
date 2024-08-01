@@ -8,7 +8,7 @@ finemap_regions(
   region_data,
   use_LD = TRUE,
   LD_map,
-  snp_map,
+  snp_map = NULL,
   weights,
   L = 5,
   group_prior = NULL,
@@ -35,9 +35,10 @@ finemap_regions(
 
 \item{LD_map}{a data frame with filenames of LD matrices for the regions. Required when \code{use_LD = TRUE}.}
 
-\item{snp_map}{a list of SNP-to-region map for the reference. Required when \code{use_LD = TRUE}.}
+\item{snp_map}{a list of SNP-to-region map for the reference.
+If \code{snp_map = NULL}, load SNP info from the 'SNP_file' column of 'LD_map'.}
 
-\item{weights}{a list of preprocessed weights.}
+\item{weights}{a list of preprocessed weights. Required when \code{use_LD = TRUE}.}
 
 \item{L}{the number of effects or a vector of number of effects for each region.}
 

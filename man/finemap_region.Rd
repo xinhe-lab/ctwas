@@ -9,7 +9,7 @@ finemap_region(
   region_id,
   use_LD = TRUE,
   LD_map,
-  snp_map,
+  snp_map = NULL,
   weights,
   L = 5,
   group_prior = NULL,
@@ -21,7 +21,7 @@ finemap_region(
   save_cor = FALSE,
   cor_dir = NULL,
   LD_format = c("rds", "rdata", "mtx", "csv", "txt", "custom"),
-  LD_loader_fun,
+  LD_loader_fun = NULL,
   include_cs_index = TRUE,
   verbose = FALSE,
   ...
@@ -36,7 +36,8 @@ finemap_region(
 
 \item{LD_map}{a data frame with filenames of LD matrices for the regions. Required when \code{use_LD = TRUE}.}
 
-\item{snp_map}{a list of SNP-to-region map for the reference. Required when \code{use_LD = TRUE}.}
+\item{snp_map}{a list of SNP-to-region map for the reference.
+If \code{snp_map = NULL}, load SNP info from the 'SNP_file' column of 'LD_map'.}
 
 \item{weights}{a list of preprocessed weights. Required when \code{use_LD = TRUE}.}
 

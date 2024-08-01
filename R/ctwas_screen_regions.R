@@ -85,7 +85,6 @@ screen_regions <- function(region_data,
 
   loginfo("Screening regions ...")
 
-
   # check input
   LD_format <- match.arg(LD_format)
 
@@ -104,25 +103,22 @@ screen_regions <- function(region_data,
     stop("'region_data' should be a list.")
 
   if (use_LD) {
-    if (missing(LD_map) || missing(snp_map) || missing(weights))
-      stop("'LD_map', 'snp_map' and 'weights' are required when use_LD = TRUE")
+    if (missing(LD_map))
+      stop("'LD_map' is required when use_LD = TRUE")
 
-    if (!inherits(snp_map,"list"))
-      stop("'snp_map' should be a list.")
+    if (missing(snp_map))
+      stop("'snp_map' is required when use_LD = TRUE")
 
-    if (!inherits(LD_map,"data.frame"))
-      stop("'LD_map' should be a data frame")
-
-    if (!inherits(weights,"list"))
-      stop("'weights' should be a list.")
-
-    if (any(sapply(weights, is.null)))
-      stop("'weights' contain NULL, remove empty weights!")
+    if (missing(weights))
+      stop("'weights' is required when use_LD = TRUE")
   }
 
   if (expand) {
-    if (missing(snp_map) || missing(z_snp))
-      stop("'snp_map' and 'z_snp' are required when expand = TRUE")
+    if (missing(snp_map))
+      stop("'snp_map' is required when expand = TRUE")
+
+    if (missing(z_snp))
+      stop("z_snp' is required when expand = TRUE")
   }
 
   # adjust group_prior to account for thin argument
@@ -281,21 +277,6 @@ estimate_region_L <- function(region_data,
 
   # check inputs
   LD_format <- match.arg(LD_format)
-
-  if (!inherits(region_data,"list"))
-    stop("'region_data' should be a list.")
-
-  if (!inherits(snp_map,"list"))
-    stop("'snp_map' should be a list.")
-
-  if (!inherits(LD_map,"data.frame"))
-    stop("'LD_map' should be a data frame")
-
-  if (!inherits(weights,"list"))
-    stop("'weights' should be a list.")
-
-  if (any(sapply(weights, is.null)))
-    stop("weights contain NULL, remove empty weights!")
 
   # fine-mapping using uniform prior
   finemap_unif_prior_res <- finemap_regions(region_data,
