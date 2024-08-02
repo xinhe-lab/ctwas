@@ -17,7 +17,7 @@
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">ctwas</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">0.3.16</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">0.3.18</span>
       </span>
     </div>
 
@@ -78,7 +78,7 @@
 <span>  init_group_prior_var <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  niter_prefit <span class="op">=</span> <span class="fl">3</span>,</span>
 <span>  niter <span class="op">=</span> <span class="fl">30</span>,</span>
-<span>  p_single_effect <span class="op">=</span> <span class="fl">0.8</span>,</span>
+<span>  min_p_single_effect <span class="op">=</span> <span class="fl">0.8</span>,</span>
 <span>  use_null_weight <span class="op">=</span> <span class="cn">TRUE</span>,</span>
 <span>  minvar <span class="op">=</span> <span class="fl">2</span>,</span>
 <span>  mingene <span class="op">=</span> <span class="fl">1</span>,</span>
@@ -106,20 +106,22 @@
 
 
 <dt id="arg-niter-prefit">niter_prefit<a class="anchor" aria-label="anchor" href="#arg-niter-prefit"></a></dt>
-<dd><p>the number of iterations of the E-M algorithm to perform during the initial parameter estimation step</p></dd>
+<dd><p>the number of iterations of the E-M algorithm to perform
+during the initial parameter estimation step</p></dd>
 
 
 <dt id="arg-niter">niter<a class="anchor" aria-label="anchor" href="#arg-niter"></a></dt>
-<dd><p>the number of iterations of the E-M algorithm to perform during the complete parameter estimation step</p></dd>
+<dd><p>the number of iterations of the E-M algorithm to perform during
+the complete parameter estimation step</p></dd>
 
 
-<dt id="arg-p-single-effect">p_single_effect<a class="anchor" aria-label="anchor" href="#arg-p-single-effect"></a></dt>
-<dd><p>Regions with probability greater than <code>p_single_effect</code> of
-having at most one causal effect will be used selected for the complete parameter estimation step</p></dd>
+<dt id="arg-min-p-single-effect">min_p_single_effect<a class="anchor" aria-label="anchor" href="#arg-min-p-single-effect"></a></dt>
+<dd><p>Regions with probability &gt;= <code>min_p_single_effect</code>
+of having at most one causal effect will be selected for the final EM step.</p></dd>
 
 
 <dt id="arg-use-null-weight">use_null_weight<a class="anchor" aria-label="anchor" href="#arg-use-null-weight"></a></dt>
-<dd><p>TRUE/FALSE. If TRUE, allow for a probability of no effect in susie</p></dd>
+<dd><p>If TRUE, allow for a probability of no effect in susie</p></dd>
 
 
 <dt id="arg-minvar">minvar<a class="anchor" aria-label="anchor" href="#arg-minvar"></a></dt>
@@ -139,7 +141,7 @@ having at most one causal effect will be used selected for the complete paramete
 
 
 <dt id="arg-verbose">verbose<a class="anchor" aria-label="anchor" href="#arg-verbose"></a></dt>
-<dd><p>TRUE/FALSE. If TRUE, print detail messages</p></dd>
+<dd><p>If TRUE, print detail messages</p></dd>
 
 
 <dt id="arg--">...<a class="anchor" aria-label="anchor" href="#arg--"></a></dt>

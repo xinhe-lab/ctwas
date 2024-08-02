@@ -32,7 +32,7 @@
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">ctwas</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">0.3.16</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">0.3.18</span>
       </span>
     </div>
 
@@ -89,7 +89,7 @@
       <h1 data-toc-skip>A minimal tutorial of running cTWAS without LD</h1>
                         <h4 data-toc-skip class="author">Kaixuan Luo, Sheng Qian</h4>
             
-            <h4 data-toc-skip class="date">2024-07-25</h4>
+            <h4 data-toc-skip class="date">2024-08-01</h4>
       
       <small class="dont-index">Source: <a href="https://github.com/xinhe-lab/ctwas/blob/singlegroup/vignettes/minimal_tutorial.Rmd" class="external-link"><code>vignettes/minimal_tutorial.Rmd</code></a></small>
       <div class="hidden name"><code>minimal_tutorial.Rmd</code></div>
@@ -104,7 +104,7 @@
 <p>First, install <code>ctwas</code> if you haven’t already:</p>
 <div class="sourceCode" id="cb1"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># install.packages("remotes")</span></span>
-<span><span class="fu">remotes</span><span class="fu">::</span><span class="fu"><a href="https://remotes.r-lib.org/reference/install_github.html" class="external-link">install_github</a></span><span class="op">(</span><span class="st">"xinhe-lab/ctwas"</span>,ref <span class="op">=</span> <span class="st">"singlegroup"</span><span class="op">)</span></span></code></pre></div>
+<span><span class="fu">remotes</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/remotes/man/install_github.html" class="external-link">install_github</a></span><span class="op">(</span><span class="st">"xinhe-lab/ctwas"</span>,ref <span class="op">=</span> <span class="st">"singlegroup"</span><span class="op">)</span></span></code></pre></div>
 <p>Currently, <code>ctwas</code> has only been tested on Linux systems.</p>
 <p>We recommend running <code>ctwas</code> on a High-Performance Computing system.</p>
 <p>Now load the <code>ctwas</code> package and a few other packages needed to perform the analysis in the tutorial:</p>
@@ -125,7 +125,7 @@
 <div class="section level3">
 <h3 id="reference-data">Reference data<a class="anchor" aria-label="anchor" href="#reference-data"></a>
 </h3>
-<p>cTWAS assumes that the genome is partitioned into approximately independent LD regions. The definitions of these regions need to be provided. You will also need to have a list of SNPs as a “reference”, with the information of these SNPs. This is similar to LD reference data, needed in fine-mapping GWAS loci with summary statistics. Also similar to fine-mapping, the variant reference should match in the population of GWAS samples.</p>
+<p>cTWAS assumes that the genome is partitioned into approximately independent LD regions. The definitions of these regions need to be provided. You will also need to have a list of SNPs as a “reference”, with the information of these SNPs. This is similar to LD reference data, needed in fine-mapping GWAS loci with summary statistics. Also similar to fine-mapping, the variant reference should match with the population of GWAS samples.</p>
 <p>It is critical that the genome build (e.g. hg38) of the reference match the genome build used to train the prediction models. By contrast, the genome build of the GWAS summary statistics does not matter because variant positions are determined by the reference.</p>
 <p>We require a data frame <code>region_info</code> containing the region definitions, with the following columns: “chrom”, “start”, “stop”, for the genomic coordinates of the regions, and “region_id” for the IDs of the regions (by default, we use the convention <chrom_start_stop> for the region IDs).</chrom_start_stop></p>
 <p>Here we use the b38 European LDetect blocks, which is again included in the R package.</p>
@@ -140,7 +140,7 @@
 <span></span>
 <span><span class="va">ref_snp_info_file</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/system.file.html" class="external-link">system.file</a></span><span class="op">(</span><span class="st">"extdata/sample_data"</span>, <span class="st">"ukb_b38_0.1_chr16_var_info.Rvar.gz"</span>, package <span class="op">=</span> <span class="st">"ctwas"</span><span class="op">)</span></span>
 <span></span>
-<span><span class="va">ref_snp_info</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdatatable.gitlab.io/data.table/reference/fread.html" class="external-link">fread</a></span><span class="op">(</span><span class="va">ref_snp_info_file</span>, sep <span class="op">=</span> <span class="st">"\t"</span><span class="op">)</span></span>
+<span><span class="va">ref_snp_info</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/data.table/man/fread.html" class="external-link">fread</a></span><span class="op">(</span><span class="va">ref_snp_info_file</span>, sep <span class="op">=</span> <span class="st">"\t"</span><span class="op">)</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/class.html" class="external-link">class</a></span><span class="op">(</span><span class="va">ref_snp_info</span><span class="op">)</span> <span class="op">&lt;-</span> <span class="st">"data.frame"</span></span>
 <span><span class="va">region_info</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/subset.html" class="external-link">subset</a></span><span class="op">(</span><span class="va">region_info</span>, <span class="va">chrom</span> <span class="op">==</span> <span class="va">example_chrom</span><span class="op">)</span></span>
 <span></span>
@@ -163,14 +163,14 @@
 <p>The GWAS summary statistics needs to be “harmonized” before use. This means, for example, the allele definitions need to be consistent with the reference SNP data in <code>snp_map</code>. Harmonization is achieved through the <code><a href="../reference/preprocess_z_snp.html">preprocess_z_snp()</a></code> function. We filter out multiallelic variants and strand-ambiguous variants by default.</p>
 <div class="sourceCode" id="cb8"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">z_snp</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/preprocess_z_snp.html">preprocess_z_snp</a></span><span class="op">(</span><span class="va">z_snp</span>, <span class="va">snp_map</span><span class="op">)</span></span></code></pre></div>
-<pre><code><span><span class="co">## 2024-07-25 20:47:33 INFO::Preprocessing z_snp...</span></span>
-<span><span class="co">## 2024-07-25 20:47:33 INFO::z_snp has 407828 variants in total</span></span>
-<span><span class="co">## 2024-07-25 20:47:33 INFO::267361 variants left after filtering by snp_map</span></span>
-<span><span class="co">## 2024-07-25 20:47:33 INFO::Drop 30 multiallelic variants</span></span>
-<span><span class="co">## 2024-07-25 20:47:33 INFO::Harmonize 267331 variants in both GWAS and LD reference</span></span>
-<span><span class="co">## 2024-07-25 20:47:34 INFO::Flip signs for 267289 (99.98%) variants</span></span>
-<span><span class="co">## 2024-07-25 20:47:34 INFO::Remove 45738 strand ambiguous variants</span></span>
-<span><span class="co">## 2024-07-25 20:47:34 INFO::221593 variants left after preprocessing and harmonization.</span></span></code></pre>
+<pre><code><span><span class="co">## 2024-08-01 21:36:19 INFO::Preprocessing z_snp...</span></span>
+<span><span class="co">## 2024-08-01 21:36:19 INFO::z_snp has 407828 variants in total</span></span>
+<span><span class="co">## 2024-08-01 21:36:19 INFO::267361 variants left after filtering by snp_map</span></span>
+<span><span class="co">## 2024-08-01 21:36:19 INFO::Drop 30 multiallelic variants</span></span>
+<span><span class="co">## 2024-08-01 21:36:19 INFO::Harmonize 267331 variants in both GWAS and LD reference</span></span>
+<span><span class="co">## 2024-08-01 21:36:20 INFO::Flip signs for 267289 (99.98%) variants</span></span>
+<span><span class="co">## 2024-08-01 21:36:20 INFO::Remove 45738 strand ambiguous variants</span></span>
+<span><span class="co">## 2024-08-01 21:36:20 INFO::221593 variants left after preprocessing and harmonization.</span></span></code></pre>
 </div>
 <div class="section level3">
 <h3 id="prediction-models-of-genes">Prediction models of genes<a class="anchor" aria-label="anchor" href="#prediction-models-of-genes"></a>
@@ -182,16 +182,16 @@
 <span>                              <span class="va">region_info</span>,</span>
 <span>                              <span class="va">z_snp</span><span class="op">$</span><span class="va">id</span>,</span>
 <span>                              <span class="va">snp_map</span><span class="op">)</span></span></code></pre></div>
-<pre><code><span><span class="co">## 2024-07-25 20:47:34 INFO::Load weight: /tmp/jobs/41161011/Rtmpw28CMa/temp_libpath46511a06eec3/ctwas/extdata/sample_data/expression_Liver.db</span></span>
-<span><span class="co">## 2024-07-25 20:47:34 INFO::Loading PredictDB weights ...</span></span>
-<span><span class="co">## 2024-07-25 20:47:34 INFO::Keep protein coding genes only</span></span>
-<span><span class="co">## 2024-07-25 20:47:34 INFO::weight_name: expression_Liver</span></span>
-<span><span class="co">## 2024-07-25 20:47:34 INFO::Remove 1 genes without predictdb LD</span></span>
-<span><span class="co">## 2024-07-25 20:47:34 INFO::Number of genes with weights: 11479</span></span>
-<span><span class="co">## 2024-07-25 20:47:34 INFO::Number of variants in weights: 16929</span></span>
-<span><span class="co">## 2024-07-25 20:47:34 INFO::529 genes and 410 variants left after filtering by GWAS and LD reference</span></span>
-<span><span class="co">## 2024-07-25 20:47:34 INFO::Harmonizing and processing weights ...</span></span>
-<span><span class="co">## 2024-07-25 20:47:36 INFO::Number of genes with weights after preprocessing: 410</span></span></code></pre>
+<pre><code><span><span class="co">## 2024-08-01 21:36:20 INFO::Load weight: /tmp/jobs/41234790/Rtmpx7OkgE/temp_libpathc9f65cad585/ctwas/extdata/sample_data/expression_Liver.db</span></span>
+<span><span class="co">## 2024-08-01 21:36:20 INFO::Loading PredictDB weights ...</span></span>
+<span><span class="co">## 2024-08-01 21:36:20 INFO::Keep protein coding genes only</span></span>
+<span><span class="co">## 2024-08-01 21:36:20 INFO::weight_name: expression_Liver</span></span>
+<span><span class="co">## 2024-08-01 21:36:20 INFO::Remove 1 genes without predictdb LD</span></span>
+<span><span class="co">## 2024-08-01 21:36:20 INFO::Number of genes with weights: 11479</span></span>
+<span><span class="co">## 2024-08-01 21:36:20 INFO::Number of variants in weights: 16929</span></span>
+<span><span class="co">## 2024-08-01 21:36:20 INFO::529 genes and 410 variants left after filtering by GWAS and LD reference</span></span>
+<span><span class="co">## 2024-08-01 21:36:20 INFO::Harmonizing and processing weights ...</span></span>
+<span><span class="co">## 2024-08-01 21:36:22 INFO::Number of genes with weights after preprocessing: 410</span></span></code></pre>
 </div>
 </div>
 <div class="section level2">

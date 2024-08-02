@@ -19,7 +19,7 @@ or force_compute_cor = TRUE."><!-- mathjax --><script src="https://cdnjs.cloudfl
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">ctwas</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">0.3.16</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">0.3.18</span>
       </span>
     </div>
 
@@ -78,10 +78,10 @@ or force_compute_cor = TRUE.</p>
     <div id="ref-usage">
     <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="fu">get_region_cor</span><span class="op">(</span></span>
 <span>  <span class="va">region_id</span>,</span>
-<span>  region_data <span class="op">=</span> <span class="cn">NULL</span>,</span>
-<span>  LD_map <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  <span class="va">region_data</span>,</span>
+<span>  <span class="va">LD_map</span>,</span>
 <span>  snp_map <span class="op">=</span> <span class="cn">NULL</span>,</span>
-<span>  weights <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  <span class="va">weights</span>,</span>
 <span>  force_compute_cor <span class="op">=</span> <span class="cn">FALSE</span>,</span>
 <span>  save_cor <span class="op">=</span> <span class="cn">FALSE</span>,</span>
 <span>  cor_dir <span class="op">=</span> <span class="cn">NULL</span>,</span>
@@ -104,15 +104,15 @@ or force_compute_cor = TRUE.</p>
 
 
 <dt id="arg-ld-map">LD_map<a class="anchor" aria-label="anchor" href="#arg-ld-map"></a></dt>
-<dd><p>a data frame with filenames of LD matrices for each of the regions. Required when <code>use_LD = TRUE</code>.</p></dd>
+<dd><p>a data frame with filenames of LD matrices for each of the regions.</p></dd>
 
 
 <dt id="arg-snp-map">snp_map<a class="anchor" aria-label="anchor" href="#arg-snp-map"></a></dt>
-<dd><p>list of data frames with SNP-to-region map for the reference. Required when <code>use_LD = TRUE</code>.</p></dd>
+<dd><p>list of data frames with SNP-to-region map for the reference.</p></dd>
 
 
 <dt id="arg-weights">weights<a class="anchor" aria-label="anchor" href="#arg-weights"></a></dt>
-<dd><p>a list of weights</p></dd>
+<dd><p>a list of preprocessed weights</p></dd>
 
 
 <dt id="arg-force-compute-cor">force_compute_cor<a class="anchor" aria-label="anchor" href="#arg-force-compute-cor"></a></dt>

@@ -30,7 +30,7 @@ library(EnsDb.Hsapiens.v86)
 ```
 
 
-We need the Ensembl database `EnsDb.Hsapiens.v86` here in this tutorial, please choose the version of Ensembl database for your specific data. 
+We need the Ensembl database `EnsDb.Hsapiens.v86` (for hg38) in this tutorial, please choose the version of Ensembl database for your specific data (e.g. `EnsDb.Hsapiens.v75` for hg19). 
 
 Let's first load the cTWAS input data needed to run this tutorial: 
 GWAS sample size (`gwas_n`), prediction models of genes (`weights`), the reference data: including information about regions (`region_info`), reference variant list (`snp_map`) and reference LD (`LD_map`).
@@ -80,14 +80,14 @@ It also produces other output:
 
 + `boundary_genes`: the genes that cross region boundaries (we will need these in the post-processing step). 
 
-+ `region_data`: assembled region data, including Z scores of SNPs and genes, for all the regions,. Note that only data of the subset of SNPs used in screening regions are included. 
++ `region_data`: assembled region data, including Z scores of SNPs and genes, for all the regions. Note that only data of the subset of SNPs used in screening regions are included. 
 
 + `screened_region_data`: the data of all SNPs and genes of the selected regions. 
 
 
 ## Assessing parameters and computing PVE
 
-First, we make plots using `use `make_convergence_plots()` to see how estimated parameters converge during the execution of the program:
+First, we make plots using the function `make_convergence_plots()` to see how estimated parameters converge during the execution of the program:
 
 ```{r convergence_plot, fig.width = 7, fig.height=5}
 make_convergence_plots(param, gwas_n)
@@ -96,7 +96,7 @@ make_convergence_plots(param, gwas_n)
 
 These plots show the estimated prior inclusion probability, prior effect size variance, and enrichment over the iterations of parameter estimation. The enrichment is defined as the ratio of the prior of genes over the prior of variants. We generally expect genes to have higher prior inclusion probability than variants. Enrichment values typically range from 20 -100 for expresion traits. 
 
-Then, we use `summarize_param()` to obtain estimated parameters (from the last iteration). We can compute the proportion of variance explained (PVE) by variants and genes.. These PVE values allow us to compute how heritability of the phenotype is partitioned among variants and genes.
+Then, we use `summarize_param()` to obtain estimated parameters (from the last iteration). We can compute the proportion of variance explained (PVE) by variants and genes. These PVE values allow us to compute how heritability of the phenotype is partitioned among variants and genes.
 
 ```{r summarize_param}
 ctwas_parameters <- summarize_param(param, gwas_n)
@@ -130,7 +130,6 @@ Note: we used the gene annotations from `EnsDb.Hsapiens.v86` for the example dat
 ```{r gene_annot_example}
 head(gene_annot)
 ```
-
 
 
 We then use the `anno_finemap_res()` function to add gene annotations to the fine-mapping result, and use gene mid-points to represent gene positions.
@@ -168,7 +167,7 @@ make_locusplot(finemap_res,
 ```
 
 
-The locus plot shows several tracks in the example region in chromosome 6 (71.6 - 72.4 Mb). The top one shows -log10(p-value) of the association of variants and genes with the phenotype. The next track shows the PIPs of variants and genes.  The data points are colored by the correlations with the focal gene (the gene with the highest PIP, HPR in this case). The red dotted line shows the PIP cutoff of 0.8. The next track shows the locations of QTLs of the focus gene (by default, the focus gene is the gene with the highest PIP). The bottom is the gene track.
+The locus plot shows several tracks in the example region in chromosome 6 (71.6 - 72.4 Mb). The top one shows -log10(p-value) of the association of variants and genes with the phenotype. The next track shows the PIPs of variants and genes.  The data points are colored by the correlations with the focal gene (the gene with the highest PIP, HPR in this case). The red dotted line shows the PIP cutoff of 0.8. The next track shows the locations of QTLs of the focal gene (by default, the focal gene is the gene with the highest PIP). The bottom is the gene track.
 
 In this plot, one can see that there are several genes with good associations with the phenotype, but only HPR is selected by cTWAS (PIP = 1). This is because once HPR and other likely causal variants are selected by cTWAS, there is no remaining association left in other genes. This example thus illustrates how cTWAS selects likely causal genes while controlling for nearby genes and variants. 
 
@@ -182,4 +181,5 @@ make_locusplot(finemap_res,
                locus_range = c(71.6e6,72.4e6),
                highlight_pip = 0.8)
 ```
+
 

@@ -32,7 +32,7 @@
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">ctwas</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">0.3.16</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">0.3.18</span>
       </span>
     </div>
 
@@ -89,7 +89,7 @@
       <h1 data-toc-skip>Running cTWAS analysis</h1>
                         <h4 data-toc-skip class="author">Kaixuan Luo, Sheng Qian</h4>
             
-            <h4 data-toc-skip class="date">2024-07-25</h4>
+            <h4 data-toc-skip class="date">2024-08-01</h4>
       
       <small class="dont-index">Source: <a href="https://github.com/xinhe-lab/ctwas/blob/singlegroup/vignettes/running_ctwas_analysis.Rmd" class="external-link"><code>vignettes/running_ctwas_analysis.Rmd</code></a></small>
       <div class="hidden name"><code>running_ctwas_analysis.Rmd</code></div>
@@ -119,33 +119,37 @@
 <h2 id="running-ctwas-main-function">Running cTWAS main function<a class="anchor" aria-label="anchor" href="#running-ctwas-main-function"></a>
 </h2>
 <p>In this section, we will show how to perform full cTWAS analysis using the main function.</p>
-<p>We use the function <code><a href="../reference/ctwas_sumstats.html">ctwas_sumstats()</a></code> to run cTWAS analysis with LD. It takes as input preprocessed GWAS z-scores (<code>z_snp</code>), and prediction models of genes (<code>weights</code>). In addition, it requires the reference data including information about regions (<code>region_info</code>), reference variant list (<code>snp_map</code>) and reference LD (<code>LD_map</code>).</p>
+<p>We use the function <code><a href="../reference/ctwas_sumstats.html">ctwas_sumstats()</a></code> to run cTWAS analysis with LD. It takes as input preprocessed GWAS z-scores (<code>z_snp</code>), and prediction models of genes (<code>weights</code>). In addition, it requires the reference data including information about regions (<code>region_info</code>), reference LD (<code>LD_map</code>) and reference variant list (<code>snp_map</code>).</p>
 <p>The function performs the main steps: (i) computing Z-scores of genes; (i) estimating model parameters; (iii) screening regions potentially containing causal genes, and (iv) fine-mapping those regions to discover causal genes.</p>
 <p>Now, we can run cTWAS using the <code><a href="../reference/ctwas_sumstats.html">ctwas_sumstats()</a></code> function:</p>
 <div class="sourceCode" id="cb3"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">ctwas_res</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/ctwas_sumstats.html">ctwas_sumstats</a></span><span class="op">(</span><span class="va">z_snp</span>, </span>
 <span>                            <span class="va">weights</span>, </span>
 <span>                            <span class="va">region_info</span>, </span>
-<span>                            <span class="va">snp_map</span>, </span>
 <span>                            <span class="va">LD_map</span>,</span>
+<span>                            <span class="va">snp_map</span>, </span>
 <span>                            thin <span class="op">=</span> <span class="fl">0.1</span>,</span>
 <span>                            maxSNP <span class="op">=</span> <span class="fl">20000</span>,</span>
+<span>                            filter_L <span class="op">=</span> <span class="cn">TRUE</span>,</span>
 <span>                            filter_nonSNP_PIP <span class="op">=</span> <span class="cn">FALSE</span>,</span>
 <span>                            min_nonSNP_PIP <span class="op">=</span> <span class="fl">0.5</span>,</span>
 <span>                            ncore <span class="op">=</span> <span class="fl">6</span>, </span>
+<span>                            ncore_LD <span class="op">=</span> <span class="fl">4</span>,</span>
 <span>                            save_cor <span class="op">=</span> <span class="cn">TRUE</span>, </span>
 <span>                            cor_dir <span class="op">=</span> <span class="st">"./cor_matrix"</span><span class="op">)</span></span></code></pre></div>
 <p>Important arguments that control how this function is executed:</p>
 <ul>
 <li><p><code>z_gene</code>: computed Z-scores of the genes. If not provided, it will compute those using <code>z_snp</code> and <code>weights</code>.</p></li>
 <li><p><code>thin</code>: the fraction of SNPs used to estimate parameters and screen regions likely containing signals. By sampling a fraction of SNPs, this speeds up computation. By default, we use <code>thin = 0.1</code>, i.e. 10% of the SNPs. To use all SNPs in parameter estimation and screening regions, one could change the <code>thin</code> parameter to 1.</p></li>
-<li><p><code>maxSNP</code> Maximum number of SNPs in a region (e.g. 20000). Default is Inf, no limit. This can be useful if there are too many SNPs in a region and you don’t have enough memory to run the program.</p></li>
+<li><p><code>maxSNP</code>: Maximum number of SNPs in a region (e.g. 20000). Default is Inf, no limit. This can be useful if there are too many SNPs in a region and you don’t have enough memory to run the program.</p></li>
+<li><p><code>filter_L</code>: If <code>filter_L = TRUE</code> (the default option), cTWAS will first estimate the number of causal signals (L) for each region. This step is done using uniform prior, treating all variants and genes equally. From the results, we obtain the number of credible sets (L). We then select regions with at least one credible set, L &gt; 0.</p></li>
 <li><p><code>filter_nonSNP_PIP</code> and <code>min_nonSNP_PIP</code>: If <code>filter_nonSNP_PIP = TRUE</code>, it will compute the non-SNP PIP, i.e. the total PIP of all molecular traits, for each region (using the estimated parameters) and select regions with non-SNP PIP &gt; <code>min_nonSNP_PIP</code> (0.5 by default`).</p></li>
 <li><p><code>ncore</code>: the number of cores to parallelize computing over regions.</p></li>
+<li><p><code>ncore_LD</code>: the number of cores to parallelize computing over regions with LD matrices. During screening regions and fine-mapping steps, computing correlation matrices requires larger memory. You could reduce the number of cores for these steps to avoid insufficient memory.</p></li>
 <li><p><code>save_cor</code> and <code>cor_dir</code>: If <code>save_cor = TRUE</code>, we save the correlation matrices in the <code>cor_dir</code>directory, which will be used later for visualizing the results.</p></li>
 </ul>
 <p>To understand and summarize the results from cTWAS, please read the tutorial “Summarizing and visualizing cTWAS results”.</p>
-<p>Note: One can run cTWAS without using reference LD data. See “A minimal tutorial of running cTWAS without LD”. That tutorial describes how to run cTWAS in a single step.</p>
+<p><em>Note:</em> One can run cTWAS without using reference LD data. See “A minimal tutorial of running cTWAS without LD”. That tutorial describes how to run cTWAS in a single step.</p>
 </div>
 <div class="section level2">
 <h2 id="running-ctwas-modules">Running cTWAS modules<a class="anchor" aria-label="anchor" href="#running-ctwas-modules"></a>
@@ -154,7 +158,7 @@
 <div class="section level3">
 <h3 id="computing-z-scores-of-genes">Computing Z-scores of genes<a class="anchor" aria-label="anchor" href="#computing-z-scores-of-genes"></a>
 </h3>
-<p>After we have done data preprocessing, we compute Z-scores of genes. This step basically performs Transcriptome-wide association studies (TWAS) on each gene with a prediction model. The underlying calculation is based on <a href="https://www.nature.com/articles/s41467-018-03621-1" class="external-link">S-PrediXcan</a>.</p>
+<p>After we have done data preprocessing, we compute Z-scores of genes. This step basically performs transcriptome-wide association studies (TWAS) on each gene with a prediction model. The underlying calculation is based on <a href="https://www.nature.com/articles/s41467-018-03621-1" class="external-link">S-PrediXcan</a>.</p>
 <p>The <code>compute_gene_z</code> function computes Z-scores for the genes using preprocessed SNP Z-scores (<code>z_snp</code>) and the preprocessed weights (<code>weights</code>).</p>
 <div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">z_gene</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/compute_gene_z.html">compute_gene_z</a></span><span class="op">(</span><span class="va">z_snp</span>, <span class="va">weights</span><span class="op">)</span></span></code></pre></div>
@@ -189,7 +193,7 @@
 <span>                   ncore <span class="op">=</span> <span class="fl">6</span><span class="op">)</span></span>
 <span><span class="va">group_prior</span> <span class="op">&lt;-</span> <span class="va">param</span><span class="op">$</span><span class="va">group_prior</span></span>
 <span><span class="va">group_prior_var</span> <span class="op">&lt;-</span> <span class="va">param</span><span class="op">$</span><span class="va">group_prior_var</span></span></code></pre></div>
-<p><em>Note:</em>, we used sample data (from chr16) in this example, however, in real data analysis, parameter estimation should be done using data from the <em>entire genome</em>.</p>
+<p><em>Note:</em> we used sample data (from chr16) in this example, however, in real data analysis, parameter estimation should be done using data from the <em>entire genome</em>.</p>
 </div>
 <div class="section level3">
 <h3 id="screening-regions">Screening regions<a class="anchor" aria-label="anchor" href="#screening-regions"></a>
@@ -202,36 +206,37 @@
 </ul>
 <p>When running with LD (<code>use_LD = TRUE</code>), we recommend screening by the number of causal signals, i.e. setting <code>filter_L = TRUE</code> and <code>filter_nonSNP_PIP = FALSE</code>.</p>
 <div class="sourceCode" id="cb7"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">screen_region_res</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/screen_regions.html">screen_regions</a></span><span class="op">(</span><span class="va">region_data</span>,</span>
-<span>                                    use_LD <span class="op">=</span> <span class="cn">TRUE</span>,</span>
-<span>                                    LD_map <span class="op">=</span> <span class="va">LD_map</span>,</span>
-<span>                                    snp_map <span class="op">=</span> <span class="va">snp_map</span>, </span>
-<span>                                    weights <span class="op">=</span> <span class="va">weights</span>,</span>
-<span>                                    filter_L <span class="op">=</span> <span class="cn">TRUE</span>,</span>
-<span>                                    filter_nonSNP_PIP <span class="op">=</span> <span class="cn">FALSE</span>,</span>
-<span>                                    ncore <span class="op">=</span> <span class="fl">6</span><span class="op">)</span></span>
-<span><span class="va">screened_region_data</span> <span class="op">&lt;-</span> <span class="va">screen_region_res</span><span class="op">$</span><span class="va">screened_region_data</span></span>
-<span><span class="va">L</span> <span class="op">&lt;-</span> <span class="va">screen_region_res</span><span class="op">$</span><span class="va">L</span></span></code></pre></div>
-<p>It returns <code>screened_region_data</code> which contains a subset of region data for selected regions. It also returns the estimated L (number of credible sets) for the selected regions, which could be used in the fine-mapping step to set L for each region.</p>
+<code class="sourceCode R"><span><span class="va">screen_regions_res</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/screen_regions.html">screen_regions</a></span><span class="op">(</span><span class="va">region_data</span>,</span>
+<span>                                     use_LD <span class="op">=</span> <span class="cn">TRUE</span>,</span>
+<span>                                     LD_map <span class="op">=</span> <span class="va">LD_map</span>,</span>
+<span>                                     snp_map <span class="op">=</span> <span class="va">snp_map</span>, </span>
+<span>                                     weights <span class="op">=</span> <span class="va">weights</span>,</span>
+<span>                                     z_snp <span class="op">=</span> <span class="va">z_snp</span>,</span>
+<span>                                     filter_L <span class="op">=</span> <span class="cn">TRUE</span>,</span>
+<span>                                     filter_nonSNP_PIP <span class="op">=</span> <span class="cn">FALSE</span>,</span>
+<span>                                     expand <span class="op">=</span> <span class="cn">TRUE</span>,</span>
+<span>                                     maxSNP <span class="op">=</span> <span class="fl">20000</span>,</span>
+<span>                                     ncore <span class="op">=</span> <span class="fl">4</span><span class="op">)</span></span>
+<span><span class="va">screened_region_data</span> <span class="op">&lt;-</span> <span class="va">screen_regions_res</span><span class="op">$</span><span class="va">screened_region_data</span></span>
+<span><span class="va">L</span> <span class="op">&lt;-</span> <span class="va">screen_regions_res</span><span class="op">$</span><span class="va">L</span></span>
+<span><span class="va">screen_summary</span> <span class="op">&lt;-</span> <span class="va">screen_regions_res</span><span class="op">$</span><span class="va">screen_summary</span></span></code></pre></div>
+<p>It returns <code>screened_region_data</code> which contains a subset of region data for selected regions. It also returns the estimated L (number of credible sets) for the selected regions, which could be used in the fine-mapping step to set L for each region. In addition, it returns a data frame <code>screen_summary</code>, which includes the estimated L and non-SNP PIPs for all the regions.</p>
+<p>When <code>expand = TRUE</code> (default option), the selected regions will be automatically expanded with all SNPs for the final fine-mapping step. If the number of SNPs in a region is more than <code>maxSNP</code>, It will trim the SNPs in the region (according to the Z-scores).</p>
 <p>When running without LD (<code>use_LD = FALSE</code>), cTWAS would only perform screening regions by non-SNP PIPs, and it will automatically set <code>filter_nonSNP_PIP = TRUE</code> and <code>filter_L = FALSE</code>.</p>
 <div class="sourceCode" id="cb8"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">screen_region_res</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/screen_regions.html">screen_regions</a></span><span class="op">(</span><span class="va">region_data</span>,</span>
+<code class="sourceCode R"><span><span class="va">screen_regions_res</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/screen_regions.html">screen_regions</a></span><span class="op">(</span><span class="va">region_data</span>,</span>
 <span>                                    use_LD <span class="op">=</span> <span class="cn">FALSE</span>,</span>
+<span>                                    z_snp <span class="op">=</span> <span class="va">z_snp</span>,</span>
 <span>                                    group_prior <span class="op">=</span> <span class="va">group_prior</span>,</span>
 <span>                                    group_prior_var <span class="op">=</span> <span class="va">group_prior_var</span>,</span>
 <span>                                    filter_L <span class="op">=</span> <span class="cn">FALSE</span>,</span>
 <span>                                    filter_nonSNP_PIP <span class="op">=</span> <span class="cn">TRUE</span>,</span>
 <span>                                    min_nonSNP_PIP <span class="op">=</span> <span class="fl">0.5</span>,</span>
-<span>                                    ncore <span class="op">=</span> <span class="fl">6</span><span class="op">)</span></span>
-<span><span class="va">screened_region_data</span> <span class="op">&lt;-</span> <span class="va">screen_region_res</span><span class="op">$</span><span class="va">screened_region_data</span></span></code></pre></div>
-<p>After selecting regions, we expand the screened regions with all SNPs for final fine-mapping. (This is not needed when <code>thin = 1</code>.)</p>
-<div class="sourceCode" id="cb9"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">screened_region_data</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/expand_region_data.html">expand_region_data</a></span><span class="op">(</span><span class="va">screened_region_data</span>,</span>
-<span>                                           <span class="va">snp_map</span>,</span>
-<span>                                           <span class="va">z_snp</span>,</span>
-<span>                                           maxSNP <span class="op">=</span> <span class="fl">20000</span>,</span>
-<span>                                           ncore <span class="op">=</span> <span class="va">ncore</span><span class="op">)</span></span></code></pre></div>
-<p>If the number of SNPs in a region is more than <code>maxSNP</code>, It will trim the SNPs in the region (according to the Z-scores, by default).</p>
+<span>                                    expand <span class="op">=</span> <span class="cn">TRUE</span>,</span>
+<span>                                    maxSNP <span class="op">=</span> <span class="fl">20000</span>,</span>
+<span>                                    ncore <span class="op">=</span> <span class="fl">4</span><span class="op">)</span></span>
+<span><span class="va">screened_region_data</span> <span class="op">&lt;-</span> <span class="va">screen_regions_res</span><span class="op">$</span><span class="va">screened_region_data</span></span>
+<span><span class="va">screen_summary</span> <span class="op">&lt;-</span> <span class="va">screen_regions_res</span><span class="op">$</span><span class="va">screen_summary</span></span></code></pre></div>
 </div>
 <div class="section level3">
 <h3 id="fine-mapping-screened-regions">Fine-mapping screened regions<a class="anchor" aria-label="anchor" href="#fine-mapping-screened-regions"></a>
@@ -239,7 +244,7 @@
 <p>We now perform the fine-mapping step for each of the screened regions with the estimated parameters.</p>
 <p>The <code><a href="../reference/finemap_regions.html">finemap_regions()</a></code> function performs fine-mapping for the regions in the <code>screened_region_data</code>.</p>
 <p>It first computes correlation matrices among all variables included in fine-mapping (SNPs, and genes), then runs fine-mapping with estimated parameters (<code>group_prior</code> and <code>group_prior_var</code>) and estimated number of causal signals (<code>L</code>), and returns a data frame with fine-mapping results for the regions.</p>
-<div class="sourceCode" id="cb10"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb9"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">finemap_res</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/finemap_regions.html">finemap_regions</a></span><span class="op">(</span><span class="va">screened_region_data</span>,</span>
 <span>                               use_LD <span class="op">=</span> <span class="cn">TRUE</span>,</span>
 <span>                               LD_map <span class="op">=</span> <span class="va">LD_map</span>,</span>
@@ -250,10 +255,11 @@
 <span>                               L <span class="op">=</span> <span class="va">screen_region_res</span><span class="op">$</span><span class="va">L</span>,</span>
 <span>                               save_cor <span class="op">=</span> <span class="cn">TRUE</span>,</span>
 <span>                               cor_dir <span class="op">=</span> <span class="st">"./cor_matrix"</span>,</span>
-<span>                               ncore <span class="op">=</span> <span class="va">ncore</span><span class="op">)</span></span></code></pre></div>
+<span>                               ncore <span class="op">=</span> <span class="fl">4</span><span class="op">)</span></span></code></pre></div>
 <p>We can save the computed correlation matrices to the directory <code>cor_dir</code> for future access, by setting <code>save_cor = TRUE</code>.</p>
-<p><em>Note</em>: it is also possible to run fine-mapping without LD:</p>
-<div class="sourceCode" id="cb11"><pre class="downlit sourceCode r">
+<p><em>Note</em>: when screening and fine-mapping regions with LD, we need larger memory to load LD matrices and compute correlation matrices. So we recommend increasing memory or reducing the number of <code>ncore</code> for these steps.</p>
+<p><em>Note:</em> it is also possible to run fine-mapping without LD:</p>
+<div class="sourceCode" id="cb10"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">finemap_res</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/finemap_regions.html">finemap_regions</a></span><span class="op">(</span><span class="va">screened_region_data</span>,</span>
 <span>                               use_LD <span class="op">=</span> <span class="cn">FALSE</span>,</span>
 <span>                               group_prior <span class="op">=</span> <span class="va">group_prior</span>,</span>
@@ -266,7 +272,7 @@
 <p>We could also run fine-mapping for a single region (or several regions of interest) with precomputed parameters. This is particularly useful to perform a deep analysis on genes/regions of interest.</p>
 <p>Here we show an example for fine mapping a single region “16_71020125_72901251”.</p>
 <p>We first expand the region of interest with the full set of SNPs using the assembled <code>region_data</code>. We also need the number of causal signals (<code>L</code>) for this region. This is obtained from the output of the earlier <code><a href="../reference/screen_regions.html">screen_regions()</a></code> function.</p>
-<div class="sourceCode" id="cb12"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb11"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">region_id</span> <span class="op">&lt;-</span> <span class="st">"16_71020125_72901251"</span></span>
 <span><span class="va">selected_region_data</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/expand_region_data.html">expand_region_data</a></span><span class="op">(</span><span class="va">region_data</span><span class="op">[</span><span class="va">region_id</span><span class="op">]</span>,</span>
 <span>                                           <span class="va">snp_map</span>,</span>
@@ -275,7 +281,7 @@
 <span></span>
 <span><span class="va">selected_region_L</span> <span class="op">&lt;-</span> <span class="va">screen_region_res</span><span class="op">$</span><span class="va">L</span><span class="op">[</span><span class="va">region_id</span><span class="op">]</span></span></code></pre></div>
 <p>We could then perform fine-mapping for this region of interest:</p>
-<div class="sourceCode" id="cb13"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb12"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">finemap_region_res</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/finemap_regions.html">finemap_regions</a></span><span class="op">(</span><span class="va">selected_region_data</span>,</span>
 <span>                                      use_LD <span class="op">=</span> <span class="cn">TRUE</span>,</span>
 <span>                                      LD_map <span class="op">=</span> <span class="va">LD_map</span>,</span>
@@ -287,7 +293,7 @@
 <span>                                      save_cor <span class="op">=</span> <span class="cn">TRUE</span>,</span>
 <span>                                      cor_dir <span class="op">=</span> <span class="st">"./cor_matrix"</span><span class="op">)</span></span></code></pre></div>
 <p>We could also perform fine-mapping without LD:</p>
-<div class="sourceCode" id="cb14"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb13"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">finemap_region_res</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/finemap_regions.html">finemap_regions</a></span><span class="op">(</span><span class="va">selected_region_data</span>,</span>
 <span>                                      use_LD <span class="op">=</span> <span class="cn">FALSE</span>,</span>
 <span>                                      group_prior <span class="op">=</span> <span class="va">group_prior</span>,</span>

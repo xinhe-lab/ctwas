@@ -17,7 +17,7 @@
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">ctwas</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">0.3.16</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">0.3.18</span>
       </span>
     </div>
 
@@ -76,9 +76,9 @@
 <span>  <span class="va">region_data</span>,</span>
 <span>  <span class="va">region_id</span>,</span>
 <span>  use_LD <span class="op">=</span> <span class="cn">TRUE</span>,</span>
-<span>  LD_map <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  <span class="va">LD_map</span>,</span>
 <span>  snp_map <span class="op">=</span> <span class="cn">NULL</span>,</span>
-<span>  weights <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  <span class="va">weights</span>,</span>
 <span>  L <span class="op">=</span> <span class="fl">5</span>,</span>
 <span>  group_prior <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  group_prior_var <span class="op">=</span> <span class="cn">NULL</span>,</span>
@@ -89,7 +89,7 @@
 <span>  save_cor <span class="op">=</span> <span class="cn">FALSE</span>,</span>
 <span>  cor_dir <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  LD_format <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"rds"</span>, <span class="st">"rdata"</span>, <span class="st">"mtx"</span>, <span class="st">"csv"</span>, <span class="st">"txt"</span>, <span class="st">"custom"</span><span class="op">)</span>,</span>
-<span>  <span class="va">LD_loader_fun</span>,</span>
+<span>  LD_loader_fun <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  include_cs_index <span class="op">=</span> <span class="cn">TRUE</span>,</span>
 <span>  verbose <span class="op">=</span> <span class="cn">FALSE</span>,</span>
 <span>  <span class="va">...</span></span>
@@ -117,7 +117,8 @@
 
 
 <dt id="arg-snp-map">snp_map<a class="anchor" aria-label="anchor" href="#arg-snp-map"></a></dt>
-<dd><p>a list of SNP-to-region map for the reference. Required when <code>use_LD = TRUE</code>.</p></dd>
+<dd><p>a list of SNP-to-region map for the reference.
+If <code>snp_map = NULL</code>, load SNP info from the 'SNP_file' column of 'LD_map'.</p></dd>
 
 
 <dt id="arg-weights">weights<a class="anchor" aria-label="anchor" href="#arg-weights"></a></dt>
@@ -137,7 +138,7 @@
 
 
 <dt id="arg-use-null-weight">use_null_weight<a class="anchor" aria-label="anchor" href="#arg-use-null-weight"></a></dt>
-<dd><p>TRUE/FALSE. If TRUE, allow for a probability of no effect in susie</p></dd>
+<dd><p>If TRUE, allow for a probability of no effect in susie</p></dd>
 
 
 <dt id="arg-coverage">coverage<a class="anchor" aria-label="anchor" href="#arg-coverage"></a></dt>
@@ -152,11 +153,11 @@ genotype data in genetic studies.</p></dd>
 
 
 <dt id="arg-force-compute-cor">force_compute_cor<a class="anchor" aria-label="anchor" href="#arg-force-compute-cor"></a></dt>
-<dd><p>TRUE/FALSE. If TRUE, force computing correlation (R) matrices</p></dd>
+<dd><p>If TRUE, force computing correlation (R) matrices</p></dd>
 
 
 <dt id="arg-save-cor">save_cor<a class="anchor" aria-label="anchor" href="#arg-save-cor"></a></dt>
-<dd><p>TRUE/FALSE. If TRUE, save correlation (R) matrices to <code>cor_dir</code></p></dd>
+<dd><p>If TRUE, save correlation (R) matrices to <code>cor_dir</code></p></dd>
 
 
 <dt id="arg-cor-dir">cor_dir<a class="anchor" aria-label="anchor" href="#arg-cor-dir"></a></dt>
@@ -173,11 +174,11 @@ genotype data in genetic studies.</p></dd>
 
 
 <dt id="arg-include-cs-index">include_cs_index<a class="anchor" aria-label="anchor" href="#arg-include-cs-index"></a></dt>
-<dd><p>TRUE/FALSE. If TRUE, add cs_index to finemapping results.</p></dd>
+<dd><p>If TRUE, add cs_index to finemapping results.</p></dd>
 
 
 <dt id="arg-verbose">verbose<a class="anchor" aria-label="anchor" href="#arg-verbose"></a></dt>
-<dd><p>TRUE/FALSE. If TRUE, print detail messages</p></dd>
+<dd><p>If TRUE, print detail messages</p></dd>
 
 
 <dt id="arg--">...<a class="anchor" aria-label="anchor" href="#arg--"></a></dt>

@@ -31,7 +31,7 @@ This function needs genotype files (`genotype_files`) and variant information fi
  
 Below is an example for creating LD matrices using 1000 Genomes European genotype data.
 
-You can download the 1000 Genomes European genotype data from [here](https://uchicago.box.com/s/qqfq7wsl1fcbfjrcpwvyyspvfud3h2xa).
+You can download the 1000 Genomes European genotype data [here](https://uchicago.box.com/s/qqfq7wsl1fcbfjrcpwvyyspvfud3h2xa).
 
 ```{r convert_geno_to_LD_matrix, eval=FALSE}
 ldref_dir <- "./1000G_EUR_Phase3_plink"
@@ -53,16 +53,16 @@ region_metatable <- convert_geno_to_LD_matrix(region_info,
 ```
 
 
-You can download the precomputed LD files using the 1000 Genomes European genotype data from [here](https://uchicago.box.com/s/bi7yy7461hdd07xafyk0qlji1kwmleu7)
+You can download the precomputed LD files using the 1000 Genomes European genotype data [here](https://uchicago.box.com/s/bi7yy7461hdd07xafyk0qlji1kwmleu7).
 
-We provide example R scripts to create LD files for UK biobank or 1000 genomes genotype files [here](https://github.com/xinhe-lab/ctwas/tree/singlegroup/inst/extdata/scripts)
+We provide example R scripts to create LD files for UK biobank or 1000 genomes genotype files [here](https://github.com/xinhe-lab/ctwas/tree/singlegroup/inst/extdata/scripts).
 
 
 ### Using FUSION weights
 
 PredictDB is the recommended format for cTWAS, and we introduced how to use PredictDB weights in the tutorial "Preparing cTWAS input data". Here, we will discuss how to use FUSION weights. 
 
-Please check [FUSION/TWAS](http://gusevlab.org/projects/fusion/#compute-your-own-predictive-models) for the format of FUSION weights. You can download [precomputed FUSION models](http://gusevlab.org/projects/fusion/#download-pre-computed-predictive-models)
+Please check [FUSION/TWAS](http://gusevlab.org/projects/fusion/#compute-your-own-predictive-models) for the format of FUSION weights. You can download [precomputed FUSION models](http://gusevlab.org/projects/fusion/#download-pre-computed-predictive-models).
 
 For example, we download an example GTEx whole blood data. 
 ```{bash download_fusion_weights, eval=FALSE}

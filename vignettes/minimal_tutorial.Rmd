@@ -68,7 +68,7 @@ gwas_n <- 343621
 
 ### Reference data
 
-cTWAS assumes that the genome is partitioned into approximately independent LD regions. The definitions of these regions need to be provided. You will also need to have a list of SNPs as a “reference”, with the information of these SNPs.  This is similar to LD reference data, needed in fine-mapping GWAS loci with summary statistics. Also similar to fine-mapping, the variant reference should match in the population of GWAS samples. 
+cTWAS assumes that the genome is partitioned into approximately independent LD regions. The definitions of these regions need to be provided. You will also need to have a list of SNPs as a “reference”, with the information of these SNPs.  This is similar to LD reference data, needed in fine-mapping GWAS loci with summary statistics. Also similar to fine-mapping, the variant reference should match with the population of GWAS samples. 
 
 It is critical that the genome build (e.g. hg38) of the reference match the genome build used to train the prediction models. By contrast, the genome build of the GWAS summary statistics does not matter because variant positions are determined by the reference.
 
