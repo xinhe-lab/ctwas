@@ -17,8 +17,6 @@
 #'
 #' @param filter_cs TRUE/FALSE. If TRUE, limits results in credible sets.
 #'
-#' @param na.rm If TRUE, remove missing values and unannotated genes.
-#'
 #' @return a data frame of cTWAS finemapping result including gene
 #' names, types and positions
 #'

@@ -239,13 +239,13 @@ screen_regions <- function(region_data,
 #'
 #' @param region_data a list object indexing regions, variants and genes.
 #'
-#' @param use_LD TRUE/FALSE. If TRUE, use LD for finemapping. Otherwise, use "no-LD" version.
+#' @param LD_map a data frame with filenames of LD matrices for each of the regions.
 #'
-#' @param LD_map a data frame with filenames of LD matrices for each of the regions. Required when \code{use_LD = TRUE}.
+#' @param snp_map a list of data frames with SNP-to-region map for the reference.
 #'
-#' @param snp_map a list of data frames with SNP-to-region map for the reference. Required when \code{use_LD = TRUE}.
+#' @param weights a list of preprocessed weights.
 #'
-#' @param weights a list of weights for each gene. Required when \code{use_LD = TRUE}.
+#' @param init_L initial number of causal signals to run fine-mapping
 #'
 #' @param LD_format file format for LD matrix. If "custom", use a user defined
 #' \code{LD_loader_fun()} function to load LD matrix.

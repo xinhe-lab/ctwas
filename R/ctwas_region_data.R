@@ -346,8 +346,6 @@ adjust_boundary_genes <- function(boundary_genes,
 #'
 #' @param z_snp A data frame with columns: "id", "z", giving the z-scores for SNPs.
 #'
-#' @param z_gene A data frame with columns: "id", "z", giving the z-scores for genes.
-#'
 #' @param maxSNP Inf or integer. Maximum number of SNPs in a region. Default is
 #' Inf, no limit. This can be useful if there are many SNPs in a region and you don't
 #' have enough memory to run the program.

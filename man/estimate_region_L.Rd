@@ -20,11 +20,13 @@ estimate_region_L(
 \arguments{
 \item{region_data}{a list object indexing regions, variants and genes.}
 
-\item{LD_map}{a data frame with filenames of LD matrices for each of the regions. Required when \code{use_LD = TRUE}.}
+\item{LD_map}{a data frame with filenames of LD matrices for each of the regions.}
 
-\item{snp_map}{a list of data frames with SNP-to-region map for the reference. Required when \code{use_LD = TRUE}.}
+\item{snp_map}{a list of data frames with SNP-to-region map for the reference.}
 
-\item{weights}{a list of weights for each gene. Required when \code{use_LD = TRUE}.}
+\item{weights}{a list of preprocessed weights.}
+
+\item{init_L}{initial number of causal signals to run fine-mapping}
 
 \item{LD_format}{file format for LD matrix. If "custom", use a user defined
 \code{LD_loader_fun()} function to load LD matrix.}
@@ -36,8 +38,6 @@ estimate_region_L(
 \item{verbose}{TRUE/FALSE. If TRUE, print detail messages}
 
 \item{...}{Additional arguments of \code{susie_rss}.}
-
-\item{use_LD}{TRUE/FALSE. If TRUE, use LD for finemapping. Otherwise, use "no-LD" version.}
 }
 \value{
 estimated L for each region
