@@ -44,7 +44,7 @@ of having at most one causal effect will be selected for the final EM step.}
 
 \item{ncore}{The number of cores used to parallelize computation over regions}
 
-\item{logfile}{The log filename. If NULL, will print log info on screen.}
+\item{logfile}{The log filename. If NULL, print log info on screen.}
 
 \item{verbose}{If TRUE, print detail messages}
 

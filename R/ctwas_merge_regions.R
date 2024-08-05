@@ -36,7 +36,7 @@
 #'
 #' @param verbose If TRUE, print detail messages
 #'
-#' @param logfile The log filename. If NULL, will print log info on screen.
+#' @param logfile The log filename. If NULL, print log info on screen.
 #'
 #' @param ... Additional arguments of \code{susie_rss}.
 #'
@@ -114,6 +114,7 @@ merge_region_data <- function(boundary_genes,
                                                 "sid" = new_sid)
   }
 
+  loginfo("update z-scores")
   merged_region_data <- update_region_z(merged_region_data, z_snp, z_gene, ncore = ncore)
 
   loginfo("%d regions in merged_region_data", length(merged_region_data))
@@ -121,14 +122,14 @@ merge_region_data <- function(boundary_genes,
   if (estimate_L) {
     loginfo("Estimating L ...")
     merged_region_L <- estimate_region_L(region_data = merged_region_data,
-                           LD_map = merged_LD_map,
-                           weights = weights,
-                           init_L = L,
-                           LD_format = LD_format,
-                           LD_loader_fun = LD_loader_fun,
-                           ncore = ncore,
-                           verbose = verbose,
-                           ...)
+                                         LD_map = merged_LD_map,
+                                         weights = weights,
+                                         init_L = L,
+                                         LD_format = LD_format,
+                                         LD_loader_fun = LD_loader_fun,
+                                         ncore = ncore,
+                                         verbose = verbose,
+                                         ...)
     merged_region_L[merged_region_L == 0] <- 1
   } else {
     merged_region_L <- L

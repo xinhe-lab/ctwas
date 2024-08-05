@@ -34,7 +34,7 @@ will be selected to run finemapping using full SNPs.}
 
 \item{ncore}{The number of cores used to parallelize susie over regions.}
 
-\item{logfile}{The log filename. If NULL, will print log info on screen.}
+\item{logfile}{The log filename. If NULL, print log info on screen.}
 
 \item{verbose}{If TRUE, print detail messages.}
 

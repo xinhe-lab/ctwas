@@ -47,7 +47,7 @@ giving the z scores for snps. "A1" is effect allele. "A2" is the other allele.}
 
 \item{region_info}{a data frame of region definitions.}
 
-\item{LD_map}{a data frame with filenames of LD matrices for each of the regions.}
+\item{LD_map}{a data frame with filenames of LD matrices and SNP information for the regions.}
 
 \item{snp_map}{a list of data frames with SNP-to-region map for the reference.}
 
@@ -65,12 +65,12 @@ giving the z scores for snps. "A1" is effect allele. "A2" is the other allele.}
 
 \item{init_group_prior_var}{a vector of initial values of prior variances for SNPs and gene effects.}
 
-\item{filter_L}{If TRUE, screening regions with L >= 1}
+\item{filter_L}{If TRUE, screening regions with L > 0.}
 
-\item{filter_nonSNP_PIP}{If TRUE, screening regions with total non-SNP PIP >= \code{min_nonSNP_PIP}}
+\item{filter_nonSNP_PIP}{If TRUE, screening regions with total non-SNP PIP >= \code{min_nonSNP_PIP}.}
 
 \item{min_nonSNP_PIP}{Regions with non-SNP PIP >= \code{min_nonSNP_PIP}
-will be selected to run finemapping using full SNPs.}
+will be selected to run finemapping using all SNPs.}
 
 \item{min_p_single_effect}{Regions with probability >= \code{min_p_single_effect}
 of having at most one causal effect will be selected for the final EM step.}
@@ -81,7 +81,8 @@ have enough memory to run the program.}
 
 \item{use_null_weight}{If TRUE, allow for a probability of no effect in susie}
 
-\item{coverage}{A number between 0 and 1 specifying the \dQuote{coverage} of the estimated confidence sets}
+\item{coverage}{A number between 0 and 1 specifying the \dQuote{coverage} of
+the estimated confidence sets.}
 
 \item{min_abs_corr}{Minimum absolute correlation allowed in a
 .  credible set. The default, 0.5, corresponds to a squared
@@ -108,7 +109,7 @@ have enough memory to run the program.}
 \item{ncore_LD}{The number of cores used to parallelize computing correlation matrices,
 in screening regions and fine-mapping steps with LD.}
 
-\item{logfile}{The log filename. If NULL, will print log info on screen.}
+\item{logfile}{The log filename. If NULL, print log info on screen.}
 
 \item{verbose}{If TRUE, print detailed messages}
 

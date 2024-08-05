@@ -126,7 +126,7 @@ giving the z scores for snps. "A1" is effect allele. "A2" is the other allele.</
 
 
 <dt id="arg-ld-map">LD_map<a class="anchor" aria-label="anchor" href="#arg-ld-map"></a></dt>
-<dd><p>a data frame with filenames of LD matrices for each of the regions.</p></dd>
+<dd><p>a data frame with filenames of LD matrices and SNP information for the regions.</p></dd>
 
 
 <dt id="arg-snp-map">snp_map<a class="anchor" aria-label="anchor" href="#arg-snp-map"></a></dt>
@@ -162,16 +162,16 @@ giving the z scores for snps. "A1" is effect allele. "A2" is the other allele.</
 
 
 <dt id="arg-filter-l">filter_L<a class="anchor" aria-label="anchor" href="#arg-filter-l"></a></dt>
-<dd><p>If TRUE, screening regions with L &gt;= 1</p></dd>
+<dd><p>If TRUE, screening regions with L &gt; 0.</p></dd>
 
 
 <dt id="arg-filter-nonsnp-pip">filter_nonSNP_PIP<a class="anchor" aria-label="anchor" href="#arg-filter-nonsnp-pip"></a></dt>
-<dd><p>If TRUE, screening regions with total non-SNP PIP &gt;= <code>min_nonSNP_PIP</code></p></dd>
+<dd><p>If TRUE, screening regions with total non-SNP PIP &gt;= <code>min_nonSNP_PIP</code>.</p></dd>
 
 
 <dt id="arg-min-nonsnp-pip">min_nonSNP_PIP<a class="anchor" aria-label="anchor" href="#arg-min-nonsnp-pip"></a></dt>
 <dd><p>Regions with non-SNP PIP &gt;= <code>min_nonSNP_PIP</code>
-will be selected to run finemapping using full SNPs.</p></dd>
+will be selected to run finemapping using all SNPs.</p></dd>
 
 
 <dt id="arg-min-p-single-effect">min_p_single_effect<a class="anchor" aria-label="anchor" href="#arg-min-p-single-effect"></a></dt>
@@ -190,7 +190,8 @@ have enough memory to run the program.</p></dd>
 
 
 <dt id="arg-coverage">coverage<a class="anchor" aria-label="anchor" href="#arg-coverage"></a></dt>
-<dd><p>A number between 0 and 1 specifying the “coverage” of the estimated confidence sets</p></dd>
+<dd><p>A number between 0 and 1 specifying the “coverage” of
+the estimated confidence sets.</p></dd>
 
 
 <dt id="arg-min-abs-corr">min_abs_corr<a class="anchor" aria-label="anchor" href="#arg-min-abs-corr"></a></dt>
@@ -239,7 +240,7 @@ in screening regions and fine-mapping steps with LD.</p></dd>
 
 
 <dt id="arg-logfile">logfile<a class="anchor" aria-label="anchor" href="#arg-logfile"></a></dt>
-<dd><p>The log filename. If NULL, will print log info on screen.</p></dd>
+<dd><p>The log filename. If NULL, print log info on screen.</p></dd>
 
 
 <dt id="arg-verbose">verbose<a class="anchor" aria-label="anchor" href="#arg-verbose"></a></dt>

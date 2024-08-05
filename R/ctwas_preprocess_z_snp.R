@@ -6,11 +6,11 @@
 #'
 #' @param snp_map a list of data frames with SNP-to-region map for the reference.
 #'
-#' @param drop_multiallelic TRUE/FALSE. If TRUE, multiallelic variants will be dropped from the summary statistics.
+#' @param drop_multiallelic If TRUE, multiallelic variants will be dropped from the summary statistics.
 #'
-#' @param drop_strand_ambig TRUE/FALSE, if TRUE remove strand ambiguous variants (A/T, G/C).
+#' @param drop_strand_ambig If TRUE remove strand ambiguous variants (A/T, G/C).
 #'
-#' @param logfile the log file, if NULL will print log info on screen.
+#' @param logfile The log filename. If NULL, print log info on screen.
 #'
 #' @return a data frame preprocessed GWAS z-scores
 #'

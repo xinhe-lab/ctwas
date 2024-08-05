@@ -3,7 +3,7 @@
 #' @param z_snp A data frame with four columns: "id", "A1", "A2", "z".
 #' giving the z scores for snps. "A1" is effect allele. "A2" is the other allele.
 #'
-#' @param weights a list of pre-processed prediction weights
+#' @param weights a list of pre-processed prediction weights.
 #'
 #' @param region_info a data frame of region definitions.
 #'
@@ -31,15 +31,15 @@
 #' @param min_p_single_effect Regions with probability >= \code{min_p_single_effect}
 #' of having at most one causal effect will be selected for the final EM step.
 #'
-#' @param use_null_weight If TRUE, allow for a probability of no effect in susie
-#'
-#' @param ncore The number of cores used to parallelize susie over regions
+#' @param use_null_weight If TRUE, allow for a probability of no effect in susie.
 #'
 #' @param outputdir The directory to store output. If specified, save outputs to the directory.
 #'
 #' @param outname The output name.
 #'
-#' @param logfile The log filename. If NULL, will print log info on screen.
+#' @param ncore The number of cores used to parallelize susie over regions
+#'
+#' @param logfile The log filename. If NULL, print log info on screen.
 #'
 #' @param verbose If TRUE, print detailed messages
 #'
@@ -48,8 +48,8 @@
 #' @importFrom logging addHandler loginfo writeToFile
 #' @importFrom utils packageVersion
 #'
-#' @return a list of estimated parameters, fine-mapping results, boundary genes,
-#' z_gene, region_data, and screened_region_data
+#' @return a list, including z_gene, estimated parameters, region_data,
+#' cross-boundary genes, screening region results, and fine-mapping results.
 #'
 #' @export
 #'
@@ -68,9 +68,9 @@ ctwas_sumstats_noLD <- function(
     min_nonSNP_PIP = 0.5,
     min_p_single_effect = 0.8,
     use_null_weight = TRUE,
-    ncore = 1,
     outputdir = NULL,
     outname = "ctwas_noLD",
+    ncore = 1,
     logfile = NULL,
     verbose = FALSE,
     ...){
@@ -194,7 +194,7 @@ ctwas_sumstats_noLD <- function(
       saveRDS(finemap_res, file.path(outputdir, paste0(outname, ".finemap_res.RDS")))
     }
   } else {
-    warning("No regions selected for finemapping.")
+    loginfo("No regions selected for finemapping.")
     finemap_res <- NULL
   }
 

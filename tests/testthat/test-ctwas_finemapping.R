@@ -1,4 +1,4 @@
-test_that("finemap_regions works with no-LD", {
+test_that("finemap_regions_noLD works", {
 
   # finemap a single region with no-LD version
   ctwas_res <- readRDS(system.file("extdata/sample_data", "LDL_example.ctwas_sumstats_noLD_res.RDS", package = "ctwas"))
@@ -21,7 +21,7 @@ test_that("finemap_regions works with no-LD", {
   expect_equal(finemap_res, expected_finemap_res)
 })
 
-test_that("finemap_regions works with LD", {
+test_that("finemap_regions works", {
 
   # finemap a single region with LD
   LD_map <- readRDS(system.file("extdata/sample_data", "LDL_example.LD_map.RDS", package = "ctwas"))

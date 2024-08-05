@@ -1,4 +1,4 @@
-test_that("diagnose_ld_mismatch_susie works", {
+test_that("diagnose_LD_mismatch_susie works", {
 
   LD_map <- readRDS(system.file("extdata/sample_data", "LDL_example.LD_map.RDS", package = "ctwas"))
   skip_if_no_LD_file(LD_map$LD_file)

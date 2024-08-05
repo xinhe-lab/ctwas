@@ -1,4 +1,4 @@
-test_that("merge_region_data with no-LD works", {
+test_that("merge_region_data_noLD works", {
 
   z_snp <- readRDS(system.file("extdata/sample_data", "LDL_example.preprocessed.z_snp.RDS", package = "ctwas"))
   weights <- readRDS(system.file("extdata/sample_data", "LDL_example.preprocessed.weights.RDS", package = "ctwas"))
@@ -26,7 +26,7 @@ test_that("merge_region_data with no-LD works", {
   expect_equal(merge_region_res, expected_merge_region_res)
 })
 
-test_that("merge_region_data with LD works", {
+test_that("merge_region_data works", {
 
   LD_map <- readRDS(system.file("extdata/sample_data", "LDL_example.LD_map.RDS", package = "ctwas"))
   skip_if_no_LD_file(LD_map$LD_file)

@@ -7,7 +7,7 @@
 #'
 #' @param region_info a data frame of region definitions.
 #'
-#' @param LD_map a data frame with filenames of LD matrices for each of the regions.
+#' @param LD_map a data frame with filenames of LD matrices and SNP information for the regions.
 #'
 #' @param snp_map a list of data frames with SNP-to-region map for the reference.
 #'
@@ -25,12 +25,12 @@
 #'
 #' @param init_group_prior_var a vector of initial values of prior variances for SNPs and gene effects.
 #'
-#' @param filter_L If TRUE, screening regions with L >= 1
+#' @param filter_L If TRUE, screening regions with L > 0.
 #'
-#' @param filter_nonSNP_PIP If TRUE, screening regions with total non-SNP PIP >= \code{min_nonSNP_PIP}
+#' @param filter_nonSNP_PIP If TRUE, screening regions with total non-SNP PIP >= \code{min_nonSNP_PIP}.
 #'
 #' @param min_nonSNP_PIP Regions with non-SNP PIP >= \code{min_nonSNP_PIP}
-#' will be selected to run finemapping using full SNPs.
+#' will be selected to run finemapping using all SNPs.
 #'
 #' @param min_p_single_effect Regions with probability >= \code{min_p_single_effect}
 #' of having at most one causal effect will be selected for the final EM step.
@@ -41,7 +41,8 @@
 #'
 #' @param use_null_weight If TRUE, allow for a probability of no effect in susie
 #'
-#' @param coverage A number between 0 and 1 specifying the \dQuote{coverage} of the estimated confidence sets
+#' @param coverage A number between 0 and 1 specifying the \dQuote{coverage} of
+#' the estimated confidence sets.
 #'
 #' @param min_abs_corr Minimum absolute correlation allowed in a
 #'.  credible set. The default, 0.5, corresponds to a squared
@@ -68,7 +69,7 @@
 #' @param ncore_LD The number of cores used to parallelize computing correlation matrices,
 #' in screening regions and fine-mapping steps with LD.
 #'
-#' @param logfile The log filename. If NULL, will print log info on screen.
+#' @param logfile The log filename. If NULL, print log info on screen.
 #'
 #' @param verbose If TRUE, print detailed messages
 #'

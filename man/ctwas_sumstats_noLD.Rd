@@ -19,9 +19,9 @@ ctwas_sumstats_noLD(
   min_nonSNP_PIP = 0.5,
   min_p_single_effect = 0.8,
   use_null_weight = TRUE,
-  ncore = 1,
   outputdir = NULL,
   outname = "ctwas_noLD",
+  ncore = 1,
   logfile = NULL,
   verbose = FALSE,
   ...
@@ -31,7 +31,7 @@ ctwas_sumstats_noLD(
 \item{z_snp}{A data frame with four columns: "id", "A1", "A2", "z".
 giving the z scores for snps. "A1" is effect allele. "A2" is the other allele.}
 
-\item{weights}{a list of pre-processed prediction weights}
+\item{weights}{a list of pre-processed prediction weights.}
 
 \item{region_info}{a data frame of region definitions.}
 
@@ -59,23 +59,23 @@ will be selected to run finemapping using full SNPs.}
 \item{min_p_single_effect}{Regions with probability >= \code{min_p_single_effect}
 of having at most one causal effect will be selected for the final EM step.}
 
-\item{use_null_weight}{If TRUE, allow for a probability of no effect in susie}
-
-\item{ncore}{The number of cores used to parallelize susie over regions}
+\item{use_null_weight}{If TRUE, allow for a probability of no effect in susie.}
 
 \item{outputdir}{The directory to store output. If specified, save outputs to the directory.}
 
 \item{outname}{The output name.}
 
-\item{logfile}{The log filename. If NULL, will print log info on screen.}
+\item{ncore}{The number of cores used to parallelize susie over regions}
+
+\item{logfile}{The log filename. If NULL, print log info on screen.}
 
 \item{verbose}{If TRUE, print detailed messages}
 
 \item{...}{Additional arguments of \code{susie_rss}.}
 }
 \value{
-a list of estimated parameters, fine-mapping results, boundary genes,
-z_gene, region_data, and screened_region_data
+a list, including z_gene, estimated parameters, region_data,
+cross-boundary genes, screening region results, and fine-mapping results.
 }
 \description{
 run cTWAS analysis using summary statistics with "no LD" version

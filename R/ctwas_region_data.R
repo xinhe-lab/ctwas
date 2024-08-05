@@ -30,9 +30,9 @@
 #'
 #' @param seed seed for random sampling
 #'
-#' @param logfile The log filename. If NULL, will print log info on screen.
+#' @param logfile The log filename. If NULL, print log info on screen.
 #'
-#' @return a list with region_data, updated weights, and cross-bounary genes
+#' @return a list, including region_data and cross-boundary genes
 #'
 #' @importFrom logging loginfo
 #' @importFrom data.table rbindlist
