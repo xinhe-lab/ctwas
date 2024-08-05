@@ -3,7 +3,7 @@ Package: ctwas
 Type: Package
 Title: Adjusting for Genetic Confounders in Transcriptome-Wide Association
   Studies Improves Discovery of Risk Genes of Complex Traits
-Date: 2024-06-14
+Date: 2024-08-05
 Version: 0.3.22
 Authors@R: c(person("Siming","Zhao",role="aut",email="siming.zhao06@gmail.com"),
              person("Wesley","Crouse",role="aut"),
