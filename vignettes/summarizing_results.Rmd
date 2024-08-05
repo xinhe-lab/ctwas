@@ -59,7 +59,7 @@ param <- ctwas_res$param
 finemap_res <- ctwas_res$finemap_res
 boundary_genes <- ctwas_res$boundary_genes
 region_data <- ctwas_res$region_data
-screened_region_data <- ctwas_res$screened_region_data
+screen_res <- ctwas_res$screen_res
 ```
 
 
@@ -82,8 +82,7 @@ It also produces other output:
 
 + `region_data`: assembled region data, including Z scores of SNPs and genes, for all the regions. Note that only data of the subset of SNPs used in screening regions are included. 
 
-+ `screened_region_data`: the data of all SNPs and genes of the selected regions. 
-
++ `screen_res`: screening regions results, including the data of all SNPs and genes of the selected regions, estimated numbers of causal signals (L) for selected regions, and a data frame with estimated L or non-SNP PIPs for all regions.
 
 ## Assessing parameters and computing PVE
 
@@ -117,6 +116,7 @@ subset(finemap_res, group == "gene" & susie_pip > 0.8)
 The result, however, does not contain gene names and position information. To add the information, it is helpful to add gene annotations to the fine-mapping result.
 
 To annotate genes, we need `gene_annot`, a data frame containing gene IDs, gene names, gene types, and position information of the genes. We have a function `get_gene_annot_from_ens_db()` , which extracts gene annotations from the Ensembl database. 
+
 ```{r get_gene_annot_from_ens_db, message=FALSE}
 ens_db <- EnsDb.Hsapiens.v86
 finemap_gene_res <- subset(finemap_res, group == "gene")

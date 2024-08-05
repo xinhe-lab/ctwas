@@ -130,7 +130,7 @@ Each variant should be uniquely assigned to a region, and the regions should be 
 
 ### Mapping reference SNPs and LD matrices to regions
 
-We will need to link the reference SNP and LD files to the regions. To do this, we add two additional columns "LD_file" and "SNP_file" to `region_info`:  "LD_file" stores the filenames to the precomputed LD (R) matrices (`.RDS` files in our precomputed reference LD files),  "SNP_file" stores the filenames of corresponding variant information (`.Rvar` files). The result is stored in a data structure `region_metatable`. 
+We will need to link the reference SNP and LD files to the regions. To do this, we add two additional columns "LD_file" and "SNP_file" to `region_info`:  "LD_file" stores the filenames to the precomputed LD matrices (`.RDS` files in our precomputed reference LD files),  "SNP_file" stores the filenames of corresponding variant information (`.Rvar` files). The result is stored in a data frame `region_metatable`. 
 
 The following paths and filenames were from the University of Chicago RCC cluster, please replace them with your own paths. 
 ```{r add_LD_paths, eval=FALSE}
@@ -145,7 +145,7 @@ region_metatable$SNP_file <- file.path(LD_dir, paste0(LD_filestem, ".Rvar"))
 ```
 
 
-The `create_snp_LD_map()` function takes `region_metatable` as input, extracts the region definitions, ensures that it matches the format required by cTWAS (e.g. adding `region_id` column if not available), and returns updated `region_info`. It reads the variant information from the `SNP_file` column of `region_metatable`, and returns the result as `snp_map`.  It also checks the `LD_file` column of `region_metatable` to make sure the files are available, and returns `LD_map`, a data frame with region IDs and the filenames to the precomputed LD (R) matrices. 
+The `create_snp_LD_map()` function takes `region_metatable` as input, extracts the region definitions, ensures that it matches the format required by cTWAS (e.g. adding `region_id` column if not available), and returns updated `region_info`. It checks the `LD_file` and `SNP_file` columns of `region_metatable` to make sure the files are available. It returns `LD_map`, a data frame with region IDs, the filenames of the precomputed LD matrices, and the filenames of corresponding variant information.  It reads the variant information from the regions, and returns the result as `snp_map`.  
 
 ```{r create_snp_LD_map, eval=FALSE}
 res <- create_snp_LD_map(region_metatable)

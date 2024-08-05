@@ -21,6 +21,13 @@ knitr::opts_chunk$set(message = FALSE,
 ```
 
 
+In this tutorial, we will introduce a few cTWAS utility functions for preparing and processing input data.
+
+Load the packages. 
+```{r load_packages, message=FALSE}
+library(ctwas)
+```
+
 
 
 #### Creating LD matrices from individual level genotype data

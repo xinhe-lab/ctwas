@@ -155,11 +155,11 @@ param <- ctwas_res$param
 finemap_res <- ctwas_res$finemap_res
 boundary_genes <- ctwas_res$boundary_genes
 region_data <- ctwas_res$region_data
-screened_region_data <- ctwas_res$screened_region_data
+screen_res <- ctwas_res$screen_res
 ```
 
 
-ctwas_sumstats_noLD() returns several main output: 
+`ctwas_sumstats_noLD()` returns several main output: 
 
 + `z_gene`: the Z-scores of genes, 
 
@@ -173,7 +173,7 @@ It also produces other output:
 
 + `region_data`: assembled region data, including Z scores of SNPs and genes, for all the regions. Note that only data of the subset of SNPs used in screening regions are included. 
 
-+ `screened_region_data`: the data of all SNPs and genes of the selected regions. 
++ `screen_res`: screening regions results, including the data of all SNPs and genes of the selected regions, and a data frame with non-SNP PIPs for all regions.
 
 *Note*, we used sample data (from chr16) in this example, however, in real data analysis, we should use data from the *entire genome* to estimate parameters.
 
