@@ -99,7 +99,7 @@ est_param <- function(
   }
 
   # Run EM for a few (niter_prefit) iterations, getting rough estimates
-  loginfo("Run EM for %d iterations (prefit), getting rough estimates ...", niter_prefit)
+  loginfo("Run EM (prefit) for %d iterations, getting rough estimates ...", niter_prefit)
   EM_prefit_res <- fit_EM(region_data,
                           niter = niter_prefit,
                           init_group_prior = init_group_prior,
@@ -117,7 +117,7 @@ est_param <- function(
   group_size <- EM_prefit_res$group_size
 
   # Select regions with single effect
-  p_single_effect <- compute_p_single_effect(region_data, EM_prefit_res$group_prior)
+  p_single_effect <- compute_region_p_single_effect(region_data, EM_prefit_res$group_prior)
   selected_region_ids <- names(p_single_effect)[p_single_effect >= min_p_single_effect]
   loginfo("Selected %d regions with p(single effect) >= %s", length(selected_region_ids), min_p_single_effect)
   selected_region_data <- region_data[selected_region_ids]
@@ -161,27 +161,5 @@ est_param <- function(
                 "p_single_effect" = p_single_effect_df)
 
   return(param)
-}
-
-
-# compute p(single effect)
-compute_p_single_effect <- function(region_data, group_prior){
-
-  if (!inherits(region_data,"list"))
-    stop("'region_data' should be a list.")
-
-  region_ids <- names(region_data)
-  if (length(region_ids) == 0)
-    stop("No region_ids in region_data!")
-
-  p_single_effect <- sapply(region_ids, function(region_id){
-    gs_group <- extract_region_data(region_data, region_id)$gs_group
-    group_size <- table(gs_group)[names(group_prior)]
-    group_size[is.na(group_size)] <- 0
-    p1 <- prod((1-group_prior)^group_size) * (1 + sum(group_size*(group_prior/(1-group_prior))))
-    p1
-  })
-  names(p_single_effect) <- region_ids
-  return(p_single_effect)
 }
 

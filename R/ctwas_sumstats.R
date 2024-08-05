@@ -39,7 +39,7 @@
 #' Inf, no limit. This can be useful if there are many SNPs in a region and you don't
 #' have enough memory to run the program.
 #'
-#' @param use_null_weight TRUE/FALSE. If TRUE, allow for a probability of no effect in susie
+#' @param use_null_weight If TRUE, allow for a probability of no effect in susie
 #'
 #' @param coverage A number between 0 and 1 specifying the \dQuote{coverage} of the estimated confidence sets
 #'
@@ -53,14 +53,9 @@
 #'
 #' @param LD_loader_fun a user defined function to load LD matrix when \code{LD_format = "custom"}.
 #'
-#' @param ncore The number of cores used to parallelize computing over regions.
-#'
-#' @param ncore_LD The number of cores used to parallelize computing correlation matrices,
-#' in screening regions and fine-mapping steps with LD.
-#'
 #' @param force_compute_cor If TRUE, force computing correlation (R) matrices
 #'
-#' @param save_cor TRUE/FALSE. If TRUE, save correlation (R) matrices to \code{cor_dir}
+#' @param save_cor If TRUE, save correlation (R) matrices to \code{cor_dir}
 #'
 #' @param cor_dir The directory to store correlation (R) matrices
 #'
@@ -68,9 +63,14 @@
 #'
 #' @param outname The output name.
 #'
+#' @param ncore The number of cores used to parallelize computing over regions.
+#'
+#' @param ncore_LD The number of cores used to parallelize computing correlation matrices,
+#' in screening regions and fine-mapping steps with LD.
+#'
 #' @param logfile path to the log file, if NULL will print log info on screen.
 #'
-#' @param verbose TRUE/FALSE. If TRUE, print detailed messages
+#' @param verbose If TRUE, print detailed messages
 #'
 #' @param ... Additional arguments of \code{susie_rss}.
 #'
@@ -105,13 +105,13 @@ ctwas_sumstats <- function(
     min_abs_corr = 0.5,
     LD_format = c("rds", "rdata", "mtx", "csv", "txt", "custom"),
     LD_loader_fun,
-    ncore = 1,
-    ncore_LD = max(ncore-1,1),
     force_compute_cor = FALSE,
     save_cor = FALSE,
     cor_dir = NULL,
     outputdir = NULL,
     outname = "ctwas",
+    ncore = 1,
+    ncore_LD = max(ncore-1,1),
     logfile = NULL,
     verbose = FALSE,
     ...){
@@ -120,7 +120,7 @@ ctwas_sumstats <- function(
     addHandler(writeToFile, file=logfile, level='DEBUG')
   }
 
-  loginfo("Begin cTWAS analysis ...")
+  loginfo("Running cTWAS analysis ...")
   loginfo("ctwas version: %s", packageVersion("ctwas"))
 
   # check inputs
@@ -204,48 +204,55 @@ ctwas_sumstats <- function(
   # Screen regions
   #. fine-map all regions with thinned SNPs
   #. select regions with L > 0 or with high non-SNP PIP
-  #. expand selected regions with all SNPs
-  screen_regions_res <- screen_regions(region_data,
-                                       use_LD = TRUE,
+  screen_res <- screen_regions(region_data,
                                        LD_map = LD_map,
-                                       snp_map = snp_map,
                                        weights = weights,
-                                       z_snp = z_snp,
                                        group_prior = group_prior,
                                        group_prior_var = group_prior_var,
                                        L = L,
                                        filter_L = filter_L,
                                        filter_nonSNP_PIP = filter_nonSNP_PIP,
                                        min_nonSNP_PIP = min_nonSNP_PIP,
-                                       expand = TRUE,
-                                       maxSNP = maxSNP,
                                        LD_format = LD_format,
                                        LD_loader_fun = LD_loader_fun,
                                        ncore = ncore_LD,
                                        verbose = verbose,
                                        ...)
+  selected_region_data <- screen_res$selected_region_data
+  selected_region_L <- screen_res$selected_region_L
+
+  # expand selected regions with all SNPs
+  if (thin < 1){
+    selected_region_data <- expand_region_data(selected_region_data,
+                                               snp_map,
+                                               z_snp,
+                                               maxSNP = maxSNP,
+                                               ncore = ncore)
+    screen_res$selected_region_data <- selected_region_data
+  }
+
   if (!is.null(outputdir)) {
-    saveRDS(screen_regions_res, file.path(outputdir, paste0(outname, ".screen_regions_res.RDS")))
+    saveRDS(screen_res, file.path(outputdir, paste0(outname, ".screen_res.RDS")))
   }
 
   # Run fine-mapping for regions with strong gene signals using full SNPs
   #. save correlation matrices if save_cor is TRUE
-  if (length(screen_regions_res$screened_region_data) > 0){
-    finemap_res <- finemap_regions(screen_regions_res$screened_region_data,
-                                   use_LD = TRUE,
+  if (length(selected_region_data) > 0){
+    finemap_res <- finemap_regions(selected_region_data,
                                    LD_map = LD_map,
-                                   snp_map = snp_map,
                                    weights = weights,
                                    group_prior = group_prior,
                                    group_prior_var = group_prior_var,
-                                   L = screen_regions_res$L,
+                                   L = selected_region_L,
                                    use_null_weight = use_null_weight,
                                    coverage = coverage,
                                    min_abs_corr = min_abs_corr,
+                                   force_compute_cor = force_compute_cor,
                                    save_cor = save_cor,
                                    cor_dir = cor_dir,
                                    LD_format = LD_format,
                                    LD_loader_fun = LD_loader_fun,
+                                   include_cs_index = TRUE,
                                    ncore = ncore_LD,
                                    verbose = verbose,
                                    ...)
@@ -253,16 +260,16 @@ ctwas_sumstats <- function(
       saveRDS(finemap_res, file.path(outputdir, paste0(outname, ".finemap_res.RDS")))
     }
   } else {
-    warning("No regions selected for finemapping.")
+    loginfo("No regions selected for fine-mapping.")
     finemap_res <- NULL
   }
 
   return(list("z_gene" = z_gene,
               "param" = param,
+              "finemap_res" = finemap_res,
               "region_data" = region_data,
               "boundary_genes" = boundary_genes,
-              "screen_regions_res" = screen_regions_res,
-              "finemap_res" = finemap_res))
+              "screen_res" = screen_res))
 
 }
 

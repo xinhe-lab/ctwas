@@ -6,9 +6,7 @@
 \usage{
 finemap_regions(
   region_data,
-  use_LD = TRUE,
   LD_map,
-  snp_map = NULL,
   weights,
   L = 5,
   group_prior = NULL,
@@ -16,12 +14,12 @@ finemap_regions(
   use_null_weight = TRUE,
   coverage = 0.95,
   min_abs_corr = 0.5,
+  include_cs_index = TRUE,
   force_compute_cor = FALSE,
   save_cor = FALSE,
   cor_dir = NULL,
   LD_format = c("rds", "rdata", "mtx", "csv", "txt", "custom"),
   LD_loader_fun,
-  include_cs_index = TRUE,
   ncore = 1,
   verbose = FALSE,
   logfile = NULL,
@@ -31,14 +29,9 @@ finemap_regions(
 \arguments{
 \item{region_data}{region_data to be finemapped}
 
-\item{use_LD}{If TRUE, use LD for finemapping. Otherwise, use "no-LD" version.}
+\item{LD_map}{a data frame with filenames of LD matrices for the regions.}
 
-\item{LD_map}{a data frame with filenames of LD matrices for the regions. Required when \code{use_LD = TRUE}.}
-
-\item{snp_map}{a list of SNP-to-region map for the reference.
-If \code{snp_map = NULL}, load SNP info from the 'SNP_file' column of 'LD_map'.}
-
-\item{weights}{a list of preprocessed weights. Required when \code{use_LD = TRUE}.}
+\item{weights}{a list of preprocessed weights.}
 
 \item{L}{the number of effects or a vector of number of effects for each region.}
 
@@ -55,6 +48,8 @@ credible set. The default, 0.5, corresponds to a squared
 correlation of 0.25, which is a commonly used threshold for
 genotype data in genetic studies.}
 
+\item{include_cs_index}{If TRUE, add cs_index to finemapping results.}
+
 \item{force_compute_cor}{If TRUE, force computing correlation (R) matrices}
 
 \item{save_cor}{If TRUE, save correlation (R) matrices to \code{cor_dir}}
@@ -65,8 +60,6 @@ genotype data in genetic studies.}
 \code{LD_loader_fun()} function to load LD matrix.}
 
 \item{LD_loader_fun}{a user defined function to load LD matrix when \code{LD_format = "custom"}.}
-
-\item{include_cs_index}{If TRUE, add cs_index to finemapping results.}
 
 \item{ncore}{The number of cores used to parallelize computation over regions}
 

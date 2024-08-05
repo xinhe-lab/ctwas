@@ -9,21 +9,26 @@ test_that("screen_regions (no-LD version) work", {
   param <- ctwas_res$param
   group_prior <- param$group_prior
   group_prior_var <- param$group_prior_var
-  expected_screen_regions_res <- ctwas_res$screen_regions_res
+  expected_screen_res <- ctwas_res$screen_res
+  rm(ctwas_res)
 
   capture.output({
-    screen_regions_res <- screen_regions(region_data,
-                                         use_LD = FALSE,
-                                         snp_map = snp_map,
-                                         z_snp = z_snp,
-                                         group_prior = group_prior,
-                                         group_prior_var = group_prior_var,
-                                         min_nonSNP_PIP = 0.5,
-                                         expand = TRUE,
-                                         maxSNP = 20000)
+    screen_res <- screen_regions_noLD(region_data,
+                                              group_prior = group_prior,
+                                              group_prior_var = group_prior_var,
+                                              min_nonSNP_PIP = 0.5)
+    selected_region_data <- screen_res$selected_region_data
+
+    # expand selected regions with all SNPs
+    selected_region_data <- expand_region_data(selected_region_data,
+                                               snp_map,
+                                               z_snp,
+                                               maxSNP = 20000)
+    screen_res$selected_region_data <- selected_region_data
   })
 
-  expect_equal(screen_regions_res, expected_screen_regions_res)
+  expect_equal(screen_res$selected_region_data, expected_screen_res$selected_region_data)
+  expect_equal(screen_res$screen_summary, expected_screen_res$screen_summary)
 
 })
 
@@ -43,24 +48,29 @@ test_that("screen_regions (LD version, filter by L) work", {
   param <- ctwas_res$param
   group_prior <- param$group_prior
   group_prior_var <- param$group_prior_var
-  expected_screen_regions_res <- ctwas_res$screen_regions_res
+  expected_screen_res <- ctwas_res$screen_res
+  rm(ctwas_res)
 
   capture.output({
-    screen_regions_res <- screen_regions(region_data,
-                                         use_LD = TRUE,
+    screen_res <- screen_regions(region_data,
                                          LD_map = LD_map,
-                                         snp_map = snp_map,
                                          weights = weights,
-                                         z_snp = z_snp,
                                          group_prior = group_prior,
                                          group_prior_var = group_prior_var,
                                          filter_L = TRUE,
-                                         filter_nonSNP_PIP = FALSE,
-                                         expand = TRUE,
-                                         maxSNP = 20000,
-                                         ncore = 2)
+                                         filter_nonSNP_PIP = FALSE)
+    selected_region_data <- screen_res$selected_region_data
+
+    # expand selected regions with all SNPs
+    selected_region_data <- expand_region_data(selected_region_data,
+                                               snp_map,
+                                               z_snp,
+                                               maxSNP = 20000)
+    screen_res$selected_region_data <- selected_region_data
   })
 
-  expect_equal(screen_regions_res, expected_screen_regions_res)
+  expect_equal(screen_res$selected_region_data, expected_screen_res$selected_region_data)
+  expect_equal(screen_res$selected_region_L, expected_screen_res$selected_region_L)
+  expect_equal(screen_res$screen_summary, expected_screen_res$screen_summary)
 
 })

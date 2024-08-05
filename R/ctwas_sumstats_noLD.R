@@ -79,7 +79,7 @@ ctwas_sumstats_noLD <- function(
     addHandler(writeToFile, file=logfile, level='DEBUG')
   }
 
-  loginfo("Begin cTWAS analysis ...")
+  loginfo("Running cTWAS analysis without LD ...")
   loginfo("ctwas version: %s", packageVersion("ctwas"))
 
   # check inputs
@@ -156,39 +156,40 @@ ctwas_sumstats_noLD <- function(
   # Screen regions
   #. fine-map all regions with thinned SNPs
   #. select regions with strong non-SNP signals
-  screen_regions_res <- screen_regions(region_data,
-                                      use_LD = FALSE,
-                                      snp_map = snp_map,
-                                      z_snp = z_snp,
-                                      group_prior = group_prior,
-                                      group_prior_var = group_prior_var,
-                                      min_nonSNP_PIP = min_nonSNP_PIP,
-                                      expand = TRUE,
-                                      maxSNP = maxSNP,
-                                      ncore = ncore,
-                                      verbose = verbose,
-                                      ...)
+  screen_res <- screen_regions_noLD(region_data,
+                                    group_prior = group_prior,
+                                    group_prior_var = group_prior_var,
+                                    min_nonSNP_PIP = min_nonSNP_PIP,
+                                    ncore = ncore,
+                                    verbose = verbose,
+                                    ...)
+  selected_region_data <- screen_res$selected_region_data
 
-  screened_region_data <- screen_regions_res$screened_region_data
-  screen_summary <- screen_regions_res$screen_summary
+  # expand selected regions with all SNPs
+  if (thin < 1){
+    selected_region_data <- expand_region_data(selected_region_data,
+                                               snp_map,
+                                               z_snp,
+                                               maxSNP = maxSNP,
+                                               ncore = ncore)
+    screen_res$selected_region_data <- selected_region_data
+  }
+
   if (!is.null(outputdir)) {
-    saveRDS(screen_regions_res, file.path(outputdir, paste0(outname, ".screen_regions_noLD_res.RDS")))
+    saveRDS(screen_res, file.path(outputdir, paste0(outname, ".screen_res.RDS")))
   }
 
   # Run fine-mapping for regions with strong gene signals using full SNPs
-  #. save correlation matrices if save_cor is TRUE
-  if (length(screened_region_data) > 0){
-    finemap_res <- finemap_regions(screened_region_data,
-                                   use_LD = FALSE,
-                                   group_prior = group_prior,
-                                   group_prior_var = group_prior_var,
-                                   use_null_weight = use_null_weight,
-                                   include_cs_index = FALSE,
-                                   ncore = ncore,
-                                   verbose = verbose,
-                                   ...)
+  if (length(selected_region_data) > 0){
+    finemap_res <- finemap_regions_noLD(selected_region_data,
+                                        group_prior = group_prior,
+                                        group_prior_var = group_prior_var,
+                                        use_null_weight = use_null_weight,
+                                        ncore = ncore,
+                                        verbose = verbose,
+                                        ...)
     if (!is.null(outputdir)) {
-      saveRDS(finemap_res, file.path(outputdir, paste0(outname, ".finemap_noLD_res.RDS")))
+      saveRDS(finemap_res, file.path(outputdir, paste0(outname, ".finemap_res.RDS")))
     }
   } else {
     warning("No regions selected for finemapping.")
@@ -197,10 +198,10 @@ ctwas_sumstats_noLD <- function(
 
   return(list("z_gene" = z_gene,
               "param" = param,
+              "finemap_res" = finemap_res,
               "region_data" = region_data,
               "boundary_genes" = boundary_genes,
-              "screen_regions_res" = screen_regions_res,
-              "finemap_res" = finemap_res))
+              "screen_res" = screen_res))
 
 }
 

@@ -27,13 +27,13 @@ ctwas_sumstats(
   min_abs_corr = 0.5,
   LD_format = c("rds", "rdata", "mtx", "csv", "txt", "custom"),
   LD_loader_fun,
-  ncore = 1,
-  ncore_LD = max(ncore - 1, 1),
   force_compute_cor = FALSE,
   save_cor = FALSE,
   cor_dir = NULL,
   outputdir = NULL,
   outname = "ctwas",
+  ncore = 1,
+  ncore_LD = max(ncore - 1, 1),
   logfile = NULL,
   verbose = FALSE,
   ...
@@ -79,7 +79,7 @@ of having at most one causal effect will be selected for the final EM step.}
 Inf, no limit. This can be useful if there are many SNPs in a region and you don't
 have enough memory to run the program.}
 
-\item{use_null_weight}{TRUE/FALSE. If TRUE, allow for a probability of no effect in susie}
+\item{use_null_weight}{If TRUE, allow for a probability of no effect in susie}
 
 \item{coverage}{A number between 0 and 1 specifying the \dQuote{coverage} of the estimated confidence sets}
 
@@ -93,14 +93,9 @@ have enough memory to run the program.}
 
 \item{LD_loader_fun}{a user defined function to load LD matrix when \code{LD_format = "custom"}.}
 
-\item{ncore}{The number of cores used to parallelize computing over regions.}
-
-\item{ncore_LD}{The number of cores used to parallelize computing correlation matrices,
-in screening regions and fine-mapping steps with LD.}
-
 \item{force_compute_cor}{If TRUE, force computing correlation (R) matrices}
 
-\item{save_cor}{TRUE/FALSE. If TRUE, save correlation (R) matrices to \code{cor_dir}}
+\item{save_cor}{If TRUE, save correlation (R) matrices to \code{cor_dir}}
 
 \item{cor_dir}{The directory to store correlation (R) matrices}
 
@@ -108,9 +103,14 @@ in screening regions and fine-mapping steps with LD.}
 
 \item{outname}{The output name.}
 
+\item{ncore}{The number of cores used to parallelize computing over regions.}
+
+\item{ncore_LD}{The number of cores used to parallelize computing correlation matrices,
+in screening regions and fine-mapping steps with LD.}
+
 \item{logfile}{path to the log file, if NULL will print log info on screen.}
 
-\item{verbose}{TRUE/FALSE. If TRUE, print detailed messages}
+\item{verbose}{If TRUE, print detailed messages}
 
 \item{...}{Additional arguments of \code{susie_rss}.}
 }

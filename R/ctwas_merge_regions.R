@@ -7,7 +7,7 @@
 #'
 #' @param region_info a data frame of region definitions
 #'
-#' @param LD_map a data frame with filenames of LD matrices for each of the regions.
+#' @param LD_map a data frame with filenames of LD matrices and SNP information for the regions.
 #'
 #' @param snp_map a list of data frames with SNP-to-region map for the reference.
 #'
@@ -17,13 +17,11 @@
 #'
 #' @param z_gene A data frame with columns: "id", "z", giving the z-scores for genes.
 #'
-#' @param use_LD If TRUE, use LD, and creates \code{merged_LD_map}.
-#'
 #' @param estimate_L If TRUE, estimate L for merged regions.
 #'
 #' @param expand If TRUE, expand merged region_data with full SNPs
 #'
-#' @param L the number of effects for susie. This is only used when \code{estimate_L = FALSE}.
+#' @param L the number of effects for susie.
 #'
 #' @param maxSNP Inf or integer. Maximum number of SNPs in a region. Default is
 #' Inf, no limit. This can be useful if there are many SNPs in a region and you don't
@@ -36,13 +34,13 @@
 #'
 #' @param ncore The number of cores used to parallelize susie over regions
 #'
-#' @param verbose TRUE/FALSE. If TRUE, print detail messages
+#' @param verbose If TRUE, print detail messages
 #'
-#' @param logfile the log file, if NULL will print log info on screen
+#' @param logfile The log filename. If NULL will print log info on screen
 #'
 #' @param ... Additional arguments of \code{susie_rss}.
 #'
-#' @return a list of merged region data, merged region info, snp_map, LD_map,
+#' @return a list of merged region data, merged region info, LD_map, snp_map,
 #' and merged region IDs.
 #'
 #' @importFrom logging loginfo
@@ -57,7 +55,6 @@ merge_region_data <- function(boundary_genes,
                               weights,
                               z_snp,
                               z_gene,
-                              use_LD = TRUE,
                               estimate_L = TRUE,
                               expand = TRUE,
                               L = 5,
@@ -78,12 +75,12 @@ merge_region_data <- function(boundary_genes,
   res <- create_merged_snp_LD_map(boundary_genes,
                                   region_info = region_info,
                                   snp_map = snp_map,
-                                  LD_map = LD_map,
-                                  use_LD = use_LD)
+                                  LD_map = LD_map)
   merged_region_info <- res$merged_region_info
   merged_LD_map <- res$merged_LD_map
   merged_snp_map <- res$merged_snp_map
   merged_region_id_map <- res$merged_region_id_map
+  rm(res)
 
   # Merge region data
   loginfo("Merging region data ...")
@@ -121,26 +118,18 @@ merge_region_data <- function(boundary_genes,
 
   loginfo("%d regions in merged_region_data", length(merged_region_data))
 
-  if (!use_LD) {
-    loginfo("No-LD version: Set L = 1")
-    merged_region_L <- 1
-  } else {
-    if (estimate_L) {
-      loginfo("Estimating L ...")
-      merged_region_L <- estimate_region_L(region_data = merged_region_data,
-                                           LD_map = merged_LD_map,
-                                           snp_map = merged_snp_map,
-                                           weights = weights,
-                                           LD_format = LD_format,
-                                           LD_loader_fun = LD_loader_fun,
-                                           ncore = ncore,
-                                           verbose = verbose,
-                                           ...)
-      merged_region_L[merged_region_L == 0] <- 1
-    } else {
-      loginfo("Set L = %d", L)
-      merged_region_L <- L
-    }
+  if (estimate_L) {
+    loginfo("Estimating L ...")
+    L <- estimate_region_L(region_data = merged_region_data,
+                           LD_map = merged_LD_map,
+                           weights = weights,
+                           init_L = L,
+                           LD_format = LD_format,
+                           LD_loader_fun = LD_loader_fun,
+                           ncore = ncore,
+                           verbose = verbose,
+                           ...)
+    L[L == 0] <- 1
   }
 
   if (expand) {
@@ -156,7 +145,118 @@ merge_region_data <- function(boundary_genes,
               "merged_LD_map" = merged_LD_map,
               "merged_snp_map" = merged_snp_map,
               "merged_region_id_map" = merged_region_id_map,
-              "merged_region_L" = merged_region_L))
+              "L" = L))
+}
+
+#' @title Merges region data for cross-boundary genes without using LD
+#'
+#' @param boundary_genes a data frame of boundary gene info
+#'
+#' @param region_data a list of original region_data
+#'
+#' @param region_info a data frame of region definitions
+#'
+#' @param snp_map a list of data frames with SNP-to-region map for the reference.
+#'
+#' @param z_snp A data frame with columns: "id", "z", giving the z-scores for SNPs.
+#'
+#' @param z_gene A data frame with columns: "id", "z", giving the z-scores for genes.
+#'
+#' @param expand If TRUE, expand merged region_data with full SNPs
+#'
+#' @param maxSNP Inf or integer. Maximum number of SNPs in a region. Default is
+#' Inf, no limit. This can be useful if there are many SNPs in a region and you don't
+#' have enough memory to run the program.
+#'
+#' @param ncore The number of cores used to parallelize susie over regions
+#'
+#' @param verbose If TRUE, print detail messages
+#'
+#' @param logfile The log filename. If NULL will print log info on screen
+#'
+#' @param ... Additional arguments of \code{susie_rss}.
+#'
+#' @return a list of merged region data, merged region info, snp_map,
+#' and merged region IDs.
+#'
+#' @importFrom logging loginfo
+#'
+#' @export
+#'
+merge_region_data_noLD <- function(boundary_genes,
+                                   region_data,
+                                   region_info,
+                                   snp_map,
+                                   z_snp,
+                                   z_gene,
+                                   expand = TRUE,
+                                   maxSNP = Inf,
+                                   ncore = 1,
+                                   verbose = FALSE,
+                                   logfile = NULL,
+                                   ...) {
+
+  if (!is.null(logfile)){
+    addHandler(writeToFile, file= logfile, level='DEBUG')
+  }
+
+  # Identify overlapping regions and get a list of regions to be merged
+  loginfo("Identify overlapping regions and create merged snp_map.")
+  res <- create_merged_snp_map(boundary_genes, region_info, snp_map)
+  merged_region_info <- res$merged_region_info
+  merged_snp_map <- res$merged_snp_map
+  merged_region_id_map <- res$merged_region_id_map
+  rm(res)
+
+  # Merge region data
+  loginfo("Merging region data ...")
+  merged_region_data <- list()
+  for (i in 1:nrow(merged_region_info)){
+    merged_regioninfo <- merged_region_info[i,]
+    new_region_id <- merged_regioninfo$region_id
+
+    old_region_ids <- merged_region_id_map$old_region_ids[merged_region_id_map$region_id == new_region_id]
+    old_region_ids <- unlist(strsplit(old_region_ids, ";"))
+
+    new_chrom <- merged_regioninfo$chrom
+    new_start <- merged_regioninfo$start
+    new_stop <- merged_regioninfo$stop
+
+    # merge gids and sids from the old region_data
+    new_gid <- as.character(unlist(lapply(region_data[old_region_ids], "[[", "gid")))
+    new_sid <- as.character(unlist(lapply(region_data[old_region_ids], "[[", "sid")))
+    new_minpos <- min(sapply(region_data[old_region_ids], "[[", "minpos"))
+    new_maxpos <- max(sapply(region_data[old_region_ids], "[[", "maxpos"))
+    new_thin <- min(sapply(region_data[old_region_ids], "[[", "thin"))
+    new_groups <- unique(as.character(sapply(region_data[old_region_ids], "[[", "groups")))
+    merged_region_data[[new_region_id]] <- list("region_id" = new_region_id,
+                                                "chrom" = new_chrom,
+                                                "start" = new_start,
+                                                "stop" = new_stop,
+                                                "minpos" = new_minpos,
+                                                "maxpos" = new_maxpos,
+                                                "thin" = new_thin,
+                                                "gid" = new_gid,
+                                                "sid" = new_sid)
+  }
+
+  merged_region_data <- update_region_z(merged_region_data, z_snp, z_gene, ncore = ncore)
+
+  loginfo("%d regions in merged_region_data", length(merged_region_data))
+
+  if (expand) {
+    merged_region_data <- expand_region_data(merged_region_data,
+                                             merged_snp_map,
+                                             z_snp = z_snp,
+                                             maxSNP = maxSNP,
+                                             ncore = ncore)
+  }
+
+  return(list("merged_region_data" = merged_region_data,
+              "merged_region_info" = merged_region_info,
+              "merged_snp_map" = merged_snp_map,
+              "merged_region_id_map" = merged_region_id_map,
+              "L" = 1))
 }
 
 # Identify overlapping regions
@@ -205,8 +305,61 @@ label_overlapping_regions <- function(boundary_genes) {
 create_merged_snp_LD_map <- function(boundary_genes,
                                      region_info,
                                      snp_map,
-                                     LD_map,
-                                     use_LD = TRUE){
+                                     LD_map){
+  # Identify overlapping regions
+  boundary_genes <- label_overlapping_regions(boundary_genes)
+
+  # For each new region, get the region IDs for the regions to be merged
+  merge_labels <- unique(boundary_genes$merge_label)
+
+  merged_region_info <- data.frame()
+  merged_snp_map <- list()
+  merged_LD_map <- data.frame()
+  merged_region_id_map <- data.frame()
+
+  for(merge_label in merge_labels){
+    df <- boundary_genes[boundary_genes$merge_label == merge_label,,drop=F]
+    new_region_chrom <- df$chrom[1]
+    new_region_start <- min(df$region_start)
+    new_region_stop <- max(df$region_stop)
+    new_region_id <- paste0(new_region_chrom, "_", new_region_start, "_", new_region_stop)
+
+    old_region_ids <- unique(unlist(strsplit(df[df$merge_label == merge_label, "region_id"], split = ";")))
+
+    merged_region_info <- rbind(merged_region_info,
+                                data.frame(chrom = new_region_chrom,
+                                           start = new_region_start,
+                                           stop = new_region_stop,
+                                           region_id = new_region_id))
+
+    old_LD_files <- paste(LD_map$LD_file[match(old_region_ids, LD_map$region_id)], collapse = ";")
+    old_SNP_files <- paste(LD_map$SNP_file[match(old_region_ids, LD_map$region_id)], collapse = ";")
+    merged_LD_map <- rbind(merged_LD_map,
+                           data.frame(region_id = new_region_id,
+                                      LD_file = old_LD_files,
+                                      SNP_file = old_SNP_files))
+
+    merged_snp_map[[new_region_id]] <-  do.call(rbind, snp_map[old_region_ids])
+
+    merged_region_id_map <- rbind(merged_region_id_map,
+                                  data.frame(region_id = new_region_id,
+                                             old_region_ids = paste(old_region_ids, collapse = ";")))
+
+  }
+
+  loginfo("Merged %d boundary genes into %d regions", nrow(boundary_genes), nrow(merged_region_info))
+
+  return(list("merged_region_info" = merged_region_info,
+              "merged_LD_map" = merged_LD_map,
+              "merged_snp_map" = merged_snp_map,
+              "merged_region_id_map" = merged_region_id_map))
+}
+
+# Get merged region_info, and snp_map
+#' @importFrom logging loginfo
+create_merged_snp_map <- function(boundary_genes,
+                                  region_info,
+                                  snp_map){
   # Identify overlapping regions
   boundary_genes <- label_overlapping_regions(boundary_genes)
 
@@ -216,7 +369,6 @@ create_merged_snp_LD_map <- function(boundary_genes,
   merged_region_info <- data.frame()
   merged_snp_map <- list()
   merged_region_id_map <- data.frame()
-  merged_LD_map <- NULL
   for(merge_label in merge_labels){
     df <- boundary_genes[boundary_genes$merge_label == merge_label,,drop=F]
     new_region_chrom <- df$chrom[1]
@@ -238,20 +390,11 @@ create_merged_snp_LD_map <- function(boundary_genes,
                                   data.frame(region_id = new_region_id,
                                              old_region_ids = paste(old_region_ids, collapse = ";")))
 
-    if (use_LD) {
-      old_LD_files <- paste(LD_map$LD_file[match(old_region_ids, LD_map$region_id)], collapse = ";")
-      old_SNP_files <- paste(LD_map$SNP_file[match(old_region_ids, LD_map$region_id)], collapse = ";")
-      merged_LD_map <- rbind(merged_LD_map,
-                             data.frame(region_id = new_region_id,
-                                        LD_file = old_LD_files,
-                                        SNP_file = old_SNP_files))
-    }
   }
 
   loginfo("Merged %d boundary genes into %d regions", nrow(boundary_genes), nrow(merged_region_info))
 
   return(list("merged_region_info" = merged_region_info,
-              "merged_LD_map" = merged_LD_map,
               "merged_snp_map" = merged_snp_map,
               "merged_region_id_map" = merged_region_id_map))
 }
