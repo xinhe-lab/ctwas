@@ -4,7 +4,6 @@ test_that("diagnose_ld_mismatch_susie works", {
   skip_if_no_LD_file(LD_map$LD_file)
 
   gwas_n <- 343621
-  snp_map <- readRDS(system.file("extdata/sample_data", "LDL_example.snp_map.RDS", package = "ctwas"))
   z_snp <- readRDS(system.file("extdata/sample_data", "LDL_example.preprocessed.z_snp.RDS", package = "ctwas"))
   z_gene <- readRDS(system.file("extdata/sample_data", "LDL_example.z_gene.RDS", package = "ctwas"))
   weights <- readRDS(system.file("extdata/sample_data", "LDL_example.preprocessed.weights.RDS", package = "ctwas"))
@@ -22,7 +21,6 @@ test_that("diagnose_ld_mismatch_susie works", {
     LD_diagnosis_res <- diagnose_LD_mismatch_susie(z_snp,
                                                    selected_region_ids,
                                                    LD_map,
-                                                   snp_map,
                                                    gwas_n)
 
     problematic_snps <- LD_diagnosis_res$problematic_snps

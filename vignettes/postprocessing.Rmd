@@ -174,7 +174,6 @@ We use the function `diagnose_LD_mismatch_susie()` to perform LD mismatch diagno
 res <- diagnose_LD_mismatch_susie(z_snp, 
                                   selected_region_ids, 
                                   LD_map, 
-                                  snp_map, 
                                   gwas_n)
 problematic_snps <- res$problematic_snps
 flipped_snps <- res$flipped_snps

@@ -18,7 +18,7 @@ test_that("ctwas_sumstats works", {
                                 snp_map,
                                 thin = 0.1,
                                 maxSNP = 20000,
-                                ncore = 6)
+                                ncore = 2)
   })
 
   expect_equal(ctwas_res, expected_ctwas_res)
