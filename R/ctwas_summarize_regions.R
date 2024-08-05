@@ -16,7 +16,7 @@
 #'
 #' @param ncore The number of cores used to parallelize susie over regions
 #'
-#' @param verbose TRUE/FALSE. If TRUE, print detail messages
+#' @param verbose If TRUE, print detail messages
 #'
 #' @param ... Additional arguments of \code{susie_rss}.
 #'

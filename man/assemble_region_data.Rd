@@ -50,7 +50,7 @@ See parameter `maxSNP` for more information.}
 
 \item{seed}{seed for random sampling}
 
-\item{logfile}{path to the log file, if NULL will print log info on screen.}
+\item{logfile}{The log filename. If NULL, will print log info on screen.}
 }
 \value{
 a list with region_data, updated weights, and cross-bounary genes

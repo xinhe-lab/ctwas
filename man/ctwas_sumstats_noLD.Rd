@@ -59,7 +59,7 @@ will be selected to run finemapping using full SNPs.}
 \item{min_p_single_effect}{Regions with probability >= \code{min_p_single_effect}
 of having at most one causal effect will be selected for the final EM step.}
 
-\item{use_null_weight}{TRUE/FALSE. If TRUE, allow for a probability of no effect in susie}
+\item{use_null_weight}{If TRUE, allow for a probability of no effect in susie}
 
 \item{ncore}{The number of cores used to parallelize susie over regions}
 
@@ -67,9 +67,9 @@ of having at most one causal effect will be selected for the final EM step.}
 
 \item{outname}{The output name.}
 
-\item{logfile}{path to the log file, if NULL will print log info on screen.}
+\item{logfile}{The log filename. If NULL, will print log info on screen.}
 
-\item{verbose}{TRUE/FALSE. If TRUE, print detailed messages}
+\item{verbose}{If TRUE, print detailed messages}
 
 \item{...}{Additional arguments of \code{susie_rss}.}
 }

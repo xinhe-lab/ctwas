@@ -34,7 +34,7 @@ or the directory containing '.wgt.RDat' files for FUSION weights.}
 
 \item{snp_map}{a list of data frames with SNP-to-region map for the reference.}
 
-\item{LD_map}{a data frame with filenames of LD matrices for each of the regions.
+\item{LD_map}{a data frame with filenames of LD matrices and SNP information for all regions.
 Required when \code{load_predictdb_LD = FALSE}.}
 
 \item{weight_format}{a string, specifying format of each weight file, e.g. PredictDB, FUSION.}

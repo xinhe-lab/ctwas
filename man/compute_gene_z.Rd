@@ -9,14 +9,14 @@ compute_gene_z(z_snp, weights, ncore = 1, logfile = NULL)
 \arguments{
 \item{z_snp}{A data frame with columns: "id", "z", giving the z-scores for SNPs.}
 
-\item{weights}{a list of weights}
+\item{weights}{a list of preprocessed weights.}
 
 \item{ncore}{The number of cores used to parallelize computation over weights}
 
-\item{logfile}{the log file, if NULL will print log info on screen}
+\item{logfile}{The log filename. If NULL, will print log info on screen.}
 }
 \value{
-a data frame of gene z-scores,
+a data frame of gene z-scores.
 }
 \description{
 Computes gene z-scores.

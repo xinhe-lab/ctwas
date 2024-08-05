@@ -2,7 +2,7 @@
 #'
 #' @param region_data region_data to be finemapped
 #'
-#' @param LD_map a data frame with filenames of LD matrices for the regions.
+#' @param LD_map a data frame with filenames of LD matrices and SNP information for the regions.
 #'
 #' @param weights a list of preprocessed weights.
 #'
@@ -38,7 +38,7 @@
 #'
 #' @param verbose If TRUE, print detail messages
 #'
-#' @param logfile the log file, if NULL will print log info on screen
+#' @param logfile The log filename. If NULL, will print log info on screen.
 #'
 #' @param ... Additional arguments of \code{susie_rss}.
 #'
@@ -160,7 +160,7 @@ finemap_regions <- function(region_data,
 #'
 #' @param verbose If TRUE, print detail messages
 #'
-#' @param logfile the log file, if NULL will print log info on screen
+#' @param logfile The log filename. If NULL, will print log info on screen.
 #'
 #' @param ... Additional arguments of \code{susie_rss}.
 #'
@@ -224,10 +224,9 @@ finemap_regions_noLD <- function(region_data,
 #'
 #' @param region_id a character string of region id to be finemapped
 #'
-#' @param LD_map a data frame with filenames of LD matrices for the regions.
-#' Required when \code{use_LD = TRUE}.
+#' @param LD_map a data frame with filenames of LD matrices and SNP information for the regions.
 #'
-#' @param weights a list of preprocessed weights. Required when \code{use_LD = TRUE}.
+#' @param weights a list of preprocessed weights.
 #'
 #' @param L the number of effects for susie during the fine mapping
 #'
@@ -319,6 +318,10 @@ finemap_single_region <- function(region_data,
   if (verbose){
     loginfo("%d genes, %d SNPs in the region", length(gids), length(sids))
     loginfo("L = %d", L)
+  }
+
+  if (length(z) < 2) {
+    stop(paste(length(z), "variables in the region. At least two variables in a region are needed to run susie"))
   }
 
   # set pi_prior and V_prior based on group_prior and group_prior_var
@@ -426,12 +429,13 @@ finemap_single_region_noLD <- function(region_data,
   groups <- regiondata$groups
   rm(regiondata)
 
-  # Set L = 1 in no-LD version
-  L <- 1
-
   if (verbose){
     loginfo("%d genes, %d SNPs in the region", length(gids), length(sids))
-    loginfo("L = %d", L)
+    loginfo("L = 1")
+  }
+
+  if (length(z) < 2) {
+    stop(paste(length(z), "variables in the region. At least two variables in a region are needed to run susie"))
   }
 
   # set pi_prior and V_prior based on group_prior and group_prior_var
@@ -441,7 +445,7 @@ finemap_single_region_noLD <- function(region_data,
   rm(res)
 
   # set prior and prior variance values for the region
-  res <- set_region_susie_priors(pi_prior, V_prior, gs_group, L = L, use_null_weight = use_null_weight)
+  res <- set_region_susie_priors(pi_prior, V_prior, gs_group, L = 1, use_null_weight = use_null_weight)
   prior <- res$prior
   V <- res$V
   null_weight <- res$null_weight
@@ -462,7 +466,7 @@ finemap_single_region_noLD <- function(region_data,
                                R = R,
                                prior_weights = prior,
                                prior_variance = V,
-                               L = L,
+                               L = 1,
                                null_weight = null_weight,
                                ...)
 
@@ -477,3 +481,52 @@ finemap_single_region_noLD <- function(region_data,
 
 }
 
+
+# finemap a single region with L = 1 without LD, used in EM
+fast_finemap_single_region_L1_noLD <- function(region_data,
+                                               region_id,
+                                               pi_prior,
+                                               V_prior,
+                                               use_null_weight = TRUE,
+                                               ...){
+  # load region data
+  regiondata <- extract_region_data(region_data, region_id)
+  gids <- regiondata$gid
+  sids <- regiondata$sid
+  z <- regiondata$z
+  gs_group <- regiondata$gs_group
+  rm(regiondata)
+
+  if (length(z) < 2) {
+    stop(paste(length(z), "variables in the region. At least two variables in a region are needed to run susie"))
+  }
+
+  # update priors, prior variances and null_weight based on the estimated group_prior and group_prior_var from the previous iteration
+  res <- set_region_susie_priors(pi_prior, V_prior, gs_group, L = 1, use_null_weight = use_null_weight)
+  prior <- res$prior
+  V <- res$V
+  null_weight <- res$null_weight
+  rm(res)
+
+  # Use an identity matrix as LD, R does not matter for susie when L = 1
+  R <- diag(length(z))
+
+  # in susie, prior_variance is under standardized scale (if performed)
+  susie_res <- ctwas_susie_rss(z = z,
+                               R = R,
+                               prior_weights = prior,
+                               prior_variance = V,
+                               L = 1,
+                               null_weight = null_weight,
+                               max_iter = 1,
+                               warn_converge_fail = FALSE,
+                               ...)
+  # annotate susie result
+  susie_res_df <- anno_susie(susie_res,
+                             gids = gids,
+                             sids = sids,
+                             region_id = region_id,
+                             include_cs_index = FALSE)
+
+  return(susie_res_df)
+}

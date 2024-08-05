@@ -30,7 +30,7 @@
 #'
 #' @param seed seed for random sampling
 #'
-#' @param logfile path to the log file, if NULL will print log info on screen.
+#' @param logfile The log filename. If NULL, will print log info on screen.
 #'
 #' @return a list with region_data, updated weights, and cross-bounary genes
 #'
@@ -138,6 +138,7 @@ assemble_region_data <- function(region_info,
                                   maxSNP = maxSNP, seed = seed)
 
   # add z-scores to region_data
+  loginfo("add region z-scores")
   region_data <- update_region_z(region_data, z_snp, z_gene, ncore = ncore)
 
   return(list("region_data" = region_data,
@@ -406,6 +407,7 @@ expand_region_data <- function(region_data,
     region_data <- trim_region_data(region_data, z_snp, trim_by = "z", maxSNP = maxSNP)
 
     # add z-scores to region_data
+    loginfo("update region z-scores")
     region_data <- update_region_z(region_data, z_snp, update = "snps", ncore = ncore)
   }
 

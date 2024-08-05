@@ -13,9 +13,9 @@
 #'
 #' @param drop_unannotated_genes If TRUE, remove unannotated genes.
 #'
-#' @param filter_protein_coding_genes TRUE/FALSE. If TRUE, keep protein coding genes only.
+#' @param filter_protein_coding_genes If TRUE, keep protein coding genes only.
 #'
-#' @param filter_cs TRUE/FALSE. If TRUE, limits results in credible sets.
+#' @param filter_cs If TRUE, limits results in credible sets.
 #'
 #' @return a data frame of cTWAS finemapping result including gene
 #' names, types and positions

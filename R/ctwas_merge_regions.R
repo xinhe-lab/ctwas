@@ -36,7 +36,7 @@
 #'
 #' @param verbose If TRUE, print detail messages
 #'
-#' @param logfile The log filename. If NULL will print log info on screen
+#' @param logfile The log filename. If NULL, will print log info on screen.
 #'
 #' @param ... Additional arguments of \code{susie_rss}.
 #'
@@ -172,7 +172,7 @@ merge_region_data <- function(boundary_genes,
 #'
 #' @param verbose If TRUE, print detail messages
 #'
-#' @param logfile The log filename. If NULL will print log info on screen
+#' @param logfile The log filename. If NULL, will print log info on screen.
 #'
 #' @param ... Additional arguments of \code{susie_rss}.
 #'

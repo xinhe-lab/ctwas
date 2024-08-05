@@ -108,7 +108,7 @@ have enough memory to run the program.}
 \item{ncore_LD}{The number of cores used to parallelize computing correlation matrices,
 in screening regions and fine-mapping steps with LD.}
 
-\item{logfile}{path to the log file, if NULL will print log info on screen.}
+\item{logfile}{The log filename. If NULL, will print log info on screen.}
 
 \item{verbose}{If TRUE, print detailed messages}
 

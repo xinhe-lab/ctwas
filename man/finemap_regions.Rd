@@ -29,7 +29,7 @@ finemap_regions(
 \arguments{
 \item{region_data}{region_data to be finemapped}
 
-\item{LD_map}{a data frame with filenames of LD matrices for the regions.}
+\item{LD_map}{a data frame with filenames of LD matrices and SNP information for the regions.}
 
 \item{weights}{a list of preprocessed weights.}
 
@@ -65,7 +65,7 @@ genotype data in genetic studies.}
 
 \item{verbose}{If TRUE, print detail messages}
 
-\item{logfile}{the log file, if NULL will print log info on screen}
+\item{logfile}{The log filename. If NULL, will print log info on screen.}
 
 \item{...}{Additional arguments of \code{susie_rss}.}
 }

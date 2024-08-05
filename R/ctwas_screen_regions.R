@@ -33,7 +33,7 @@
 #'
 #' @param ncore The number of cores used to parallelize susie over regions.
 #'
-#' @param logfile the log file, if NULL will print log info on screen.
+#' @param logfile The log filename. If NULL, will print log info on screen.
 #'
 #' @param verbose If TRUE, print detail messages.
 #'
@@ -210,8 +210,8 @@ screen_regions <- function(region_data,
 #'
 #' @param ncore The number of cores used to parallelize susie over regions.
 #'
-#' @param logfile the log file, if NULL will print log info on screen.
-#'
+#' @param logfile The log filename. If NULL, will print log info on screen.
+##'
 #' @param verbose If TRUE, print detail messages.
 #'
 #' @param ... Additional arguments of \code{susie_rss}.

@@ -31,7 +31,7 @@
 #' @param min_p_single_effect Regions with probability >= \code{min_p_single_effect}
 #' of having at most one causal effect will be selected for the final EM step.
 #'
-#' @param use_null_weight TRUE/FALSE. If TRUE, allow for a probability of no effect in susie
+#' @param use_null_weight If TRUE, allow for a probability of no effect in susie
 #'
 #' @param ncore The number of cores used to parallelize susie over regions
 #'
@@ -39,9 +39,9 @@
 #'
 #' @param outname The output name.
 #'
-#' @param logfile path to the log file, if NULL will print log info on screen.
+#' @param logfile The log filename. If NULL, will print log info on screen.
 #'
-#' @param verbose TRUE/FALSE. If TRUE, print detailed messages
+#' @param verbose If TRUE, print detailed messages
 #'
 #' @param ... Additional arguments of \code{susie_rss}.
 #'

@@ -22,7 +22,7 @@ convert_fusion_to_predictdb(
 
 \item{fusion_genome_version}{a string, specifying the genome version of FUSION models}
 
-\item{make_extra_table}{TRUE/FALSE. If TRUE, make an extra table in predictDB format}
+\item{make_extra_table}{If TRUE, make an extra table in predictDB format}
 
 \item{cov_table}{a data frame of covariances between variants, with columns:
 "GENE","RSID1","RSID2","VALUE".

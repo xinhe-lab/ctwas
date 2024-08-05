@@ -68,7 +68,7 @@
 #' @param ncore_LD The number of cores used to parallelize computing correlation matrices,
 #' in screening regions and fine-mapping steps with LD.
 #'
-#' @param logfile path to the log file, if NULL will print log info on screen.
+#' @param logfile The log filename. If NULL, will print log info on screen.
 #'
 #' @param verbose If TRUE, print detailed messages
 #'

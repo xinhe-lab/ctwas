@@ -27,9 +27,9 @@ represent gene positions.}
 
 \item{drop_unannotated_genes}{If TRUE, remove unannotated genes.}
 
-\item{filter_protein_coding_genes}{TRUE/FALSE. If TRUE, keep protein coding genes only.}
+\item{filter_protein_coding_genes}{If TRUE, keep protein coding genes only.}
 
-\item{filter_cs}{TRUE/FALSE. If TRUE, limits results in credible sets.}
+\item{filter_cs}{If TRUE, limits results in credible sets.}
 }
 \value{
 a data frame of cTWAS finemapping result including gene

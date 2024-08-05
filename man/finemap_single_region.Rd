@@ -30,10 +30,9 @@ finemap_single_region(
 
 \item{region_id}{a character string of region id to be finemapped}
 
-\item{LD_map}{a data frame with filenames of LD matrices for the regions.
-Required when \code{use_LD = TRUE}.}
+\item{LD_map}{a data frame with filenames of LD matrices and SNP information for the regions.}
 
-\item{weights}{a list of preprocessed weights. Required when \code{use_LD = TRUE}.}
+\item{weights}{a list of preprocessed weights.}
 
 \item{L}{the number of effects for susie during the fine mapping}
 

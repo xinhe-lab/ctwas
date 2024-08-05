@@ -32,7 +32,7 @@ estimate_region_L(
 
 \item{ncore}{The number of cores used to parallelize susie over regions}
 
-\item{verbose}{TRUE/FALSE. If TRUE, print detail messages}
+\item{verbose}{If TRUE, print detail messages}
 
 \item{...}{Additional arguments of \code{susie_rss}.}
 }

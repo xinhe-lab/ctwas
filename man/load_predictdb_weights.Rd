@@ -13,10 +13,10 @@ load_predictdb_weights(
 \arguments{
 \item{weight_file}{a string, pointing path to weights in PredictDB format.}
 
-\item{filter_protein_coding_genes}{TRUE/FALSE. If TRUE, keep protein coding
+\item{filter_protein_coding_genes}{If TRUE, keep protein coding
 genes only.}
 
-\item{load_predictdb_LD}{TRUE/FALSE. If TRUE, load pre-computed LD
+\item{load_predictdb_LD}{If TRUE, load pre-computed LD
 among weight variants.}
 }
 \description{

@@ -10,7 +10,7 @@
 #'
 #' @param snp_map a list of data frames with SNP-to-region map for the reference.
 #'
-#' @param LD_map a data frame with filenames of LD matrices for each of the regions.
+#' @param LD_map a data frame with filenames of LD matrices and SNP information for all regions.
 #' Required when \code{load_predictdb_LD = FALSE}.
 #'
 #' @param weight_format a string, specifying format of each weight file, e.g. PredictDB, FUSION.
@@ -150,14 +150,13 @@ preprocess_weights <- function(weight_file,
                                           weight_name,
                                           region_info = region_info,
                                           LD_map = LD_map,
-                                          snp_map = snp_map,
                                           LD_format = LD_format,
                                           LD_loader_fun = LD_loader_fun,
                                           ncore = ncore)
   }
 
   if (any(sapply(weights, is.null))) {
-    warning("weights contain NULL!")
+    warning("'weights' contain 'NULL'!")
   }
 
   loginfo("Number of genes with weights after preprocessing: %d", length(weights))

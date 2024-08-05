@@ -58,7 +58,7 @@ when \code{LD_format = "custom"}.}
 
 \item{ncore}{The number of cores used to parallelize susie over regions.}
 
-\item{logfile}{the log file, if NULL will print log info on screen.}
+\item{logfile}{The log filename. If NULL, will print log info on screen.}
 
 \item{verbose}{If TRUE, print detail messages.}
 
