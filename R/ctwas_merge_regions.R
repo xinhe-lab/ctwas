@@ -120,7 +120,7 @@ merge_region_data <- function(boundary_genes,
 
   if (estimate_L) {
     loginfo("Estimating L ...")
-    L <- estimate_region_L(region_data = merged_region_data,
+    merged_region_L <- estimate_region_L(region_data = merged_region_data,
                            LD_map = merged_LD_map,
                            weights = weights,
                            init_L = L,
@@ -129,7 +129,9 @@ merge_region_data <- function(boundary_genes,
                            ncore = ncore,
                            verbose = verbose,
                            ...)
-    L[L == 0] <- 1
+    merged_region_L[merged_region_L == 0] <- 1
+  } else {
+    merged_region_L <- L
   }
 
   if (expand) {
@@ -145,7 +147,7 @@ merge_region_data <- function(boundary_genes,
               "merged_LD_map" = merged_LD_map,
               "merged_snp_map" = merged_snp_map,
               "merged_region_id_map" = merged_region_id_map,
-              "L" = L))
+              "merged_region_L" = merged_region_L))
 }
 
 #' @title Merges region data for cross-boundary genes without using LD
@@ -255,8 +257,7 @@ merge_region_data_noLD <- function(boundary_genes,
   return(list("merged_region_data" = merged_region_data,
               "merged_region_info" = merged_region_info,
               "merged_snp_map" = merged_snp_map,
-              "merged_region_id_map" = merged_region_id_map,
-              "L" = 1))
+              "merged_region_id_map" = merged_region_id_map))
 }
 
 # Identify overlapping regions
