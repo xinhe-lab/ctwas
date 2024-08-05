@@ -147,8 +147,7 @@ ctwas_sumstats <- function(
   if (!is.null(outputdir))
     dir.create(outputdir, showWarnings=FALSE, recursive=TRUE)
 
-  loginfo("ncore = %d", ncore)
-  loginfo("ncore_LD = %d", ncore_LD)
+  loginfo("ncore: %d", ncore)
 
   # Compute gene z-scores
   if (missing(z_gene)) {
@@ -200,6 +199,8 @@ ctwas_sumstats <- function(
   if (!is.null(outputdir)) {
     saveRDS(param, file.path(outputdir, paste0(outname, ".param.RDS")))
   }
+
+  loginfo("ncore for screening regions and fine-mapping: %d", ncore_LD)
 
   # Screen regions
   #. fine-map all regions with thinned SNPs

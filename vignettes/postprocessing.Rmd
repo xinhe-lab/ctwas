@@ -148,10 +148,9 @@ merged_region_id_map <- merge_region_res$merged_region_id_map
 
 
 ```{r screen_merged_regions_noLD, eval=FALSE}
-finemap_merged_regions_res <- finemap_regions_noLD(
-                                            merged_region_data,                                                     
-                                            group_prior = group_prior,
-                                            group_prior_var = group_prior_var)
+finemap_merged_regions_res <- finemap_regions_noLD(merged_region_data,                                                     
+                                                   group_prior = group_prior,
+                                                   group_prior_var = group_prior_var)
 ```
 
 
@@ -204,10 +203,9 @@ We then rerun the fine-mapping without LD information for the problematic region
 if (any(problematic_region_ids)) {
   rerun_region_data <- screen_res$selected_region_data[problematic_region_ids]
 
-  finemap_rerun_region_res <- finemap_regions_noLD(
-                                         rerun_region_data, 
-                                         group_prior = group_prior,
-                                         group_prior_var = group_prior_var)
+  finemap_rerun_region_res <- finemap_regions_noLD(rerun_region_data, 
+                                                   group_prior = group_prior,
+                                                   group_prior_var = group_prior_var)
 }
 ```
 

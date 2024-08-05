@@ -19,7 +19,7 @@ or force_compute_cor = TRUE."><!-- mathjax --><script src="https://cdnjs.cloudfl
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">ctwas</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">0.3.18</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">0.3.19</span>
       </span>
     </div>
 
@@ -80,7 +80,6 @@ or force_compute_cor = TRUE.</p>
 <span>  <span class="va">region_id</span>,</span>
 <span>  <span class="va">region_data</span>,</span>
 <span>  <span class="va">LD_map</span>,</span>
-<span>  snp_map <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  <span class="va">weights</span>,</span>
 <span>  force_compute_cor <span class="op">=</span> <span class="cn">FALSE</span>,</span>
 <span>  save_cor <span class="op">=</span> <span class="cn">FALSE</span>,</span>
@@ -104,11 +103,7 @@ or force_compute_cor = TRUE.</p>
 
 
 <dt id="arg-ld-map">LD_map<a class="anchor" aria-label="anchor" href="#arg-ld-map"></a></dt>
-<dd><p>a data frame with filenames of LD matrices for each of the regions.</p></dd>
-
-
-<dt id="arg-snp-map">snp_map<a class="anchor" aria-label="anchor" href="#arg-snp-map"></a></dt>
-<dd><p>list of data frames with SNP-to-region map for the reference.</p></dd>
+<dd><p>a data frame with filenames of LD matrices and SNP information for the regions.</p></dd>
 
 
 <dt id="arg-weights">weights<a class="anchor" aria-label="anchor" href="#arg-weights"></a></dt>
@@ -116,11 +111,11 @@ or force_compute_cor = TRUE.</p>
 
 
 <dt id="arg-force-compute-cor">force_compute_cor<a class="anchor" aria-label="anchor" href="#arg-force-compute-cor"></a></dt>
-<dd><p>TRUE/FALSE. If TRUE, force computing correlation (R) matrices</p></dd>
+<dd><p>If TRUE, force computing correlation (R) matrices</p></dd>
 
 
 <dt id="arg-save-cor">save_cor<a class="anchor" aria-label="anchor" href="#arg-save-cor"></a></dt>
-<dd><p>TRUE/FALSE. If TRUE, save correlation (R) matrices to <code>cor_dir</code></p></dd>
+<dd><p>If TRUE, save correlation (R) matrices to <code>cor_dir</code></p></dd>
 
 
 <dt id="arg-cor-dir">cor_dir<a class="anchor" aria-label="anchor" href="#arg-cor-dir"></a></dt>
@@ -137,7 +132,7 @@ or force_compute_cor = TRUE.</p>
 
 
 <dt id="arg-verbose">verbose<a class="anchor" aria-label="anchor" href="#arg-verbose"></a></dt>
-<dd><p>TRUE/FALSE. If TRUE, print detail messages</p></dd>
+<dd><p>If TRUE, print detail messages</p></dd>
 
 </dl></div>
     <div id="value">

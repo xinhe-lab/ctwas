@@ -17,7 +17,7 @@
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">ctwas</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">0.3.18</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">0.3.19</span>
       </span>
     </div>
 
@@ -84,7 +84,7 @@
       </tr><tr><td>
           <p><code><a href="compute_region_nonSNP_PIPs.html">compute_region_nonSNP_PIPs()</a></code> </p>
         </td>
-        <td><p>Computes non-SNP PIPs for each region from finemapping result</p></td>
+        <td><p>Computes non-SNP PIPs for all regions from finemapping result</p></td>
       </tr><tr><td>
           <p><code><a href="convert_fusion_to_predictdb.html">convert_fusion_to_predictdb()</a></code> </p>
         </td>
@@ -124,7 +124,7 @@
       </tr><tr><td>
           <p><code><a href="estimate_region_L.html">estimate_region_L()</a></code> </p>
         </td>
-        <td><p>Estimate L for each region by running finemapping with uniform prior</p></td>
+        <td><p>Estimate L for all regions by running finemapping with uniform prior</p></td>
       </tr><tr><td>
           <p><code><a href="expand_region_data.html">expand_region_data()</a></code> </p>
         </td>
@@ -133,6 +133,10 @@
           <p><code><a href="finemap_regions.html">finemap_regions()</a></code> </p>
         </td>
         <td><p>Runs cTWAS fine-mapping for regions</p></td>
+      </tr><tr><td>
+          <p><code><a href="finemap_regions_noLD.html">finemap_regions_noLD()</a></code> </p>
+        </td>
+        <td><p>Runs cTWAS fine-mapping for regions without LD (L = 1)</p></td>
       </tr><tr><td>
           <p><code><a href="get_gene_annot_from_ens_db.html">get_gene_annot_from_ens_db()</a></code> </p>
         </td>
@@ -174,6 +178,10 @@
         </td>
         <td><p>Merges region data for cross-boundary genes</p></td>
       </tr><tr><td>
+          <p><code><a href="merge_region_data_noLD.html">merge_region_data_noLD()</a></code> </p>
+        </td>
+        <td><p>Merges region data for cross-boundary genes without using LD</p></td>
+      </tr><tr><td>
           <p><code><a href="preprocess_weights.html">preprocess_weights()</a></code> </p>
         </td>
         <td><p>Preprocess PredictDB/FUSION weights and harmonize with LD reference</p></td>
@@ -184,7 +192,11 @@
       </tr><tr><td>
           <p><code><a href="screen_regions.html">screen_regions()</a></code> </p>
         </td>
-        <td><p>Screens regions with strong non-SNP PIPs to be used in finemapping step</p></td>
+        <td><p>Screens regions with strong signals to be used in fine-mapping step.</p></td>
+      </tr><tr><td>
+          <p><code><a href="screen_regions_noLD.html">screen_regions_noLD()</a></code> </p>
+        </td>
+        <td><p>Screens regions with strong signals without using LD.</p></td>
       </tr><tr><td>
           <p><code><a href="summarize_param.html">summarize_param()</a></code> </p>
         </td>

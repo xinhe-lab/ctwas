@@ -14,9 +14,9 @@ test_that("screen_regions (no-LD version) work", {
 
   capture.output({
     screen_res <- screen_regions_noLD(region_data,
-                                              group_prior = group_prior,
-                                              group_prior_var = group_prior_var,
-                                              min_nonSNP_PIP = 0.5)
+                                      group_prior = group_prior,
+                                      group_prior_var = group_prior_var,
+                                      min_nonSNP_PIP = 0.5)
     selected_region_data <- screen_res$selected_region_data
 
     # expand selected regions with all SNPs
@@ -53,12 +53,12 @@ test_that("screen_regions (LD version, filter by L) work", {
 
   capture.output({
     screen_res <- screen_regions(region_data,
-                                         LD_map = LD_map,
-                                         weights = weights,
-                                         group_prior = group_prior,
-                                         group_prior_var = group_prior_var,
-                                         filter_L = TRUE,
-                                         filter_nonSNP_PIP = FALSE)
+                                 LD_map = LD_map,
+                                 weights = weights,
+                                 group_prior = group_prior,
+                                 group_prior_var = group_prior_var,
+                                 filter_L = TRUE,
+                                 filter_nonSNP_PIP = FALSE)
     selected_region_data <- screen_res$selected_region_data
 
     # expand selected regions with all SNPs
