@@ -31,7 +31,7 @@ multiple molecular traits; and each molecular trait is allowed to have multiple 
 First, install `ctwas` if you haven't already:
 
 ```{r install_ctwas, eval=FALSE}
-install.packages("remotes")
+# install.packages("remotes")
 remotes::install_github("xinhe-lab/ctwas",ref = "multigroup")
 ```
 
@@ -69,7 +69,7 @@ gwas_n <- 343621
 
 ### Reference data
 
-cTWAS assumes that the genome is partitioned into approximately independent LD regions. The definitions of these regions need to be provided. You will also need to have a list of SNPs as a “reference”, with the information of these SNPs.  This is similar to LD reference data, needed in fine-mapping GWAS loci with summary statistics. Also similar to fine-mapping, the variant reference should match in the population of GWAS samples. 
+cTWAS assumes that the genome is partitioned into approximately independent LD regions. The definitions of these regions need to be provided. You will also need to have a list of SNPs as a “reference”, with the information of these SNPs.  This is similar to LD reference data, needed in fine-mapping GWAS loci with summary statistics. Also similar to fine-mapping, the variant reference should match with the population of GWAS samples. 
 
 It is critical that the genome build (e.g. hg38) of the reference match the genome build used to train the prediction models. By contrast, the genome build of the GWAS summary statistics does not matter because variant positions are determined by the reference.
 
@@ -173,7 +173,7 @@ param <- ctwas_res$param
 finemap_res <- ctwas_res$finemap_res
 boundary_genes <- ctwas_res$boundary_genes
 region_data <- ctwas_res$region_data
-screened_region_data <- ctwas_res$screened_region_data
+screen_res <- ctwas_res$screen_res
 ```
 
 
@@ -191,9 +191,9 @@ It also produces other output:
 
 + `region_data`: assembled region data, including Z scores of SNPs and molecular traits, for all the regions,. Note that only data of the subset of SNPs used in screening regions are included. 
 
-+ `screened_region_data`: the data of all SNPs and molecular traits of the selected regions. 
++ `screen_res`: screening regions results, including the data of all SNPs and molecular traits of the selected regions, and a data frame with non-SNP PIPs for all regions.
 
-*Note:*, we used sample data (from chr16) in this example, however, in real data analysis, we should use data from the *entire genome* to estimate parameters.
+*Note:* we used sample data (from chr16) in this example, however, in real data analysis, we should use data from the *entire genome* to estimate parameters.
 
 To interpret and visualize the results, please see the tutorial "Summarizing and visualizing cTWAS results" for details.
 

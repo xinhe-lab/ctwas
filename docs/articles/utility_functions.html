@@ -32,7 +32,7 @@
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">ctwas</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">0.4.4</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">0.4.5</span>
       </span>
     </div>
 
@@ -89,7 +89,7 @@
       <h1 data-toc-skip>cTWAS utility functions</h1>
                         <h4 data-toc-skip class="author">Kaixuan Luo, Sheng Qian</h4>
             
-            <h4 data-toc-skip class="date">2024-07-26</h4>
+            <h4 data-toc-skip class="date">2024-08-06</h4>
       
       <small class="dont-index">Source: <a href="https://github.com/xinhe-lab/ctwas/blob/multigroup/vignettes/utility_functions.Rmd" class="external-link"><code>vignettes/utility_functions.Rmd</code></a></small>
       <div class="hidden name"><code>utility_functions.Rmd</code></div>
@@ -98,14 +98,18 @@
 
     
     
+<p>In this tutorial, we will introduce a few cTWAS utility functions for preparing and processing input data.</p>
+<p>Load the packages.</p>
+<div class="sourceCode" id="cb1"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://github.com/xinhe-lab/ctwas/" class="external-link">ctwas</a></span><span class="op">)</span></span></code></pre></div>
 <div class="section level4">
 <h4 id="creating-ld-matrices-from-individual-level-genotype-data">Creating LD matrices from individual level genotype data<a class="anchor" aria-label="anchor" href="#creating-ld-matrices-from-individual-level-genotype-data"></a>
 </h4>
 <p>cTWAS provides a function, <code><a href="../reference/convert_geno_to_LD_matrix.html">convert_geno_to_LD_matrix()</a></code> to create LD matrices from individual level genotype data.</p>
 <p>This function needs genotype files (<code>genotype_files</code>) and variant information files (<code>varinfo_files</code>) in PLINK format, and region definitions (<code>region_info</code>) as input, and it converts genotype data to LD matrices region-by-region, and save the LD correlation matrices (<code>.RDS</code> files) and corresponding variant information (<code>.Rvar</code> files) to the directory <code>outputdir</code>. It returns a data frame <code>region_metatable</code>, which contains region definitions from <code>region_info</code> and two additional columns “LD_file” and “SNP_file”. “LD_file” stores the filenames to the LD matrices (<code>.RDS</code> files), “SNP_file” stores the filenames of corresponding variant information (<code>.Rvar</code> files).</p>
 <p>Below is an example for creating LD matrices using 1000 Genomes European genotype data.</p>
-<p>You can download the 1000 Genomes European genotype data from <a href="https://uchicago.box.com/s/qqfq7wsl1fcbfjrcpwvyyspvfud3h2xa" class="external-link">here</a>.</p>
-<div class="sourceCode" id="cb1"><pre class="downlit sourceCode r">
+<p>You can download the 1000 Genomes European genotype data <a href="https://uchicago.box.com/s/qqfq7wsl1fcbfjrcpwvyyspvfud3h2xa" class="external-link">here</a>.</p>
+<div class="sourceCode" id="cb2"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">ldref_dir</span> <span class="op">&lt;-</span> <span class="st">"./1000G_EUR_Phase3_plink"</span></span>
 <span><span class="va">genotype_files</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/paste.html" class="external-link">paste0</a></span><span class="op">(</span><span class="st">"1000G.EUR.QC."</span>, <span class="fl">1</span><span class="op">:</span><span class="fl">22</span>, <span class="st">".bed"</span><span class="op">)</span></span>
 <span><span class="va">varinfo_files</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/paste.html" class="external-link">paste0</a></span><span class="op">(</span><span class="st">"1000G.EUR.QC."</span>, <span class="fl">1</span><span class="op">:</span><span class="fl">22</span>, <span class="st">".bim"</span><span class="op">)</span></span>
@@ -122,22 +126,22 @@
 <span>                                              chrom <span class="op">=</span> <span class="fl">1</span><span class="op">:</span><span class="fl">22</span>,</span>
 <span>                                              outputdir <span class="op">=</span> <span class="va">outputdir</span>,</span>
 <span>                                              outname <span class="op">=</span> <span class="va">outname</span><span class="op">)</span></span></code></pre></div>
-<p>You can download the precomputed LD files using the 1000 Genomes European genotype data from <a href="https://uchicago.box.com/s/bi7yy7461hdd07xafyk0qlji1kwmleu7" class="external-link">here</a></p>
-<p>We provide example R scripts to create LD files for UK biobank or 1000 genomes genotype files <a href="https://github.com/xinhe-lab/ctwas/tree/singlegroup/inst/extdata/scripts" class="external-link">here</a></p>
+<p>You can download the precomputed LD files using the 1000 Genomes European genotype data <a href="https://uchicago.box.com/s/bi7yy7461hdd07xafyk0qlji1kwmleu7" class="external-link">here</a>.</p>
+<p>We provide example R scripts to create LD files for UK biobank or 1000 genomes genotype files <a href="https://github.com/xinhe-lab/ctwas/tree/singlegroup/inst/extdata/scripts" class="external-link">here</a>.</p>
 </div>
 <div class="section level3">
 <h3 id="using-fusion-weights">Using FUSION weights<a class="anchor" aria-label="anchor" href="#using-fusion-weights"></a>
 </h3>
 <p>PredictDB is the recommended format for cTWAS, and we introduced how to use PredictDB weights in the tutorial “Preparing cTWAS input data”. Here, we will discuss how to use FUSION weights.</p>
-<p>Please check <a href="http://gusevlab.org/projects/fusion/#compute-your-own-predictive-models" class="external-link">FUSION/TWAS</a> for the format of FUSION weights. You can download <a href="http://gusevlab.org/projects/fusion/#download-pre-computed-predictive-models" class="external-link">precomputed FUSION models</a></p>
+<p>Please check <a href="http://gusevlab.org/projects/fusion/#compute-your-own-predictive-models" class="external-link">FUSION/TWAS</a> for the format of FUSION weights. You can download <a href="http://gusevlab.org/projects/fusion/#download-pre-computed-predictive-models" class="external-link">precomputed FUSION models</a>.</p>
 <p>For example, we download an example GTEx whole blood data.</p>
-<div class="sourceCode" id="cb2"><pre class="sourceCode bash"><code class="sourceCode bash"><span id="cb2-1"><a href="#cb2-1"></a><span class="fu">wget</span> https://data.broadinstitute.org/alkesgroup/FUSION/WGT/GTEx.Whole_Blood.tar.bz2</span>
-<span id="cb2-2"><a href="#cb2-2"></a></span>
-<span id="cb2-3"><a href="#cb2-3"></a><span class="fu">tar</span> xjf GTEx.Whole_Blood.tar.bz2</span></code></pre></div>
+<div class="sourceCode" id="cb3"><pre class="sourceCode bash"><code class="sourceCode bash"><span id="cb3-1"><a href="#cb3-1"></a><span class="fu">wget</span> https://data.broadinstitute.org/alkesgroup/FUSION/WGT/GTEx.Whole_Blood.tar.bz2</span>
+<span id="cb3-2"><a href="#cb3-2"></a></span>
+<span id="cb3-3"><a href="#cb3-3"></a><span class="fu">tar</span> xjf GTEx.Whole_Blood.tar.bz2</span></code></pre></div>
 <p>After unpacking the package, we will see a folder named <code>GTEx.Whole_Blood</code>, which contains the <code>.wgt.RDat</code> files of the precomputed weights. We will also see a file <code>GTEx.Whole_Blood.pos</code> (outside the weight folder), which points to the individual <code>.wgt.RDat</code> weight files, their gene IDs, and genomic positions.</p>
 <p>We use the <code>preprocess_weight()</code> function to harmonize the prediction models and LD reference. To use the FUSION format, we need to specify the weight directory that contains the <code>.wgt.RDat</code> files. We specify <code>weight_format = 'FUSION'</code> and specify the prediction models in FUSION by <code>fusion_method</code>. It supports the following models: “lasso” (default), “enet”, “top1”, “blup”, “bslmm”, and also “best.cv”, which will choose the best model for each gene based on the cross-validation performance.</p>
 <p>This function also takes a few other inputs, including the definition of regions (<code>region_info</code>), the list of variants from GWAS (<code>z_snp$id</code>), and the SNP to region map (<code>snp_map</code>). Please refer to the tutorial `Preparing input data” about these data structures.</p>
-<div class="sourceCode" id="cb3"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">weights</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/preprocess_weights.html">preprocess_weights</a></span><span class="op">(</span><span class="st">"./GTEx.Whole_Blood"</span>,</span>
 <span>                              <span class="va">region_info</span>,</span>
 <span>                              <span class="va">z_snp</span><span class="op">$</span><span class="va">id</span>,</span>
@@ -153,7 +157,7 @@
 </h3>
 <p>Often a researcher may have a list of significant QTLs, but have not explicitly built prediction models. In such cases, it is possible to run cTWAS. One just needs to use the top QTL per molecular trait as the prediction models. Running cTWAS in this way would be similar to colocalization analysis with coloc. Nevertheless, it still has some advantages over coloc: it estimates the important parameters from data, and it analyzes multiple molecular traits in a region simultaneously. See the Supplementary Note of the cTWAS paper for details.</p>
 <p>We could convert top QTLs into PredictDB format weights using the function <code><a href="../reference/create_predictdb_from_QTLs.html">create_predictdb_from_QTLs()</a></code>. It will create PredictDB format weights, and save to the <code>outputdir</code> directory.</p>
-<div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="../reference/create_predictdb_from_QTLs.html">create_predictdb_from_QTLs</a></span><span class="op">(</span><span class="va">weight_table</span>, </span>
 <span>                           <span class="va">gene_table</span>, </span>
 <span>                           use_top_QTL <span class="op">=</span> <span class="cn">TRUE</span>,</span>

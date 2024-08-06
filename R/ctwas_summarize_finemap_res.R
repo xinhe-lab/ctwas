@@ -163,6 +163,7 @@ get_gene_annot_from_ens_db <- function(ens_db, gene_ids) {
   gene_annot$start <- as.numeric(gene_annot$start)
   gene_annot$end <- as.numeric(gene_annot$end)
   gene_annot <- gene_annot[, c("chrom", "start", "end", "gene_id", "gene_name", "gene_type")]
+
   return(gene_annot)
 }
 

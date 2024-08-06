@@ -17,7 +17,7 @@
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">ctwas</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">0.4.4</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">0.4.5</span>
       </span>
     </div>
 
@@ -76,7 +76,6 @@
 <span>  <span class="va">z_snp</span>,</span>
 <span>  <span class="va">region_ids</span>,</span>
 <span>  <span class="va">LD_map</span>,</span>
-<span>  <span class="va">snp_map</span>,</span>
 <span>  <span class="va">gwas_n</span>,</span>
 <span>  p_diff_thresh <span class="op">=</span> <span class="fl">5e-08</span>,</span>
 <span>  LD_format <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"rds"</span>, <span class="st">"rdata"</span>, <span class="st">"mtx"</span>, <span class="st">"csv"</span>, <span class="st">"txt"</span>, <span class="st">"custom"</span><span class="op">)</span>,</span>
@@ -100,11 +99,7 @@ snps. "A1" is effect allele. "A2" is the other allele.</p></dd>
 
 
 <dt id="arg-ld-map">LD_map<a class="anchor" aria-label="anchor" href="#arg-ld-map"></a></dt>
-<dd><p>a data frame with filenames of LD matrices for each of the regions.</p></dd>
-
-
-<dt id="arg-snp-map">snp_map<a class="anchor" aria-label="anchor" href="#arg-snp-map"></a></dt>
-<dd><p>a list of data frames with SNP-to-region map for the reference.</p></dd>
+<dd><p>a data frame with filenames of LD matrices and SNP information for each of the regions.</p></dd>
 
 
 <dt id="arg-gwas-n">gwas_n<a class="anchor" aria-label="anchor" href="#arg-gwas-n"></a></dt>

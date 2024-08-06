@@ -10,7 +10,7 @@
 #'
 #' @param snp_map a list of SNP-to-region map for the reference.
 #'
-#' @param LD_map a data frame with filenames of LD matrices for the regions.
+#' @param LD_map a data frame with filenames of LD matrices and SNP information for the regions.
 #' Required when \code{load_predictdb_LD = FALSE}.
 #'
 #' @param type a string, specifying QTL type of each weight file, e.g. expression, splicing, protein.
@@ -47,7 +47,7 @@
 #'
 #' @param ncore The number of cores used to parallelize computation.
 #'
-#' @param logfile the log file, if NULL will print log info on screen.
+#' @param logfile The log filename. If NULL, will print log info on screen.
 #'
 #' @return a list of processed weights
 #'
@@ -83,7 +83,6 @@ preprocess_weights <- function(weight_file,
   # check input arguments
   weight_format <- match.arg(weight_format)
   fusion_method <- match.arg(fusion_method)
-  fusion_genome_version <- match.arg(fusion_genome_version)
   LD_format <- match.arg(LD_format)
 
   if (length(weight_file) != 1) {
@@ -170,19 +169,18 @@ preprocess_weights <- function(weight_file,
   }
 
   if (!load_predictdb_LD) {
-    loginfo("Computing LD among variants in weights ...")
+    loginfo("Computing LD for weights using the LD reference ...")
     weights <- compute_weight_LD_from_ref(weights,
                                           weight_name,
                                           region_info = region_info,
                                           LD_map = LD_map,
-                                          snp_map = snp_map,
                                           LD_format = LD_format,
                                           LD_loader_fun = LD_loader_fun,
                                           ncore = ncore)
   }
 
   if (any(sapply(weights, is.null))) {
-    warning("weights contain NULL!")
+    warning("'weights' contain 'NULL'!")
   }
 
   loginfo("Number of genes with weights after preprocessing: %d", length(weights))
@@ -281,14 +279,14 @@ process_weight <- function(gene_name,
     wgt <- R_wgt <- NULL
   }
 
-  return(list(chrom = chrom,
-              p0 = p0,
-              p1 = p1,
-              wgt = wgt,
-              R_wgt = R_wgt,
-              gene_name = gene_name,
-              weight_name = weight_name,
-              type = type,
-              context = context,
-              n_wgt = n_wgt))
+  return(list("chrom" = chrom,
+              "p0" = p0,
+              "p1" = p1,
+              "wgt" = wgt,
+              "R_wgt" = R_wgt,
+              "gene_name" = gene_name,
+              "weight_name" = weight_name,
+              "type" = type,
+              "context" = context,
+              "n_wgt" = n_wgt))
 }

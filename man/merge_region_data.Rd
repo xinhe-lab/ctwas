@@ -8,12 +8,11 @@ merge_region_data(
   boundary_genes,
   region_data,
   region_info,
-  snp_map,
   LD_map,
+  snp_map,
   weights,
   z_snp,
   z_gene,
-  use_LD = TRUE,
   estimate_L = TRUE,
   expand = TRUE,
   L = 5,
@@ -33,9 +32,9 @@ merge_region_data(
 
 \item{region_info}{a data frame of region definitions}
 
-\item{snp_map}{a list of data frames with SNP-to-region map for the reference.}
+\item{LD_map}{a data frame with filenames of LD matrices and SNP information for the regions.}
 
-\item{LD_map}{a data frame with filenames of LD matrices for each of the regions.}
+\item{snp_map}{a list of data frames with SNP-to-region map for the reference.}
 
 \item{weights}{a list of preprocessed weights.}
 
@@ -43,13 +42,11 @@ merge_region_data(
 
 \item{z_gene}{A data frame with columns: "id", "z", giving the z-scores for genes.}
 
-\item{use_LD}{If TRUE, use LD, and creates \code{merged_LD_map}.}
-
 \item{estimate_L}{If TRUE, estimate L for merged regions.}
 
 \item{expand}{If TRUE, expand merged region_data with full SNPs}
 
-\item{L}{the number of effects for susie. This is only used when \code{estimate_L = FALSE}.}
+\item{L}{the number of effects for susie.}
 
 \item{maxSNP}{Inf or integer. Maximum number of SNPs in a region. Default is
 Inf, no limit. This can be useful if there are many SNPs in a region and you don't
@@ -62,14 +59,14 @@ have enough memory to run the program.}
 
 \item{ncore}{The number of cores used to parallelize susie over regions}
 
-\item{verbose}{TRUE/FALSE. If TRUE, print detail messages}
+\item{verbose}{If TRUE, print detail messages}
 
-\item{logfile}{the log file, if NULL will print log info on screen}
+\item{logfile}{The log filename. If NULL, will print log info on screen.}
 
 \item{...}{Additional arguments of \code{susie_rss}.}
 }
 \value{
-a list of merged region data, merged region info, snp_map, LD_map,
+a list of merged region data, merged region info, LD_map, snp_map,
 and merged region IDs.
 }
 \description{

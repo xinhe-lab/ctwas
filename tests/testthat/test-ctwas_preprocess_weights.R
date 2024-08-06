@@ -4,7 +4,7 @@ test_that("preprocess_weights works", {
   snp_map <- readRDS(system.file("extdata/sample_data", "LDL_example.snp_map.RDS", package = "ctwas"))
   z_snp <- readRDS(system.file("extdata/sample_data", "LDL_example.preprocessed.z_snp.RDS", package = "ctwas"))
 
-  precomputed_weights <- readRDS("LDL_example.preprocessed.liver.weights.RDS")
+  expected_weights <- readRDS("LDL_example.preprocessed.liver.weights.RDS")
 
   weight_dir <- system.file("extdata/sample_data", "expression_Liver.db", package = "ctwas")
 
@@ -22,6 +22,6 @@ test_that("preprocess_weights works", {
                                   filter_protein_coding_genes = TRUE)
   })
 
-  expect_equal(weights, precomputed_weights)
+  expect_equal(weights, expected_weights)
 
 })

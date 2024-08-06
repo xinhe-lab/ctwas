@@ -8,8 +8,8 @@ ctwas_sumstats(
   z_snp,
   weights,
   region_info,
-  snp_map,
   LD_map,
+  snp_map,
   z_gene = NULL,
   thin = 0.1,
   niter_prefit = 3,
@@ -22,18 +22,19 @@ ctwas_sumstats(
   filter_L = TRUE,
   filter_nonSNP_PIP = FALSE,
   min_nonSNP_PIP = 0.5,
-  p_single_effect = 0.8,
+  min_p_single_effect = 0.8,
   maxSNP = Inf,
   use_null_weight = TRUE,
   coverage = 0.95,
   min_abs_corr = 0.5,
   LD_format = c("rds", "rdata", "mtx", "csv", "txt", "custom"),
   LD_loader_fun,
-  ncore = 1,
   save_cor = FALSE,
   cor_dir = NULL,
   outputdir = NULL,
   outname = "ctwas",
+  ncore = 1,
+  ncore_LD = max(ncore - 1, 1),
   logfile = NULL,
   verbose = FALSE,
   ...
@@ -41,25 +42,25 @@ ctwas_sumstats(
 }
 \arguments{
 \item{z_snp}{A data frame with four columns: "id", "A1", "A2", "z".
-giving the z scores for snps. "A1" is effect allele. "A2" is the other allele.}
+giving the z scores for SNPs. "A1" is effect allele. "A2" is the other allele.}
 
-\item{weights}{a list of prediction weights}
+\item{weights}{a list of pre-processed prediction weights.}
 
 \item{region_info}{a data frame of region definitions.}
 
-\item{snp_map}{a list of SNP-to-region map for the reference.}
+\item{LD_map}{a data frame with filenames of LD matrices and SNP information for the regions.}
 
-\item{LD_map}{a data frame with filenames of LD matrices for the regions.}
+\item{snp_map}{a list of data frames with SNP-to-region map for the reference.}
 
 \item{z_gene}{A data frame with columns: "id", "z", giving the z-scores for genes.}
 
 \item{thin}{The proportion of SNPs to be used for estimating parameters and screening regions.}
 
-\item{niter_prefit}{the number of iterations of the E-M algorithm to perform during the initial parameter estimation step}
+\item{niter_prefit}{the number of iterations of the E-M algorithm to perform during the initial parameter estimation step.}
 
-\item{niter}{the number of iterations of the E-M algorithm to perform during the complete parameter estimation step}
+\item{niter}{the number of iterations of the E-M algorithm to perform during the complete parameter estimation step.}
 
-\item{L}{the number of effects for susie during the fine mapping steps}
+\item{L}{the number of effects for susie during the fine mapping steps.}
 
 \item{init_group_prior}{a vector of initial values of prior inclusion probabilities for SNPs and genes.}
 
@@ -72,23 +73,24 @@ giving the z scores for snps. "A1" is effect allele. "A2" is the other allele.}
 "shared_all" allows all groups to share the same variance parameter.
 "independent" allows all groups to have their own separate variance parameters.}
 
-\item{filter_L}{If TRUE, screening regions with L >= 1}
+\item{filter_L}{If TRUE, screening regions with L > 0.}
 
-\item{filter_nonSNP_PIP}{If TRUE, screening regions with total non-SNP PIP >= \code{min_nonSNP_PIP}}
+\item{filter_nonSNP_PIP}{If TRUE, screening regions with total non-SNP PIP >= \code{min_nonSNP_PIP}.}
 
 \item{min_nonSNP_PIP}{Regions with non-SNP PIP >= \code{min_nonSNP_PIP}
-will be selected to run finemapping using full SNPs.}
+will be selected to run finemapping using all SNPs.}
 
-\item{p_single_effect}{Regions with probability greater than \code{p_single_effect} of
-having 1 or fewer effects will be used for parameter estimation}
+\item{min_p_single_effect}{Regions with probability greater than \code{min_p_single_effect} of
+having 1 or fewer effects will be used for parameter estimation.}
 
 \item{maxSNP}{Inf or integer. Maximum number of SNPs in a region. Default is
 Inf, no limit. This can be useful if there are many SNPs in a region and you don't
 have enough memory to run the program.}
 
-\item{use_null_weight}{TRUE/FALSE. If TRUE, allow for a probability of no effect in susie}
+\item{use_null_weight}{If TRUE, allow for a probability of no effect in susie.}
 
-\item{coverage}{A number between 0 and 1 specifying the \dQuote{coverage} of the estimated confidence sets}
+\item{coverage}{A number between 0 and 1 specifying the \dQuote{coverage} of
+the estimated confidence sets.}
 
 \item{min_abs_corr}{Minimum absolute correlation allowed in a
 .  credible set. The default, 0.5, corresponds to a squared
@@ -100,25 +102,30 @@ have enough memory to run the program.}
 
 \item{LD_loader_fun}{a user defined function to load LD matrix when \code{LD_format = "custom"}.}
 
-\item{ncore}{The number of cores used to parallelize susie over regions}
+\item{save_cor}{If TRUE, save correlation (R) matrices to \code{cor_dir}.}
 
-\item{save_cor}{TRUE/FALSE. If TRUE, save correlation (R) matrices to \code{cor_dir}}
-
-\item{cor_dir}{The directory to store correlation (R) matrices}
+\item{cor_dir}{The directory to store correlation (R) matrices.}
 
 \item{outputdir}{The directory to store output. If specified, save outputs to the directory.}
 
 \item{outname}{The output name.}
 
-\item{logfile}{path to the log file, if NULL will print log info on screen.}
+\item{ncore}{The number of cores used to parallelize computing over regions.}
 
-\item{verbose}{TRUE/FALSE. If TRUE, print detailed messages}
+\item{ncore_LD}{The number of cores used to parallelize computing correlation matrices,
+in screening regions and fine-mapping steps with LD.}
+
+\item{logfile}{The log filename. If NULL, print log info on screen.}
+
+\item{verbose}{If TRUE, print detailed messages.}
 
 \item{...}{Additional arguments of \code{susie_rss}.}
+
+\item{force_compute_cor}{If TRUE, force computing correlation (R) matrices.}
 }
 \value{
-a list of estimated parameters, fine-mapping results, boundary genes,
-z_gene, region_data, and screened_region_data
+a list, including z_gene, estimated parameters, region_data,
+cross-boundary genes, screening region results, and fine-mapping results.
 }
 \description{
 cTWAS analysis using summary statistics

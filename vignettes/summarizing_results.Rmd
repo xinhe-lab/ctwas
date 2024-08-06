@@ -30,7 +30,7 @@ library(EnsDb.Hsapiens.v86)
 ```
 
 
-We need the Ensembl database `EnsDb.Hsapiens.v86` here in this tutorial, please choose the version of Ensembl database for your specific data. 
+We need the Ensembl database `EnsDb.Hsapiens.v86` (for hg38) in this tutorial, please choose the version of Ensembl database for your specific data (e.g. `EnsDb.Hsapiens.v75` for hg19). 
 
 Let's first load the cTWAS input data needed to run this tutorial: 
 GWAS sample size (`gwas_n`), prediction models of molecular traits (`weights`), the reference data: including information about regions (`region_info`), reference variant list (`snp_map`) and reference LD (`LD_map`).
@@ -58,7 +58,7 @@ param <- ctwas_res$param
 finemap_res <- ctwas_res$finemap_res
 boundary_genes <- ctwas_res$boundary_genes
 region_data <- ctwas_res$region_data
-screened_region_data <- ctwas_res$screened_region_data
+screen_res <- ctwas_res$screen_res
 ```
 
 
@@ -80,16 +80,16 @@ It also produces other output:
 
 + `boundary_genes`: the genes/molecular traits that cross region boundaries (we will need these in the post-processing step). 
 
-+ `region_data`: assembled region data, including Z scores of SNPs and molecular traits, for all the regions,. Note that only data of the subset of SNPs used in screening regions are included. 
++ `region_data`: assembled region data, including Z scores of SNPs and molecular traits, for all the regions. Note that only data of the subset of SNPs used in screening regions are included. 
 
-+ `screened_region_data`: the data of all SNPs and molecular traits of the selected regions. 
++ `screen_res`: screening regions results, including the data of all SNPs and molecular traits of the selected regions, estimated numbers of causal signals (L) for selected regions, and a data frame with estimated L or non-SNP PIPs for all regions.
 
 
 ## Assessing parameters and computing PVE
 
-First, we make plots using `use `make_convergence_plots()` to see how estimated parameters converge during the execution of the program:
+First, we make plots using the function `make_convergence_plots()` to see how estimated parameters converge during the execution of the program:
 
-```{r convergence_plot, fig.width=10, fig.height=5}
+```{r convergence_plot, fig.width = 10, fig.height=5}
 make_convergence_plots(param, gwas_n)
 ```
 
@@ -189,7 +189,7 @@ make_locusplot(finemap_res,
 ```
 
 
-The locus plot shows several tracks in the example region in chromosome 6 (71.6 - 72.4 Mb). The top one shows -log10(p-value) of the association of variants and molecular traits with the phenotype. The next track shows the PIPs of variants and molecular traits.  The data points are colored by the correlations with the focal gene (the gene with the highest PIP, HPR in this case). The red dotted line shows the PIP cutoff of 0.8. The next track shows the locations of QTLs of the focus gene (by default, the focus gene is the gene with the highest PIP). The bottom is the gene track.
+The locus plot shows several tracks in the example region in chromosome 6 (71.6 - 72.4 Mb). The top one shows -log10(p-value) of the association of variants and molecular traits with the phenotype. The next track shows the PIPs of variants and molecular traits.  The data points are colored by the correlations with the focal gene (the gene with the highest PIP, HPR in this case). The red dotted line shows the PIP cutoff of 0.8. The next track shows the locations of QTLs of the focal gene (by default, the focal gene is the gene with the highest PIP). The bottom is the gene track.
 
 In this plot, one can see that there are several genes with good associations with the phenotype, but only HPR in liver and HP in adipose are selected by cTWAS. This is because once HPR, HP and other likely causal variants are selected by cTWAS, there is no remaining association left in other molecular traits. This example thus illustrates how cTWAS selects likely causal molecular traits while controlling for nearby molecular traits and variants. 
 

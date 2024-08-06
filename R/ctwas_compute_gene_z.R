@@ -2,11 +2,11 @@
 #'
 #' @param z_snp A data frame with columns: "id", "z", giving the z-scores for SNPs.
 #'
-#' @param weights a list of weights
+#' @param weights a list of preprocessed weights.
 #'
-#' @param ncore The number of cores used to parallelize computation over weights
+#' @param ncore The number of cores used to parallelize computation over weights.
 #'
-#' @param logfile the log file, if NULL will print log info on screen
+#' @param logfile The log filename. If NULL, print log info on screen.
 #'
 #' @return a data frame of z-scores of molecular traits
 #'

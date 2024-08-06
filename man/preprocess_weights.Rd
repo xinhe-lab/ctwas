@@ -36,7 +36,7 @@ or the directory containing '.wgt.RDat' files for FUSION weights.}
 
 \item{snp_map}{a list of SNP-to-region map for the reference.}
 
-\item{LD_map}{a data frame with filenames of LD matrices for the regions.
+\item{LD_map}{a data frame with filenames of LD matrices and SNP information for the regions.
 Required when \code{load_predictdb_LD = FALSE}.}
 
 \item{type}{a string, specifying QTL type of each weight file, e.g. expression, splicing, protein.}
@@ -73,7 +73,7 @@ By default, use all weight SNPs.}
 
 \item{ncore}{The number of cores used to parallelize computation.}
 
-\item{logfile}{the log file, if NULL will print log info on screen.}
+\item{logfile}{The log filename. If NULL, will print log info on screen.}
 }
 \value{
 a list of processed weights

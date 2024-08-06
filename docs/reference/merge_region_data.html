@@ -17,7 +17,7 @@
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">ctwas</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">0.4.4</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">0.4.5</span>
       </span>
     </div>
 
@@ -76,12 +76,11 @@
 <span>  <span class="va">boundary_genes</span>,</span>
 <span>  <span class="va">region_data</span>,</span>
 <span>  <span class="va">region_info</span>,</span>
-<span>  <span class="va">snp_map</span>,</span>
 <span>  <span class="va">LD_map</span>,</span>
+<span>  <span class="va">snp_map</span>,</span>
 <span>  <span class="va">weights</span>,</span>
 <span>  <span class="va">z_snp</span>,</span>
 <span>  <span class="va">z_gene</span>,</span>
-<span>  use_LD <span class="op">=</span> <span class="cn">TRUE</span>,</span>
 <span>  estimate_L <span class="op">=</span> <span class="cn">TRUE</span>,</span>
 <span>  expand <span class="op">=</span> <span class="cn">TRUE</span>,</span>
 <span>  L <span class="op">=</span> <span class="fl">5</span>,</span>
@@ -111,12 +110,12 @@
 <dd><p>a data frame of region definitions</p></dd>
 
 
+<dt id="arg-ld-map">LD_map<a class="anchor" aria-label="anchor" href="#arg-ld-map"></a></dt>
+<dd><p>a data frame with filenames of LD matrices and SNP information for the regions.</p></dd>
+
+
 <dt id="arg-snp-map">snp_map<a class="anchor" aria-label="anchor" href="#arg-snp-map"></a></dt>
 <dd><p>a list of data frames with SNP-to-region map for the reference.</p></dd>
-
-
-<dt id="arg-ld-map">LD_map<a class="anchor" aria-label="anchor" href="#arg-ld-map"></a></dt>
-<dd><p>a data frame with filenames of LD matrices for each of the regions.</p></dd>
 
 
 <dt id="arg-weights">weights<a class="anchor" aria-label="anchor" href="#arg-weights"></a></dt>
@@ -131,10 +130,6 @@
 <dd><p>A data frame with columns: "id", "z", giving the z-scores for genes.</p></dd>
 
 
-<dt id="arg-use-ld">use_LD<a class="anchor" aria-label="anchor" href="#arg-use-ld"></a></dt>
-<dd><p>If TRUE, use LD, and creates <code>merged_LD_map</code>.</p></dd>
-
-
 <dt id="arg-estimate-l">estimate_L<a class="anchor" aria-label="anchor" href="#arg-estimate-l"></a></dt>
 <dd><p>If TRUE, estimate L for merged regions.</p></dd>
 
@@ -144,7 +139,7 @@
 
 
 <dt id="arg-l">L<a class="anchor" aria-label="anchor" href="#arg-l"></a></dt>
-<dd><p>the number of effects for susie. This is only used when <code>estimate_L = FALSE</code>.</p></dd>
+<dd><p>the number of effects for susie.</p></dd>
 
 
 <dt id="arg-maxsnp">maxSNP<a class="anchor" aria-label="anchor" href="#arg-maxsnp"></a></dt>
@@ -167,11 +162,11 @@ have enough memory to run the program.</p></dd>
 
 
 <dt id="arg-verbose">verbose<a class="anchor" aria-label="anchor" href="#arg-verbose"></a></dt>
-<dd><p>TRUE/FALSE. If TRUE, print detail messages</p></dd>
+<dd><p>If TRUE, print detail messages</p></dd>
 
 
 <dt id="arg-logfile">logfile<a class="anchor" aria-label="anchor" href="#arg-logfile"></a></dt>
-<dd><p>the log file, if NULL will print log info on screen</p></dd>
+<dd><p>The log filename. If NULL, will print log info on screen.</p></dd>
 
 
 <dt id="arg--">...<a class="anchor" aria-label="anchor" href="#arg--"></a></dt>
@@ -180,7 +175,7 @@ have enough memory to run the program.</p></dd>
 </dl></div>
     <div id="value">
     <h2>Value</h2>
-    <p>a list of merged region data, merged region info, snp_map, LD_map,
+    <p>a list of merged region data, merged region info, LD_map, snp_map,
 and merged region IDs.</p>
     </div>
 

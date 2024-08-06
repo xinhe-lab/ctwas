@@ -1,19 +1,19 @@
 #' @title cTWAS analysis using summary statistics with "no LD" version
 #'
 #' @param z_snp A data frame with four columns: "id", "A1", "A2", "z".
-#' giving the z scores for snps. "A1" is effect allele. "A2" is the other allele.
+#' giving the z scores for SNPs. "A1" is effect allele. "A2" is the other allele.
 #'
-#' @param weights a list of prediction weights.
+#' @param weights a list of pre-processed prediction weights.
 #'
 #' @param region_info a data frame of region definitions.
 #'
-#' @param snp_map a list of SNP-to-region map for the reference.
+#' @param snp_map a list of data frames with SNP-to-region map for the reference.
 #'
 #' @param z_gene A data frame with columns: "id", "z", giving the z-scores for genes.
 #'
-#' @param niter_prefit the number of iterations of the E-M algorithm to perform during the initial parameter estimation step
+#' @param niter_prefit the number of iterations of the E-M algorithm to perform during the initial parameter estimation step.
 #'
-#' @param niter the number of iterations of the E-M algorithm to perform during the complete parameter estimation step
+#' @param niter the number of iterations of the E-M algorithm to perform during the complete parameter estimation step.
 #'
 #' @param thin The proportion of SNPs to be used for estimating parameters and screening regions.
 #'
@@ -35,27 +35,27 @@
 #' @param min_nonSNP_PIP Regions with non-SNP PIP >= \code{min_nonSNP_PIP}
 #' will be selected to run finemapping using full SNPs.
 #'
-#' @param p_single_effect Regions with probability greater than \code{p_single_effect} of
-#' having 1 or fewer effects will be used for parameter estimation
+#' @param min_p_single_effect Regions with probability greater than \code{min_p_single_effect} of
+#' having 1 or fewer effects will be used for parameter estimation.
 #'
-#' @param use_null_weight TRUE/FALSE. If TRUE, allow for a probability of no effect in susie
-#'
-#' @param ncore The number of cores used to parallelize susie over regions
+#' @param use_null_weight If TRUE, allow for a probability of no effect in susie.
 #'
 #' @param outputdir The directory to store output. If specified, save outputs to the directory.
 #'
 #' @param outname The output name.
 #'
-#' @param logfile path to the log file, if NULL will print log info on screen.
+#' @param ncore The number of cores used to parallelize susie over regions.
 #'
-#' @param verbose TRUE/FALSE. If TRUE, print detailed messages
+#' @param logfile The log filename. If NULL, print log info on screen.
+#'
+#' @param verbose If TRUE, print detailed messages.
 #'
 #' @param ... Additional arguments of \code{susie_rss}.
 #'
 #' @importFrom logging addHandler loginfo writeToFile
 #'
-#' @return a list of estimated parameters, fine-mapping results, boundary genes,
-#' z_gene, region_data, and screened_region_data
+#' @return a list, including z_gene, estimated parameters, region_data,
+#' cross-boundary genes, screening region results, and fine-mapping results.
 #'
 #' @export
 #'
@@ -73,11 +73,11 @@ ctwas_sumstats_noLD <- function(
     group_prior_var_structure = c("shared_type", "shared_context", "shared_nonSNP", "shared_all", "independent"),
     maxSNP = Inf,
     min_nonSNP_PIP = 0.5,
-    p_single_effect = 0.8,
+    min_p_single_effect = 0.8,
     use_null_weight = TRUE,
-    ncore = 1,
     outputdir = NULL,
     outname = "ctwas_noLD",
+    ncore = 1,
     logfile = NULL,
     verbose = FALSE,
     ...){
@@ -85,6 +85,9 @@ ctwas_sumstats_noLD <- function(
   if (!is.null(logfile)) {
     addHandler(writeToFile, file=logfile, level='DEBUG')
   }
+
+  loginfo("Running cTWAS analysis without LD ...")
+  loginfo("ctwas version: %s", packageVersion("ctwas"))
 
   # check inputs
   group_prior_var_structure <- match.arg(group_prior_var_structure)
@@ -107,6 +110,8 @@ ctwas_sumstats_noLD <- function(
   if (!is.null(outputdir)) {
     dir.create(outputdir, showWarnings=FALSE, recursive=TRUE)
   }
+
+  loginfo("ncore: %d", ncore)
 
   # Compute gene z-scores
   if (is.null(z_gene)) {
@@ -149,7 +154,7 @@ ctwas_sumstats_noLD <- function(
                      group_prior_var_structure = group_prior_var_structure,
                      niter_prefit = niter_prefit,
                      niter = niter,
-                     p_single_effect = p_single_effect,
+                     min_p_single_effect = min_p_single_effect,
                      ncore = ncore,
                      verbose = verbose)
 
@@ -162,56 +167,52 @@ ctwas_sumstats_noLD <- function(
   # Screen regions
   #. fine-map all regions with thinned SNPs
   #. select regions with strong non-SNP signals
-  screen_regions_res <- screen_regions(region_data,
-                                       use_LD = FALSE,
-                                       group_prior = group_prior,
-                                       group_prior_var = group_prior_var,
-                                       min_nonSNP_PIP = min_nonSNP_PIP,
-                                       ncore = ncore,
-                                       verbose = verbose)
-  screened_region_data <- screen_regions_res$screened_region_data
+  screen_res <- screen_regions_noLD(region_data,
+                                    group_prior = group_prior,
+                                    group_prior_var = group_prior_var,
+                                    min_nonSNP_PIP = min_nonSNP_PIP,
+                                    ncore = ncore,
+                                    verbose = verbose,
+                                    ...)
+  screened_region_data <- screen_res$screened_region_data
 
-  # Expand screened region_data with all SNPs in the regions
+  # expand selected regions with all SNPs
   if (thin < 1){
     screened_region_data <- expand_region_data(screened_region_data,
                                                snp_map,
                                                z_snp,
-                                               z_gene,
-                                               trim_by = "z",
                                                maxSNP = maxSNP,
                                                ncore = ncore)
+    screen_res$screened_region_data <- screened_region_data
   }
+
   if (!is.null(outputdir)) {
-    saveRDS(screened_region_data, file.path(outputdir, paste0(outname, ".screened_region_data.RDS")))
+    saveRDS(screen_res, file.path(outputdir, paste0(outname, ".screen_res.RDS")))
   }
 
   # Run fine-mapping for regions with strong gene signals using full SNPs
-  #. save correlation matrices if save_cor is TRUE
   if (length(screened_region_data) > 0){
-    finemap_res <- finemap_regions(screened_region_data,
-                                   use_LD = FALSE,
-                                   group_prior = group_prior,
-                                   group_prior_var = group_prior_var,
-                                   L = 1,
-                                   use_null_weight = use_null_weight,
-                                   include_cs_index = FALSE,
-                                   ncore = ncore,
-                                   verbose = verbose,
-                                   ...)
+    finemap_res <- finemap_regions_noLD(screened_region_data,
+                                        group_prior = group_prior,
+                                        group_prior_var = group_prior_var,
+                                        use_null_weight = use_null_weight,
+                                        ncore = ncore,
+                                        verbose = verbose,
+                                        ...)
     if (!is.null(outputdir)) {
       saveRDS(finemap_res, file.path(outputdir, paste0(outname, ".finemap_res.RDS")))
     }
   } else {
-    warning("No regions selected for finemapping.")
+    loginfo("No regions selected for finemapping.")
     finemap_res <- NULL
   }
 
-  return(list("param" = param,
+  return(list("z_gene" = z_gene,
+              "param" = param,
               "finemap_res" = finemap_res,
-              "boundary_genes" = boundary_genes,
-              "z_gene" = z_gene,
               "region_data" = region_data,
-              "screened_region_data" = screened_region_data))
+              "boundary_genes" = boundary_genes,
+              "screen_res" = screen_res))
 
 }
 

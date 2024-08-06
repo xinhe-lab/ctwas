@@ -3,30 +3,29 @@
 #' saves LD matrices as .RDS files and SNP info as .Rvar files
 #'
 #' @param region_info a data frame of region definitions, with columns:
-#' chrom, start, stop, and region_id
+#' chrom, start, stop, and region_id.
 #'
 #' @param genotype_files Reference genotype files in PLINK binary genotype data
-#' in .pgen or .bed format
+#' in .pgen or .bed format.
 #'
 #' @param varinfo_files Reference variant information files in PLINK
 #' .pvar or .bim format. The output will use the genome positions in \code{varinfo_files}.
 #'
-#' @param chrom a vector of chromosomes to process genotype data
+#' @param chrom a vector of chromosomes to process genotype data.
 #'
-#' @param outputdir Output directory
+#' @param outputdir Output directory.
 #'
-#' @param outname Output filestem
+#' @param outname Output filestem.
 #'
-#' @param include_variance TRUE/FALSE, if TRUE, include variance in .Rvar output
+#' @param include_variance If TRUE, include variance in .Rvar output.
 #'
-#' @param include_allele_freq TRUE/FALSE, if TRUE, include allele frequency
-#' in .Rvar output
+#' @param include_allele_freq If TRUE, include allele frequency in .Rvar output.
 #'
-#' @param show_progress_bar If TRUE, print progress bar
+#' @param show_progress_bar If TRUE, print progress bar.
 #'
-#' @param verbose If TRUE, print detail messages
+#' @param verbose If TRUE, print detail messages.
 #'
-#' @param logfile the log file, if NULL will print log info on screen
+#' @param logfile The log filename. If NULL, print log info on screen.
 #'
 #' @return a data frame of region_metatable, with region definitions and
 #' filenames of LD matrices and variant information.

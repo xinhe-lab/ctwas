@@ -5,7 +5,7 @@ read_snp_info_file <- function (file){
   snp_info <- as.data.frame(fread(file, header = TRUE))
   target_header <- c("chrom", "id", "pos", "alt", "ref")
   if (!all(target_header %in% colnames(snp_info))){
-    stop("The SNP info file needs to contain the following columns: ",
+    stop("The SNP file needs to contain the following columns: ",
          paste(target_header, collapse = " "))
   }
   return(snp_info)
@@ -19,16 +19,21 @@ read_snp_info_files <- function (files){
 }
 
 #' Load LD matrix
+#'
 #' @param file path to LD matrix
+#'
 #' @param format file format for LD matrix. If "custom", use a user defined
 #' \code{LD_loader_fun()} function to load LD matrix.
+#'
 #' @param LD_loader_fun a user defined function to load LD matrix
 #'
 #' @importFrom utils read.csv
 #' @importFrom Matrix readMM
 #' @importFrom data.table fread
 #' @importFrom tools file_ext
+#'
 #' @export
+#'
 load_LD <- function (file,
                      format = c("rds", "rdata", "mtx", "csv", "txt", "custom"),
                      LD_loader_fun) {
@@ -210,20 +215,25 @@ read_var_info <- function(var_info_file){
 }
 
 
-# run mclapply and stop if not all cores delivered results
+# run mclapply and check to see if NULL was found in mclapply output.
 #' @importFrom parallel mclapply
-mclapply_check <- function(X, FUN, mc.cores = 1, stop_if_missing = TRUE){
+#' @importFrom logging logwarn
+mclapply_check <- function(X, FUN, mc.cores = 1, stop_if_missing = FALSE){
   if (length(X) <= 1 || mc.cores == 1) {
     res <- lapply(X, FUN)
   } else {
     res <- mclapply(X, FUN, mc.cores = mc.cores)
     if (any(sapply(res, is.null))) {
+      msg <- paste("'NULL' found in mclapply output. Results may be incomplete!",
+                   "Try more memory or ncore = 1.")
       if (stop_if_missing) {
-        stop("mclapply returned NULL or incomplete results. Try bigger memory or fewer cores.")
+        stop(msg)
       } else {
-        warning("mclapply returned NULL or incomplete results.")
+        logwarn(msg)
       }
     }
   }
   return(res)
 }
+
+

@@ -2,14 +2,12 @@
 % Please edit documentation in R/ctwas_screen_regions.R
 \name{screen_regions}
 \alias{screen_regions}
-\title{Screens regions with strong non-SNP PIPs to be used in finemapping step}
+\title{Screens regions with strong signals to be used in fine-mapping step.}
 \usage{
 screen_regions(
   region_data,
-  use_LD = TRUE,
-  LD_map = NULL,
-  snp_map = NULL,
-  weights = NULL,
+  LD_map,
+  weights,
   group_prior = NULL,
   group_prior_var = NULL,
   L = 5,
@@ -29,13 +27,9 @@ screen_regions(
 \arguments{
 \item{region_data}{a list object indexing regions, variants and genes.}
 
-\item{use_LD}{TRUE/FALSE. If TRUE, use LD for finemapping. Otherwise, use "no-LD" version.}
+\item{LD_map}{a data frame with filenames of LD matrices and SNP information for each of the regions.}
 
-\item{LD_map}{a data frame with filenames of LD matrices for each of the regions. Required when \code{use_LD = TRUE}.}
-
-\item{snp_map}{a list of data frames with SNP-to-region map for the reference. Required when \code{use_LD = TRUE}.}
-
-\item{weights}{a list of weights for each gene. Required when \code{use_LD = TRUE}.}
+\item{weights}{a list of preprocessed weights.}
 
 \item{group_prior}{a vector of two prior inclusion probabilities for SNPs and genes.}
 
@@ -43,13 +37,14 @@ screen_regions(
 
 \item{L}{the number of effects for susie.}
 
-\item{minvar}{minimum number of variables (snps and genes) in a region}
+\item{minvar}{minimum number of variables (snps and genes) in a region.}
 
-\item{mingene}{minimum number of genes in a region}
+\item{mingene}{minimum number of genes in a region.}
 
 \item{filter_L}{If TRUE, screening regions with estimated L > 0.}
 
-\item{filter_nonSNP_PIP}{If TRUE, screening regions with total non-SNP PIP >= \code{min_nonSNP_PIP}}
+\item{filter_nonSNP_PIP}{If TRUE, screening regions with
+total non-SNP PIP >= \code{min_nonSNP_PIP}.}
 
 \item{min_nonSNP_PIP}{If screening by non-SNP PIPs,
 regions with total non-SNP PIP >= \code{min_nonSNP_PIP}
@@ -58,20 +53,22 @@ will be selected to run finemapping using full SNPs.}
 \item{LD_format}{file format for LD matrix. If "custom", use a user defined
 \code{LD_loader_fun()} function to load LD matrix.}
 
-\item{LD_loader_fun}{a user defined function to load LD matrix when \code{LD_format = "custom"}.}
+\item{LD_loader_fun}{a user defined function to load LD matrix
+when \code{LD_format = "custom"}.}
 
-\item{ncore}{The number of cores used to parallelize susie over regions}
+\item{ncore}{The number of cores used to parallelize susie over regions.}
 
-\item{logfile}{the log file, if NULL will print log info on screen}
+\item{logfile}{The log filename. If NULL, will print log info on screen.}
 
-\item{verbose}{TRUE/FALSE. If TRUE, print detail messages}
+\item{verbose}{If TRUE, print detail messages.}
 
 \item{...}{Additional arguments of \code{susie_rss}.}
 }
 \value{
-a list of screened_region_data, and
-non-SNP PIPs or estimated L for each region
+a list, containing a data frame of selected region data,
+estimated L for selected regions,
+and a data frame of screening summary for all regions.
 }
 \description{
-Screens regions with strong non-SNP PIPs to be used in finemapping step
+Screens regions with strong signals to be used in fine-mapping step.
 }

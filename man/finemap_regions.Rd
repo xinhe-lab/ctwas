@@ -2,27 +2,25 @@
 % Please edit documentation in R/ctwas_finemapping.R
 \name{finemap_regions}
 \alias{finemap_regions}
-\title{Runs cTWAS finemapping for multiple regions}
+\title{Runs cTWAS fine-mapping for regions}
 \usage{
 finemap_regions(
   region_data,
-  use_LD = TRUE,
-  LD_map = NULL,
-  snp_map = NULL,
-  weights = NULL,
+  LD_map,
+  weights,
   L = 5,
   group_prior = NULL,
   group_prior_var = NULL,
   use_null_weight = TRUE,
   coverage = 0.95,
   min_abs_corr = 0.5,
-  ncore = 1,
+  include_cs_index = TRUE,
   force_compute_cor = FALSE,
   save_cor = FALSE,
   cor_dir = NULL,
   LD_format = c("rds", "rdata", "mtx", "csv", "txt", "custom"),
   LD_loader_fun,
-  include_cs_index = TRUE,
+  ncore = 1,
   verbose = FALSE,
   logfile = NULL,
   ...
@@ -31,11 +29,7 @@ finemap_regions(
 \arguments{
 \item{region_data}{region_data to be finemapped}
 
-\item{use_LD}{If TRUE, use LD for finemapping. Otherwise, use "no-LD" version.}
-
-\item{LD_map}{a data frame with filenames of LD matrices for the regions. Required when \code{use_LD = TRUE}.}
-
-\item{snp_map}{a list of SNP-to-region map for the reference. Required when \code{use_LD = TRUE}.}
+\item{LD_map}{a data frame with filenames of LD matrices for the regions.}
 
 \item{weights}{a list of preprocessed weights.}
 
@@ -45,7 +39,7 @@ finemap_regions(
 
 \item{group_prior_var}{a vector of two prior variances for SNPs and gene effects.}
 
-\item{use_null_weight}{TRUE/FALSE. If TRUE, allow for a probability of no effect in susie}
+\item{use_null_weight}{If TRUE, allow for a probability of no effect in susie}
 
 \item{coverage}{A number between 0 and 1 specifying the \dQuote{coverage} of the estimated confidence sets}
 
@@ -54,11 +48,11 @@ credible set. The default, 0.5, corresponds to a squared
 correlation of 0.25, which is a commonly used threshold for
 genotype data in genetic studies.}
 
-\item{ncore}{The number of cores used to parallelize computation over regions}
+\item{include_cs_index}{If TRUE, add cs_index to finemapping results.}
 
-\item{force_compute_cor}{TRUE/FALSE. If TRUE, force computing correlation (R) matrices}
+\item{force_compute_cor}{If TRUE, force computing correlation (R) matrices}
 
-\item{save_cor}{TRUE/FALSE. If TRUE, save correlation (R) matrices to \code{cor_dir}}
+\item{save_cor}{If TRUE, save correlation (R) matrices to \code{cor_dir}}
 
 \item{cor_dir}{a string, the directory to store correlation (R) matrices}
 
@@ -67,9 +61,9 @@ genotype data in genetic studies.}
 
 \item{LD_loader_fun}{a user defined function to load LD matrix when \code{LD_format = "custom"}.}
 
-\item{include_cs_index}{TRUE/FALSE. If TRUE, add cs_index to finemapping results.}
+\item{ncore}{The number of cores used to parallelize computation over regions}
 
-\item{verbose}{TRUE/FALSE. If TRUE, print detail messages}
+\item{verbose}{If TRUE, print detail messages}
 
 \item{logfile}{the log file, if NULL will print log info on screen}
 
@@ -79,5 +73,5 @@ genotype data in genetic studies.}
 a data frame of cTWAS finemapping results.
 }
 \description{
-Runs cTWAS finemapping for multiple regions
+Runs cTWAS fine-mapping for regions
 }
