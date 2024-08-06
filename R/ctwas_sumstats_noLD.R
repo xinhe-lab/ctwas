@@ -165,16 +165,16 @@ ctwas_sumstats_noLD <- function(
                                     ncore = ncore,
                                     verbose = verbose,
                                     ...)
-  selected_region_data <- screen_res$selected_region_data
+  screened_region_data <- screen_res$screened_region_data
 
   # expand selected regions with all SNPs
   if (thin < 1){
-    selected_region_data <- expand_region_data(selected_region_data,
+    screened_region_data <- expand_region_data(screened_region_data,
                                                snp_map,
                                                z_snp,
                                                maxSNP = maxSNP,
                                                ncore = ncore)
-    screen_res$selected_region_data <- selected_region_data
+    screen_res$screened_region_data <- screened_region_data
   }
 
   if (!is.null(outputdir)) {
@@ -182,8 +182,8 @@ ctwas_sumstats_noLD <- function(
   }
 
   # Run fine-mapping for regions with strong gene signals using full SNPs
-  if (length(selected_region_data) > 0){
-    finemap_res <- finemap_regions_noLD(selected_region_data,
+  if (length(screened_region_data) > 0){
+    finemap_res <- finemap_regions_noLD(screened_region_data,
                                         group_prior = group_prior,
                                         group_prior_var = group_prior_var,
                                         use_null_weight = use_null_weight,

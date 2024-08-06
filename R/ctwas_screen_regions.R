@@ -141,17 +141,17 @@ screen_regions <- function(region_data,
                                          ncore = ncore,
                                          verbose = verbose,
                                          ...)
-    selected_region_ids <- names(all_estimated_L[all_estimated_L > 0])
-    selected_region_data <- region_data[selected_region_ids]
-    loginfo("Selected %d regions with L > 0", length(selected_region_data))
-    selected_region_L <- all_estimated_L[selected_region_ids]
+    screened_region_ids <- names(all_estimated_L[all_estimated_L > 0])
+    screened_region_data <- region_data[screened_region_ids]
+    loginfo("Selected %d regions with L > 0", length(screened_region_data))
+    screened_region_L <- all_estimated_L[screened_region_ids]
 
     idx <- match(names(all_estimated_L), screen_summary$region_id)
     screen_summary$L[idx] <- all_estimated_L
   } else {
     loginfo("L = %d", L)
-    selected_region_data <- region_data
-    selected_region_L <- L
+    screened_region_data <- region_data
+    screened_region_L <- L
     screen_summary$L <- L
   }
 
@@ -159,7 +159,7 @@ screen_regions <- function(region_data,
   # select regions with total non-SNP PIPs > 0.5
   if (filter_nonSNP_PIP) {
     loginfo("Computing non-SNP PIPs ...")
-    finemap_screening_res <- finemap_regions(selected_region_data,
+    finemap_screening_res <- finemap_regions(screened_region_data,
                                              LD_map = LD_map,
                                              weights = weights,
                                              L = L,
@@ -174,20 +174,20 @@ screen_regions <- function(region_data,
     # select regions based on total non-SNP PIPs
     all_nonSNP_PIPs <- compute_region_nonSNP_PIPs(finemap_screening_res)
 
-    selected_region_ids <- names(all_nonSNP_PIPs[all_nonSNP_PIPs >= min_nonSNP_PIP])
-    selected_region_data <- region_data[selected_region_ids]
-    loginfo("Selected %d regions with non-SNP PIP >= %s", length(selected_region_data), min_nonSNP_PIP)
+    screened_region_ids <- names(all_nonSNP_PIPs[all_nonSNP_PIPs >= min_nonSNP_PIP])
+    screened_region_data <- region_data[screened_region_ids]
+    loginfo("Selected %d regions with non-SNP PIP >= %s", length(screened_region_data), min_nonSNP_PIP)
 
-    if (length(selected_region_L) > 1) {
-      selected_region_L <- selected_region_L[selected_region_ids]
+    if (length(screened_region_L) > 1) {
+      screened_region_L <- screened_region_L[screened_region_ids]
     }
 
     idx <- match(names(all_nonSNP_PIPs), screen_summary$region_id)
     screen_summary$nonSNP_PIP[idx] <- all_nonSNP_PIPs
   }
 
-  return(list("selected_region_data" = selected_region_data,
-              "selected_region_L" = selected_region_L,
+  return(list("screened_region_data" = screened_region_data,
+              "screened_region_L" = screened_region_L,
               "screen_summary" = screen_summary))
 }
 
@@ -298,13 +298,13 @@ screen_regions_noLD <- function(region_data,
                                                 ...)
   # select regions based on total non-SNP PIPs
   all_nonSNP_PIPs <- compute_region_nonSNP_PIPs(finemap_screening_res)
-  selected_region_ids <- names(all_nonSNP_PIPs[all_nonSNP_PIPs >= min_nonSNP_PIP])
-  selected_region_data <- region_data[selected_region_ids]
-  loginfo("Selected %d regions with non-SNP PIP >= %s", length(selected_region_data), min_nonSNP_PIP)
+  screened_region_ids <- names(all_nonSNP_PIPs[all_nonSNP_PIPs >= min_nonSNP_PIP])
+  screened_region_data <- region_data[screened_region_ids]
+  loginfo("Selected %d regions with non-SNP PIP >= %s", length(screened_region_data), min_nonSNP_PIP)
   idx <- match(names(all_nonSNP_PIPs), screen_summary$region_id)
   screen_summary$nonSNP_PIP[idx] <- all_nonSNP_PIPs
 
-  return(list("selected_region_data" = selected_region_data,
+  return(list("screened_region_data" = screened_region_data,
               "screen_summary" = screen_summary))
 }
 

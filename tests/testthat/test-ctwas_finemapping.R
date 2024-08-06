@@ -3,18 +3,18 @@ test_that("finemap_regions_noLD works", {
   # finemap a single region with no-LD version
   ctwas_res <- readRDS(system.file("extdata/sample_data", "LDL_example.ctwas_sumstats_noLD_res.RDS", package = "ctwas"))
   expected_finemap_res <- ctwas_res$finemap_res
-  selected_region_data <- ctwas_res$screen_res$selected_region_data
+  screened_region_data <- ctwas_res$screen_res$screened_region_data
   param <- ctwas_res$param
   group_prior <- param$group_prior
   group_prior_var <- param$group_prior_var
   rm(ctwas_res)
 
-  region_id <- sample(names(selected_region_data),1)
+  region_id <- sample(names(screened_region_data),1)
   expected_finemap_res <- expected_finemap_res[expected_finemap_res$region_id == region_id,]
   rownames(expected_finemap_res) <- NULL
 
   capture.output({
-    finemap_res <- finemap_regions_noLD(region_data = selected_region_data[region_id],
+    finemap_res <- finemap_regions_noLD(region_data = screened_region_data[region_id],
                                         group_prior = group_prior,
                                         group_prior_var = group_prior_var)
   })
@@ -31,25 +31,25 @@ test_that("finemap_regions works", {
 
   ctwas_res <- readRDS(system.file("extdata/sample_data", "LDL_example.ctwas_sumstats_res.RDS", package = "ctwas"))
   expected_finemap_res <- ctwas_res$finemap_res
-  selected_region_data <- ctwas_res$screen_res$selected_region_data
-  selected_region_L <- ctwas_res$screen_res$selected_region_L
+  screened_region_data <- ctwas_res$screen_res$screened_region_data
+  screened_region_L <- ctwas_res$screen_res$screened_region_L
   param <- ctwas_res$param
   group_prior <- param$group_prior
   group_prior_var <- param$group_prior_var
   rm(ctwas_res)
 
-  region_id <- sample(names(selected_region_data),1)
+  region_id <- sample(names(screened_region_data),1)
   expected_finemap_res <- expected_finemap_res[expected_finemap_res$region_id == region_id,]
   rownames(expected_finemap_res) <- NULL
 
   # use reference SNP info from snp_map
   capture.output({
-    finemap_res <- finemap_regions(region_data = selected_region_data[region_id],
+    finemap_res <- finemap_regions(region_data = screened_region_data[region_id],
                                    LD_map = LD_map,
                                    weights = weights,
                                    group_prior = group_prior,
                                    group_prior_var = group_prior_var,
-                                   L = selected_region_L[region_id])
+                                   L = screened_region_L[region_id])
   })
 
   expect_equal(finemap_res, expected_finemap_res)

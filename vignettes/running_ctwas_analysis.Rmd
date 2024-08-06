@@ -179,13 +179,13 @@ screen_res <- screen_regions(region_data,
                              group_prior = NULL,
                              group_prior_var = NULL, 
                              ncore = 4)
-selected_region_data <- screen_res$selected_region_data
-selected_region_L <- screen_res$selected_region_L
+screened_region_data <- screen_res$screened_region_data
+screened_region_L <- screen_res$screened_region_L
 screen_summary <- screen_res$screen_summary
 ```
 
 
-It returns `selected_region_data` which contains a subset of region data for selected regions. It also returns the estimated L (number of credible sets) for the selected regions, which could be used in the fine-mapping step to set L for each region. In addition, it returns a data frame `screen_summary`, which includes the estimated L and non-SNP PIPs for all the regions.
+It returns `screened_region_data` which contains a subset of region data for selected regions. It also returns the estimated L (number of credible sets) for the selected regions, which could be used in the fine-mapping step to set L for each region. In addition, it returns a data frame `screen_summary`, which includes the estimated L and non-SNP PIPs for all the regions.
 
 When running without LD, we could use the `screen_regions_noLD()` function; it would only perform screening regions by non-SNP PIPs.
 
@@ -195,7 +195,7 @@ screen_res <- screen_regions_noLD(region_data,
                                   group_prior_var = group_prior_var,
                                   min_nonSNP_PIP = 0.5,
                                   ncore = 6)
-selected_region_data <- screen_res$selected_region_data
+screened_region_data <- screen_res$screened_region_data
 screen_summary <- screen_res$screen_summary
 ```
 
@@ -203,13 +203,13 @@ screen_summary <- screen_res$screen_summary
 After screening regions, we expand the selected regions with all SNPs for final fine-mapping. (This is not needed when `thin = 1`.)
 
 ```{r expand_region_data, eval=FALSE}
-selected_region_data <- expand_region_data(selected_region_data,
+screened_region_data <- expand_region_data(screened_region_data,
                                            snp_map,
                                            z_snp,
                                            maxSNP = 20000,
                                            ncore = 6)
 
-screen_res$selected_region_data <- selected_region_data
+screen_res$screened_region_data <- screened_region_data
 ```
 
 
@@ -219,16 +219,16 @@ If the number of SNPs in a region is more than `maxSNP`, It will trim the SNPs i
 
 We now perform the fine-mapping step for each of the screened regions with the estimated parameters.
 
-The `finemap_regions()` function performs fine-mapping for the regions in the `selected_region_data`.
+The `finemap_regions()` function performs fine-mapping for the regions in the `screened_region_data`.
 
 It first computes correlation matrices among all variables included in fine-mapping (SNPs, and genes), then runs fine-mapping with estimated parameters (`group_prior` and `group_prior_var`) and estimated number of causal signals (`L`), and returns a data frame with fine-mapping results for the regions. 
 ```{r finemap_regions, eval=FALSE}
-finemap_res <- finemap_regions(selected_region_data,
+finemap_res <- finemap_regions(screened_region_data,
                                LD_map = LD_map,
                                weights = weights,
                                group_prior = group_prior,
                                group_prior_var = group_prior_var,
-                               L = selected_region_L
+                               L = screened_region_L
                                save_cor = TRUE,
                                cor_dir = "./cor_matrix",
                                ncore = 4)
@@ -241,7 +241,7 @@ We can save the computed correlation matrices to the directory `cor_dir` for fut
 
 *Note:* we could use the `finemap_regions_noLD()` function to run fine-mapping without LD:
 ```{r finemap_regions_noLD, eval=FALSE}
-finemap_res <- finemap_regions_noLD(selected_region_data,
+finemap_res <- finemap_regions_noLD(screened_region_data,
                                     group_prior = group_prior,
                                     group_prior_var = group_prior_var,
                                     ncore = 6)
@@ -254,16 +254,12 @@ We could also run fine-mapping for a single region (or several regions of intere
 
 Here we show an example for fine-mapping a single region "16_71020125_72901251".
 
-We first expand the region of interest with all SNPs using the assembled `region_data`. We also need the number of causal signals (`L`) for this region. This is obtained from the output of the earlier `screen_regions()` function.
+We first select the data for the region of interest from `screened_region_data`. We also need the number of causal signals (`L`) for this region. These are obtained from the output of the earlier `screen_regions()` function.
 
 ```{r example_region, eval=FALSE}
 region_id <- "16_71020125_72901251"
-selected_region_data <- expand_region_data(region_data[region_id],
-                                           snp_map,
-                                           z_snp,
-                                           maxSNP = 20000)
-
-selected_region_L <- selected_region_L[region_id]
+selected_region_data <- screened_region_data[region_id]
+selected_region_L <- screened_region_L[region_id]
 ```
 
 

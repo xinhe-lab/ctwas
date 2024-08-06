@@ -378,9 +378,9 @@ expand_region_data <- function(region_data,
 
   # update SNP IDs for each region
   thin <- sapply(region_data, "[[", "thin")
-  loginfo("Expanding %d regions with all SNPs ...", length(which(thin < 1)))
 
   if (length(which(thin < 1)) > 0) {
+    loginfo("Expand %d regions with all SNPs", length(which(thin < 1)))
     region_ids <- names(region_data)
     region_data <- mclapply_check(region_ids, function(region_id){
       # add z-scores and types of the region to the region_data
@@ -407,7 +407,7 @@ expand_region_data <- function(region_data,
     region_data <- trim_region_data(region_data, z_snp, trim_by = "z", maxSNP = maxSNP)
 
     # add z-scores to region_data
-    loginfo("update region z-scores")
+    loginfo("Update region z-scores")
     region_data <- update_region_z(region_data, z_snp, update = "snps", ncore = ncore)
   }
 
