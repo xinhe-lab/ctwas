@@ -65,14 +65,16 @@ Now, we can run cTWAS using the `ctwas_sumstats()` function:
 ctwas_res <- ctwas_sumstats(z_snp, 
                             weights, 
                             region_info, 
+                            LD_map, 
                             snp_map, 
-                            LD_map,
                             thin = 0.1,
                             maxSNP = 20000,
                             group_prior_var_structure = "shared_type", 
+                            filter_L = TRUE,
                             filter_nonSNP_PIP = FALSE,
                             min_nonSNP_PIP = 0.5,
                             ncore = 6, 
+                            ncore_LD = 4,
                             save_cor = TRUE, 
                             cor_dir = "./cor_matrix")
 ```
@@ -84,19 +86,23 @@ Important arguments that control how this function is executed:
 
 + `thin`: the fraction of SNPs used to estimate parameters and screen regions likely containing signals. By sampling a fraction of SNPs, this speeds up computation. By default, we use `thin = 0.1`, i.e. 10% of the SNPs. To use all SNPs in parameter estimation and screening regions, one could change the `thin` parameter to 1. 
 
-+ `maxSNP` Maximum number of SNPs in a region (e.g. 20000). Default is Inf, no limit. This can be useful if there are too many SNPs in a region and you don't have enough memory to run the program.
++ `maxSNP`: maximum number of SNPs in a region (e.g. 20000). Default is Inf, no limit. This can be useful if there are too many SNPs in a region and you don't have enough memory to run the program.
 
 + `group_prior_var_stucture`: options to control how parameters are shared among groups. For example, "shared_type" (default option) allows all groups in one molecular QTL type to share the same variance parameter.  "independent" allows all groups to have their own separate variance parameters. More options can be found in the Reference page of the function.
 
-+ `filter_nonSNP_PIP` and `min_nonSNP_PIP`: If `filter_nonSNP_PIP = TRUE`, it will compute the non-SNP PIP, i.e. the total PIP of all molecular traits,  for each region (using the estimated parameters) and select regions with non-SNP PIP > `min_nonSNP_PIP` (0.5 by default`). 
++  `filter_L`: if `filter_L = TRUE` (the default option), cTWAS will first estimate the number of causal signals (`L`) for each region. This step is done using uniform prior, treating all variants and genes equally. From the results, we obtain the number of credible sets (`L`). We then select regions with at least one credible set, L > 0. 
+
++ `filter_nonSNP_PIP` and `min_nonSNP_PIP`: if `filter_nonSNP_PIP = TRUE`, it will compute the non-SNP PIP, i.e. the total PIP of all molecular traits,  for each region (using the estimated parameters) and select regions with non-SNP PIP > `min_nonSNP_PIP` (0.5 by default`). 
 
 + `ncore`:  the number of cores to parallelize computing over regions.
 
-+ `save_cor` and `cor_dir`: If `save_cor = TRUE`, we save the correlation matrices in the `cor_dir`directory, which will be used later for visualizing the results.
++ `ncore_LD`:  the number of cores to parallelize computing over regions with LD matrices. During screening regions and fine-mapping steps, computing correlation matrices requires larger memory. You could reduce the number of cores for these steps to avoid insufficient memory.
+
++ `save_cor` and `cor_dir`: if `save_cor = TRUE`, we save the correlation matrices in the `cor_dir`directory, which will be used later for visualizing the results.
 
 To understand and summarize the results from cTWAS, please read the tutorial “Summarizing and visualizing cTWAS results”. 
 
-Note: One can run cTWAS without using reference LD data. See “A minimal tutorial of running cTWAS without LD”. That tutorial describes how to run cTWAS in a single step. 
+*Note:* One can run cTWAS without using reference LD data. See “A minimal tutorial of running cTWAS without LD”. That tutorial describes how to run cTWAS in a single step. 
 
 
 ## Running cTWAS modules
@@ -105,7 +111,7 @@ This section describes how to perform cTWAS analysis by running each of the modu
 
 ### Computing Z-scores of molecular traits
 
-After we have done data preprocessing, we compute Z-scores of molecular traits. This step basically performs Transcriptome-wide association studies (TWAS) on each molecular trait with a prediction model. The underlying calculation is based on [S-PrediXcan][S-PrediXcan].
+After we have done data preprocessing, we compute Z-scores of molecular traits. This step basically performs transcriptome-wide association studies (TWAS) on each molecular trait with a prediction model. The underlying calculation is based on [S-PrediXcan][S-PrediXcan].
 
 The `compute_gene_z` function computes Z-scores for the molecular traits using preprocessed SNP Z-scores (`z_snp`) and the preprocessed weights (`weights`). 
 
@@ -118,6 +124,7 @@ z_gene <- compute_gene_z(z_snp, weights)
 ### Assemble input data for the regions
 
 Because cTWAS runs region-by-region, we will first need to prepare the data for each region, combining information of all variants and molecular traits in that region. After data preprocessing and computation of Z-scores of molecular traits, we assemble the input data for all the regions using the function `assemble_region_data()`.  It assigns molecular traits, variants and their Z-scores to each region. The assignment of a molecular trait to regions is based on the weights, i.e. variants in the prediction model, of the molecular trait. 
+
 ```{r assemble_region_data, eval=FALSE}
 res <- assemble_region_data(region_info, 
                             z_snp, 
@@ -163,63 +170,65 @@ group_prior_var <- param$group_prior_var
 ```
 
 
-*Note:*, we used sample data (from chr16) in this example, however, in real data analysis, parameter estimation should be done using data from the *entire genome*.
+*Note:* we used sample data (from chr16) in this example, however, in real data analysis, parameter estimation should be done using data from the *entire genome*.
 
 ### Screening regions
 
 After parameter estimation, we use the `screen_regions()` function to perform a screening process to select regions with likely causal signals in molecular traits. To find these regions, we perform an initial fine-mapping with thinned SNPs (a subset of all variants, see the Section “Assemble input data”). Only these regions would be subject to full fine-mapping analysis, using all variants, in the final step. Thus screening regions can save computational time. 
 
 cTWAS have two options to screen regions:
- 
-+ screening by the number of causal signals: If `filter_L = TRUE` (the default option), cTWAS will first estimate the number of causal signals (L) for each region. This step is done using uniform prior, treating all variants and molecular traits equally. From the results, we obtain the number of credible sets (L). We then select regions with at least one credible set, L > 0. 
 
-+ screening by non-SNP PIPs: If `filter_nonSNP_PIP = TRUE`, cTWAS will compute the non-SNP PIP, i.e. total PIP of all molecular traits, for each region (using estimated L and estimated priors). It then selects regions by applying a  `min_nonSNP_PIP` cutoff (0.5, by default). 
++ screening by the number of causal signals: if `filter_L = TRUE` (the default option), cTWAS will first estimate the number of causal signals (`L`) for each region. This step is done using uniform prior  (`group_prior = NULL` and `group_prior_var = NULL`), treating all variants and molecular traits equally. From the results, we obtain the number of credible sets (`L`). We then select regions with at least one credible set, L > 0. 
 
-When running with LD (`use_LD = TRUE`), we recommend screening by the number of causal signals, i.e. setting `filter_L = TRUE` and `filter_nonSNP_PIP = FALSE`. 
++ screening by non-SNP PIPs: if `filter_nonSNP_PIP = TRUE`, cTWAS will compute the non-SNP PIP, i.e. total PIP of all molecular traits, for each region (using estimated L and estimated priors). It then selects regions by applying a  `min_nonSNP_PIP` cutoff (0.5, by default). 
 
-```{r screen_regions_cs, eval=FALSE}
-screen_region_res <- screen_regions(region_data,
-                                    use_LD = TRUE,
-                                    LD_map = LD_map,
-                                    snp_map = snp_map, 
-                                    weights = weights,
-                                    filter_L = TRUE,
-                                    filter_nonSNP_PIP = FALSE,
-                                    ncore = 6)
-screened_region_data <- screen_region_res$screened_region_data
-L <- screen_region_res$L
+When running with LD, we recommend screening by the number of causal signals, i.e. setting `filter_L = TRUE` and `filter_nonSNP_PIP = FALSE`. 
+
+```{r screen_regions_filter_L, eval=FALSE}
+screen_res <- screen_regions(region_data,
+                             LD_map = LD_map,
+                             weights = weights, 
+                             filter_L = TRUE,
+                             filter_nonSNP_PIP = FALSE,
+                             group_prior = NULL,
+                             group_prior_var = NULL, 
+                             ncore = 4)
+screened_region_data <- screen_res$screened_region_data
+screened_region_L <- screen_res$screened_region_L
+screen_summary <- screen_res$screen_summary
 ```
 
 
-It returns `screened_region_data` which contains a subset of region data for selected regions. It also returns the estimated L (number of credible sets) for the selected regions, which could be used in the fine-mapping step to set L for each region.
+It returns `screened_region_data` which contains a subset of region data for selected regions. It also returns the estimated L (number of credible sets) for the selected regions, which could be used in the fine-mapping step to set L for each region. In addition, it returns a data frame `screen_summary`, which includes the estimated L and non-SNP PIPs for all the regions.
 
-When running without LD (`use_LD = FALSE`), cTWAS would only perform screening regions by non-SNP PIPs, and it will automatically set `filter_nonSNP_PIP = TRUE` and `filter_L = FALSE`.
+When running without LD, we could use the `screen_regions_noLD()` function; it would only perform screening regions by non-SNP PIPs.
+
 
 ```{r screen_regions_nonSNP_PIP, eval=FALSE}
-screen_region_res <- screen_regions(region_data,
-                                    use_LD = FALSE,
-                                    group_prior = group_prior,
-                                    group_prior_var = group_prior_var,
-                                    filter_L = FALSE,
-                                    filter_nonSNP_PIP = TRUE,
-                                    min_nonSNP_PIP = 0.5,
-                                    ncore = 6)
-screened_region_data <- screen_region_res$screened_region_data
+screen_res <- screen_regions_noLD(region_data,
+                                  group_prior = group_prior,
+                                  group_prior_var = group_prior_var,
+                                  min_nonSNP_PIP = 0.5,
+                                  ncore = 6)
+screened_region_data <- screen_res$screened_region_data
+screen_summary <- screen_res$screen_summary
 ```
 
 
-After selecting regions, we expand the screened regions with all SNPs for final fine-mapping. (This is not needed when `thin = 1`.)
+After screening regions, we expand the selected regions with all SNPs for final fine-mapping. (This is not needed when `thin = 1`.)
 
 ```{r expand_region_data, eval=FALSE}
 screened_region_data <- expand_region_data(screened_region_data,
                                            snp_map,
-                                           z_snp, 
+                                           z_snp,
                                            maxSNP = 20000,
-                                           ncore = ncore)
+                                           ncore = 6)
+
+screen_res$screened_region_data <- screened_region_data
 ```
 
 
-If the number of SNPs in a region is more than `maxSNP`, It will trim the SNPs in the region (according to the Z-scores, by default).
+If the number of SNPs in a region is more than `maxSNP`, It will trim the SNPs in the region according to the Z-scores.
 
 ### Fine-mapping screened regions
 
@@ -228,32 +237,32 @@ We now perform the fine-mapping step for each of the screened regions with the e
 The `finemap_regions()` function performs fine-mapping for the regions in the `screened_region_data`.
 
 It first computes correlation matrices among all variables included in fine-mapping (SNPs, and molecular traits), then runs fine-mapping with estimated parameters (`group_prior` and `group_prior_var`) and estimated number of causal signals (`L`), and returns a data frame with fine-mapping results for the regions. 
+
+
 ```{r finemap_regions, eval=FALSE}
 finemap_res <- finemap_regions(screened_region_data,
-                               use_LD = TRUE,
                                LD_map = LD_map,
-                               snp_map = snp_map,
                                weights = weights,
                                group_prior = group_prior,
                                group_prior_var = group_prior_var,
-                               L = screen_region_res$L,
+                               L = screened_region_L
                                save_cor = TRUE,
                                cor_dir = "./cor_matrix",
-                               ncore = ncore)
+                               ncore = 4)
 ```
 
 
 We can save the computed correlation matrices to the directory `cor_dir` for future access, by setting `save_cor = TRUE`.
 
-*Note*: it is also possible to run fine-mapping without LD:
-```{r finemap_regions_noLD, eval=FALSE}
-finemap_res <- finemap_regions(screened_region_data,
-                               use_LD = FALSE,
-                               group_prior = group_prior,
-                               group_prior_var = group_prior_var,
-                               ncore = 6)
-```
+*Note:* when screening regions and fine-mapping with LD, we need larger memory to load LD matrices and compute correlation matrices. So we recommend increasing memory or reducing the number of `ncore` for these steps.
 
+*Note:* we could use the `finemap_regions_noLD()` function to run fine-mapping without LD:
+```{r finemap_regions_noLD, eval=FALSE}
+finemap_res <- finemap_regions_noLD(screened_region_data,
+                                    group_prior = group_prior,
+                                    group_prior_var = group_prior_var,
+                                    ncore = 6)
+```
 
 
 ### Fine-mapping a single region
@@ -262,16 +271,12 @@ We could also run fine-mapping for a single region (or several regions of intere
 
 Here we show an example for fine mapping a single region "16_71020125_72901251".
 
-We first expand the region of interest with the full set of SNPs using the assembled `region_data`. We also need the number of causal signals (`L`) for this region. This is obtained from the output of the earlier `screen_regions()` function.
+We first select the data for the region of interest from `screened_region_data`. We also need the number of causal signals (`L`) for this region. These are obtained from the output of the earlier `screen_regions()` function.
 
 ```{r example_region, eval=FALSE}
 region_id <- "16_71020125_72901251"
-selected_region_data <- expand_region_data(region_data[region_id],
-                                           snp_map,
-                                           z_snp,
-                                           maxSNP = 20000)
-
-selected_region_L <- screen_region_res$L[region_id]
+selected_region_data <- screened_region_data[region_id]
+selected_region_L <- screened_region_L[region_id]
 ```
 
 
@@ -279,9 +284,7 @@ We could then perform fine-mapping for this region of interest:
 
 ```{r finemap_single_region, eval=FALSE}
 finemap_region_res <- finemap_regions(selected_region_data,
-                                      use_LD = TRUE,
                                       LD_map = LD_map,
-                                      snp_map = snp_map,
                                       weights = weights,
                                       group_prior = group_prior,
                                       group_prior_var = group_prior_var,
@@ -294,12 +297,10 @@ finemap_region_res <- finemap_regions(selected_region_data,
 We could also perform fine-mapping without LD:
 
 ```{r finemap_single_region_noLD, eval=FALSE}
-finemap_region_res <- finemap_regions(selected_region_data,
-                                      use_LD = FALSE,
-                                      group_prior = group_prior,
-                                      group_prior_var = group_prior_var)
+finemap_region_res <- finemap_regions_noLD(selected_region_data,
+                                           group_prior = group_prior,
+                                           group_prior_var = group_prior_var)
 ```
-
 
 
 

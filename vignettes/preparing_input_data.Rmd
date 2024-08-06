@@ -60,7 +60,7 @@ z_snp <- as.data.frame(gwasvcf::vcf_to_tibble(z_snp))
 z_snp$Z <- z_snp$ES/z_snp$SE
 
 gwas_n <- as.numeric(names(sort(table(z_snp$SS),decreasing=TRUE)[1]))
-cat("gwas_n=", gwas_n, "\n")
+cat("gwas_n =", gwas_n, "\n")
 
 
 z_snp <- z_snp[,c("rsid", "ALT", "REF", "Z")]
@@ -73,24 +73,20 @@ If your GWAS summary statistics is of other formats, please extract relevant col
 ## Prediction models
 
 Prediction models can be specified in either PredictDB or FUSION format. 
-PredictDB is the recommended format, as it has information about correlations among variants included in a model, and also has extra information about the genes/molecular traits in the model. In this user guide, we focus on the PredictDB format. For FUSION format, please see section "FUSION weights" in the tutorial "Utility functions" for details. We also note that it is possible to run cTWAS with only a list of QTLs, which is often the case in practice. See the section "Creating prediction models from QTL lists" in the tutorial "Utility functions"  for details.
+PredictDB is the recommended format, as it has information about correlations among variants included in a model, and also has extra information about the genes/molecular traits in the model. In this user guide, we focus on the PredictDB format. Please check [PredictDB](http://predictdb.org/) for the format of PredictDB weights. Please save both the prediction models (.db) and the covariances between variants in the prediction models (.txt.gz) in the same directory. The covariances can optionally be used for computing LD. For FUSION format, please see section "FUSION weights" in the tutorial "Utility functions" for details. We also note that it is possible to run cTWAS with only a list of QTLs, which is often the case in practice. See the section "Creating prediction models from QTL lists" in the tutorial "Utility functions"  for details.
 
 In terms of the choice of prediction models, cTWAS performs best when prediction models are sparse, i.e. they have relatively few variants per molecular trait. Dense weights may lead to a “cross-region” problem. Basically, if the variants in the prediction model of a molecular trait span two regions, it would be unclear to cTWAS what region the molecular trait should be assigned to. The problem becomes worse with dense weights. If this happens, cTWAS will attempt to assign the molecular trait to one of the two regions that contain most of the weights. Nevertheless, there will be a risk of cross-region LD which can lead to problems. Given this consideration, we recommend choosing sparse prediction models such as Lasso. If using dense prediction models, we recommend removing variants with weights below a threshold from the prediction models.
 
 Note: we implemented an option to address the “cross-region” problem. It performs “region merging” as a post-processing step. If any molecular trait has variants in the weights that span two regions, those regions will be merged, and cTWAS will rerun the analysis using the merged regions. See the tutorial "Post-processing cTWAS results" for details.   
 
-In this example, we will use liver and subcutaneous adipose gene expression models trained on GTEx v8 in the PredictDB format. We can download both the prediction models (.db) and the covariances between variants in the prediction models (.txt.gz) from the link below. The covariances can optionally be used for computing LD.
-```{bash, eval=FALSE}
-wget https://zenodo.org/record/3518299/files/mashr_eqtl.tar
-tar -xvf mashr_eqtl.tar
-```
-
-
-Please check [PredictDB](http://predictdb.org/) for the format of PredictDB weights. To specify weights in PredictDB format, provide the path to the `.db` file when running cTWAS. 
-
+In this example, we will use liver and subcutaneous adipose gene expression models trained on GTEx v8 in the PredictDB format. The weight files have been included in the R package. To specify weights in PredictDB format, provide the path to the `.db` file when running cTWAS. 
 ```{r predictdb_weights}
-weight_file <- system.file("extdata/sample_data", "expression_Liver.db", package = "ctwas")
+weight_liver_file <- system.file("extdata/sample_data", 
+"expression_Liver.db", package = "ctwas")
+
+weight_adipose_file <- system.file("extdata/sample_data", "expression_Adipose_Subcutaneous.db", package = "ctwas")
 ```
+
 
 ## Reference data
 
@@ -126,10 +122,12 @@ cTWAS performs its analysis region-by-region. The preferred way to run cTWAS is 
 
 By default, we need a LD matrix file for each region (preferably in `.RDS` format) and a variant information table accompanying each LD matrix. The `.RDS` files store the LD correlation matrix  (R) for each region (a $p \times p$ matrix, $p$ is the number of variants in the region). The accompanying `.Rvar` files include variant information for the region, and the order of its rows should match the order of rows and columns in the `.RDS` file.
 
-We have precomputed reference LD matrices (`.RDS` files) and the variant information tables (`.Rvar` files) accompanying the LD matrices for UK Biobank. The complete LD matrices of European individuals from UK Biobank can be downloaded [here](https://uchicago.box.com/s/jqocacd2fulskmhoqnasrknbt59x3xkn). 
+We have precomputed reference LD matrices (`.RDS` files) and the variant information tables (`.Rvar` files) accompanying the LD matrices for UK Biobank. LD matrices were computed on 10% of the UK Biobank independent, White British samples for variants with MAF > 1%. 
+
+The complete LD matrices of European individuals from UK Biobank can be downloaded [here](https://uchicago.box.com/s/jqocacd2fulskmhoqnasrknbt59x3xkn). 
 On the University of Chicago RCC cluster, the b38 reference is available at `/project2/mstephens/wcrouse/UKB_LDR_0.1/` and the b37 reference is available at `/project2/mstephens/wcrouse/UKB_LDR_0.1_b37/`.
 
-The columns of the `.Rvar` file include information on chromosome, variant name, position in base pairs, and the alternative and reference alleles. The `variance` column is the variance of each variant prior to standardization; this is required for PredictDB weights but not FUSION weights. We've also included information on allele frequency in the variant info, but this is optional.
+The columns of the `.Rvar` file include information on chromosome, variant name, position in base pairs, and the alternative and reference alleles. The `variance` column is the variance of each variant prior to standardization; this is required for PredictDB weights but not FUSION weights. We've also included information on allele frequency (for the alternative alleles) in the variant info, but this is optional and not used in the program.
 
 Each variant should be uniquely assigned to a region, and the regions should be left closed and right open, i.e. [start, stop). The positions of the LD matrices must match exactly the positions specified by the region file. Do not include multiallelic variants in the LD reference. 
 
@@ -139,7 +137,7 @@ We will need to link the reference SNP and LD files to the regions. To do this, 
 
 The following paths and filenames were from the University of Chicago RCC cluster, please replace them with your own paths. 
 ```{r add_LD_paths, eval=FALSE}
-LD_dir <- "/project2/mstephens/wcrouse/UKB_LDR_0.1/"
+LD_dir <- "/project2/mstephens/wcrouse/UKB_LDR_0.1"
 genome_version <- "b38"
 
 LD_filestem <- sprintf("ukb_%s_0.1_chr%s.R_snp.%s_%s", genome_version, region_info$chrom, region_info$start, region_info$stop)
@@ -150,7 +148,7 @@ region_metatable$SNP_file <- file.path(LD_dir, paste0(LD_filestem, ".Rvar"))
 ```
 
 
-The `create_snp_LD_map()` function takes `region_metatable` as input, extracts the region definitions, ensures that it matches the format required by cTWAS (e.g. adding `region_id` column if not available), and returns updated `region_info`. It reads the variant information from the `SNP_file` column of `region_metatable`, and returns the result as `snp_map`.  It also checks the `LD_file` column of `region_metatable` to make sure the files are available, and returns `LD_map`, a data frame with region IDs and the filenames to the precomputed LD (R) matrices. 
+The `create_snp_LD_map()` function takes `region_metatable` as input, extracts the region definitions, ensures that it matches the format required by cTWAS (e.g. adding `region_id` column if not available), and returns updated `region_info`. It checks the `LD_file` and `SNP_file` columns of `region_metatable` to make sure the files are available. It returns `LD_map`, a data frame with region IDs, the filenames of the precomputed LD matrices, and the filenames of corresponding variant information.  It reads the variant information from the regions, and returns the result as `snp_map`.  
 
 ```{r create_snp_LD_map, eval=FALSE}
 res <- create_snp_LD_map(region_metatable)
@@ -161,7 +159,7 @@ LD_map <- res$LD_map
 
 
 
-### Mapping reference SNPs to regions
+### Mapping reference SNPs to regions (without LD)
 
 When preparing data without LD, we need `region_info` (region definitions, no need to provide "LD_file" and "SNP_file" columns) and `ref_snp_info`, a data frame containing information of all variants from the reference. 
 
@@ -184,9 +182,9 @@ snp_map <- res$snp_map
 
 ## Data harmonization
 
-There are a few potential problems when preparing the input data. First, the variants in the three sets of input data, GWAS summary statistics, weights, and the reference data, may not match. Only variants in all three input data will be used in cTWAS. The `preprocess_weights()` function described below will automatically select variants in all three input data. So it is important to maximize the overlap of the variants in the three sets. This can be done for example, by imputing GWAS summary statistics of the variants missing in GWAS but in the LD reference. Another useful pre-processing step is to perform Minor allele frequency (MAF) filtering on the GWAS data so that only those with MAF above a certain cutoff would be used in the analysis, ideally the same cutoff used in the references. Additionally, when building the prediction models of gene expression, it is better to impute the genotype data using the LD reference, if possible.  All these steps should be done before running cTWAS.  
+There are a few potential problems when preparing the input data. First, the variants in the three sets of input data, GWAS summary statistics, weights, and the reference data, may not match. Only variants in all three input data will be used in cTWAS. The `preprocess_weights()` function described below will automatically select variants in all three input data. So it is important to maximize the overlap of the variants in the three sets. This can be done for example, by imputing GWAS summary statistics of the variants missing in GWAS but in the LD reference. Another useful pre-processing step is to perform minor allele frequency (MAF) filtering on the GWAS data so that only those with MAF above a certain cutoff would be used in the analysis, ideally the same cutoff used in the references. Additionally, when building the prediction models of gene expression, it is better to impute the genotype data using the LD reference, if possible.  All these steps should be done before running cTWAS.  
 
-The second potential problem is that the effect alleles in the prediction model, GWAS and LD reference may not agree with each other, thus we need to ``harmonize'' the data to ensure that the effect alleles match in all three data sources. 
+The second potential problem is that the effect alleles in the prediction model, GWAS and LD reference may not agree with each other, thus we need to  "harmonize"' the data to ensure that the effect alleles match in all three data sources. 
     
 Another potential problem is the LD of the GWAS data (in-sample LD) do not match the reference LD. This can lead to problems in fine-mapping. Diagnostic tools including [SuSiE-RSS][susierss_diagnostic], and [DENTIST][DENTIST], have been developed to check possible LD mismatch. We have provided such analysis in cTWAS. However, it is time consuming to run the LD mismatch diagnosis for all the regions across the genome, so we will perform the diagnosis and adjustment only for selected regions with high PIP signals in the post-processing step. Please see the tutorial "Post-processing cTWAS results" for details.
 
@@ -214,8 +212,6 @@ In this version of cTWAS, we allow the joint analysis of multiple groups of mole
 We get a list of processed weights for each weight file, and then we simply concatenate them to  get a list of all processed weights from different types or contexts.
 
 ```{r preprocess_weights, eval=FALSE}
-weight_liver_file <- system.file("extdata/sample_data", 
-"expression_Liver.db", package = "ctwas")
 weights_liver <- preprocess_weights(weight_liver_file,
                                     region_info,
                                     z_snp$id,
@@ -223,25 +219,25 @@ weights_liver <- preprocess_weights(weight_liver_file,
                                     type = "expression",
                                     context = "liver",
                                     weight_format = "PredictDB",
-                                    ncore = 6,
                                     drop_strand_ambig = TRUE,
                                     scale_predictdb_weights = TRUE,
                                     load_predictdb_LD = TRUE,
-                                    filter_protein_coding_genes = TRUE)
+                                    filter_protein_coding_genes = TRUE,
+                                    ncore = 6)
 
-weight_adipose_file <- system.file("extdata/sample_data", "expression_Adipose_Subcutaneous.db", package = "ctwas")
 weights_adipose <- preprocess_weights(weight_adipose_file,
                                       region_info,
                                       z_snp$id,
                                       snp_info,
                                       type = "expression",
                                       context = "adipose",
-                                      weight_format = "PredictDB",
-                                      ncore = 6,
+                                      weight_format = "PredictDB", 
                                       drop_strand_ambig = TRUE,
                                       scale_predictdb_weights = TRUE,
                                       load_predictdb_LD = TRUE,
-                                      filter_protein_coding_genes = TRUE)
+                                      filter_protein_coding_genes = TRUE,
+                                      ncore = 6)
+
 weights <- c(weights_liver, weights_adipose)
 ```
 
@@ -250,7 +246,7 @@ This function returns `weights`, which contains the effect sizes of the variants
 
 In the function above, we specify the weight format in `weight_format`. We use PredictDB format by default. We set `load_predictdb_LD = TRUE` to load pre-computed covariances between variants in PredictDB weights (`.txt.gz`). PredictDB weights assume that variant genotypes are not standardized, but our implementation assumes standardized variant genotypes. Thus, we set `scale_predictdb_weights = TRUE`, to scale PredictDB weights by the variance before computing Z-scores of molecular traits. If weights are already on the standardized scale (e.g. FUSION weights or PredictDB weights converted from eQTLs), this scaling should be turned off.
 
-We drop strand ambiguous variants (`drop_strand_ambig = TRUE`) by default. We could limit to protein coding genes (`filter_protein_coding_genes = TRUE`). We could set `ncore` to parallelize the computation.
+We drop strand ambiguous variants (`drop_strand_ambig = TRUE`) by default. We could limit weights to protein coding genes (`filter_protein_coding_genes = TRUE`) based on the `gene_type` information in the "extra table" of PredictDB weights. We could set `ncore` to parallelize the computation.
 
 [reference]: https://xinhe-lab.github.io/ctwas/reference/index.html
 [UKBB_LD_ref]: https://uchicago.box.com/s/jqocacd2fulskmhoqnasrknbt59x3xkn
