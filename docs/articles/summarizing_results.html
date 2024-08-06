@@ -32,7 +32,7 @@
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">ctwas</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">0.3.22</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">0.3.23</span>
       </span>
     </div>
 
@@ -201,11 +201,11 @@
 <div class="sourceCode" id="cb13"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">finemap_res</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/anno_finemap_res.html">anno_finemap_res</a></span><span class="op">(</span><span class="va">finemap_res</span>, <span class="va">snp_map</span>, <span class="va">gene_annot</span>,</span>
 <span>                                use_gene_pos <span class="op">=</span> <span class="st">"mid"</span><span class="op">)</span></span></code></pre></div>
-<pre><code><span><span class="co">## 2024-08-05 15:42:05 INFO::Annotating ctwas finemapping result ...</span></span>
-<span><span class="co">## 2024-08-05 15:42:05 INFO::add gene_name and gene_type</span></span>
-<span><span class="co">## 2024-08-05 15:42:05 INFO::Remove unannotated genes</span></span>
-<span><span class="co">## 2024-08-05 15:42:05 INFO::use gene mid positions</span></span>
-<span><span class="co">## 2024-08-05 15:42:05 INFO::add SNP positions</span></span></code></pre>
+<pre><code><span><span class="co">## 2024-08-05 22:16:43 INFO::Annotating ctwas finemapping result ...</span></span>
+<span><span class="co">## 2024-08-05 22:16:43 INFO::add gene_name and gene_type</span></span>
+<span><span class="co">## 2024-08-05 22:16:43 INFO::Remove unannotated genes</span></span>
+<span><span class="co">## 2024-08-05 22:16:43 INFO::use gene mid positions</span></span>
+<span><span class="co">## 2024-08-05 22:16:43 INFO::add SNP positions</span></span></code></pre>
 <p>You can now run the command at the beginning of this section to view the genes with additional information. In this example, HPR is the only gene that satisfies PIP &gt; 0.8.</p>
 </div>
 <div class="section level2">
@@ -225,11 +225,11 @@
 <span>               highlight_pip <span class="op">=</span> <span class="fl">0.8</span>,</span>
 <span>               R_snp_gene <span class="op">=</span> <span class="va">cor_res</span><span class="op">$</span><span class="va">R_snp_gene</span>,</span>
 <span>               R_gene <span class="op">=</span> <span class="va">cor_res</span><span class="op">$</span><span class="va">R_gene</span><span class="op">)</span></span></code></pre></div>
-<pre><code><span><span class="co">## 2024-08-05 15:42:07 INFO::focal gene: HPR</span></span>
-<span><span class="co">## 2024-08-05 15:42:07 INFO::focal id: ENSG00000261701.6|expression_Liver</span></span>
-<span><span class="co">## 2024-08-05 15:42:07 INFO::plot locus range: chr16 71600000,72400000</span></span>
-<span><span class="co">## 2024-08-05 15:42:08 INFO::gene: HPR</span></span>
-<span><span class="co">## 2024-08-05 15:42:08 INFO::QTL positions: 72063820,72063928</span></span></code></pre>
+<pre><code><span><span class="co">## 2024-08-05 22:16:44 INFO::focal gene: HPR</span></span>
+<span><span class="co">## 2024-08-05 22:16:44 INFO::focal id: ENSG00000261701.6|expression_Liver</span></span>
+<span><span class="co">## 2024-08-05 22:16:44 INFO::plot locus range: chr16 71600000,72400000</span></span>
+<span><span class="co">## 2024-08-05 22:16:46 INFO::gene: HPR</span></span>
+<span><span class="co">## 2024-08-05 22:16:46 INFO::QTL positions: 72063820,72063928</span></span></code></pre>
 <div class="figure" style="text-align: center">
 <img src="summarizing_results_files/figure-html/locus_plot-1.png" alt="&amp;nbsp;" width="1200"><p class="caption">
  
@@ -245,11 +245,11 @@
 <span>               ens_db <span class="op">=</span> <span class="va">ens_db</span>,</span>
 <span>               locus_range <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">71.6e6</span>,<span class="fl">72.4e6</span><span class="op">)</span>,</span>
 <span>               highlight_pip <span class="op">=</span> <span class="fl">0.8</span><span class="op">)</span></span></code></pre></div>
-<pre><code><span><span class="co">## 2024-08-05 15:42:10 INFO::focal gene: HPR</span></span>
-<span><span class="co">## 2024-08-05 15:42:10 INFO::focal id: ENSG00000261701.6|expression_Liver</span></span>
-<span><span class="co">## 2024-08-05 15:42:10 INFO::plot locus range: chr16 71600000,72400000</span></span>
-<span><span class="co">## 2024-08-05 15:42:10 INFO::gene: HPR</span></span>
-<span><span class="co">## 2024-08-05 15:42:10 INFO::QTL positions: 72063820,72063928</span></span></code></pre>
+<pre><code><span><span class="co">## 2024-08-05 22:16:48 INFO::focal gene: HPR</span></span>
+<span><span class="co">## 2024-08-05 22:16:48 INFO::focal id: ENSG00000261701.6|expression_Liver</span></span>
+<span><span class="co">## 2024-08-05 22:16:48 INFO::plot locus range: chr16 71600000,72400000</span></span>
+<span><span class="co">## 2024-08-05 22:16:48 INFO::gene: HPR</span></span>
+<span><span class="co">## 2024-08-05 22:16:48 INFO::QTL positions: 72063820,72063928</span></span></code></pre>
 <div class="figure" style="text-align: center">
 <img src="summarizing_results_files/figure-html/locus_plot_noLD-1.png" alt="&amp;nbsp;" width="1200"><p class="caption">
  
