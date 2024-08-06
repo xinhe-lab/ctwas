@@ -32,7 +32,7 @@
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">ctwas</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">0.4.4</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">0.4.5</span>
       </span>
     </div>
 
@@ -89,7 +89,7 @@
       <h1 data-toc-skip>Summarizing and visualizing cTWAS results</h1>
                         <h4 data-toc-skip class="author">Kaixuan Luo, Sheng Qian</h4>
             
-            <h4 data-toc-skip class="date">2024-07-26</h4>
+            <h4 data-toc-skip class="date">2024-08-06</h4>
       
       <small class="dont-index">Source: <a href="https://github.com/xinhe-lab/ctwas/blob/multigroup/vignettes/summarizing_results.Rmd" class="external-link"><code>vignettes/summarizing_results.Rmd</code></a></small>
       <div class="hidden name"><code>summarizing_results.Rmd</code></div>
@@ -103,7 +103,7 @@
 <div class="sourceCode" id="cb1"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://github.com/xinhe-lab/ctwas/" class="external-link">ctwas</a></span><span class="op">)</span></span>
 <span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va">EnsDb.Hsapiens.v86</span><span class="op">)</span></span></code></pre></div>
-<p>We need the Ensembl database <code>EnsDb.Hsapiens.v86</code> here in this tutorial, please choose the version of Ensembl database for your specific data.</p>
+<p>We need the Ensembl database <code>EnsDb.Hsapiens.v86</code> (for hg38) in this tutorial, please choose the version of Ensembl database for your specific data (e.g. <code>EnsDb.Hsapiens.v75</code> for hg19).</p>
 <p>Let’s first load the cTWAS input data needed to run this tutorial: GWAS sample size (<code>gwas_n</code>), prediction models of molecular traits (<code>weights</code>), the reference data: including information about regions (<code>region_info</code>), reference variant list (<code>snp_map</code>) and reference LD (<code>LD_map</code>).</p>
 <div class="sourceCode" id="cb2"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">gwas_n</span> <span class="op">&lt;-</span> <span class="fl">343621</span></span>
@@ -123,7 +123,7 @@
 <span><span class="va">finemap_res</span> <span class="op">&lt;-</span> <span class="va">ctwas_res</span><span class="op">$</span><span class="va">finemap_res</span></span>
 <span><span class="va">boundary_genes</span> <span class="op">&lt;-</span> <span class="va">ctwas_res</span><span class="op">$</span><span class="va">boundary_genes</span></span>
 <span><span class="va">region_data</span> <span class="op">&lt;-</span> <span class="va">ctwas_res</span><span class="op">$</span><span class="va">region_data</span></span>
-<span><span class="va">screened_region_data</span> <span class="op">&lt;-</span> <span class="va">ctwas_res</span><span class="op">$</span><span class="va">screened_region_data</span></span></code></pre></div>
+<span><span class="va">screen_res</span> <span class="op">&lt;-</span> <span class="va">ctwas_res</span><span class="op">$</span><span class="va">screen_res</span></span></code></pre></div>
 <p><code><a href="../reference/ctwas_sumstats.html">ctwas_sumstats()</a></code> returns several main output:</p>
 <ul>
 <li><p><code>z_gene</code>: the Z-scores of molecular traits,</p></li>
@@ -149,13 +149,13 @@
 <p>It also produces other output:</p>
 <ul>
 <li><p><code>boundary_genes</code>: the genes/molecular traits that cross region boundaries (we will need these in the post-processing step).</p></li>
-<li><p><code>region_data</code>: assembled region data, including Z scores of SNPs and molecular traits, for all the regions,. Note that only data of the subset of SNPs used in screening regions are included.</p></li>
-<li><p><code>screened_region_data</code>: the data of all SNPs and molecular traits of the selected regions.</p></li>
+<li><p><code>region_data</code>: assembled region data, including Z scores of SNPs and molecular traits, for all the regions. Note that only data of the subset of SNPs used in screening regions are included.</p></li>
+<li><p><code>screen_res</code>: screening regions results, including the data of all SNPs and molecular traits of the selected regions, estimated numbers of causal signals (L) for selected regions, and a data frame with estimated L or non-SNP PIPs for all regions.</p></li>
 </ul>
 <div class="section level2">
 <h2 id="assessing-parameters-and-computing-pve">Assessing parameters and computing PVE<a class="anchor" aria-label="anchor" href="#assessing-parameters-and-computing-pve"></a>
 </h2>
-<p>First, we make plots using <code>use</code>make_convergence_plots()` to see how estimated parameters converge during the execution of the program:</p>
+<p>First, we make plots using the function <code><a href="../reference/make_convergence_plots.html">make_convergence_plots()</a></code> to see how estimated parameters converge during the execution of the program:</p>
 <div class="sourceCode" id="cb6"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="../reference/make_convergence_plots.html">make_convergence_plots</a></span><span class="op">(</span><span class="va">param</span>, <span class="va">gwas_n</span><span class="op">)</span></span></code></pre></div>
 <div class="figure" style="text-align: center">
@@ -209,10 +209,10 @@
 <div class="sourceCode" id="cb13"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">finemap_res</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/anno_finemap_res.html">anno_finemap_res</a></span><span class="op">(</span><span class="va">finemap_res</span>, <span class="va">snp_map</span>, <span class="va">gene_annot</span>,</span>
 <span>                                use_gene_pos <span class="op">=</span> <span class="st">"mid"</span><span class="op">)</span></span></code></pre></div>
-<pre><code><span><span class="co">## 2024-07-26 20:53:00 INFO::Annotating ctwas finemapping result ...</span></span>
-<span><span class="co">## 2024-07-26 20:53:00 INFO::add gene_name and gene_type</span></span>
-<span><span class="co">## 2024-07-26 20:53:00 INFO::use gene mid positions</span></span>
-<span><span class="co">## 2024-07-26 20:53:00 INFO::add SNP positions</span></span></code></pre>
+<pre><code><span><span class="co">## 2024-08-06 16:23:19 INFO::Annotating ctwas finemapping result ...</span></span>
+<span><span class="co">## 2024-08-06 16:23:20 INFO::add gene_name and gene_type</span></span>
+<span><span class="co">## 2024-08-06 16:23:20 INFO::use gene mid positions</span></span>
+<span><span class="co">## 2024-08-06 16:23:20 INFO::add SNP positions</span></span></code></pre>
 <p>You can now run the command at the beginning of this section to view the genes with additional information. In this example, HPR gene in liver, HP gene in adipose, and CETP gene in adipose are the only three genes that satisfy this threshold.</p>
 <p>When we have multiple contexts (tissues), it is useful to evaluate the total evidence of a gene being causal, <em>combining evidence of all the molecular traits affecting this gene across all types and contexts.</em> This is done by summing up the PIPs of all these molecular traits of the same gene, expressed as the combined PIP of this gene.</p>
 <p>For example, we can combine PIPs of the same gene by context. We could limit results in protein coding genes by setting <code>filter_protein_coding_genes = TRUE</code>, and limit results in credible sets by setting <code>filter_cs = TRUE</code>.</p>
@@ -251,17 +251,17 @@
 <span>               highlight_pip <span class="op">=</span> <span class="fl">0.8</span>,</span>
 <span>               R_snp_gene <span class="op">=</span> <span class="va">cor_res</span><span class="op">$</span><span class="va">R_snp_gene</span>,</span>
 <span>               R_gene <span class="op">=</span> <span class="va">cor_res</span><span class="op">$</span><span class="va">R_gene</span><span class="op">)</span></span></code></pre></div>
-<pre><code><span><span class="co">## 2024-07-26 20:53:02 INFO::focal gene: HPR</span></span>
-<span><span class="co">## 2024-07-26 20:53:02 INFO::focal id: ENSG00000261701.6|expression_Liver</span></span>
-<span><span class="co">## 2024-07-26 20:53:02 INFO::plot locus range: chr16 71600000,72400000</span></span>
-<span><span class="co">## 2024-07-26 20:53:02 INFO::HPR liver expression QTLs</span></span>
-<span><span class="co">## 2024-07-26 20:53:02 INFO::QTL positions: 72063820,72063928</span></span></code></pre>
+<pre><code><span><span class="co">## 2024-08-06 16:23:22 INFO::focal gene: HPR</span></span>
+<span><span class="co">## 2024-08-06 16:23:22 INFO::focal id: ENSG00000261701.6|expression_Liver</span></span>
+<span><span class="co">## 2024-08-06 16:23:22 INFO::plot locus range: chr16 71600000,72400000</span></span>
+<span><span class="co">## 2024-08-06 16:23:23 INFO::HPR liver expression QTLs</span></span>
+<span><span class="co">## 2024-08-06 16:23:23 INFO::QTL positions: 72063820,72063928</span></span></code></pre>
 <div class="figure" style="text-align: center">
 <img src="summarizing_results_files/figure-html/locus_plot-1.png" alt="&amp;nbsp;" width="1200"><p class="caption">
  
 </p>
 </div>
-<p>The locus plot shows several tracks in the example region in chromosome 6 (71.6 - 72.4 Mb). The top one shows -log10(p-value) of the association of variants and molecular traits with the phenotype. The next track shows the PIPs of variants and molecular traits. The data points are colored by the correlations with the focal gene (the gene with the highest PIP, HPR in this case). The red dotted line shows the PIP cutoff of 0.8. The next track shows the locations of QTLs of the focus gene (by default, the focus gene is the gene with the highest PIP). The bottom is the gene track.</p>
+<p>The locus plot shows several tracks in the example region in chromosome 6 (71.6 - 72.4 Mb). The top one shows -log10(p-value) of the association of variants and molecular traits with the phenotype. The next track shows the PIPs of variants and molecular traits. The data points are colored by the correlations with the focal gene (the gene with the highest PIP, HPR in this case). The red dotted line shows the PIP cutoff of 0.8. The next track shows the locations of QTLs of the focal gene (by default, the focal gene is the gene with the highest PIP). The bottom is the gene track.</p>
 <p>In this plot, one can see that there are several genes with good associations with the phenotype, but only HPR in liver and HP in adipose are selected by cTWAS. This is because once HPR, HP and other likely causal variants are selected by cTWAS, there is no remaining association left in other molecular traits. This example thus illustrates how cTWAS selects likely causal molecular traits while controlling for nearby molecular traits and variants.</p>
 <p>For the “no-LD” version, we could still make the locus plot. The difference is that the plot will not color the data points based on the correlations to the focal gene.</p>
 <div class="sourceCode" id="cb22"><pre class="downlit sourceCode r">
@@ -271,11 +271,11 @@
 <span>               ens_db <span class="op">=</span> <span class="va">ens_db</span>,</span>
 <span>               locus_range <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">71.6e6</span>,<span class="fl">72.4e6</span><span class="op">)</span>,</span>
 <span>               highlight_pip <span class="op">=</span> <span class="fl">0.8</span><span class="op">)</span></span></code></pre></div>
-<pre><code><span><span class="co">## 2024-07-26 20:53:04 INFO::focal gene: HPR</span></span>
-<span><span class="co">## 2024-07-26 20:53:04 INFO::focal id: ENSG00000261701.6|expression_Liver</span></span>
-<span><span class="co">## 2024-07-26 20:53:04 INFO::plot locus range: chr16 71600000,72400000</span></span>
-<span><span class="co">## 2024-07-26 20:53:05 INFO::HPR liver expression QTLs</span></span>
-<span><span class="co">## 2024-07-26 20:53:05 INFO::QTL positions: 72063820,72063928</span></span></code></pre>
+<pre><code><span><span class="co">## 2024-08-06 16:23:25 INFO::focal gene: HPR</span></span>
+<span><span class="co">## 2024-08-06 16:23:25 INFO::focal id: ENSG00000261701.6|expression_Liver</span></span>
+<span><span class="co">## 2024-08-06 16:23:25 INFO::plot locus range: chr16 71600000,72400000</span></span>
+<span><span class="co">## 2024-08-06 16:23:25 INFO::HPR liver expression QTLs</span></span>
+<span><span class="co">## 2024-08-06 16:23:25 INFO::QTL positions: 72063820,72063928</span></span></code></pre>
 <div class="figure" style="text-align: center">
 <img src="summarizing_results_files/figure-html/locus_plot_noLD-1.png" alt="&amp;nbsp;" width="1200"><p class="caption">
  

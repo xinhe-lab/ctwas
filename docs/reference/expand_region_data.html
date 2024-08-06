@@ -17,7 +17,7 @@
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">ctwas</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">0.4.4</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">0.4.5</span>
       </span>
     </div>
 
@@ -72,15 +72,7 @@
     </div>
 
     <div id="ref-usage">
-    <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="fu">expand_region_data</span><span class="op">(</span></span>
-<span>  <span class="va">region_data</span>,</span>
-<span>  <span class="va">snp_map</span>,</span>
-<span>  <span class="va">z_snp</span>,</span>
-<span>  trim_by <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"z"</span>, <span class="st">"random"</span><span class="op">)</span>,</span>
-<span>  maxSNP <span class="op">=</span> <span class="cn">Inf</span>,</span>
-<span>  ncore <span class="op">=</span> <span class="fl">1</span>,</span>
-<span>  seed <span class="op">=</span> <span class="fl">99</span></span>
-<span><span class="op">)</span></span></code></pre></div>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="fu">expand_region_data</span><span class="op">(</span><span class="va">region_data</span>, <span class="va">snp_map</span>, <span class="va">z_snp</span>, maxSNP <span class="op">=</span> <span class="cn">Inf</span>, ncore <span class="op">=</span> <span class="fl">1</span><span class="op">)</span></span></code></pre></div>
     </div>
 
     <div id="arguments">
@@ -99,11 +91,6 @@
 <dd><p>A data frame with columns: "id", "z", giving the z-scores for SNPs.</p></dd>
 
 
-<dt id="arg-trim-by">trim_by<a class="anchor" aria-label="anchor" href="#arg-trim-by"></a></dt>
-<dd><p>remove SNPs if the total number of SNPs exceeds limit, options: "random",
-or "z" (trim SNPs with lower |z|) See parameter `maxSNP` for more information.</p></dd>
-
-
 <dt id="arg-maxsnp">maxSNP<a class="anchor" aria-label="anchor" href="#arg-maxsnp"></a></dt>
 <dd><p>Inf or integer. Maximum number of SNPs in a region. Default is
 Inf, no limit. This can be useful if there are many SNPs in a region and you don't
@@ -112,10 +99,6 @@ have enough memory to run the program.</p></dd>
 
 <dt id="arg-ncore">ncore<a class="anchor" aria-label="anchor" href="#arg-ncore"></a></dt>
 <dd><p>The number of cores used to parallelize susie over regions</p></dd>
-
-
-<dt id="arg-seed">seed<a class="anchor" aria-label="anchor" href="#arg-seed"></a></dt>
-<dd><p>seed for random sampling</p></dd>
 
 </dl></div>
     <div id="value">
