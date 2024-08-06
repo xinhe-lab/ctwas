@@ -5,7 +5,7 @@ read_snp_info_file <- function (file){
   snp_info <- as.data.frame(fread(file, header = TRUE))
   target_header <- c("chrom", "id", "pos", "alt", "ref")
   if (!all(target_header %in% colnames(snp_info))){
-    stop("The SNP info file needs to contain the following columns: ",
+    stop("The SNP file needs to contain the following columns: ",
          paste(target_header, collapse = " "))
   }
   return(snp_info)
@@ -19,16 +19,21 @@ read_snp_info_files <- function (files){
 }
 
 #' Load LD matrix
+#'
 #' @param file path to LD matrix
+#'
 #' @param format file format for LD matrix. If "custom", use a user defined
 #' \code{LD_loader_fun()} function to load LD matrix.
+#'
 #' @param LD_loader_fun a user defined function to load LD matrix
 #'
 #' @importFrom utils read.csv
 #' @importFrom Matrix readMM
 #' @importFrom data.table fread
 #' @importFrom tools file_ext
+#'
 #' @export
+#'
 load_LD <- function (file,
                      format = c("rds", "rdata", "mtx", "csv", "txt", "custom"),
                      LD_loader_fun) {
@@ -209,38 +214,26 @@ read_var_info <- function(var_info_file){
   return(var_info)
 }
 
-# run mclapply and stop if not all cores delivered results
+
+# run mclapply and check to see if NULL was found in mclapply output.
 #' @importFrom parallel mclapply
 #' @importFrom logging logwarn
-mclapply_check <- function(X, FUN, mc.cores = 1, stop_if_missing = TRUE) {
+mclapply_check <- function(X, FUN, mc.cores = 1, stop_if_missing = FALSE){
   if (length(X) <= 1 || mc.cores == 1) {
     res <- lapply(X, FUN)
-    return(res)
   } else {
-    tryCatch( {
-      res <- mclapply(X, FUN, mc.cores = mc.cores)
-      if (any(sapply(res, is.null))) {
-        logwarn("mclapply returns NULL in the output!")
+    res <- mclapply(X, FUN, mc.cores = mc.cores)
+    if (any(sapply(res, is.null))) {
+      msg <- paste("'NULL' found in mclapply output. Results may be incomplete!",
+                   "Try more memory or ncore = 1.")
+      if (stop_if_missing) {
+        stop(msg)
+      } else {
+        logwarn(msg)
       }
-      return(res)
-    },
-    warning = function(w) {
-      warning(w)
-      if (grepl("did not deliver results|jobs will be affected", w$message)) {
-        mclapply_message <- "mclapply failed, probably due to insufficent memory!"
-        if (stop_if_missing) {
-          stop(mclapply_message)
-        } else {
-          logwarn(mclapply_message)
-        }
-      }
-      return(res)
-    },
-    error = function(e) {
-      stop(e)
-    })
+    }
   }
+  return(res)
 }
-
 
 

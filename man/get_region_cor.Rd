@@ -6,10 +6,9 @@
 \usage{
 get_region_cor(
   region_id,
-  region_data = NULL,
-  LD_map = NULL,
-  snp_map = NULL,
-  weights = NULL,
+  region_data,
+  LD_map,
+  weights,
   force_compute_cor = FALSE,
   save_cor = FALSE,
   cor_dir = NULL,
@@ -23,15 +22,13 @@ get_region_cor(
 
 \item{region_data}{a list object with data for the regions}
 
-\item{LD_map}{a data frame with filenames of LD matrices for each of the regions. Required when \code{use_LD = TRUE}.}
+\item{LD_map}{a data frame with filenames of LD matrices and SNP information for the regions.}
 
-\item{snp_map}{list of data frames with SNP-to-region map for the reference. Required when \code{use_LD = TRUE}.}
+\item{weights}{a list of preprocessed weights}
 
-\item{weights}{a list of weights}
+\item{force_compute_cor}{If TRUE, force computing correlation (R) matrices}
 
-\item{force_compute_cor}{TRUE/FALSE. If TRUE, force computing correlation (R) matrices}
-
-\item{save_cor}{TRUE/FALSE. If TRUE, save correlation (R) matrices to \code{cor_dir}}
+\item{save_cor}{If TRUE, save correlation (R) matrices to \code{cor_dir}}
 
 \item{cor_dir}{a string, the directory to store correlation (R) matrices}
 
@@ -40,7 +37,7 @@ get_region_cor(
 
 \item{LD_loader_fun}{a user defined function to load LD matrix when \code{LD_format = "custom"}.}
 
-\item{verbose}{TRUE/FALSE. If TRUE, print detail messages}
+\item{verbose}{If TRUE, print detail messages}
 }
 \value{
 a list of correlation matrices (R_snp, R_snp_gene and R_gene)

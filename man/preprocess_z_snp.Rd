@@ -18,11 +18,11 @@ snps. "A1" is effect allele. "A2" is the other allele.}
 
 \item{snp_map}{a list of SNP-to-region map for the reference.}
 
-\item{drop_multiallelic}{TRUE/FALSE. If TRUE, multiallelic variants will be dropped from the summary statistics.}
+\item{drop_multiallelic}{If TRUE, multiallelic variants will be dropped from the summary statistics.}
 
-\item{drop_strand_ambig}{TRUE/FALSE, if TRUE remove strand ambiguous variants (A/T, G/C).}
+\item{drop_strand_ambig}{If TRUE remove strand ambiguous variants (A/T, G/C).}
 
-\item{logfile}{the log file, if NULL will print log info on screen.}
+\item{logfile}{The log filename. If NULL, print log info on screen.}
 }
 \value{
 a data frame preprocessed GWAS z-scores

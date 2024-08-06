@@ -6,9 +6,9 @@
 #'
 #' @param weight_format a string or a vector, specifying format of each weight file, e.g. PredictDB, FUSION.
 #'
-#' @param filter_protein_coding_genes TRUE/FALSE. If TRUE, keep protein coding genes only. This option is only for PredictDB weights
+#' @param filter_protein_coding_genes If TRUE, keep protein coding genes only. This option is only for PredictDB weights
 #'
-#' @param load_predictdb_LD TRUE/FALSE. If TRUE, load pre-computed LD among weight SNPs. This option is only for PredictDB weights
+#' @param load_predictdb_LD If TRUE, load pre-computed LD among weight SNPs. This option is only for PredictDB weights
 #'
 #' @param fusion_method a string, specifying the method to choose in FUSION models.
 #' "best.cv" option will use the best model (smallest p-value) under cross-validation.
@@ -40,6 +40,7 @@ load_weights <- function(weight_file,
                                fusion_genome_version = fusion_genome_version,
                                ncore = ncore)
   }
+
   return(res)
 }
 
@@ -99,10 +100,10 @@ load_predictdb_weights <- function(weight_file,
   }
   dbDisconnect(db)
 
-  return(list(weight_name=weight_name,
-              weight_table=weight_table,
-              extra_table=extra_table,
-              cov_table=cov_table))
+  return(list("weight_name" = weight_name,
+              "weight_table" = weight_table,
+              "extra_table" = extra_table,
+              "cov_table" = cov_table))
 }
 
 #' @title Loads weights in FUSION format
@@ -114,7 +115,7 @@ load_predictdb_weights <- function(weight_file,
 #'
 #' @param fusion_genome_version a string, specifying the genome version of FUSION models
 #'
-#' @param make_extra_table TRUE/FALSE. If TRUE, make an extra table in predictDB format
+#' @param make_extra_table If TRUE, make an extra table in predictDB format
 #'
 #' @param ncore integer, number of cores for parallel computing.
 #'
@@ -190,10 +191,10 @@ load_fusion_weights <- function(weight_dir,
 
   cov_table <- NULL
 
-  return(list(weight_name=weight_name,
-              weight_table=weight_table,
-              extra_table=extra_table,
-              cov_table=cov_table))
+  return(list("weight_name" = weight_name,
+              "weight_table" = weight_table,
+              "extra_table" = extra_table,
+              "cov_table" = cov_table))
 }
 
 
@@ -266,10 +267,10 @@ load_fusion_wgt_data <- function(wgt_rdata_file,
     colnames(weight_table) <- c("gene","rsid","varID","ref_allele","eff_allele","weight")
   }
 
-  return(list(weight_table = weight_table,
-              fusion_method = g.method,
-              wgt_ID = wgt_ID,
-              cv.rsq = g.cv.rsq))
+  return(list("weight_table" = weight_table,
+              "fusion_method" = g.method,
+              "wgt_ID" = wgt_ID,
+              "cv.rsq" = g.cv.rsq))
 }
 
 #' Creates weight files in PredictDB format from QTL data
@@ -371,7 +372,7 @@ create_predictdb_from_QTLs <- function(weight_table,
 #'
 #' @param fusion_genome_version a string, specifying the genome version of FUSION models
 #'
-#' @param make_extra_table TRUE/FALSE. If TRUE, make an extra table in predictDB format
+#' @param make_extra_table If TRUE, make an extra table in predictDB format
 #'
 #' @param cov_table a data frame of covariances between variants, with columns:
 #' "GENE","RSID1","RSID2","VALUE".
@@ -408,10 +409,10 @@ convert_fusion_to_predictdb <- function(
   # write PredictDB weights
   write_predictdb(weight_table, extra_table, cov_table, outputdir, outname)
 
-  return(list(weight_name=weight_name,
-              weight_table=weight_table,
-              extra_table=extra_table,
-              cov_table = cov_table))
+  return(list("weight_name" = weight_name,
+              "weight_table" = weight_table,
+              "extra_table" = extra_table,
+              "cov_table" = cov_table))
 }
 
 
@@ -514,6 +515,7 @@ convert_predictdb_cov_to_cor <- function(cov_table){
   stdev_table <- setNames(sqrt(stdev_table$VALUE), stdev_table$RSID1)
   R_table <- cov_table
   R_table$VALUE <- cov_table$VALUE/(stdev_table[cov_table$RSID1]*stdev_table[cov_table$RSID2])
+
   return(R_table)
 }
 
@@ -525,7 +527,6 @@ compute_weight_LD_from_ref <- function(weights,
                                        weight_name,
                                        region_info,
                                        LD_map,
-                                       snp_map,
                                        LD_format = c("rds", "rdata", "mtx", "csv", "txt", "custom"),
                                        LD_loader_fun,
                                        ncore = 1) {
@@ -535,6 +536,9 @@ compute_weight_LD_from_ref <- function(weights,
   }
 
   LD_format <- match.arg(LD_format)
+
+  if (!inherits(weights,"list"))
+    stop("'weights' should be a list!")
 
   weight_info <- lapply(names(weights), function(x){
     as.data.frame(weights[[x]][c("chrom", "p0","p1", "gene_name", "weight_name", "type","context")])})
@@ -562,7 +566,10 @@ compute_weight_LD_from_ref <- function(weights,
         curr_region_LD_list <- list()
         curr_region_ids <- unlist(strsplit(x, ";"))
         curr_region_idx <- match(curr_region_ids, LD_map$region_id)
+
         LD_matrix_files <- LD_map$LD_file[curr_region_idx]
+        stopifnot(all(file.exists(LD_matrix_files)))
+
         if (length(LD_matrix_files) > 1) {
           R_snp <- lapply(LD_matrix_files, load_LD, format = LD_format, LD_loader_fun = LD_loader_fun)
           R_snp <- suppressWarnings(as.matrix(bdiag(R_snp)))
@@ -570,7 +577,11 @@ compute_weight_LD_from_ref <- function(weights,
           R_snp <- load_LD(LD_matrix_files, format = LD_format, LD_loader_fun = LD_loader_fun)
         }
 
-        snpinfo <- do.call(rbind, snp_map[curr_region_ids])
+        # load SNP info of the region
+        SNP_info_files <- LD_map$SNP_file[curr_region_idx]
+        stopifnot(all(file.exists(SNP_info_files)))
+        snpinfo <- read_snp_info_files(SNP_info_files)
+
         rownames(R_snp) <- snpinfo$id
         colnames(R_snp) <- snpinfo$id
 
@@ -582,7 +593,7 @@ compute_weight_LD_from_ref <- function(weights,
           curr_region_LD_list[[weight_id]] <- R_wgt
         }
         curr_region_LD_list
-      }, mc.cores = ncore)
+      }, mc.cores = ncore, stop_if_missing = TRUE)
 
       weight_LD_list <- unlist(weight_LD_list, recursive = FALSE)
       for(weight_id in names(weight_LD_list)){

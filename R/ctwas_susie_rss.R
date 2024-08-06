@@ -105,8 +105,8 @@ initiate_group_priors <- function(group_prior = NULL, group_prior_var = NULL, gr
   pi_prior <- unlist(pi_prior)
   V_prior <- unlist(V_prior)
 
-  return(list(pi_prior = pi_prior,
-              V_prior = V_prior))
+  return(list("pi_prior" = pi_prior,
+              "V_prior" = V_prior))
 }
 
 
@@ -140,8 +140,8 @@ set_region_susie_priors <- function(pi_prior, V_prior, gs_group, L, use_null_wei
     null_weight <- NULL
   }
 
-  return(list(prior = prior,
-              V = V,
-              null_weight = null_weight))
+  return(list("prior" = prior,
+              "V" = V,
+              "null_weight" = null_weight))
 
 }

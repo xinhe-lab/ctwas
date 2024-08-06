@@ -12,7 +12,7 @@ est_param(
     "shared_all", "independent"),
   niter_prefit = 3,
   niter = 30,
-  p_single_effect = 0.8,
+  min_p_single_effect = 0.8,
   use_null_weight = TRUE,
   minvar = 2,
   mingene = 1,
@@ -36,24 +36,24 @@ est_param(
 "shared_all" allows all groups to share the same variance parameter.
 "independent" allows all groups to have their own separate variance parameters.}
 
-\item{niter_prefit}{the number of iterations of the E-M algorithm to perform during the initial parameter estimation step}
+\item{niter_prefit}{the number of iterations of the E-M algorithm to perform during the initial parameter estimation step.}
 
-\item{niter}{the number of iterations of the E-M algorithm to perform during the complete parameter estimation step}
+\item{niter}{the number of iterations of the E-M algorithm to perform during the complete parameter estimation step.}
 
-\item{p_single_effect}{Regions with probability greater than \code{p_single_effect} of
-having at most one causal effect will be used selected for the complete parameter estimation step}
+\item{min_p_single_effect}{Regions with probability greater than \code{min_p_single_effect} of
+having at most one causal effect will be used selected for the complete parameter estimation step.}
 
-\item{use_null_weight}{TRUE/FALSE. If TRUE, allow for a probability of no effect in susie}
+\item{use_null_weight}{If TRUE, allow for a probability of no effect in susie.}
 
-\item{minvar}{minimum number of variables (snps and genes) in a region}
+\item{minvar}{minimum number of variables (snps and genes) in a region.}
 
-\item{mingene}{minimum number of genes in a region}
+\item{mingene}{minimum number of genes in a region.}
 
-\item{ncore}{The number of cores used to parallelize computation over regions}
+\item{ncore}{The number of cores used to parallelize computation over regions.}
 
-\item{logfile}{the log file, if NULL will print log info on screen}
+\item{logfile}{The log filename. If NULL, print log info on screen.}
 
-\item{verbose}{TRUE/FALSE. If TRUE, print detail messages}
+\item{verbose}{If TRUE, print detail messages.}
 
 \item{...}{Additional arguments of \code{susie_rss}.}
 }

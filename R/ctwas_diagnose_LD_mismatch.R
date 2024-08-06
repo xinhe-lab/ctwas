@@ -6,9 +6,7 @@
 #'
 #' @param region_ids A vector of region IDs to run diagnosis
 #'
-#' @param LD_map a data frame with filenames of LD matrices for each of the regions.
-#'
-#' @param snp_map a list of data frames with SNP-to-region map for the reference.
+#' @param LD_map a data frame with filenames of LD matrices and SNP information for each of the regions.
 #'
 #' @param gwas_n integer, GWAS sample size.
 #'
@@ -36,7 +34,6 @@
 diagnose_LD_mismatch_susie <- function(z_snp,
                                        region_ids,
                                        LD_map,
-                                       snp_map,
                                        gwas_n,
                                        p_diff_thresh = 5e-8,
                                        LD_format = c("rds", "rdata", "mtx", "csv", "txt", "custom"),
@@ -52,10 +49,10 @@ diagnose_LD_mismatch_susie <- function(z_snp,
   LD_format <- match.arg(LD_format)
 
   condz_list <- mclapply_check(region_ids, function(region_id){
-    compute_region_condz(region_id, LD_map, snp_map, z_snp, gwas_n,
+    compute_region_condz(region_id, LD_map, z_snp, gwas_n,
                          LD_format = LD_format,
                          LD_loader_fun = LD_loader_fun)
-  }, mc.cores = ncore)
+  }, mc.cores = ncore, stop_if_missing = TRUE)
 
   names(condz_list) <- region_ids
   condz_stats <- rbindlist(condz_list, idcol = "region_id")
@@ -75,15 +72,19 @@ diagnose_LD_mismatch_susie <- function(z_snp,
 #
 #' @importFrom stats pchisq
 #' @importFrom Matrix bdiag
-compute_region_condz <- function(region_id, LD_map, snp_map, z_snp, gwas_n,
+compute_region_condz <- function(region_id,
+                                 LD_map,
+                                 z_snp,
+                                 gwas_n,
                                  LD_format = c("rds", "rdata", "mtx", "csv", "txt", "custom"),
                                  LD_loader_fun){
 
   LD_format <- match.arg(LD_format)
 
   # load LD matrix
-  LD_matrix_files <- unlist(strsplit(LD_map[LD_map$region_id == region_id, "LD_file"], split = ";"))
+  LD_matrix_files <- unlist(strsplit(LD_map$LD_file[LD_map$region_id == region_id], split = ";"))
   stopifnot(all(file.exists(LD_matrix_files)))
+
   if (length(LD_matrix_files) > 1) {
     R_snp <- lapply(LD_matrix_files, load_LD, format = LD_format, LD_loader_fun = LD_loader_fun)
     R_snp <- suppressWarnings(as.matrix(bdiag(R_snp)))
@@ -91,16 +92,15 @@ compute_region_condz <- function(region_id, LD_map, snp_map, z_snp, gwas_n,
     R_snp <- load_LD(LD_matrix_files, format = LD_format, LD_loader_fun = LD_loader_fun)
   }
 
-  # load SNP info
-  snpinfo <- do.call(rbind, snp_map[region_id])
+  # load SNP info of the region
+  SNP_info_files <- unlist(strsplit(LD_map$SNP_file[LD_map$region_id == region_id], split = ";"))
+  stopifnot(all(file.exists(SNP_info_files)))
+  snpinfo <- read_snp_info_files(SNP_info_files)
 
   # Match GWAS sumstats with LD reference files. Only keep variants included in LD reference.
   region_z_snp <- z_snp[z_snp$id %in% snpinfo$id,]
   sidx <- match(region_z_snp$id, snpinfo$id)
   region_R_snp <- R_snp[sidx, sidx]
-
-  # # Estimate lambda (consistency) between the z-scores and LD matrix
-  # lambda <- estimate_s_rss(z = z.locus$z, R = R.locus, n = gwas_n)
 
   # Compute expected z-scores based on conditional distribution of z-scores
   condz_stats <- kriging_rss(z = region_z_snp$z, R = region_R_snp, n = gwas_n)$conditional_dist
@@ -128,7 +128,10 @@ compute_region_condz <- function(region_id, LD_map, snp_map, z_snp, gwas_n,
 #'
 #' @export
 #'
-get_problematic_genes <- function(problematic_snps, weights, z_gene, z_thresh = 3){
+get_problematic_genes <- function(problematic_snps,
+                                  weights,
+                                  z_gene,
+                                  z_thresh = 3){
 
   if (length(problematic_snps) == 0) {
     loginfo('No problematic SNPs')

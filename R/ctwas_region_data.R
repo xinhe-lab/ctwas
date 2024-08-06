@@ -71,9 +71,9 @@ assemble_region_data <- function(region_info,
   if (thin > 1 | thin <= 0)
     stop("thin needs to be in (0,1]")
 
-  if (!inherits(snp_map,"list")){
+  if (!inherits(snp_map,"list"))
     stop("'snp_map' should be a list object.")
-  }
+
   snp_info <- as.data.frame(rbindlist(snp_map, idcol = "region_id"))
 
   # begin assembling region_data
@@ -139,10 +139,11 @@ assemble_region_data <- function(region_info,
                                   maxSNP = maxSNP, seed = seed)
 
   # add z-scores to region_data
+  loginfo("Add region z-scores")
   region_data <- update_region_z(region_data, z_snp, z_gene, ncore = ncore)
 
-  return(list(region_data = region_data,
-              boundary_genes = boundary_genes))
+  return(list("region_data" = region_data,
+              "boundary_genes" = boundary_genes))
 }
 
 assign_region_data <- function(region_info,
@@ -313,7 +314,7 @@ adjust_boundary_genes <- function(boundary_genes,
                                   weights,
                                   region_data,
                                   snp_map){
-  loginfo("Adjusting for boundary genes ...")
+  loginfo("Adjust region assignment for boundary genes")
 
   if (!inherits(weights,"list")){
     stop("'weights' should be a list.")
@@ -327,18 +328,17 @@ adjust_boundary_genes <- function(boundary_genes,
     stop("'snp_map' should be a list.")
   }
 
+  # assign boundary gene to the region with max weights
   for (i in 1:nrow(boundary_genes)){
     gname <- boundary_genes[i, "id"]
     region_ids <- unlist(strsplit(boundary_genes[i, "region_id"], split = ";"))
     wgt <- weights[[gname]][["wgt"]]
 
-    region_r2 <- sapply(region_ids, function(region_id){
+    region_sum_wgt <- sapply(region_ids, function(region_id){
       snpinfo <- snp_map[[region_id]]
-      sum(wgt[which(rownames(wgt) %in% snpinfo$id)]^2)
+      sum(abs(wgt)[which(rownames(wgt) %in% snpinfo$id)])
     })
-
-    # assign boundary gene to the region with max r2, and remove it from other regions
-    selected_region_id <- region_ids[which.max(region_r2)]
+    selected_region_id <- region_ids[which.max(region_sum_wgt)]
     unselected_region_ids <- setdiff(region_ids, selected_region_id)
     region_data[[selected_region_id]][["gid"]] <- union(region_data[[selected_region_id]][["gid"]], gname)
     for(unselected_region_id in unselected_region_ids){
@@ -357,16 +357,11 @@ adjust_boundary_genes <- function(boundary_genes,
 #'
 #' @param z_snp A data frame with columns: "id", "z", giving the z-scores for SNPs.
 #'
-#' @param trim_by remove SNPs if the total number of SNPs exceeds limit, options: "random",
-#' or "z" (trim SNPs with lower |z|) See parameter `maxSNP` for more information.
-#'
 #' @param maxSNP Inf or integer. Maximum number of SNPs in a region. Default is
 #' Inf, no limit. This can be useful if there are many SNPs in a region and you don't
 #' have enough memory to run the program.
 #'
 #' @param ncore The number of cores used to parallelize susie over regions
-#'
-#' @param seed seed for random sampling
 #'
 #' @return updated region_data with all SNPs
 #'
@@ -379,30 +374,23 @@ adjust_boundary_genes <- function(boundary_genes,
 expand_region_data <- function(region_data,
                                snp_map,
                                z_snp,
-                               trim_by = c("z", "random"),
                                maxSNP = Inf,
-                               ncore = 1,
-                               seed = 99) {
-  # check arguments
-  trim_by <- match.arg(trim_by)
-
-  if (!inherits(region_data,"list")){
+                               ncore = 1) {
+  # check inputs
+  if (!inherits(region_data,"list"))
     stop("'region_data' should be a list.")
-  }
 
-  if (!inherits(snp_map,"list")){
+  if (!inherits(snp_map,"list"))
     stop("'snp_map' should be a list object.")
-  }
 
-  if (anyNA(z_snp)){
+  if (anyNA(z_snp))
     stop("z_snp contains missing values!")
-  }
 
   # update SNP IDs for each region
   thin <- sapply(region_data, "[[", "thin")
-  loginfo("Expanding %d regions with all SNPs ...", length(which(thin < 1)))
 
   if (length(which(thin < 1)) > 0) {
+    loginfo("Expand %d regions with all SNPs", length(which(thin < 1)))
     region_ids <- names(region_data)
     region_data <- mclapply_check(region_ids, function(region_id){
       # add z-scores and types of the region to the region_data
@@ -426,18 +414,21 @@ expand_region_data <- function(region_data,
     names(region_data) <- region_ids
 
     # Trim regions with SNPs more than maxSNP
-    region_data <- trim_region_data(region_data, z_snp, trim_by = trim_by, maxSNP = maxSNP, seed = seed)
+    region_data <- trim_region_data(region_data, z_snp, trim_by = "z", maxSNP = maxSNP)
 
     # add z-scores to region_data
+    loginfo("Update region z-scores")
     region_data <- update_region_z(region_data, z_snp, update = "snps", ncore = ncore)
   }
 
   return(region_data)
+
 }
 
-
 # extract data for a region from region_data
-extract_region_data <- function(region_data, region_id){
+extract_region_data <- function(region_data,
+                                region_id,
+                                keep_snps_only = FALSE){
 
   if (!inherits(region_data,"list")){
     stop("'region_data' should be a list.")
@@ -445,47 +436,74 @@ extract_region_data <- function(region_data, region_id){
 
   regiondata <- region_data[[region_id]]
 
-  if (is.null(regiondata$z)) {
-    regiondata$z <- c(regiondata$z_gene$z, regiondata$z_snp$z)
-  }
+  stopifnot(all.equal(regiondata$sid, regiondata$z_snp$id))
+  stopifnot(all.equal(regiondata$gid, regiondata$z_gene$id))
 
-  if (is.null(regiondata$gs_type)) {
-    regiondata$gs_type <- c(regiondata$z_gene$type, regiondata$z_snp$type)
-  }
+  if (keep_snps_only) {
+    regiondata$gid <- NULL
+    regiondata$z_gene <- NULL
+    regiondata$z <- regiondata$z_snp$z
+    regiondata$gs_type <- regiondata$z_snp$type
+    regiondata$gs_context <- regiondata$z_snp$context
+    regiondata$gs_group <- regiondata$z_snp$group
+    regiondata$g_type <- NULL
+    regiondata$g_context <- NULL
+    regiondata$g_group <- NULL
+    regiondata$types <- "SNP"
+    regiondata$contexts <- "SNP"
+    regiondata$groups <- "SNP"
+  } else {
+    if (is.null(regiondata$z))
+      regiondata$z <- c(regiondata$z_gene$z, regiondata$z_snp$z)
 
-  if (is.null(regiondata$gs_context)) {
-    regiondata$gs_context <- c(regiondata$z_gene$context, regiondata$z_snp$context)
-  }
+    if (is.null(regiondata$gs_type))
+      regiondata$gs_type <- c(regiondata$z_gene$type, regiondata$z_snp$type)
 
-  if (is.null(regiondata$gs_group)) {
-    regiondata$gs_group <- c(regiondata$z_gene$group, regiondata$z_snp$group)
-  }
+    if (is.null(regiondata$gs_context))
+      regiondata$gs_context <- c(regiondata$z_gene$context, regiondata$z_snp$context)
 
-  if (is.null(regiondata$g_type)) {
-    regiondata$g_type <- regiondata$z_gene$type
-  }
+    if (is.null(regiondata$gs_group))
+      regiondata$gs_group <- c(regiondata$z_gene$group, regiondata$z_snp$group)
 
-  if (is.null(regiondata$g_context)) {
-    regiondata$g_context <- regiondata$z_gene$context
-  }
+    if (is.null(regiondata$g_type))
+      regiondata$g_type <- regiondata$z_gene$type
 
-  if (is.null(regiondata$g_group)) {
-    regiondata$g_group <- regiondata$z_gene$group
-  }
+    if (is.null(regiondata$g_context))
+      regiondata$g_context <- regiondata$z_gene$context
 
-  if (is.null(regiondata$types)) {
-    regiondata$types <- unique(regiondata$gs_type)
-  }
+    if (is.null(regiondata$g_group))
+      regiondata$g_group <- regiondata$z_gene$group
 
-  if (is.null(regiondata$contexts)) {
-    regiondata$contexts <- unique(regiondata$gs_context)
-  }
+    if (is.null(regiondata$types))
+      regiondata$types <- unique(regiondata$gs_type)
 
-  if (is.null(regiondata$groups)) {
-    regiondata$groups <- unique(regiondata$gs_group)
+    if (is.null(regiondata$contexts))
+      regiondata$contexts <- unique(regiondata$gs_context)
+
+    if (is.null(regiondata$groups))
+      regiondata$groups <- unique(regiondata$gs_group)
   }
 
   return(regiondata)
 }
 
+# create fine-mapping input region data of the earlier version
+create_finemap_input_region_data <- function(region_data,
+                                             keep_snps_only = FALSE){
 
+  if (!inherits(region_data,"list"))
+    stop("'region_data' should be a list.")
+
+  if (keep_snps_only)
+    loginfo("Keep SNPs only")
+
+  region_ids <- names(region_data)
+
+  region_data2 <- lapply(region_ids, function(region_id){
+    regiondata <- extract_region_data(region_data, region_id,
+                                      keep_snps_only = keep_snps_only)
+  })
+  names(region_data2) <- region_ids
+
+  return(region_data2)
+}

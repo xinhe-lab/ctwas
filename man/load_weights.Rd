@@ -20,9 +20,9 @@ or the directory containing '.wgt.RDat' files for FUSION weights.}
 
 \item{weight_format}{a string or a vector, specifying format of each weight file, e.g. PredictDB, FUSION.}
 
-\item{filter_protein_coding_genes}{TRUE/FALSE. If TRUE, keep protein coding genes only. This option is only for PredictDB weights}
+\item{filter_protein_coding_genes}{If TRUE, keep protein coding genes only. This option is only for PredictDB weights}
 
-\item{load_predictdb_LD}{TRUE/FALSE. If TRUE, load pre-computed LD among weight SNPs. This option is only for PredictDB weights}
+\item{load_predictdb_LD}{If TRUE, load pre-computed LD among weight SNPs. This option is only for PredictDB weights}
 
 \item{fusion_method}{a string, specifying the method to choose in FUSION models.
 "best.cv" option will use the best model (smallest p-value) under cross-validation.}
