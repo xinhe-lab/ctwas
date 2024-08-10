@@ -192,14 +192,20 @@ make_locusplot <- function(finemap_res,
   finemap_region_res$object_type <- factor(finemap_region_res$object_type,
                                            levels = c("non-SNP", "SNP"))
 
+  region_types <- levels(finemap_region_res$type)
+  region_contexts <- levels(finemap_region_res$context)
+  region_group <- levels(finemap_region_res$group)
+  region_nonSNP_types <- setdiff(region_types, "SNP")
+
   # set shapes, sizes, and alpha for data points
-  point.shapes <- point.shapes[1:length(unique(finemap_region_res$type))]
-  names(point.shapes) <- c("SNP", setdiff(unique(finemap_region_res$type), "SNP"))
+  point.shapes <- point.shapes[1:length(region_types)]
+  names(point.shapes) <- c("SNP", region_nonSNP_types)
 
-  point.alpha <- c("SNP"= point.alpha[1], "non-SNP"= point.alpha[2])
-  point.sizes <- c("SNP"= point.sizes[1], "non-SNP"= point.sizes[2])
+  point.alpha <- c("SNP" = point.alpha[1], "non-SNP" = point.alpha[2])
+  point.sizes <- c("SNP" = point.sizes[1], "non-SNP" = point.sizes[2])
 
-  legend.sizes <- c("non-SNP"= 3.5, "SNP"= 2)
+  legend.sizes <- c(rep(3.5, length(region_nonSNP_types)), 2)
+  names(legend.sizes) <- c(region_nonSNP_types, "SNP")
 
   # create a locus object for plotting
   loc <- locus(
