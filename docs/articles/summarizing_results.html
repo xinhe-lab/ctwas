@@ -173,9 +173,9 @@
 <div class="section level2">
 <h2 id="inspecting-the-ctwas-results">Inspecting the cTWAS results<a class="anchor" aria-label="anchor" href="#inspecting-the-ctwas-results"></a>
 </h2>
-<p>We can view the genes above a certain PIP cutoff, e.g. PIP &gt; 0.8, by:</p>
+<p>We can view the genes above a certain PIP cutoff, e.g. PIP &gt; 0.8, and in credible sets, by:</p>
 <div class="sourceCode" id="cb8"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/subset.html" class="external-link">subset</a></span><span class="op">(</span><span class="va">finemap_res</span>, <span class="va">group</span> <span class="op">==</span> <span class="st">"gene"</span> <span class="op">&amp;</span> <span class="va">susie_pip</span> <span class="op">&gt;</span> <span class="fl">0.8</span><span class="op">)</span></span></code></pre></div>
+<code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/subset.html" class="external-link">subset</a></span><span class="op">(</span><span class="va">finemap_res</span>, <span class="va">group</span> <span class="op">==</span> <span class="st">"gene"</span> <span class="op">&amp;</span> <span class="va">susie_pip</span> <span class="op">&gt;</span> <span class="fl">0.8</span> <span class="op">&amp;</span> <span class="va">cs_index</span> <span class="op">!=</span> <span class="fl">0</span><span class="op">)</span></span></code></pre></div>
 <pre><code><span><span class="co">##                                       id group         z            region_id</span></span>
 <span><span class="co">## 17101 ENSG00000261701.6|expression_Liver  gene -18.40315 16_71020125_72901251</span></span>
 <span><span class="co">##       susie_pip      mu2 cs_index</span></span>
@@ -201,22 +201,14 @@
 <div class="sourceCode" id="cb13"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">finemap_res</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/anno_finemap_res.html">anno_finemap_res</a></span><span class="op">(</span><span class="va">finemap_res</span>, <span class="va">snp_map</span>, <span class="va">gene_annot</span>,</span>
 <span>                                use_gene_pos <span class="op">=</span> <span class="st">"mid"</span><span class="op">)</span></span></code></pre></div>
-<pre><code><span><span class="co">## 2024-08-12 11:02:13 INFO::Annotating ctwas finemapping result ...</span></span>
-<span><span class="co">## 2024-08-12 11:02:13 INFO::add gene_name and gene_type</span></span>
-<span><span class="co">## 2024-08-12 11:02:13 INFO::Remove unannotated genes</span></span>
-<span><span class="co">## 2024-08-12 11:02:13 INFO::use gene mid positions</span></span>
-<span><span class="co">## 2024-08-12 11:02:13 INFO::add SNP positions</span></span></code></pre>
+<pre><code><span><span class="co">## 2024-08-12 11:19:25 INFO::Annotating ctwas finemapping result ...</span></span>
+<span><span class="co">## 2024-08-12 11:19:25 INFO::add gene_name and gene_type</span></span>
+<span><span class="co">## 2024-08-12 11:19:25 INFO::Remove unannotated genes</span></span>
+<span><span class="co">## 2024-08-12 11:19:25 INFO::use gene mid positions</span></span>
+<span><span class="co">## 2024-08-12 11:19:25 INFO::add SNP positions</span></span></code></pre>
+<p>You can now run the command at the beginning of this section to view the genes with additional information. In this example, HPR is the only gene that satisfies PIP &gt; 0.8 and in credible sets.</p>
 <div class="sourceCode" id="cb15"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/subset.html" class="external-link">subset</a></span><span class="op">(</span><span class="va">finemap_res</span>, <span class="va">group</span> <span class="op">==</span> <span class="st">"gene"</span> <span class="op">&amp;</span> <span class="va">susie_pip</span> <span class="op">&gt;</span> <span class="fl">0.8</span><span class="op">)</span></span></code></pre></div>
-<pre><code><span><span class="co">##    chrom      pos           gene_id gene_name      gene_type</span></span>
-<span><span class="co">## 57    16 72070235 ENSG00000261701.6       HPR protein_coding</span></span>
-<span><span class="co">##                                    id group         z            region_id</span></span>
-<span><span class="co">## 57 ENSG00000261701.6|expression_Liver  gene -18.40315 16_71020125_72901251</span></span>
-<span><span class="co">##    susie_pip      mu2 cs_index</span></span>
-<span><span class="co">## 57         1 632.3152        1</span></span></code></pre>
-<p>You can now run the command at the beginning of this section to view the genes with additional information. In this example, HPR is the only gene that satisfies PIP &gt; 0.8.</p>
-<div class="sourceCode" id="cb17"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/subset.html" class="external-link">subset</a></span><span class="op">(</span><span class="va">finemap_res</span>, <span class="va">group</span> <span class="op">==</span> <span class="st">"gene"</span> <span class="op">&amp;</span> <span class="va">susie_pip</span> <span class="op">&gt;</span> <span class="fl">0.8</span><span class="op">)</span></span></code></pre></div>
+<code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/subset.html" class="external-link">subset</a></span><span class="op">(</span><span class="va">finemap_res</span>, <span class="va">group</span> <span class="op">==</span> <span class="st">"gene"</span> <span class="op">&amp;</span> <span class="va">susie_pip</span> <span class="op">&gt;</span> <span class="fl">0.8</span> <span class="op">&amp;</span> <span class="va">cs_index</span> <span class="op">!=</span> <span class="fl">0</span><span class="op">)</span></span></code></pre></div>
 <pre><code><span><span class="co">##    chrom      pos           gene_id gene_name      gene_type</span></span>
 <span><span class="co">## 57    16 72070235 ENSG00000261701.6       HPR protein_coding</span></span>
 <span><span class="co">##                                    id group         z            region_id</span></span>
@@ -229,10 +221,10 @@
 </h2>
 <p>It is often useful to visualize the results of cTWAS. This would help one understand the rationale of how cTWAS chooses a particular gene and identify issues when cTWAS doesn’t behave properly. We could use the <code><a href="../reference/make_locusplot.html">make_locusplot()</a></code> function to make locus plots for regions of interest, and zoom in the region by specifying the <code>locus_range</code>. For example:</p>
 <p>The plotting function could color the genes and SNPs based on the correlations among them. If we have computed and saved correlation matrices to <code>cor_dir</code> when running cTWAS with LD, we could simply load those precomputed correlation matrices of the region (<code>R_snp_gene</code> for gene-SNP correlations and <code>R_gene</code> for gene-gene correlations), and then make the locus plot.</p>
-<div class="sourceCode" id="cb19"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb17"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">cor_dir</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/system.file.html" class="external-link">system.file</a></span><span class="op">(</span><span class="st">"extdata/sample_data"</span>, <span class="st">"cor_matrix"</span>, package <span class="op">=</span> <span class="st">"ctwas"</span><span class="op">)</span></span>
 <span><span class="va">cor_res</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/get_region_cor.html">get_region_cor</a></span><span class="op">(</span>region_id <span class="op">=</span> <span class="st">"16_71020125_72901251"</span>, cor_dir <span class="op">=</span> <span class="va">cor_dir</span><span class="op">)</span></span></code></pre></div>
-<div class="sourceCode" id="cb20"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb18"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="../reference/make_locusplot.html">make_locusplot</a></span><span class="op">(</span><span class="va">finemap_res</span>,</span>
 <span>               region_id <span class="op">=</span> <span class="st">"16_71020125_72901251"</span>,</span>
 <span>               weights <span class="op">=</span> <span class="va">weights</span>,</span>
@@ -241,11 +233,11 @@
 <span>               highlight_pip <span class="op">=</span> <span class="fl">0.8</span>,</span>
 <span>               R_snp_gene <span class="op">=</span> <span class="va">cor_res</span><span class="op">$</span><span class="va">R_snp_gene</span>,</span>
 <span>               R_gene <span class="op">=</span> <span class="va">cor_res</span><span class="op">$</span><span class="va">R_gene</span><span class="op">)</span></span></code></pre></div>
-<pre><code><span><span class="co">## 2024-08-12 11:02:15 INFO::focal gene: HPR</span></span>
-<span><span class="co">## 2024-08-12 11:02:15 INFO::focal id: ENSG00000261701.6|expression_Liver</span></span>
-<span><span class="co">## 2024-08-12 11:02:15 INFO::plot locus range: chr16 71600000,72400000</span></span>
-<span><span class="co">## 2024-08-12 11:02:15 INFO::gene: HPR</span></span>
-<span><span class="co">## 2024-08-12 11:02:15 INFO::QTL positions: 72063820,72063928</span></span></code></pre>
+<pre><code><span><span class="co">## 2024-08-12 11:19:27 INFO::focal gene: HPR</span></span>
+<span><span class="co">## 2024-08-12 11:19:27 INFO::focal id: ENSG00000261701.6|expression_Liver</span></span>
+<span><span class="co">## 2024-08-12 11:19:27 INFO::plot locus range: chr16 71600000,72400000</span></span>
+<span><span class="co">## 2024-08-12 11:19:27 INFO::gene: HPR</span></span>
+<span><span class="co">## 2024-08-12 11:19:27 INFO::QTL positions: 72063820,72063928</span></span></code></pre>
 <div class="figure" style="text-align: center">
 <img src="summarizing_results_files/figure-html/locus_plot-1.png" alt="&amp;nbsp;" width="1200"><p class="caption">
  
@@ -254,18 +246,18 @@
 <p>The locus plot shows several tracks in the example region in chromosome 6 (71.6 - 72.4 Mb). The top one shows -log10(p-value) of the association of variants and genes with the phenotype. The next track shows the PIPs of variants and genes. The data points are colored by the correlations with the focal gene (the gene with the highest PIP, HPR in this case). The red dotted line shows the PIP cutoff of 0.8. The next track shows the locations of QTLs of the focal gene (by default, the focal gene is the gene with the highest PIP). The bottom is the gene track.</p>
 <p>In this plot, one can see that there are several genes with good associations with the phenotype, but only HPR is selected by cTWAS (PIP = 1). This is because once HPR and other likely causal variants are selected by cTWAS, there is no remaining association left in other genes. This example thus illustrates how cTWAS selects likely causal genes while controlling for nearby genes and variants.</p>
 <p>For the “no-LD” version, we could still make the locus plot. The difference is that the plot will not color the data points based on the correlations to the focal gene.</p>
-<div class="sourceCode" id="cb22"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb20"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="../reference/make_locusplot.html">make_locusplot</a></span><span class="op">(</span><span class="va">finemap_res</span>,</span>
 <span>               region_id <span class="op">=</span> <span class="st">"16_71020125_72901251"</span>,</span>
 <span>               weights <span class="op">=</span> <span class="va">weights</span>,</span>
 <span>               ens_db <span class="op">=</span> <span class="va">ens_db</span>,</span>
 <span>               locus_range <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">71.6e6</span>,<span class="fl">72.4e6</span><span class="op">)</span>,</span>
 <span>               highlight_pip <span class="op">=</span> <span class="fl">0.8</span><span class="op">)</span></span></code></pre></div>
-<pre><code><span><span class="co">## 2024-08-12 11:02:17 INFO::focal gene: HPR</span></span>
-<span><span class="co">## 2024-08-12 11:02:17 INFO::focal id: ENSG00000261701.6|expression_Liver</span></span>
-<span><span class="co">## 2024-08-12 11:02:17 INFO::plot locus range: chr16 71600000,72400000</span></span>
-<span><span class="co">## 2024-08-12 11:02:17 INFO::gene: HPR</span></span>
-<span><span class="co">## 2024-08-12 11:02:17 INFO::QTL positions: 72063820,72063928</span></span></code></pre>
+<pre><code><span><span class="co">## 2024-08-12 11:19:29 INFO::focal gene: HPR</span></span>
+<span><span class="co">## 2024-08-12 11:19:29 INFO::focal id: ENSG00000261701.6|expression_Liver</span></span>
+<span><span class="co">## 2024-08-12 11:19:29 INFO::plot locus range: chr16 71600000,72400000</span></span>
+<span><span class="co">## 2024-08-12 11:19:29 INFO::gene: HPR</span></span>
+<span><span class="co">## 2024-08-12 11:19:29 INFO::QTL positions: 72063820,72063928</span></span></code></pre>
 <div class="figure" style="text-align: center">
 <img src="summarizing_results_files/figure-html/locus_plot_noLD-1.png" alt="&amp;nbsp;" width="1200"><p class="caption">
  
