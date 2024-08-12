@@ -17,9 +17,9 @@
 #'
 #' @param use_null_weight If TRUE, allow for a probability of no effect in susie
 #'
-#' @param minvar minimum number of variables (snps and genes) in a region
+#' @param min_snps minimum number of SNPs in a region.
 #'
-#' @param mingene minimum number of genes in a region
+#' @param min_genes minimum number of genes in a region.
 #'
 #' @param ncore The number of cores used to parallelize computation over regions
 #'
@@ -43,8 +43,8 @@ est_param <- function(
     niter = 30,
     min_p_single_effect = 0.8,
     use_null_weight = TRUE,
-    minvar = 2,
-    mingene = 1,
+    min_snps = 2,
+    min_genes = 1,
     ncore = 1,
     logfile = NULL,
     verbose = FALSE,
@@ -80,20 +80,20 @@ est_param <- function(
   p_single_effect_df <- data.frame(region_id = region_ids,
                                    p_single_effect = NA)
 
-  # skip regions with fewer than mingene genes
-  if (mingene > 0) {
-    skip_region_ids <- region_ids[n_gids < mingene]
+  # skip regions with fewer than min_snps SNPs
+  if (min_snps > 0) {
+    skip_region_ids <- region_ids[n_sids < min_snps]
     if (length(skip_region_ids) > 0){
-      loginfo("Skip %d regions with number of genes < %d.", length(skip_region_ids), mingene)
+      loginfo("Skip %d regions with number of SNPs < %d.", length(skip_region_ids), min_snps)
       region_data[skip_region_ids] <- NULL
     }
   }
 
-  # skip regions with fewer than minvar variables
-  if (minvar > 0) {
-    skip_region_ids <- region_ids[(n_gids + n_sids) < minvar]
+  # skip regions with fewer than min_genes genes
+  if (min_genes > 0) {
+    skip_region_ids <- region_ids[n_gids < min_genes]
     if (length(skip_region_ids) > 0){
-      loginfo("Skip %d regions with number of variables < %d.", length(skip_region_ids), minvar)
+      loginfo("Skip %d regions with number of genes < %d.", length(skip_region_ids), min_genes)
       region_data[skip_region_ids] <- NULL
     }
   }

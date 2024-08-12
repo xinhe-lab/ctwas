@@ -10,6 +10,7 @@ finemap_single_region_noLD(
   group_prior = NULL,
   group_prior_var = NULL,
   use_null_weight = TRUE,
+  snps_only = FALSE,
   verbose = FALSE,
   ...
 )

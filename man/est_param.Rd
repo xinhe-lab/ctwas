@@ -12,8 +12,8 @@ est_param(
   niter = 30,
   min_p_single_effect = 0.8,
   use_null_weight = TRUE,
-  minvar = 2,
-  mingene = 1,
+  min_snps = 2,
+  min_genes = 1,
   ncore = 1,
   logfile = NULL,
   verbose = FALSE,
@@ -38,9 +38,9 @@ of having at most one causal effect will be selected for the final EM step.}
 
 \item{use_null_weight}{If TRUE, allow for a probability of no effect in susie}
 
-\item{minvar}{minimum number of variables (snps and genes) in a region}
+\item{min_snps}{minimum number of SNPs in a region.}
 
-\item{mingene}{minimum number of genes in a region}
+\item{min_genes}{minimum number of genes in a region.}
 
 \item{ncore}{The number of cores used to parallelize computation over regions}
 

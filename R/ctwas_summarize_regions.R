@@ -9,6 +9,10 @@
 #'
 #' @param init_L upper bound of the number of causal signals
 #'
+#' @param min_abs_corr Minimum absolute correlation allowed in a credible set.
+#'
+#' @param snps_only If TRUE, use only SNPs in the region data.
+#'
 #' @param LD_format file format for LD matrix. If "custom", use a user defined
 #' \code{LD_loader_fun()} function to load LD matrix.
 #'
@@ -30,6 +34,8 @@ estimate_region_L <- function(region_data,
                               LD_map,
                               weights,
                               init_L = 5,
+                              min_abs_corr = 0.1,
+                              snps_only = FALSE,
                               LD_format = c("rds", "rdata", "mtx", "csv", "txt", "custom"),
                               LD_loader_fun,
                               ncore = 1,
@@ -39,12 +45,17 @@ estimate_region_L <- function(region_data,
   # check inputs
   LD_format <- match.arg(LD_format)
 
+  if (snps_only)
+    loginfo("Use SNPs only when estimating L")
+
   # fine-mapping using uniform prior
   finemap_unif_prior_res <- finemap_regions(region_data,
                                             LD_map = LD_map,
                                             weights = weights,
                                             L = init_L,
+                                            min_abs_corr = min_abs_corr,
                                             include_cs_index = TRUE,
+                                            snps_only = snps_only,
                                             LD_format = LD_format,
                                             LD_loader_fun = LD_loader_fun,
                                             ncore = ncore,

@@ -44,10 +44,7 @@
 #' @param coverage A number between 0 and 1 specifying the \dQuote{coverage} of
 #' the estimated confidence sets.
 #'
-#' @param min_abs_corr Minimum absolute correlation allowed in a
-#'.  credible set. The default, 0.5, corresponds to a squared
-#'   correlation of 0.25, which is a commonly used threshold for
-#'   genotype data in genetic studies.
+#' @param min_abs_corr Minimum absolute correlation allowed in a credible set.
 #'
 #' @param LD_format file format for LD matrix. If "custom", use a user defined
 #' \code{LD_loader_fun()} function to load LD matrix.
@@ -103,7 +100,7 @@ ctwas_sumstats <- function(
     maxSNP = Inf,
     use_null_weight = TRUE,
     coverage = 0.95,
-    min_abs_corr = 0.5,
+    min_abs_corr = 0.1,
     LD_format = c("rds", "rdata", "mtx", "csv", "txt", "custom"),
     LD_loader_fun,
     force_compute_cor = FALSE,
@@ -148,7 +145,8 @@ ctwas_sumstats <- function(
   if (!is.null(outputdir))
     dir.create(outputdir, showWarnings=FALSE, recursive=TRUE)
 
-  loginfo("ncore: %d", ncore)
+  loginfo("ncore = %d", ncore)
+  loginfo("ncore_LD = %d", ncore_LD)
 
   # Compute gene z-scores
   if (missing(z_gene)) {
@@ -201,25 +199,24 @@ ctwas_sumstats <- function(
     saveRDS(param, file.path(outputdir, paste0(outname, ".param.RDS")))
   }
 
-  loginfo("ncore for screening regions and fine-mapping: %d", ncore_LD)
-
   # Screen regions
   #. fine-map all regions with thinned SNPs
   #. select regions with L > 0 or with high non-SNP PIP
   screen_res <- screen_regions(region_data,
-                                       LD_map = LD_map,
-                                       weights = weights,
-                                       group_prior = group_prior,
-                                       group_prior_var = group_prior_var,
-                                       L = L,
-                                       filter_L = filter_L,
-                                       filter_nonSNP_PIP = filter_nonSNP_PIP,
-                                       min_nonSNP_PIP = min_nonSNP_PIP,
-                                       LD_format = LD_format,
-                                       LD_loader_fun = LD_loader_fun,
-                                       ncore = ncore_LD,
-                                       verbose = verbose,
-                                       ...)
+                               LD_map = LD_map,
+                               weights = weights,
+                               group_prior = group_prior,
+                               group_prior_var = group_prior_var,
+                               L = L,
+                               filter_L = filter_L,
+                               filter_nonSNP_PIP = filter_nonSNP_PIP,
+                               min_nonSNP_PIP = min_nonSNP_PIP,
+                               min_abs_corr = min_abs_corr,
+                               LD_format = LD_format,
+                               LD_loader_fun = LD_loader_fun,
+                               ncore = ncore_LD,
+                               verbose = verbose,
+                               ...)
   screened_region_data <- screen_res$screened_region_data
   screened_region_L <- screen_res$screened_region_L
 

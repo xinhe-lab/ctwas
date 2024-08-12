@@ -16,12 +16,11 @@
 #'
 #' @param coverage A number between 0 and 1 specifying the \dQuote{coverage} of the estimated confidence sets
 #'
-#' @param min_abs_corr Minimum absolute correlation allowed in a
-#'   credible set. The default, 0.5, corresponds to a squared
-#'   correlation of 0.25, which is a commonly used threshold for
-#'   genotype data in genetic studies.
+#' @param min_abs_corr Minimum absolute correlation allowed in a credible set.
 #'
 #' @param include_cs_index If TRUE, add cs_index to finemapping results.
+#'
+#' @param snps_only If TRUE, use only SNPs in the region data.
 #'
 #' @param force_compute_cor If TRUE, force computing correlation (R) matrices
 #'
@@ -57,8 +56,9 @@ finemap_regions <- function(region_data,
                             group_prior_var = NULL,
                             use_null_weight = TRUE,
                             coverage = 0.95,
-                            min_abs_corr = 0.5,
+                            min_abs_corr = 0.1,
                             include_cs_index = TRUE,
+                            snps_only = FALSE,
                             force_compute_cor = FALSE,
                             save_cor = FALSE,
                             cor_dir = NULL,
@@ -115,6 +115,11 @@ finemap_regions <- function(region_data,
     }
   }
 
+  if (verbose) {
+    loginfo("coverage = %s", coverage)
+    loginfo("min_abs_corr = %s", min_abs_corr)
+  }
+
   region_ids <- names(region_data)
 
   finemap_res_list <- mclapply_check(region_ids, function(region_id){
@@ -130,6 +135,7 @@ finemap_regions <- function(region_data,
                           coverage = coverage,
                           min_abs_corr = min_abs_corr,
                           include_cs_index = include_cs_index,
+                          snps_only = snps_only,
                           force_compute_cor = force_compute_cor,
                           save_cor = save_cor,
                           cor_dir = cor_dir,
@@ -154,7 +160,9 @@ finemap_regions <- function(region_data,
 #'
 #' @param group_prior_var a vector of two prior variances for SNPs and gene effects.
 #'
-#' @param use_null_weight If TRUE, allow for a probability of no effect in susie
+#' @param use_null_weight If TRUE, allow for a probability of no effect in susie.
+#'
+#' @param snps_only If TRUE, use only SNPs in the region data.
 #'
 #' @param ncore The number of cores used to parallelize computation over regions
 #'
@@ -175,6 +183,7 @@ finemap_regions_noLD <- function(region_data,
                                  group_prior = NULL,
                                  group_prior_var = NULL,
                                  use_null_weight = TRUE,
+                                 snps_only = FALSE,
                                  ncore = 1,
                                  verbose = FALSE,
                                  logfile = NULL,
@@ -207,6 +216,7 @@ finemap_regions_noLD <- function(region_data,
                                group_prior = group_prior,
                                group_prior_var = group_prior_var,
                                use_null_weight = use_null_weight,
+                               snps_only = snps_only,
                                verbose = verbose,
                                ...)
 
@@ -238,10 +248,7 @@ finemap_regions_noLD <- function(region_data,
 #'
 #' @param coverage A number between 0 and 1 specifying the \dQuote{coverage} of the estimated confidence sets
 #'
-#' @param min_abs_corr Minimum absolute correlation allowed in a
-#'   credible set. The default, 0.5, corresponds to a squared
-#'   correlation of 0.25, which is a commonly used threshold for
-#'   genotype data in genetic studies.
+#' @param min_abs_corr Minimum absolute correlation allowed in a credible set.
 #'
 #' @param force_compute_cor If TRUE, force computing correlation (R) matrices
 #'
@@ -276,8 +283,9 @@ finemap_single_region <- function(region_data,
                                   group_prior_var = NULL,
                                   use_null_weight = TRUE,
                                   coverage = 0.95,
-                                  min_abs_corr = 0.5,
+                                  min_abs_corr = 0.1,
                                   include_cs_index = TRUE,
+                                  snps_only = FALSE,
                                   force_compute_cor = FALSE,
                                   save_cor = FALSE,
                                   cor_dir = NULL,
@@ -307,7 +315,7 @@ finemap_single_region <- function(region_data,
     stop("'weights' contain NULL, remove empty weights!")
 
   # load input data for the region
-  regiondata <- extract_region_data(region_data, region_id)
+  regiondata <- extract_region_data(region_data, region_id, snps_only = snps_only)
   gids <- regiondata$gid
   sids <- regiondata$sid
   z <- regiondata$z
@@ -338,7 +346,8 @@ finemap_single_region <- function(region_data,
   rm(res)
 
   cor_res <- get_region_cor(region_id,
-                            region_data = region_data,
+                            sids = sids,
+                            gids = gids,
                             LD_map = LD_map,
                             weights = weights,
                             force_compute_cor = force_compute_cor,
@@ -409,6 +418,7 @@ finemap_single_region_noLD <- function(region_data,
                                        group_prior = NULL,
                                        group_prior_var = NULL,
                                        use_null_weight = TRUE,
+                                       snps_only = FALSE,
                                        verbose = FALSE,
                                        ...){
 
@@ -421,7 +431,7 @@ finemap_single_region_noLD <- function(region_data,
   }
 
   # load input data for the region
-  regiondata <- extract_region_data(region_data, region_id)
+  regiondata <- extract_region_data(region_data, region_id, snps_only = snps_only)
   gids <- regiondata$gid
   sids <- regiondata$sid
   z <- regiondata$z

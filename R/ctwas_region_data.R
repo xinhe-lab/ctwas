@@ -138,7 +138,7 @@ assemble_region_data <- function(region_info,
                                   maxSNP = maxSNP, seed = seed)
 
   # add z-scores to region_data
-  loginfo("add region z-scores")
+  loginfo("Add region z-scores")
   region_data <- update_region_z(region_data, z_snp, z_gene, ncore = ncore)
 
   return(list("region_data" = region_data,
@@ -418,7 +418,7 @@ expand_region_data <- function(region_data,
 # extract data for a region from region_data
 extract_region_data <- function(region_data,
                                 region_id,
-                                keep_snps_only = FALSE){
+                                snps_only = FALSE){
 
   if (!inherits(region_data,"list"))
     stop("'region_data' should be a list.")
@@ -428,7 +428,7 @@ extract_region_data <- function(region_data,
   stopifnot(all.equal(regiondata$sid, regiondata$z_snp$id))
   stopifnot(all.equal(regiondata$gid, regiondata$z_gene$id))
 
-  if (keep_snps_only) {
+  if (snps_only) {
     regiondata$gid <- NULL
     regiondata$z_gene <- NULL
     regiondata$z <- regiondata$z_snp$z
@@ -450,19 +450,19 @@ extract_region_data <- function(region_data,
 
 # create fine-mapping input region data of the earlier version
 create_finemap_input_region_data <- function(region_data,
-                                             keep_snps_only = FALSE){
+                                             snps_only = FALSE){
 
   if (!inherits(region_data,"list"))
     stop("'region_data' should be a list.")
 
-  if (keep_snps_only)
+  if (snps_only)
     loginfo("Keep SNPs only")
 
   region_ids <- names(region_data)
 
   region_data2 <- lapply(region_ids, function(region_id){
     regiondata <- extract_region_data(region_data, region_id,
-                                      keep_snps_only = keep_snps_only)
+                                      snps_only = snps_only)
   })
   names(region_data2) <- region_ids
 

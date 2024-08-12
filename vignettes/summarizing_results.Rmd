@@ -183,3 +183,4 @@ make_locusplot(finemap_res,
 ```
 
 
+Note, if you got an error message `Viewport has zero dimension(s)` when making the plot, it usually suggests the R viewer window is too small. You can try increasing the size of the viewer window size to try again. 

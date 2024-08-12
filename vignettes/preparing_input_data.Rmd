@@ -124,7 +124,7 @@ We have precomputed reference LD matrices (`.RDS` files) and the variant informa
 The complete LD matrices of European individuals from UK Biobank can be downloaded [here](https://uchicago.box.com/s/jqocacd2fulskmhoqnasrknbt59x3xkn). 
 On the University of Chicago RCC cluster, the b38 reference is available at `/project2/mstephens/wcrouse/UKB_LDR_0.1/` and the b37 reference is available at `/project2/mstephens/wcrouse/UKB_LDR_0.1_b37/`.
 
-The columns of the `.Rvar` file include information on chromosome, variant name, position in base pairs, and the alternative and reference alleles. The `variance` column is the variance of each variant prior to standardization; this is required for PredictDB weights but not FUSION weights. We've also included information on allele frequency in the variant info, but this is optional.
+The columns of the `.Rvar` file include information on chromosome, variant name, position in base pairs, and the alternative and reference alleles. The `variance` column is the variance of each variant prior to standardization; this is required for PredictDB weights but not FUSION weights. We've also included information on allele frequency (for the alternative alleles) in the variant info, but this is optional, and not used in the program. 
 
 Each variant should be uniquely assigned to a region, and the regions should be left closed and right open, i.e. [start, stop). The positions of the LD matrices must match exactly the positions specified by the region file. Do not include multiallelic variants in the LD reference. 
 
@@ -156,7 +156,7 @@ LD_map <- res$LD_map
 
 
 
-### Mapping reference SNPs to regions
+### Mapping reference SNPs to regions (without LD)
 
 When preparing data without LD, we need `region_info` (region definitions, no need to provide "LD_file" and "SNP_file" columns) and `ref_snp_info`, a data frame containing information of all variants from the reference. 
 

@@ -116,7 +116,7 @@ We used `estimate_L=TRUE` to estimate the number of credible sets (`L`) for the 
 
 Next, we run fine-mapping again for these merged regions, similar to the section "Fine-mapping screened regions" in the tutorial "Running cTWAS analysis".
 
-```{r screen_merged_regions, eval=FALSE}
+```{r finemap_merged_regions, eval=FALSE}
 finemap_merged_regions_res <- finemap_regions(merged_region_data,
                                               LD_map = merged_LD_map,
                                               weights = weights,
@@ -128,18 +128,18 @@ finemap_merged_regions_res <- finemap_regions(merged_region_data,
 ```
 
 
-The output of this function has the same format as those from regular cTWAS analysis. It returns fine-mapping results for merged regions (`finemap_merged_regions_res`). 
+The output of this function has the same format as those from regular cTWAS analysis. It returns fine-mapping results for merged regions. 
 
 We can also run these steps without LD, using the functions `merge_region_data_noLD()`.
 
 ```{r merge_region_data_noLD, eval=FALSE}
- merge_region_res <- merge_region_data_noLD(boundary_genes,
-                                            region_data,
-                                            region_info = region_info,
-                                            snp_map = snp_map,
-                                            z_snp = z_snp,
-                                            z_gene = z_gene,
-                                            maxSNP = 20000)
+merge_region_res <- merge_region_data_noLD(boundary_genes,
+                                           region_data,
+                                           region_info = region_info,
+                                           snp_map = snp_map,
+                                           z_snp = z_snp,
+                                           z_gene = z_gene,
+                                           maxSNP = 20000)
 merged_region_data <- merge_region_res$merged_region_data
 merged_region_info <- merge_region_res$merged_region_info
 merged_snp_map <- merge_region_res$merged_snp_map
