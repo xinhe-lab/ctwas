@@ -20,6 +20,7 @@ test_that("ctwas_sumstats works", {
                                 snp_map,
                                 thin = 0.1,
                                 maxSNP = 20000,
+                                min_abs_corr = 0.1,
                                 ncore = 2,
                                 ncore_LD = 2)
   })
@@ -58,6 +59,7 @@ test_that("ctwas_sumstats with nonSNP_PIP filtering works", {
                                 filter_L = FALSE,
                                 filter_nonSNP_PIP = TRUE,
                                 min_nonSNP_PIP = 0.5,
+                                min_abs_corr = 0.1,
                                 ncore = 2,
                                 ncore_LD = 2)
   })

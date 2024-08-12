@@ -14,8 +14,9 @@ finemap_single_region(
   group_prior_var = NULL,
   use_null_weight = TRUE,
   coverage = 0.95,
-  min_abs_corr = 0.5,
+  min_abs_corr = 0.1,
   include_cs_index = TRUE,
+  snps_only = FALSE,
   force_compute_cor = FALSE,
   save_cor = FALSE,
   cor_dir = NULL,
@@ -44,12 +45,11 @@ finemap_single_region(
 
 \item{coverage}{A number between 0 and 1 specifying the \dQuote{coverage} of the estimated confidence sets}
 
-\item{min_abs_corr}{Minimum absolute correlation allowed in a
-credible set. The default, 0.5, corresponds to a squared
-correlation of 0.25, which is a commonly used threshold for
-genotype data in genetic studies.}
+\item{min_abs_corr}{Minimum absolute correlation allowed in a credible set.}
 
 \item{include_cs_index}{If TRUE, add cs_index to finemapping results.}
+
+\item{snps_only}{If TRUE, use only SNPs in the region data.}
 
 \item{force_compute_cor}{If TRUE, force computing correlation (R) matrices}
 

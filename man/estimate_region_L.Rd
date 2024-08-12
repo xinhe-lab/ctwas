@@ -9,6 +9,8 @@ estimate_region_L(
   LD_map,
   weights,
   init_L = 5,
+  min_abs_corr = 0.1,
+  snps_only = FALSE,
   LD_format = c("rds", "rdata", "mtx", "csv", "txt", "custom"),
   LD_loader_fun,
   ncore = 1,
@@ -24,6 +26,10 @@ estimate_region_L(
 \item{weights}{a list of preprocessed weights.}
 
 \item{init_L}{upper bound of the number of causal signals}
+
+\item{min_abs_corr}{Minimum absolute correlation allowed in a credible set.}
+
+\item{snps_only}{If TRUE, use only SNPs in the region data.}
 
 \item{LD_format}{file format for LD matrix. If "custom", use a user defined
 \code{LD_loader_fun()} function to load LD matrix.}

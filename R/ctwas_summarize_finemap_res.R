@@ -139,6 +139,7 @@ anno_finemap_res <- function(finemap_res,
 #' @importFrom stats na.omit
 #' @importFrom ensembldb genes
 #' @importFrom AnnotationFilter GeneIdFilter
+#' @importFrom logging loginfo
 #'
 #' @export
 get_gene_annot_from_ens_db <- function(ens_db, gene_ids) {
@@ -150,8 +151,7 @@ get_gene_annot_from_ens_db <- function(ens_db, gene_ids) {
   gene_annot_gr <- genes(ens_db, filter = GeneIdFilter(gene_ids_trimmed))
   annot_idx <- match(gene_ids_trimmed, gene_annot_gr$gene_id)
   if (anyNA(annot_idx)) {
-    warning(sprintf("remove %d gene_ids not found in ens_db.",
-                    length(which(is.na(annot_idx)))))
+    loginfo("Remove %d gene_ids not found in ens_db.", length(which(is.na(annot_idx))))
     gene_ids <- gene_ids[!is.na(annot_idx)]
     gene_ids_trimmed <- gene_ids_trimmed[!is.na(annot_idx)]
     annot_idx <- annot_idx[!is.na(annot_idx)]

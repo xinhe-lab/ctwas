@@ -26,7 +26,7 @@ ctwas_sumstats(
   maxSNP = Inf,
   use_null_weight = TRUE,
   coverage = 0.95,
-  min_abs_corr = 0.5,
+  min_abs_corr = 0.1,
   LD_format = c("rds", "rdata", "mtx", "csv", "txt", "custom"),
   LD_loader_fun,
   save_cor = FALSE,
@@ -92,10 +92,7 @@ have enough memory to run the program.}
 \item{coverage}{A number between 0 and 1 specifying the \dQuote{coverage} of
 the estimated confidence sets.}
 
-\item{min_abs_corr}{Minimum absolute correlation allowed in a
-.  credible set. The default, 0.5, corresponds to a squared
-  correlation of 0.25, which is a commonly used threshold for
-  genotype data in genetic studies.}
+\item{min_abs_corr}{Minimum absolute correlation allowed in a credible set.}
 
 \item{LD_format}{file format for LD matrix. If "custom", use a user defined
 \code{LD_loader_fun()} function to load LD matrix.}

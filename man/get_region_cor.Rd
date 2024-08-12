@@ -6,7 +6,8 @@
 \usage{
 get_region_cor(
   region_id,
-  region_data,
+  sids,
+  gids,
   LD_map,
   weights,
   force_compute_cor = FALSE,
@@ -20,7 +21,9 @@ get_region_cor(
 \arguments{
 \item{region_id}{a character string of region id to be finemapped}
 
-\item{region_data}{a list object with data for the regions}
+\item{sids}{SNP IDs in the region}
+
+\item{gids}{gene IDs in the region}
 
 \item{LD_map}{a data frame with filenames of LD matrices and SNP information for the regions.}
 
@@ -40,7 +43,7 @@ get_region_cor(
 \item{verbose}{If TRUE, print detail messages}
 }
 \value{
-a list of correlation matrices (R_snp, R_snp_gene and R_gene)
+correlation matrices (R_snp, R_snp_gene and R_gene)
 }
 \description{
 Loads precomputed correlation matrices if available in \code{cor_dir},
