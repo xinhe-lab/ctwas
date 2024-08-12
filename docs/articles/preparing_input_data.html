@@ -32,7 +32,7 @@
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">ctwas</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">0.3.23</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">0.3.24</span>
       </span>
     </div>
 
@@ -89,7 +89,7 @@
       <h1 data-toc-skip>Preparing cTWAS input data</h1>
                         <h4 data-toc-skip class="author">Kaixuan Luo, Sheng Qian</h4>
             
-            <h4 data-toc-skip class="date">2024-08-05</h4>
+            <h4 data-toc-skip class="date">2024-08-12</h4>
       
       <small class="dont-index">Source: <a href="https://github.com/xinhe-lab/ctwas/blob/singlegroup/vignettes/preparing_input_data.Rmd" class="external-link"><code>vignettes/preparing_input_data.Rmd</code></a></small>
       <div class="hidden name"><code>preparing_input_data.Rmd</code></div>
@@ -173,7 +173,7 @@
 <p>By default, we need a LD matrix file for each region (preferably in <code>.RDS</code> format) and a variant information table accompanying each LD matrix. The <code>.RDS</code> files store the LD correlation matrix (R) for each region (a <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>p</mi><mo>×</mo><mi>p</mi></mrow><annotation encoding="application/x-tex">p \times p</annotation></semantics></math> matrix, <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>p</mi><annotation encoding="application/x-tex">p</annotation></semantics></math> is the number of variants in the region). The accompanying <code>.Rvar</code> files include variant information for the region, and the order of its rows should match the order of rows and columns in the <code>.RDS</code> file.</p>
 <p>We have precomputed reference LD matrices (<code>.RDS</code> files) and the variant information tables (<code>.Rvar</code> files) accompanying the LD matrices for UK Biobank. LD matrices were computed on 10% of the UK Biobank independent, White British samples for variants with MAF &gt; 1%.</p>
 <p>The complete LD matrices of European individuals from UK Biobank can be downloaded <a href="https://uchicago.box.com/s/jqocacd2fulskmhoqnasrknbt59x3xkn" class="external-link">here</a>. On the University of Chicago RCC cluster, the b38 reference is available at <code>/project2/mstephens/wcrouse/UKB_LDR_0.1/</code> and the b37 reference is available at <code>/project2/mstephens/wcrouse/UKB_LDR_0.1_b37/</code>.</p>
-<p>The columns of the <code>.Rvar</code> file include information on chromosome, variant name, position in base pairs, and the alternative and reference alleles. The <code>variance</code> column is the variance of each variant prior to standardization; this is required for PredictDB weights but not FUSION weights. We’ve also included information on allele frequency in the variant info, but this is optional.</p>
+<p>The columns of the <code>.Rvar</code> file include information on chromosome, variant name, position in base pairs, and the alternative and reference alleles. The <code>variance</code> column is the variance of each variant prior to standardization; this is required for PredictDB weights but not FUSION weights. We’ve also included information on allele frequency (for the alternative alleles) in the variant info, but this is optional, and not used in the program.</p>
 <p>Each variant should be uniquely assigned to a region, and the regions should be left closed and right open, i.e. [start, stop). The positions of the LD matrices must match exactly the positions specified by the region file. Do not include multiallelic variants in the LD reference.</p>
 </div>
 <div class="section level3">
@@ -198,7 +198,7 @@
 <span><span class="va">LD_map</span> <span class="op">&lt;-</span> <span class="va">res</span><span class="op">$</span><span class="va">LD_map</span></span></code></pre></div>
 </div>
 <div class="section level3">
-<h3 id="mapping-reference-snps-to-regions">Mapping reference SNPs to regions<a class="anchor" aria-label="anchor" href="#mapping-reference-snps-to-regions"></a>
+<h3 id="mapping-reference-snps-to-regions-without-ld">Mapping reference SNPs to regions (without LD)<a class="anchor" aria-label="anchor" href="#mapping-reference-snps-to-regions-without-ld"></a>
 </h3>
 <p>When preparing data without LD, we need <code>region_info</code> (region definitions, no need to provide “LD_file” and “SNP_file” columns) and <code>ref_snp_info</code>, a data frame containing information of all variants from the reference.</p>
 <p>We have the reference variant information from UK Biobank European population in <a href="https://uchicago.box.com/s/t089or92dkovv0epkrjvxq8r9db9ys99" class="external-link">hg38</a> and <a href="https://uchicago.box.com/s/ufko2gjagcb693dob4khccqubuztb9pz" class="external-link">hg19</a>.</p>

@@ -32,7 +32,7 @@
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">ctwas</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">0.3.23</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">0.3.24</span>
       </span>
     </div>
 
@@ -89,7 +89,7 @@
       <h1 data-toc-skip>Running cTWAS analysis</h1>
                         <h4 data-toc-skip class="author">Kaixuan Luo, Sheng Qian</h4>
             
-            <h4 data-toc-skip class="date">2024-08-05</h4>
+            <h4 data-toc-skip class="date">2024-08-12</h4>
       
       <small class="dont-index">Source: <a href="https://github.com/xinhe-lab/ctwas/blob/singlegroup/vignettes/running_ctwas_analysis.Rmd" class="external-link"><code>vignettes/running_ctwas_analysis.Rmd</code></a></small>
       <div class="hidden name"><code>running_ctwas_analysis.Rmd</code></div>
@@ -141,12 +141,12 @@
 <ul>
 <li><p><code>z_gene</code>: computed Z-scores of the genes. If not provided, it will compute those using <code>z_snp</code> and <code>weights</code>.</p></li>
 <li><p><code>thin</code>: the fraction of SNPs used to estimate parameters and screen regions likely containing signals. By sampling a fraction of SNPs, this speeds up computation. By default, we use <code>thin = 0.1</code>, i.e. 10% of the SNPs. To use all SNPs in parameter estimation and screening regions, one could change the <code>thin</code> parameter to 1.</p></li>
-<li><p><code>maxSNP</code>: Maximum number of SNPs in a region (e.g. 20000). Default is Inf, no limit. This can be useful if there are too many SNPs in a region and you don’t have enough memory to run the program.</p></li>
-<li><p><code>filter_L</code>: If <code>filter_L = TRUE</code> (the default option), cTWAS will first estimate the number of causal signals (L) for each region. This step is done using uniform prior, treating all variants and genes equally. From the results, we obtain the number of credible sets (L). We then select regions with at least one credible set, L &gt; 0.</p></li>
-<li><p><code>filter_nonSNP_PIP</code> and <code>min_nonSNP_PIP</code>: If <code>filter_nonSNP_PIP = TRUE</code>, it will compute the non-SNP PIP, i.e. the total PIP of all molecular traits, for each region (using the estimated parameters) and select regions with non-SNP PIP &gt; <code>min_nonSNP_PIP</code> (0.5 by default`).</p></li>
+<li><p><code>maxSNP</code>: maximum number of SNPs in a region (e.g. 20000). Default is Inf, no limit. This can be useful if there are too many SNPs in a region and you don’t have enough memory to run the program.</p></li>
+<li><p><code>filter_L</code>: if <code>filter_L = TRUE</code> (the default option), cTWAS will first estimate the number of causal signals (<code>L</code>) for each region. This step is done using uniform prior, treating all variants and genes equally. From the results, we obtain the number of credible sets (<code>L</code>). We then select regions with at least one credible set, L &gt; 0.</p></li>
+<li><p><code>filter_nonSNP_PIP</code> and <code>min_nonSNP_PIP</code>: if <code>filter_nonSNP_PIP = TRUE</code>, it will compute the non-SNP PIP, i.e. the total PIP of all genes, for each region (using the estimated parameters) and select regions with non-SNP PIP &gt; <code>min_nonSNP_PIP</code> (0.5 by default`).</p></li>
 <li><p><code>ncore</code>: the number of cores to parallelize computing over regions.</p></li>
 <li><p><code>ncore_LD</code>: the number of cores to parallelize computing over regions with LD matrices. During screening regions and fine-mapping steps, computing correlation matrices requires larger memory. You could reduce the number of cores for these steps to avoid insufficient memory.</p></li>
-<li><p><code>save_cor</code> and <code>cor_dir</code>: If <code>save_cor = TRUE</code>, we save the correlation matrices in the <code>cor_dir</code>directory, which will be used later for visualizing the results.</p></li>
+<li><p><code>save_cor</code> and <code>cor_dir</code>: if <code>save_cor = TRUE</code>, we save the correlation matrices in the <code>cor_dir</code>directory, which will be used later for visualizing the results.</p></li>
 </ul>
 <p>To understand and summarize the results from cTWAS, please read the tutorial “Summarizing and visualizing cTWAS results”.</p>
 <p><em>Note:</em> One can run cTWAS without using reference LD data. See “A minimal tutorial of running cTWAS without LD”. That tutorial describes how to run cTWAS in a single step.</p>
@@ -201,8 +201,8 @@
 <p>After parameter estimation, we use the <code><a href="../reference/screen_regions.html">screen_regions()</a></code> function to perform a screening process to select regions with likely causal signals in genes. To find these regions, we perform an initial fine-mapping with thinned SNPs (a subset of all variants, see the Section “Assemble input data”). Only these regions would be subject to full fine-mapping analysis, using all variants, in the final step. Thus screening regions can save computational time.</p>
 <p>cTWAS have two options to screen regions:</p>
 <ul>
-<li><p>screening by the number of causal signals: If <code>filter_L = TRUE</code> (the default option), cTWAS will first estimate the number of causal signals (L) for each region. This step is done using uniform prior (<code>group_prior = NULL</code> and <code>group_prior_var = NULL</code>), treating all variants and genes equally. From the results, we obtain the number of credible sets (L). We then select regions with at least one credible set, L &gt; 0.</p></li>
-<li><p>screening by non-SNP PIPs: If <code>filter_nonSNP_PIP = TRUE</code>, cTWAS will compute the non-SNP PIP, i.e. total PIP of all genes, for each region (using estimated L and estimated priors). It then selects regions by applying a <code>min_nonSNP_PIP</code> cutoff (0.5, by default).</p></li>
+<li><p>screening by the number of causal signals: if <code>filter_L = TRUE</code> (the default option), cTWAS will first estimate the number of causal signals (<code>L</code>) for each region. This step is done using uniform prior (<code>group_prior = NULL</code> and <code>group_prior_var = NULL</code>), treating all variants and genes equally. From the results, we obtain the number of credible sets (<code>L</code>). We then select regions with at least one credible set, L &gt; 0.</p></li>
+<li><p>screening by non-SNP PIPs: if <code>filter_nonSNP_PIP = TRUE</code>, cTWAS will compute the non-SNP PIP, i.e. total PIP of all genes, for each region (using estimated L and estimated priors). It then selects regions by applying a <code>min_nonSNP_PIP</code> cutoff (0.5, by default).</p></li>
 </ul>
 <p>When running with LD, we recommend screening by the number of causal signals, i.e. setting <code>filter_L = TRUE</code> and <code>filter_nonSNP_PIP = FALSE</code>.</p>
 <div class="sourceCode" id="cb7"><pre class="downlit sourceCode r">
@@ -254,7 +254,7 @@
 <span id="cb10-8"><a href="#cb10-8"></a>                               <span class="dt">cor_dir =</span> <span class="st">"./cor_matrix"</span>,</span>
 <span id="cb10-9"><a href="#cb10-9"></a>                               <span class="dt">ncore =</span> <span class="dv">4</span>)</span></code></pre></div>
 <p>We can save the computed correlation matrices to the directory <code>cor_dir</code> for future access, by setting <code>save_cor = TRUE</code>.</p>
-<p><em>Note</em>: when screening and fine-mapping regions with LD, we need larger memory to load LD matrices and compute correlation matrices. So we recommend increasing memory or reducing the number of <code>ncore</code> for these steps.</p>
+<p><em>Note:</em> when screening regions and fine-mapping with LD, we need larger memory to load LD matrices and compute correlation matrices. So we recommend increasing memory or reducing the number of <code>ncore</code> for these steps.</p>
 <p><em>Note:</em> we could use the <code><a href="../reference/finemap_regions_noLD.html">finemap_regions_noLD()</a></code> function to run fine-mapping without LD:</p>
 <div class="sourceCode" id="cb11"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">finemap_res</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/finemap_regions_noLD.html">finemap_regions_noLD</a></span><span class="op">(</span><span class="va">screened_region_data</span>,</span>

@@ -32,7 +32,7 @@
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">ctwas</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">0.3.23</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">0.3.24</span>
       </span>
     </div>
 
@@ -89,7 +89,7 @@
       <h1 data-toc-skip>Post-processing cTWAS results</h1>
                         <h4 data-toc-skip class="author">Kaixuan Luo, Sheng Qian</h4>
             
-            <h4 data-toc-skip class="date">2024-08-05</h4>
+            <h4 data-toc-skip class="date">2024-08-12</h4>
       
       <small class="dont-index">Source: <a href="https://github.com/xinhe-lab/ctwas/blob/singlegroup/vignettes/postprocessing.Rmd" class="external-link"><code>vignettes/postprocessing.Rmd</code></a></small>
       <div class="hidden name"><code>postprocessing.Rmd</code></div>
@@ -174,16 +174,16 @@
 <span>                                              L <span class="op">=</span> <span class="va">merged_region_L</span>,</span>
 <span>                                              save_cor <span class="op">=</span> <span class="cn">TRUE</span>,</span>
 <span>                                              cor_dir <span class="op">=</span> <span class="st">"./cor_matrix"</span><span class="op">)</span></span></code></pre></div>
-<p>The output of this function has the same format as those from regular cTWAS analysis. It returns fine-mapping results for merged regions (<code>finemap_merged_regions_res</code>).</p>
+<p>The output of this function has the same format as those from regular cTWAS analysis. It returns fine-mapping results for merged regions.</p>
 <p>We can also run these steps without LD, using the functions <code><a href="../reference/merge_region_data_noLD.html">merge_region_data_noLD()</a></code>.</p>
 <div class="sourceCode" id="cb8"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span> <span class="va">merge_region_res</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/merge_region_data_noLD.html">merge_region_data_noLD</a></span><span class="op">(</span><span class="va">boundary_genes</span>,</span>
-<span>                                            <span class="va">region_data</span>,</span>
-<span>                                            region_info <span class="op">=</span> <span class="va">region_info</span>,</span>
-<span>                                            snp_map <span class="op">=</span> <span class="va">snp_map</span>,</span>
-<span>                                            z_snp <span class="op">=</span> <span class="va">z_snp</span>,</span>
-<span>                                            z_gene <span class="op">=</span> <span class="va">z_gene</span>,</span>
-<span>                                            maxSNP <span class="op">=</span> <span class="fl">20000</span><span class="op">)</span></span>
+<code class="sourceCode R"><span><span class="va">merge_region_res</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/merge_region_data_noLD.html">merge_region_data_noLD</a></span><span class="op">(</span><span class="va">boundary_genes</span>,</span>
+<span>                                           <span class="va">region_data</span>,</span>
+<span>                                           region_info <span class="op">=</span> <span class="va">region_info</span>,</span>
+<span>                                           snp_map <span class="op">=</span> <span class="va">snp_map</span>,</span>
+<span>                                           z_snp <span class="op">=</span> <span class="va">z_snp</span>,</span>
+<span>                                           z_gene <span class="op">=</span> <span class="va">z_gene</span>,</span>
+<span>                                           maxSNP <span class="op">=</span> <span class="fl">20000</span><span class="op">)</span></span>
 <span><span class="va">merged_region_data</span> <span class="op">&lt;-</span> <span class="va">merge_region_res</span><span class="op">$</span><span class="va">merged_region_data</span></span>
 <span><span class="va">merged_region_info</span> <span class="op">&lt;-</span> <span class="va">merge_region_res</span><span class="op">$</span><span class="va">merged_region_info</span></span>
 <span><span class="va">merged_snp_map</span> <span class="op">&lt;-</span> <span class="va">merge_region_res</span><span class="op">$</span><span class="va">merged_snp_map</span></span>

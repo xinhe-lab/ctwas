@@ -137,10 +137,15 @@ We then use the `anno_finemap_res()` function to add gene annotations to the fin
 ```{r add_gene_names}
 finemap_res <- anno_finemap_res(finemap_res, snp_map, gene_annot,
                                 use_gene_pos = "mid")
+subset(finemap_res, group == "gene" & susie_pip > 0.8)
 ```
 
 
 You can now run the command at the beginning of this section to view the genes with additional information. In this example, HPR is the only gene that satisfies PIP > 0.8.
+
+```{r interpret_res_2}
+subset(finemap_res, group == "gene" & susie_pip > 0.8)
+```
 
 
 ## Visualizing the cTWAS results
