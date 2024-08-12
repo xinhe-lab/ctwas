@@ -80,6 +80,7 @@
 #' @param ... Additional arguments of \code{susie_rss}.
 #'
 #' @importFrom logging addHandler loginfo writeToFile
+#' @importFrom utils packageVersion
 #'
 #' @return a list, including z_gene, estimated parameters, region_data,
 #' cross-boundary genes, screening region results, and fine-mapping results.
@@ -110,6 +111,7 @@ ctwas_sumstats <- function(
     min_abs_corr = 0.1,
     LD_format = c("rds", "rdata", "mtx", "csv", "txt", "custom"),
     LD_loader_fun,
+    force_compute_cor = FALSE,
     save_cor = FALSE,
     cor_dir = NULL,
     outputdir = NULL,

@@ -29,6 +29,7 @@ ctwas_sumstats(
   min_abs_corr = 0.1,
   LD_format = c("rds", "rdata", "mtx", "csv", "txt", "custom"),
   LD_loader_fun,
+  force_compute_cor = FALSE,
   save_cor = FALSE,
   cor_dir = NULL,
   outputdir = NULL,
@@ -99,6 +100,8 @@ the estimated confidence sets.}
 
 \item{LD_loader_fun}{a user defined function to load LD matrix when \code{LD_format = "custom"}.}
 
+\item{force_compute_cor}{If TRUE, force computing correlation (R) matrices.}
+
 \item{save_cor}{If TRUE, save correlation (R) matrices to \code{cor_dir}.}
 
 \item{cor_dir}{The directory to store correlation (R) matrices.}
@@ -117,8 +120,6 @@ in screening regions and fine-mapping steps with LD.}
 \item{verbose}{If TRUE, print detailed messages.}
 
 \item{...}{Additional arguments of \code{susie_rss}.}
-
-\item{force_compute_cor}{If TRUE, force computing correlation (R) matrices.}
 }
 \value{
 a list, including z_gene, estimated parameters, region_data,

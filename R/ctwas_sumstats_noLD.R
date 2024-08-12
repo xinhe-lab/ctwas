@@ -53,6 +53,7 @@
 #' @param ... Additional arguments of \code{susie_rss}.
 #'
 #' @importFrom logging addHandler loginfo writeToFile
+#' @importFrom utils packageVersion
 #'
 #' @return a list, including z_gene, estimated parameters, region_data,
 #' cross-boundary genes, screening region results, and fine-mapping results.
