@@ -1,13 +1,13 @@
 # ctwas
 
-Package for the causal TWAS project.
+This is the old multi-group version of the ctwas package.
 
 # Install
 
-Install `ctwas` (`multigroup` branch):
+Install `ctwas` (`multigroup_old` branch):
 
 ```
-remotes::install_github("xinhe-lab/ctwas",ref = "multigroup")
+remotes::install_github("xinhe-lab/ctwas",ref = "multigroup_old")
 ```
 
 # Acknowledgement
