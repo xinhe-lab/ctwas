@@ -89,7 +89,7 @@
       <h1 data-toc-skip>Summarizing and visualizing cTWAS results</h1>
                         <h4 data-toc-skip class="author">Kaixuan Luo, Sheng Qian</h4>
             
-            <h4 data-toc-skip class="date">2024-08-12</h4>
+            <h4 data-toc-skip class="date">2024-08-13</h4>
       
       <small class="dont-index">Source: <a href="https://github.com/xinhe-lab/ctwas/blob/multigroup/vignettes/summarizing_results.Rmd" class="external-link"><code>vignettes/summarizing_results.Rmd</code></a></small>
       <div class="hidden name"><code>summarizing_results.Rmd</code></div>
@@ -172,7 +172,7 @@
 <div class="section level2">
 <h2 id="inspecting-the-ctwas-results">Inspecting the cTWAS results<a class="anchor" aria-label="anchor" href="#inspecting-the-ctwas-results"></a>
 </h2>
-<p>We can view the molecular traits above a certain PIP cutoff, e.g. PIP &gt; 0.8, by:</p>
+<p>We can view the molecular traits above a certain PIP cutoff, e.g. PIP &gt; 0.8 and limit to credible sets, by:</p>
 <div class="sourceCode" id="cb8"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/subset.html" class="external-link">subset</a></span><span class="op">(</span><span class="va">finemap_res</span>, <span class="va">group</span> <span class="op">!=</span> <span class="st">"SNP"</span> <span class="op">&amp;</span> <span class="va">susie_pip</span> <span class="op">&gt;</span> <span class="fl">0.8</span> <span class="op">&amp;</span> <span class="va">cs_index</span> <span class="op">!=</span> <span class="fl">0</span><span class="op">)</span></span></code></pre></div>
 <pre><code><span><span class="co">##                                                       id       type context</span></span>
@@ -208,32 +208,38 @@
 <p>We then use the <code><a href="../reference/anno_finemap_res.html">anno_finemap_res()</a></code> function to add gene annotations to the fine-mapping result, and use gene mid-points to represent gene positions.</p>
 <div class="sourceCode" id="cb13"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">finemap_res</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/anno_finemap_res.html">anno_finemap_res</a></span><span class="op">(</span><span class="va">finemap_res</span>, <span class="va">snp_map</span>, <span class="va">gene_annot</span>,</span>
-<span>                                use_gene_pos <span class="op">=</span> <span class="st">"mid"</span><span class="op">)</span></span></code></pre></div>
-<pre><code><span><span class="co">## 2024-08-12 17:24:36 INFO::Annotating ctwas finemapping result ...</span></span>
-<span><span class="co">## 2024-08-12 17:24:36 INFO::add gene_name and gene_type</span></span>
-<span><span class="co">## 2024-08-12 17:24:36 INFO::use gene mid positions</span></span>
-<span><span class="co">## 2024-08-12 17:24:36 INFO::add SNP positions</span></span></code></pre>
+<span>                                use_gene_pos <span class="op">=</span> <span class="st">"mid"</span>,</span>
+<span>                                drop_unannotated_genes <span class="op">=</span> <span class="cn">TRUE</span>,</span>
+<span>                                filter_protein_coding_genes <span class="op">=</span> <span class="cn">TRUE</span>,</span>
+<span>                                filter_cs <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span></code></pre></div>
+<pre><code><span><span class="co">## 2024-08-13 11:03:26 INFO::Annotating ctwas finemapping result ...</span></span>
+<span><span class="co">## 2024-08-13 11:03:27 INFO::keep only protein coding genes</span></span>
+<span><span class="co">## 2024-08-13 11:03:27 INFO::keep only results in credible sets</span></span>
+<span><span class="co">## 2024-08-13 11:03:27 INFO::add gene_name and gene_type</span></span>
+<span><span class="co">## 2024-08-13 11:03:27 INFO::use gene mid positions</span></span>
+<span><span class="co">## 2024-08-13 11:03:27 INFO::add SNP positions</span></span></code></pre>
+<p>We can drop unannotated genes by setting <code>drop_unannotated_genes = TRUE</code>, limit to protein coding genes by setting <code>filter_protein_coding_genes = TRUE</code>, and limit to credible sets by setting <code>filter_cs = TRUE</code>.</p>
 <p>You can now run the command at the beginning of this section to view the genes with additional information.</p>
 <div class="sourceCode" id="cb15"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/subset.html" class="external-link">subset</a></span><span class="op">(</span><span class="va">finemap_res</span>, <span class="va">group</span> <span class="op">!=</span> <span class="st">"SNP"</span> <span class="op">&amp;</span> <span class="va">susie_pip</span> <span class="op">&gt;</span> <span class="fl">0.8</span> <span class="op">&amp;</span> <span class="va">cs_index</span> <span class="op">!=</span> <span class="fl">0</span><span class="op">)</span></span></code></pre></div>
-<pre><code><span><span class="co">##     chrom      pos            gene_id gene_name      gene_type</span></span>
-<span><span class="co">## 51     16 56972848 ENSG00000087237.10      CETP protein_coding</span></span>
-<span><span class="co">## 111    16 72070235  ENSG00000261701.6       HPR protein_coding</span></span>
-<span><span class="co">## 124    16 72057824  ENSG00000257017.8        HP protein_coding</span></span>
-<span><span class="co">##                                                     id       type context</span></span>
-<span><span class="co">## 51  ENSG00000087237.10|expression_Adipose_Subcutaneous expression adipose</span></span>
-<span><span class="co">## 111                 ENSG00000261701.6|expression_Liver expression   liver</span></span>
-<span><span class="co">## 124  ENSG00000257017.8|expression_Adipose_Subcutaneous expression adipose</span></span>
-<span><span class="co">##                  group          z            region_id susie_pip      mu2</span></span>
-<span><span class="co">## 51  expression|adipose  13.749840 16_55869862_57630418 0.9999483 145.7879</span></span>
-<span><span class="co">## 111   expression|liver -18.403150 16_71020125_72901251 1.0000000 474.3442</span></span>
-<span><span class="co">## 124 expression|adipose  -4.810203 16_71020125_72901251 1.0000000 420.6018</span></span>
-<span><span class="co">##     cs_index</span></span>
-<span><span class="co">## 51         1</span></span>
-<span><span class="co">## 111        1</span></span>
-<span><span class="co">## 124        3</span></span></code></pre>
+<pre><code><span><span class="co">##   chrom      pos            gene_id gene_name      gene_type</span></span>
+<span><span class="co">## 1    16 56972848 ENSG00000087237.10      CETP protein_coding</span></span>
+<span><span class="co">## 2    16 72070235  ENSG00000261701.6       HPR protein_coding</span></span>
+<span><span class="co">## 4    16 72057824  ENSG00000257017.8        HP protein_coding</span></span>
+<span><span class="co">##                                                   id       type context</span></span>
+<span><span class="co">## 1 ENSG00000087237.10|expression_Adipose_Subcutaneous expression adipose</span></span>
+<span><span class="co">## 2                 ENSG00000261701.6|expression_Liver expression   liver</span></span>
+<span><span class="co">## 4  ENSG00000257017.8|expression_Adipose_Subcutaneous expression adipose</span></span>
+<span><span class="co">##                group          z            region_id susie_pip      mu2</span></span>
+<span><span class="co">## 1 expression|adipose  13.749840 16_55869862_57630418 0.9999483 145.7879</span></span>
+<span><span class="co">## 2   expression|liver -18.403150 16_71020125_72901251 1.0000000 474.3442</span></span>
+<span><span class="co">## 4 expression|adipose  -4.810203 16_71020125_72901251 1.0000000 420.6018</span></span>
+<span><span class="co">##   cs_index</span></span>
+<span><span class="co">## 1        1</span></span>
+<span><span class="co">## 2        1</span></span>
+<span><span class="co">## 4        3</span></span></code></pre>
 <p>In this example, HPR gene in liver, HP gene in adipose, and CETP gene in adipose are the only three genes that satisfy this threshold.</p>
-<p>When we have multiple contexts (tissues), it is useful to evaluate the total evidence of a gene being causal, <em>combining evidence of all the molecular traits affecting this gene across all types and contexts.</em> This is done by summing up the PIPs of all these molecular traits of the same gene, expressed as the combined PIP of this gene.</p>
+<p>When we have multiple contexts (tissues), it is useful to evaluate the total evidence of a gene being causal, <em>combining evidence of all the molecular traits affecting this gene across all types and contexts.</em> We compute combined PIPs of all these molecular traits of the same gene, using the following formula: <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mn>1</mn><mo>−</mo><msub><mo>∏</mo><mi>k</mi></msub><mo stretchy="false" form="prefix">(</mo><mn>1</mn><mo>−</mo><msub><mtext mathvariant="normal">PIP</mtext><mi>k</mi></msub><mo stretchy="false" form="postfix">)</mo></mrow><annotation encoding="application/x-tex">1 - \prod_k (1 - \text{PIP}_k)</annotation></semantics></math>, where <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msub><mtext mathvariant="normal">PIP</mtext><mi>k</mi></msub><annotation encoding="application/x-tex">\text{PIP}_k</annotation></semantics></math> is the PIP of the <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>k</mi><annotation encoding="application/x-tex">k</annotation></semantics></math>-th molecular trait of a gene.</p>
 <p>For example, we can combine PIPs of the same gene by context. We could limit results in protein coding genes by setting <code>filter_protein_coding_genes = TRUE</code>, and limit results in credible sets by setting <code>filter_cs = TRUE</code>.</p>
 <div class="sourceCode" id="cb17"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">combined_pip_by_context</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/combine_gene_pips.html">combine_gene_pips</a></span><span class="op">(</span><span class="va">finemap_res</span>, </span>
@@ -271,11 +277,11 @@
 <span>               highlight_pip <span class="op">=</span> <span class="fl">0.8</span>,</span>
 <span>               R_snp_gene <span class="op">=</span> <span class="va">cor_res</span><span class="op">$</span><span class="va">R_snp_gene</span>,</span>
 <span>               R_gene <span class="op">=</span> <span class="va">cor_res</span><span class="op">$</span><span class="va">R_gene</span><span class="op">)</span></span></code></pre></div>
-<pre><code><span><span class="co">## 2024-08-12 17:24:38 INFO::focal gene: HPR</span></span>
-<span><span class="co">## 2024-08-12 17:24:38 INFO::focal id: ENSG00000261701.6|expression_Liver</span></span>
-<span><span class="co">## 2024-08-12 17:24:38 INFO::plot locus range: chr16 71600000,72400000</span></span>
-<span><span class="co">## 2024-08-12 17:24:38 INFO::HPR liver expression QTLs</span></span>
-<span><span class="co">## 2024-08-12 17:24:38 INFO::QTL positions: 72063820,72063928</span></span></code></pre>
+<pre><code><span><span class="co">## 2024-08-13 11:03:28 INFO::focal gene: HPR</span></span>
+<span><span class="co">## 2024-08-13 11:03:28 INFO::focal id: ENSG00000261701.6|expression_Liver</span></span>
+<span><span class="co">## 2024-08-13 11:03:28 INFO::plot locus range: chr16 71600000,72400000</span></span>
+<span><span class="co">## 2024-08-13 11:03:31 INFO::HPR liver expression QTLs</span></span>
+<span><span class="co">## 2024-08-13 11:03:31 INFO::QTL positions:</span></span></code></pre>
 <div class="figure" style="text-align: center">
 <img src="summarizing_results_files/figure-html/locus_plot-1.png" alt="&amp;nbsp;" width="1200"><p class="caption">
  
@@ -291,11 +297,11 @@
 <span>               ens_db <span class="op">=</span> <span class="va">ens_db</span>,</span>
 <span>               locus_range <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">71.6e6</span>,<span class="fl">72.4e6</span><span class="op">)</span>,</span>
 <span>               highlight_pip <span class="op">=</span> <span class="fl">0.8</span><span class="op">)</span></span></code></pre></div>
-<pre><code><span><span class="co">## 2024-08-12 17:24:40 INFO::focal gene: HPR</span></span>
-<span><span class="co">## 2024-08-12 17:24:40 INFO::focal id: ENSG00000261701.6|expression_Liver</span></span>
-<span><span class="co">## 2024-08-12 17:24:40 INFO::plot locus range: chr16 71600000,72400000</span></span>
-<span><span class="co">## 2024-08-12 17:24:40 INFO::HPR liver expression QTLs</span></span>
-<span><span class="co">## 2024-08-12 17:24:40 INFO::QTL positions: 72063820,72063928</span></span></code></pre>
+<pre><code><span><span class="co">## 2024-08-13 11:03:32 INFO::focal gene: HPR</span></span>
+<span><span class="co">## 2024-08-13 11:03:32 INFO::focal id: ENSG00000261701.6|expression_Liver</span></span>
+<span><span class="co">## 2024-08-13 11:03:32 INFO::plot locus range: chr16 71600000,72400000</span></span>
+<span><span class="co">## 2024-08-13 11:03:32 INFO::HPR liver expression QTLs</span></span>
+<span><span class="co">## 2024-08-13 11:03:32 INFO::QTL positions:</span></span></code></pre>
 <div class="figure" style="text-align: center">
 <img src="summarizing_results_files/figure-html/locus_plot_noLD-1.png" alt="&amp;nbsp;" width="1200"><p class="caption">
  

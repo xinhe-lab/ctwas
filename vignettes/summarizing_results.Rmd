@@ -107,7 +107,7 @@ Note, we used sample data (from chr16) here in the tutorial, but in real data an
 
 ## Inspecting the cTWAS results
 
-We can view the molecular traits above a certain PIP cutoff, e.g. PIP > 0.8, by: 
+We can view the molecular traits above a certain PIP cutoff, e.g. PIP > 0.8 and limit to credible sets, by: 
 
 ```{r interpret_res}
 subset(finemap_res, group != "SNP" & susie_pip > 0.8 & cs_index != 0)
@@ -138,9 +138,14 @@ We then use the `anno_finemap_res()` function to add gene annotations to the fin
 
 ```{r add_gene_names}
 finemap_res <- anno_finemap_res(finemap_res, snp_map, gene_annot,
-                                use_gene_pos = "mid")
+                                use_gene_pos = "mid",
+                                drop_unannotated_genes = TRUE,
+                                filter_protein_coding_genes = TRUE,
+                                filter_cs = TRUE)
 ```
 
+
+We can drop unannotated genes by setting `drop_unannotated_genes = TRUE`,  limit to protein coding genes by setting `filter_protein_coding_genes = TRUE`, and limit to credible sets by setting `filter_cs = TRUE`. 
 
 You can now run the command at the beginning of this section to view the genes with additional information.
 
@@ -151,7 +156,8 @@ subset(finemap_res, group != "SNP" & susie_pip > 0.8 & cs_index != 0)
 
 In this example, HPR gene in liver, HP gene in adipose, and CETP gene in adipose are the only three genes that satisfy this threshold.
 
-When we have multiple contexts (tissues), it is useful to evaluate the total evidence of a gene being causal, *combining evidence of all the molecular traits affecting this gene across all types and contexts.* This is done by summing up the PIPs of all these molecular traits of the same gene, expressed as the combined PIP of this gene. 
+When we have multiple contexts (tissues), it is useful to evaluate the total evidence of a gene being causal, *combining evidence of all the molecular traits affecting this gene across all types and contexts.* We compute combined PIPs of all these molecular traits of the same gene, using the following formula: $1 - \prod_k (1 - \text{PIP}_k)$, where $\text{PIP}_k$ is the PIP of the $k$-th molecular trait of a gene.
+
  
 For example, we can combine PIPs of the same gene by context.  We could limit results in protein coding genes by setting `filter_protein_coding_genes = TRUE`, and limit results in credible sets by setting `filter_cs = TRUE`.
 

@@ -89,7 +89,7 @@
       <h1 data-toc-skip>Running cTWAS analysis</h1>
                         <h4 data-toc-skip class="author">Kaixuan Luo, Sheng Qian</h4>
             
-            <h4 data-toc-skip class="date">2024-08-12</h4>
+            <h4 data-toc-skip class="date">2024-08-13</h4>
       
       <small class="dont-index">Source: <a href="https://github.com/xinhe-lab/ctwas/blob/multigroup/vignettes/running_ctwas_analysis.Rmd" class="external-link"><code>vignettes/running_ctwas_analysis.Rmd</code></a></small>
       <div class="hidden name"><code>running_ctwas_analysis.Rmd</code></div>
@@ -135,6 +135,7 @@
 <span>                            filter_L <span class="op">=</span> <span class="cn">TRUE</span>,</span>
 <span>                            filter_nonSNP_PIP <span class="op">=</span> <span class="cn">FALSE</span>,</span>
 <span>                            min_nonSNP_PIP <span class="op">=</span> <span class="fl">0.5</span>,</span>
+<span>                            min_abs_corr <span class="op">=</span> <span class="fl">0.1</span>, </span>
 <span>                            ncore <span class="op">=</span> <span class="fl">6</span>, </span>
 <span>                            ncore_LD <span class="op">=</span> <span class="fl">4</span>,</span>
 <span>                            save_cor <span class="op">=</span> <span class="cn">TRUE</span>, </span>
@@ -146,7 +147,8 @@
 <li><p><code>maxSNP</code>: maximum number of SNPs in a region (e.g. 20000). Default is Inf, no limit. This can be useful if there are too many SNPs in a region and you don’t have enough memory to run the program.</p></li>
 <li><p><code>group_prior_var_stucture</code>: options to control how parameters are shared among groups. For example, “shared_type” (default option) allows all groups in one molecular QTL type to share the same variance parameter. “independent” allows all groups to have their own separate variance parameters. More options can be found in the Reference page of the function.</p></li>
 <li><p><code>filter_L</code>: if <code>filter_L = TRUE</code> (the default option), cTWAS will first estimate the number of causal signals (<code>L</code>) for each region. This step is done using uniform prior, treating all variants and genes equally. From the results, we obtain the number of credible sets (<code>L</code>). We then select regions with at least one credible set, L &gt; 0.</p></li>
-<li><p><code>filter_nonSNP_PIP</code> and <code>min_nonSNP_PIP</code>: if <code>filter_nonSNP_PIP = TRUE</code>, it will compute the non-SNP PIP, i.e. the total PIP of all molecular traits, for each region (using the estimated parameters) and select regions with non-SNP PIP &gt; <code>min_nonSNP_PIP</code> (0.5 by default`).</p></li>
+<li><p><code>filter_nonSNP_PIP</code> and <code>min_nonSNP_PIP</code>: if <code>filter_nonSNP_PIP = TRUE</code>, it will compute the non-SNP PIP, i.e. the total PIP of all molecular traits, for each region (using the estimated parameters) and select regions with non-SNP PIP &gt; <code>min_nonSNP_PIP</code> (0.5 by default).</p></li>
+<li><p><code>min_abs_corr</code>: Minimum absolute correlation allowed in a credible set. cTWAs jointly fine-maps both SNPs and molecular traits, the correlations between SNPs and molecular traits could be lower than standard fine-mapping with SNPs. We use a lower cutoff (0.1 by default) to avoid missing causal genes.</p></li>
 <li><p><code>ncore</code>: the number of cores to parallelize computing over regions.</p></li>
 <li><p><code>ncore_LD</code>: the number of cores to parallelize computing over regions with LD matrices. During screening regions and fine-mapping steps, computing correlation matrices requires larger memory. You could reduce the number of cores for these steps to avoid insufficient memory.</p></li>
 <li><p><code>save_cor</code> and <code>cor_dir</code>: if <code>save_cor = TRUE</code>, we save the correlation matrices in the <code>cor_dir</code>directory, which will be used later for visualizing the results.</p></li>
@@ -213,7 +215,7 @@
 <p>After parameter estimation, we use the <code><a href="../reference/screen_regions.html">screen_regions()</a></code> function to perform a screening process to select regions with likely causal signals in molecular traits. To find these regions, we perform an initial fine-mapping with thinned SNPs (a subset of all variants, see the Section “Assemble input data”). Only these regions would be subject to full fine-mapping analysis, using all variants, in the final step. Thus screening regions can save computational time.</p>
 <p>cTWAS have two options to screen regions:</p>
 <ul>
-<li><p>screening by the number of causal signals: if <code>filter_L = TRUE</code> (the default option), cTWAS will first estimate the number of causal signals (<code>L</code>) for each region. This step is done using uniform prior (<code>group_prior = NULL</code> and <code>group_prior_var = NULL</code>), treating all variants and molecular traits equally. From the results, we obtain the number of credible sets (<code>L</code>). We then select regions with at least one credible set, L &gt; 0.</p></li>
+<li><p>screening by the number of causal signals: if <code>filter_L = TRUE</code> (the default option), cTWAS will first estimate the number of causal signals (<code>L</code>) for each region. This step is done by running fine-mapping using uniform prior (<code>group_prior = NULL</code> and <code>group_prior_var = NULL</code>), treating all variants and molecular traits equally. From the results, we obtain the number of credible sets (<code>L</code>). We then select regions with at least one credible set, L &gt; 0.</p></li>
 <li><p>screening by non-SNP PIPs: if <code>filter_nonSNP_PIP = TRUE</code>, cTWAS will compute the non-SNP PIP, i.e. total PIP of all molecular traits, for each region (using estimated L and estimated priors). It then selects regions by applying a <code>min_nonSNP_PIP</code> cutoff (0.5, by default).</p></li>
 </ul>
 <p>When running with LD, we recommend screening by the number of causal signals, i.e. setting <code>filter_L = TRUE</code> and <code>filter_nonSNP_PIP = FALSE</code>.</p>
@@ -223,6 +225,7 @@
 <span>                             weights <span class="op">=</span> <span class="va">weights</span>, </span>
 <span>                             filter_L <span class="op">=</span> <span class="cn">TRUE</span>,</span>
 <span>                             filter_nonSNP_PIP <span class="op">=</span> <span class="cn">FALSE</span>,</span>
+<span>                             min_abs_corr <span class="op">=</span> <span class="fl">0.1</span>, </span>
 <span>                             group_prior <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>                             group_prior_var <span class="op">=</span> <span class="cn">NULL</span>, </span>
 <span>                             ncore <span class="op">=</span> <span class="fl">4</span><span class="op">)</span></span>
@@ -230,6 +233,7 @@
 <span><span class="va">screened_region_L</span> <span class="op">&lt;-</span> <span class="va">screen_res</span><span class="op">$</span><span class="va">screened_region_L</span></span>
 <span><span class="va">screen_summary</span> <span class="op">&lt;-</span> <span class="va">screen_res</span><span class="op">$</span><span class="va">screen_summary</span></span></code></pre></div>
 <p>It returns <code>screened_region_data</code> which contains a subset of region data for selected regions. It also returns the estimated L (number of credible sets) for the selected regions, which could be used in the fine-mapping step to set L for each region. In addition, it returns a data frame <code>screen_summary</code>, which includes the estimated L and non-SNP PIPs for all the regions.</p>
+<p>Note, cTWAs jointly fine-maps both SNPs and molecular traits, the correlations between SNPs and molecular traits could be lower than standard fine-mapping with SNPs. Thus, we set a lower purity cutoff (default option: <code>min_abs_corr = 0.1</code>) for obtaining credible sets to avoid missing causal genes.</p>
 <p>When running without LD, we could use the <code><a href="../reference/screen_regions_noLD.html">screen_regions_noLD()</a></code> function; it would only perform screening regions by non-SNP PIPs.</p>
 <div class="sourceCode" id="cb8"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">screen_res</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/screen_regions_noLD.html">screen_regions_noLD</a></span><span class="op">(</span><span class="va">region_data</span>,</span>
@@ -256,15 +260,17 @@
 <p>We now perform the fine-mapping step for each of the screened regions with the estimated parameters.</p>
 <p>The <code><a href="../reference/finemap_regions.html">finemap_regions()</a></code> function performs fine-mapping for the regions in the <code>screened_region_data</code>.</p>
 <p>It first computes correlation matrices among all variables included in fine-mapping (SNPs, and molecular traits), then runs fine-mapping with estimated parameters (<code>group_prior</code> and <code>group_prior_var</code>) and estimated number of causal signals (<code>L</code>), and returns a data frame with fine-mapping results for the regions.</p>
-<div class="sourceCode" id="cb10"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb10-1"><a href="#cb10-1"></a>finemap_res &lt;-<span class="st"> </span><span class="kw">finemap_regions</span>(screened_region_data,</span>
-<span id="cb10-2"><a href="#cb10-2"></a>                               <span class="dt">LD_map =</span> LD_map,</span>
-<span id="cb10-3"><a href="#cb10-3"></a>                               <span class="dt">weights =</span> weights,</span>
-<span id="cb10-4"><a href="#cb10-4"></a>                               <span class="dt">group_prior =</span> group_prior,</span>
-<span id="cb10-5"><a href="#cb10-5"></a>                               <span class="dt">group_prior_var =</span> group_prior_var,</span>
-<span id="cb10-6"><a href="#cb10-6"></a>                               <span class="dt">L =</span> screened_region_L</span>
-<span id="cb10-7"><a href="#cb10-7"></a>                               <span class="dt">save_cor =</span> <span class="ot">TRUE</span>,</span>
-<span id="cb10-8"><a href="#cb10-8"></a>                               <span class="dt">cor_dir =</span> <span class="st">"./cor_matrix"</span>,</span>
-<span id="cb10-9"><a href="#cb10-9"></a>                               <span class="dt">ncore =</span> <span class="dv">4</span>)</span></code></pre></div>
+<div class="sourceCode" id="cb10"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">finemap_res</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/finemap_regions.html">finemap_regions</a></span><span class="op">(</span><span class="va">screened_region_data</span>,</span>
+<span>                               LD_map <span class="op">=</span> <span class="va">LD_map</span>,</span>
+<span>                               weights <span class="op">=</span> <span class="va">weights</span>,</span>
+<span>                               group_prior <span class="op">=</span> <span class="va">group_prior</span>,</span>
+<span>                               group_prior_var <span class="op">=</span> <span class="va">group_prior_var</span>,</span>
+<span>                               L <span class="op">=</span> <span class="va">screened_region_L</span>,</span>
+<span>                               min_abs_corr <span class="op">=</span> <span class="fl">0.1</span>, </span>
+<span>                               save_cor <span class="op">=</span> <span class="cn">TRUE</span>,</span>
+<span>                               cor_dir <span class="op">=</span> <span class="st">"./cor_matrix"</span>,</span>
+<span>                               ncore <span class="op">=</span> <span class="fl">4</span><span class="op">)</span></span></code></pre></div>
 <p>We can save the computed correlation matrices to the directory <code>cor_dir</code> for future access, by setting <code>save_cor = TRUE</code>.</p>
 <p><em>Note:</em> when screening regions and fine-mapping with LD, we need larger memory to load LD matrices and compute correlation matrices. So we recommend increasing memory or reducing the number of <code>ncore</code> for these steps.</p>
 <p><em>Note:</em> we could use the <code><a href="../reference/finemap_regions_noLD.html">finemap_regions_noLD()</a></code> function to run fine-mapping without LD:</p>
