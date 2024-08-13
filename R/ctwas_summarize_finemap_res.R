@@ -139,6 +139,7 @@ anno_finemap_res <- function(finemap_res,
 #' @importFrom stats na.omit
 #' @importFrom ensembldb genes
 #' @importFrom AnnotationFilter GeneIdFilter
+#' @importFrom logging loginfo
 #'
 #' @export
 get_gene_annot_from_ens_db <- function(ens_db, gene_ids) {
@@ -150,8 +151,7 @@ get_gene_annot_from_ens_db <- function(ens_db, gene_ids) {
   gene_annot_gr <- genes(ens_db, filter = GeneIdFilter(gene_ids_trimmed))
   annot_idx <- match(gene_ids_trimmed, gene_annot_gr$gene_id)
   if (anyNA(annot_idx)) {
-    warning(sprintf("remove %d gene_ids not found in ens_db.",
-                    length(which(is.na(annot_idx)))))
+    loginfo("Remove %d gene_ids not found in ens_db.", length(which(is.na(annot_idx))))
     gene_ids <- gene_ids[!is.na(annot_idx)]
     gene_ids_trimmed <- gene_ids_trimmed[!is.na(annot_idx)]
     annot_idx <- annot_idx[!is.na(annot_idx)]
@@ -167,15 +167,15 @@ get_gene_annot_from_ens_db <- function(ens_db, gene_ids) {
   return(gene_annot)
 }
 
-#' @title Combines gene PIPs by context, type or group
+#' @title Combines gene PIPs by context, type or group.
 #'
 #' @param finemap_res a data frame of annotated cTWAS finemapping result
 #'
 #' @param by sum gene PIPs by "context", "type", or "group".
 #'
-#' @param filter_protein_coding_genes TRUE/FALSE. If TRUE, keep protein coding genes only.
+#' @param filter_protein_coding_genes If TRUE, keep protein coding genes only.
 #'
-#' @param filter_cs TRUE/FALSE. If TRUE, limits results in credible sets.
+#' @param filter_cs If TRUE, limits results in credible sets.
 #'
 #' @param replace_NA values to replace NAs with.
 #'
@@ -217,10 +217,10 @@ combine_gene_pips <- function(finemap_res,
     finemap_gene_res <- finemap_gene_res[finemap_gene_res$cs_index!=0,]
   }
 
-  # sum PIPs
+  # combine PIPs
   combined_gene_pips <- aggregate(finemap_gene_res$susie_pip,
-                                  by=list(finemap_gene_res$gene_name),
-                                  FUN=sum)
+                                  by = list(finemap_gene_res$gene_name),
+                                  FUN = get_combined_pip)
   colnames(combined_gene_pips) <- c("gene_name", "combined_pip")
 
   if (by == "context"){
@@ -228,7 +228,7 @@ combine_gene_pips <- function(finemap_res,
     contexts <- unique(finemap_gene_res$context)
     for (context in contexts){
       tmp_res <- finemap_gene_res[finemap_gene_res$context==context, c("gene_name", "susie_pip")]
-      tmp_res <- aggregate(tmp_res$susie_pip, by=list(tmp_res$gene_name), FUN=sum)
+      tmp_res <- aggregate(tmp_res$susie_pip, by=list(tmp_res$gene_name), FUN=get_combined_pip)
       colnames(tmp_res) <- c("gene_name", paste0(context, "_pip"))
       combined_gene_pips <- combined_gene_pips %>% left_join(tmp_res, by = "gene_name")
     }
@@ -237,7 +237,7 @@ combine_gene_pips <- function(finemap_res,
     types <- unique(finemap_gene_res$type)
     for (type in types){
       tmp_res <- finemap_gene_res[finemap_gene_res$type==type, c("gene_name", "susie_pip")]
-      tmp_res <- aggregate(tmp_res$susie_pip, by=list(tmp_res$gene_name), FUN=sum)
+      tmp_res <- aggregate(tmp_res$susie_pip, by=list(tmp_res$gene_name), FUN=get_combined_pip)
       colnames(tmp_res) <- c("gene_name", paste0(type, "_pip"))
       combined_gene_pips <- combined_gene_pips %>% left_join(tmp_res, by = "gene_name")
     }
@@ -246,7 +246,7 @@ combine_gene_pips <- function(finemap_res,
     groups <- unique(finemap_gene_res$group)
     for (group in groups){
       tmp_res <- finemap_gene_res[finemap_gene_res$group==group, c("gene_name", "susie_pip")]
-      tmp_res <- aggregate(tmp_res$susie_pip, by=list(tmp_res$gene_name), FUN=sum)
+      tmp_res <- aggregate(tmp_res$susie_pip, by=list(tmp_res$gene_name), FUN=get_combined_pip)
       colnames(tmp_res) <- c("gene_name", paste0(group, "_pip"))
       combined_gene_pips <- combined_gene_pips %>% left_join(tmp_res, by = "gene_name")
     }
@@ -265,3 +265,8 @@ combine_gene_pips <- function(finemap_res,
   return(combined_gene_pips)
 }
 
+# combined gene PIP: 1 - \prod_k (1 - PIP_k).
+# PIP_k is the PIP of the k-th molecular trait of a gene.
+get_combined_pip <- function(pips){
+  return(1 - prod(1 - pips))
+}

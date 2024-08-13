@@ -110,7 +110,7 @@ Note, we used sample data (from chr16) here in the tutorial, but in real data an
 We can view the molecular traits above a certain PIP cutoff, e.g. PIP > 0.8, by: 
 
 ```{r interpret_res}
-subset(finemap_res, group != "SNP" & susie_pip > 0.8)
+subset(finemap_res, group != "SNP" & susie_pip > 0.8 & cs_index != 0)
 ```
 
 
@@ -142,7 +142,14 @@ finemap_res <- anno_finemap_res(finemap_res, snp_map, gene_annot,
 ```
 
 
-You can now run the command at the beginning of this section to view the genes with additional information. In this example, HPR gene in liver, HP gene in adipose, and CETP gene in adipose are the only three genes that satisfy this threshold.
+You can now run the command at the beginning of this section to view the genes with additional information.
+
+```{r interpret_res_2}
+subset(finemap_res, group != "SNP" & susie_pip > 0.8 & cs_index != 0)
+```
+
+
+In this example, HPR gene in liver, HP gene in adipose, and CETP gene in adipose are the only three genes that satisfy this threshold.
 
 When we have multiple contexts (tissues), it is useful to evaluate the total evidence of a gene being causal, *combining evidence of all the molecular traits affecting this gene across all types and contexts.* This is done by summing up the PIPs of all these molecular traits of the same gene, expressed as the combined PIP of this gene. 
  

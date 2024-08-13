@@ -17,7 +17,7 @@
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">ctwas</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">0.4.5</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">0.4.7</span>
       </span>
     </div>
 
@@ -76,8 +76,8 @@
 <span>  <span class="va">region_data</span>,</span>
 <span>  group_prior <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  group_prior_var <span class="op">=</span> <span class="cn">NULL</span>,</span>
-<span>  minvar <span class="op">=</span> <span class="fl">2</span>,</span>
-<span>  mingene <span class="op">=</span> <span class="fl">1</span>,</span>
+<span>  min_snps <span class="op">=</span> <span class="fl">2</span>,</span>
+<span>  min_genes <span class="op">=</span> <span class="fl">1</span>,</span>
 <span>  min_nonSNP_PIP <span class="op">=</span> <span class="fl">0.5</span>,</span>
 <span>  ncore <span class="op">=</span> <span class="fl">1</span>,</span>
 <span>  logfile <span class="op">=</span> <span class="cn">NULL</span>,</span>
@@ -102,11 +102,11 @@
 <dd><p>a vector of two prior variances for SNPs and gene effects.</p></dd>
 
 
-<dt id="arg-minvar">minvar<a class="anchor" aria-label="anchor" href="#arg-minvar"></a></dt>
-<dd><p>minimum number of variables (snps and genes) in a region.</p></dd>
+<dt id="arg-min-snps">min_snps<a class="anchor" aria-label="anchor" href="#arg-min-snps"></a></dt>
+<dd><p>minimum number of SNPs in a region.</p></dd>
 
 
-<dt id="arg-mingene">mingene<a class="anchor" aria-label="anchor" href="#arg-mingene"></a></dt>
+<dt id="arg-min-genes">min_genes<a class="anchor" aria-label="anchor" href="#arg-min-genes"></a></dt>
 <dd><p>minimum number of genes in a region.</p></dd>
 
 
@@ -121,7 +121,7 @@ will be selected to run finemapping using full SNPs.</p></dd>
 
 
 <dt id="arg-logfile">logfile<a class="anchor" aria-label="anchor" href="#arg-logfile"></a></dt>
-<dd><p>The log filename. If NULL, will print log info on screen.</p></dd>
+<dd><p>The log filename. If NULL, print log info on screen.</p></dd>
 
 
 <dt id="arg-verbose">verbose<a class="anchor" aria-label="anchor" href="#arg-verbose"></a></dt>

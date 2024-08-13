@@ -8,7 +8,7 @@ ctwas_susie_rss <- function(z,
                             z_ld_weight = 0,
                             null_weight = NULL,
                             coverage = 0.95,
-                            min_abs_corr = 0.5,
+                            min_abs_corr = 0.1,
                             warn_converge_fail = TRUE,
                             ...){
 

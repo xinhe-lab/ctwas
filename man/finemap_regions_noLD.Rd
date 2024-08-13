@@ -9,6 +9,7 @@ finemap_regions_noLD(
   group_prior = NULL,
   group_prior_var = NULL,
   use_null_weight = TRUE,
+  snps_only = FALSE,
   ncore = 1,
   verbose = FALSE,
   logfile = NULL,
@@ -23,6 +24,8 @@ finemap_regions_noLD(
 \item{group_prior_var}{a vector of two prior variances for SNPs and gene effects.}
 
 \item{use_null_weight}{If TRUE, allow for a probability of no effect in susie}
+
+\item{snps_only}{If TRUE, use only SNPs in the region data.}
 
 \item{ncore}{The number of cores used to parallelize computation over regions}
 

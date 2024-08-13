@@ -15,6 +15,7 @@
 <url><loc>/reference/assemble_region_data.html</loc></url>
 <url><loc>/reference/combine_gene_pips.html</loc></url>
 <url><loc>/reference/compute_gene_z.html</loc></url>
+<url><loc>/reference/compute_region_cor.html</loc></url>
 <url><loc>/reference/compute_region_nonSNP_PIPs.html</loc></url>
 <url><loc>/reference/convert_fusion_to_predictdb.html</loc></url>
 <url><loc>/reference/convert_geno_to_LD_matrix.html</loc></url>

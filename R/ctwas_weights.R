@@ -531,10 +531,6 @@ compute_weight_LD_from_ref <- function(weights,
                                        LD_loader_fun,
                                        ncore = 1) {
 
-  if (is.null(LD_map) || is.null(snp_map)) {
-    stop("LD_map and snp_map are required for computing LD")
-  }
-
   LD_format <- match.arg(LD_format)
 
   if (!inherits(weights,"list"))

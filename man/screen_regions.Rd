@@ -11,11 +11,13 @@ screen_regions(
   group_prior = NULL,
   group_prior_var = NULL,
   L = 5,
-  minvar = 2,
-  mingene = 1,
+  min_snps = 2,
+  min_genes = 1,
   filter_L = TRUE,
   filter_nonSNP_PIP = FALSE,
   min_nonSNP_PIP = 0.5,
+  min_abs_corr = 0.1,
+  snps_only = FALSE,
   LD_format = c("rds", "rdata", "mtx", "csv", "txt", "custom"),
   LD_loader_fun,
   ncore = 1,
@@ -37,9 +39,9 @@ screen_regions(
 
 \item{L}{the number of effects for susie.}
 
-\item{minvar}{minimum number of variables (snps and genes) in a region.}
+\item{min_snps}{minimum number of SNPs in a region.}
 
-\item{mingene}{minimum number of genes in a region.}
+\item{min_genes}{minimum number of genes in a region.}
 
 \item{filter_L}{If TRUE, screening regions with estimated L > 0.}
 
@@ -49,6 +51,10 @@ total non-SNP PIP >= \code{min_nonSNP_PIP}.}
 \item{min_nonSNP_PIP}{If screening by non-SNP PIPs,
 regions with total non-SNP PIP >= \code{min_nonSNP_PIP}
 will be selected to run finemapping using full SNPs.}
+
+\item{min_abs_corr}{Minimum absolute correlation allowed in a credible set.}
+
+\item{snps_only}{If TRUE, use only SNPs when estimating L.}
 
 \item{LD_format}{file format for LD matrix. If "custom", use a user defined
 \code{LD_loader_fun()} function to load LD matrix.}

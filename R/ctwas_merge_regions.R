@@ -121,14 +121,14 @@ merge_region_data <- function(boundary_genes,
   if (estimate_L) {
     loginfo("Estimating L ...")
     merged_region_L <- estimate_region_L(region_data = merged_region_data,
-                           LD_map = merged_LD_map,
-                           weights = weights,
-                           init_L = L,
-                           LD_format = LD_format,
-                           LD_loader_fun = LD_loader_fun,
-                           ncore = ncore,
-                           verbose = verbose,
-                           ...)
+                                         LD_map = merged_LD_map,
+                                         weights = weights,
+                                         init_L = L,
+                                         LD_format = LD_format,
+                                         LD_loader_fun = LD_loader_fun,
+                                         ncore = ncore,
+                                         verbose = verbose,
+                                         ...)
     merged_region_L[merged_region_L == 0] <- 1
   } else {
     merged_region_L <- L
