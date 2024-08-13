@@ -19,7 +19,7 @@ or force_compute_cor = TRUE."><!-- mathjax --><script src="https://cdnjs.cloudfl
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">ctwas</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">0.4.5</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">0.4.7</span>
       </span>
     </div>
 
@@ -78,7 +78,8 @@ or force_compute_cor = TRUE.</p>
     <div id="ref-usage">
     <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="fu">get_region_cor</span><span class="op">(</span></span>
 <span>  <span class="va">region_id</span>,</span>
-<span>  <span class="va">region_data</span>,</span>
+<span>  <span class="va">sids</span>,</span>
+<span>  <span class="va">gids</span>,</span>
 <span>  <span class="va">LD_map</span>,</span>
 <span>  <span class="va">weights</span>,</span>
 <span>  force_compute_cor <span class="op">=</span> <span class="cn">FALSE</span>,</span>
@@ -98,8 +99,12 @@ or force_compute_cor = TRUE.</p>
 <dd><p>a character string of region id to be finemapped</p></dd>
 
 
-<dt id="arg-region-data">region_data<a class="anchor" aria-label="anchor" href="#arg-region-data"></a></dt>
-<dd><p>a list object with data for the regions</p></dd>
+<dt id="arg-sids">sids<a class="anchor" aria-label="anchor" href="#arg-sids"></a></dt>
+<dd><p>SNP IDs in the region</p></dd>
+
+
+<dt id="arg-gids">gids<a class="anchor" aria-label="anchor" href="#arg-gids"></a></dt>
+<dd><p>gene IDs in the region</p></dd>
 
 
 <dt id="arg-ld-map">LD_map<a class="anchor" aria-label="anchor" href="#arg-ld-map"></a></dt>
@@ -137,7 +142,7 @@ or force_compute_cor = TRUE.</p>
 </dl></div>
     <div id="value">
     <h2>Value</h2>
-    <p>a list of correlation matrices (R_snp, R_snp_gene and R_gene)</p>
+    <p>correlation matrices (R_snp, R_snp_gene and R_gene)</p>
     </div>
 
   </div>
