@@ -86,10 +86,11 @@ anno_finemap_res <- function(finemap_res,
       mutate(chrom = parse_number(as.character(.data$chrom)))
 
     if (drop_unannotated_genes) {
-      n.all.genes <- length(unique(finemap_gene_res$gene_id))
-      n.filtered.genes <- length(unique(finemap_gene_res$gene_id[!is.na(finemap_gene_res$gene_name)]))
-      # loginfo("Drop unannotated genes: %d -> %d genes", n.all.genes, n.filtered.genes)
-      finemap_gene_res <- finemap_gene_res[!is.na(finemap_gene_res$gene_name), , drop=FALSE]
+      unannotated.genes <- unique(finemap_gene_res$gene_id[is.na(finemap_gene_res$gene_name)])
+      if (length(unannotated.genes) > 0){
+        loginfo("Drop unannotated genes")
+        finemap_gene_res <- finemap_gene_res[!is.na(finemap_gene_res$gene_name), , drop=FALSE]
+      }
     }
 
     # split PIPs for molecular traits (e.g. introns) mapped to multiple genes

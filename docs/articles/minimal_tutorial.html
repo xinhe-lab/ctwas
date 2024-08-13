@@ -89,7 +89,7 @@
       <h1 data-toc-skip>A minimal tutorial of running cTWAS without LD</h1>
                         <h4 data-toc-skip class="author">Kaixuan Luo, Sheng Qian</h4>
             
-            <h4 data-toc-skip class="date">2024-08-12</h4>
+            <h4 data-toc-skip class="date">2024-08-13</h4>
       
       <small class="dont-index">Source: <a href="https://github.com/xinhe-lab/ctwas/blob/multigroup/vignettes/minimal_tutorial.Rmd" class="external-link"><code>vignettes/minimal_tutorial.Rmd</code></a></small>
       <div class="hidden name"><code>minimal_tutorial.Rmd</code></div>
@@ -163,14 +163,14 @@
 <p>The GWAS summary statistics needs to be “harmonized” before use. This means, for example, the allele definitions need to be consistent with the reference SNP data in <code>snp_map</code>. Harmonization is achieved through the <code><a href="../reference/preprocess_z_snp.html">preprocess_z_snp()</a></code> function. We filter out multiallelic variants and strand-ambiguous variants by default.</p>
 <div class="sourceCode" id="cb8"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">z_snp</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/preprocess_z_snp.html">preprocess_z_snp</a></span><span class="op">(</span><span class="va">z_snp</span>, <span class="va">snp_map</span><span class="op">)</span></span></code></pre></div>
-<pre><code><span><span class="co">## 2024-08-12 17:20:53 INFO::Preprocessing z_snp...</span></span>
-<span><span class="co">## 2024-08-12 17:20:53 INFO::z_snp has 407828 variants in total</span></span>
-<span><span class="co">## 2024-08-12 17:20:53 INFO::267361 variants left after filtering by snp_map</span></span>
-<span><span class="co">## 2024-08-12 17:20:53 INFO::Drop 30 multiallelic variants</span></span>
-<span><span class="co">## 2024-08-12 17:20:54 INFO::Harmonize 267331 variants in both GWAS and LD reference</span></span>
-<span><span class="co">## 2024-08-12 17:20:54 INFO::Flip signs for 267289 (99.98%) variants</span></span>
-<span><span class="co">## 2024-08-12 17:20:54 INFO::Remove 45738 strand ambiguous variants</span></span>
-<span><span class="co">## 2024-08-12 17:20:54 INFO::221593 variants left after preprocessing and harmonization.</span></span></code></pre>
+<pre><code><span><span class="co">## 2024-08-13 10:59:40 INFO::Preprocessing z_snp...</span></span>
+<span><span class="co">## 2024-08-13 10:59:40 INFO::z_snp has 407828 variants in total</span></span>
+<span><span class="co">## 2024-08-13 10:59:40 INFO::267361 variants left after filtering by snp_map</span></span>
+<span><span class="co">## 2024-08-13 10:59:40 INFO::Drop 30 multiallelic variants</span></span>
+<span><span class="co">## 2024-08-13 10:59:41 INFO::Harmonize 267331 variants in both GWAS and LD reference</span></span>
+<span><span class="co">## 2024-08-13 10:59:41 INFO::Flip signs for 267289 (99.98%) variants</span></span>
+<span><span class="co">## 2024-08-13 10:59:41 INFO::Remove 45738 strand ambiguous variants</span></span>
+<span><span class="co">## 2024-08-13 10:59:41 INFO::221593 variants left after preprocessing and harmonization.</span></span></code></pre>
 </div>
 <div class="section level3">
 <h3 id="prediction-models-of-molecular-traits">Prediction models of molecular traits<a class="anchor" aria-label="anchor" href="#prediction-models-of-molecular-traits"></a>
@@ -186,18 +186,18 @@
 <span>                                    <span class="va">snp_map</span>,</span>
 <span>                                    type <span class="op">=</span> <span class="st">"expression"</span>,</span>
 <span>                                    context <span class="op">=</span> <span class="st">"liver"</span><span class="op">)</span></span></code></pre></div>
-<pre><code><span><span class="co">## 2024-08-12 17:20:55 INFO::Load weight: /tmp/jobs/41340764/RtmpPwpRdJ/temp_libpath9a06d2217d0/ctwas/extdata/sample_data/expression_Liver.db</span></span>
-<span><span class="co">## 2024-08-12 17:20:55 INFO::type: expression</span></span>
-<span><span class="co">## 2024-08-12 17:20:55 INFO::context: liver</span></span>
-<span><span class="co">## 2024-08-12 17:20:55 INFO::Loading PredictDB weights ...</span></span>
-<span><span class="co">## 2024-08-12 17:20:55 INFO::Keep protein coding genes only</span></span>
-<span><span class="co">## 2024-08-12 17:20:55 INFO::weight_name: expression_Liver</span></span>
-<span><span class="co">## 2024-08-12 17:20:55 INFO::Remove 1 genes without predictdb LD</span></span>
-<span><span class="co">## 2024-08-12 17:20:55 INFO::Number of genes with weights: 11479</span></span>
-<span><span class="co">## 2024-08-12 17:20:55 INFO::Number of variants in weights: 16929</span></span>
-<span><span class="co">## 2024-08-12 17:20:55 INFO::529 genes and 410 variants left after filtering by GWAS and LD reference</span></span>
-<span><span class="co">## 2024-08-12 17:20:55 INFO::Harmonizing and processing weights ...</span></span>
-<span><span class="co">## 2024-08-12 17:20:56 INFO::Number of genes with weights after preprocessing: 410</span></span></code></pre>
+<pre><code><span><span class="co">## 2024-08-13 10:59:41 INFO::Load weight: /tmp/jobs/41346776/RtmpfymbN0/temp_libpathda1343f4466e/ctwas/extdata/sample_data/expression_Liver.db</span></span>
+<span><span class="co">## 2024-08-13 10:59:41 INFO::type: expression</span></span>
+<span><span class="co">## 2024-08-13 10:59:41 INFO::context: liver</span></span>
+<span><span class="co">## 2024-08-13 10:59:41 INFO::Loading PredictDB weights ...</span></span>
+<span><span class="co">## 2024-08-13 10:59:42 INFO::Keep protein coding genes only</span></span>
+<span><span class="co">## 2024-08-13 10:59:42 INFO::weight_name: expression_Liver</span></span>
+<span><span class="co">## 2024-08-13 10:59:42 INFO::Remove 1 genes without predictdb LD</span></span>
+<span><span class="co">## 2024-08-13 10:59:42 INFO::Number of genes with weights: 11479</span></span>
+<span><span class="co">## 2024-08-13 10:59:42 INFO::Number of variants in weights: 16929</span></span>
+<span><span class="co">## 2024-08-13 10:59:42 INFO::529 genes and 410 variants left after filtering by GWAS and LD reference</span></span>
+<span><span class="co">## 2024-08-13 10:59:42 INFO::Harmonizing and processing weights ...</span></span>
+<span><span class="co">## 2024-08-13 10:59:43 INFO::Number of genes with weights after preprocessing: 410</span></span></code></pre>
 <div class="sourceCode" id="cb12"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">weight_adipose_file</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/system.file.html" class="external-link">system.file</a></span><span class="op">(</span><span class="st">"extdata/sample_data"</span>, <span class="st">"expression_Adipose_Subcutaneous.db"</span>, package <span class="op">=</span> <span class="st">"ctwas"</span><span class="op">)</span></span>
 <span><span class="va">weights_adipose</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/preprocess_weights.html">preprocess_weights</a></span><span class="op">(</span><span class="va">weight_adipose_file</span>,</span>
@@ -206,18 +206,18 @@
 <span>                                      <span class="va">snp_map</span>,</span>
 <span>                                      type <span class="op">=</span> <span class="st">"expression"</span>,</span>
 <span>                                      context <span class="op">=</span> <span class="st">"adipose"</span><span class="op">)</span></span></code></pre></div>
-<pre><code><span><span class="co">## 2024-08-12 17:20:56 INFO::Load weight: /tmp/jobs/41340764/RtmpPwpRdJ/temp_libpath9a06d2217d0/ctwas/extdata/sample_data/expression_Adipose_Subcutaneous.db</span></span>
-<span><span class="co">## 2024-08-12 17:20:56 INFO::type: expression</span></span>
-<span><span class="co">## 2024-08-12 17:20:56 INFO::context: adipose</span></span>
-<span><span class="co">## 2024-08-12 17:20:56 INFO::Loading PredictDB weights ...</span></span>
-<span><span class="co">## 2024-08-12 17:20:56 INFO::Keep protein coding genes only</span></span>
-<span><span class="co">## 2024-08-12 17:20:56 INFO::weight_name: expression_Adipose_Subcutaneous</span></span>
-<span><span class="co">## 2024-08-12 17:20:56 INFO::Remove 0 genes without predictdb LD</span></span>
-<span><span class="co">## 2024-08-12 17:20:56 INFO::Number of genes with weights: 13102</span></span>
-<span><span class="co">## 2024-08-12 17:20:56 INFO::Number of variants in weights: 23737</span></span>
-<span><span class="co">## 2024-08-12 17:20:56 INFO::720 genes and 484 variants left after filtering by GWAS and LD reference</span></span>
-<span><span class="co">## 2024-08-12 17:20:56 INFO::Harmonizing and processing weights ...</span></span>
-<span><span class="co">## 2024-08-12 17:20:58 INFO::Number of genes with weights after preprocessing: 484</span></span></code></pre>
+<pre><code><span><span class="co">## 2024-08-13 10:59:43 INFO::Load weight: /tmp/jobs/41346776/RtmpfymbN0/temp_libpathda1343f4466e/ctwas/extdata/sample_data/expression_Adipose_Subcutaneous.db</span></span>
+<span><span class="co">## 2024-08-13 10:59:43 INFO::type: expression</span></span>
+<span><span class="co">## 2024-08-13 10:59:43 INFO::context: adipose</span></span>
+<span><span class="co">## 2024-08-13 10:59:43 INFO::Loading PredictDB weights ...</span></span>
+<span><span class="co">## 2024-08-13 10:59:43 INFO::Keep protein coding genes only</span></span>
+<span><span class="co">## 2024-08-13 10:59:43 INFO::weight_name: expression_Adipose_Subcutaneous</span></span>
+<span><span class="co">## 2024-08-13 10:59:43 INFO::Remove 0 genes without predictdb LD</span></span>
+<span><span class="co">## 2024-08-13 10:59:43 INFO::Number of genes with weights: 13102</span></span>
+<span><span class="co">## 2024-08-13 10:59:43 INFO::Number of variants in weights: 23737</span></span>
+<span><span class="co">## 2024-08-13 10:59:43 INFO::720 genes and 484 variants left after filtering by GWAS and LD reference</span></span>
+<span><span class="co">## 2024-08-13 10:59:43 INFO::Harmonizing and processing weights ...</span></span>
+<span><span class="co">## 2024-08-13 10:59:44 INFO::Number of genes with weights after preprocessing: 484</span></span></code></pre>
 <div class="sourceCode" id="cb14"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">weights</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="va">weights_liver</span>, <span class="va">weights_adipose</span><span class="op">)</span></span></code></pre></div>
 </div>
