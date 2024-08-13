@@ -89,7 +89,7 @@
       <h1 data-toc-skip>A minimal tutorial of running cTWAS without LD</h1>
                         <h4 data-toc-skip class="author">Kaixuan Luo, Sheng Qian</h4>
             
-            <h4 data-toc-skip class="date">2024-08-12</h4>
+            <h4 data-toc-skip class="date">2024-08-13</h4>
       
       <small class="dont-index">Source: <a href="https://github.com/xinhe-lab/ctwas/blob/singlegroup/vignettes/minimal_tutorial.Rmd" class="external-link"><code>vignettes/minimal_tutorial.Rmd</code></a></small>
       <div class="hidden name"><code>minimal_tutorial.Rmd</code></div>
@@ -163,14 +163,14 @@
 <p>The GWAS summary statistics needs to be “harmonized” before use. This means, for example, the allele definitions need to be consistent with the reference SNP data in <code>snp_map</code>. Harmonization is achieved through the <code><a href="../reference/preprocess_z_snp.html">preprocess_z_snp()</a></code> function. We filter out multiallelic variants and strand-ambiguous variants by default.</p>
 <div class="sourceCode" id="cb8"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">z_snp</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/preprocess_z_snp.html">preprocess_z_snp</a></span><span class="op">(</span><span class="va">z_snp</span>, <span class="va">snp_map</span><span class="op">)</span></span></code></pre></div>
-<pre><code><span><span class="co">## 2024-08-12 10:47:09 INFO::Preprocessing z_snp...</span></span>
-<span><span class="co">## 2024-08-12 10:47:09 INFO::z_snp has 407828 variants in total</span></span>
-<span><span class="co">## 2024-08-12 10:47:09 INFO::267361 variants left after filtering by snp_map</span></span>
-<span><span class="co">## 2024-08-12 10:47:09 INFO::Drop 30 multiallelic variants</span></span>
-<span><span class="co">## 2024-08-12 10:47:10 INFO::Harmonize 267331 variants in both GWAS and LD reference</span></span>
-<span><span class="co">## 2024-08-12 10:47:11 INFO::Flip signs for 267289 (99.98%) variants</span></span>
-<span><span class="co">## 2024-08-12 10:47:11 INFO::Remove 45738 strand ambiguous variants</span></span>
-<span><span class="co">## 2024-08-12 10:47:11 INFO::221593 variants left after preprocessing and harmonization.</span></span></code></pre>
+<pre><code><span><span class="co">## 2024-08-13 11:41:49 INFO::Preprocessing z_snp...</span></span>
+<span><span class="co">## 2024-08-13 11:41:49 INFO::z_snp has 407828 variants in total</span></span>
+<span><span class="co">## 2024-08-13 11:41:49 INFO::267361 variants left after filtering by snp_map</span></span>
+<span><span class="co">## 2024-08-13 11:41:49 INFO::Drop 30 multiallelic variants</span></span>
+<span><span class="co">## 2024-08-13 11:41:50 INFO::Harmonize 267331 variants in both GWAS and LD reference</span></span>
+<span><span class="co">## 2024-08-13 11:41:50 INFO::Flip signs for 267289 (99.98%) variants</span></span>
+<span><span class="co">## 2024-08-13 11:41:50 INFO::Remove 45738 strand ambiguous variants</span></span>
+<span><span class="co">## 2024-08-13 11:41:50 INFO::221593 variants left after preprocessing and harmonization.</span></span></code></pre>
 </div>
 <div class="section level3">
 <h3 id="prediction-models-of-genes">Prediction models of genes<a class="anchor" aria-label="anchor" href="#prediction-models-of-genes"></a>
@@ -182,16 +182,16 @@
 <span>                              <span class="va">region_info</span>,</span>
 <span>                              <span class="va">z_snp</span><span class="op">$</span><span class="va">id</span>,</span>
 <span>                              <span class="va">snp_map</span><span class="op">)</span></span></code></pre></div>
-<pre><code><span><span class="co">## 2024-08-12 10:47:11 INFO::Load weight: /tmp/jobs/41340764/Rtmp82Dyl3/temp_libpath116d26fec391/ctwas/extdata/sample_data/expression_Liver.db</span></span>
-<span><span class="co">## 2024-08-12 10:47:11 INFO::Loading PredictDB weights ...</span></span>
-<span><span class="co">## 2024-08-12 10:47:11 INFO::Keep protein coding genes only</span></span>
-<span><span class="co">## 2024-08-12 10:47:11 INFO::weight_name: expression_Liver</span></span>
-<span><span class="co">## 2024-08-12 10:47:11 INFO::Remove 1 genes without predictdb LD</span></span>
-<span><span class="co">## 2024-08-12 10:47:11 INFO::Number of genes with weights: 11479</span></span>
-<span><span class="co">## 2024-08-12 10:47:11 INFO::Number of variants in weights: 16929</span></span>
-<span><span class="co">## 2024-08-12 10:47:11 INFO::529 genes and 410 variants left after filtering by GWAS and LD reference</span></span>
-<span><span class="co">## 2024-08-12 10:47:11 INFO::Harmonizing and processing weights ...</span></span>
-<span><span class="co">## 2024-08-12 10:47:12 INFO::Number of genes with weights after preprocessing: 410</span></span></code></pre>
+<pre><code><span><span class="co">## 2024-08-13 11:41:50 INFO::Load weight: /tmp/jobs/41346776/RtmpQE9YN3/temp_libpath1b05682b1225/ctwas/extdata/sample_data/expression_Liver.db</span></span>
+<span><span class="co">## 2024-08-13 11:41:50 INFO::Loading PredictDB weights ...</span></span>
+<span><span class="co">## 2024-08-13 11:41:50 INFO::Keep protein coding genes only</span></span>
+<span><span class="co">## 2024-08-13 11:41:50 INFO::weight_name: expression_Liver</span></span>
+<span><span class="co">## 2024-08-13 11:41:50 INFO::Remove 1 genes without predictdb LD</span></span>
+<span><span class="co">## 2024-08-13 11:41:50 INFO::Number of genes with weights: 11479</span></span>
+<span><span class="co">## 2024-08-13 11:41:50 INFO::Number of variants in weights: 16929</span></span>
+<span><span class="co">## 2024-08-13 11:41:51 INFO::529 genes and 410 variants left after filtering by GWAS and LD reference</span></span>
+<span><span class="co">## 2024-08-13 11:41:51 INFO::Harmonizing and processing weights ...</span></span>
+<span><span class="co">## 2024-08-13 11:41:52 INFO::Number of genes with weights after preprocessing: 410</span></span></code></pre>
 </div>
 </div>
 <div class="section level2">

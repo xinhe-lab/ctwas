@@ -89,7 +89,7 @@
       <h1 data-toc-skip>Summarizing and visualizing cTWAS results</h1>
                         <h4 data-toc-skip class="author">Kaixuan Luo, Sheng Qian</h4>
             
-            <h4 data-toc-skip class="date">2024-08-12</h4>
+            <h4 data-toc-skip class="date">2024-08-13</h4>
       
       <small class="dont-index">Source: <a href="https://github.com/xinhe-lab/ctwas/blob/singlegroup/vignettes/summarizing_results.Rmd" class="external-link"><code>vignettes/summarizing_results.Rmd</code></a></small>
       <div class="hidden name"><code>summarizing_results.Rmd</code></div>
@@ -201,11 +201,10 @@
 <div class="sourceCode" id="cb13"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">finemap_res</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/anno_finemap_res.html">anno_finemap_res</a></span><span class="op">(</span><span class="va">finemap_res</span>, <span class="va">snp_map</span>, <span class="va">gene_annot</span>,</span>
 <span>                                use_gene_pos <span class="op">=</span> <span class="st">"mid"</span><span class="op">)</span></span></code></pre></div>
-<pre><code><span><span class="co">## 2024-08-12 11:19:25 INFO::Annotating ctwas finemapping result ...</span></span>
-<span><span class="co">## 2024-08-12 11:19:25 INFO::add gene_name and gene_type</span></span>
-<span><span class="co">## 2024-08-12 11:19:25 INFO::Remove unannotated genes</span></span>
-<span><span class="co">## 2024-08-12 11:19:25 INFO::use gene mid positions</span></span>
-<span><span class="co">## 2024-08-12 11:19:25 INFO::add SNP positions</span></span></code></pre>
+<pre><code><span><span class="co">## 2024-08-13 11:45:29 INFO::Annotating ctwas finemapping result ...</span></span>
+<span><span class="co">## 2024-08-13 11:45:29 INFO::add gene_name and gene_type</span></span>
+<span><span class="co">## 2024-08-13 11:45:29 INFO::use gene mid positions</span></span>
+<span><span class="co">## 2024-08-13 11:45:29 INFO::add SNP positions</span></span></code></pre>
 <p>You can now run the command at the beginning of this section to view the genes with additional information. In this example, HPR is the only gene that satisfies PIP &gt; 0.8 and in credible sets.</p>
 <div class="sourceCode" id="cb15"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/subset.html" class="external-link">subset</a></span><span class="op">(</span><span class="va">finemap_res</span>, <span class="va">group</span> <span class="op">==</span> <span class="st">"gene"</span> <span class="op">&amp;</span> <span class="va">susie_pip</span> <span class="op">&gt;</span> <span class="fl">0.8</span> <span class="op">&amp;</span> <span class="va">cs_index</span> <span class="op">!=</span> <span class="fl">0</span><span class="op">)</span></span></code></pre></div>
@@ -233,11 +232,11 @@
 <span>               highlight_pip <span class="op">=</span> <span class="fl">0.8</span>,</span>
 <span>               R_snp_gene <span class="op">=</span> <span class="va">cor_res</span><span class="op">$</span><span class="va">R_snp_gene</span>,</span>
 <span>               R_gene <span class="op">=</span> <span class="va">cor_res</span><span class="op">$</span><span class="va">R_gene</span><span class="op">)</span></span></code></pre></div>
-<pre><code><span><span class="co">## 2024-08-12 11:19:27 INFO::focal gene: HPR</span></span>
-<span><span class="co">## 2024-08-12 11:19:27 INFO::focal id: ENSG00000261701.6|expression_Liver</span></span>
-<span><span class="co">## 2024-08-12 11:19:27 INFO::plot locus range: chr16 71600000,72400000</span></span>
-<span><span class="co">## 2024-08-12 11:19:27 INFO::gene: HPR</span></span>
-<span><span class="co">## 2024-08-12 11:19:27 INFO::QTL positions: 72063820,72063928</span></span></code></pre>
+<pre><code><span><span class="co">## 2024-08-13 11:45:31 INFO::focal gene: HPR</span></span>
+<span><span class="co">## 2024-08-13 11:45:31 INFO::focal id: ENSG00000261701.6|expression_Liver</span></span>
+<span><span class="co">## 2024-08-13 11:45:31 INFO::plot locus range: chr16 71600000,72400000</span></span>
+<span><span class="co">## 2024-08-13 11:45:31 INFO::gene: HPR</span></span>
+<span><span class="co">## 2024-08-13 11:45:31 INFO::QTL positions: 72063820,72063928</span></span></code></pre>
 <div class="figure" style="text-align: center">
 <img src="summarizing_results_files/figure-html/locus_plot-1.png" alt="&amp;nbsp;" width="1200"><p class="caption">
  
@@ -253,11 +252,11 @@
 <span>               ens_db <span class="op">=</span> <span class="va">ens_db</span>,</span>
 <span>               locus_range <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">71.6e6</span>,<span class="fl">72.4e6</span><span class="op">)</span>,</span>
 <span>               highlight_pip <span class="op">=</span> <span class="fl">0.8</span><span class="op">)</span></span></code></pre></div>
-<pre><code><span><span class="co">## 2024-08-12 11:19:29 INFO::focal gene: HPR</span></span>
-<span><span class="co">## 2024-08-12 11:19:29 INFO::focal id: ENSG00000261701.6|expression_Liver</span></span>
-<span><span class="co">## 2024-08-12 11:19:29 INFO::plot locus range: chr16 71600000,72400000</span></span>
-<span><span class="co">## 2024-08-12 11:19:29 INFO::gene: HPR</span></span>
-<span><span class="co">## 2024-08-12 11:19:29 INFO::QTL positions: 72063820,72063928</span></span></code></pre>
+<pre><code><span><span class="co">## 2024-08-13 11:45:33 INFO::focal gene: HPR</span></span>
+<span><span class="co">## 2024-08-13 11:45:33 INFO::focal id: ENSG00000261701.6|expression_Liver</span></span>
+<span><span class="co">## 2024-08-13 11:45:33 INFO::plot locus range: chr16 71600000,72400000</span></span>
+<span><span class="co">## 2024-08-13 11:45:33 INFO::gene: HPR</span></span>
+<span><span class="co">## 2024-08-13 11:45:33 INFO::QTL positions: 72063820,72063928</span></span></code></pre>
 <div class="figure" style="text-align: center">
 <img src="summarizing_results_files/figure-html/locus_plot_noLD-1.png" alt="&amp;nbsp;" width="1200"><p class="caption">
  

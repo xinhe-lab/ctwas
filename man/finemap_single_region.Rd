@@ -49,7 +49,9 @@ finemap_single_region(
 
 \item{include_cs_index}{If TRUE, add cs_index to finemapping results.}
 
-\item{force_compute_cor}{If TRUE, force computing correlation (R) matrices}
+\item{snps_only}{If TRUE, use only SNPs in the region data.}
+
+\item{force_compute_cor}{If TRUE, force computing correlation (R) matrices.}
 
 \item{save_cor}{If TRUE, save correlation (R) matrices to \code{cor_dir}}
 

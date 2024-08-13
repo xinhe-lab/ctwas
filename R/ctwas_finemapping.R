@@ -250,7 +250,11 @@ finemap_regions_noLD <- function(region_data,
 #'
 #' @param min_abs_corr Minimum absolute correlation allowed in a credible set.
 #'
-#' @param force_compute_cor If TRUE, force computing correlation (R) matrices
+#' @param include_cs_index If TRUE, add cs_index to finemapping results.
+#'
+#' @param snps_only If TRUE, use only SNPs in the region data.
+#'
+#' @param force_compute_cor If TRUE, force computing correlation (R) matrices.
 #'
 #' @param save_cor If TRUE, save correlation (R) matrices to \code{cor_dir}
 #'
@@ -260,8 +264,6 @@ finemap_regions_noLD <- function(region_data,
 #' \code{LD_loader_fun()} function to load LD matrix.
 #'
 #' @param LD_loader_fun a user defined function to load LD matrix when \code{LD_format = "custom"}.
-#'
-#' @param include_cs_index If TRUE, add cs_index to finemapping results.
 #'
 #' @param verbose If TRUE, print detail messages
 #'
@@ -401,6 +403,8 @@ finemap_single_region <- function(region_data,
 #' @param group_prior_var a vector of two prior variances for SNPs and gene effects.
 #'
 #' @param use_null_weight If TRUE, allow for a probability of no effect in susie
+#'
+#' @param snps_only If TRUE, use only SNPs in the region data.
 #'
 #' @param verbose If TRUE, print detail messages
 #'

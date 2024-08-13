@@ -70,6 +70,7 @@ ctwas_res <- ctwas_sumstats(z_snp,
                             filter_L = TRUE,
                             filter_nonSNP_PIP = FALSE,
                             min_nonSNP_PIP = 0.5,
+                            min_abs_corr = 0.1, 
                             ncore = 6, 
                             ncore_LD = 4,
                             save_cor = TRUE, 
@@ -87,7 +88,9 @@ Important arguments that control how this function is executed:
 
 +  `filter_L`: if `filter_L = TRUE` (the default option), cTWAS will first estimate the number of causal signals (`L`) for each region. This step is done using uniform prior, treating all variants and genes equally. From the results, we obtain the number of credible sets (`L`). We then select regions with at least one credible set, L > 0. 
 
-+ `filter_nonSNP_PIP` and `min_nonSNP_PIP`: if `filter_nonSNP_PIP = TRUE`, it will compute the non-SNP PIP, i.e. the total PIP of all genes,  for each region (using the estimated parameters) and select regions with non-SNP PIP > `min_nonSNP_PIP` (0.5 by default`). 
++ `filter_nonSNP_PIP` and `min_nonSNP_PIP`: if `filter_nonSNP_PIP = TRUE`, it will compute the non-SNP PIP, i.e. the total PIP of all genes,  for each region (using the estimated parameters) and select regions with non-SNP PIP > `min_nonSNP_PIP` (0.5 by default). 
+
++ `min_abs_corr`: Minimum absolute correlation allowed in a credible set. cTWAs jointly fine-maps both SNPs and molecular traits, the correlations between SNPs and molecular traits could be lower than standard fine-mapping with SNPs. We use a lower cutoff (0.1 by default) to avoid missing causal genes.  
 
 + `ncore`:  the number of cores to parallelize computing over regions.
 
@@ -113,7 +116,6 @@ The `compute_gene_z` function computes Z-scores for the genes using preprocessed
 ```{r compute_gene_z, eval=FALSE}
 z_gene <- compute_gene_z(z_snp, weights)
 ```
-
 
 
 
@@ -165,7 +167,7 @@ After parameter estimation, we use the `screen_regions()` function to perform a 
 
 cTWAS have two options to screen regions:
  
-+ screening by the number of causal signals: if `filter_L = TRUE` (the default option), cTWAS will first estimate the number of causal signals (`L`) for each region. This step is done using uniform prior (`group_prior = NULL` and `group_prior_var = NULL`), treating all variants and genes equally. From the results, we obtain the number of credible sets (`L`). We then select regions with at least one credible set, L > 0. 
++ screening by the number of causal signals: if `filter_L = TRUE` (the default option), cTWAS will first estimate the number of causal signals (`L`) for each region. This step is done by running fine-mapping using uniform prior  (`group_prior = NULL` and `group_prior_var = NULL`), treating all variants and genes equally. From the results, we obtain the number of credible sets (`L`). We then select regions with at least one credible set, L > 0. 
 
 + screening by non-SNP PIPs: if `filter_nonSNP_PIP = TRUE`, cTWAS will compute the non-SNP PIP, i.e. total PIP of all genes, for each region (using estimated L and estimated priors). It then selects regions by applying a  `min_nonSNP_PIP` cutoff (0.5, by default). 
 
@@ -177,6 +179,7 @@ screen_res <- screen_regions(region_data,
                              weights = weights, 
                              filter_L = TRUE,
                              filter_nonSNP_PIP = FALSE,
+                             min_abs_corr = 0.1, 
                              group_prior = NULL,
                              group_prior_var = NULL, 
                              ncore = 4)
@@ -187,6 +190,8 @@ screen_summary <- screen_res$screen_summary
 
 
 It returns `screened_region_data` which contains a subset of region data for selected regions. It also returns the estimated L (number of credible sets) for the selected regions, which could be used in the fine-mapping step to set L for each region. In addition, it returns a data frame `screen_summary`, which includes the estimated L and non-SNP PIPs for all the regions.
+
+Note, cTWAs jointly fine-maps both SNPs and molecular traits, the correlations between SNPs and molecular traits could be lower than standard fine-mapping with SNPs. Thus, we set a lower purity cutoff (default option: `min_abs_corr = 0.1`) for obtaining credible sets to avoid missing causal genes. 
 
 When running without LD, we could use the `screen_regions_noLD()` function; it would only perform screening regions by non-SNP PIPs.
 
@@ -230,7 +235,8 @@ finemap_res <- finemap_regions(screened_region_data,
                                weights = weights,
                                group_prior = group_prior,
                                group_prior_var = group_prior_var,
-                               L = screened_region_L
+                               L = screened_region_L,
+                               min_abs_corr = 0.1, 
                                save_cor = TRUE,
                                cor_dir = "./cor_matrix",
                                ncore = 4)

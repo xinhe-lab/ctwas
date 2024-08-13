@@ -26,6 +26,8 @@ finemap_single_region_noLD(
 
 \item{use_null_weight}{If TRUE, allow for a probability of no effect in susie}
 
+\item{snps_only}{If TRUE, use only SNPs in the region data.}
+
 \item{verbose}{If TRUE, print detail messages}
 
 \item{...}{Additional arguments of \code{susie_rss}.}
