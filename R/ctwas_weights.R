@@ -536,6 +536,9 @@ compute_weight_LD_from_ref <- function(weights,
   if (!inherits(weights,"list"))
     stop("'weights' should be a list!")
 
+  if (!inherits(LD_map,"data.frame"))
+    stop("'LD_map' should be a data frame!")
+
   weight_info <- lapply(names(weights), function(x){
     as.data.frame(weights[[x]][c("chrom", "p0","p1", "gene_name", "weight_name", "type","context")])})
   weight_info <- do.call(rbind, weight_info)

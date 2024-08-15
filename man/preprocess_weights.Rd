@@ -19,7 +19,7 @@ preprocess_weights(
   load_predictdb_LD = TRUE,
   fusion_method = c("lasso", "enet", "top1", "blup", "bslmm", "best.cv"),
   fusion_genome_version = "b38",
-  fusion_top_n_snps,
+  fusion_top_n_snps = NULL,
   LD_format = c("rds", "rdata", "csv", "txt", "custom"),
   LD_loader_fun = NULL,
   ncore = 1,

@@ -71,7 +71,7 @@ preprocess_weights <- function(weight_file,
                                load_predictdb_LD = TRUE,
                                fusion_method = c("lasso","enet","top1","blup","bslmm","best.cv"),
                                fusion_genome_version = "b38",
-                               fusion_top_n_snps,
+                               fusion_top_n_snps = NULL,
                                LD_format = c("rds", "rdata", "csv", "txt", "custom"),
                                LD_loader_fun = NULL,
                                ncore = 1,
@@ -93,6 +93,14 @@ preprocess_weights <- function(weight_file,
     load_predictdb_LD <- FALSE
     filter_protein_coding_genes <- FALSE
     scale_predictdb_weights <- FALSE
+  }
+
+  if (!load_predictdb_LD) {
+    if (missing(LD_map))
+      stop("'LD_map' is required when load_predictdb_LD = FALSE!")
+
+    if (!inherits(LD_map,"data.frame"))
+      stop("'LD_map' should be a data frame!")
   }
 
   if (!inherits(snp_map,"list")){
@@ -139,7 +147,7 @@ preprocess_weights <- function(weight_file,
   snpnames <- Reduce(intersect, list(snpnames, snp_info$id, gwas_snp_ids))
   weight_table <- weight_table[weight_table$rsid %in% snpnames, ]
   gene_names <- unique(weight_table$gene)
-  loginfo("%d genes and %d variants left after filtering by GWAS and LD reference",
+  loginfo("%d genes and %d variants left after filtering by GWAS and reference",
           length(snpnames), length(gene_names))
   # subset to variants in weight table
   snp_info <- snp_info[snp_info$id %in% weight_table$rsid,]
@@ -169,7 +177,7 @@ preprocess_weights <- function(weight_file,
   }
 
   if (!load_predictdb_LD) {
-    loginfo("Computing LD for weights using the LD reference ...")
+    loginfo("Computing LD for weights using reference LD matrices ...")
     weights <- compute_weight_LD_from_ref(weights,
                                           weight_name,
                                           region_info = region_info,
@@ -203,6 +211,10 @@ process_weight <- function(gene_name,
                            fusion_top_n_snps = NULL,
                            drop_strand_ambig = TRUE,
                            scale_predictdb_weights = TRUE) {
+
+  if (weight_format != "PredictDB") {
+    scale_predictdb_weights <- FALSE
+  }
 
   # Check LD reference SNP info
   target_header <- c("chrom", "id", "pos", "alt", "ref")
