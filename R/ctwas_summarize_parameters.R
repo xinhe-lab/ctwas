@@ -21,6 +21,8 @@ summarize_param <- function(param, gwas_n){
   # set group size
   group_size <- param$group_size
   group_size <- group_size[rownames(group_prior_iters)]
+  group_size <- as.numeric(group_size)
+  names(group_size) <- rownames(group_prior_iters)
 
   # estimated group PVE (all iterations)
   group_pve_iters <- group_prior_var_iters*group_prior_iters*group_size/gwas_n

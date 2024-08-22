@@ -22,9 +22,7 @@
 #'
 #' @param use_null_weight If TRUE, allow for a probability of no effect in susie.
 #'
-#' @param min_snps minimum number of SNPs in a region.
-#'
-#' @param min_genes minimum number of genes in a region.
+#' @param min_var minimum number of variables (SNPs and genes) in a region.
 #'
 #' @param ncore The number of cores used to parallelize computation over regions.
 #'
@@ -49,15 +47,14 @@ est_param <- function(
     niter = 30,
     min_p_single_effect = 0.8,
     use_null_weight = TRUE,
-    min_snps = 2,
-    min_genes = 1,
+    min_var = 2,
     ncore = 1,
     logfile = NULL,
     verbose = FALSE,
     ...){
 
   if (!is.null(logfile)){
-    addHandler(writeToFile, file= logfile, level='DEBUG')
+    addHandler(writeToFile, file=logfile, level='DEBUG')
   }
 
   loginfo('Estimating parameters ... ')
@@ -88,26 +85,22 @@ est_param <- function(
   p_single_effect_df <- data.frame(region_id = region_ids,
                                    p_single_effect = NA)
 
-  # skip regions with fewer than min_snps SNPs
-  if (min_snps > 0) {
-    skip_region_ids <- region_ids[n_sids < min_snps]
+  # skip regions with fewer than min_var variables
+  if (min_var > 0) {
+    skip_region_ids <- region_ids[(n_sids + n_gids) < min_var]
     if (length(skip_region_ids) > 0){
-      loginfo("Skip %d regions with number of SNPs < %d.", length(skip_region_ids), min_snps)
+      loginfo("Skip %d regions with number of variables < %d.", length(skip_region_ids), min_var)
       region_data[skip_region_ids] <- NULL
     }
   }
 
-  # skip regions with fewer than min_genes genes
-  if (min_genes > 0) {
-    skip_region_ids <- region_ids[n_gids < min_genes]
-    if (length(skip_region_ids) > 0){
-      loginfo("Skip %d regions with number of genes < %d.", length(skip_region_ids), min_genes)
-      region_data[skip_region_ids] <- NULL
-    }
-  }
+  loginfo("Estimate parameters using %d regions", length(region_data))
 
   # Run EM for a few (niter_prefit) iterations, getting rough estimates
   loginfo("Run EM (prefit) for %d iterations, getting rough estimates ...", niter_prefit)
+  if (length(region_data) == 0){
+    stop("No regions selected!")
+  }
   EM_prefit_res <- fit_EM(region_data,
                           niter = niter_prefit,
                           init_group_prior = init_group_prior,
@@ -118,12 +111,18 @@ est_param <- function(
                           verbose = verbose,
                           ...)
   adjusted_EM_prefit_group_prior <- EM_prefit_res$group_prior
-  adjusted_EM_prefit_group_prior["SNP"] <- EM_prefit_res$group_prior["SNP"] * thin
+  group_size <- EM_prefit_res$group_size
+  if (thin != 1){
+    adjusted_EM_prefit_group_prior["SNP"] <- EM_prefit_res$group_prior["SNP"] * thin
+    group_size["SNP"] <- group_size["SNP"]/thin
+  }
+  group_size <- group_size[names(EM_prefit_res$group_prior)]
+  loginfo("group_size {%s}: {%s}", names(group_size), group_size)
+
   loginfo("Roughly estimated group_prior {%s}: {%s}",
           names(EM_prefit_res$group_prior), format(adjusted_EM_prefit_group_prior, digits = 4))
   loginfo("Roughly estimated group_prior_var {%s}: {%s}",
           names(EM_prefit_res$group_prior_var), format(EM_prefit_res$group_prior_var, digits = 4))
-  group_size <- EM_prefit_res$group_size
 
   # Select regions with single effect
   p_single_effect <- compute_region_p_single_effect(region_data, EM_prefit_res$group_prior)
@@ -135,6 +134,9 @@ est_param <- function(
 
   # Run EM for more (niter) iterations, getting rough estimates
   loginfo("Run EM for %d iterations, getting accurate estimates ...", niter)
+  if (length(selected_region_data) == 0){
+    stop("No regions selected!")
+  }
   EM_res <- fit_EM(selected_region_data,
                    niter = niter,
                    init_group_prior = EM_prefit_res$group_prior,
@@ -156,13 +158,10 @@ est_param <- function(
   if (thin != 1){
     group_prior["SNP"] <- group_prior["SNP"] * thin
     group_prior_iters["SNP",] <- group_prior_iters["SNP",] * thin
-    group_size["SNP"] <- group_size["SNP"]/thin
   }
-  group_size <- group_size[names(group_prior)]
 
   loginfo("Estimated group_prior {%s}: {%s}", names(group_prior), format(group_prior, digits = 4))
   loginfo("Estimated group_prior_var {%s}: {%s}", names(group_prior_var), format(group_prior_var, digits = 4))
-  loginfo("group_size {%s}: {%s}", names(group_size), group_size)
 
   param <- list("group_prior" = group_prior,
                 "group_prior_var" = group_prior_var,

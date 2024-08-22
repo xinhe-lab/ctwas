@@ -5,7 +5,7 @@
 #'
 #' @param region_id region ID to be plotted
 #'
-#' @param weights a list of weights
+#' @param weights a list of proprocessed weights
 #'
 #' @param ens_db Ensembl database
 #'
@@ -392,6 +392,8 @@ make_convergence_plots <- function(param,
 
   # group size
   group_size <- param$group_size[rownames(group_prior_iters)]
+  group_size <- as.numeric(group_size)
+  names(group_size) <- rownames(group_prior_iters)
 
   # estimated group PVE (all iterations)
   group_pve_iters <- group_prior_var_iters*group_prior_iters*group_size/gwas_n
