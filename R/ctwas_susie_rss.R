@@ -43,27 +43,36 @@ ctwas_susie_rss <- function(z,
 anno_susie <- function(susie_res,
                        gids,
                        sids,
-                       region_id,
-                       z = NULL,
                        g_type = "gene",
                        g_context = "gene",
                        g_group = "gene",
+                       gene_ids = NULL,
+                       region_id = NULL,
+                       z = NULL,
                        include_cs_index = TRUE) {
 
   gene_df <- data.frame(id = gids, type = g_type, context = g_context, group = g_group)
   snp_df <- data.frame(id = sids, type = "SNP", context = "SNP", group = "SNP")
+
+  if (!is.null(gene_ids)) {
+    gene_df$gene_id <- gene_ids
+    snp_df$gene_id <- NA
+  }
+
   susie_res_df <- rbind(gene_df, snp_df)
+
+  if (!is.null(region_id)) {
+    susie_res_df$region_id <- region_id
+  }
 
   if (!is.null(z)) {
     susie_res_df$z <- z
   }
 
-  susie_res_df$region_id <- region_id
-
   susie_res_df$susie_pip <- susie_res$pip
 
   p <- length(gids) + length(sids)
-  susie_res_df$mu2 <- colSums(susie_res$mu2[, seq(1, p)[1:p!=susie_res$null_index], drop = F]) #WARN: not sure for L>1
+  susie_res_df$mu2 <- colSums(susie_res$mu2[, seq(1, p)[1:p!=susie_res$null_index], drop = FALSE]) #WARN: not sure for L>1
 
   if (include_cs_index) {
     susie_res_df$cs_index <- 0
