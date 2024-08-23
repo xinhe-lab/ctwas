@@ -7,7 +7,7 @@
 convert_fusion_to_predictdb(
   weight_dir,
   fusion_method = c("lasso", "enet", "top1", "blup", "bslmm", "best.cv"),
-  fusion_genome_version = "b38",
+  fusion_genome_version = NA,
   make_extra_table = TRUE,
   cov_table = NULL,
   outputdir = getwd(),

@@ -10,7 +10,7 @@
 #'
 #' @return a data frame of z-scores of molecular traits
 #'
-#' @importFrom logging addHandler loginfo writeToFile
+#' @importFrom logging addHandler loginfo logwarn writeToFile
 #' @importFrom parallel mclapply
 #'
 #' @export
@@ -37,17 +37,23 @@ compute_gene_z <- function (z_snp,
   }
 
   loginfo("Computing gene z-scores ...")
-  weight_snpnames <- unique(unlist(lapply(weights, function(x){rownames(x[["wgt"]])})))
-  z_snp <- z_snp[z_snp$id %in% weight_snpnames, c("id", "z")]
+  weight_snp_ids <- unique(unlist(lapply(weights, function(x){rownames(x[["wgt"]])})))
+
+  if (any(!weight_snp_ids %in% z_snp$id)){
+    stop("Some SNPs in weights not found in z_snp!
+         Please run preprocess_weights() with 'gwas_snp_ids = z_snp$id'!")
+  }
+
+  z_snp <- z_snp[z_snp$id %in% weight_snp_ids, c("id", "z")]
 
   z_gene <- mclapply_check(names(weights), function(id) {
     wgt <- weights[[id]][["wgt"]]
-    snpnames <- rownames(wgt)
+    wgt_snp_ids <- rownames(wgt)
     R.s <- weights[[id]][["R_wgt"]]
     type <- weights[[id]][["type"]]
     context <- weights[[id]][["context"]]
-    group <- paste0(type,"|",context)
-    z.idx <- match(snpnames, z_snp$id)
+    group <- paste0(context,"|",type)
+    z.idx <- match(wgt_snp_ids, z_snp$id)
     z.s <- as.matrix(z_snp$z[z.idx])
     z.g <- as.matrix(crossprod(wgt, z.s)/sqrt(t(wgt)%*%R.s%*% wgt))
     dimnames(z.g) <- NULL
@@ -56,10 +62,6 @@ compute_gene_z <- function (z_snp,
 
   z_gene <- do.call("rbind", z_gene)
   rownames(z_gene) <- NULL
-
-  if (anyNA(z_gene)){
-    stop("z_gene contains missing values!")
-  }
 
   return(z_gene)
 }
@@ -71,10 +73,10 @@ get_gene_info <- function(weights){
     stop("'weights' should be a list.")
   }
   gene_info <- lapply(names(weights), function(x){
-    as.data.frame(weights[[x]][c("chrom", "p0","p1", "gene_name", "weight_name")])})
+    as.data.frame(weights[[x]][c("chrom", "p0","p1", "gene_id", "weight_name")])})
   gene_info <- do.call(rbind, gene_info)
   gene_info$id <- names(weights)
-  gene_info <- gene_info[, c("chrom", "id", "p0", "p1", "gene_name", "weight_name")]
+  gene_info <- gene_info[, c("chrom", "id", "p0", "p1", "gene_id", "weight_name")]
   gene_info[, c("chrom","p0", "p1")] <- sapply(gene_info[, c("chrom","p0", "p1")], as.integer)
   rownames(gene_info) <- NULL
 
