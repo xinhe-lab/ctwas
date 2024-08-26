@@ -5,8 +5,9 @@
 \title{Combines gene PIPs by context, type or group.}
 \usage{
 combine_gene_pips(
-  finemap_res,
+  finemap_gene_res,
   by = c("context", "type", "group"),
+  gene_col = "gene_name",
   filter_protein_coding_genes = FALSE,
   filter_cs = FALSE,
   replace_NA = NA,
@@ -14,8 +15,6 @@ combine_gene_pips(
 )
 }
 \arguments{
-\item{finemap_res}{a data frame of annotated cTWAS finemapping result}
-
 \item{by}{sum gene PIPs by "context", "type", or "group".}
 
 \item{filter_protein_coding_genes}{If TRUE, keep protein coding genes only.}
@@ -25,6 +24,8 @@ combine_gene_pips(
 \item{replace_NA}{values to replace NAs with.}
 
 \item{digits}{digits to round combined PIPs}
+
+\item{finemap_res}{a data frame of annotated cTWAS finemapping result}
 }
 \value{
 a data frame of combined gene PIPs for each context, type or group

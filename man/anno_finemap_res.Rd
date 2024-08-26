@@ -2,39 +2,28 @@
 % Please edit documentation in R/ctwas_summarize_finemap_res.R
 \name{anno_finemap_res}
 \alias{anno_finemap_res}
-\title{Annotates cTWAS finemapping result with gene annotations}
+\title{Map finemapping result of molecular traits to genes.}
 \usage{
 anno_finemap_res(
   finemap_res,
-  snp_map,
-  gene_annot = NULL,
-  use_gene_pos = c("mid", "start", "end"),
-  drop_unannotated_genes = TRUE,
-  filter_protein_coding_genes = FALSE,
-  filter_cs = FALSE
+  mapping_table = NULL,
+  map_by = "gene_id",
+  drop_unmapped_genes = TRUE
 )
 }
 \arguments{
-\item{finemap_res}{a data frame of cTWAS finemapping result}
+\item{finemap_res}{a data frame of cTWAS finemapping results.}
 
-\item{snp_map}{a list of data frames with SNP-to-region map for the reference.}
+\item{mapping_table}{a data frame of mapping between molecular traits and genes,
+with required columns: "gene_id", "gene_name".}
 
-\item{gene_annot}{a data frame of gene annotations, with columns:
-"chrom", "start", "end", "gene_id", "gene_name", "gene_type.}
+\item{map_by}{column name to be mapped by (default: "gene_id").}
 
-\item{use_gene_pos}{use mid (midpoint), start or end positions to
-represent gene positions.}
-
-\item{drop_unannotated_genes}{If TRUE, remove unannotated genes.}
-
-\item{filter_protein_coding_genes}{TRUE/FALSE. If TRUE, keep protein coding genes only.}
-
-\item{filter_cs}{TRUE/FALSE. If TRUE, limits results in credible sets.}
+\item{drop_unmapped_genes}{If TRUE, remove unmapped genes.}
 }
 \value{
-a data frame of cTWAS finemapping result including gene
-names, types and positions
+a data frame of annotated finemapping result.
 }
 \description{
-Annotates cTWAS finemapping result with gene annotations
+Map finemapping result of molecular traits to genes.
 }
