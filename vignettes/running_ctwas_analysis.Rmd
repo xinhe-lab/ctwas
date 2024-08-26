@@ -1,6 +1,6 @@
 ---
 title: "Running cTWAS analysis"
-author: "Kaixuan Luo, Sheng Qian"
+author: "Kaixuan Luo, Sheng Qian, Xin He"
 date: "`r Sys.Date()`"
 output: rmarkdown::html_vignette
 vignette: >
@@ -24,7 +24,7 @@ knitr::opts_chunk$set(message = FALSE,
 
 Running cTWAS analysis involves several major steps: preparing input data, computing associations of molecular traits with the phenotype, estimating parameters, screening for candidate genomic regions, and fine-mapping these regions. 
 
-In this version of cTWAS, we allow the joint analysis of multiple groups of molecular traits. This could be: eQTL of multiple tissues; or eQTLs, splicing QTLs and other types of QTLs in a single tissue. In a more complex setting, multiple types of QTL data from multiple tissues/cell types. Each group is defined by its “type” (kind of molecular traits), and “context” (tissue, cell type, condition, etc.). Please see the section "Harmonizing prediction models and the reference data" in the "Preparing cTWAS input data" tutorial. 
+In this version of cTWAS, we allow the joint analysis of multiple groups of molecular traits. This could be: eQTL of multiple tissues; or eQTLs, splicing QTLs and other types of QTLs in a single tissue. In a more complex setting, multiple types of QTL data from multiple tissues/cell types. Each group is defined by its “type” (kind of molecular traits), and “context” (tissue, cell type, condition, etc.). 
 
 We require first running the data preprocessing and harmonization steps. Please follow the "Preparing cTWAS input data" tutorial.
 
@@ -34,7 +34,7 @@ library(ctwas)
 ```
 
 
-Let's first load the preprocessed input data,including GWAS summary statistics (`z_snp`), the processed weights of molecular traits (`weights`), the region definitions (`region_info`), and the list of SNPs and information of LD matrix of each region (`snp_map` and `LD_map`): :
+Let's first load the preprocessed input data,including GWAS summary statistics (`z_snp`), the processed weights of molecular traits (`weights`), the region definitions (`region_info`), and the list of SNPs and information of LD matrix of each region (`snp_map` and `LD_map`):
 
 ```{r load_ctwas_res}
 z_snp <- readRDS(system.file("extdata/sample_data", "LDL_example.preprocessed.z_snp.RDS", package = "ctwas"))
@@ -76,8 +76,9 @@ ctwas_res <- ctwas_sumstats(z_snp,
                             min_abs_corr = 0.1, 
                             ncore = 6, 
                             ncore_LD = 4,
-                            save_cor = TRUE, 
-                            cor_dir = "./cor_matrix")
+                            save_cor = TRUE,
+                            cor_dir = "./cor_matrix",
+                            force_compute_cor = FALSE)
 ```
 
 
@@ -89,19 +90,19 @@ Important arguments that control how this function is executed:
 
 + `maxSNP`: maximum number of SNPs in a region (e.g. 20000). Default is Inf, no limit. This can be useful if there are too many SNPs in a region and you don't have enough memory to run the program.
 
-+ `group_prior_var_stucture`: options to control how parameters are shared among groups. For example, "shared_type" (default option) allows all groups in one molecular QTL type to share the same variance parameter.  "independent" allows all groups to have their own separate variance parameters. More options can be found in the Reference page of the function.
++ `group_prior_var_stucture`: options to control how the effect size variance parameters are shared among groups. For example, "shared_type" (default option) allows all groups in one molecular QTL type to share the same variance parameter.  "independent" allows all groups to have their own separate variance parameters. More options can be found in the "Estimating parameters" section below.
 
 +  `filter_L`: if `filter_L = TRUE` (the default option), cTWAS will first estimate the number of causal signals (`L`) for each region. This step is done using uniform prior, treating all variants and genes equally. From the results, we obtain the number of credible sets (`L`). We then select regions with at least one credible set, L > 0. 
 
 + `filter_nonSNP_PIP` and `min_nonSNP_PIP`: if `filter_nonSNP_PIP = TRUE`, it will compute the non-SNP PIP, i.e. the total PIP of all molecular traits,  for each region (using the estimated parameters) and select regions with non-SNP PIP > `min_nonSNP_PIP` (0.5 by default). 
 
-+ `min_abs_corr`: Minimum absolute correlation allowed in a credible set. cTWAs jointly fine-maps both SNPs and molecular traits, the correlations between SNPs and molecular traits could be lower than standard fine-mapping with SNPs. We use a lower cutoff (0.1 by default) to avoid missing causal genes.  
++ `min_abs_corr`: Minimum absolute correlation allowed in a credible set. cTWAs jointly fine-maps both SNPs and molecular traits, the correlations between SNPs and molecular traits could be lower than standard fine-mapping with SNPs. We use a lower cutoff (0.1 by default). 
 
-+ `ncore`:  the number of cores to parallelize computing over regions.
++ `ncore`:  computation of genomic regions can be performed in parallel. This parameter controls how many cores are used in the parallelization.
 
-+ `ncore_LD`:  the number of cores to parallelize computing over regions with LD matrices. During screening regions and fine-mapping steps, computing correlation matrices requires larger memory. You could reduce the number of cores for these steps to avoid insufficient memory.
++ `ncore_LD`:  this sets the number of cores in parallelization when LD matrices are needed. In screening regions and fine-mapping steps, we need larger memory to load and process LD matrices. We recommend using fewer cores in `ncore_LD` than `ncore`.
 
-+ `save_cor` and `cor_dir`: if `save_cor = TRUE`, we save the correlation matrices in the `cor_dir`directory, which will be used later for visualizing the results.
++ `save_cor`, `cor_dir` and `force_compute_cor`: we need correlation matrices during fine-mapping and visualizing the results with LD.  If `save_cor = TRUE`, it saves the correlation matrices in the `cor_dir` directory for future access. These are large datasets, so they are not saved by default. If you have correlation matrices saved in `cor_dir` and `force_compute_cor = FALSE` (default option), then if you rerun fine-mapping, cTWAS will automatically check to see if correlation matrices are available in `cor_dir` and reuse them. You can set `force_compute_cor = TRUE` so that it always computes the correlation matrices. 
 
 To understand and summarize the results from cTWAS, please read the tutorial “Summarizing and visualizing cTWAS results”. 
 
@@ -111,6 +112,8 @@ To understand and summarize the results from cTWAS, please read the tutorial “
 ## Running cTWAS modules
 
 This section describes how to perform cTWAS analysis by running each of the modules separately. This would allow more flexible controls of the cTWAS modules, e.g. running each module with different settings (memory, parallelization, etc.). We could also save the results from each module for future access, that way, we can re-run just one module, if necessary, without running the entire process. One useful way of running cTWAS is to first run the first few steps to estimate model parameters and assess their values. If this step does not converge, or the parameters look strange, it is best to pause and understand why.
+
+We note that one can also run cTWAS without using LD information - see the tutorial “A minimal tutorial of running cTWAS without LD”. It is also possible to do this analysis one step at a time. We describe below how each step can be done in appropriate places.
 
 ### Computing Z-scores of molecular traits
 
@@ -142,7 +145,7 @@ boundary_genes <- res$boundary_genes
 ```
 
 
-The function has a few arguments to control its behavior. The `thin` argument randomly selects a subset of variants (10% when thin = 0.1) to use during parameter estimation and screening for candidate regions. This helps reduce computation. If `thin = 1`, it will use all the SNPs. `maxSNP` sets a maximum on the number of variants that can be in a single region to prevent memory issues during fine-mapping. If the number of SNPs in a region is more than `maxSNP`, It will trim the SNPs (randomly, by default) in the region. `ncore` specifies the number of cores to use when parallelizing over regions.
+The function has a few arguments to control its behavior. The `thin` argument randomly selects a subset of variants (10% when thin = 0.1) to use during parameter estimation and screening for candidate regions. This helps reduce computation. If `thin = 1`, it will use all the SNPs. `maxSNP` sets a maximum on the number of variants that can be in a single region to prevent memory issues during fine-mapping. If the number of SNPs in a region is more than `maxSNP`, It will choose `maxSNP` SNPs (randomly, by default) in the region. `ncore` specifies the number of cores to use when parallelizing over regions.
 
 This function returns `region_data`, a list object containing input data (IDs of molecular traits and variants, their Z-scores, genomic boundaries, etc.) for each of the regions. It also returns 
 a data frame `boundary_genes`, containing the information of molecular traits whose weights cross region boundaries. The information would be used in later analysis and post-processing. 
@@ -152,12 +155,12 @@ a data frame `boundary_genes`, containing the information of molecular traits wh
 
 We use the `est_param()` function to estimate two sets of parameters: the prior inclusion probabilities and the prior effect size variance for molecular traits and variants, separately. 
 
-As described in the Introduction, cTWAS can analyze multiple groups of molecular traits. This step will estimate the prior parameters for each group. But we allow sharing of the prior effect variance parameters among groups. This may improve the accuracy of parameter estimation. If the input data has several groups of similar molecular traits (e.g. eQTLs from several brain regions), estimation of parameters for each group separately may lead to relatively large estimation error. There are several options to control how parameters are shared among groups. This can be done by specifying the `group_prior_var_stucture`:
+As described in the Introduction, cTWAS can analyze multiple groups of molecular traits. This step will estimate the prior parameters for each group. But we allow sharing of the prior effect variance parameters among groups. This may improve the accuracy of parameter estimation.There are several options to control how parameters are shared among groups. This can be done by specifying the `group_prior_var_stucture`:
 
 - "shared_type" (default option) allows all groups in one molecular QTL type to share the same variance parameter.
 -  "shared_context" allows all groups in one context (tissue, cell type, condition) to share the same variance parameter.
-- "shared_nonSNP" allows all non-SNP groups to share the same variance parameter.
-- "shared_all" allows all groups to share the same variance parameter.
+- "shared_nonSNP" allows all non-SNP groups (i.e. all molecular traits) to share the same variance parameter.
+- "shared_all" allows all groups, including SNPs, to share the same variance parameter.
 - "independent" allows all groups to have their own separate variance parameters.
 
 This step will run the EM algorithm to estimate parameters and return the estimated parameters (`group_prior`, `group_prior_var`, etc.). For technical reasons (see Methods of the cTWAS paper), it will run two rounds of EM algorithm. In the first round, it uses fewer iterations (`niter_prefit=3` by default) to get rough parameter estimates, and using these values, select regions for the analysis in the second run of EM. We use more iterations in the second round (`niter=30` by default) to get accurate parameter estimates. 
@@ -185,7 +188,7 @@ cTWAS have two options to screen regions:
 
 + screening by non-SNP PIPs: if `filter_nonSNP_PIP = TRUE`, cTWAS will compute the non-SNP PIP, i.e. total PIP of all molecular traits, for each region (using estimated L and estimated priors). It then selects regions by applying a  `min_nonSNP_PIP` cutoff (0.5, by default). 
 
-When running with LD, we recommend screening by the number of causal signals, i.e. setting `filter_L = TRUE` and `filter_nonSNP_PIP = FALSE`. 
+In general, we recommend screening by the number of causal signals, i.e. setting `filter_L = TRUE` and `filter_nonSNP_PIP = FALSE`. 
 
 ```{r screen_regions_filter_L, eval=FALSE}
 screen_res <- screen_regions(region_data,
@@ -234,7 +237,7 @@ screen_res$screened_region_data <- screened_region_data
 ```
 
 
-If the number of SNPs in a region is more than `maxSNP`, It will trim the SNPs in the region according to the Z-scores.
+If the number of SNPs in a region is more than `maxSNP`, it will choose the top `maxSNP` SNPs with the highest Z-scores.
 
 ### Fine-mapping screened regions
 

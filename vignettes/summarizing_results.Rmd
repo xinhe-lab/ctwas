@@ -1,6 +1,6 @@
 ---
 title: "Summarizing and visualizing cTWAS results"
-author: "Kaixuan Luo, Sheng Qian"
+author: "Kaixuan Luo, Sheng Qian, Xin He"
 date: "`r Sys.Date()`"
 output: rmarkdown::html_vignette
 vignette: >
@@ -107,91 +107,152 @@ Note, we used sample data (from chr16) here in the tutorial, but in real data an
 
 ## Inspecting the cTWAS results
 
-We can view the molecular traits above a certain PIP cutoff, e.g. PIP > 0.8 and limit to credible sets, by: 
+We can view the molecular traits above a certain PIP cutoff, e.g. PIP > 0.8. We also generally recommend limiting the results to credible sets. 
 
 ```{r interpret_res}
 subset(finemap_res, group != "SNP" & susie_pip > 0.8 & cs_index != 0)
 ```
 
 
-The result, however, does not contain gene names and position information. To add the information, it is helpful to add gene annotations to the fine-mapping result.
+To help interpret the results, we could add gene annotations (e.g. gene names, gene types, etc.) to the fine-mapping result. 
 
-To annotate genes, we need `gene_annot`, a data frame containing gene IDs, gene names, gene types, and position information of the genes. We have a function `get_gene_annot_from_ens_db()` , which extracts gene annotations from the Ensembl database. 
+To map between molecular traits and their corresponding genes, we need `mapping_table`, a  data frame containing IDs of molecular traits (`gene_id`), and the corresponding gene names (`gene_name`). Other gene annotation information, such as gene types (`gene_type`), and position information of the genes (`chrom`, `start`, `end`) could also be included and would be useful later when visualizing the results. 
+
+We have a function `get_gene_annot_from_ens_db()` , which creates gene annotations from the Ensembl database.   
 ```{r get_gene_annot_from_ens_db, message=FALSE}
 ens_db <- EnsDb.Hsapiens.v86
 finemap_gene_res <- subset(finemap_res, group != "SNP")
 gene_ids <- unique(sapply(strsplit(finemap_gene_res$id, split = "[|]"), "[[", 1))
 gene_annot <- get_gene_annot_from_ens_db(ens_db, gene_ids)
+mapping_table <- gene_annot
+head(mapping_table)
 ```
 
 
-Note: we used the gene annotations from `EnsDb.Hsapiens.v86` for the example data. You can  choose the Ensembl database for your specific data, or prepare your own gene annotations in the following format:
+Note: we used the gene annotations from `EnsDb.Hsapiens.v86` for the example data in hg38. You can choose the Ensembl database for the genome build of your own data (e.g. `EnsDb.Hsapiens.v75` for hg19)
 
-```{r gene_annot_example}
-head(gene_annot)
-```
+For gene expression models, we could use the gene annotations as `mapping_table` to map gene IDs to corresponding gene names. If you have other molecular traits such as splicing, you would need to prepare your own `mapping_table` in similar format.
 
-
-If you have other molecular traits (e.g. splicing), you need to create your own `gene_annot`, that contains annotations for all the molecular traits. 
-
-We then use the `anno_finemap_res()` function to add gene annotations to the fine-mapping result, and use gene mid-points to represent gene positions.
+We then use the `anno_finemap_res()` function to map between molecular traits and their corresponding genes and add gene annotations to the fine-mapping result. If a molecular trait is mapped to multiple genes, it splits the PIP of the molecular trait to the target genes. We can drop unannotated genes by setting `drop_unannotated_genes = TRUE`. 
 
 ```{r add_gene_names}
-finemap_res <- anno_finemap_res(finemap_res, snp_map, gene_annot,
-                                use_gene_pos = "mid",
-                                drop_unannotated_genes = TRUE,
-                                filter_protein_coding_genes = TRUE,
-                                filter_cs = TRUE)
+annotated_finemap_res <- anno_finemap_res(finemap_res,
+                                          mapping_table,
+                                          map_by = "gene_id",
+                                          drop_unmapped_genes = TRUE)
 ```
 
-
-We can drop unannotated genes by setting `drop_unannotated_genes = TRUE`,  limit to protein coding genes by setting `filter_protein_coding_genes = TRUE`, and limit to credible sets by setting `filter_cs = TRUE`. 
 
 You can now run the command at the beginning of this section to view the genes with additional information.
 
 ```{r interpret_res_2}
-subset(finemap_res, group != "SNP" & susie_pip > 0.8 & cs_index != 0)
+subset(annotated_finemap_res, group != "SNP" & susie_pip > 0.8 & cs_index != 0)
 ```
 
 
 In this example, HPR gene in liver, HP gene in adipose, and CETP gene in adipose are the only three genes that satisfy this threshold.
 
 When we have multiple contexts (tissues), it is useful to evaluate the total evidence of a gene being causal, *combining evidence of all the molecular traits affecting this gene across all types and contexts.* We compute combined PIPs of all these molecular traits of the same gene, using the following formula: $1 - \prod_k (1 - \text{PIP}_k)$, where $\text{PIP}_k$ is the PIP of the $k$-th molecular trait of a gene.
-
  
-For example, we can combine PIPs of the same gene by context.  We could limit results in protein coding genes by setting `filter_protein_coding_genes = TRUE`, and limit results in credible sets by setting `filter_cs = TRUE`.
-
+For example, we can combine PIPs of the same gene by context.  
 ```{r combine_pips_by_context}
-combined_pip_by_context <- combine_gene_pips(finemap_res, 
+combined_pip_by_context <- combine_gene_pips(annotated_finemap_res, 
                                              by = "context",
+                                             gene_col = "gene_name",
                                              filter_protein_coding_genes = TRUE,    
                                              filter_cs = TRUE)
 combined_pip_by_context
 ```
 
 
+We could limit to protein coding genes by setting `filter_protein_coding_genes = TRUE`, and limit to credible sets by setting `filter_cs = TRUE`.
 
 ```{r show_sig_gene}
 subset(combined_pip_by_context, combined_pip > 0.8)
 ```
 
 
-In this example, we can see the causal signal of HPR is specific in liver,  and the causal signals of HP and CETP gene are specific in adipose. 
+In this example, we can see the causal signal of HPR is specific in liver,  and the causal signals of HP and CETP genes are specific in adipose. 
 
-## Visualizing the cTWAS results
+Similarly, we can also combine PIPs of the same gene by types.  
 
-It is often useful to visualize the results of cTWAS. This would help one understand the rationale of how cTWAS chooses a particular molecular trait and identify issues when cTWAS doesn’t behave properly. We could use the `make_locusplot()` function to make locus plots for regions of interest, and zoom in the region by specifying the `locus_range`. For example:
-
-The plotting function could color the molecular traits and SNPs based on  the correlations among them. If we have computed and saved correlation matrices to `cor_dir` when running cTWAS with LD, we could simply load those precomputed correlation matrices of the region (`R_snp_gene` for gene-SNP correlations and `R_gene` for gene-gene correlations), and then make the locus plot. 
-
-```{r get_region_cor_res}
-cor_dir <- system.file("extdata/sample_data", "cor_matrix", package = "ctwas")
-cor_res <- get_region_cor(region_id = "16_71020125_72901251", cor_dir = cor_dir)
+```{r combine_pips_by_context}
+combined_pip_by_type <- combine_gene_pips(annotated_finemap_res, 
+                                          by = "type",
+                                          gene_col = "gene_name",
+                                          filter_protein_coding_genes = TRUE,    
+                                          filter_cs = TRUE)
+combined_pip_by_type
 ```
 
 
+
+```{r show_sig_gene}
+subset(combined_pip_by_type, combined_pip > 0.8)
+```
+
+
+
+We can also combine PIPs of the same gene by groups, which includes all the combinations of contexts and types.  
+
+```{r combine_pips_by_context}
+combined_pip_by_group <- combine_gene_pips(annotated_finemap_res, 
+                                           by = "group",
+                                           gene_col = "gene_name",
+                                           filter_protein_coding_genes = TRUE,    
+                                           filter_cs = TRUE)
+combined_pip_by_group
+```
+
+
+
+```{r show_sig_gene}
+subset(combined_pip_by_group, combined_pip > 0.8)
+```
+
+
+
+## Visualizing the cTWAS results
+
+It is often useful to visualize the results of cTWAS. This would help one understand the rationale of how cTWAS chooses a particular molecular trait and identify issues when cTWAS doesn’t behave properly. 
+
+Before we make the plots,  we use the function `add_pos_to_finemap_res()` to add position information for the genes and SNPs to the fine-mapping result. The function needs annotated fine-mapping results, the list of reference SNPs (`snp_map`) which contains IDs and positions of SNPs, and the gene annotations (`gene_annot`) which contain the names and positions of genes. 
+```{r add_pos}
+annotated_finemap_res <- add_pos_to_finemap_res(annotated_finemap_res,
+                                                snp_map,
+                                                gene_annot,
+                                                use_gene_pos = "mid",
+                                                map_by = "gene_name")
+```
+
+
+The plotting function could color the molecular traits and SNPs based on the correlations among them. If we have saved correlation matrices in `cor_dir` when running cTWAS with LD, we could simply load those precomputed correlation matrices of the region using function `load_region_cor()`, and then make the locus plot. 
+
+```{r load_region_cor_res}
+region_id <- "16_71020125_72901251"
+cor_dir <- system.file("extdata/sample_data", "cor_matrix", package = "ctwas")
+cor_res <- load_region_cor(region_id, cor_dir = cor_dir)
+```
+
+
+If we don't have precomputed correlation matrices, we could compute the correlation matrices of the region using the function `get_region_cor()`. We will need the region data with all SNPs (`screened_region_data`), `LD_map` and `weights`.
+
+```{r compute_region_cor_res, eval=FALSE}
+screened_region_data <- screen_res$screened_region_data
+region_id <- "16_71020125_72901251"
+
+cor_res <- get_region_cor(region_id,
+                          sids = screened_region_data[[region_id]]$sid,
+                          gids = screened_region_data[[region_id]]$gid,
+                          LD_map = LD_map,
+                          weights = weights)
+```
+
+
+We could now use the `make_locusplot()` function to make locus plots for regions of interest. We need the annotated fine-mapping result with position information, region ID, preprocessed weights (to plot QTL locations), and Ensembl gene annotation database (to plot the gene track). 
+
 ```{r locus_plot, fig.width=10, fig.height=8}
-make_locusplot(finemap_res,
+make_locusplot(annotated_finemap_res,
                region_id = "16_71020125_72901251",
                weights = weights,
                ens_db = ens_db, 
@@ -202,9 +263,9 @@ make_locusplot(finemap_res,
 ```
 
 
-The locus plot shows several tracks in the example region in chromosome 6 (71.6 - 72.4 Mb). The top one shows -log10(p-value) of the association of variants and molecular traits with the phenotype. The next track shows the PIPs of variants and molecular traits.  The data points are colored by the correlations with the focal gene (the gene with the highest PIP, HPR in this case). The red dotted line shows the PIP cutoff of 0.8. The next track shows the locations of QTLs of the focal gene (by default, the focal gene is the gene with the highest PIP). The bottom is the gene track.
+The locus plot shows several tracks in the example region in chromosome 6. We could zoom in a region by specifying the `locus_range` (71.6 - 72.4 Mb). The top one shows -log10(p-value) of the association of variants and molecular traits with the phenotype. The next track shows the PIPs of variants and molecular traits.  The data points are colored by the correlations with the focal gene (the gene with the highest PIP, HPR in this case). We can draw a red dotted line to show the PIP cutoff of 0.8 by setting `highlight_pip = 0.8`. The next track shows the locations of QTLs of the focal gene (by default, the focal gene is the gene with the highest PIP). The bottom is the gene track.
 
-In this plot, one can see that there are several genes with good associations with the phenotype, but only HPR in liver and HP in adipose are selected by cTWAS. This is because once HPR, HP and other likely causal variants are selected by cTWAS, there is no remaining association left in other molecular traits. This example thus illustrates how cTWAS selects likely causal molecular traits while controlling for nearby molecular traits and variants. 
+In this plot, one can see that there are several genes with good associations with the phenotype, but only HPR in liver and HP in adipose are selected by cTWAS. This is because once HPR, HP and other likely causal variants are selected by cTWAS, there is no remaining association left in other molecular traits. 
 
 For the "no-LD" version, we could still make the locus plot. The difference is that the plot will not color the data points based on the correlations to the focal gene.
 

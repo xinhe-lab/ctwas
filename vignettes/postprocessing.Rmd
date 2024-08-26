@@ -1,6 +1,6 @@
 ---
 title: "Post-processing cTWAS results"
-author: "Kaixuan Luo, Sheng Qian"
+author: "Kaixuan Luo, Sheng Qian, Xin He"
 date: "`r Sys.Date()`"
 output: rmarkdown::html_vignette
 vignette: >
@@ -90,6 +90,8 @@ selected_boundary_genes <- boundary_genes[boundary_genes$id %in% high_PIP_genes,
 ```
 
 
+###  Merge regions
+
 Next, we use the function `merge_region_data()` to perform region merging.  It first identifies overlapping regions from the selected genes, then creates the data about the merged region(s) needed for fine-mapping. The data includes:  `merged_region_data`,  `merged_region_info`, and the variant and LD information of the merged region(s), `merged_snp_map` and `merged_LD_map`. The function expands the merged regions with all SNPs if the `region_data` contains thinned SNPs. It also creates `merged_region_id_map`, a data frame containing region IDs for merged regions and the original region IDs, so that one could keep track of the regions that were merged.  
 
 ```{r merge_region_data, eval=FALSE}
@@ -130,7 +132,9 @@ finemap_merged_regions_res <- finemap_regions(merged_region_data,
 
 The output of this function has the same format as those from regular cTWAS analysis. It returns fine-mapping results for merged regions. 
 
-We can also run these steps without LD, using the functions `merge_region_data_noLD()`.
+###  Merge regions without LD
+
+When running cTWAS without LD, we can do region merging using the function `merge_region_data_noLD()`. 
 
 ```{r merge_region_data_noLD, eval=FALSE}
 merge_region_res <- merge_region_data_noLD(boundary_genes,
@@ -146,6 +150,8 @@ merged_snp_map <- merge_region_res$merged_snp_map
 merged_region_id_map <- merge_region_res$merged_region_id_map
 ```
 
+
+We can then run fine-mapping (without LD) on the merged region data:
 
 ```{r screen_merged_regions_noLD, eval=FALSE}
 finemap_merged_regions_res <- finemap_regions_noLD(merged_region_data,                                                     

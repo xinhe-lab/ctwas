@@ -1,6 +1,6 @@
 ---
 title: "cTWAS utility functions"
-author: "Kaixuan Luo, Sheng Qian"
+author: "Kaixuan Luo, Sheng Qian, Xin He"
 date: "`r Sys.Date()`"
 output: rmarkdown::html_vignette
 vignette: >
@@ -83,22 +83,30 @@ After unpacking the package, we will see a folder named `GTEx.Whole_Blood`, whic
 
 We use the `preprocess_weight()` function to harmonize the prediction models and LD reference. To use the FUSION format, we need to specify the weight directory that contains the `.wgt.RDat` files. We specify `weight_format = 'FUSION'` and specify the prediction models in FUSION by `fusion_method`. It supports the following models: "lasso" (default), "enet", "top1", "blup", "bslmm", and also "best.cv", which will choose the best model for each gene based on the cross-validation performance. 
 
-This function also takes a few other inputs, including the definition of regions (`region_info`), the list of variants from GWAS (`z_snp$id`), and the SNP to region map (`snp_map`). Please refer to the tutorial `Preparing input data” about these data structures.  
+This function also takes a few other inputs, including the definition of regions (`region_info`), the list of variants from GWAS (`z_snp$id`), the list of SNPs and information of LD matrix of each region (`snp_map` and `LD_map`), type (`type`) and context (`context`) of the weights. Please refer to the tutorial `Preparing input data” about these data structures.  
 
 ```{r preprocess_fusion_weights, eval=FALSE}
 weights <- preprocess_weights("./GTEx.Whole_Blood",
                               region_info,
                               z_snp$id,
-                              snp_map,                                  
+                              snp_map,
+                              LD_map,
+                              type = "expression",
+                              context = "whole_blood",                         
                               weight_format = "FUSION",
                               fusion_method = "lasso",
+                              fusion_genome_version = "b37",
+                              fusion_top_n_snps = NULL,
                               drop_strand_ambig = TRUE,
-                              ncore = 6)
+                              filter_protein_coding_genes = FALSE,
+                              scale_predictdb_weights = FALSE,
+                              load_predictdb_LD = FALSE,
+                              ncore = 4)
 ```
 
 
 
-We drop strand ambiguous variants (`drop_strand_ambig = TRUE`) by default. FUSION weights are already on the standardized scale, so we don't scale weights by the variance. For FUSION models, we don't have precomputed covariances between variants. So we calculate correlations between weight variants using the LD reference. This usually takes a while, so it is helpful to set `ncore` to parallelize the computation. FUSION weights do not contain gene type information, so we don't limit to protein coding genes. 
+We could keep the top N variants in each weight by setting `fusion_top_n_snps`. By default (`fusion_top_n_snps = NULL`), we use all weight variants. We could set the genome build of the FUSION models in `fusion_genome_version`. This is only used when creating the "varID" of the variants to be consistent with PredictDB format, but does not affect the preprocessed weights. We drop strand ambiguous variants (`drop_strand_ambig = TRUE`) by default. FUSION weights are already on the standardized scale, so we don't scale weights by the variance. For FUSION models, we don't have precomputed covariances between variants. So we calculate correlations between weight variants using the LD reference. This usually takes a while, so it is helpful to set `ncore` to parallelize the computation. FUSION weights do not contain gene type information, so we don't limit to protein coding genes. 
 
 
 ### Creating prediction models from QTL lists

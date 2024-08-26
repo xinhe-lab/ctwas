@@ -1,6 +1,6 @@
 ---
 title: "A minimal tutorial of running cTWAS without LD"
-author: "Kaixuan Luo, Sheng Qian"
+author: "Kaixuan Luo, Sheng Qian, Xin He"
 date: "`r Sys.Date()`"
 output: rmarkdown::html_vignette
 vignette: >
@@ -83,7 +83,7 @@ region_info <- readRDS(region_file)
 ```
 
 
-Additionally, we require `ref_snp_info` as a “reference” of the variants. `ref_snp_info` is a data frame, containing the positions and allele information of all the variants from the entire genome. This reference data needs to be mapped to the regions, i.e. we will need a structure to store the information of which variants are located in which regions. To do this, we provide a function, `create_snp_map()`.  It takes input of `region_info` and `ref_snp_info`. It maps variants to regions based on the variant locations, and returns the result as `snp_map`. In addition, the function checks the format of `region_info` to ensure that it matches the format required by cTWAS (e.g. adding `region_id` column if not available), and returns the output as updated `region_info`. 
+Additionally, we require `ref_snp_info` as a “reference” of the variants. `ref_snp_info` is a data frame, containing the positions and allele information of all the variants from the entire genome. This reference data needs to be mapped to the regions, i.e. we will need a structure to store the information of which variants are located in which regions. To do this, we provide a function, `create_snp_map()`.  It takes input of `region_info` and `ref_snp_info`. It maps variants to regions based on the variant locations, and returns the result as `snp_map`, a list object containing variant information in each of the regions. In addition, the function checks the format of `region_info` to ensure that it matches the format required by cTWAS (e.g. adding `region_id` column if not available), and returns the output as updated `region_info`. 
 
 We have the lists of reference variant information from UK Biobank European population from all the LD regions in the genome in [hg38](https://uchicago.box.com/s/t089or92dkovv0epkrjvxq8r9db9ys99) and [hg19](https://uchicago.box.com/s/ufko2gjagcb693dob4khccqubuztb9pz). They are also available on the University of Chicago RCC cluster at `/project2/xinhe/shared_data/multigroup_ctwas/LD_reference/`. 
 
@@ -98,7 +98,7 @@ ref_snp_info <- fread(ref_snp_info_file, sep = "\t")
 class(ref_snp_info) <- "data.frame"
 region_info <- subset(region_info, chrom == example_chrom)
 
-res <- create_snp_map(region_info, ref_snp_info)
+res <- create_snp_map(region_info, ref_snp_info, ncore = 6)
 region_info <- res$region_info
 snp_map <- res$snp_map
 
@@ -106,6 +106,7 @@ head(region_info)
 ```
 
 
+We set `ncore` to parallelize the computation. 
 
 ### Harmonizing GWAS summary statistics 
 
@@ -118,11 +119,11 @@ z_snp <- preprocess_z_snp(z_snp, snp_map)
 
 ###  Prediction models of molecular traits 
 
-We need a list `weights` which contains preprocessed weights. The weights can be in the PredictDB (default, used in this tutorial) or FUSION format. In this tutorial, we used the weights from GTEx liver eQTL data from PredictDB. We provide a function `preprocess_weight()` to harmonize the prediction models and LD reference. 
+We need `weights`, a list object containing preprocessed weights for the molecular traits. The weights can be in the PredictDB (default, used in this tutorial) or FUSION format. In this tutorial, we used the weights from GTEx liver eQTL data from PredictDB. We provide a function `preprocess_weight()` to harmonize the prediction models and LD reference. 
 
-In this version of cTWAS, we allow the joint analysis of multiple groups of molecular traits. This could be: eQTLs of multiple tissues; or eQTLs, splicing QTLs and other types of QTLs in a single tissue. In a more complex setting, multiple types of QTL data from multiple tissues/cell types. Each group is defined by its “type” (kind of molecular traits), and “context” (tissue, cell type, condition, etc.).  So, we specify the `type` and `context` arguments for each weight file. 
+In this version of cTWAS, we allow the joint analysis of multiple groups of molecular traits. This could be: eQTLs of multiple tissues; or eQTLs, splicing QTLs and other types of QTLs in a single tissue. In a more complex setting, multiple types of QTL data from multiple tissues/cell types. Each group of molecular traits is defined by its “type” (kind of molecular traits), and “context” (tissue, cell type, condition, etc.).  So, we specify the `type` and `context` arguments for each weight file. 
 
-In this example, we use liver and subcutaneous adipose gene expression models. We specify the `type` and `context` arguments for each weight file. We preprocess each of the weight files, and then simply concatenate them to get a list of all processed weights from different types or contexts.
+In this example, we use liver and subcutaneous adipose gene expression models. We specify the `type` and `context` arguments for each weight file. We preprocess each of the weight files, and then simply concatenate them to `weights`, a list object containing all processed weights from different types or contexts.
 
 
 ```{r preprocess_weights}
@@ -132,7 +133,8 @@ weights_liver <- preprocess_weights(weight_liver_file,
                                     z_snp$id,
                                     snp_map,
                                     type = "expression",
-                                    context = "liver")
+                                    context = "liver",
+                                    ncore = 6)
 
 weight_adipose_file <- system.file("extdata/sample_data", "expression_Adipose_Subcutaneous.db", package = "ctwas")
 weights_adipose <- preprocess_weights(weight_adipose_file,
@@ -140,7 +142,8 @@ weights_adipose <- preprocess_weights(weight_adipose_file,
                                       z_snp$id,
                                       snp_map,
                                       type = "expression",
-                                      context = "adipose")
+                                      context = "adipose", 
+                                      ncore = 6)
 
 weights <- c(weights_liver, weights_adipose)
 ```
@@ -155,14 +158,15 @@ ctwas_res <- ctwas_sumstats_noLD(z_snp,
                                  weights,
                                  region_info,
                                  snp_map,
-                                 thin = 0.1)
+                                 thin = 0.1, 
+                                 ncore = 6)
 ```
 
 
 
 We load the pre-computed results from running cTWAS without LD: 
 
-```{r, include=FALSE}
+```{r load_res}
 ctwas_res <- readRDS(system.file("extdata/sample_data", "LDL_example.ctwas_sumstats_noLD_res.RDS", package = "ctwas"))
 ```
 
@@ -177,7 +181,7 @@ screen_res <- ctwas_res$screen_res
 ```
 
 
-ctwas_sumstats_noLD() returns several main output: 
+`ctwas_sumstats_noLD()` returns several main output: 
 
 + `z_gene`: the Z-scores of molecular traits, 
 
@@ -191,7 +195,7 @@ It also produces other output:
 
 + `region_data`: assembled region data, including Z scores of SNPs and molecular traits, for all the regions,. Note that only data of the subset of SNPs used in screening regions are included. 
 
-+ `screen_res`: screening regions results, including the data of all SNPs and molecular traits of the selected regions, and a data frame with non-SNP PIPs for all regions.
++ `screen_res`: screening regions results, including the data of all SNPs and molecular traits of the selected regions, and a data frame with non-SNP PIPs (total PIPs of all molecular traits) for all regions.
 
 *Note:* we used sample data (from chr16) in this example, however, in real data analysis, we should use data from the *entire genome* to estimate parameters.
 
