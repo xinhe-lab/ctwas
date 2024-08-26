@@ -141,7 +141,7 @@ preprocess_weights <- function(weight_file,
   # remove genes without predictdb LD
   if (load_predictdb_LD && !is.null(cov_table)) {
     genes_without_predictdb_LD <- setdiff(weight_table$gene, cov_table$GENE)
-    if (any(genes_without_predictdb_LD)){
+    if (length(genes_without_predictdb_LD) > 0){
       loginfo("Remove %d genes without predictdb LD", length(genes_without_predictdb_LD))
       weight_table <- weight_table[!weight_table$gene %in% genes_without_predictdb_LD, ]
     }

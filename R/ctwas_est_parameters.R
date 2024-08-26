@@ -94,10 +94,9 @@ est_param <- function(
     }
   }
 
-  loginfo("Estimate parameters using %d regions", length(region_data))
-
   # Run EM for a few (niter_prefit) iterations, getting rough estimates
   loginfo("Run EM (prefit) for %d iterations, getting rough estimates ...", niter_prefit)
+  loginfo("Using data in %d regions", length(region_data))
   if (length(region_data) == 0){
     stop("No regions selected!")
   }
@@ -134,6 +133,7 @@ est_param <- function(
 
   # Run EM for more (niter) iterations, getting rough estimates
   loginfo("Run EM for %d iterations, getting accurate estimates ...", niter)
+  loginfo("Using data in %d regions", length(selected_region_data))
   if (length(selected_region_data) == 0){
     stop("No regions selected!")
   }

@@ -112,7 +112,7 @@ ctwas_sumstats_noLD <- function(
     dir.create(outputdir, showWarnings=FALSE, recursive=TRUE)
   }
 
-  loginfo("ncore: %d", ncore)
+  loginfo("ncore = %d", ncore)
 
   # Compute gene z-scores
   if (is.null(z_gene)) {

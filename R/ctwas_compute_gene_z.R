@@ -68,16 +68,17 @@ compute_gene_z <- function (z_snp,
 
 # get gene info from weights
 get_gene_info <- function(weights){
-  # check input data
+
   if (!inherits(weights,"list")){
     stop("'weights' should be a list.")
   }
   gene_info <- lapply(names(weights), function(x){
-    as.data.frame(weights[[x]][c("chrom", "p0","p1", "gene_id", "weight_name")])})
+    as.data.frame(weights[[x]][c("chrom", "p0","p1", "gene_id", "weight_name")])
+  })
   gene_info <- do.call(rbind, gene_info)
   gene_info$id <- names(weights)
   gene_info <- gene_info[, c("chrom", "id", "p0", "p1", "gene_id", "weight_name")]
-  gene_info[, c("chrom","p0", "p1")] <- sapply(gene_info[, c("chrom","p0", "p1")], as.integer)
+  gene_info[, c("chrom", "p0", "p1")] <- sapply(gene_info[, c("chrom", "p0", "p1")], as.integer)
   rownames(gene_info) <- NULL
 
   return(gene_info)
@@ -91,11 +92,11 @@ get_gene_regions <- function(gene_info, region_info){
     chrom <- gene_info[i, "chrom"]
     p0 <- gene_info[i, "p0"]
     p1 <- gene_info[i, "p1"]
-    region_idx <- which(region_info$chrom == chrom & region_info$start <= p1 & region_info$stop > p0)
-    gene_info[i, "region_start"] <- min(region_info[region_idx,"start"])
-    gene_info[i, "region_stop"] <- max(region_info[region_idx,"stop"])
-    gene_info[i, "region_id"] <- paste(sort(region_info[region_idx, "region_id"]), collapse = ";")
-    gene_info[i, "n_regions"] <- length(region_idx)
+    region.idx <- which(region_info$chrom == chrom & region_info$start <= p1 & region_info$stop > p0)
+    gene_info[i, "region_start"] <- min(region_info[region.idx,"start"])
+    gene_info[i, "region_stop"] <- max(region_info[region.idx,"stop"])
+    gene_info[i, "region_id"] <- paste(sort(region_info[region.idx, "region_id"]), collapse = ";")
+    gene_info[i, "n_regions"] <- length(region.idx)
   }
   return(gene_info)
 }
@@ -125,7 +126,7 @@ combine_z <- function(z_snp, z_gene){
   z_snp$group <- "SNP"
 
   z_df <- rbind(z_gene[, c("id", "z", "type", "context", "group")],
-               z_snp[, c("id", "z", "type", "context", "group")])
+                z_snp[, c("id", "z", "type", "context", "group")])
   rownames(z_df) <- NULL
   return(z_df)
 }
