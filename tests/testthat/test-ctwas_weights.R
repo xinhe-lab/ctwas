@@ -1,14 +1,15 @@
 test_that("load_weights works for predictDB weights", {
 
   weight_file <- system.file("extdata/sample_data", "expression_Liver.db", package = "ctwas")
-  loaded_weights <- readRDS("expression_Liver.loaded.predictdb.weights.RDS")
+  expected_weights <- readRDS("expression_Liver.loaded.predictdb.weights.RDS")
 
   capture.output({
-    res <- load_weights(weight_file,
-                        weight_format = "PredictDB")
+    loaded_weights <- load_weights(weight_file,
+                                   weight_format = "PredictDB")
   })
 
-  expect_equal(res, loaded_weights)
+  expect_equal(loaded_weights, expected_weights)
+
 })
 
 test_that("load_weights works for FUSION weights", {
@@ -26,4 +27,5 @@ test_that("load_weights works for FUSION weights", {
   })
 
   expect_equal(res, loaded_weights)
+
 })

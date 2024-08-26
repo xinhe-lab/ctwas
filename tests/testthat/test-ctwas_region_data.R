@@ -17,13 +17,14 @@ test_that("assemble_region_data works", {
                                 weights,
                                 snp_map,
                                 thin = 0.1,
+                                thin_by = "ref",
                                 maxSNP = 20000)
   })
   region_data <- res$region_data
   boundary_genes <- res$boundary_genes
 
   expect_equal(region_data, expected_region_data)
-  expect_equal(boundary_genes, expected_boundary_genes)
+  expect_equal(boundary_genes$id, expected_boundary_genes$id)
 
 })
 

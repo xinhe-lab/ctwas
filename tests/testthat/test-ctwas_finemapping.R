@@ -18,7 +18,9 @@ test_that("finemap_regions_noLD works", {
                                         group_prior = group_prior,
                                         group_prior_var = group_prior_var)
   })
+
   expect_equal(finemap_res, expected_finemap_res)
+
 })
 
 test_that("finemap_regions works", {
@@ -42,7 +44,6 @@ test_that("finemap_regions works", {
   expected_finemap_res <- expected_finemap_res[expected_finemap_res$region_id == region_id,]
   rownames(expected_finemap_res) <- NULL
 
-  # use reference SNP info from snp_map
   capture.output({
     finemap_res <- finemap_regions(region_data = screened_region_data[region_id],
                                    LD_map = LD_map,

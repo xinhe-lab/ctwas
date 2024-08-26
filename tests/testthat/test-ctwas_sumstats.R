@@ -10,8 +10,6 @@ test_that("ctwas_sumstats works", {
 
   expected_ctwas_res <- readRDS(system.file("extdata/sample_data", "LDL_example.ctwas_sumstats_res.RDS", package = "ctwas"))
 
-  set.seed(99)
-
   capture.output({
     ctwas_res <- ctwas_sumstats(z_snp,
                                 weights,
@@ -45,8 +43,6 @@ test_that("ctwas_sumstats with nonSNP_PIP filtering works", {
   weights <- readRDS(system.file("extdata/sample_data", "LDL_example.preprocessed.weights.RDS", package = "ctwas"))
 
   expected_ctwas_res <- readRDS(system.file("extdata/sample_data", "LDL_example.ctwas_sumstats_nonSNP_PIP_res.RDS", package = "ctwas"))
-
-  set.seed(99)
 
   capture.output({
     ctwas_res <- ctwas_sumstats(z_snp,
