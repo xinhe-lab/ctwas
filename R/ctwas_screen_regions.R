@@ -12,9 +12,7 @@
 #'
 #' @param L the number of effects for susie.
 #'
-#' @param min_snps minimum number of SNPs in a region.
-#'
-#' @param min_genes minimum number of genes in a region.
+#' @param min_var minimum number of variables (SNPs and genes) in a region.
 #'
 #' @param filter_L If TRUE, screening regions with estimated L > 0.
 #'
@@ -57,8 +55,7 @@ screen_regions <- function(region_data,
                            group_prior = NULL,
                            group_prior_var = NULL,
                            L = 5,
-                           min_snps = 2,
-                           min_genes = 1,
+                           min_var = 2,
                            filter_L = TRUE,
                            filter_nonSNP_PIP = FALSE,
                            min_nonSNP_PIP = 0.5,
@@ -115,20 +112,11 @@ screen_regions <- function(region_data,
                                L = NA,
                                nonSNP_PIP = NA)
 
-  # skip regions with fewer than min_snps SNPs
-  if (min_snps > 0) {
-    skip_region_ids <- region_ids[n_sids < min_snps]
+  # skip regions with fewer than min_var variables
+  if (min_var > 0) {
+    skip_region_ids <- region_ids[(n_sids + n_gids) < min_var]
     if (length(skip_region_ids) > 0){
-      loginfo("Skip %d regions with number of SNPs < %d.", length(skip_region_ids), min_snps)
-      region_data[skip_region_ids] <- NULL
-    }
-  }
-
-  # skip regions with fewer than min_genes genes
-  if (min_genes > 0) {
-    skip_region_ids <- region_ids[n_gids < min_genes]
-    if (length(skip_region_ids) > 0){
-      loginfo("Skip %d regions with number of genes < %d.", length(skip_region_ids), min_genes)
+      loginfo("Skip %d regions with number of variables < %d.", length(skip_region_ids), min_var)
       region_data[skip_region_ids] <- NULL
     }
   }
@@ -180,7 +168,7 @@ screen_regions <- function(region_data,
                                              verbose = verbose,
                                              ...)
     # select regions based on total non-SNP PIPs
-    all_nonSNP_PIPs <- compute_region_nonSNP_PIPs(finemap_screening_res)
+    all_nonSNP_PIPs <- compute_region_nonSNP_PIPs(finemap_screening_res, filter_cs = FALSE)
 
     screened_region_ids <- names(all_nonSNP_PIPs[all_nonSNP_PIPs >= min_nonSNP_PIP])
     screened_region_data <- region_data[screened_region_ids]
@@ -208,6 +196,8 @@ screen_regions <- function(region_data,
 #'
 #' @param group_prior_var a vector of two prior variances for SNPs and gene effects.
 #'
+#' @param min_var minimum number of variables (SNPs and genes) in a region.
+#'
 #' @param min_snps minimum number of SNPs in a region.
 #'
 #' @param min_genes minimum number of genes in a region.
@@ -234,7 +224,8 @@ screen_regions <- function(region_data,
 screen_regions_noLD <- function(region_data,
                                 group_prior = NULL,
                                 group_prior_var = NULL,
-                                min_snps = 2,
+                                min_var = 2,
+                                min_snps = 1,
                                 min_genes = 1,
                                 min_nonSNP_PIP = 0.5,
                                 ncore = 1,
@@ -277,6 +268,15 @@ screen_regions_noLD <- function(region_data,
                                L = 1,
                                nonSNP_PIP = NA)
 
+  # skip regions with fewer than min_var variables
+  if (min_var > 0) {
+    skip_region_ids <- region_ids[(n_sids + n_gids) < min_var]
+    if (length(skip_region_ids) > 0){
+      loginfo("Skip %d regions with number of variables < %d.", length(skip_region_ids), min_var)
+      region_data[skip_region_ids] <- NULL
+    }
+  }
+
   # skip regions with fewer than min_snps SNPs
   if (min_snps > 0) {
     skip_region_ids <- region_ids[n_sids < min_snps]
@@ -305,7 +305,7 @@ screen_regions_noLD <- function(region_data,
                                                 verbose = verbose,
                                                 ...)
   # select regions based on total non-SNP PIPs
-  all_nonSNP_PIPs <- compute_region_nonSNP_PIPs(finemap_screening_res)
+  all_nonSNP_PIPs <- compute_region_nonSNP_PIPs(finemap_screening_res, filter_cs = FALSE)
   screened_region_ids <- names(all_nonSNP_PIPs[all_nonSNP_PIPs >= min_nonSNP_PIP])
   screened_region_data <- region_data[screened_region_ids]
   loginfo("Selected %d regions with non-SNP PIP >= %s", length(screened_region_data), min_nonSNP_PIP)

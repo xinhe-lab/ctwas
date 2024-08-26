@@ -11,8 +11,7 @@ screen_regions(
   group_prior = NULL,
   group_prior_var = NULL,
   L = 5,
-  min_snps = 2,
-  min_genes = 1,
+  min_var = 2,
   filter_L = TRUE,
   filter_nonSNP_PIP = FALSE,
   min_nonSNP_PIP = 0.5,
@@ -39,9 +38,7 @@ screen_regions(
 
 \item{L}{the number of effects for susie.}
 
-\item{min_snps}{minimum number of SNPs in a region.}
-
-\item{min_genes}{minimum number of genes in a region.}
+\item{min_var}{minimum number of variables (SNPs and genes) in a region.}
 
 \item{filter_L}{If TRUE, screening regions with estimated L > 0.}
 

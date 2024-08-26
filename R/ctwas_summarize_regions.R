@@ -86,13 +86,20 @@ get_L <- function(finemap_res){
 #'
 #' @param finemap_res a data frame of finemapping result
 #'
+#' @param filter_cs If TRUE, limits to credible sets.
+#'
 #' @return a vector of non-SNP PIPs for all regions
 #'
 #' @export
-compute_region_nonSNP_PIPs <- function(finemap_res){
+compute_region_nonSNP_PIPs <- function(finemap_res, filter_cs = TRUE){
+  # limit to credible sets
+  if (filter_cs) {
+    finemap_res <- finemap_res[finemap_res$cs_index!=0,]
+  }
+
   region_ids <- unique(finemap_res$region_id)
   if (length(region_ids) == 0) {
-    stop("No region_ids in finemap_res!")
+    stop("No region_ids in finemap_res to compute non-SNP PIPs!")
   }
   nonSNP_PIPs <- sapply(region_ids, function(x){
     finemap_region_res <- finemap_res[finemap_res$region_id == x,]

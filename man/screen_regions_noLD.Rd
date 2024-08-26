@@ -8,7 +8,8 @@ screen_regions_noLD(
   region_data,
   group_prior = NULL,
   group_prior_var = NULL,
-  min_snps = 2,
+  min_var = 2,
+  min_snps = 1,
   min_genes = 1,
   min_nonSNP_PIP = 0.5,
   ncore = 1,
@@ -23,6 +24,8 @@ screen_regions_noLD(
 \item{group_prior}{a vector of two prior inclusion probabilities for SNPs and genes.}
 
 \item{group_prior_var}{a vector of two prior variances for SNPs and gene effects.}
+
+\item{min_var}{minimum number of variables (SNPs and genes) in a region.}
 
 \item{min_snps}{minimum number of SNPs in a region.}
 
