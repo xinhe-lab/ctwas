@@ -5,7 +5,7 @@
 \title{Add SNP and gene positions to cTWAS finemapping result.}
 \usage{
 add_pos_to_finemap_res(
-  finemap_res,
+  annotated_finemap_res,
   snp_map,
   gene_annot,
   use_gene_pos = c("mid", "start", "end"),
@@ -13,7 +13,7 @@ add_pos_to_finemap_res(
 )
 }
 \arguments{
-\item{finemap_res}{a data frame of cTWAS finemapping result}
+\item{annotated_finemap_res}{a data frame of annotated cTWAS finemapping result}
 
 \item{snp_map}{a list of data frames with SNP-to-region map for the reference.}
 

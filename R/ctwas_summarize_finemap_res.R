@@ -74,16 +74,15 @@ anno_finemap_res <- function(finemap_res,
   finemap_snp_res$gene_type <- "SNP"
 
   new_colnames <- unique(c("gene_id", "gene_name", "gene_type", colnames(finemap_res)))
-  finemap_res <- rbind(finemap_gene_res[,new_colnames],
-                       finemap_snp_res[,new_colnames])
 
-  return(finemap_res)
+  return(rbind(finemap_gene_res[,new_colnames],
+               finemap_snp_res[,new_colnames]))
 }
 
 
 #' @title Add SNP and gene positions to cTWAS finemapping result.
 #'
-#' @param finemap_res a data frame of cTWAS finemapping result
+#' @param annotated_finemap_res a data frame of annotated cTWAS finemapping result
 #'
 #' @param snp_map a list of data frames with SNP-to-region map for the reference.
 #'
@@ -108,7 +107,7 @@ anno_finemap_res <- function(finemap_res,
 #'
 #' @export
 #'
-add_pos_to_finemap_res <- function(finemap_res,
+add_pos_to_finemap_res <- function(annotated_finemap_res,
                                    snp_map,
                                    gene_annot,
                                    use_gene_pos = c("mid", "start", "end"),
@@ -119,7 +118,7 @@ add_pos_to_finemap_res <- function(finemap_res,
   use_gene_pos <- match.arg(use_gene_pos)
 
   # gene results
-  finemap_gene_res <- finemap_res[finemap_res$group!="SNP",]
+  finemap_gene_res <- annotated_finemap_res[annotated_finemap_res$group!="SNP",]
 
   # Check required columns for gene_annot
   annot_cols <- c("gene_name", "start", "end")
@@ -153,18 +152,17 @@ add_pos_to_finemap_res <- function(finemap_res,
 
   # add SNP positions
   loginfo("Add SNP positions")
-  finemap_snp_res <- finemap_res[finemap_res$group=="SNP",]
+  finemap_snp_res <- annotated_finemap_res[annotated_finemap_res$group=="SNP",]
   snp_info <- as.data.frame(rbindlist(snp_map, idcol = "region_id"))
   snp_idx <- match(finemap_snp_res$id, snp_info$id)
   finemap_snp_res$chrom <- snp_info$chrom[snp_idx]
   finemap_snp_res$chrom <- parse_number(as.character(finemap_snp_res$chrom))
   finemap_snp_res$pos <- as.numeric(snp_info$pos[snp_idx])
 
-  new_colnames <- unique(c("chrom", "pos", colnames(finemap_res)))
-  finemap_res <- rbind(finemap_gene_res[,new_colnames],
-                       finemap_snp_res[,new_colnames])
+  new_colnames <- unique(c("chrom", "pos", colnames(annotated_finemap_res)))
 
-  return(finemap_res)
+  return(rbind(finemap_gene_res[,new_colnames],
+               finemap_snp_res[,new_colnames]))
 }
 
 #' @title Get gene annotation table from Ensembl database
@@ -212,7 +210,7 @@ get_gene_annot_from_ens_db <- function(ens_db, gene_ids) {
 #'
 #' @param filter_cs If TRUE, limits results in credible sets.
 #'
-#' @param replace_NA values to replace NAs with.
+#' @param missing_value set missing value (default: NA)
 #'
 #' @param digits digits to round combined PIPs
 #'
@@ -223,36 +221,22 @@ get_gene_annot_from_ens_db <- function(ens_db, gene_ids) {
 #' @importFrom dplyr left_join
 #'
 #' @export
-combine_gene_pips <- function(finemap_gene_res,
+combine_gene_pips <- function(annotated_finemap_res,
                               by = c("context", "type", "group"),
                               gene_col = "gene_name",
-                              filter_protein_coding_genes = FALSE,
-                              filter_cs = FALSE,
-                              replace_NA = NA,
+                              missing_value = NA,
                               digits = 3){
 
   by <- match.arg(by)
 
-  # Check to see if gene_name and gene_type are already in finemap_res
-  annot_cols <- c(gene_col, "gene_type")
-  if (!all(annot_cols %in% colnames(finemap_res))){
-    stop("finemap_res needs to contain the following columns: ",
-         paste(annot_cols, collapse = " "),
+  # Check to see if gene_name and gene_type are already in annotated_finemap_res
+  if (!(gene_col %in% colnames(annotated_finemap_res))){
+    stop("annotated_finemap_res needs to contain the column: ", gene_col,
          "\nPlease first run anno_finemap_res() to annotate finemap_res!")
   }
 
   # work with gene results below
-  finemap_gene_res <- finemap_res[finemap_res$type!="SNP",]
-
-  # limit to protein coding genes
-  if (filter_protein_coding_genes) {
-    finemap_gene_res <- finemap_gene_res[finemap_gene_res$gene_type=="protein_coding",]
-  }
-
-  # filter credible sets
-  if (filter_cs) {
-    finemap_gene_res <- finemap_gene_res[finemap_gene_res$cs_index!=0,]
-  }
+  finemap_gene_res <- annotated_finemap_res[annotated_finemap_res$type!="SNP",]
 
   # combine PIPs
   combined_gene_pips <- aggregate(finemap_gene_res[,"susie_pip"],
@@ -289,8 +273,8 @@ combine_gene_pips <- function(finemap_gene_res,
     }
   }
 
-  if (!is.na(replace_NA)) {
-    combined_gene_pips[is.na(combined_gene_pips)] <- replace_NA
+  if (!is.na(missing_value)) {
+    combined_gene_pips[is.na(combined_gene_pips)] <- missing_value
   }
 
   # order by combined PIP
@@ -299,6 +283,10 @@ combine_gene_pips <- function(finemap_gene_res,
   # round gene PIPs
   combined_gene_pips[,-1] <- round(combined_gene_pips[, -1], digits)
 
+  new_colnames <- c(setdiff(colnames(combined_gene_pips), "combined_pip"), "combined_pip")
+  combined_gene_pips <- combined_gene_pips[, new_colnames]
+  rownames(combined_gene_pips) <- NULL
+
   return(combined_gene_pips)
 }
 
@@ -306,4 +294,51 @@ combine_gene_pips <- function(finemap_gene_res,
 # PIP_k is the PIP of the k-th molecular trait of a gene.
 get_combined_pip <- function(pips){
   return(1 - prod(1 - pips))
+}
+
+
+#' Filter fine-mapping result
+#'
+#' @param annotated_finemap_res Annotated cTWAS fine-mapping result
+#'
+#' @param filter_protein_coding_genes If TRUE, keep protein coding genes only.
+#'
+#' @param filter_cs_genes If TRUE, limits gene results in credible sets.
+#'
+#' @param filter_cs_snps If TRUE, limits SNP results in credible sets.
+#'
+#' @return a data frame of filtered cTWAS fine-mapping result
+#'
+#' @export
+filter_finemap_res <- function(annotated_finemap_res,
+                               filter_protein_coding_genes = TRUE,
+                               filter_cs_genes = TRUE,
+                               filter_cs_snps = FALSE){
+
+  finemap_gene_res <- annotated_finemap_res[annotated_finemap_res$type!="SNP",]
+
+  # limit to protein coding genes
+  if (filter_protein_coding_genes) {
+    # Check to see if gene_name and gene_type are already in annotated_finemap_res
+    if ("protein_coding" %in% colnames(annotated_finemap_res)){
+      loginfo("Limit to protein coding genes")
+      finemap_gene_res <- finemap_gene_res[finemap_gene_res$gene_type=="protein_coding",]
+    } else {
+      loginfo("No 'protein_coding' in 'gene_type'. Skipped filtering protein coding genes.")
+    }
+  }
+
+  # limit genes in credible sets
+  if (filter_cs_genes) {
+    finemap_gene_res <- finemap_gene_res[finemap_gene_res$cs_index!=0,]
+  }
+
+  finemap_snp_res <- annotated_finemap_res[annotated_finemap_res$group=="SNP",]
+
+  # limit SNPs in credible sets
+  if (filter_cs_snps) {
+    finemap_snp_res <- finemap_snp_res[finemap_snp_res$cs_index!=0,]
+  }
+
+  return(rbind(finemap_gene_res, finemap_snp_res))
 }

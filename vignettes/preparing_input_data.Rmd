@@ -1,6 +1,6 @@
 ---
 title: "Preparing cTWAS input data"
-author: "Kaixuan Luo, Sheng Qian, Xin He"
+author: "Kaixuan Luo, Sheng Qian"
 date: "`r Sys.Date()`"
 output: rmarkdown::html_vignette
 vignette: >
