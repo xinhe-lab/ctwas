@@ -202,17 +202,13 @@ get_gene_annot_from_ens_db <- function(ens_db, gene_ids) {
 
 #' @title Combines gene PIPs by context, type or group.
 #'
-#' @param finemap_res a data frame of annotated cTWAS finemapping result
+#' @param annotated_finemap_res a data frame of annotated cTWAS finemapping result
 #'
 #' @param by sum gene PIPs by "context", "type", or "group".
 #'
-#' @param filter_protein_coding_genes If TRUE, keep protein coding genes only.
-#'
-#' @param filter_cs If TRUE, limits results in credible sets.
+#' @param gene_col column name of target genes to combine gene PIPs.
 #'
 #' @param missing_value set missing value (default: NA)
-#'
-#' @param digits digits to round combined PIPs
 #'
 #' @return a data frame of combined gene PIPs for each context, type or group
 #'
@@ -224,8 +220,7 @@ get_gene_annot_from_ens_db <- function(ens_db, gene_ids) {
 combine_gene_pips <- function(annotated_finemap_res,
                               by = c("context", "type", "group"),
                               gene_col = "gene_name",
-                              missing_value = NA,
-                              digits = 3){
+                              missing_value = NA){
 
   by <- match.arg(by)
 
@@ -279,13 +274,10 @@ combine_gene_pips <- function(annotated_finemap_res,
 
   # order by combined PIP
   combined_gene_pips <- combined_gene_pips[order(-combined_gene_pips$combined_pip),]
-
-  # round gene PIPs
-  combined_gene_pips[,-1] <- round(combined_gene_pips[, -1], digits)
+  rownames(combined_gene_pips) <- NULL
 
   new_colnames <- c(setdiff(colnames(combined_gene_pips), "combined_pip"), "combined_pip")
   combined_gene_pips <- combined_gene_pips[, new_colnames]
-  rownames(combined_gene_pips) <- NULL
 
   return(combined_gene_pips)
 }
