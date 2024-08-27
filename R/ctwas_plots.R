@@ -412,7 +412,7 @@ make_convergence_plots <- function(param,
 
   p_pi <- ggplot(df, aes(x=.data$niter, y=.data$value, group=.data$group, color=.data$group)) +
     geom_line() +
-    geom_point() +
+    geom_point(alpha = 0.5) +
     scale_color_manual(values = colors) +
     xlab("Iteration") + ylab(bquote(pi)) +
     ggtitle("Proportion Causal") +
@@ -431,7 +431,7 @@ make_convergence_plots <- function(param,
 
   p_sigma2 <- ggplot(df, aes(x=.data$niter, y=.data$value, group=.data$group, color=.data$group)) +
     geom_line() +
-    geom_point() +
+    geom_point(alpha = 0.5) +
     scale_color_manual(values = colors) +
     xlab("Iteration") + ylab(bquote(sigma^2)) +
     ggtitle("Effect Size") +
@@ -450,7 +450,7 @@ make_convergence_plots <- function(param,
 
   p_pve <- ggplot(df, aes(x=.data$niter, y=.data$value, group=.data$group, color=.data$group)) +
     geom_line() +
-    geom_point() +
+    geom_point(alpha = 0.5) +
     scale_color_manual(values = colors) +
     xlab("Iteration") + ylab(bquote(h[G]^2)) +
     ggtitle("PVE") +
@@ -469,7 +469,7 @@ make_convergence_plots <- function(param,
 
   p_enrich <- ggplot(df, aes(x=.data$niter, y=.data$value, group=.data$group, color=.data$group)) +
     geom_line() +
-    geom_point() +
+    geom_point(alpha = 0.5) +
     scale_color_manual(values = colors) +
     xlab("Iteration") + ylab(bquote(pi[G]/pi[S])) +
     ggtitle("Enrichment") +
