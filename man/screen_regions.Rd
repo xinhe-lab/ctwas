@@ -16,7 +16,6 @@ screen_regions(
   filter_nonSNP_PIP = FALSE,
   min_nonSNP_PIP = 0.5,
   min_abs_corr = 0.1,
-  snps_only = FALSE,
   LD_format = c("rds", "rdata", "mtx", "csv", "txt", "custom"),
   LD_loader_fun,
   ncore = 1,
@@ -50,8 +49,6 @@ regions with total non-SNP PIP >= \code{min_nonSNP_PIP}
 will be selected to run finemapping using full SNPs.}
 
 \item{min_abs_corr}{Minimum absolute correlation allowed in a credible set.}
-
-\item{snps_only}{If TRUE, use only SNPs when estimating L.}
 
 \item{LD_format}{file format for LD matrix. If "custom", use a user defined
 \code{LD_loader_fun()} function to load LD matrix.}

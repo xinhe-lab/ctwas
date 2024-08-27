@@ -40,8 +40,8 @@ compute_gene_z <- function (z_snp,
   weight_snp_ids <- unique(unlist(lapply(weights, function(x){rownames(x[["wgt"]])})))
 
   if (any(!weight_snp_ids %in% z_snp$id)){
-    stop("Some SNPs in weights not found in z_snp!
-         Please run preprocess_weights() with 'gwas_snp_ids = z_snp$id'!")
+    stop(paste("Some SNPs in weights not found in z_snp!\n",
+         "Please run preprocess_z_snp() before running preprocess_weights() with 'gwas_snp_ids = z_snp$id'!"))
   }
 
   z_snp <- z_snp[z_snp$id %in% weight_snp_ids, c("id", "z")]

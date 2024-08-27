@@ -193,7 +193,7 @@ finemap_regions_noLD <- function(region_data,
     addHandler(writeToFile, file=logfile, level='DEBUG')
   }
 
-  loginfo("Fine-mapping %d regions using no-LD version ...", length(region_data))
+  loginfo("Fine-mapping %d regions without LD ...", length(region_data))
 
   if (!inherits(region_data,"list"))
     stop("'region_data' should be a list!")
@@ -436,7 +436,7 @@ finemap_single_region_noLD <- function(region_data,
                                        ...){
 
   if (verbose){
-    loginfo("Fine-mapping region %s", region_id)
+    loginfo("Fine-mapping region %s without LD", region_id)
   }
 
   if (!inherits(region_data,"list"))

@@ -61,7 +61,7 @@ preprocess_weights <- function(weight_file,
                                region_info,
                                gwas_snp_ids,
                                snp_map,
-                               LD_map,
+                               LD_map = NULL,
                                type,
                                context,
                                weight_format = c("PredictDB", "FUSION"),
@@ -70,7 +70,7 @@ preprocess_weights <- function(weight_file,
                                scale_predictdb_weights = TRUE,
                                load_predictdb_LD = TRUE,
                                fusion_method = c("lasso","enet","top1","blup","bslmm","best.cv"),
-                               fusion_genome_version = "b38",
+                               fusion_genome_version = NA,
                                fusion_top_n_snps = NULL,
                                LD_format = c("rds", "rdata", "csv", "txt", "custom"),
                                LD_loader_fun = NULL,
@@ -96,7 +96,7 @@ preprocess_weights <- function(weight_file,
   }
 
   if (!load_predictdb_LD) {
-    if (missing(LD_map))
+    if (is.null(LD_map))
       stop("'LD_map' is required when load_predictdb_LD = FALSE!")
 
     if (!inherits(LD_map,"data.frame"))
