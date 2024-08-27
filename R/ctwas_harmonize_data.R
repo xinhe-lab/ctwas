@@ -8,7 +8,7 @@
 #' @param snp_info a data frame of SNP info for the reference,
 #' with columns "chrom", "id", "pos", "alt", "ref".
 #'
-#' @param drop_strand_ambig TRUE/FALSE, if TRUE remove strand ambiguous variants (A/T, G/C).
+#' @param drop_strand_ambig If TRUE, remove strand ambiguous variants (A/T, G/C).
 #'
 #' @return a data frame, z_snp with the "z" columns flipped to match LD reference.
 #'
@@ -27,7 +27,7 @@ harmonize_z <- function(z_snp, snp_info, drop_strand_ambig = TRUE){
   }
 
   snpnames <- intersect(z_snp$id, snp_info$id)
-  loginfo("Harmonize %s variants in both GWAS and LD reference", length(snpnames))
+  loginfo("Harmonize %s variants between GWAS and the reference", length(snpnames))
 
   if (length(snpnames) != 0) {
     z.idx <- match(snpnames, z_snp$id)
@@ -60,7 +60,7 @@ harmonize_z <- function(z_snp, snp_info, drop_strand_ambig = TRUE){
 #' @param snp_info a data frame of SNP info for the reference,
 #'  with columns "chrom", "id", "pos", "alt", "ref".
 #'
-#' @param drop_strand_ambig TRUE/FALSE, if TRUE remove strand ambiguous variants (A/T, G/C).
+#' @param drop_strand_ambig If TRUE, remove strand ambiguous variants (A/T, G/C).
 #'
 #' @return wgt.matrix and snps with alleles flipped to match
 #

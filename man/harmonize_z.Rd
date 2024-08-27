@@ -14,7 +14,7 @@ Z scores for every SNP. "A1" is the effect allele.}
 \item{snp_info}{a data frame of SNP info for the reference,
 with columns "chrom", "id", "pos", "alt", "ref".}
 
-\item{drop_strand_ambig}{TRUE/FALSE, if TRUE remove strand ambiguous variants (A/T, G/C).}
+\item{drop_strand_ambig}{If TRUE, remove strand ambiguous variants (A/T, G/C).}
 }
 \value{
 a data frame, z_snp with the "z" columns flipped to match LD reference.

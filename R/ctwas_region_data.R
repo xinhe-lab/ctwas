@@ -39,7 +39,7 @@
 #'
 #' @return a list with region_data, updated weights, and cross-bounary genes
 #'
-#' @importFrom logging loginfo
+#' @importFrom logging addHandler loginfo logwarn writeToFile
 #' @importFrom data.table rbindlist
 #'
 #' @export
@@ -57,6 +57,10 @@ assemble_region_data <- function(region_info,
                                  ncore = 1,
                                  seed = 99,
                                  logfile = NULL) {
+
+  if (!is.null(logfile)) {
+    addHandler(writeToFile, file=logfile, level='DEBUG')
+  }
 
   # check inputs
   trim_by <- match.arg(trim_by)

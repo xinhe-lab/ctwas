@@ -155,7 +155,7 @@ preprocess_weights <- function(weight_file,
   snp_ids <- Reduce(intersect, list(snp_ids, snp_info$id, gwas_snp_ids))
   weight_table <- weight_table[weight_table$rsid %in% snp_ids, ]
   gene_ids <- unique(weight_table$gene)
-  loginfo("%d genes and %d variants left after filtering by GWAS and reference",
+  loginfo("%d genes and %d variants left after filtering by GWAS and the reference.",
           length(gene_ids), length(snp_ids))
   # subset to variants in weight table
   snp_info <- snp_info[snp_info$id %in% weight_table$rsid,]
