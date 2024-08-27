@@ -16,9 +16,9 @@ filter_finemap_res(
 
 \item{filter_protein_coding_genes}{If TRUE, keep protein coding genes only.}
 
-\item{filter_cs_genes}{If TRUE, limits gene results in credible sets.}
+\item{filter_cs_genes}{If TRUE, limits gene results to credible sets.}
 
-\item{filter_cs_snps}{If TRUE, limits SNP results in credible sets.}
+\item{filter_cs_snps}{If TRUE, limits SNP results to credible sets.}
 }
 \value{
 a data frame of filtered cTWAS fine-mapping result

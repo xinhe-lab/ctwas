@@ -27,7 +27,7 @@ anno_finemap_res <- function(finemap_res,
                              map_by = "gene_id",
                              drop_unmapped_genes = TRUE){
 
-  loginfo("Mapping molecular traits to genes ...")
+  loginfo("Map molecular traits to genes")
 
   # gene results
   finemap_gene_res <- finemap_res[finemap_res$group!="SNP",]
@@ -45,8 +45,6 @@ anno_finemap_res <- function(finemap_res,
   }
 
   # map molecular traits to genes
-  loginfo("Map molecular traits to genes")
-
   # there could be n-to-1 and 1-to-n mapping
   finemap_gene_res <- finemap_gene_res %>%
     left_join(mapping_table, by = map_by, multiple = "all")
@@ -295,9 +293,9 @@ get_combined_pip <- function(pips){
 #'
 #' @param filter_protein_coding_genes If TRUE, keep protein coding genes only.
 #'
-#' @param filter_cs_genes If TRUE, limits gene results in credible sets.
+#' @param filter_cs_genes If TRUE, limits gene results to credible sets.
 #'
-#' @param filter_cs_snps If TRUE, limits SNP results in credible sets.
+#' @param filter_cs_snps If TRUE, limits SNP results to credible sets.
 #'
 #' @return a data frame of filtered cTWAS fine-mapping result
 #'
@@ -312,7 +310,7 @@ filter_finemap_res <- function(annotated_finemap_res,
   # limit to protein coding genes
   if (filter_protein_coding_genes) {
     # Check to see if gene_name and gene_type are already in annotated_finemap_res
-    if ("protein_coding" %in% colnames(annotated_finemap_res)){
+    if ("protein_coding" %in% annotated_finemap_res$gene_type){
       loginfo("Limit to protein coding genes")
       finemap_gene_res <- finemap_gene_res[finemap_gene_res$gene_type=="protein_coding",]
     } else {
@@ -320,15 +318,17 @@ filter_finemap_res <- function(annotated_finemap_res,
     }
   }
 
-  # limit genes in credible sets
+  # limit genes to credible sets
   if (filter_cs_genes) {
+    loginfo("Limit gene results to credible sets")
     finemap_gene_res <- finemap_gene_res[finemap_gene_res$cs_index!=0,]
   }
 
   finemap_snp_res <- annotated_finemap_res[annotated_finemap_res$group=="SNP",]
 
-  # limit SNPs in credible sets
+  # limit SNPs to credible sets
   if (filter_cs_snps) {
+    loginfo("Limit SNP results to credible sets")
     finemap_snp_res <- finemap_snp_res[finemap_snp_res$cs_index!=0,]
   }
 
