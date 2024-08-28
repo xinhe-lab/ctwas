@@ -92,10 +92,6 @@ get_L <- function(finemap_res){
 #'
 #' @export
 compute_region_nonSNP_PIPs <- function(finemap_res, filter_cs = TRUE){
-  # limit to credible sets
-  if (filter_cs) {
-    finemap_res <- finemap_res[finemap_res$cs_index!=0,]
-  }
 
   region_ids <- unique(finemap_res$region_id)
   if (length(region_ids) == 0) {
@@ -103,6 +99,9 @@ compute_region_nonSNP_PIPs <- function(finemap_res, filter_cs = TRUE){
   }
   nonSNP_PIPs <- sapply(region_ids, function(x){
     finemap_region_res <- finemap_res[finemap_res$region_id == x,]
+    if (filter_cs) {
+      finemap_region_res <- finemap_region_res[finemap_region_res$cs_index != 0,,drop=FALSE]
+    }
     nonSNP_PIP <- sum(finemap_region_res$susie_pip[finemap_region_res$group != "SNP"])
     nonSNP_PIP[is.na(nonSNP_PIP)] <- 0 # 0 if nonSNP_PIP is NA
     nonSNP_PIP

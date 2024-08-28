@@ -14,13 +14,14 @@ test_that("diagnose_LD_mismatch_susie works", {
 
   capture.output({
     set.seed(99)
-    nonSNP_PIPs <- compute_region_nonSNP_PIPs(finemap_res)
+    nonSNP_PIPs <- compute_region_nonSNP_PIPs(finemap_res, filter_cs = TRUE)
     selected_region_ids <- names(nonSNP_PIPs[nonSNP_PIPs > 0.8])
 
-    LD_diagnosis_res <- diagnose_LD_mismatch_susie(z_snp,
-                                                   selected_region_ids,
+    LD_diagnosis_res <- diagnose_LD_mismatch_susie(selected_region_ids,
+                                                   z_snp,
                                                    LD_map,
-                                                   gwas_n)
+                                                   gwas_n,
+                                                   ncore = 2)
 
     problematic_snps <- LD_diagnosis_res$problematic_snps
     flipped_snps <- LD_diagnosis_res$flipped_snps

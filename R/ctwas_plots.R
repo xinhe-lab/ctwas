@@ -403,7 +403,7 @@ make_convergence_plots <- function(param,
 
   # make convergence plots
 
-  # inclusion plot
+  # prior inclusion probability plot
   df <- data.frame(niter = rep(1:ncol(group_prior_iters), nrow(group_prior_iters)),
                    value = unlist(lapply(1:nrow(group_prior_iters), function(x){group_prior_iters[x,]})),
                    group = rep(rownames(group_prior_iters), each=ncol(group_prior_iters)))
@@ -421,9 +421,10 @@ make_convergence_plots <- function(param,
     expand_limits(y=0) +
     guides(color = guide_legend(title = "")) +
     theme(legend.title = element_text(size=legend.size, face="bold"),
-          legend.text = element_text(size=legend.size))
+          legend.text = element_text(size=legend.size),
+          plot.margin = margin(b=10, l=10, t=10, r=10))
 
-  # effect size plot
+  # prior effect size variance plot
   df <- data.frame(niter = rep(1:ncol(group_prior_var_iters), nrow(group_prior_var_iters)),
                    value = unlist(lapply(1:nrow(group_prior_var_iters), function(x){group_prior_var_iters[x,]})),
                    group = rep(rownames(group_prior_var_iters), each=ncol(group_prior_var_iters)))
@@ -440,26 +441,8 @@ make_convergence_plots <- function(param,
     expand_limits(y=0) +
     guides(color = guide_legend(title = "")) +
     theme(legend.title = element_text(size=legend.size, face="bold"),
-          legend.text = element_text(size=legend.size))
-
-  # PVE plot
-  df <- data.frame(niter = rep(1:ncol(group_pve_iters), nrow(group_pve_iters)),
-                   value = unlist(lapply(1:nrow(group_pve_iters), function(x){group_pve_iters[x,]})),
-                   group = rep(rownames(group_pve_iters), each=ncol(group_pve_iters)))
-  df$group <- factor(df$group, levels = factor_levels)
-
-  p_pve <- ggplot(df, aes(x=.data$niter, y=.data$value, group=.data$group, color=.data$group)) +
-    geom_line() +
-    geom_point(alpha = 0.5) +
-    scale_color_manual(values = colors) +
-    xlab("Iteration") + ylab(bquote(h[G]^2)) +
-    ggtitle("PVE") +
-    theme_cowplot() +
-    theme(plot.title=element_text(size=title.size)) +
-    expand_limits(y=0) +
-    guides(color = guide_legend(title = "")) +
-    theme(legend.title = element_text(size=legend.size, face="bold"),
-          legend.text = element_text(size=legend.size))
+          legend.text = element_text(size=legend.size),
+          plot.margin = margin(b=10, l=10, t=10, r=10))
 
   # enrichment plot
   df <- data.frame(niter = rep(1:ncol(enrichment_iters), nrow(enrichment_iters)),
@@ -478,7 +461,29 @@ make_convergence_plots <- function(param,
     expand_limits(y=0) +
     guides(color = guide_legend(title = "")) +
     theme(legend.title = element_text(size=legend.size, face="bold"),
-          legend.text = element_text(size=legend.size))
+          legend.text = element_text(size=legend.size),
+          plot.margin = margin(b=10, l=10, t=10, r=10))
 
-  cowplot::plot_grid(p_pi, p_sigma2, p_enrich, p_pve, ncol = ncol)
+  # PVE plot
+  df <- data.frame(niter = rep(1:ncol(group_pve_iters), nrow(group_pve_iters)),
+                   value = unlist(lapply(1:nrow(group_pve_iters), function(x){group_pve_iters[x,]})),
+                   group = rep(rownames(group_pve_iters), each=ncol(group_pve_iters)))
+  df$group <- factor(df$group, levels = factor_levels)
+
+  p_pve <- ggplot(df, aes(x=.data$niter, y=.data$value, group=.data$group, color=.data$group)) +
+    geom_line() +
+    geom_point(alpha = 0.5) +
+    scale_color_manual(values = colors) +
+    xlab("Iteration") + ylab(bquote(h[G]^2)) +
+    ggtitle("PVE") +
+    theme_cowplot() +
+    theme(plot.title=element_text(size=title.size)) +
+    expand_limits(y=0) +
+    guides(color = guide_legend(title = "")) +
+    theme(legend.title = element_text(size=legend.size, face="bold"),
+          legend.text = element_text(size=legend.size),
+          plot.margin = margin(b=10, l=10, t=10, r=10))
+
+  cowplot::plot_grid(p_pi, p_sigma2, p_enrich, p_pve,
+                     ncol = ncol)
 }
