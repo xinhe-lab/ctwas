@@ -102,7 +102,7 @@ Important arguments that control how this function is executed:
 
 + `ncore_LD`:  this sets the number of cores in parallelization when LD matrices are needed. In screening regions and fine-mapping steps, we need larger memory to load and process LD matrices. We recommend using fewer cores in `ncore_LD` than `ncore`.
 
-+ `save_cor`, `cor_dir` and `force_compute_cor`: we need correlation matrices during fine-mapping and visualizing the results with LD.  If `save_cor = TRUE`, it saves the correlation matrices in the `cor_dir` directory for future access. These are large datasets, so they are not saved by default. If you have correlation matrices saved in `cor_dir` and `force_compute_cor = FALSE` (default option), then if you rerun fine-mapping, cTWAS will automatically check to see if correlation matrices are available in `cor_dir` and reuse them. You can set `force_compute_cor = TRUE` so that it always computes the correlation matrices. 
++ `cor_dir`, `save_cor`, and `force_compute_cor`: we need correlation matrices during fine-mapping and visualizing the results with LD. If `cor_dir` is provided, cTWAS will check `cor_dir`. If precomputed correlation matrices are available in `cor_dir`, cTWAS will simply load those. Otherwise, it will compute the correlation matrices and save to the `cor_dir` directory if `save_cor = TRUE`. You can set `force_compute_cor = TRUE` so that it always computes the correlation matrices. The correlation matrices are large datasets, so they are not saved by default.  
 
 To understand and summarize the results from cTWAS, please read the tutorial “Summarizing and visualizing cTWAS results”. 
 
@@ -283,7 +283,7 @@ finemap_res <- finemap_regions(screened_region_data,
 ```
 
 
-We can save the computed correlation matrices to the directory `cor_dir` for future access, by setting `save_cor = TRUE`.
+cTWAS will automatically check `cor_dir`. If precomputed correlation matrices are available in `cor_dir`, cTWAS will simply load and reuse those. Otherwise, it will compute the correlation matrices and save to the `cor_dir` directory if `save_cor = TRUE`.  You can set `force_compute_cor = TRUE` so that it always computes the correlation matrices. The correlation matrices are large datasets, so they are not saved by default. 
 
 *Note*: when screening regions and fine-mapping with LD, we need larger memory to load LD matrices and compute correlation matrices. So we recommend increasing memory or reducing the number of `ncore` for these steps.
 
