@@ -32,7 +32,7 @@
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">ctwas</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">0.4.10</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">0.4.11</span>
       </span>
     </div>
 
@@ -89,7 +89,7 @@
       <h1 data-toc-skip>cTWAS utility functions</h1>
                         <h4 data-toc-skip class="author">Kaixuan Luo, Sheng Qian</h4>
             
-            <h4 data-toc-skip class="date">2024-08-27</h4>
+            <h4 data-toc-skip class="date">2024-08-28</h4>
       
       <small class="dont-index">Source: <a href="https://github.com/xinhe-lab/ctwas/blob/multigroup/vignettes/utility_functions.Rmd" class="external-link"><code>vignettes/utility_functions.Rmd</code></a></small>
       <div class="hidden name"><code>utility_functions.Rmd</code></div>
@@ -105,7 +105,7 @@
 <div class="section level4">
 <h4 id="creating-ld-matrices-from-individual-level-genotype-data">Creating LD matrices from individual level genotype data<a class="anchor" aria-label="anchor" href="#creating-ld-matrices-from-individual-level-genotype-data"></a>
 </h4>
-<p>cTWAS provides a function, <code><a href="../reference/convert_geno_to_LD_matrix.html">convert_geno_to_LD_matrix()</a></code> to create LD matrices from individual level genotype data.</p>
+<p>cTWAS provides a function <code><a href="../reference/convert_geno_to_LD_matrix.html">convert_geno_to_LD_matrix()</a></code> to create LD matrices from individual level genotype data.</p>
 <p>This function needs genotype files (<code>genotype_files</code>) and variant information files (<code>varinfo_files</code>) in PLINK format, and region definitions (<code>region_info</code>) as input, and it converts genotype data to LD matrices region-by-region, and save the LD correlation matrices (<code>.RDS</code> files) and corresponding variant information (<code>.Rvar</code> files) to the directory <code>outputdir</code>. It returns a data frame <code>region_metatable</code>, which contains region definitions from <code>region_info</code> and two additional columns “LD_file” and “SNP_file”. “LD_file” stores the filenames to the LD matrices (<code>.RDS</code> files), “SNP_file” stores the filenames of corresponding variant information (<code>.Rvar</code> files).</p>
 <p>Below is an example for creating LD matrices using 1000 Genomes European genotype data.</p>
 <p>You can download the 1000 Genomes European genotype data <a href="https://uchicago.box.com/s/qqfq7wsl1fcbfjrcpwvyyspvfud3h2xa" class="external-link">here</a>.</p>
@@ -134,7 +134,7 @@
 </h3>
 <p>PredictDB is the recommended format for cTWAS, and we introduced how to use PredictDB weights in the tutorial “Preparing cTWAS input data”. Here, we will discuss how to use FUSION weights.</p>
 <p>Please check <a href="http://gusevlab.org/projects/fusion/#compute-your-own-predictive-models" class="external-link">FUSION/TWAS</a> for the format of FUSION weights. You can download <a href="http://gusevlab.org/projects/fusion/#download-pre-computed-predictive-models" class="external-link">precomputed FUSION models</a>.</p>
-<p>For example, we download an example GTEx whole blood data.</p>
+<p>For example, we download an example GTEx whole blood data:</p>
 <div class="sourceCode" id="cb3"><pre class="sourceCode bash"><code class="sourceCode bash"><span id="cb3-1"><a href="#cb3-1"></a><span class="fu">wget</span> https://data.broadinstitute.org/alkesgroup/FUSION/WGT/GTEx.Whole_Blood.tar.bz2</span>
 <span id="cb3-2"><a href="#cb3-2"></a></span>
 <span id="cb3-3"><a href="#cb3-3"></a><span class="fu">tar</span> xjf GTEx.Whole_Blood.tar.bz2</span></code></pre></div>
@@ -144,9 +144,9 @@
 <div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">weights</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/preprocess_weights.html">preprocess_weights</a></span><span class="op">(</span><span class="st">"./GTEx.Whole_Blood"</span>,</span>
 <span>                              <span class="va">region_info</span>,</span>
-<span>                              <span class="va">z_snp</span><span class="op">$</span><span class="va">id</span>,</span>
-<span>                              <span class="va">snp_map</span>,</span>
-<span>                              <span class="va">LD_map</span>,</span>
+<span>                              gwas_snp_ids <span class="op">=</span> <span class="va">z_snp</span><span class="op">$</span><span class="va">id</span>,</span>
+<span>                              snp_map <span class="op">=</span> <span class="va">snp_map</span>,</span>
+<span>                              LD_map <span class="op">=</span> <span class="va">LD_map</span>,</span>
 <span>                              type <span class="op">=</span> <span class="st">"expression"</span>,</span>
 <span>                              context <span class="op">=</span> <span class="st">"whole_blood"</span>,                         </span>
 <span>                              weight_format <span class="op">=</span> <span class="st">"FUSION"</span>,</span>

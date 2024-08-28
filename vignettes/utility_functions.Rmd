@@ -32,7 +32,7 @@ library(ctwas)
 
 #### Creating LD matrices from individual level genotype data
 
-cTWAS provides a function,  `convert_geno_to_LD_matrix()` to create LD matrices from  individual level genotype data. 
+cTWAS provides a function `convert_geno_to_LD_matrix()` to create LD matrices from  individual level genotype data. 
 
 This function needs genotype files (`genotype_files`) and variant information files (`varinfo_files`) in PLINK format, and region definitions (`region_info`) as input, and it converts genotype data to LD matrices region-by-region, and save the LD correlation matrices (`.RDS` files) and corresponding variant information (`.Rvar` files) to the directory `outputdir`. It returns a data frame `region_metatable`, which contains region definitions from `region_info` and two additional columns "LD_file" and "SNP_file". "LD_file" stores the filenames to the LD matrices (`.RDS` files),  "SNP_file" stores the filenames of corresponding variant information (`.Rvar` files). 
  
@@ -71,7 +71,8 @@ PredictDB is the recommended format for cTWAS, and we introduced how to use Pred
 
 Please check [FUSION/TWAS](http://gusevlab.org/projects/fusion/#compute-your-own-predictive-models) for the format of FUSION weights. You can download [precomputed FUSION models](http://gusevlab.org/projects/fusion/#download-pre-computed-predictive-models).
 
-For example, we download an example GTEx whole blood data. 
+For example, we download an example GTEx whole blood data:
+ 
 ```{bash download_fusion_weights, eval=FALSE}
 wget https://data.broadinstitute.org/alkesgroup/FUSION/WGT/GTEx.Whole_Blood.tar.bz2
 
@@ -88,9 +89,9 @@ This function also takes a few other inputs, including the definition of regions
 ```{r preprocess_fusion_weights, eval=FALSE}
 weights <- preprocess_weights("./GTEx.Whole_Blood",
                               region_info,
-                              z_snp$id,
-                              snp_map,
-                              LD_map,
+                              gwas_snp_ids = z_snp$id,
+                              snp_map = snp_map,
+                              LD_map = LD_map,
                               type = "expression",
                               context = "whole_blood",                         
                               weight_format = "FUSION",

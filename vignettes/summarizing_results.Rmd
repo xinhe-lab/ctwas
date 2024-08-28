@@ -262,4 +262,4 @@ make_locusplot(annotated_finemap_res,
 ```
 
 
-If you get an error message `Viewport has zero dimension(s)` when making locus plots, it usually suggests the R viewer window is too small. You can try increasing the size of the viewer window size and try again. 
+If you get an error message "`Viewport has zero dimension(s)`" when making locus plots, it usually suggests the R viewer window is too small. You can try increasing the size of the viewer window size and try again. 
