@@ -14,8 +14,7 @@ est_param(
   niter = 30,
   min_p_single_effect = 0.8,
   use_null_weight = TRUE,
-  min_snps = 2,
-  min_genes = 1,
+  min_var = 2,
   ncore = 1,
   logfile = NULL,
   verbose = FALSE,
@@ -45,9 +44,7 @@ having at most one causal effect will be used selected for the complete paramete
 
 \item{use_null_weight}{If TRUE, allow for a probability of no effect in susie.}
 
-\item{min_snps}{minimum number of SNPs in a region.}
-
-\item{min_genes}{minimum number of genes in a region.}
+\item{min_var}{minimum number of variables (SNPs and genes) in a region.}
 
 \item{ncore}{The number of cores used to parallelize computation over regions.}
 

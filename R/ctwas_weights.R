@@ -24,7 +24,7 @@ load_weights <- function(weight_file,
                          filter_protein_coding_genes = TRUE,
                          load_predictdb_LD = TRUE,
                          fusion_method = c("lasso","enet","top1","blup","bslmm","best.cv"),
-                         fusion_genome_version = "b38",
+                         fusion_genome_version = NA,
                          ncore = 1){
 
   weight_format <- match.arg(weight_format)
@@ -67,28 +67,33 @@ load_predictdb_weights <- function(weight_file,
   # read the PredictDB weights
   stopifnot(file.exists(weight_file))
 
-  loginfo("Loading PredictDB weights ...")
+  loginfo("Load PredictDB weights")
 
   weight_name <- file_path_sans_ext(basename(weight_file))
   sqlite <- dbDriver("SQLite")
   db <- dbConnect(sqlite, weight_file)
   query <- function(...) dbGetQuery(db, ...)
   weight_table <- query("select * from weights")
-  weight_table <- weight_table[weight_table$weight!=0,]
   extra_table <- query("select * from extra")
+
+  loginfo("Number of genes in weights: %s", length(unique(weight_table$gene)))
 
   # subset to protein coding genes only
   if (filter_protein_coding_genes) {
     # filter only when protein coding genes exist
     if ("protein_coding" %in% extra_table$gene_type){
-      loginfo("Keep protein coding genes only")
-      extra_table <- extra_table[extra_table$gene_type=="protein_coding",,drop=F]
+      loginfo("Limit to protein coding genes")
+      extra_table <- extra_table[extra_table$gene_type=="protein_coding",,drop=FALSE]
       weight_table <- weight_table[weight_table$gene %in% extra_table$gene,]
+      loginfo("Number of genes in weights after filtering protein coding genes: %s", length(unique(weight_table$gene)))
+    } else {
+      loginfo("No 'protein_coding' in 'extra_table$gene_type'. Skipped filtering protein coding genes.")
     }
   }
 
   # load pre-computed covariances from PredictDB LD file
   if (load_predictdb_LD) {
+    loginfo("Load PredictDB LD")
     predictdb_LD_file <- paste0(file_path_sans_ext(weight_file), ".txt.gz")
     if (!file.exists(predictdb_LD_file)){
       stop(paste("PredictDB LD file", predictdb_LD_file, "does not exist!"))
@@ -131,14 +136,14 @@ load_predictdb_weights <- function(weight_file,
 #'
 load_fusion_weights <- function(weight_dir,
                                 fusion_method = c("lasso","enet","top1","blup","bslmm","best.cv"),
-                                fusion_genome_version = "b38",
+                                fusion_genome_version = NA,
                                 make_extra_table = FALSE,
                                 ncore = 1) {
 
   fusion_method <- match.arg(fusion_method)
   stopifnot(dir.exists(weight_dir))
 
-  loginfo("Loading FUSION weights ...")
+  loginfo("Load FUSION weights")
   weight_name <- file_path_sans_ext(basename(weight_dir))
 
   # list FUSION weight Rdata files
@@ -160,11 +165,11 @@ load_fusion_weights <- function(weight_dir,
 
   # Get list of all files in weight_dir
   if (length(wgt_rdata_files) == 0) {
-    stop("No FUSION .wgt.RDat files found.")
+    stop("No FUSION '.wgt.RDat' files found.")
   }
 
-  loginfo("Loading %d .wgt.RDat files", length(wgt_rdata_files))
-  weight_table_list <- mclapply_check(1:length(wgt_rdata_files), function(i){
+  loginfo("Load %d FUSION '.wgt.RDat' files", length(wgt_rdata_files))
+  weight_table <- mclapply_check(1:length(wgt_rdata_files), function(i){
     loaded_wgt_res <- load_fusion_wgt_data(
       wgt_rdata_files[i],
       wgt_IDs[i],
@@ -173,7 +178,7 @@ load_fusion_weights <- function(weight_dir,
     loaded_wgt_res$weight_table
   }, mc.cores = ncore)
 
-  weight_table <- do.call(rbind, weight_table_list)
+  weight_table <- do.call(rbind, weight_table)
 
   if (make_extra_table) {
     extra_table <- weight_table %>% group_by(.data$gene) %>%
@@ -203,10 +208,9 @@ load_fusion_weights <- function(weight_dir,
 load_fusion_wgt_data <- function(wgt_rdata_file,
                                  wgt_ID,
                                  fusion_method = c("lasso","enet","top1","blup","bslmm","best.cv"),
-                                 fusion_genome_version = "b38"){
+                                 fusion_genome_version = NA){
 
   fusion_method <- match.arg(fusion_method)
-  stopifnot(file.exists(wgt_rdata_file))
 
   # define the variables as NULL to binding the variables locally to the function.
   snps <- wgt.matrix <- cv.performance <- NULL
@@ -387,7 +391,7 @@ create_predictdb_from_QTLs <- function(weight_table,
 convert_fusion_to_predictdb <- function(
     weight_dir,
     fusion_method = c("lasso","enet","top1","blup","bslmm","best.cv"),
-    fusion_genome_version = "b38",
+    fusion_genome_version = NA,
     make_extra_table = TRUE,
     cov_table = NULL,
     outputdir = getwd(),
@@ -536,10 +540,13 @@ compute_weight_LD_from_ref <- function(weights,
   if (!inherits(weights,"list"))
     stop("'weights' should be a list!")
 
+  if (!inherits(LD_map,"data.frame"))
+    stop("'LD_map' should be a data frame!")
+
   weight_info <- lapply(names(weights), function(x){
-    as.data.frame(weights[[x]][c("chrom", "p0","p1", "gene_name", "weight_name", "type","context")])})
+    as.data.frame(weights[[x]][c("chrom", "p0","p1", "gene_id", "weight_name", "type","context")])})
   weight_info <- do.call(rbind, weight_info)
-  weight_info$weight_id <- paste0(weight_info$gene_name, "|", weight_name)
+  weight_info$weight_id <- paste0(weight_info$gene_id, "|", weight_name)
   # get the regions overlapping with each gene
   for (k in 1:nrow(weight_info)) {
     chrom <- weight_info[k, "chrom"]
@@ -552,7 +559,7 @@ compute_weight_LD_from_ref <- function(weights,
   # compute LD for weight variants on each chromosome
   chrs <- sort(unique(weight_info$chrom))
   for (b in chrs) {
-    loginfo("Computing LD for weight variants on chr%s", b)
+    loginfo("Computing LD for variants in weights on chr%s", b)
     weightinfo <- weight_info[weight_info$chrom == b, ]
     if (nrow(weightinfo) > 0) {
       weight_region_ids <- names(sort(-table(weightinfo$region_id)))
@@ -584,8 +591,8 @@ compute_weight_LD_from_ref <- function(weights,
         weight_ids <- weightinfo[weightinfo$region_id == x, "weight_id"]
 
         for (weight_id in weight_ids) {
-          snpnames <- rownames(weights[[weight_id]]$wgt)
-          R_wgt <- R_snp[snpnames, snpnames, drop=FALSE]
+          wgt_snp_ids <- rownames(weights[[weight_id]]$wgt)
+          R_wgt <- R_snp[wgt_snp_ids, wgt_snp_ids, drop=FALSE]
           curr_region_LD_list[[weight_id]] <- R_wgt
         }
         curr_region_LD_list

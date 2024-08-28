@@ -5,8 +5,8 @@
 \title{Diagnose LD mismatch using SuSiE RSS}
 \usage{
 diagnose_LD_mismatch_susie(
-  z_snp,
   region_ids,
+  z_snp,
   LD_map,
   gwas_n,
   p_diff_thresh = 5e-08,
@@ -17,10 +17,10 @@ diagnose_LD_mismatch_susie(
 )
 }
 \arguments{
+\item{region_ids}{A vector of region IDs to run diagnosis}
+
 \item{z_snp}{A data frame with two columns: "id", "A1", "A2", "z". giving the z scores for
 snps. "A1" is effect allele. "A2" is the other allele.}
-
-\item{region_ids}{A vector of region IDs to run diagnosis}
 
 \item{LD_map}{a data frame with filenames of LD matrices and SNP information for each of the regions.}
 

@@ -5,7 +5,7 @@
 #' otherwise, computes correlation matrices if no precomputed correlation matrices,
 #' or force_compute_cor = TRUE.
 #'
-#' @param region_id a character string of region id to be finemapped
+#' @param region_id a character string of region id.
 #'
 #' @param sids SNP IDs in the region
 #'
@@ -127,6 +127,56 @@ get_region_cor <- function(region_id,
               "R_gene" = R_gene))
 }
 
+
+#' @title Loads precomputed correlation matrices for a single region.
+#'
+#' @description It loads precomputed correlation matrices for a single region.
+#' It could load correlation matrices by \code{region_id} and
+#' directory of correlation matrices \code{cor_dir}. Otherwise,
+#' it loads correlation matrices by the
+#' filenames (\code{R_sg_file}, \code{R_sg_file}, \code{R_s_file})
+#' if they are provided.
+#'
+#' @param region_id a character string of region id.
+#'
+#' @param cor_dir a string, the directory to store correlation matrices.
+#'
+#' @param R_sg_file filename of SNP-gene correlations.
+#'
+#' @param R_g_file filename of gene-gene correlations.
+#'
+#' @param R_s_file filename of SNP-SNP correlations.
+#'
+#' @return correlation matrices (R_snp, R_snp_gene and R_gene)
+#'
+#' @export
+load_region_cor <- function(region_id,
+                            cor_dir,
+                            R_sg_file,
+                            R_g_file,
+                            R_s_file) {
+
+  if (missing(R_sg_file)){
+    R_sg_file <- file.path(cor_dir, paste0("region.", region_id, ".R_snp_gene.RDS"))
+  }
+
+  if (missing(R_g_file)){
+    R_g_file <- file.path(cor_dir, paste0("region.", region_id, ".R_gene.RDS"))
+  }
+
+  if (missing(R_s_file)){
+    R_s_file <- file.path(cor_dir, paste0("region.", region_id, ".R_snp.RDS"))
+  }
+
+  # load precomputed correlation matrices
+  R_snp_gene <- load_LD(R_sg_file)
+  R_gene <- load_LD(R_g_file)
+  R_snp <- load_LD(R_s_file)
+
+  return(list("R_snp" = R_snp,
+              "R_snp_gene" = R_snp_gene,
+              "R_gene" = R_gene))
+}
 
 #' @title Computes correlation matrices for a single region
 #'

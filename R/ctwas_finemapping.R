@@ -122,7 +122,7 @@ finemap_regions <- function(region_data,
 
   region_ids <- names(region_data)
 
-  finemap_res_list <- mclapply_check(region_ids, function(region_id){
+  finemap_res <- mclapply_check(region_ids, function(region_id){
 
     finemap_single_region(region_data = region_data,
                           region_id = region_id,
@@ -146,7 +146,7 @@ finemap_regions <- function(region_data,
 
   }, mc.cores = ncore, stop_if_missing = TRUE)
 
-  finemap_res <- do.call(rbind, finemap_res_list)
+  finemap_res <- do.call(rbind, finemap_res)
   rownames(finemap_res) <- NULL
 
   return(finemap_res)
@@ -193,7 +193,7 @@ finemap_regions_noLD <- function(region_data,
     addHandler(writeToFile, file=logfile, level='DEBUG')
   }
 
-  loginfo("Fine-mapping %d regions using no-LD version ...", length(region_data))
+  loginfo("Fine-mapping %d regions without LD ...", length(region_data))
 
   if (!inherits(region_data,"list"))
     stop("'region_data' should be a list!")
@@ -209,7 +209,7 @@ finemap_regions_noLD <- function(region_data,
 
   region_ids <- names(region_data)
 
-  finemap_res_list <- mclapply_check(region_ids, function(region_id){
+  finemap_res <- mclapply_check(region_ids, function(region_id){
 
     finemap_single_region_noLD(region_data = region_data,
                                region_id = region_id,
@@ -222,7 +222,7 @@ finemap_regions_noLD <- function(region_data,
 
   }, mc.cores = ncore, stop_if_missing = TRUE)
 
-  finemap_res <- do.call(rbind, finemap_res_list)
+  finemap_res <- do.call(rbind, finemap_res)
   rownames(finemap_res) <- NULL
 
   return(finemap_res)
@@ -327,6 +327,9 @@ finemap_single_region <- function(region_data,
   groups <- regiondata$groups
   rm(regiondata)
 
+  # get original gene IDs
+  gene_ids <- sapply(strsplit(gids, split = "[|]"), "[[", 1)
+
   if (verbose){
     loginfo("%d genes, %d SNPs in the region", length(gids), length(sids))
     loginfo("L = %d", L)
@@ -385,11 +388,12 @@ finemap_single_region <- function(region_data,
   susie_res_df <- anno_susie(susie_res,
                              gids = gids,
                              sids = sids,
-                             region_id = region_id,
-                             z = z,
                              g_type = g_type,
                              g_context = g_context,
                              g_group = g_group,
+                             gene_ids = gene_ids,
+                             region_id = region_id,
+                             z = z,
                              include_cs_index = include_cs_index)
 
   return(susie_res_df)
@@ -432,7 +436,7 @@ finemap_single_region_noLD <- function(region_data,
                                        ...){
 
   if (verbose){
-    loginfo("Fine-mapping region %s", region_id)
+    loginfo("Fine-mapping region %s without LD", region_id)
   }
 
   if (!inherits(region_data,"list"))
@@ -449,6 +453,9 @@ finemap_single_region_noLD <- function(region_data,
   g_group <- regiondata[["g_group"]]
   groups <- regiondata$groups
   rm(regiondata)
+
+  # get original gene IDs
+  gene_ids <- sapply(strsplit(gids, split = "[|]"), "[[", 1)
 
   if (verbose){
     loginfo("%d genes, %d SNPs in the region", length(gids), length(sids))
@@ -493,11 +500,12 @@ finemap_single_region_noLD <- function(region_data,
   susie_res_df <- anno_susie(susie_res,
                              gids = gids,
                              sids = sids,
-                             region_id = region_id,
-                             z = z,
                              g_type = g_type,
                              g_context = g_context,
                              g_group = g_group,
+                             gene_ids = gene_ids,
+                             region_id = region_id,
+                             z = z,
                              include_cs_index = FALSE)
 
   return(susie_res_df)
@@ -546,6 +554,7 @@ fast_finemap_single_region_L1_noLD <- function(region_data,
                                max_iter = 1,
                                warn_converge_fail = FALSE,
                                ...)
+
   # annotate susie result
   susie_res_df <- anno_susie(susie_res,
                              gids = gids,

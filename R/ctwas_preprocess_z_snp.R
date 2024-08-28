@@ -39,15 +39,22 @@ preprocess_z_snp <- function(z_snp,
 
   loginfo("z_snp has %d variants in total", length(z_snp$id))
 
+  # remove SNPs with missing values
+  if (anyNA(z_snp)){
+    missing.idx <- which(is.na(z_snp$z))
+    loginfo("Remove variants with %d missing z-scores", length(missing.idx))
+    z_snp <- z_snp[-missing.idx,]
+  }
+
   # remove SNPs not in LD reference
   z_snp <- z_snp[z_snp$id %in% snp_info$id,]
-  loginfo("%d variants left after filtering by snp_map", length(z_snp$id))
+  loginfo("%d variants left after filtering by the reference SNPs.", length(z_snp$id))
 
   # drop multiallelic variants (id not unique)
   if (drop_multiallelic) {
     duplicated.idx <- which(z_snp$id %in% z_snp$id[duplicated(z_snp$id)])
     if(length(duplicated.idx) > 0){
-      loginfo("Drop %d multiallelic variants", length(duplicated.idx))
+      loginfo("Remove %d multiallelic variants", length(duplicated.idx))
       z_snp <- z_snp[-duplicated.idx,]
     }
   }

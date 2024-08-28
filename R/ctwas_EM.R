@@ -61,18 +61,18 @@ fit_EM <- function(
   colnames(group_prior_var_iters) <- paste0("iter", 1:ncol(group_prior_var_iters))
 
   region_ids <- names(region_data)
-  for (iter in 1:niter){
+  for (iter in 1:niter) {
     if (verbose){
       loginfo("Start EM iteration %d ...", iter)
     }
 
-    EM_susie_res_list <- mclapply_check(region_ids, function(region_id){
+    EM_susie_res <- mclapply_check(region_ids, function(region_id){
       fast_finemap_single_region_L1_noLD(region_data, region_id, pi_prior, V_prior,
                                          use_null_weight = use_null_weight,
                                          ...)
-    }, mc.cores = ncore)
+    }, mc.cores = ncore, stop_if_missing = TRUE)
 
-    EM_susie_res <- do.call(rbind, EM_susie_res_list)
+    EM_susie_res <- do.call(rbind, EM_susie_res)
 
     # update estimated group_prior from the current iteration
     pi_prior <- sapply(names(pi_prior), function(x){mean(EM_susie_res$susie_pip[EM_susie_res$group==x])})
@@ -91,10 +91,9 @@ fit_EM <- function(
     # res2 = susie(X2,y,L=10)
     # res$mu2 is identical to res2$mu2 but coefficients are on diff scale.
     if (group_prior_var_structure=="independent") {
-      V_prior <- sapply(names(V_prior),
-                        function(x){
-                          tmp_EM_susie_res <- EM_susie_res[EM_susie_res$group==x,];
-                          sum(tmp_EM_susie_res$susie_pip*tmp_EM_susie_res$mu2)/sum(tmp_EM_susie_res$susie_pip)})
+      V_prior <- sapply(names(V_prior), function(x){
+        tmp_EM_susie_res <- EM_susie_res[EM_susie_res$group==x,];
+        sum(tmp_EM_susie_res$susie_pip*tmp_EM_susie_res$mu2)/sum(tmp_EM_susie_res$susie_pip)})
     } else if (group_prior_var_structure=="shared_nonSNP") {
       tmp_EM_susie_res <- EM_susie_res[EM_susie_res$group=="SNP",]
       V_prior["SNP"] <- sum(tmp_EM_susie_res$susie_pip*tmp_EM_susie_res$mu2)/sum(tmp_EM_susie_res$susie_pip)
@@ -109,7 +108,7 @@ fit_EM <- function(
       for(type in nonSNP_types){
         tmp_EM_susie_res <- EM_susie_res[EM_susie_res$type==type,]
         V_prior[sapply(names(V_prior), function(x){
-          unlist(strsplit(x, "[|]"))[1]})==type] <-
+          unlist(strsplit(x, "[|]"))[2]})==type] <-
           sum(tmp_EM_susie_res$susie_pip*tmp_EM_susie_res$mu2)/sum(tmp_EM_susie_res$susie_pip)
       }
     } else if (group_prior_var_structure=="shared_context") {
@@ -119,7 +118,7 @@ fit_EM <- function(
       for(context in nonSNP_contexts){
         tmp_EM_susie_res <- EM_susie_res[EM_susie_res$context==context,]
         V_prior[sapply(names(V_prior), function(x){
-          unlist(strsplit(x, "[|]"))[2]})==context] <-
+          unlist(strsplit(x, "[|]"))[1]})==context] <-
           sum(tmp_EM_susie_res$susie_pip*tmp_EM_susie_res$mu2)/sum(tmp_EM_susie_res$susie_pip)
       }
     }
@@ -132,6 +131,8 @@ fit_EM <- function(
 
   group_size <- table(EM_susie_res$group)
   group_size <- group_size[rownames(group_prior_iters)]
+  group_size <- as.numeric(group_size)
+  names(group_size) <- rownames(group_prior_iters)
 
   return(list("group_prior"= pi_prior,
               "group_prior_var" = V_prior,

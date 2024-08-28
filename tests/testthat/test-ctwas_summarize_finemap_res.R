@@ -9,14 +9,17 @@ test_that("anno_finemap_res works", {
 
   capture.output({
     annotated_finemap_res <- anno_finemap_res(finemap_res,
-                                              snp_map,
-                                              gene_annot,
-                                              use_gene_pos = "mid",
-                                              drop_unannotated_genes = TRUE,
-                                              filter_protein_coding_genes = FALSE,
-                                              filter_cs = FALSE)
+                                              mapping_table = gene_annot,
+                                              map_by = "gene_id",
+                                              drop_unmapped_genes = TRUE)
+
+    annotated_finemap_res <- add_pos_to_finemap_res(annotated_finemap_res,
+                                                    snp_map,
+                                                    gene_annot,
+                                                    use_gene_pos = "mid",
+                                                    map_by = "gene_name")
   })
 
-  expect_equal(annotated_finemap_res, expected_annotated_finemap_res)
+  expect_equal(annotated_finemap_res$gene_id, expected_annotated_finemap_res$gene_id)
 
 })

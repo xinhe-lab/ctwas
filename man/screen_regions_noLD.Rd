@@ -8,8 +8,7 @@ screen_regions_noLD(
   region_data,
   group_prior = NULL,
   group_prior_var = NULL,
-  min_snps = 2,
-  min_genes = 1,
+  min_var = 2,
   min_nonSNP_PIP = 0.5,
   ncore = 1,
   logfile = NULL,
@@ -24,9 +23,7 @@ screen_regions_noLD(
 
 \item{group_prior_var}{a vector of two prior variances for SNPs and gene effects.}
 
-\item{min_snps}{minimum number of SNPs in a region.}
-
-\item{min_genes}{minimum number of genes in a region.}
+\item{min_var}{minimum number of variables (SNPs and genes) in a region.}
 
 \item{min_nonSNP_PIP}{If screening by non-SNP PIPs,
 regions with total non-SNP PIP >= \code{min_nonSNP_PIP}

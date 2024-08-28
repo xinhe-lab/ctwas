@@ -32,7 +32,7 @@
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">ctwas</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">0.4.7</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">0.4.11</span>
       </span>
     </div>
 
@@ -89,7 +89,7 @@
       <h1 data-toc-skip>Summarizing and visualizing cTWAS results</h1>
                         <h4 data-toc-skip class="author">Kaixuan Luo, Sheng Qian</h4>
             
-            <h4 data-toc-skip class="date">2024-08-13</h4>
+            <h4 data-toc-skip class="date">2024-08-28</h4>
       
       <small class="dont-index">Source: <a href="https://github.com/xinhe-lab/ctwas/blob/multigroup/vignettes/summarizing_results.Rmd" class="external-link"><code>vignettes/summarizing_results.Rmd</code></a></small>
       <div class="hidden name"><code>summarizing_results.Rmd</code></div>
@@ -115,9 +115,9 @@
 <span><span class="va">snp_map</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/readRDS.html" class="external-link">readRDS</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/system.file.html" class="external-link">system.file</a></span><span class="op">(</span><span class="st">"extdata/sample_data"</span>, <span class="st">"LDL_example.snp_map.RDS"</span>, package <span class="op">=</span> <span class="st">"ctwas"</span><span class="op">)</span><span class="op">)</span></span>
 <span></span>
 <span><span class="va">LD_map</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/readRDS.html" class="external-link">readRDS</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/system.file.html" class="external-link">system.file</a></span><span class="op">(</span><span class="st">"extdata/sample_data"</span>, <span class="st">"LDL_example.LD_map.RDS"</span>, package <span class="op">=</span> <span class="st">"ctwas"</span><span class="op">)</span><span class="op">)</span></span></code></pre></div>
-<p>We then load the cTWAS result. We focus on examples from running cTWAS with LD here, but the steps below also work for running without LD.</p>
+<p>We then load the cTWAS result for the sample data (chr16). Note, to better show the examples, here we use cTWAS results obtained using parameters estimated from the <em>entire genome</em>.</p>
 <div class="sourceCode" id="cb3"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">ctwas_res</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/readRDS.html" class="external-link">readRDS</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/system.file.html" class="external-link">system.file</a></span><span class="op">(</span><span class="st">"extdata/sample_data"</span>, <span class="st">"LDL_example.ctwas_sumstats_res.RDS"</span>, package <span class="op">=</span> <span class="st">"ctwas"</span><span class="op">)</span><span class="op">)</span></span>
+<code class="sourceCode R"><span><span class="va">ctwas_res</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/readRDS.html" class="external-link">readRDS</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/system.file.html" class="external-link">system.file</a></span><span class="op">(</span><span class="st">"extdata/sample_data"</span>, <span class="st">"LDL_example.ctwas_sumstats_res_param_allchrs.RDS"</span>, package <span class="op">=</span> <span class="st">"ctwas"</span><span class="op">)</span><span class="op">)</span></span>
 <span><span class="va">z_gene</span> <span class="op">&lt;-</span> <span class="va">ctwas_res</span><span class="op">$</span><span class="va">z_gene</span></span>
 <span><span class="va">param</span> <span class="op">&lt;-</span> <span class="va">ctwas_res</span><span class="op">$</span><span class="va">param</span></span>
 <span><span class="va">finemap_res</span> <span class="op">&lt;-</span> <span class="va">ctwas_res</span><span class="op">$</span><span class="va">finemap_res</span></span>
@@ -133,25 +133,33 @@
 <div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">head</a></span><span class="op">(</span><span class="va">finemap_res</span><span class="op">)</span></span></code></pre></div>
 <pre><code><span><span class="co">##                                    id       type context            group</span></span>
-<span><span class="co">## 1 ENSG00000103494.12|expression_Liver expression   liver expression|liver</span></span>
-<span><span class="co">## 2 ENSG00000177508.11|expression_Liver expression   liver expression|liver</span></span>
-<span><span class="co">## 3 ENSG00000087245.12|expression_Liver expression   liver expression|liver</span></span>
-<span><span class="co">## 4 ENSG00000087253.12|expression_Liver expression   liver expression|liver</span></span>
-<span><span class="co">## 5 ENSG00000103546.18|expression_Liver expression   liver expression|liver</span></span>
-<span><span class="co">## 6 ENSG00000198848.12|expression_Liver expression   liver expression|liver</span></span>
-<span><span class="co">##            z            region_id    susie_pip      mu2 cs_index</span></span>
-<span><span class="co">## 1 -0.4550967 16_53348660_55869862 1.084873e-06 1.198302        0</span></span>
-<span><span class="co">## 2 -0.3912807 16_53348660_55869862 1.056144e-06 1.144961        0</span></span>
-<span><span class="co">## 3  0.5636824 16_53348660_55869862 1.146175e-06 1.307552        0</span></span>
-<span><span class="co">## 4 -1.3879522 16_53348660_55869862 2.549128e-06 2.896225        0</span></span>
-<span><span class="co">## 5  0.5507643 16_53348660_55869862 1.138005e-06 1.293334        0</span></span>
-<span><span class="co">## 6 -0.6042867 16_53348660_55869862 1.173505e-06 1.354387        0</span></span></code></pre>
+<span><span class="co">## 1 ENSG00000103494.12|expression_Liver expression   liver liver|expression</span></span>
+<span><span class="co">## 2 ENSG00000177508.11|expression_Liver expression   liver liver|expression</span></span>
+<span><span class="co">## 3 ENSG00000087245.12|expression_Liver expression   liver liver|expression</span></span>
+<span><span class="co">## 4 ENSG00000087253.12|expression_Liver expression   liver liver|expression</span></span>
+<span><span class="co">## 5 ENSG00000103546.18|expression_Liver expression   liver liver|expression</span></span>
+<span><span class="co">## 6 ENSG00000198848.12|expression_Liver expression   liver liver|expression</span></span>
+<span><span class="co">##              gene_id            region_id          z    susie_pip      mu2</span></span>
+<span><span class="co">## 1 ENSG00000103494.12 16_53348660_55869862 -0.4550967 1.456841e-06 1.158774</span></span>
+<span><span class="co">## 2 ENSG00000177508.11 16_53348660_55869862 -0.3912807 1.419340e-06 1.108409</span></span>
+<span><span class="co">## 3 ENSG00000087245.12 16_53348660_55869862  0.5636824 1.536769e-06 1.261929</span></span>
+<span><span class="co">## 4 ENSG00000087253.12 16_53348660_55869862 -1.3879522 3.341393e-06 2.761976</span></span>
+<span><span class="co">## 5 ENSG00000103546.18 16_53348660_55869862  0.5507643 1.526124e-06 1.248505</span></span>
+<span><span class="co">## 6 ENSG00000198848.12 16_53348660_55869862 -0.6042867 1.572364e-06 1.306151</span></span>
+<span><span class="co">##   cs_index</span></span>
+<span><span class="co">## 1        0</span></span>
+<span><span class="co">## 2        0</span></span>
+<span><span class="co">## 3        0</span></span>
+<span><span class="co">## 4        0</span></span>
+<span><span class="co">## 5        0</span></span>
+<span><span class="co">## 6        0</span></span></code></pre>
 <p>It also produces other output:</p>
 <ul>
 <li><p><code>boundary_genes</code>: the genes/molecular traits that cross region boundaries (we will need these in the post-processing step).</p></li>
 <li><p><code>region_data</code>: assembled region data, including Z scores of SNPs and molecular traits, for all the regions. Note that only data of the subset of SNPs used in screening regions are included.</p></li>
-<li><p><code>screen_res</code>: screening regions results, including the data of all SNPs and molecular traits of the selected regions, estimated numbers of causal signals (L) for selected regions, and a data frame with estimated L or non-SNP PIPs for all regions.</p></li>
+<li><p><code>screen_res</code>: screening regions results, including the data of all SNPs and molecular traits of the selected regions, estimated numbers of causal signals (<code>L</code>) for selected regions, and a data frame with estimated <code>L</code> and non-SNP PIPs for all regions.</p></li>
 </ul>
+<p>We focus on examples from running cTWAS with LD here, but the steps below also work for running without LD.</p>
 <div class="section level2">
 <h2 id="assessing-parameters-and-computing-pve">Assessing parameters and computing PVE<a class="anchor" aria-label="anchor" href="#assessing-parameters-and-computing-pve"></a>
 </h2>
@@ -163,40 +171,67 @@
  
 </p>
 </div>
-<p>These plots show the estimated prior inclusion probability, prior effect size variance, and enrichment over the iterations of parameter estimation. The enrichment is defined as the ratio of the prior of molecular traits over the prior of variants. We generally expect molecular traits to have higher prior inclusion probability than variants. Enrichment values typically range from 20 -100 for expresion traits.</p>
+<p>These plots show the estimated prior inclusion probability, prior effect size variance, and enrichment over the iterations of parameter estimation. The enrichment is defined as the ratio of the prior of molecular traits over the prior of variants. We generally expect molecular traits to have higher prior inclusion probability than variants. Enrichment values typically range from 20 - 100 for expresion traits.</p>
 <p>Then, we use <code><a href="../reference/summarize_param.html">summarize_param()</a></code> to obtain estimated parameters (from the last iteration) and to compute the proportion of variance explained (PVE) by variants and molecular traits. These PVE values allow us to compute how heritability of the phenotype is partitioned among variants and groups of molecular traits.</p>
 <div class="sourceCode" id="cb7"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">ctwas_parameters</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/summarize_param.html">summarize_param</a></span><span class="op">(</span><span class="va">param</span>, <span class="va">gwas_n</span><span class="op">)</span></span></code></pre></div>
-<p>Note, we used sample data (from chr16) here in the tutorial, but in real data analysis, parameter estimation should be done using data from the entire genome. From our experience, genes typically explain around 5-15% of the total heritability of the trait. So if your number is much higher or lower, it may suggest some problems.</p>
+<code class="sourceCode R"><span><span class="va">ctwas_parameters</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/summarize_param.html">summarize_param</a></span><span class="op">(</span><span class="va">param</span>, <span class="va">gwas_n</span><span class="op">)</span></span>
+<span><span class="va">ctwas_parameters</span></span></code></pre></div>
+<pre><code><span><span class="co">## $group_size</span></span>
+<span><span class="co">##   liver|expression adipose|expression                SNP </span></span>
+<span><span class="co">##               8775              10538            7405450 </span></span>
+<span><span class="co">## </span></span>
+<span><span class="co">## $group_prior</span></span>
+<span><span class="co">##   liver|expression adipose|expression                SNP </span></span>
+<span><span class="co">##        0.012495672        0.001110846        0.000195999 </span></span>
+<span><span class="co">## </span></span>
+<span><span class="co">## $group_prior_var</span></span>
+<span><span class="co">##   liver|expression adipose|expression                SNP </span></span>
+<span><span class="co">##          28.109518          28.109518           9.999069 </span></span>
+<span><span class="co">## </span></span>
+<span><span class="co">## $enrichment</span></span>
+<span><span class="co">##   liver|expression adipose|expression </span></span>
+<span><span class="co">##           63.75376            5.66761 </span></span>
+<span><span class="co">## </span></span>
+<span><span class="co">## $group_pve</span></span>
+<span><span class="co">##   liver|expression adipose|expression                SNP </span></span>
+<span><span class="co">##       0.0089697521       0.0009576034       0.0422362306 </span></span>
+<span><span class="co">## </span></span>
+<span><span class="co">## $total_pve</span></span>
+<span><span class="co">## [1] 0.05216359</span></span>
+<span><span class="co">## </span></span>
+<span><span class="co">## $attributable_pve</span></span>
+<span><span class="co">##   liver|expression adipose|expression                SNP </span></span>
+<span><span class="co">##          0.1719543          0.0183577          0.8096880</span></span></code></pre>
+<p>From our experience, genes typically explain around 5-15% of the total heritability of the trait. So if your number is much higher or lower, it may suggest some problems.</p>
 </div>
 <div class="section level2">
 <h2 id="inspecting-the-ctwas-results">Inspecting the cTWAS results<a class="anchor" aria-label="anchor" href="#inspecting-the-ctwas-results"></a>
 </h2>
-<p>We can view the molecular traits above a certain PIP cutoff, e.g. PIP &gt; 0.8 and limit to credible sets, by:</p>
-<div class="sourceCode" id="cb8"><pre class="downlit sourceCode r">
+<p>We can view the molecular traits above a certain PIP cutoff, e.g. PIP &gt; 0.8. We also generally recommend limiting the results to credible sets.</p>
+<div class="sourceCode" id="cb9"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/subset.html" class="external-link">subset</a></span><span class="op">(</span><span class="va">finemap_res</span>, <span class="va">group</span> <span class="op">!=</span> <span class="st">"SNP"</span> <span class="op">&amp;</span> <span class="va">susie_pip</span> <span class="op">&gt;</span> <span class="fl">0.8</span> <span class="op">&amp;</span> <span class="va">cs_index</span> <span class="op">!=</span> <span class="fl">0</span><span class="op">)</span></span></code></pre></div>
 <pre><code><span><span class="co">##                                                       id       type context</span></span>
 <span><span class="co">## 7766  ENSG00000087237.10|expression_Adipose_Subcutaneous expression adipose</span></span>
 <span><span class="co">## 17155                 ENSG00000261701.6|expression_Liver expression   liver</span></span>
 <span><span class="co">## 17168  ENSG00000257017.8|expression_Adipose_Subcutaneous expression adipose</span></span>
-<span><span class="co">##                    group          z            region_id susie_pip      mu2</span></span>
-<span><span class="co">## 7766  expression|adipose  13.749840 16_55869862_57630418 0.9999483 145.7879</span></span>
-<span><span class="co">## 17155   expression|liver -18.403150 16_71020125_72901251 1.0000000 474.3442</span></span>
-<span><span class="co">## 17168 expression|adipose  -4.810203 16_71020125_72901251 1.0000000 420.6018</span></span>
-<span><span class="co">##       cs_index</span></span>
-<span><span class="co">## 7766         1</span></span>
-<span><span class="co">## 17155        1</span></span>
-<span><span class="co">## 17168        3</span></span></code></pre>
-<p>The result, however, does not contain gene names and position information. To add the information, it is helpful to add gene annotations to the fine-mapping result.</p>
-<p>To annotate genes, we need <code>gene_annot</code>, a data frame containing gene IDs, gene names, gene types, and position information of the genes. We have a function <code><a href="../reference/get_gene_annot_from_ens_db.html">get_gene_annot_from_ens_db()</a></code> , which extracts gene annotations from the Ensembl database.</p>
-<div class="sourceCode" id="cb10"><pre class="downlit sourceCode r">
+<span><span class="co">##                    group            gene_id            region_id          z</span></span>
+<span><span class="co">## 7766  adipose|expression ENSG00000087237.10 16_55869862_57630418  13.749840</span></span>
+<span><span class="co">## 17155   liver|expression  ENSG00000261701.6 16_71020125_72901251 -18.403150</span></span>
+<span><span class="co">## 17168 adipose|expression  ENSG00000257017.8 16_71020125_72901251  -4.810203</span></span>
+<span><span class="co">##       susie_pip      mu2 cs_index</span></span>
+<span><span class="co">## 7766  0.9996953 177.2574        1</span></span>
+<span><span class="co">## 17155 1.0000000 689.1921        1</span></span>
+<span><span class="co">## 17168 0.9991837 453.5788        3</span></span></code></pre>
+<p>To help interpret the results, we could add gene annotations (e.g. gene names, gene types, etc.) to the fine-mapping result.</p>
+<p>To map between molecular traits and their corresponding genes, we need <code>mapping_table</code>, a data frame containing IDs of molecular traits (<code>gene_id</code>), and the corresponding gene names (<code>gene_name</code>). Other gene annotation information, such as gene types (<code>gene_type</code>), and position information of the genes (<code>chrom</code>, <code>start</code>, <code>end</code>) could also be included and would be useful later when visualizing the results.</p>
+<p>We have a function <code><a href="../reference/get_gene_annot_from_ens_db.html">get_gene_annot_from_ens_db()</a></code> , which creates gene annotations from the Ensembl database.</p>
+<div class="sourceCode" id="cb11"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">ens_db</span> <span class="op">&lt;-</span> <span class="va">EnsDb.Hsapiens.v86</span></span>
 <span><span class="va">finemap_gene_res</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/subset.html" class="external-link">subset</a></span><span class="op">(</span><span class="va">finemap_res</span>, <span class="va">group</span> <span class="op">!=</span> <span class="st">"SNP"</span><span class="op">)</span></span>
 <span><span class="va">gene_ids</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/unique.html" class="external-link">unique</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/lapply.html" class="external-link">sapply</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/strsplit.html" class="external-link">strsplit</a></span><span class="op">(</span><span class="va">finemap_gene_res</span><span class="op">$</span><span class="va">id</span>, split <span class="op">=</span> <span class="st">"[|]"</span><span class="op">)</span>, <span class="st">"[["</span>, <span class="fl">1</span><span class="op">)</span><span class="op">)</span></span>
-<span><span class="va">gene_annot</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/get_gene_annot_from_ens_db.html">get_gene_annot_from_ens_db</a></span><span class="op">(</span><span class="va">ens_db</span>, <span class="va">gene_ids</span><span class="op">)</span></span></code></pre></div>
-<p>Note: we used the gene annotations from <code>EnsDb.Hsapiens.v86</code> for the example data. You can choose the Ensembl database for your specific data, or prepare your own gene annotations in the following format:</p>
-<div class="sourceCode" id="cb11"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">head</a></span><span class="op">(</span><span class="va">gene_annot</span><span class="op">)</span></span></code></pre></div>
+<span><span class="va">gene_annot</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/get_gene_annot_from_ens_db.html">get_gene_annot_from_ens_db</a></span><span class="op">(</span><span class="va">ens_db</span>, <span class="va">gene_ids</span><span class="op">)</span></span>
+<span><span class="va">mapping_table</span> <span class="op">&lt;-</span> <span class="va">gene_annot</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">head</a></span><span class="op">(</span><span class="va">mapping_table</span><span class="op">)</span></span></code></pre></div>
 <pre><code><span><span class="co">##   chrom    start      end            gene_id gene_name      gene_type</span></span>
 <span><span class="co">## 1    16 53597683 53703938 ENSG00000103494.12  RPGRIP1L protein_coding</span></span>
 <span><span class="co">## 2    16 54283304 54286763 ENSG00000177508.11      IRX3 protein_coding</span></span>
@@ -204,72 +239,104 @@
 <span><span class="co">## 4    16 55508998 55586670 ENSG00000087253.12    LPCAT2 protein_coding</span></span>
 <span><span class="co">## 5    16 55655604 55706192 ENSG00000103546.18    SLC6A2 protein_coding</span></span>
 <span><span class="co">## 6    16 55802851 55833337 ENSG00000198848.12      CES1 protein_coding</span></span></code></pre>
-<p>If you have other molecular traits (e.g. splicing), you need to create your own <code>gene_annot</code>, that contains annotations for all the molecular traits.</p>
-<p>We then use the <code><a href="../reference/anno_finemap_res.html">anno_finemap_res()</a></code> function to add gene annotations to the fine-mapping result, and use gene mid-points to represent gene positions.</p>
+<p>Note: we used the gene annotations from <code>EnsDb.Hsapiens.v86</code> for the example data in hg38. You can choose the Ensembl database for the genome build of your own data (e.g. <code>EnsDb.Hsapiens.v75</code> for hg19)</p>
+<p>For gene expression models, we could use the gene annotations as <code>mapping_table</code> to map gene IDs to corresponding gene names. If you have other molecular traits such as splicing, you would need to prepare your own <code>mapping_table</code> in similar format.</p>
+<p>We then use the <code><a href="../reference/anno_finemap_res.html">anno_finemap_res()</a></code> function to map between molecular traits and their corresponding genes and add gene annotations to the fine-mapping result. If a molecular trait is mapped to multiple genes, it splits the PIP of the molecular trait to the target genes.</p>
 <div class="sourceCode" id="cb13"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">finemap_res</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/anno_finemap_res.html">anno_finemap_res</a></span><span class="op">(</span><span class="va">finemap_res</span>, <span class="va">snp_map</span>, <span class="va">gene_annot</span>,</span>
-<span>                                use_gene_pos <span class="op">=</span> <span class="st">"mid"</span>,</span>
-<span>                                drop_unannotated_genes <span class="op">=</span> <span class="cn">TRUE</span>,</span>
-<span>                                filter_protein_coding_genes <span class="op">=</span> <span class="cn">TRUE</span>,</span>
-<span>                                filter_cs <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span></code></pre></div>
-<pre><code><span><span class="co">## 2024-08-13 11:03:26 INFO::Annotating ctwas finemapping result ...</span></span>
-<span><span class="co">## 2024-08-13 11:03:27 INFO::keep only protein coding genes</span></span>
-<span><span class="co">## 2024-08-13 11:03:27 INFO::keep only results in credible sets</span></span>
-<span><span class="co">## 2024-08-13 11:03:27 INFO::add gene_name and gene_type</span></span>
-<span><span class="co">## 2024-08-13 11:03:27 INFO::use gene mid positions</span></span>
-<span><span class="co">## 2024-08-13 11:03:27 INFO::add SNP positions</span></span></code></pre>
-<p>We can drop unannotated genes by setting <code>drop_unannotated_genes = TRUE</code>, limit to protein coding genes by setting <code>filter_protein_coding_genes = TRUE</code>, and limit to credible sets by setting <code>filter_cs = TRUE</code>.</p>
-<p>You can now run the command at the beginning of this section to view the genes with additional information.</p>
+<code class="sourceCode R"><span><span class="va">annotated_finemap_res</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/anno_finemap_res.html">anno_finemap_res</a></span><span class="op">(</span><span class="va">finemap_res</span>,</span>
+<span>                                          <span class="va">mapping_table</span>,</span>
+<span>                                          map_by <span class="op">=</span> <span class="st">"gene_id"</span>,</span>
+<span>                                          drop_unmapped_genes <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span></code></pre></div>
+<pre><code><span><span class="co">## 2024-08-28 14:35:34 INFO::Map molecular traits to genes</span></span></code></pre>
+<p>We drop unannotated genes by setting <code>drop_unannotated_genes = TRUE</code> (default).</p>
+<p>We could limit to protein coding genes by setting <code>filter_protein_coding_genes = TRUE</code>, and limit genes to credible sets by setting <code>filter_cs_genes = TRUE</code>.</p>
 <div class="sourceCode" id="cb15"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/subset.html" class="external-link">subset</a></span><span class="op">(</span><span class="va">finemap_res</span>, <span class="va">group</span> <span class="op">!=</span> <span class="st">"SNP"</span> <span class="op">&amp;</span> <span class="va">susie_pip</span> <span class="op">&gt;</span> <span class="fl">0.8</span> <span class="op">&amp;</span> <span class="va">cs_index</span> <span class="op">!=</span> <span class="fl">0</span><span class="op">)</span></span></code></pre></div>
-<pre><code><span><span class="co">##   chrom      pos            gene_id gene_name      gene_type</span></span>
-<span><span class="co">## 1    16 56972848 ENSG00000087237.10      CETP protein_coding</span></span>
-<span><span class="co">## 2    16 72070235  ENSG00000261701.6       HPR protein_coding</span></span>
-<span><span class="co">## 4    16 72057824  ENSG00000257017.8        HP protein_coding</span></span>
-<span><span class="co">##                                                   id       type context</span></span>
-<span><span class="co">## 1 ENSG00000087237.10|expression_Adipose_Subcutaneous expression adipose</span></span>
-<span><span class="co">## 2                 ENSG00000261701.6|expression_Liver expression   liver</span></span>
-<span><span class="co">## 4  ENSG00000257017.8|expression_Adipose_Subcutaneous expression adipose</span></span>
-<span><span class="co">##                group          z            region_id susie_pip      mu2</span></span>
-<span><span class="co">## 1 expression|adipose  13.749840 16_55869862_57630418 0.9999483 145.7879</span></span>
-<span><span class="co">## 2   expression|liver -18.403150 16_71020125_72901251 1.0000000 474.3442</span></span>
-<span><span class="co">## 4 expression|adipose  -4.810203 16_71020125_72901251 1.0000000 420.6018</span></span>
-<span><span class="co">##   cs_index</span></span>
-<span><span class="co">## 1        1</span></span>
-<span><span class="co">## 2        1</span></span>
-<span><span class="co">## 4        3</span></span></code></pre>
-<p>In this example, HPR gene in liver, HP gene in adipose, and CETP gene in adipose are the only three genes that satisfy this threshold.</p>
-<p>When we have multiple contexts (tissues), it is useful to evaluate the total evidence of a gene being causal, <em>combining evidence of all the molecular traits affecting this gene across all types and contexts.</em> We compute combined PIPs of all these molecular traits of the same gene, using the following formula: <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mn>1</mn><mo>−</mo><msub><mo>∏</mo><mi>k</mi></msub><mo stretchy="false" form="prefix">(</mo><mn>1</mn><mo>−</mo><msub><mtext mathvariant="normal">PIP</mtext><mi>k</mi></msub><mo stretchy="false" form="postfix">)</mo></mrow><annotation encoding="application/x-tex">1 - \prod_k (1 - \text{PIP}_k)</annotation></semantics></math>, where <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msub><mtext mathvariant="normal">PIP</mtext><mi>k</mi></msub><annotation encoding="application/x-tex">\text{PIP}_k</annotation></semantics></math> is the PIP of the <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>k</mi><annotation encoding="application/x-tex">k</annotation></semantics></math>-th molecular trait of a gene.</p>
-<p>For example, we can combine PIPs of the same gene by context. We could limit results in protein coding genes by setting <code>filter_protein_coding_genes = TRUE</code>, and limit results in credible sets by setting <code>filter_cs = TRUE</code>.</p>
+<code class="sourceCode R"><span><span class="va">annotated_finemap_res</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/filter_finemap_res.html">filter_finemap_res</a></span><span class="op">(</span><span class="va">annotated_finemap_res</span>, </span>
+<span>                                            filter_protein_coding_genes <span class="op">=</span> <span class="cn">TRUE</span>, </span>
+<span>                                            filter_cs_genes <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span></code></pre></div>
+<pre><code><span><span class="co">## 2024-08-28 14:35:35 INFO::Limit to protein coding genes</span></span>
+<span><span class="co">## 2024-08-28 14:35:35 INFO::Limit gene results to credible sets</span></span></code></pre>
+<p>We can now run the command at the beginning of this section to view the genes with additional information.</p>
 <div class="sourceCode" id="cb17"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">combined_pip_by_context</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/combine_gene_pips.html">combine_gene_pips</a></span><span class="op">(</span><span class="va">finemap_res</span>, </span>
-<span>                                             by <span class="op">=</span> <span class="st">"context"</span>,</span>
-<span>                                             filter_protein_coding_genes <span class="op">=</span> <span class="cn">TRUE</span>,    </span>
-<span>                                             filter_cs <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span>
-<span><span class="va">combined_pip_by_context</span></span></code></pre></div>
-<pre><code><span><span class="co">##   gene_name combined_pip adipose_pip liver_pip</span></span>
-<span><span class="co">## 3       HPR        1.000          NA         1</span></span>
-<span><span class="co">## 2        HP        1.000       1.000        NA</span></span>
-<span><span class="co">## 1      CETP        1.000       1.000        NA</span></span>
-<span><span class="co">## 4  MARVELD3        0.089       0.089        NA</span></span></code></pre>
+<code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/subset.html" class="external-link">subset</a></span><span class="op">(</span><span class="va">annotated_finemap_res</span>, <span class="va">group</span> <span class="op">!=</span> <span class="st">"SNP"</span> <span class="op">&amp;</span> <span class="va">susie_pip</span> <span class="op">&gt;</span> <span class="fl">0.8</span> <span class="op">&amp;</span> <span class="va">cs_index</span> <span class="op">!=</span> <span class="fl">0</span><span class="op">)</span></span></code></pre></div>
+<pre><code><span><span class="co">##                gene_id gene_name      gene_type</span></span>
+<span><span class="co">## 51  ENSG00000087237.10      CETP protein_coding</span></span>
+<span><span class="co">## 111  ENSG00000261701.6       HPR protein_coding</span></span>
+<span><span class="co">## 124  ENSG00000257017.8        HP protein_coding</span></span>
+<span><span class="co">##                                                     id       type context</span></span>
+<span><span class="co">## 51  ENSG00000087237.10|expression_Adipose_Subcutaneous expression adipose</span></span>
+<span><span class="co">## 111                 ENSG00000261701.6|expression_Liver expression   liver</span></span>
+<span><span class="co">## 124  ENSG00000257017.8|expression_Adipose_Subcutaneous expression adipose</span></span>
+<span><span class="co">##                  group            region_id          z susie_pip      mu2</span></span>
+<span><span class="co">## 51  adipose|expression 16_55869862_57630418  13.749840 0.9996953 177.2574</span></span>
+<span><span class="co">## 111   liver|expression 16_71020125_72901251 -18.403150 1.0000000 689.1921</span></span>
+<span><span class="co">## 124 adipose|expression 16_71020125_72901251  -4.810203 0.9991837 453.5788</span></span>
+<span><span class="co">##     cs_index</span></span>
+<span><span class="co">## 51         1</span></span>
+<span><span class="co">## 111        1</span></span>
+<span><span class="co">## 124        3</span></span></code></pre>
+<p>In this example, HPR gene in liver, HP gene in adipose, and CETP gene in adipose are the only three genes that satisfy this threshold.</p>
+<p>When we have multiple contexts or different types of molecular traits, it is useful to evaluate the total evidence of a gene being causal, <em>combining evidence of all the molecular traits affecting this gene across all types and contexts.</em> We compute combined PIPs of all these molecular traits of the same gene, using the following formula: <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mn>1</mn><mo>−</mo><msub><mo>∏</mo><mi>k</mi></msub><mo stretchy="false" form="prefix">(</mo><mn>1</mn><mo>−</mo><msub><mtext mathvariant="normal">PIP</mtext><mi>k</mi></msub><mo stretchy="false" form="postfix">)</mo></mrow><annotation encoding="application/x-tex">1 - \prod_k (1 - \text{PIP}_k)</annotation></semantics></math>, where <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msub><mtext mathvariant="normal">PIP</mtext><mi>k</mi></msub><annotation encoding="application/x-tex">\text{PIP}_k</annotation></semantics></math> is the PIP of the <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>k</mi><annotation encoding="application/x-tex">k</annotation></semantics></math>-th molecular trait of a gene.</p>
+<p>For example, we can combine PIPs of the same gene by context:</p>
 <div class="sourceCode" id="cb19"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/subset.html" class="external-link">subset</a></span><span class="op">(</span><span class="va">combined_pip_by_context</span>, <span class="va">combined_pip</span> <span class="op">&gt;</span> <span class="fl">0.8</span><span class="op">)</span></span></code></pre></div>
-<pre><code><span><span class="co">##   gene_name combined_pip adipose_pip liver_pip</span></span>
-<span><span class="co">## 3       HPR            1          NA         1</span></span>
-<span><span class="co">## 2        HP            1           1        NA</span></span>
-<span><span class="co">## 1      CETP            1           1        NA</span></span></code></pre>
-<p>In this example, we can see the causal signal of HPR is specific in liver, and the causal signals of HP and CETP gene are specific in adipose.</p>
+<code class="sourceCode R"><span><span class="va">combined_pip_by_context</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/combine_gene_pips.html">combine_gene_pips</a></span><span class="op">(</span><span class="va">annotated_finemap_res</span>, </span>
+<span>                                             by <span class="op">=</span> <span class="st">"context"</span><span class="op">)</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/base/subset.html" class="external-link">subset</a></span><span class="op">(</span><span class="va">combined_pip_by_context</span>, <span class="va">combined_pip</span> <span class="op">&gt;</span> <span class="fl">0.8</span><span class="op">)</span></span></code></pre></div>
+<pre><code><span><span class="co">##   gene_name adipose_pip liver_pip combined_pip</span></span>
+<span><span class="co">## 1       HPR          NA         1    1.0000000</span></span>
+<span><span class="co">## 2      CETP   0.9996953        NA    0.9996953</span></span>
+<span><span class="co">## 3        HP   0.9991837        NA    0.9991837</span></span></code></pre>
+<p>In this example, we can see the causal signal of HPR is specific in liver, and the causal signals of HP and CETP genes are specific in adipose.</p>
+<p>Similarly, we can also combine PIPs of the same gene by types:</p>
+<div class="sourceCode" id="cb21"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">combined_pip_by_type</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/combine_gene_pips.html">combine_gene_pips</a></span><span class="op">(</span><span class="va">annotated_finemap_res</span>, </span>
+<span>                                          by <span class="op">=</span> <span class="st">"type"</span><span class="op">)</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/base/subset.html" class="external-link">subset</a></span><span class="op">(</span><span class="va">combined_pip_by_type</span>, <span class="va">combined_pip</span> <span class="op">&gt;</span> <span class="fl">0.8</span><span class="op">)</span></span></code></pre></div>
+<pre><code><span><span class="co">##   gene_name expression_pip combined_pip</span></span>
+<span><span class="co">## 1       HPR      1.0000000    1.0000000</span></span>
+<span><span class="co">## 2      CETP      0.9996953    0.9996953</span></span>
+<span><span class="co">## 3        HP      0.9991837    0.9991837</span></span></code></pre>
+<p>We can also combine PIPs of the same gene by groups, which includes all the combinations of contexts and types.</p>
+<div class="sourceCode" id="cb23"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">combined_pip_by_group</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/combine_gene_pips.html">combine_gene_pips</a></span><span class="op">(</span><span class="va">annotated_finemap_res</span>, </span>
+<span>                                           by <span class="op">=</span> <span class="st">"group"</span><span class="op">)</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/base/subset.html" class="external-link">subset</a></span><span class="op">(</span><span class="va">combined_pip_by_group</span>, <span class="va">combined_pip</span> <span class="op">&gt;</span> <span class="fl">0.8</span><span class="op">)</span></span></code></pre></div>
+<pre><code><span><span class="co">##   gene_name adipose|expression_pip liver|expression_pip combined_pip</span></span>
+<span><span class="co">## 1       HPR                     NA                    1    1.0000000</span></span>
+<span><span class="co">## 2      CETP              0.9996953                   NA    0.9996953</span></span>
+<span><span class="co">## 3        HP              0.9991837                   NA    0.9991837</span></span></code></pre>
 </div>
 <div class="section level2">
 <h2 id="visualizing-the-ctwas-results">Visualizing the cTWAS results<a class="anchor" aria-label="anchor" href="#visualizing-the-ctwas-results"></a>
 </h2>
-<p>It is often useful to visualize the results of cTWAS. This would help one understand the rationale of how cTWAS chooses a particular molecular trait and identify issues when cTWAS doesn’t behave properly. We could use the <code><a href="../reference/make_locusplot.html">make_locusplot()</a></code> function to make locus plots for regions of interest, and zoom in the region by specifying the <code>locus_range</code>. For example:</p>
-<p>The plotting function could color the molecular traits and SNPs based on the correlations among them. If we have computed and saved correlation matrices to <code>cor_dir</code> when running cTWAS with LD, we could simply load those precomputed correlation matrices of the region (<code>R_snp_gene</code> for gene-SNP correlations and <code>R_gene</code> for gene-gene correlations), and then make the locus plot.</p>
-<div class="sourceCode" id="cb21"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">cor_dir</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/system.file.html" class="external-link">system.file</a></span><span class="op">(</span><span class="st">"extdata/sample_data"</span>, <span class="st">"cor_matrix"</span>, package <span class="op">=</span> <span class="st">"ctwas"</span><span class="op">)</span></span>
-<span><span class="va">cor_res</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/get_region_cor.html">get_region_cor</a></span><span class="op">(</span>region_id <span class="op">=</span> <span class="st">"16_71020125_72901251"</span>, cor_dir <span class="op">=</span> <span class="va">cor_dir</span><span class="op">)</span></span></code></pre></div>
-<div class="sourceCode" id="cb22"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="fu"><a href="../reference/make_locusplot.html">make_locusplot</a></span><span class="op">(</span><span class="va">finemap_res</span>,</span>
+<p>It is often useful to visualize the results of cTWAS. This would help one understand the rationale of how cTWAS chooses a particular molecular trait and identify issues when cTWAS doesn’t behave properly.</p>
+<p>Before we make the plots, we use the function <code><a href="../reference/add_pos_to_finemap_res.html">add_pos_to_finemap_res()</a></code> to add position information for the genes and SNPs to the fine-mapping result. Here we use the midpoint position to represent genes (<code>use_gene_pos = "mid"</code>). The function needs annotated fine-mapping results, the list of reference SNPs (<code>snp_map</code>) which contains IDs and positions of SNPs, and the gene annotations (<code>gene_annot</code>) which contain the names and positions of genes.</p>
+<div class="sourceCode" id="cb25"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">annotated_finemap_res</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/add_pos_to_finemap_res.html">add_pos_to_finemap_res</a></span><span class="op">(</span><span class="va">annotated_finemap_res</span>,</span>
+<span>                                                <span class="va">snp_map</span>,</span>
+<span>                                                <span class="va">gene_annot</span>,</span>
+<span>                                                use_gene_pos <span class="op">=</span> <span class="st">"mid"</span><span class="op">)</span></span></code></pre></div>
+<pre><code><span><span class="co">## 2024-08-28 14:35:35 INFO::Annotating fine-mapping result ...</span></span>
+<span><span class="co">## 2024-08-28 14:35:35 INFO::Add gene positions</span></span>
+<span><span class="co">## 2024-08-28 14:35:35 INFO::Add SNP positions</span></span></code></pre>
+<p>The plotting function could color the molecular traits and SNPs based on the correlations among them. If we have saved correlation matrices in <code>cor_dir</code> when running cTWAS with LD, we could simply load those precomputed correlation matrices of the region using function <code><a href="../reference/load_region_cor.html">load_region_cor()</a></code>, and then make the locus plot.</p>
+<div class="sourceCode" id="cb27"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">region_id</span> <span class="op">&lt;-</span> <span class="st">"16_71020125_72901251"</span></span>
+<span><span class="va">cor_dir</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/system.file.html" class="external-link">system.file</a></span><span class="op">(</span><span class="st">"extdata/sample_data"</span>, <span class="st">"cor_matrix"</span>, package <span class="op">=</span> <span class="st">"ctwas"</span><span class="op">)</span></span>
+<span><span class="va">cor_res</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/load_region_cor.html">load_region_cor</a></span><span class="op">(</span><span class="va">region_id</span>, cor_dir <span class="op">=</span> <span class="va">cor_dir</span><span class="op">)</span></span></code></pre></div>
+<p>If we don’t have precomputed correlation matrices, we could compute the correlation matrices of the region using the function <code><a href="../reference/get_region_cor.html">get_region_cor()</a></code>. We will need the region data with all SNPs (<code>screened_region_data</code>), <code>LD_map</code> and <code>weights</code>.</p>
+<div class="sourceCode" id="cb28"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">screened_region_data</span> <span class="op">&lt;-</span> <span class="va">screen_res</span><span class="op">$</span><span class="va">screened_region_data</span></span>
+<span><span class="va">region_id</span> <span class="op">&lt;-</span> <span class="st">"16_71020125_72901251"</span></span>
+<span></span>
+<span><span class="va">cor_res</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/get_region_cor.html">get_region_cor</a></span><span class="op">(</span><span class="va">region_id</span>,</span>
+<span>                          sids <span class="op">=</span> <span class="va">screened_region_data</span><span class="op">[[</span><span class="va">region_id</span><span class="op">]</span><span class="op">]</span><span class="op">$</span><span class="va">sid</span>,</span>
+<span>                          gids <span class="op">=</span> <span class="va">screened_region_data</span><span class="op">[[</span><span class="va">region_id</span><span class="op">]</span><span class="op">]</span><span class="op">$</span><span class="va">gid</span>,</span>
+<span>                          LD_map <span class="op">=</span> <span class="va">LD_map</span>,</span>
+<span>                          weights <span class="op">=</span> <span class="va">weights</span><span class="op">)</span></span></code></pre></div>
+<p>We could now use the <code><a href="../reference/make_locusplot.html">make_locusplot()</a></code> function to make locus plots for regions of interest. We need the annotated fine-mapping result with position information, region ID, preprocessed weights (to plot QTL locations), and Ensembl gene annotation database (to plot the gene track).</p>
+<div class="sourceCode" id="cb29"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="fu"><a href="../reference/make_locusplot.html">make_locusplot</a></span><span class="op">(</span><span class="va">annotated_finemap_res</span>,</span>
 <span>               region_id <span class="op">=</span> <span class="st">"16_71020125_72901251"</span>,</span>
 <span>               weights <span class="op">=</span> <span class="va">weights</span>,</span>
 <span>               ens_db <span class="op">=</span> <span class="va">ens_db</span>, </span>
@@ -277,36 +344,37 @@
 <span>               highlight_pip <span class="op">=</span> <span class="fl">0.8</span>,</span>
 <span>               R_snp_gene <span class="op">=</span> <span class="va">cor_res</span><span class="op">$</span><span class="va">R_snp_gene</span>,</span>
 <span>               R_gene <span class="op">=</span> <span class="va">cor_res</span><span class="op">$</span><span class="va">R_gene</span><span class="op">)</span></span></code></pre></div>
-<pre><code><span><span class="co">## 2024-08-13 11:03:28 INFO::focal gene: HPR</span></span>
-<span><span class="co">## 2024-08-13 11:03:28 INFO::focal id: ENSG00000261701.6|expression_Liver</span></span>
-<span><span class="co">## 2024-08-13 11:03:28 INFO::plot locus range: chr16 71600000,72400000</span></span>
-<span><span class="co">## 2024-08-13 11:03:31 INFO::HPR liver expression QTLs</span></span>
-<span><span class="co">## 2024-08-13 11:03:31 INFO::QTL positions:</span></span></code></pre>
+<pre><code><span><span class="co">## 2024-08-28 14:35:37 INFO::focal gene: HPR</span></span>
+<span><span class="co">## 2024-08-28 14:35:37 INFO::focal id: ENSG00000261701.6|expression_Liver</span></span>
+<span><span class="co">## 2024-08-28 14:35:37 INFO::plot locus range: chr16 71600000,72400000</span></span>
+<span><span class="co">## 2024-08-28 14:35:37 INFO::HPR liver expression QTLs</span></span>
+<span><span class="co">## 2024-08-28 14:35:37 INFO::QTL positions: 72063820,72063928</span></span></code></pre>
 <div class="figure" style="text-align: center">
 <img src="summarizing_results_files/figure-html/locus_plot-1.png" alt="&amp;nbsp;" width="1200"><p class="caption">
  
 </p>
 </div>
-<p>The locus plot shows several tracks in the example region in chromosome 6 (71.6 - 72.4 Mb). The top one shows -log10(p-value) of the association of variants and molecular traits with the phenotype. The next track shows the PIPs of variants and molecular traits. The data points are colored by the correlations with the focal gene (the gene with the highest PIP, HPR in this case). The red dotted line shows the PIP cutoff of 0.8. The next track shows the locations of QTLs of the focal gene (by default, the focal gene is the gene with the highest PIP). The bottom is the gene track.</p>
-<p>In this plot, one can see that there are several genes with good associations with the phenotype, but only HPR in liver and HP in adipose are selected by cTWAS. This is because once HPR, HP and other likely causal variants are selected by cTWAS, there is no remaining association left in other molecular traits. This example thus illustrates how cTWAS selects likely causal molecular traits while controlling for nearby molecular traits and variants.</p>
+<p>The locus plot shows several tracks in the example region in chromosome 6. We could zoom in a region by specifying the <code>locus_range</code> (71.6 - 72.4 Mb). The top one shows -log10(p-value) of the association of variants and molecular traits with the phenotype. The next track shows the PIPs of variants and molecular traits. The data points are colored by the correlations with the focal gene (the gene with the highest PIP, HPR in this case). We can draw a red dotted line to show the PIP cutoff of 0.8 by setting <code>highlight_pip = 0.8</code>. The next track shows the locations of QTLs of the focal gene (by default, the focal gene is the gene with the highest PIP). The bottom is the gene track.</p>
+<p>In this plot, one can see that there are several genes with good associations with the phenotype, but only HPR in liver and HP in adipose are selected by cTWAS. This is because once HPR, HP and other likely causal variants are selected by cTWAS, there is no remaining association left in other molecular traits.</p>
 <p>For the “no-LD” version, we could still make the locus plot. The difference is that the plot will not color the data points based on the correlations to the focal gene.</p>
-<div class="sourceCode" id="cb24"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="fu"><a href="../reference/make_locusplot.html">make_locusplot</a></span><span class="op">(</span><span class="va">finemap_res</span>,</span>
+<div class="sourceCode" id="cb31"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="fu"><a href="../reference/make_locusplot.html">make_locusplot</a></span><span class="op">(</span><span class="va">annotated_finemap_res</span>,</span>
 <span>               region_id <span class="op">=</span> <span class="st">"16_71020125_72901251"</span>,</span>
 <span>               weights <span class="op">=</span> <span class="va">weights</span>,</span>
 <span>               ens_db <span class="op">=</span> <span class="va">ens_db</span>,</span>
 <span>               locus_range <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">71.6e6</span>,<span class="fl">72.4e6</span><span class="op">)</span>,</span>
 <span>               highlight_pip <span class="op">=</span> <span class="fl">0.8</span><span class="op">)</span></span></code></pre></div>
-<pre><code><span><span class="co">## 2024-08-13 11:03:32 INFO::focal gene: HPR</span></span>
-<span><span class="co">## 2024-08-13 11:03:32 INFO::focal id: ENSG00000261701.6|expression_Liver</span></span>
-<span><span class="co">## 2024-08-13 11:03:32 INFO::plot locus range: chr16 71600000,72400000</span></span>
-<span><span class="co">## 2024-08-13 11:03:32 INFO::HPR liver expression QTLs</span></span>
-<span><span class="co">## 2024-08-13 11:03:32 INFO::QTL positions:</span></span></code></pre>
+<pre><code><span><span class="co">## 2024-08-28 14:35:39 INFO::focal gene: HPR</span></span>
+<span><span class="co">## 2024-08-28 14:35:39 INFO::focal id: ENSG00000261701.6|expression_Liver</span></span>
+<span><span class="co">## 2024-08-28 14:35:39 INFO::plot locus range: chr16 71600000,72400000</span></span>
+<span><span class="co">## 2024-08-28 14:35:39 INFO::HPR liver expression QTLs</span></span>
+<span><span class="co">## 2024-08-28 14:35:39 INFO::QTL positions: 72063820,72063928</span></span></code></pre>
 <div class="figure" style="text-align: center">
 <img src="summarizing_results_files/figure-html/locus_plot_noLD-1.png" alt="&amp;nbsp;" width="1200"><p class="caption">
  
 </p>
 </div>
+<p>If you get an error message “<code>Viewport has zero dimension(s)</code>” when making locus plots, it usually suggests the R viewer window is too small. You can try increasing the size of the viewer window size and try again.</p>
 </div>
   </div>
 

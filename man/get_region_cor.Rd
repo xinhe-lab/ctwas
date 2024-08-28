@@ -19,7 +19,7 @@ get_region_cor(
 )
 }
 \arguments{
-\item{region_id}{a character string of region id to be finemapped}
+\item{region_id}{a character string of region id.}
 
 \item{sids}{SNP IDs in the region}
 

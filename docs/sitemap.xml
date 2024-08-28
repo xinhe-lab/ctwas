@@ -11,6 +11,7 @@
 <url><loc>/articles/utility_functions.html</loc></url>
 <url><loc>/authors.html</loc></url>
 <url><loc>/index.html</loc></url>
+<url><loc>/reference/add_pos_to_finemap_res.html</loc></url>
 <url><loc>/reference/anno_finemap_res.html</loc></url>
 <url><loc>/reference/assemble_region_data.html</loc></url>
 <url><loc>/reference/combine_gene_pips.html</loc></url>
@@ -29,6 +30,7 @@
 <url><loc>/reference/estimate_region_L.html</loc></url>
 <url><loc>/reference/estimate_s_rss.html</loc></url>
 <url><loc>/reference/expand_region_data.html</loc></url>
+<url><loc>/reference/filter_finemap_res.html</loc></url>
 <url><loc>/reference/finemap_regions.html</loc></url>
 <url><loc>/reference/finemap_regions_noLD.html</loc></url>
 <url><loc>/reference/finemap_single_region.html</loc></url>
@@ -45,6 +47,7 @@
 <url><loc>/reference/load_LD.html</loc></url>
 <url><loc>/reference/load_fusion_weights.html</loc></url>
 <url><loc>/reference/load_predictdb_weights.html</loc></url>
+<url><loc>/reference/load_region_cor.html</loc></url>
 <url><loc>/reference/load_weights.html</loc></url>
 <url><loc>/reference/make_convergence_plots.html</loc></url>
 <url><loc>/reference/make_locusplot.html</loc></url>

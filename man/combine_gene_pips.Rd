@@ -5,26 +5,20 @@
 \title{Combines gene PIPs by context, type or group.}
 \usage{
 combine_gene_pips(
-  finemap_res,
+  annotated_finemap_res,
   by = c("context", "type", "group"),
-  filter_protein_coding_genes = FALSE,
-  filter_cs = FALSE,
-  replace_NA = NA,
-  digits = 3
+  gene_col = "gene_name",
+  missing_value = NA
 )
 }
 \arguments{
-\item{finemap_res}{a data frame of annotated cTWAS finemapping result}
+\item{annotated_finemap_res}{a data frame of annotated cTWAS finemapping result}
 
 \item{by}{sum gene PIPs by "context", "type", or "group".}
 
-\item{filter_protein_coding_genes}{If TRUE, keep protein coding genes only.}
+\item{gene_col}{column name of target genes to combine gene PIPs.}
 
-\item{filter_cs}{If TRUE, limits results in credible sets.}
-
-\item{replace_NA}{values to replace NAs with.}
-
-\item{digits}{digits to round combined PIPs}
+\item{missing_value}{set missing value (default: NA)}
 }
 \value{
 a data frame of combined gene PIPs for each context, type or group

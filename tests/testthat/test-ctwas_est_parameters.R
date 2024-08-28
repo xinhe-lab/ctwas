@@ -7,7 +7,8 @@ test_that("est_param works", {
   capture.output({
     param <- est_param(region_data,
                        niter_prefit = 3,
-                       niter = 30)
+                       niter = 30,
+                       ncore = 2)
   })
 
   expect_equal(param, expected_param)

@@ -30,7 +30,7 @@
 #' @return a data frame of region_metatable, with region definitions and
 #' filenames of LD matrices and variant information.
 #'
-#' @importFrom logging loginfo
+#' @importFrom logging addHandler loginfo writeToFile
 #' @importFrom utils write.table
 #' @importFrom utils txtProgressBar
 #' @importFrom utils setTxtProgressBar
@@ -52,7 +52,7 @@ convert_geno_to_LD_matrix <- function(region_info,
                                       logfile = NULL) {
 
   if (!is.null(logfile)){
-    addHandler(writeToFile, file= logfile, level='DEBUG')
+    addHandler(writeToFile, file=logfile, level='DEBUG')
   }
 
   loginfo("Convert genotype data to LD matrices")

@@ -52,7 +52,7 @@
 #'
 #' @param ... Additional arguments of \code{susie_rss}.
 #'
-#' @importFrom logging addHandler loginfo writeToFile
+#' @importFrom logging addHandler loginfo logwarn writeToFile
 #' @importFrom utils packageVersion
 #'
 #' @return a list, including z_gene, estimated parameters, region_data,
@@ -112,7 +112,7 @@ ctwas_sumstats_noLD <- function(
     dir.create(outputdir, showWarnings=FALSE, recursive=TRUE)
   }
 
-  loginfo("ncore: %d", ncore)
+  loginfo("ncore = %d", ncore)
 
   # Compute gene z-scores
   if (is.null(z_gene)) {

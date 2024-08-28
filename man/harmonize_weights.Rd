@@ -16,7 +16,7 @@ with columns "chrom", "id", "cm", "pos", "alt", "ref". "alt" is the effect allel
 \item{snp_info}{a data frame of SNP info for the reference,
 with columns "chrom", "id", "pos", "alt", "ref".}
 
-\item{drop_strand_ambig}{TRUE/FALSE, if TRUE remove strand ambiguous variants (A/T, G/C).}
+\item{drop_strand_ambig}{If TRUE, remove strand ambiguous variants (A/T, G/C).}
 }
 \value{
 wgt.matrix and snps with alleles flipped to match

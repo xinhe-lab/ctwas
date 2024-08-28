@@ -32,7 +32,7 @@
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">ctwas</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">0.4.7</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">0.4.11</span>
       </span>
     </div>
 
@@ -89,7 +89,7 @@
       <h1 data-toc-skip>Preparing cTWAS input data</h1>
                         <h4 data-toc-skip class="author">Kaixuan Luo, Sheng Qian</h4>
             
-            <h4 data-toc-skip class="date">2024-08-13</h4>
+            <h4 data-toc-skip class="date">2024-08-28</h4>
       
       <small class="dont-index">Source: <a href="https://github.com/xinhe-lab/ctwas/blob/multigroup/vignettes/preparing_input_data.Rmd" class="external-link"><code>vignettes/preparing_input_data.Rmd</code></a></small>
       <div class="hidden name"><code>preparing_input_data.Rmd</code></div>
@@ -99,12 +99,13 @@
     
     
 <p>This tutorial shows how to prepare for the input data for running cTWAS with summary statistics.</p>
-<p>Load the package</p>
+<p>Load the packages</p>
 <div class="sourceCode" id="cb1"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://github.com/xinhe-lab/ctwas/" class="external-link">ctwas</a></span><span class="op">)</span></span></code></pre></div>
+<code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://github.com/xinhe-lab/ctwas/" class="external-link">ctwas</a></span><span class="op">)</span></span>
+<span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://r-datatable.com" class="external-link">data.table</a></span><span class="op">)</span></span></code></pre></div>
 <p>We use <code>VariantAnnotation</code> and <code>gwasvcf</code> packages to read the VCF files, so please install those packages before running this tutorial.</p>
 <p>The inputs include GWAS summary statistics, prediction models (referred to as “weights” in the documents), and LD reference. Additionally, cTWAS partitions the genome into disjoint regions, assuming no LD across regions. So a user also needs to provide the definition of these regions.</p>
-<p>Note: In this tutorial, we assume we run full cTWAS using the LD reference. To run cTWAS without LD, see the “minimal tutorial of running cTWAS without LD”:</p>
+<p>Note: In most sections of this tutorial, we assume we run full cTWAS using the LD reference. To run cTWAS without LD, see the “minimal tutorial of running cTWAS without LD”.</p>
 <p>In the tutorial, we use sample data provided in the package.</p>
 <div class="section level2">
 <h2 id="gwas-z-scores">GWAS Z-scores<a class="anchor" aria-label="anchor" href="#gwas-z-scores"></a>
@@ -116,9 +117,8 @@
 <p>Let us read the GWAS summary statistics and convert it to the <code>z_snp</code> data frame. We will also collect the sample size, which will be used later.</p>
 <div class="sourceCode" id="cb3"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">z_snp</span> <span class="op">&lt;-</span> <span class="fu">VariantAnnotation</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/VariantAnnotation/man/readVcf-methods.html" class="external-link">readVcf</a></span><span class="op">(</span><span class="st">"ukb-d-30780_irnt.vcf.gz"</span><span class="op">)</span></span>
-<span><span class="va">gwas_name</span> <span class="op">&lt;-</span> <span class="st">"ukb-d-30780_irnt"</span></span>
-<span></span>
 <span><span class="va">z_snp</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/as.data.frame.html" class="external-link">as.data.frame</a></span><span class="op">(</span><span class="fu">gwasvcf</span><span class="fu">::</span><span class="fu">vcf_to_tibble</span><span class="op">(</span><span class="va">z_snp</span><span class="op">)</span><span class="op">)</span></span>
+<span></span>
 <span><span class="va">z_snp</span><span class="op">$</span><span class="va">Z</span> <span class="op">&lt;-</span> <span class="va">z_snp</span><span class="op">$</span><span class="va">ES</span><span class="op">/</span><span class="va">z_snp</span><span class="op">$</span><span class="va">SE</span></span>
 <span></span>
 <span><span class="va">gwas_n</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/numeric.html" class="external-link">as.numeric</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/names.html" class="external-link">names</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/sort.html" class="external-link">sort</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/table.html" class="external-link">table</a></span><span class="op">(</span><span class="va">z_snp</span><span class="op">$</span><span class="va">SS</span><span class="op">)</span>,decreasing<span class="op">=</span><span class="cn">TRUE</span><span class="op">)</span><span class="op">[</span><span class="fl">1</span><span class="op">]</span><span class="op">)</span><span class="op">)</span></span>
@@ -182,7 +182,7 @@
 <div class="section level3">
 <h3 id="mapping-reference-snps-and-ld-matrices-to-regions">Mapping reference SNPs and LD matrices to regions<a class="anchor" aria-label="anchor" href="#mapping-reference-snps-and-ld-matrices-to-regions"></a>
 </h3>
-<p>We will need to link the reference SNP and LD files to the regions. To do this, we add two additional columns “LD_file” and “SNP_file” to <code>region_info</code>: “LD_file” stores the filenames to the precomputed LD (R) matrices (<code>.RDS</code> files in our precomputed reference LD files), “SNP_file” stores the filenames of corresponding variant information (<code>.Rvar</code> files). The result is stored in a data structure <code>region_metatable</code>.</p>
+<p>We will need to link the reference SNP and LD files to the regions. To do this, we add two additional columns “LD_file” and “SNP_file” to <code>region_info</code>: “LD_file” stores the filenames to the precomputed LD (R) matrices (<code>.RDS</code> files in our precomputed reference LD files), “SNP_file” stores the filenames of corresponding variant information (<code>.Rvar</code> files). The result is stored in a data frame <code>region_metatable</code>.</p>
 <p>The following paths and filenames were from the University of Chicago RCC cluster, please replace them with your own paths.</p>
 <div class="sourceCode" id="cb7"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">LD_dir</span> <span class="op">&lt;-</span> <span class="st">"/project2/mstephens/wcrouse/UKB_LDR_0.1"</span></span>
@@ -193,12 +193,13 @@
 <span><span class="va">region_metatable</span> <span class="op">&lt;-</span> <span class="va">region_info</span></span>
 <span><span class="va">region_metatable</span><span class="op">$</span><span class="va">LD_file</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/file.path.html" class="external-link">file.path</a></span><span class="op">(</span><span class="va">LD_dir</span>, <span class="fu"><a href="https://rdrr.io/r/base/paste.html" class="external-link">paste0</a></span><span class="op">(</span><span class="va">LD_filestem</span>, <span class="st">".RDS"</span><span class="op">)</span><span class="op">)</span></span>
 <span><span class="va">region_metatable</span><span class="op">$</span><span class="va">SNP_file</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/file.path.html" class="external-link">file.path</a></span><span class="op">(</span><span class="va">LD_dir</span>, <span class="fu"><a href="https://rdrr.io/r/base/paste.html" class="external-link">paste0</a></span><span class="op">(</span><span class="va">LD_filestem</span>, <span class="st">".Rvar"</span><span class="op">)</span><span class="op">)</span></span></code></pre></div>
-<p>The <code><a href="../reference/create_snp_LD_map.html">create_snp_LD_map()</a></code> function takes <code>region_metatable</code> as input, extracts the region definitions, ensures that it matches the format required by cTWAS (e.g. adding <code>region_id</code> column if not available), and returns updated <code>region_info</code>. It checks the <code>LD_file</code> and <code>SNP_file</code> columns of <code>region_metatable</code> to make sure the files are available. It returns <code>LD_map</code>, a data frame with region IDs, the filenames of the precomputed LD matrices, and the filenames of corresponding variant information. It reads the variant information from the regions, and returns the result as <code>snp_map</code>.</p>
+<p>The <code><a href="../reference/create_snp_LD_map.html">create_snp_LD_map()</a></code> function takes <code>region_metatable</code> as input, extracts the region definitions, ensures that it matches the format required by cTWAS (e.g. adding <code>region_id</code> column if not available), and returns updated <code>region_info</code>. It reads the variant information from the regions, and returns the result as <code>snp_map</code>. <code>snp_map</code> will be used when we need reference SNP information. The function also checks the <code>LD_file</code> and <code>SNP_file</code> columns of <code>region_metatable</code> to make sure the files are available. It then returns <code>LD_map</code>, a data frame with the <code>region_id</code>, <code>LD_file</code> and <code>SNP_file</code> columns of <code>region_metatable</code>. <code>LD_map</code> will be used when we need LD matrices, e.g. when computing correlations for fine-mapping.</p>
 <div class="sourceCode" id="cb8"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">res</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/create_snp_LD_map.html">create_snp_LD_map</a></span><span class="op">(</span><span class="va">region_metatable</span><span class="op">)</span></span>
 <span><span class="va">region_info</span> <span class="op">&lt;-</span> <span class="va">res</span><span class="op">$</span><span class="va">region_info</span></span>
 <span><span class="va">snp_map</span> <span class="op">&lt;-</span> <span class="va">res</span><span class="op">$</span><span class="va">snp_map</span></span>
 <span><span class="va">LD_map</span> <span class="op">&lt;-</span> <span class="va">res</span><span class="op">$</span><span class="va">LD_map</span></span></code></pre></div>
+<p>The <code>snp_map</code> and <code>SNP_file</code> column of <code>LD_map</code> both contain reference SNP information, which may seem redundant. The reason is that when computing correlations for a region, the LD matrix is often very large, and the <code>snp_map</code> object is quite large too. Loading the LD matrix and the corresponding SNP information from the <code>LD_file</code> and <code>SNP_file</code> in <code>LD_map</code> has much less burden on memory.</p>
 </div>
 <div class="section level3">
 <h3 id="mapping-reference-snps-to-regions-without-ld">Mapping reference SNPs to regions (without LD)<a class="anchor" aria-label="anchor" href="#mapping-reference-snps-to-regions-without-ld"></a>
@@ -209,7 +210,7 @@
 <div class="sourceCode" id="cb9"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">ref_snp_info_file</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/system.file.html" class="external-link">system.file</a></span><span class="op">(</span><span class="st">"extdata/sample_data"</span>, <span class="st">"ukb_b38_0.1_chr16_var_info.Rvar.gz"</span>, package <span class="op">=</span> <span class="st">"ctwas"</span><span class="op">)</span></span>
 <span></span>
-<span><span class="va">ref_snp_info</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/data.table/man/fread.html" class="external-link">fread</a></span><span class="op">(</span><span class="va">ref_snp_info_file</span>, sep <span class="op">=</span> <span class="st">"\t"</span><span class="op">)</span></span>
+<span><span class="va">ref_snp_info</span> <span class="op">&lt;-</span> <span class="fu">data.table</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/data.table/man/fread.html" class="external-link">fread</a></span><span class="op">(</span><span class="va">ref_snp_info_file</span>, sep <span class="op">=</span> <span class="st">"\t"</span><span class="op">)</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/class.html" class="external-link">class</a></span><span class="op">(</span><span class="va">ref_snp_info</span><span class="op">)</span> <span class="op">&lt;-</span> <span class="st">"data.frame"</span></span>
 <span></span>
 <span><span class="va">res</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/create_snp_map.html">create_snp_map</a></span><span class="op">(</span><span class="va">region_info</span>, <span class="va">ref_snp_info</span><span class="op">)</span></span>
@@ -221,7 +222,7 @@
 <h2 id="data-harmonization">Data harmonization<a class="anchor" aria-label="anchor" href="#data-harmonization"></a>
 </h2>
 <p>There are a few potential problems when preparing the input data. First, the variants in the three sets of input data, GWAS summary statistics, weights, and the reference data, may not match. Only variants in all three input data will be used in cTWAS. The <code><a href="../reference/preprocess_weights.html">preprocess_weights()</a></code> function described below will automatically select variants in all three input data. So it is important to maximize the overlap of the variants in the three sets. This can be done for example, by imputing GWAS summary statistics of the variants missing in GWAS but in the LD reference. Another useful pre-processing step is to perform minor allele frequency (MAF) filtering on the GWAS data so that only those with MAF above a certain cutoff would be used in the analysis, ideally the same cutoff used in the references. Additionally, when building the prediction models of gene expression, it is better to impute the genotype data using the LD reference, if possible. All these steps should be done before running cTWAS.</p>
-<p>The second potential problem is that the effect alleles in the prediction model, GWAS and LD reference may not agree with each other, thus we need to “harmonize”’ the data to ensure that the effect alleles match in all three data sources.</p>
+<p>The second potential problem is that the effect alleles in the prediction model, GWAS and LD reference may not agree with each other, thus we need to “harmonize” the data to ensure that the effect alleles match in all three data sources.</p>
 <p>Another potential problem is the LD of the GWAS data (in-sample LD) do not match the reference LD. This can lead to problems in fine-mapping. Diagnostic tools including <a href="https://stephenslab.github.io/susieR/articles/susierss_diagnostic.html" class="external-link">SuSiE-RSS</a>, and <a href="https://github.com/Yves-CHEN/DENTIST/" class="external-link">DENTIST</a>, have been developed to check possible LD mismatch. We have provided such analysis in cTWAS. However, it is time consuming to run the LD mismatch diagnosis for all the regions across the genome, so we will perform the diagnosis and adjustment only for selected regions with high PIP signals in the post-processing step. Please see the tutorial “Post-processing cTWAS results” for details.</p>
 <p>Below we describe several functions to harmonize the input datasets.</p>
 <div class="section level3">
@@ -243,8 +244,8 @@
 <div class="sourceCode" id="cb11"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">weights_liver</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/preprocess_weights.html">preprocess_weights</a></span><span class="op">(</span><span class="va">weight_liver_file</span>,</span>
 <span>                                    <span class="va">region_info</span>,</span>
-<span>                                    <span class="va">z_snp</span><span class="op">$</span><span class="va">id</span>,</span>
-<span>                                    <span class="va">snp_info</span>,</span>
+<span>                                    gwas_snp_ids <span class="op">=</span> <span class="va">z_snp</span><span class="op">$</span><span class="va">id</span>,</span>
+<span>                                    snp_map <span class="op">=</span> <span class="va">snp_map</span>,</span>
 <span>                                    type <span class="op">=</span> <span class="st">"expression"</span>,</span>
 <span>                                    context <span class="op">=</span> <span class="st">"liver"</span>,</span>
 <span>                                    weight_format <span class="op">=</span> <span class="st">"PredictDB"</span>,</span>
@@ -256,8 +257,8 @@
 <span></span>
 <span><span class="va">weights_adipose</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/preprocess_weights.html">preprocess_weights</a></span><span class="op">(</span><span class="va">weight_adipose_file</span>,</span>
 <span>                                      <span class="va">region_info</span>,</span>
-<span>                                      <span class="va">z_snp</span><span class="op">$</span><span class="va">id</span>,</span>
-<span>                                      <span class="va">snp_info</span>,</span>
+<span>                                      gwas_snp_ids <span class="op">=</span> <span class="va">z_snp</span><span class="op">$</span><span class="va">id</span>,</span>
+<span>                                      snp_map <span class="op">=</span> <span class="va">snp_map</span>,</span>
 <span>                                      type <span class="op">=</span> <span class="st">"expression"</span>,</span>
 <span>                                      context <span class="op">=</span> <span class="st">"adipose"</span>,</span>
 <span>                                      weight_format <span class="op">=</span> <span class="st">"PredictDB"</span>, </span>
@@ -271,6 +272,7 @@
 <p>This function returns <code>weights</code>, which contains the effect sizes of the variants in the prediction models, LD of variants in the weights, the first and last QTL positions of molecular traits.</p>
 <p>In the function above, we specify the weight format in <code>weight_format</code>. We use PredictDB format by default. We set <code>load_predictdb_LD = TRUE</code> to load pre-computed covariances between variants in PredictDB weights (<code>.txt.gz</code>). PredictDB weights assume that variant genotypes are not standardized, but our implementation assumes standardized variant genotypes. Thus, we set <code>scale_predictdb_weights = TRUE</code>, to scale PredictDB weights by the variance before computing Z-scores of molecular traits. If weights are already on the standardized scale (e.g. FUSION weights or PredictDB weights converted from eQTLs), this scaling should be turned off.</p>
 <p>We drop strand ambiguous variants (<code>drop_strand_ambig = TRUE</code>) by default. We could limit weights to protein coding genes (<code>filter_protein_coding_genes = TRUE</code>) based on the <code>gene_type</code> information in the “extra table” of PredictDB weights. We could set <code>ncore</code> to parallelize the computation.</p>
+<p><em>Note</em>: we limit variants in the processed weights to the preprocessed variants in <code>z_snp</code> (by setting <code>gwas_snp_ids = z_snp$id</code>), so please run preprocess_z_snp() before running preprocess_weights().</p>
 </div>
 </div>
   </div>

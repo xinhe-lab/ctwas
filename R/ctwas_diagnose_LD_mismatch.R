@@ -1,10 +1,10 @@
 
 #' @title Diagnose LD mismatch using SuSiE RSS
 #'
+#' @param region_ids A vector of region IDs to run diagnosis
+#'
 #' @param z_snp A data frame with two columns: "id", "A1", "A2", "z". giving the z scores for
 #' snps. "A1" is effect allele. "A2" is the other allele.
-#'
-#' @param region_ids A vector of region IDs to run diagnosis
 #'
 #' @param LD_map a data frame with filenames of LD matrices and SNP information for each of the regions.
 #'
@@ -31,8 +31,8 @@
 #'
 #' @export
 #'
-diagnose_LD_mismatch_susie <- function(z_snp,
-                                       region_ids,
+diagnose_LD_mismatch_susie <- function(region_ids,
+                                       z_snp,
                                        LD_map,
                                        gwas_n,
                                        p_diff_thresh = 5e-8,
@@ -49,7 +49,7 @@ diagnose_LD_mismatch_susie <- function(z_snp,
   LD_format <- match.arg(LD_format)
 
   condz_list <- mclapply_check(region_ids, function(region_id){
-    compute_region_condz(region_id, LD_map, z_snp, gwas_n,
+    compute_region_condz(region_id, z_snp, LD_map, gwas_n,
                          LD_format = LD_format,
                          LD_loader_fun = LD_loader_fun)
   }, mc.cores = ncore, stop_if_missing = TRUE)
@@ -73,8 +73,8 @@ diagnose_LD_mismatch_susie <- function(z_snp,
 #' @importFrom stats pchisq
 #' @importFrom Matrix bdiag
 compute_region_condz <- function(region_id,
-                                 LD_map,
                                  z_snp,
+                                 LD_map,
                                  gwas_n,
                                  LD_format = c("rds", "rdata", "mtx", "csv", "txt", "custom"),
                                  LD_loader_fun){
@@ -99,15 +99,16 @@ compute_region_condz <- function(region_id,
 
   # Match GWAS sumstats with LD reference files. Only keep variants included in LD reference.
   region_z_snp <- z_snp[z_snp$id %in% snpinfo$id,]
+  region_z <- region_z_snp$z
   sidx <- match(region_z_snp$id, snpinfo$id)
-  region_R_snp <- R_snp[sidx, sidx]
+  region_R <- R_snp[sidx, sidx]
 
   # Compute expected z-scores based on conditional distribution of z-scores
-  condz_stats <- kriging_rss(z = region_z_snp$z, R = region_R_snp, n = gwas_n)$conditional_dist
+  condz_stats <- kriging_rss(z = region_z, R = region_R, n = gwas_n)$conditional_dist
   condz_stats <- cbind(region_z_snp[,c("id", "A1", "A2")], condz_stats)
 
   # compute p-values for the significance of z-score difference between observed and estimated values
-  condz_stats$p_diff <- pchisq(condz_stats$z_std_diff^2, df = 1, lower.tail=F)
+  condz_stats$p_diff <- pchisq(condz_stats$z_std_diff^2, df = 1, lower.tail=FALSE)
 
   return(condz_stats)
 }
@@ -148,8 +149,8 @@ get_problematic_genes <- function(problematic_snps,
       for (i in 1:length(selected_weights)){
         gid <- names(selected_weights)[i]
         wgt <- selected_weights[[i]]$wgt
-        wgt_snpnames <- rownames(wgt)
-        if (any(wgt_snpnames %in% problematic_snps)){
+        wgt_snp_ids <- rownames(wgt)
+        if (any(wgt_snp_ids %in% problematic_snps)){
           problematic_genes <- c(problematic_genes, gid)
         }
       }

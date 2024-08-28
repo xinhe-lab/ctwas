@@ -32,7 +32,7 @@ make_locusplot(
 
 \item{region_id}{region ID to be plotted}
 
-\item{weights}{a list of weights}
+\item{weights}{a list of proprocessed weights}
 
 \item{ens_db}{Ensembl database}
 

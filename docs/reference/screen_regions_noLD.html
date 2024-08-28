@@ -17,7 +17,7 @@
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">ctwas</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">0.4.7</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">0.4.11</span>
       </span>
     </div>
 
@@ -76,8 +76,7 @@
 <span>  <span class="va">region_data</span>,</span>
 <span>  group_prior <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  group_prior_var <span class="op">=</span> <span class="cn">NULL</span>,</span>
-<span>  min_snps <span class="op">=</span> <span class="fl">2</span>,</span>
-<span>  min_genes <span class="op">=</span> <span class="fl">1</span>,</span>
+<span>  min_var <span class="op">=</span> <span class="fl">2</span>,</span>
 <span>  min_nonSNP_PIP <span class="op">=</span> <span class="fl">0.5</span>,</span>
 <span>  ncore <span class="op">=</span> <span class="fl">1</span>,</span>
 <span>  logfile <span class="op">=</span> <span class="cn">NULL</span>,</span>
@@ -102,12 +101,8 @@
 <dd><p>a vector of two prior variances for SNPs and gene effects.</p></dd>
 
 
-<dt id="arg-min-snps">min_snps<a class="anchor" aria-label="anchor" href="#arg-min-snps"></a></dt>
-<dd><p>minimum number of SNPs in a region.</p></dd>
-
-
-<dt id="arg-min-genes">min_genes<a class="anchor" aria-label="anchor" href="#arg-min-genes"></a></dt>
-<dd><p>minimum number of genes in a region.</p></dd>
+<dt id="arg-min-var">min_var<a class="anchor" aria-label="anchor" href="#arg-min-var"></a></dt>
+<dd><p>minimum number of variables (SNPs and genes) in a region.</p></dd>
 
 
 <dt id="arg-min-nonsnp-pip">min_nonSNP_PIP<a class="anchor" aria-label="anchor" href="#arg-min-nonsnp-pip"></a></dt>
