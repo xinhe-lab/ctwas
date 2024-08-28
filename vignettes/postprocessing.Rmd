@@ -202,13 +202,11 @@ problematic_genes <- get_problematic_genes(problematic_snps,
 problematic_region_ids <- unique(finemap_res[finemap_res$id %in% problematic_genes, "region_id"])
 ```
 
-
 We then rerun the fine-mapping without LD information for the problematic regions, using the  `finemap_regions_noLD()` function:
  
 ```{r rerun_finemap_problematic_regions, eval=FALSE}
 if (any(problematic_region_ids)) {
   rerun_region_data <- screen_res$selected_region_data[problematic_region_ids]
-
   finemap_rerun_region_res <- finemap_regions_noLD(rerun_region_data, 
                                                    group_prior = group_prior,
                                                    group_prior_var = group_prior_var)

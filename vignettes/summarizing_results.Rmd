@@ -48,11 +48,11 @@ LD_map <- readRDS(system.file("extdata/sample_data", "LDL_example.LD_map.RDS", p
 ```
 
 
-
-We then load the cTWAS result. We focus on examples from running cTWAS with LD here, but the steps below also work for running without LD.
+We then load the cTWAS result for the sample data (chr16). 
+Note, to better show the examples, here we use cTWAS results obtained using parameters estimated from the *entire genome*. 
 
 ```{r load_ctwas_res}
-ctwas_res <- readRDS(system.file("extdata/sample_data", "LDL_example.ctwas_sumstats_res.RDS", package = "ctwas"))
+ctwas_res <- readRDS(system.file("extdata/sample_data", "LDL_example.ctwas_sumstats_res_param_allchrs.RDS", package = "ctwas"))
 z_gene <- ctwas_res$z_gene
 param <- ctwas_res$param
 finemap_res <- ctwas_res$finemap_res
@@ -75,15 +75,15 @@ head(finemap_res)
 ```
 
 
-
 It also produces other output: 
 
 + `boundary_genes`: the genes/molecular traits that cross region boundaries (we will need these in the post-processing step). 
 
 + `region_data`: assembled region data, including Z scores of SNPs and molecular traits, for all the regions. Note that only data of the subset of SNPs used in screening regions are included. 
 
-+ `screen_res`: screening regions results, including the data of all SNPs and molecular traits of the selected regions, estimated numbers of causal signals (L) for selected regions, and a data frame with estimated L or non-SNP PIPs for all regions.
++ `screen_res`: screening regions results, including the data of all SNPs and molecular traits of the selected regions, estimated numbers of causal signals (`L`) for selected regions, and a data frame with estimated `L` and non-SNP PIPs for all regions.
 
+We focus on examples from running cTWAS with LD here, but the steps below also work for running without LD.
 
 ## Assessing parameters and computing PVE
 
@@ -94,16 +94,17 @@ make_convergence_plots(param, gwas_n)
 ```
 
 
-These plots show the estimated prior inclusion probability, prior effect size variance, and enrichment over the iterations of parameter estimation. The enrichment is defined as the ratio of the prior of molecular traits over the prior of variants. We generally expect molecular traits to have higher prior inclusion probability than variants. Enrichment values typically range from 20 -100 for expresion traits. 
+These plots show the estimated prior inclusion probability, prior effect size variance, and enrichment over the iterations of parameter estimation. The enrichment is defined as the ratio of the prior of molecular traits over the prior of variants. We generally expect molecular traits to have higher prior inclusion probability than variants. Enrichment values typically range from 20 - 100 for expresion traits. 
 
 Then, we use `summarize_param()` to obtain estimated parameters (from the last iteration) and to compute the proportion of variance explained (PVE) by variants and molecular traits. These PVE values allow us to compute how heritability of the phenotype is partitioned among variants and groups of molecular traits. 
 
 ```{r summarize_param}
 ctwas_parameters <- summarize_param(param, gwas_n)
+ctwas_parameters
 ```
 
 
-Note, we used sample data (from chr16) here in the tutorial, but in real data analysis, parameter estimation should be done using data from the entire genome.  From our experience, genes typically explain around 5-15% of the total heritability of the trait. So if your number is much higher or lower, it may suggest some problems.
+From our experience, genes typically explain around 5-15% of the total heritability of the trait. So if your number is much higher or lower, it may suggest some problems.
 
 ## Inspecting the cTWAS results
 
@@ -163,7 +164,7 @@ subset(annotated_finemap_res, group != "SNP" & susie_pip > 0.8 & cs_index != 0)
 
 In this example, HPR gene in liver, HP gene in adipose, and CETP gene in adipose are the only three genes that satisfy this threshold.
 
-When we have multiple contexts (tissues), it is useful to evaluate the total evidence of a gene being causal, *combining evidence of all the molecular traits affecting this gene across all types and contexts.* We compute combined PIPs of all these molecular traits of the same gene, using the following formula: $1 - \prod_k (1 - \text{PIP}_k)$, where $\text{PIP}_k$ is the PIP of the $k$-th molecular trait of a gene.
+When we have multiple contexts or different types of molecular traits, it is useful to evaluate the total evidence of a gene being causal, *combining evidence of all the molecular traits affecting this gene across all types and contexts.* We compute combined PIPs of all these molecular traits of the same gene, using the following formula: $1 - \prod_k (1 - \text{PIP}_k)$, where $\text{PIP}_k$ is the PIP of the $k$-th molecular trait of a gene.
  
 For example, we can combine PIPs of the same gene by context:
  
@@ -259,7 +260,6 @@ make_locusplot(annotated_finemap_res,
                locus_range = c(71.6e6,72.4e6),
                highlight_pip = 0.8)
 ```
-
 
 
 

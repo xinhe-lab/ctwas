@@ -163,15 +163,7 @@ ctwas_res <- ctwas_sumstats_noLD(z_snp,
 ```
 
 
-
-We load the pre-computed results from running cTWAS without LD: 
-
-```{r load_res}
-ctwas_res <- readRDS(system.file("extdata/sample_data", "LDL_example.ctwas_sumstats_noLD_res.RDS", package = "ctwas"))
-```
-
-
-```{r ctwas_sumstats_noLD_part2}
+```{r list_ctwas_res, eval=FALSE}
 z_gene <- ctwas_res$z_gene
 param <- ctwas_res$param
 finemap_res <- ctwas_res$finemap_res
@@ -197,7 +189,7 @@ It also produces other output:
 
 + `screen_res`: screening regions results, including the data of all SNPs and molecular traits of the selected regions, and a data frame with non-SNP PIPs (total PIPs of all molecular traits) for all regions.
 
-*Note:* we used sample data (from chr16) in this example, however, in real data analysis, we should use data from the *entire genome* to estimate parameters.
+*Note*: we used sample data (from chr16) in this example, however, in real data analysis, we should use data from the *entire genome* to estimate parameters.
 
 To interpret and visualize the results, please see the tutorial "Summarizing and visualizing cTWAS results" for details.
 
