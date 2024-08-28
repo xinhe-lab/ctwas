@@ -32,7 +32,7 @@
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">ctwas</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">0.4.7</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">0.4.10</span>
       </span>
     </div>
 
@@ -89,7 +89,7 @@
       <h1 data-toc-skip>Post-processing cTWAS results</h1>
                         <h4 data-toc-skip class="author">Kaixuan Luo, Sheng Qian</h4>
             
-            <h4 data-toc-skip class="date">2024-08-13</h4>
+            <h4 data-toc-skip class="date">2024-08-27</h4>
       
       <small class="dont-index">Source: <a href="https://github.com/xinhe-lab/ctwas/blob/multigroup/vignettes/postprocessing.Rmd" class="external-link"><code>vignettes/postprocessing.Rmd</code></a></small>
       <div class="hidden name"><code>postprocessing.Rmd</code></div>
@@ -145,6 +145,9 @@
 <code class="sourceCode R"><span><span class="va">high_PIP_genes</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/unique.html" class="external-link">unique</a></span><span class="op">(</span><span class="va">finemap_res</span><span class="op">[</span><span class="va">finemap_res</span><span class="op">$</span><span class="va">group</span> <span class="op">!=</span> <span class="st">"SNP"</span> <span class="op">&amp;</span> <span class="va">finemap_res</span><span class="op">$</span><span class="va">susie_pip</span> <span class="op">&gt;</span> <span class="fl">0.5</span>, <span class="st">"id"</span><span class="op">]</span><span class="op">)</span></span>
 <span></span>
 <span><span class="va">selected_boundary_genes</span> <span class="op">&lt;-</span> <span class="va">boundary_genes</span><span class="op">[</span><span class="va">boundary_genes</span><span class="op">$</span><span class="va">id</span> <span class="op"><a href="https://rdrr.io/r/base/match.html" class="external-link">%in%</a></span> <span class="va">high_PIP_genes</span>, , drop<span class="op">=</span><span class="cn">FALSE</span><span class="op">]</span></span></code></pre></div>
+<div class="section level3">
+<h3 id="merge-regions">Merge regions<a class="anchor" aria-label="anchor" href="#merge-regions"></a>
+</h3>
 <p>Next, we use the function <code><a href="../reference/merge_region_data.html">merge_region_data()</a></code> to perform region merging. It first identifies overlapping regions from the selected genes, then creates the data about the merged region(s) needed for fine-mapping. The data includes: <code>merged_region_data</code>, <code>merged_region_info</code>, and the variant and LD information of the merged region(s), <code>merged_snp_map</code> and <code>merged_LD_map</code>. The function expands the merged regions with all SNPs if the <code>region_data</code> contains thinned SNPs. It also creates <code>merged_region_id_map</code>, a data frame containing region IDs for merged regions and the original region IDs, so that one could keep track of the regions that were merged.</p>
 <div class="sourceCode" id="cb6"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span> <span class="va">merge_region_res</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/merge_region_data.html">merge_region_data</a></span><span class="op">(</span><span class="va">boundary_genes</span>,</span>
@@ -175,7 +178,11 @@
 <span>                                              save_cor <span class="op">=</span> <span class="cn">TRUE</span>,</span>
 <span>                                              cor_dir <span class="op">=</span> <span class="st">"./cor_matrix"</span><span class="op">)</span></span></code></pre></div>
 <p>The output of this function has the same format as those from regular cTWAS analysis. It returns fine-mapping results for merged regions.</p>
-<p>We can also run these steps without LD, using the functions <code><a href="../reference/merge_region_data_noLD.html">merge_region_data_noLD()</a></code>.</p>
+</div>
+<div class="section level3">
+<h3 id="merge-regions-without-ld">Merge regions without LD<a class="anchor" aria-label="anchor" href="#merge-regions-without-ld"></a>
+</h3>
+<p>When running cTWAS without LD, we can do region merging using the function <code><a href="../reference/merge_region_data_noLD.html">merge_region_data_noLD()</a></code>.</p>
 <div class="sourceCode" id="cb8"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">merge_region_res</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/merge_region_data_noLD.html">merge_region_data_noLD</a></span><span class="op">(</span><span class="va">boundary_genes</span>,</span>
 <span>                                           <span class="va">region_data</span>,</span>
@@ -188,10 +195,12 @@
 <span><span class="va">merged_region_info</span> <span class="op">&lt;-</span> <span class="va">merge_region_res</span><span class="op">$</span><span class="va">merged_region_info</span></span>
 <span><span class="va">merged_snp_map</span> <span class="op">&lt;-</span> <span class="va">merge_region_res</span><span class="op">$</span><span class="va">merged_snp_map</span></span>
 <span><span class="va">merged_region_id_map</span> <span class="op">&lt;-</span> <span class="va">merge_region_res</span><span class="op">$</span><span class="va">merged_region_id_map</span></span></code></pre></div>
+<p>We can then run fine-mapping (without LD) on the merged region data:</p>
 <div class="sourceCode" id="cb9"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">finemap_merged_regions_res</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/finemap_regions_noLD.html">finemap_regions_noLD</a></span><span class="op">(</span><span class="va">merged_region_data</span>,                                                     </span>
 <span>                                                   group_prior <span class="op">=</span> <span class="va">group_prior</span>,</span>
 <span>                                                   group_prior_var <span class="op">=</span> <span class="va">group_prior_var</span><span class="op">)</span></span></code></pre></div>
+</div>
 </div>
 <div class="section level2">
 <h2 id="dealing-with-ld-mismatch">Dealing with LD mismatch<a class="anchor" aria-label="anchor" href="#dealing-with-ld-mismatch"></a>
@@ -224,7 +233,6 @@
 <div class="sourceCode" id="cb13"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="kw">if</span> <span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/any.html" class="external-link">any</a></span><span class="op">(</span><span class="va">problematic_region_ids</span><span class="op">)</span><span class="op">)</span> <span class="op">{</span></span>
 <span>  <span class="va">rerun_region_data</span> <span class="op">&lt;-</span> <span class="va">screen_res</span><span class="op">$</span><span class="va">selected_region_data</span><span class="op">[</span><span class="va">problematic_region_ids</span><span class="op">]</span></span>
-<span></span>
 <span>  <span class="va">finemap_rerun_region_res</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/finemap_regions_noLD.html">finemap_regions_noLD</a></span><span class="op">(</span><span class="va">rerun_region_data</span>, </span>
 <span>                                                   group_prior <span class="op">=</span> <span class="va">group_prior</span>,</span>
 <span>                                                   group_prior_var <span class="op">=</span> <span class="va">group_prior_var</span><span class="op">)</span></span>

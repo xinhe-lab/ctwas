@@ -32,7 +32,7 @@
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">ctwas</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">0.4.7</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">0.4.10</span>
       </span>
     </div>
 
@@ -89,7 +89,7 @@
       <h1 data-toc-skip>A minimal tutorial of running cTWAS without LD</h1>
                         <h4 data-toc-skip class="author">Kaixuan Luo, Sheng Qian</h4>
             
-            <h4 data-toc-skip class="date">2024-08-13</h4>
+            <h4 data-toc-skip class="date">2024-08-27</h4>
       
       <small class="dont-index">Source: <a href="https://github.com/xinhe-lab/ctwas/blob/multigroup/vignettes/minimal_tutorial.Rmd" class="external-link"><code>vignettes/minimal_tutorial.Rmd</code></a></small>
       <div class="hidden name"><code>minimal_tutorial.Rmd</code></div>
@@ -132,7 +132,7 @@
 <div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">region_file</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/system.file.html" class="external-link">system.file</a></span><span class="op">(</span><span class="st">"extdata/ldetect"</span>, <span class="st">"EUR.b38.ldetect.regions.RDS"</span>, package <span class="op">=</span> <span class="st">"ctwas"</span><span class="op">)</span></span>
 <span><span class="va">region_info</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/readRDS.html" class="external-link">readRDS</a></span><span class="op">(</span><span class="va">region_file</span><span class="op">)</span></span></code></pre></div>
-<p>Additionally, we require <code>ref_snp_info</code> as a “reference” of the variants. <code>ref_snp_info</code> is a data frame, containing the positions and allele information of all the variants from the entire genome. This reference data needs to be mapped to the regions, i.e. we will need a structure to store the information of which variants are located in which regions. To do this, we provide a function, <code><a href="../reference/create_snp_map.html">create_snp_map()</a></code>. It takes input of <code>region_info</code> and <code>ref_snp_info</code>. It maps variants to regions based on the variant locations, and returns the result as <code>snp_map</code>. In addition, the function checks the format of <code>region_info</code> to ensure that it matches the format required by cTWAS (e.g. adding <code>region_id</code> column if not available), and returns the output as updated <code>region_info</code>.</p>
+<p>Additionally, we require <code>ref_snp_info</code> as a “reference” of the variants. <code>ref_snp_info</code> is a data frame, containing the positions and allele information of all the variants from the entire genome. This reference data needs to be mapped to the regions, i.e. we will need a structure to store the information of which variants are located in which regions. To do this, we provide a function, <code><a href="../reference/create_snp_map.html">create_snp_map()</a></code>. It takes input of <code>region_info</code> and <code>ref_snp_info</code>. It maps variants to regions based on the variant locations, and returns the result as <code>snp_map</code>, a list object containing variant information in each of the regions. In addition, the function checks the format of <code>region_info</code> to ensure that it matches the format required by cTWAS (e.g. adding <code>region_id</code> column if not available), and returns the output as updated <code>region_info</code>.</p>
 <p>We have the lists of reference variant information from UK Biobank European population from all the LD regions in the genome in <a href="https://uchicago.box.com/s/t089or92dkovv0epkrjvxq8r9db9ys99" class="external-link">hg38</a> and <a href="https://uchicago.box.com/s/ufko2gjagcb693dob4khccqubuztb9pz" class="external-link">hg19</a>. They are also available on the University of Chicago RCC cluster at <code>/project2/xinhe/shared_data/multigroup_ctwas/LD_reference/</code>.</p>
 <p>In this tutorial, we use chr16 as an example, so we specify <code>chrom = 16</code>. In real cTWAS analysis, you should run the entire genome.</p>
 <div class="sourceCode" id="cb6"><pre class="downlit sourceCode r">
@@ -144,7 +144,7 @@
 <span><span class="fu"><a href="https://rdrr.io/r/base/class.html" class="external-link">class</a></span><span class="op">(</span><span class="va">ref_snp_info</span><span class="op">)</span> <span class="op">&lt;-</span> <span class="st">"data.frame"</span></span>
 <span><span class="va">region_info</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/subset.html" class="external-link">subset</a></span><span class="op">(</span><span class="va">region_info</span>, <span class="va">chrom</span> <span class="op">==</span> <span class="va">example_chrom</span><span class="op">)</span></span>
 <span></span>
-<span><span class="va">res</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/create_snp_map.html">create_snp_map</a></span><span class="op">(</span><span class="va">region_info</span>, <span class="va">ref_snp_info</span><span class="op">)</span></span>
+<span><span class="va">res</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/create_snp_map.html">create_snp_map</a></span><span class="op">(</span><span class="va">region_info</span>, <span class="va">ref_snp_info</span>, ncore <span class="op">=</span> <span class="fl">6</span><span class="op">)</span></span>
 <span><span class="va">region_info</span> <span class="op">&lt;-</span> <span class="va">res</span><span class="op">$</span><span class="va">region_info</span></span>
 <span><span class="va">snp_map</span> <span class="op">&lt;-</span> <span class="va">res</span><span class="op">$</span><span class="va">snp_map</span></span>
 <span></span>
@@ -156,6 +156,7 @@
 <span><span class="co">## 4    16 3951195 5068344 16_3951195_5068344</span></span>
 <span><span class="co">## 5    16 5068344 5841579 16_5068344_5841579</span></span>
 <span><span class="co">## 6    16 5841579 6843550 16_5841579_6843550</span></span></code></pre>
+<p>We set <code>ncore</code> to parallelize the computation.</p>
 </div>
 <div class="section level3">
 <h3 id="harmonizing-gwas-summary-statistics">Harmonizing GWAS summary statistics<a class="anchor" aria-label="anchor" href="#harmonizing-gwas-summary-statistics"></a>
@@ -163,21 +164,21 @@
 <p>The GWAS summary statistics needs to be “harmonized” before use. This means, for example, the allele definitions need to be consistent with the reference SNP data in <code>snp_map</code>. Harmonization is achieved through the <code><a href="../reference/preprocess_z_snp.html">preprocess_z_snp()</a></code> function. We filter out multiallelic variants and strand-ambiguous variants by default.</p>
 <div class="sourceCode" id="cb8"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">z_snp</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/preprocess_z_snp.html">preprocess_z_snp</a></span><span class="op">(</span><span class="va">z_snp</span>, <span class="va">snp_map</span><span class="op">)</span></span></code></pre></div>
-<pre><code><span><span class="co">## 2024-08-13 10:59:40 INFO::Preprocessing z_snp...</span></span>
-<span><span class="co">## 2024-08-13 10:59:40 INFO::z_snp has 407828 variants in total</span></span>
-<span><span class="co">## 2024-08-13 10:59:40 INFO::267361 variants left after filtering by snp_map</span></span>
-<span><span class="co">## 2024-08-13 10:59:40 INFO::Drop 30 multiallelic variants</span></span>
-<span><span class="co">## 2024-08-13 10:59:41 INFO::Harmonize 267331 variants in both GWAS and LD reference</span></span>
-<span><span class="co">## 2024-08-13 10:59:41 INFO::Flip signs for 267289 (99.98%) variants</span></span>
-<span><span class="co">## 2024-08-13 10:59:41 INFO::Remove 45738 strand ambiguous variants</span></span>
-<span><span class="co">## 2024-08-13 10:59:41 INFO::221593 variants left after preprocessing and harmonization.</span></span></code></pre>
+<pre><code><span><span class="co">## 2024-08-27 20:00:37 INFO::Preprocessing z_snp...</span></span>
+<span><span class="co">## 2024-08-27 20:00:37 INFO::z_snp has 407828 variants in total</span></span>
+<span><span class="co">## 2024-08-27 20:00:37 INFO::267361 variants left after filtering by the reference SNPs.</span></span>
+<span><span class="co">## 2024-08-27 20:00:38 INFO::Remove 30 multiallelic variants</span></span>
+<span><span class="co">## 2024-08-27 20:00:38 INFO::Harmonize 267331 variants between GWAS and the reference</span></span>
+<span><span class="co">## 2024-08-27 20:00:39 INFO::Flip signs for 267289 (99.98%) variants</span></span>
+<span><span class="co">## 2024-08-27 20:00:39 INFO::Remove 45738 strand ambiguous variants</span></span>
+<span><span class="co">## 2024-08-27 20:00:39 INFO::221593 variants left after preprocessing and harmonization.</span></span></code></pre>
 </div>
 <div class="section level3">
 <h3 id="prediction-models-of-molecular-traits">Prediction models of molecular traits<a class="anchor" aria-label="anchor" href="#prediction-models-of-molecular-traits"></a>
 </h3>
-<p>We need a list <code>weights</code> which contains preprocessed weights. The weights can be in the PredictDB (default, used in this tutorial) or FUSION format. In this tutorial, we used the weights from GTEx liver eQTL data from PredictDB. We provide a function <code>preprocess_weight()</code> to harmonize the prediction models and LD reference.</p>
-<p>In this version of cTWAS, we allow the joint analysis of multiple groups of molecular traits. This could be: eQTLs of multiple tissues; or eQTLs, splicing QTLs and other types of QTLs in a single tissue. In a more complex setting, multiple types of QTL data from multiple tissues/cell types. Each group is defined by its “type” (kind of molecular traits), and “context” (tissue, cell type, condition, etc.). So, we specify the <code>type</code> and <code>context</code> arguments for each weight file.</p>
-<p>In this example, we use liver and subcutaneous adipose gene expression models. We specify the <code>type</code> and <code>context</code> arguments for each weight file. We preprocess each of the weight files, and then simply concatenate them to get a list of all processed weights from different types or contexts.</p>
+<p>We need <code>weights</code>, a list object containing preprocessed weights for the molecular traits. The weights can be in the PredictDB (default, used in this tutorial) or FUSION format. In this tutorial, we used the weights from GTEx liver eQTL data from PredictDB. We provide a function <code>preprocess_weight()</code> to harmonize the prediction models and LD reference.</p>
+<p>In this version of cTWAS, we allow the joint analysis of multiple groups of molecular traits. This could be: eQTLs of multiple tissues; or eQTLs, splicing QTLs and other types of QTLs in a single tissue. In a more complex setting, multiple types of QTL data from multiple tissues/cell types. Each group of molecular traits is defined by its “type” (kind of molecular traits), and “context” (tissue, cell type, condition, etc.). So, we specify the <code>type</code> and <code>context</code> arguments for each weight file.</p>
+<p>In this example, we use liver and subcutaneous adipose gene expression models. We specify the <code>type</code> and <code>context</code> arguments for each weight file. We preprocess each of the weight files, and then simply concatenate them to <code>weights</code>, a list object containing all processed weights from different types or contexts.</p>
 <div class="sourceCode" id="cb10"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">weight_liver_file</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/system.file.html" class="external-link">system.file</a></span><span class="op">(</span><span class="st">"extdata/sample_data"</span>, <span class="st">"expression_Liver.db"</span>, package <span class="op">=</span> <span class="st">"ctwas"</span><span class="op">)</span></span>
 <span><span class="va">weights_liver</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/preprocess_weights.html">preprocess_weights</a></span><span class="op">(</span><span class="va">weight_liver_file</span>,</span>
@@ -185,19 +186,23 @@
 <span>                                    <span class="va">z_snp</span><span class="op">$</span><span class="va">id</span>,</span>
 <span>                                    <span class="va">snp_map</span>,</span>
 <span>                                    type <span class="op">=</span> <span class="st">"expression"</span>,</span>
-<span>                                    context <span class="op">=</span> <span class="st">"liver"</span><span class="op">)</span></span></code></pre></div>
-<pre><code><span><span class="co">## 2024-08-13 10:59:41 INFO::Load weight: /tmp/jobs/41346776/RtmpfymbN0/temp_libpathda1343f4466e/ctwas/extdata/sample_data/expression_Liver.db</span></span>
-<span><span class="co">## 2024-08-13 10:59:41 INFO::type: expression</span></span>
-<span><span class="co">## 2024-08-13 10:59:41 INFO::context: liver</span></span>
-<span><span class="co">## 2024-08-13 10:59:41 INFO::Loading PredictDB weights ...</span></span>
-<span><span class="co">## 2024-08-13 10:59:42 INFO::Keep protein coding genes only</span></span>
-<span><span class="co">## 2024-08-13 10:59:42 INFO::weight_name: expression_Liver</span></span>
-<span><span class="co">## 2024-08-13 10:59:42 INFO::Remove 1 genes without predictdb LD</span></span>
-<span><span class="co">## 2024-08-13 10:59:42 INFO::Number of genes with weights: 11479</span></span>
-<span><span class="co">## 2024-08-13 10:59:42 INFO::Number of variants in weights: 16929</span></span>
-<span><span class="co">## 2024-08-13 10:59:42 INFO::529 genes and 410 variants left after filtering by GWAS and LD reference</span></span>
-<span><span class="co">## 2024-08-13 10:59:42 INFO::Harmonizing and processing weights ...</span></span>
-<span><span class="co">## 2024-08-13 10:59:43 INFO::Number of genes with weights after preprocessing: 410</span></span></code></pre>
+<span>                                    context <span class="op">=</span> <span class="st">"liver"</span>,</span>
+<span>                                    ncore <span class="op">=</span> <span class="fl">6</span><span class="op">)</span></span></code></pre></div>
+<pre><code><span><span class="co">## 2024-08-27 20:00:39 INFO::Load weight: /tmp/jobs/41556604/RtmpUKZco3/temp_libpathcd2e372be556/ctwas/extdata/sample_data/expression_Liver.db</span></span>
+<span><span class="co">## 2024-08-27 20:00:39 INFO::type: expression</span></span>
+<span><span class="co">## 2024-08-27 20:00:39 INFO::context: liver</span></span>
+<span><span class="co">## 2024-08-27 20:00:39 INFO::Load PredictDB weights</span></span>
+<span><span class="co">## 2024-08-27 20:00:39 INFO::Number of genes in weights: 12714</span></span>
+<span><span class="co">## 2024-08-27 20:00:39 INFO::Limit to protein coding genes</span></span>
+<span><span class="co">## 2024-08-27 20:00:39 INFO::Number of genes in weights after filtering protein coding genes: 11502</span></span>
+<span><span class="co">## 2024-08-27 20:00:39 INFO::Load PredictDB LD</span></span>
+<span><span class="co">## 2024-08-27 20:00:39 INFO::weight_name: expression_Liver</span></span>
+<span><span class="co">## 2024-08-27 20:00:39 INFO::Remove 1 genes without predictdb LD</span></span>
+<span><span class="co">## 2024-08-27 20:00:39 INFO::Number of genes in weights: 11501</span></span>
+<span><span class="co">## 2024-08-27 20:00:39 INFO::Number of variants in weights: 16953</span></span>
+<span><span class="co">## 2024-08-27 20:00:39 INFO::410 genes and 529 variants left after filtering by GWAS and the reference.</span></span>
+<span><span class="co">## 2024-08-27 20:00:39 INFO::Harmonizing and processing weights ...</span></span>
+<span><span class="co">## 2024-08-27 20:00:40 INFO::Number of genes in weights after preprocessing: 410</span></span></code></pre>
 <div class="sourceCode" id="cb12"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">weight_adipose_file</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/system.file.html" class="external-link">system.file</a></span><span class="op">(</span><span class="st">"extdata/sample_data"</span>, <span class="st">"expression_Adipose_Subcutaneous.db"</span>, package <span class="op">=</span> <span class="st">"ctwas"</span><span class="op">)</span></span>
 <span><span class="va">weights_adipose</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/preprocess_weights.html">preprocess_weights</a></span><span class="op">(</span><span class="va">weight_adipose_file</span>,</span>
@@ -205,19 +210,22 @@
 <span>                                      <span class="va">z_snp</span><span class="op">$</span><span class="va">id</span>,</span>
 <span>                                      <span class="va">snp_map</span>,</span>
 <span>                                      type <span class="op">=</span> <span class="st">"expression"</span>,</span>
-<span>                                      context <span class="op">=</span> <span class="st">"adipose"</span><span class="op">)</span></span></code></pre></div>
-<pre><code><span><span class="co">## 2024-08-13 10:59:43 INFO::Load weight: /tmp/jobs/41346776/RtmpfymbN0/temp_libpathda1343f4466e/ctwas/extdata/sample_data/expression_Adipose_Subcutaneous.db</span></span>
-<span><span class="co">## 2024-08-13 10:59:43 INFO::type: expression</span></span>
-<span><span class="co">## 2024-08-13 10:59:43 INFO::context: adipose</span></span>
-<span><span class="co">## 2024-08-13 10:59:43 INFO::Loading PredictDB weights ...</span></span>
-<span><span class="co">## 2024-08-13 10:59:43 INFO::Keep protein coding genes only</span></span>
-<span><span class="co">## 2024-08-13 10:59:43 INFO::weight_name: expression_Adipose_Subcutaneous</span></span>
-<span><span class="co">## 2024-08-13 10:59:43 INFO::Remove 0 genes without predictdb LD</span></span>
-<span><span class="co">## 2024-08-13 10:59:43 INFO::Number of genes with weights: 13102</span></span>
-<span><span class="co">## 2024-08-13 10:59:43 INFO::Number of variants in weights: 23737</span></span>
-<span><span class="co">## 2024-08-13 10:59:43 INFO::720 genes and 484 variants left after filtering by GWAS and LD reference</span></span>
-<span><span class="co">## 2024-08-13 10:59:43 INFO::Harmonizing and processing weights ...</span></span>
-<span><span class="co">## 2024-08-13 10:59:44 INFO::Number of genes with weights after preprocessing: 484</span></span></code></pre>
+<span>                                      context <span class="op">=</span> <span class="st">"adipose"</span>, </span>
+<span>                                      ncore <span class="op">=</span> <span class="fl">6</span><span class="op">)</span></span></code></pre></div>
+<pre><code><span><span class="co">## 2024-08-27 20:00:40 INFO::Load weight: /tmp/jobs/41556604/RtmpUKZco3/temp_libpathcd2e372be556/ctwas/extdata/sample_data/expression_Adipose_Subcutaneous.db</span></span>
+<span><span class="co">## 2024-08-27 20:00:40 INFO::type: expression</span></span>
+<span><span class="co">## 2024-08-27 20:00:40 INFO::context: adipose</span></span>
+<span><span class="co">## 2024-08-27 20:00:40 INFO::Load PredictDB weights</span></span>
+<span><span class="co">## 2024-08-27 20:00:40 INFO::Number of genes in weights: 14732</span></span>
+<span><span class="co">## 2024-08-27 20:00:40 INFO::Limit to protein coding genes</span></span>
+<span><span class="co">## 2024-08-27 20:00:40 INFO::Number of genes in weights after filtering protein coding genes: 13113</span></span>
+<span><span class="co">## 2024-08-27 20:00:40 INFO::Load PredictDB LD</span></span>
+<span><span class="co">## 2024-08-27 20:00:40 INFO::weight_name: expression_Adipose_Subcutaneous</span></span>
+<span><span class="co">## 2024-08-27 20:00:40 INFO::Number of genes in weights: 13113</span></span>
+<span><span class="co">## 2024-08-27 20:00:40 INFO::Number of variants in weights: 23759</span></span>
+<span><span class="co">## 2024-08-27 20:00:40 INFO::484 genes and 720 variants left after filtering by GWAS and the reference.</span></span>
+<span><span class="co">## 2024-08-27 20:00:40 INFO::Harmonizing and processing weights ...</span></span>
+<span><span class="co">## 2024-08-27 20:00:41 INFO::Number of genes in weights after preprocessing: 484</span></span></code></pre>
 <div class="sourceCode" id="cb14"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">weights</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="va">weights_liver</span>, <span class="va">weights_adipose</span><span class="op">)</span></span></code></pre></div>
 </div>
@@ -231,8 +239,8 @@
 <span>                                 <span class="va">weights</span>,</span>
 <span>                                 <span class="va">region_info</span>,</span>
 <span>                                 <span class="va">snp_map</span>,</span>
-<span>                                 thin <span class="op">=</span> <span class="fl">0.1</span><span class="op">)</span></span></code></pre></div>
-<p>We load the pre-computed results from running cTWAS without LD:</p>
+<span>                                 thin <span class="op">=</span> <span class="fl">0.1</span>, </span>
+<span>                                 ncore <span class="op">=</span> <span class="fl">6</span><span class="op">)</span></span></code></pre></div>
 <div class="sourceCode" id="cb16"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">z_gene</span> <span class="op">&lt;-</span> <span class="va">ctwas_res</span><span class="op">$</span><span class="va">z_gene</span></span>
 <span><span class="va">param</span> <span class="op">&lt;-</span> <span class="va">ctwas_res</span><span class="op">$</span><span class="va">param</span></span>
@@ -240,7 +248,7 @@
 <span><span class="va">boundary_genes</span> <span class="op">&lt;-</span> <span class="va">ctwas_res</span><span class="op">$</span><span class="va">boundary_genes</span></span>
 <span><span class="va">region_data</span> <span class="op">&lt;-</span> <span class="va">ctwas_res</span><span class="op">$</span><span class="va">region_data</span></span>
 <span><span class="va">screen_res</span> <span class="op">&lt;-</span> <span class="va">ctwas_res</span><span class="op">$</span><span class="va">screen_res</span></span></code></pre></div>
-<p>ctwas_sumstats_noLD() returns several main output:</p>
+<p><code><a href="../reference/ctwas_sumstats_noLD.html">ctwas_sumstats_noLD()</a></code> returns several main output:</p>
 <ul>
 <li><p><code>z_gene</code>: the Z-scores of molecular traits,</p></li>
 <li><p><code>param</code>: the estimated parameters,</p></li>
@@ -250,9 +258,9 @@
 <ul>
 <li><p><code>boundary_genes</code>: the genes/molecular traits whose weights cross region boundaries (we will need these in the post-processing step).</p></li>
 <li><p><code>region_data</code>: assembled region data, including Z scores of SNPs and molecular traits, for all the regions,. Note that only data of the subset of SNPs used in screening regions are included.</p></li>
-<li><p><code>screen_res</code>: screening regions results, including the data of all SNPs and molecular traits of the selected regions, and a data frame with non-SNP PIPs for all regions.</p></li>
+<li><p><code>screen_res</code>: screening regions results, including the data of all SNPs and molecular traits of the selected regions, and a data frame with non-SNP PIPs (total PIPs of all molecular traits) for all regions.</p></li>
 </ul>
-<p><em>Note:</em> we used sample data (from chr16) in this example, however, in real data analysis, we should use data from the <em>entire genome</em> to estimate parameters.</p>
+<p><em>Note</em>: we used sample data (from chr16) in this example, however, in real data analysis, we should use data from the <em>entire genome</em> to estimate parameters.</p>
 <p>To interpret and visualize the results, please see the tutorial “Summarizing and visualizing cTWAS results” for details.</p>
 <p>One potential issue of cTWAS is the “cross-region” genes. These are genes whose variants in the weight models span two LD regions. Under the current setting of running cTWAS without LD, this is likely not a concern. Nevertheless, it might be helpful to check the tutorial “Post-processing cTWAS results” - see the section “Cross-region LD”. We note that “LD mismatch” is not an issue when running without LD.</p>
 </div>
