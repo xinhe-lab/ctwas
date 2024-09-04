@@ -6,12 +6,21 @@ Running cTWAS involves four main steps: preparing input data, imputing gene z-sc
 
 <img style="display:block;margin:auto" width="700" height="300" src="./workflow.png">
 
+We have updated the `ctwas` package. The new version, multi-group cTWAS, can analyze GWAS and molecular QTL data from multiple modalities and tissues/cell types. 
+Please follow this [link](https://github.com/xinhe-lab/multigroup_ctwas).
+
 ## Install
 
 Install `ctwas`:
 
+To install the original single-group version:
 ```
 remotes::install_github("xinhe-lab/ctwas",ref = "main")
+```
+
+To install the latest multi-group version:
+```
+remotes::install_github("xinhe-lab/ctwas",ref = "multigroup")
 ```
 
 Currently, `ctwas` has only been tested on linux systems. 
