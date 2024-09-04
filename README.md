@@ -13,7 +13,7 @@ Please follow this [link](https://github.com/xinhe-lab/multigroup_ctwas).
 
 Install `ctwas`:
 
-To install the original single-group version:
+To install the original version:
 ```
 remotes::install_github("xinhe-lab/ctwas",ref = "main")
 ```
