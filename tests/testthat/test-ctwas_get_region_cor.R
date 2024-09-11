@@ -1,6 +1,5 @@
 
 test_that("get_region_cor correctly loads correlation matrices", {
-
   region_id <- "16_71020125_72901251"
   R_gene <- readRDS(system.file("extdata/sample_data/cor_matrix", paste0("region.", region_id, ".R_gene.RDS"), package = "ctwas"))
   R_snp_gene <- readRDS(system.file("extdata/sample_data/cor_matrix", paste0("region.", region_id, ".R_snp_gene.RDS"), package = "ctwas"))

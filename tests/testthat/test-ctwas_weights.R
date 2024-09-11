@@ -17,15 +17,15 @@ test_that("load_weights works for FUSION weights", {
   weight_dir <- "/project/mstephens/causalTWAS/apa_models/Heart_Atrial_Appendage/Heart_Atrial_Appendage/"
   skip_if_no_weight(weight_dir)
 
-  loaded_weights <- readRDS("Heart_Atrial_Appendage.loaded.fusion.weights.RDS")
+  expected_weights <- readRDS("Heart_Atrial_Appendage.loaded.fusion.weights.RDS")
 
   capture.output({
-    res <- load_weights(weight_dir,
-                        weight_format = "FUSION",
-                        fusion_method = "enet",
-                        fusion_genome_version = "b38")
+    loaded_weights <- load_weights(weight_dir,
+                                   weight_format = "FUSION",
+                                   fusion_method = "enet",
+                                   fusion_genome_version = "b38")
   })
 
-  expect_equal(res, loaded_weights)
+  expect_equal(loaded_weights, expected_weights)
 
 })

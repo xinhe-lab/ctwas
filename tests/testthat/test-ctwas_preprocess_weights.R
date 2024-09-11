@@ -15,6 +15,7 @@ test_that("preprocess_weights with PredictDB weights works", {
                                   snp_map,
                                   type = "expression",
                                   context = "liver",
+                                  weight_name = "liver_expression",
                                   weight_format = "PredictDB",
                                   drop_strand_ambig = TRUE,
                                   scale_predictdb_weights = TRUE,
@@ -41,7 +42,8 @@ test_that("preprocess_weights with PredictDB weights works", {
                                         z_snp$id,
                                         snp_map,
                                         type = "expression",
-                                        context = "liver")
+                                        context = "liver",
+                                        weight_name = "liver_expression")
 
     weight_adipose_file <- system.file("extdata/sample_data", "expression_Adipose_Subcutaneous.db", package = "ctwas")
     weights_adipose <- preprocess_weights(weight_adipose_file,
@@ -49,8 +51,8 @@ test_that("preprocess_weights with PredictDB weights works", {
                                           z_snp$id,
                                           snp_map,
                                           type = "expression",
-                                          context = "adipose")
-
+                                          context = "adipose",
+                                          weight_name = "adipose_expression")
     weights <- c(weights_liver, weights_adipose)
   })
 
@@ -80,6 +82,7 @@ test_that("preprocess_weights with FUSION weights works", {
                                   LD_map,
                                   type = "APA",
                                   context = "Heart_Atrial_Appendage",
+                                  weight_name = "Heart_Atrial_Appendage_APA",
                                   weight_format = "FUSION",
                                   fusion_method = "enet",
                                   fusion_genome_version = "b38",
