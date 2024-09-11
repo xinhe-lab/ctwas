@@ -2,12 +2,12 @@ Package: ctwas
 Type: Package
 Title: Adjusting for genetic confounders in transcriptome-wide association studies 
   improves discovery of risk genes of complex traits
-Date: 2024-02-05
-Version: 0.1.37
+Date: 2024-09-11
+Version: 0.1.38
 Authors@R: c(person("Siming","Zhao",role="aut",email="siming.zhao06@gmail.com"),
              person("Wesley","Crouse",role="aut"),
-             person("Sheng","Qian",role=c("aut", "cre"),email="shengqian@uchicago.edu"),
-             person("Kaixuan","Luo",role="aut",email="kevinlkx@gmail.com"),
+             person("Sheng","Qian",role="aut",email="shengqian@uchicago.edu"),
+             person("Kaixuan","Luo",role=c("aut", "cre"),email="kevinlkx@gmail.com"),
              person("Matthew","Stephens",role="aut"),
              person("Xin","He",role="aut"))
 Description: This package implements the causal-TWAS (cTWAS) method we developed to identify
@@ -40,4 +40,4 @@ Suggests:
     rmarkdown
 VignetteBuilder: knitr
 NeedsCompilation: no
-RoxygenNote: 7.3.0
+RoxygenNote: 7.3.2
