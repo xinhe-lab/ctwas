@@ -5,20 +5,31 @@
 \title{Combines gene PIPs by context, type or group.}
 \usage{
 combine_gene_pips(
-  annotated_finemap_res,
+  finemap_res,
+  group_by = "gene_name",
   by = c("context", "type", "group"),
-  gene_col = "gene_name",
+  method = c("combine_cs", "combine_all", "sum"),
+  filter_cs = TRUE,
   missing_value = NA
 )
 }
 \arguments{
-\item{annotated_finemap_res}{a data frame of annotated cTWAS finemapping result}
+\item{finemap_res}{a data frame of annotated cTWAS finemapping result}
 
-\item{by}{sum gene PIPs by "context", "type", or "group".}
+\item{group_by}{column name to group genes by.}
 
-\item{gene_col}{column name of target genes to combine gene PIPs.}
+\item{by}{option to combine PIPs by: "context" (default), "type", or "group".}
 
-\item{missing_value}{set missing value (default: NA)}
+\item{method}{method to combine PIPs of molecular traits targeting the same gene.
+options:
+"combine_cs" (default): first sum PIPs of molecular traits for the same gene in the same CS,
+then apply the multiplication formula across CS.
+"sum" sum over PIPs of all molecular traits for the same gene;
+"combine_all" use the multiplication formula for all molecular traits for the same gene.}
+
+\item{filter_cs}{If TRUE, limits gene results to credible sets.}
+
+\item{missing_value}{set missing value as (default: NA)}
 }
 \value{
 a data frame of combined gene PIPs for each context, type or group
