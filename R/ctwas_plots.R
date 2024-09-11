@@ -112,8 +112,6 @@ make_locusplot <- function(finemap_res,
                            panel.heights = c(4, 4, 1, 4),
                            verbose = FALSE) {
 
-  color_PIP_by <- match.arg(color_PIP_by)
-
   if (is.null(finemap_res$chrom) || is.null(finemap_res$pos)){
     stop("Please add 'chrom' and 'pos' columns to finemapping result!")
   }
@@ -324,7 +322,7 @@ make_locusplot <- function(finemap_res,
       pip_plot_data <- pip_plot_data[pip_plot_data$cs_index!=0,]
     }
   } else {
-    color_PIP_by <- "correlation"
+    color_PIP_by_cs <- FALSE
   }
 
   p_pip <- ggplot(pip_plot_data, aes(x=.data$pos/1e6, y=.data$susie_pip, shape=.data$type,
