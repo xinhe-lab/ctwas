@@ -4,10 +4,12 @@ Expression Quantitative Trait Loci (eQTLs) have often been used to nominate cand
 
 Running cTWAS involves four main steps: preparing input data, imputing gene z-scores, estimating parameters, and fine-mapping genes and variants. The output of cTWAS are posterior inclusion probabilities (PIPs) for all variants and genes with expression models. We have included a [tutorial](https://xinhe-lab.github.io/ctwas/articles/ctwas_summary_statistics.html) of how to use the ctwas software. You can [browse source code](https://github.com/xinhe-lab/ctwas) and [report a bug](https://github.com/xinhe-lab/ctwas/issues) here. 
 
+<img style="display:block;margin:auto" width="700" height="300" src="./workflow.png">
+
+## New version: multi-group cTWAS
+
 We have updated the `ctwas` package. The new version, multi-group cTWAS, can analyze GWAS and molecular QTL data from multiple modalities and tissues/cell types. 
 Please see this [link](https://github.com/xinhe-lab/multigroup_ctwas) and follow tutorials [here](https://xinhe-lab.github.io/multigroup_ctwas/)
-
-<img style="display:block;margin:auto" width="700" height="300" src="./workflow.png">
 
 ## Install
 

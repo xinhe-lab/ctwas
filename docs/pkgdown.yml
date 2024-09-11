@@ -1,9 +1,8 @@
 pandoc: 2.7.3
-pkgdown: 2.0.7
+pkgdown: 2.1.0
 pkgdown_sha: ~
 articles:
   ctwas_summary_statistics: ctwas_summary_statistics.html
   harmonization: harmonization.html
   regionmerging: regionmerging.html
-last_built: 2024-04-17T22:42Z
-
+last_built: 2024-09-11T14:55Z

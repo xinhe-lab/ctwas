@@ -6,20 +6,19 @@
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Using cTWAS with summary statistics • ctwas</title>
-<!-- jquery --><script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.4.1/jquery.min.js" integrity="sha256-CSXorXvZcTkaix6Yvo6HppcZGetbYMGWSFlBw8HfCJo=" crossorigin="anonymous"></script><!-- Bootstrap --><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/3.4.1/css/bootstrap.min.css" integrity="sha256-bZLfwXAP04zRMK2BjiO8iu9pf4FbLqX6zitd+tIvLhE=" crossorigin="anonymous">
+<!-- jquery --><script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.7.1/jquery.min.js" integrity="sha512-v2CJ7UaYy4JwqLDIrZUI/4hqeoQieOmAZNXBeQyjo21dadnwR+8ZaIJVT8EE2iyI61OV8e6M8PP2/4hpQINQ/g==" crossorigin="anonymous" referrerpolicy="no-referrer"></script><!-- Bootstrap --><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/3.4.1/css/bootstrap.min.css" integrity="sha256-bZLfwXAP04zRMK2BjiO8iu9pf4FbLqX6zitd+tIvLhE=" crossorigin="anonymous">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/3.4.1/js/bootstrap.min.js" integrity="sha256-nuL8/2cJ5NDSSwnKD8VqreErSWHtnEP9E7AySL+1ev4=" crossorigin="anonymous"></script><!-- bootstrap-toc --><link rel="stylesheet" href="../bootstrap-toc.css">
 <script src="../bootstrap-toc.js"></script><!-- Font Awesome icons --><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.12.1/css/all.min.css" integrity="sha256-mmgLkCYLUQbXn0B1SRqzHar6dCnv9oZFPEC1g1cwlkk=" crossorigin="anonymous">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.12.1/css/v4-shims.min.css" integrity="sha256-wZjR52fzng1pJHwx4aV2AO3yyTOXrcDW7jBpJtTwVxw=" crossorigin="anonymous">
 <!-- clipboard.js --><script src="https://cdnjs.cloudflare.com/ajax/libs/clipboard.js/2.0.6/clipboard.min.js" integrity="sha256-inc5kl9MA1hkeYUt+EC3BhlIgyp/2jDIyBLS6k3UxPI=" crossorigin="anonymous"></script><!-- headroom.js --><script src="https://cdnjs.cloudflare.com/ajax/libs/headroom/0.11.0/headroom.min.js" integrity="sha256-AsUX4SJE1+yuDu5+mAVzJbuYNPHj/WroHuZ8Ir/CkE0=" crossorigin="anonymous"></script><script src="https://cdnjs.cloudflare.com/ajax/libs/headroom/0.11.0/jQuery.headroom.min.js" integrity="sha256-ZX/yNShbjqsohH1k95liqY9Gd8uOiE1S4vZc+9KQ1K4=" crossorigin="anonymous"></script><!-- pkgdown --><link href="../pkgdown.css" rel="stylesheet">
 <script src="../pkgdown.js"></script><meta property="og:title" content="Using cTWAS with summary statistics">
-<meta property="og:description" content="ctwas">
 <!-- mathjax --><script src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/MathJax.js" integrity="sha256-nvJJv9wWKEm88qvoQl9ekL2J+k/RWIsaSScxxlsrv8k=" crossorigin="anonymous"></script><script src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/config/TeX-AMS-MML_HTMLorMML.js" integrity="sha256-84DKXVJXs0/F8OTMzX4UR909+jtl4G7SPypPavF+GfA=" crossorigin="anonymous"></script><!--[if lt IE 9]>
 <script src="https://oss.maxcdn.com/html5shiv/3.7.3/html5shiv.min.js"></script>
 <script src="https://oss.maxcdn.com/respond/1.4.2/respond.min.js"></script>
 <![endif]-->
 </head>
 <body data-spy="scroll" data-target="#toc">
-    
+
 
     <div class="container template-article">
       <header><div class="navbar navbar-default navbar-fixed-top" role="navigation">
@@ -33,7 +32,7 @@
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">ctwas</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">0.1.37</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">0.1.38</span>
       </span>
     </div>
 
@@ -45,7 +44,7 @@
 <li class="dropdown">
   <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
     Tutorial
-     
+
     <span class="caret"></span>
   </a>
   <ul class="dropdown-menu" role="menu">
@@ -73,7 +72,7 @@
 </div>
 <!--/.navbar -->
 
-      
+
 
       </header><script src="ctwas_summary_statistics_files/accessible-code-block-0.0.1/empty-anchor.js"></script><div class="row">
   <div class="col-md-9 contents">
@@ -81,7 +80,7 @@
       <h1 data-toc-skip>Using cTWAS with summary statistics</h1>
                         <h4 data-toc-skip class="author">Wesley Crouse, Sheng Qian, Kaixuan Luo, Xin He</h4>
             
-            <h4 data-toc-skip class="date">2024-04-17</h4>
+            <h4 data-toc-skip class="date">2024-09-11</h4>
       
       <small class="dont-index">Source: <a href="https://github.com/xinhe-lab/ctwas/blob/main/vignettes/ctwas_summary_statistics.Rmd" class="external-link"><code>vignettes/ctwas_summary_statistics.Rmd</code></a></small>
       <div class="hidden name"><code>ctwas_summary_statistics.Rmd</code></div>
@@ -133,7 +132,7 @@
 <div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># read the data using the VariantAnnotation package</span></span>
 <span><span class="va">z_snp</span> <span class="op">&lt;-</span> <span class="fu">VariantAnnotation</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/VariantAnnotation/man/readVcf-methods.html" class="external-link">readVcf</a></span><span class="op">(</span><span class="st">"/project2/xinhe/shared_data/ctwas_tutorial/gwas_summary_stats/ukb-d-30780_irnt.vcf"</span><span class="op">)</span></span>
-<span><span class="va">z_snp</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/as.data.frame.html" class="external-link">as.data.frame</a></span><span class="op">(</span><span class="fu">gwasvcf</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/gwasvcf/man/vcf_to_tibble.html" class="external-link">vcf_to_tibble</a></span><span class="op">(</span><span class="va">z_snp</span><span class="op">)</span><span class="op">)</span></span>
+<span><span class="va">z_snp</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/as.data.frame.html" class="external-link">as.data.frame</a></span><span class="op">(</span><span class="fu">gwasvcf</span><span class="fu">::</span><span class="fu">vcf_to_tibble</span><span class="op">(</span><span class="va">z_snp</span><span class="op">)</span><span class="op">)</span></span>
 <span></span>
 <span><span class="co"># compute the z-scores</span></span>
 <span><span class="va">z_snp</span><span class="op">$</span><span class="va">Z</span> <span class="op">&lt;-</span> <span class="va">z_snp</span><span class="op">$</span><span class="va">ES</span><span class="op">/</span><span class="va">z_snp</span><span class="op">$</span><span class="va">SE</span></span>
@@ -297,7 +296,7 @@
 <span><span class="fu"><a href="https://rdrr.io/r/base/list.files.html" class="external-link">list.files</a></span><span class="op">(</span><span class="va">ld_R_dir</span><span class="op">)</span></span></code></pre></div>
 <pre><code><span><span class="co">## [1] "example_locus_chr16.R_snp.71020125_72901251.RDS" </span></span>
 <span><span class="co">## [2] "example_locus_chr16.R_snp.71020125_72901251.Rvar"</span></span></code></pre>
-<p>The <code>.RDS</code> file is in <code>.RDS</code> format. It stores the LD correlation matrix for a region (a <span class="math inline">\(p \times p\)</span> matrix, <span class="math inline">\(p\)</span> is the number of variants in the region). We require that for each <code>.RDS</code> file, in the same directory, there is a corresponding file with the same stem but ending with the suffix <code>.Rvar</code>. This <code>.Rvar</code> files includes variant information for the region, and the order of its rows must match the order of rows and columns in the <code>.RDS</code> file. The format of these files is:</p>
+<p>The <code>.RDS</code> file is in <code>.RDS</code> format. It stores the LD correlation matrix for a region (a <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>p</mi><mo>×</mo><mi>p</mi></mrow><annotation encoding="application/x-tex">p \times p</annotation></semantics></math> matrix, <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>p</mi><annotation encoding="application/x-tex">p</annotation></semantics></math> is the number of variants in the region). We require that for each <code>.RDS</code> file, in the same directory, there is a corresponding file with the same stem but ending with the suffix <code>.Rvar</code>. This <code>.Rvar</code> files includes variant information for the region, and the order of its rows must match the order of rows and columns in the <code>.RDS</code> file. The format of these files is:</p>
 <div class="sourceCode" id="cb22"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># correlation matrix</span></span>
 <span><span class="va">R_snp</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/readRDS.html" class="external-link">readRDS</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/system.file.html" class="external-link">system.file</a></span><span class="op">(</span><span class="st">"extdata/ld_matrices"</span>, <span class="st">"example_locus_chr16.R_snp.71020125_72901251.RDS"</span>, package <span class="op">=</span> <span class="st">"ctwas"</span><span class="op">)</span><span class="op">)</span></span>
@@ -838,33 +837,31 @@
 <span><span class="co">## [1] stats     graphics  grDevices utils     datasets  methods   base     </span></span>
 <span><span class="co">## </span></span>
 <span><span class="co">## other attached packages:</span></span>
-<span><span class="co">## [1] cowplot_1.1.3 ggplot2_3.5.0 RSQLite_2.3.6 ctwas_0.1.37 </span></span>
+<span><span class="co">## [1] cowplot_1.1.1 ggplot2_3.5.1 RSQLite_2.3.7 ctwas_0.1.38 </span></span>
 <span><span class="co">## </span></span>
 <span><span class="co">## loaded via a namespace (and not attached):</span></span>
-<span><span class="co">##  [1] tidyselect_1.2.1  xfun_0.37         bslib_0.4.2       purrr_1.0.1      </span></span>
-<span><span class="co">##  [5] lattice_0.20-45   pgenlibr_0.3.3    colorspace_2.1-0  vctrs_0.6.5      </span></span>
-<span><span class="co">##  [9] generics_0.1.3    htmltools_0.5.4   yaml_2.3.7        utf8_1.2.4       </span></span>
-<span><span class="co">## [13] blob_1.2.4        rlang_1.1.3       pkgdown_2.0.7     jquerylib_0.1.4  </span></span>
-<span><span class="co">## [17] pillar_1.9.0      withr_3.0.0       glue_1.7.0        DBI_1.2.2        </span></span>
-<span><span class="co">## [21] bit64_4.0.5       foreach_1.5.2     lifecycle_1.0.4   stringr_1.5.0    </span></span>
-<span><span class="co">## [25] munsell_0.5.1     gtable_0.3.4      ragg_1.2.5        codetools_0.2-18 </span></span>
-<span><span class="co">## [29] memoise_2.0.1     evaluate_0.20     labeling_0.4.3    knitr_1.42       </span></span>
-<span><span class="co">## [33] fastmap_1.1.1     fansi_1.0.6       highr_0.10        logging_0.10-108 </span></span>
-<span><span class="co">## [37] Rcpp_1.0.12       scales_1.3.0      cachem_1.0.8      desc_1.4.3       </span></span>
-<span><span class="co">## [41] jsonlite_1.8.4    farver_2.1.1      systemfonts_1.0.4 fs_1.6.1         </span></span>
-<span><span class="co">## [45] bit_4.0.5         textshaping_0.3.6 digest_0.6.31     stringi_1.7.12   </span></span>
-<span><span class="co">## [49] dplyr_1.1.0       grid_4.2.0        cli_3.6.2         tools_4.2.0      </span></span>
-<span><span class="co">## [53] magrittr_2.0.3    sass_0.4.5        tibble_3.2.1      pkgconfig_2.0.3  </span></span>
-<span><span class="co">## [57] Matrix_1.5-3      data.table_1.15.4 rmarkdown_2.20    iterators_1.0.14 </span></span>
-<span><span class="co">## [61] R6_2.5.1          compiler_4.2.0</span></span></code></pre>
+<span><span class="co">##  [1] tidyselect_1.2.1  xfun_0.45         bslib_0.7.0       lattice_0.22-6   </span></span>
+<span><span class="co">##  [5] pgenlibr_0.3.7    generics_0.1.3    colorspace_2.1-0  vctrs_0.6.5      </span></span>
+<span><span class="co">##  [9] htmltools_0.5.8.1 yaml_2.3.9        utf8_1.2.4        blob_1.2.4       </span></span>
+<span><span class="co">## [13] rlang_1.1.4       pkgdown_2.1.0     jquerylib_0.1.4   pillar_1.9.0     </span></span>
+<span><span class="co">## [17] withr_3.0.0       glue_1.7.0        DBI_1.2.3         bit64_4.0.5      </span></span>
+<span><span class="co">## [21] foreach_1.5.2     lifecycle_1.0.4   munsell_0.5.1     gtable_0.3.0     </span></span>
+<span><span class="co">## [25] ragg_1.3.2        htmlwidgets_1.6.4 codetools_0.2-20  evaluate_0.24.0  </span></span>
+<span><span class="co">## [29] memoise_2.0.1     labeling_0.4.3    knitr_1.48        tzdb_0.4.0       </span></span>
+<span><span class="co">## [33] fastmap_1.2.0     fansi_1.0.6       highr_0.11        logging_0.10-108 </span></span>
+<span><span class="co">## [37] Rcpp_1.0.12       readr_2.1.5       scales_1.3.0      cachem_1.1.0     </span></span>
+<span><span class="co">## [41] desc_1.4.3        jsonlite_1.8.8    farver_2.1.2      systemfonts_1.1.0</span></span>
+<span><span class="co">## [45] fs_1.6.4          bit_4.0.5         textshaping_0.4.0 hms_1.1.3        </span></span>
+<span><span class="co">## [49] digest_0.6.36     dplyr_1.1.4       grid_4.2.0        cli_3.6.3        </span></span>
+<span><span class="co">## [53] tools_4.2.0       magrittr_2.0.3    sass_0.4.9        tibble_3.2.1     </span></span>
+<span><span class="co">## [57] pkgconfig_2.0.3   Matrix_1.4-1      data.table_1.15.4 rmarkdown_2.27   </span></span>
+<span><span class="co">## [61] iterators_1.0.14  R6_2.5.1          compiler_4.2.0</span></span></code></pre>
 </div>
   </div>
 
   <div class="col-md-3 hidden-xs hidden-sm" id="pkgdown-sidebar">
 
-        <nav id="toc" data-toggle="toc"><h2 data-toc-skip>Contents</h2>
-    </nav>
-</div>
+      </div>
 
 </div>
 
@@ -877,16 +874,16 @@
 
 <div class="pkgdown">
   <p></p>
-<p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.0.7.</p>
+<p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.1.0.</p>
 </div>
 
       </footer>
 </div>
 
-  
 
 
-  
+
+
 
   </body>
 </html>

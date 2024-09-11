@@ -1,198 +1,59 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
-  <url>
-    <loc>/404.html</loc>
-  </url>
-  <url>
-    <loc>/LICENSE-text.html</loc>
-  </url>
-  <url>
-    <loc>/README_xin.html</loc>
-  </url>
-  <url>
-    <loc>/articles/ctwas_summary_statistics.html</loc>
-  </url>
-  <url>
-    <loc>/articles/harmonization.html</loc>
-  </url>
-  <url>
-    <loc>/articles/index.html</loc>
-  </url>
-  <url>
-    <loc>/articles/regionmerging.html</loc>
-  </url>
-  <url>
-    <loc>/articles/transition.html</loc>
-  </url>
-  <url>
-    <loc>/authors.html</loc>
-  </url>
-  <url>
-    <loc>/index.html</loc>
-  </url>
-  <url>
-    <loc>/reference/anno_susie.html</loc>
-  </url>
-  <url>
-    <loc>/reference/coef.susie.html</loc>
-  </url>
-  <url>
-    <loc>/reference/compute_ss.html</loc>
-  </url>
-  <url>
-    <loc>/reference/convert_geno_to_LD_matrix.html</loc>
-  </url>
-  <url>
-    <loc>/reference/ctwas.html</loc>
-  </url>
-  <url>
-    <loc>/reference/ctwas_locus_plot.html</loc>
-  </url>
-  <url>
-    <loc>/reference/ctwas_locus_plot_genetrack.html</loc>
-  </url>
-  <url>
-    <loc>/reference/ctwas_rss.html</loc>
-  </url>
-  <url>
-    <loc>/reference/ctwas_summarize_parameters.html</loc>
-  </url>
-  <url>
-    <loc>/reference/filter_regions.html</loc>
-  </url>
-  <url>
-    <loc>/reference/get_cs_correlation.html</loc>
-  </url>
-  <url>
-    <loc>/reference/harmonize_wgt_ld.html</loc>
-  </url>
-  <url>
-    <loc>/reference/harmonize_z_ld.html</loc>
-  </url>
-  <url>
-    <loc>/reference/impute_expr.html</loc>
-  </url>
-  <url>
-    <loc>/reference/impute_expr_z.html</loc>
-  </url>
-  <url>
-    <loc>/reference/index.html</loc>
-  </url>
-  <url>
-    <loc>/reference/index_regions.html</loc>
-  </url>
-  <url>
-    <loc>/reference/init_finalize.html</loc>
-  </url>
-  <url>
-    <loc>/reference/init_finalize_rss.html</loc>
-  </url>
-  <url>
-    <loc>/reference/muffled_corr.html</loc>
-  </url>
-  <url>
-    <loc>/reference/muffled_cov2cor.html</loc>
-  </url>
-  <url>
-    <loc>/reference/predict.susie.html</loc>
-  </url>
-  <url>
-    <loc>/reference/preharmonize_z_ld.html</loc>
-  </url>
-  <url>
-    <loc>/reference/prep_exprvar.html</loc>
-  </url>
-  <url>
-    <loc>/reference/prep_pgen.html</loc>
-  </url>
-  <url>
-    <loc>/reference/prep_pvar.html</loc>
-  </url>
-  <url>
-    <loc>/reference/read_bim.html</loc>
-  </url>
-  <url>
-    <loc>/reference/read_expr.html</loc>
-  </url>
-  <url>
-    <loc>/reference/read_exprvar.html</loc>
-  </url>
-  <url>
-    <loc>/reference/read_ld_Rvar.html</loc>
-  </url>
-  <url>
-    <loc>/reference/read_ld_Rvar_RDS.html</loc>
-  </url>
-  <url>
-    <loc>/reference/read_pgen.html</loc>
-  </url>
-  <url>
-    <loc>/reference/read_pvar.html</loc>
-  </url>
-  <url>
-    <loc>/reference/read_var_info.html</loc>
-  </url>
-  <url>
-    <loc>/reference/region2core.html</loc>
-  </url>
-  <url>
-    <loc>/reference/single_effect_regression.html</loc>
-  </url>
-  <url>
-    <loc>/reference/single_effect_regression_rss.html</loc>
-  </url>
-  <url>
-    <loc>/reference/susie.html</loc>
-  </url>
-  <url>
-    <loc>/reference/susieI.html</loc>
-  </url>
-  <url>
-    <loc>/reference/susieI_rss.html</loc>
-  </url>
-  <url>
-    <loc>/reference/susie_get_cs.html</loc>
-  </url>
-  <url>
-    <loc>/reference/susie_get_lfsr.html</loc>
-  </url>
-  <url>
-    <loc>/reference/susie_get_methods.html</loc>
-  </url>
-  <url>
-    <loc>/reference/susie_get_niter.html</loc>
-  </url>
-  <url>
-    <loc>/reference/susie_get_objective.html</loc>
-  </url>
-  <url>
-    <loc>/reference/susie_get_pip.html</loc>
-  </url>
-  <url>
-    <loc>/reference/susie_get_posterior_mean.html</loc>
-  </url>
-  <url>
-    <loc>/reference/susie_get_posterior_sd.html</loc>
-  </url>
-  <url>
-    <loc>/reference/susie_get_prior_variance.html</loc>
-  </url>
-  <url>
-    <loc>/reference/susie_get_residual_variance.html</loc>
-  </url>
-  <url>
-    <loc>/reference/susie_init_coef.html</loc>
-  </url>
-  <url>
-    <loc>/reference/susie_rss.html</loc>
-  </url>
-  <url>
-    <loc>/reference/univariate_regression.html</loc>
-  </url>
-  <url>
-    <loc>/reference/update_each_effect.html</loc>
-  </url>
-  <url>
-    <loc>/reference/write_ld_Rf.html</loc>
-  </url>
+<urlset xmlns = 'http://www.sitemaps.org/schemas/sitemap/0.9'>
+<url><loc>/404.html</loc></url>
+<url><loc>/LICENSE-text.html</loc></url>
+<url><loc>/README_xin.html</loc></url>
+<url><loc>/articles/ctwas_summary_statistics.html</loc></url>
+<url><loc>/articles/harmonization.html</loc></url>
+<url><loc>/articles/index.html</loc></url>
+<url><loc>/articles/regionmerging.html</loc></url>
+<url><loc>/articles/transition.html</loc></url>
+<url><loc>/authors.html</loc></url>
+<url><loc>/index.html</loc></url>
+<url><loc>/reference/anno_susie.html</loc></url>
+<url><loc>/reference/coef.susie.html</loc></url>
+<url><loc>/reference/compute_ss.html</loc></url>
+<url><loc>/reference/convert_geno_to_LD_matrix.html</loc></url>
+<url><loc>/reference/ctwas.html</loc></url>
+<url><loc>/reference/ctwas_locus_plot.html</loc></url>
+<url><loc>/reference/ctwas_locus_plot_genetrack.html</loc></url>
+<url><loc>/reference/ctwas_rss.html</loc></url>
+<url><loc>/reference/ctwas_summarize_parameters.html</loc></url>
+<url><loc>/reference/filter_regions.html</loc></url>
+<url><loc>/reference/get_cs_correlation.html</loc></url>
+<url><loc>/reference/harmonize_wgt_ld.html</loc></url>
+<url><loc>/reference/harmonize_z_ld.html</loc></url>
+<url><loc>/reference/impute_expr.html</loc></url>
+<url><loc>/reference/impute_expr_z.html</loc></url>
+<url><loc>/reference/index.html</loc></url>
+<url><loc>/reference/index_regions.html</loc></url>
+<url><loc>/reference/init_finalize.html</loc></url>
+<url><loc>/reference/init_finalize_rss.html</loc></url>
+<url><loc>/reference/muffled_corr.html</loc></url>
+<url><loc>/reference/muffled_cov2cor.html</loc></url>
+<url><loc>/reference/predict.susie.html</loc></url>
+<url><loc>/reference/preharmonize_z_ld.html</loc></url>
+<url><loc>/reference/prep_exprvar.html</loc></url>
+<url><loc>/reference/prep_pgen.html</loc></url>
+<url><loc>/reference/prep_pvar.html</loc></url>
+<url><loc>/reference/read_bim.html</loc></url>
+<url><loc>/reference/read_expr.html</loc></url>
+<url><loc>/reference/read_exprvar.html</loc></url>
+<url><loc>/reference/read_ld_Rvar.html</loc></url>
+<url><loc>/reference/read_ld_Rvar_RDS.html</loc></url>
+<url><loc>/reference/read_pgen.html</loc></url>
+<url><loc>/reference/read_pvar.html</loc></url>
+<url><loc>/reference/read_var_info.html</loc></url>
+<url><loc>/reference/region2core.html</loc></url>
+<url><loc>/reference/single_effect_regression.html</loc></url>
+<url><loc>/reference/susie.html</loc></url>
+<url><loc>/reference/susieI.html</loc></url>
+<url><loc>/reference/susieI_rss.html</loc></url>
+<url><loc>/reference/susie_get_methods.html</loc></url>
+<url><loc>/reference/susie_get_objective.html</loc></url>
+<url><loc>/reference/susie_init_coef.html</loc></url>
+<url><loc>/reference/susie_rss.html</loc></url>
+<url><loc>/reference/univariate_regression.html</loc></url>
+<url><loc>/reference/update_each_effect.html</loc></url>
+<url><loc>/reference/write_ld_Rf.html</loc></url>
 </urlset>
+
