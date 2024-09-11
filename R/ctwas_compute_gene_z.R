@@ -73,11 +73,11 @@ get_gene_info <- function(weights){
     stop("'weights' should be a list.")
   }
   gene_info <- lapply(names(weights), function(x){
-    as.data.frame(weights[[x]][c("chrom", "p0","p1", "gene_id", "weight_name")])
+    as.data.frame(weights[[x]][c("chrom", "p0","p1", "molecular_id", "weight_name")])
   })
   gene_info <- do.call(rbind, gene_info)
   gene_info$id <- names(weights)
-  gene_info <- gene_info[, c("chrom", "id", "p0", "p1", "gene_id", "weight_name")]
+  gene_info <- gene_info[, c("chrom", "id", "p0", "p1", "molecular_id", "weight_name")]
   gene_info[, c("chrom", "p0", "p1")] <- sapply(gene_info[, c("chrom", "p0", "p1")], as.integer)
   rownames(gene_info) <- NULL
 

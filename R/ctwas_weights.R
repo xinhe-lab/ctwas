@@ -74,7 +74,7 @@ load_predictdb_weights <- function(weight_file,
   weight_table <- query("select * from weights")
   extra_table <- query("select * from extra")
 
-  loginfo("Number of genes in weights: %s", length(unique(weight_table$gene)))
+  loginfo("Number of molecular traits in weights: %s", length(unique(weight_table$gene)))
 
   # subset to protein coding genes only
   if (filter_protein_coding_genes) {
@@ -83,7 +83,7 @@ load_predictdb_weights <- function(weight_file,
       loginfo("Limit to protein coding genes")
       extra_table <- extra_table[extra_table$gene_type=="protein_coding",,drop=FALSE]
       weight_table <- weight_table[weight_table$gene %in% extra_table$gene,]
-      loginfo("Number of genes in weights after filtering protein coding genes: %s", length(unique(weight_table$gene)))
+      loginfo("Number of molecular traits in weights after filtering protein coding genes: %s", length(unique(weight_table$gene)))
     } else {
       loginfo("No 'protein_coding' in 'extra_table$gene_type'. Skipped filtering protein coding genes.")
     }
@@ -538,9 +538,9 @@ compute_weight_LD_from_ref <- function(weights,
     stop("'LD_map' should be a data frame!")
 
   weight_info <- lapply(names(weights), function(x){
-    as.data.frame(weights[[x]][c("chrom", "p0","p1", "gene_id", "weight_name", "type","context")])})
+    as.data.frame(weights[[x]][c("chrom", "p0","p1", "molecular_id", "weight_name", "type","context")])})
   weight_info <- do.call(rbind, weight_info)
-  weight_info$weight_id <- paste0(weight_info$gene_id, "|", weight_name)
+  weight_info$weight_id <- paste0(weight_info$molecular_id, "|", weight_name)
   # get the regions overlapping with each gene
   for (k in 1:nrow(weight_info)) {
     chrom <- weight_info[k, "chrom"]
