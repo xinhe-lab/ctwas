@@ -73,6 +73,8 @@
 #' @param ncore_LD The number of cores used to parallelize computing correlation matrices,
 #' in screening regions and fine-mapping steps with LD.
 #'
+#' @param seed seed for random sampling when thinning the SNPs in region data.
+#'
 #' @param logfile The log filename. If NULL, print log info on screen.
 #'
 #' @param verbose If TRUE, print detailed messages.
@@ -118,6 +120,7 @@ ctwas_sumstats <- function(
     outname = "ctwas",
     ncore = 1,
     ncore_LD = max(ncore-1,1),
+    seed = 99,
     logfile = NULL,
     verbose = FALSE,
     ...){
@@ -185,7 +188,8 @@ ctwas_sumstats <- function(
                                           maxSNP = maxSNP,
                                           trim_by = "random",
                                           adjust_boundary_genes = TRUE,
-                                          ncore = ncore)
+                                          ncore = ncore,
+                                          seed = seed)
   region_data <- region_data_res$region_data
   boundary_genes <- region_data_res$boundary_genes
   if (!is.null(outputdir)) {

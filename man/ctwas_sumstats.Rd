@@ -36,6 +36,7 @@ ctwas_sumstats(
   outname = "ctwas",
   ncore = 1,
   ncore_LD = max(ncore - 1, 1),
+  seed = 99,
   logfile = NULL,
   verbose = FALSE,
   ...
@@ -114,6 +115,8 @@ the estimated confidence sets.}
 
 \item{ncore_LD}{The number of cores used to parallelize computing correlation matrices,
 in screening regions and fine-mapping steps with LD.}
+
+\item{seed}{seed for random sampling when thinning the SNPs in region data.}
 
 \item{logfile}{The log filename. If NULL, print log info on screen.}
 

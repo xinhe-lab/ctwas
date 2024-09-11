@@ -24,6 +24,7 @@ ctwas_sumstats_noLD(
   outputdir = NULL,
   outname = "ctwas_noLD",
   ncore = 1,
+  seed = 99,
   logfile = NULL,
   verbose = FALSE,
   ...
@@ -75,6 +76,8 @@ having 1 or fewer effects will be used for parameter estimation.}
 \item{outname}{The output name.}
 
 \item{ncore}{The number of cores used to parallelize susie over regions.}
+
+\item{seed}{seed for random sampling when thinning the SNPs in region data.}
 
 \item{logfile}{The log filename. If NULL, print log info on screen.}
 

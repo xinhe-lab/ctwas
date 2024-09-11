@@ -46,6 +46,8 @@
 #'
 #' @param ncore The number of cores used to parallelize susie over regions.
 #'
+#' @param seed seed for random sampling when thinning the SNPs in region data.
+#'
 #' @param logfile The log filename. If NULL, print log info on screen.
 #'
 #' @param verbose If TRUE, print detailed messages.
@@ -79,6 +81,7 @@ ctwas_sumstats_noLD <- function(
     outputdir = NULL,
     outname = "ctwas_noLD",
     ncore = 1,
+    seed = 99,
     logfile = NULL,
     verbose = FALSE,
     ...){
@@ -138,7 +141,8 @@ ctwas_sumstats_noLD <- function(
                                           maxSNP = maxSNP,
                                           trim_by = "random",
                                           adjust_boundary_genes = TRUE,
-                                          ncore = ncore)
+                                          ncore = ncore,
+                                          seed = seed)
   region_data <- region_data_res$region_data
   boundary_genes <- region_data_res$boundary_genes
   if (!is.null(outputdir)) {
