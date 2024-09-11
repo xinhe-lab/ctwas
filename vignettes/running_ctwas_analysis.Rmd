@@ -26,7 +26,7 @@ Running cTWAS analysis involves several major steps: preparing input data, compu
 
 In this version of cTWAS, we allow the joint analysis of multiple groups of molecular traits. This could be: eQTL of multiple tissues; or eQTLs, splicing QTLs and other types of QTLs in a single tissue. In a more complex setting, multiple types of QTL data from multiple tissues/cell types. Each group is defined by its “type” (kind of molecular traits), and “context” (tissue, cell type, condition, etc.). 
 
-We require first running the data preprocessing and harmonization steps. Please follow the "Preparing cTWAS input data" tutorial.
+We require first running the data preprocessing and harmonization steps. Please follow the ["Preparing cTWAS input data"][preparing_input_data_tutorial] tutorial.
 
 Load the packages
 ```{r load_package, message=FALSE}
@@ -96,24 +96,24 @@ Important arguments that control how this function is executed:
 
 + `filter_nonSNP_PIP` and `min_nonSNP_PIP`: if `filter_nonSNP_PIP = TRUE`, it will compute the non-SNP PIP, i.e. the total PIP of all molecular traits,  for each region (using the estimated parameters) and select regions with non-SNP PIP > `min_nonSNP_PIP` (0.5 by default). 
 
-+ `min_abs_corr`: Minimum absolute correlation allowed in a credible set. cTWAs jointly fine-maps both SNPs and molecular traits, the correlations between SNPs and molecular traits could be lower than standard fine-mapping with SNPs. We use a lower cutoff (0.1 by default). 
++ `min_abs_corr`: Minimum absolute correlation allowed in a credible set. cTWAS jointly fine-maps both SNPs and molecular traits, the correlations between SNPs and molecular traits could be lower than standard fine-mapping with SNPs. We use a lower cutoff (0.1 by default). 
 
 + `ncore`:  computation of genomic regions can be performed in parallel. This parameter controls how many cores are used in the parallelization.
 
 + `ncore_LD`:  this sets the number of cores in parallelization when LD matrices are needed. In screening regions and fine-mapping steps, we need larger memory to load and process LD matrices. We recommend using fewer cores in `ncore_LD` than `ncore`.
 
-+ `cor_dir`, `save_cor`, and `force_compute_cor`: we need correlation matrices during fine-mapping and visualizing the results with LD. If `cor_dir` is provided, cTWAS will check `cor_dir`. If precomputed correlation matrices are available in `cor_dir`, cTWAS will simply load those. Otherwise, it will compute the correlation matrices and save to the `cor_dir` directory if `save_cor = TRUE`. You can set `force_compute_cor = TRUE` so that it always computes the correlation matrices. The correlation matrices are large datasets, so they are not saved by default.  
++ `cor_dir`, `save_cor`, and `force_compute_cor`: we need correlation matrices during fine-mapping and visualizing the results with LD. If `cor_dir` is provided, cTWAS will check the `cor_dir` directory. If precomputed correlation matrices are available in `cor_dir`, cTWAS will simply load those. Otherwise, it will compute the correlation matrices and save to the `cor_dir` directory if `save_cor = TRUE`. You can set `force_compute_cor = TRUE` so that it always computes the correlation matrices. The correlation matrices are large datasets, so they are not saved by default.  *Note*: you should use a different `cor_dir` directory for each cTWAS analysis; otherwise, it would cause mismatch between Z-scores and correlation matrices in the old `cor_dir`. 
 
-To understand and summarize the results from cTWAS, please read the tutorial “Summarizing and visualizing cTWAS results”. 
+To understand and summarize the results from cTWAS, please read the tutorial [“Summarizing and visualizing cTWAS results”][summarizing_results_tutorial]. 
 
-*Note:* One can run cTWAS without using reference LD data. See “A minimal tutorial of running cTWAS without LD”. That tutorial describes how to run cTWAS in a single step. 
+*Note:* One can run cTWAS without using reference LD data. See [“A minimal tutorial of running cTWAS without LD”][minimal_tutorial]. That tutorial describes how to run cTWAS in a single step. 
 
 
 ## Running cTWAS modules
 
 This section describes how to perform cTWAS analysis by running each of the modules separately. This would allow more flexible controls of the cTWAS modules, e.g. running each module with different settings (memory, parallelization, etc.). We could also save the results from each module for future access, that way, we can re-run just one module, if necessary, without running the entire process. One useful way of running cTWAS is to first run the first few steps to estimate model parameters and assess their values. If this step does not converge, or the parameters look strange, it is best to pause and understand why.
 
-We note that one can also run cTWAS without using LD information - see the tutorial “A minimal tutorial of running cTWAS without LD”. It is also possible to do this analysis one step at a time. We describe below how each step can be done in appropriate places.
+We note that one can also run cTWAS without using LD information - see the tutorial [“A minimal tutorial of running cTWAS without LD”][minimal_tutorial]. It is also possible to do this analysis one step at a time. We describe below how each step can be done in appropriate places.
 
 ### Computing Z-scores of molecular traits
 
@@ -176,7 +176,7 @@ group_prior_var <- param$group_prior_var
 ```
 
 
-*Note:* we used sample data (from chr16) in this example, however, in real data analysis, parameter estimation should be done using data from the *entire genome*.
+*Note*: we used sample data (from chr16) in this example, however, in real data analysis, parameter estimation should be done using data from the *entire genome*.
 
 ### Screening regions
 
@@ -206,7 +206,7 @@ screen_summary <- screen_res$screen_summary
 
 It returns `screened_region_data` which contains a subset of region data for selected regions. It also returns the estimated L (number of credible sets) for the selected regions, which could be used in the fine-mapping step to set L for each region. In addition, it returns a data frame `screen_summary`, which includes the estimated L and non-SNP PIPs for all the regions.
 
-Note: cTWAs jointly fine-maps both SNPs and molecular traits, the correlations between SNPs and molecular traits could be lower than standard fine-mapping with SNPs. Thus, we set a lower purity cutoff (default option: `min_abs_corr = 0.1`) for obtaining credible sets to avoid missing causal genes. 
+Note: cTWAS jointly fine-maps both SNPs and molecular traits, the correlations between SNPs and molecular traits could be lower than standard fine-mapping with SNPs. Thus, we set a lower purity cutoff (default option: `min_abs_corr = 0.1`) for obtaining credible sets to avoid missing causal genes. 
 
 Option 2: screening by non-SNP PIPs. If `filter_nonSNP_PIP = TRUE` and `filter_L = FALSE`, cTWAS will compute the non-SNP PIP, i.e. total PIP of all molecular traits, for each region (using estimated priors). It then selects regions by applying a  `min_nonSNP_PIP` cutoff (0.5, by default). 
 
@@ -348,4 +348,10 @@ finemap_region_res <- finemap_regions_noLD(selected_region_data,
 [S-PrediXcan]: https://www.nature.com/articles/s41467-018-03621-1
 [susierss_diagnostic]: https://stephenslab.github.io/susieR/articles/susierss_diagnostic.html
 [DENTIST]: https://github.com/Yves-CHEN/DENTIST/
+[minimal_tutorial]: https://xinhe-lab.github.io/multigroup_ctwas/articles/minimal_tutorial.html
+[preparing_input_data_tutorial]: https://xinhe-lab.github.io/multigroup_ctwas/articles/preparing_input_data.html
+[running_ctwas_analysis_tutorial]: https://xinhe-lab.github.io/multigroup_ctwas/articles/running_ctwas_analysis.html
+[summarizing_results_tutorial]: https://xinhe-lab.github.io/multigroup_ctwas/articles/summarizing_results.html
+[postprocessing_tutorial]: https://xinhe-lab.github.io/multigroup_ctwas/articles/postprocessing.html
+[utility_functions_tutorial]:https://xinhe-lab.github.io/multigroup_ctwas/articles/utility_functions.html
 

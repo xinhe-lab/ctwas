@@ -34,9 +34,11 @@ library(ctwas)
 
 cTWAS provides a function `convert_geno_to_LD_matrix()` to create LD matrices from  individual level genotype data. 
 
-This function needs genotype files (`genotype_files`) and variant information files (`varinfo_files`) in PLINK format, and region definitions (`region_info`) as input, and it converts genotype data to LD matrices region-by-region, and save the LD correlation matrices (`.RDS` files) and corresponding variant information (`.Rvar` files) to the directory `outputdir`. It returns a data frame `region_metatable`, which contains region definitions from `region_info` and two additional columns "LD_file" and "SNP_file". "LD_file" stores the filenames to the LD matrices (`.RDS` files),  "SNP_file" stores the filenames of corresponding variant information (`.Rvar` files). 
+This function needs genotype files (`genotype_files`) and variant information files (`varinfo_files`) in PLINK format, and region definitions (`region_info`) as input.  It converts genotype data to LD matrices region-by-region, and save the LD correlation matrices (`.RDS` files) and corresponding variant information (`.Rvar` files) to the directory `outputdir`. It returns a data frame `region_metatable`, which contains region definitions from `region_info` and two additional columns "LD_file" and "SNP_file". "LD_file" stores the filenames to the LD matrices (`.RDS` files),  "SNP_file" stores the filenames of corresponding variant information (`.Rvar` files). 
  
 Below is an example for creating LD matrices in b37 using 1000 Genomes European data. 
+
+`genotype_files` need to have genotype files for all chromosomes (one file per chromosome). `varinfo_files` could have one variant information file for each chromosome or have one big file with variant information from all chromosomes. By default, it will process all chromosomes from 1 to 22. You could process only one chromosome or several chromosomes by specifying `chrom`. 
 
 ```{r convert_geno_to_LD_matrix, eval=FALSE}
 ldref_dir <- "./1000G_EUR_Phase3_plink"
@@ -64,7 +66,7 @@ We provide example R scripts to create LD matrices for UK biobank or 1000 genome
 
 ### Using FUSION weights
 
-PredictDB is the recommended format for cTWAS, and we introduced how to use PredictDB weights in the tutorial "Preparing cTWAS input data". Here, we will discuss how to use FUSION weights. 
+PredictDB is the recommended format for cTWAS, and we introduced how to use PredictDB weights in the tutorial ["Preparing cTWAS input data"][preparing_input_data_tutorial]. Here, we will discuss how to use FUSION weights. 
 
 Please check [FUSION/TWAS](http://gusevlab.org/projects/fusion/#compute-your-own-predictive-models) for the format of FUSION weights. You can download [precomputed FUSION models](http://gusevlab.org/projects/fusion/#download-pre-computed-predictive-models).
 
@@ -81,7 +83,7 @@ After unpacking the package, we will see a folder named `GTEx.Whole_Blood`, whic
 
 We use the `preprocess_weight()` function to harmonize the prediction models and LD reference. To use the FUSION format, we need to specify the weight directory that contains the `.wgt.RDat` files. We specify `weight_format = 'FUSION'` and specify the prediction models in FUSION by `fusion_method`. It supports the following models: "lasso" (default), "enet", "top1", "blup", "bslmm", and also "best.cv", which will choose the best model for each gene based on the cross-validation performance. 
 
-This function also takes a few other inputs, including the definition of regions (`region_info`), the list of variants from GWAS (`z_snp$id`), the list of SNPs and information of LD matrix of each region (`snp_map` and `LD_map`), type (`type`) and context (`context`) of the weights. Please refer to the tutorial `Preparing input data” about these data structures.  
+This function also takes a few other inputs, including the definition of regions (`region_info`), the list of variants from GWAS (`z_snp$id`), the list of SNPs and information of LD matrix of each region (`snp_map` and `LD_map`), type (`type`) and context (`context`) of the weights. Please refer to the tutorial [`Preparing input data”][preparing_input_data_tutorial] about these data structures.  
 
 ```{r preprocess_fusion_weights, eval=FALSE}
 weights <- preprocess_weights("./GTEx.Whole_Blood",
@@ -104,7 +106,7 @@ weights <- preprocess_weights("./GTEx.Whole_Blood",
 
 
 
-We drop strand ambiguous variants (`drop_strand_ambig = TRUE`) by default. FUSION weights are already on the standardized scale, so we don't scale weights by the variance. For FUSION models, we don't have precomputed covariances between variants. So we calculate correlations between weight variants using the LD reference. This usually takes a while, so it is helpful to set `ncore` to parallelize the computation. FUSION weights do not contain gene type information, so we don't limit to protein coding genes. By default, we use all variants in the prediction models. If you have dense prediction models and want to use only the top few variants for each gene in the weights, you could set the number in `fusion_top_n_snps` (`fusion_top_n_snps = 5` will use the top 5 variants for each gene).  We could set the genome build of the FUSION models in `fusion_genome_version`. This is only used when creating the "varID" of the variants to be consistent with PredictDB format, but does not affect the preprocessed weights. 
+We drop strand ambiguous variants (`drop_strand_ambig = TRUE`) by default. FUSION weights are already on the standardized scale, so we don't scale weights by the variance. For FUSION models, we don't have precomputed covariances between variants. So we calculate correlations between weight variants using the LD reference. This usually takes a while, so it is helpful to set `ncore` to parallelize the computation. FUSION weights do not contain gene type information, so we don't limit to protein coding genes. By default, we use all variants in the prediction models. If you have dense prediction models and want to use only the top variants for each gene in the weights, you could set the number in `fusion_top_n_snps` (`fusion_top_n_snps = 5` will use the top five variants for each gene).  We could set the genome build of the FUSION models in `fusion_genome_version`. This is only used when creating the "varID" of the variants to be consistent with PredictDB format, but does not affect the preprocessed weights. 
 
 
 ### Creating prediction models from QTL lists
@@ -157,4 +159,15 @@ When `use_top_QTL=TRUE`, it is limited to only one top QTL per molecular trait. 
 If you want to use multiple QTLs per molecular trait, you can set `use_top_QTL=FALSE`. In that case, we assume the weights of the QTLs are learned from multiple regression (instead of marginal effect sizes). 
 
 If you use weights converted from *top* QTLs, we set `load_predictdb_LD = TRUE` in the `preprocess_weights()` function to load pre-computed correlations between variants. But for weights converted from multiple QTLs per molecular trait, you would still need to compute correlations between variants from the LD reference by setting `load_predictdb_LD = FALSE`. Also, we do not need to scale the weights, so we set  `scale_predictdb_weights = FALSE`. 
+
+
+
+
+
+[minimal_tutorial]: https://xinhe-lab.github.io/multigroup_ctwas/articles/minimal_tutorial.html
+[preparing_input_data_tutorial]: https://xinhe-lab.github.io/multigroup_ctwas/articles/preparing_input_data.html
+[running_ctwas_analysis_tutorial]: https://xinhe-lab.github.io/multigroup_ctwas/articles/running_ctwas_analysis.html
+[summarizing_results_tutorial]: https://xinhe-lab.github.io/multigroup_ctwas/articles/summarizing_results.html
+[postprocessing_tutorial]: https://xinhe-lab.github.io/multigroup_ctwas/articles/postprocessing.html
+[utility_functions_tutorial]:https://xinhe-lab.github.io/multigroup_ctwas/articles/utility_functions.html
 

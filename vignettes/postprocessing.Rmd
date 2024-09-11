@@ -117,7 +117,7 @@ merged_region_L <- merge_region_res$merged_region_L
 
 When `estimate_L = TRUE`, we estimate the number of credible sets (`merged_region_L`) for the merged regions. This information will be used later in the fine-mapping step. We could set `maxSNP` to limit the number of SNPs in the region, if merged regions contain too many SNPs,  
 
-Next, we run fine-mapping again for these merged regions, similar to the section "Fine-mapping screened regions" in the tutorial "Running cTWAS analysis".
+Next, we run fine-mapping again for these merged regions, similar to the section "Fine-mapping screened regions" in the tutorial ["Running cTWAS analysis"][running_ctwas_analysis_tutorial].
 
 ```{r finemap_merged_regions, eval=FALSE}
 finemap_merged_regions_res <- finemap_regions(merged_region_data,
@@ -176,7 +176,7 @@ selected_region_ids <- names(nonSNP_PIPs)[nonSNP_PIPs > 0.8]
 ```
 
 
-We use the function `diagnose_LD_mismatch_susie()` to perform LD mismatch diagnosis for these regions.  This function uses SuSiE RSS to detect problematic SNPs among all variants in a region. Basically, it infers the expected statistic of a variant, based on the statistics of nearby variants and their LD from the reference, and compares this with the observed statistic. Inconsistency between the two would suggest potential LD mismatch.  
+We use the function `diagnose_LD_mismatch_susie()` to perform LD mismatch diagnosis for these regions.  This function uses [SuSiE-RSS][susierss_diagnostic] to detect problematic SNPs among all variants in a region. Basically, it infers the expected statistic of a variant, based on the statistics of nearby variants and their LD from the reference, and compares this with the observed statistic. Inconsistency between the two would suggest potential LD mismatch.  
 
 ```{r diagnose_LD_mismatch, eval=FALSE}
 res <- diagnose_LD_mismatch_susie(region_ids = selected_region_ids, 
@@ -191,7 +191,7 @@ condz_stats <- res$condz_stats
 ```
 
 
-This returns a list of problematic SNPs (diagnostic test `p-value < 5e-8`, by default), flipped SNPs, and the test statistics of `kriging_rss` function from SuSiE-RSS. 
+This returns a list of problematic SNPs (diagnostic test `p-value < 5e-8`, by default), flipped SNPs, and the test statistics of `kriging_rss` function from [SuSiE-RSS][susierss_diagnostic]. 
 
 Our basic strategy of dealing with LD mismatch is: we use the list of problematic SNPs to identify the molecular traits whose results may be affected by LD-mismatch. We would then run SuSiE fine-mapping with L = 1 in the regions containing these molecular traits, assuming a single causal signal in such a region. The fine-mapping results in this setting would be independent of LD. 
 
@@ -235,5 +235,11 @@ finemap_noLD_res[finemap_noLD_res$id %in% problematic_genes,]
 [S-PrediXcan]: https://www.nature.com/articles/s41467-018-03621-1
 [susierss_diagnostic]: https://stephenslab.github.io/susieR/articles/susierss_diagnostic.html
 [DENTIST]: https://github.com/Yves-CHEN/DENTIST/
+[minimal_tutorial]: https://xinhe-lab.github.io/multigroup_ctwas/articles/minimal_tutorial.html
+[preparing_input_data_tutorial]: https://xinhe-lab.github.io/multigroup_ctwas/articles/preparing_input_data.html
+[running_ctwas_analysis_tutorial]: https://xinhe-lab.github.io/multigroup_ctwas/articles/running_ctwas_analysis.html
+[summarizing_results_tutorial]: https://xinhe-lab.github.io/multigroup_ctwas/articles/summarizing_results.html
+[postprocessing_tutorial]: https://xinhe-lab.github.io/multigroup_ctwas/articles/postprocessing.html
+[utility_functions_tutorial]:https://xinhe-lab.github.io/multigroup_ctwas/articles/utility_functions.html
 
 

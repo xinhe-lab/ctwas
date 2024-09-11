@@ -23,6 +23,8 @@ navbar:
         href: articles/postprocessing.html
       - text: cTWAS utility functions
         href: articles/utility_functions.html
+      - text: FAQ
+        href: articles/FAQ.html
     source:
       text: Source
       href: https://github.com/xinhe-lab/ctwas/tree/multigroup

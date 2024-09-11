@@ -50,11 +50,11 @@ library(data.table)
 
 ## Preparing the input data
 
-The "no-LD" version of cTWAS requires several input datasets: (i) GWAS summary statistics; (ii) prediction models (called "weights" in our documentation) and (iii) the reference data, including information about all the variants; and the definition of the genomic regions. We describe below the steps for data preparation and preprocessing before running cTWAS. More details about data preparation, including preparing the LD data, which is required for full cTWAS, are given in the tutorial, "Preparing cTWAS input data".
+The "no-LD" version of cTWAS requires several input datasets: (i) GWAS summary statistics; (ii) prediction models (called "weights" in our documentation) and (iii) the reference data, including information about all the variants; and the definition of the genomic regions. We describe below the steps for data preparation and preprocessing before running cTWAS. More details about data preparation, including preparing the LD data, which is required for full cTWAS, are given in the tutorial, ["Preparing cTWAS input data"][preparing_input_data_tutorial].
 
 For GWAS summary statistics, we use sample GWAS data of LDL on chromosome 16. These data are provided in the R package. 
 
-Here we assume the `z_snp` (a data frame of GWAS summary statistics) is available. Please see the section "GWAS Z-score"  in the "Preparing cTWAS input data" tutorial for details. 
+Here we assume the `z_snp` (a data frame of GWAS summary statistics) is available. Please see the section "GWAS Z-score"  in the ["Preparing cTWAS input data"][preparing_input_data_tutorial] tutorial for details. 
 
 ```{r load_z_snp}
 z_snp <- readRDS(system.file("extdata/sample_data", "LDL_example.z_snp.RDS", package = "ctwas"))
@@ -83,7 +83,7 @@ region_info <- readRDS(region_file)
 ```
 
 
-Additionally, we require `ref_snp_info` as a “reference” of the variants. `ref_snp_info` is a data frame, containing the positions and allele information of all the variants from the entire genome. This reference data needs to be mapped to the regions, i.e. we will need a structure to store the information of which variants are located in which regions. To do this, we provide a function, `create_snp_map()`.  It takes input of `region_info` and `ref_snp_info`. It maps variants to regions based on the variant locations, and returns the result as `snp_map`, a list object containing variant information in each of the regions. In addition, the function checks the format of `region_info` to ensure that it matches the format required by cTWAS (e.g. adding `region_id` column if not available), and returns the output as updated `region_info`. 
+Additionally, we require `ref_snp_info` as a “reference” of the variants. `ref_snp_info` is a data frame, containing the positions and allele information of all the variants from the entire genome. This reference data needs to be mapped to the regions, i.e. we will need a structure to store the information of which variants are located in which regions. To do this, we provide a function, `create_snp_map()`.  It takes input of `region_info` and `ref_snp_info`. It maps variants to regions based on the variant locations, and returns the result as `snp_map`, a list object containing variant information in each of the regions. In addition, the function checks the format of `region_info` to ensure that it matches the format required by cTWAS (e.g. adding "region_id" column if not available), and returns the output as updated `region_info`. 
 
 We have the lists of reference variant information from UK Biobank European population from all the LD regions in the genome in [hg38](https://uchicago.box.com/s/t089or92dkovv0epkrjvxq8r9db9ys99) and [hg19](https://uchicago.box.com/s/ufko2gjagcb693dob4khccqubuztb9pz). They are also available on the University of Chicago RCC cluster at `/project2/xinhe/shared_data/multigroup_ctwas/LD_reference/`. 
 
@@ -191,7 +191,15 @@ It also produces other output:
 
 *Note*: we used sample data (from chr16) in this example, however, in real data analysis, we should use data from the *entire genome* to estimate parameters.
 
-To interpret and visualize the results, please see the tutorial "Summarizing and visualizing cTWAS results" for details.
+To interpret and visualize the results, please see the tutorial ["Summarizing and visualizing cTWAS results"][summarizing_results_tutorial] for details.
 
-One potential issue of cTWAS is the “cross-region” genes. These are genes whose variants in the weight models span two LD regions. Under the current setting of running cTWAS without LD, this is likely not a concern. Nevertheless, it might be helpful to check the tutorial “Post-processing cTWAS results” - see the section “Cross-region LD”. We note that “LD mismatch” is not an issue when running without LD.
+One potential issue of cTWAS is the “cross-region” genes. These are genes whose variants in the weight models span two LD regions. Under the current setting of running cTWAS without LD, this is likely not a concern. Nevertheless, it might be helpful to check the tutorial [“Post-processing cTWAS results”][postprocessing_tutorial] - see the section “Cross-region LD”. We note that “LD mismatch” is not an issue when running without LD.
+
+
+[minimal_tutorial]: https://xinhe-lab.github.io/multigroup_ctwas/articles/minimal_tutorial.html
+[preparing_input_data_tutorial]: https://xinhe-lab.github.io/multigroup_ctwas/articles/preparing_input_data.html
+[running_ctwas_analysis_tutorial]: https://xinhe-lab.github.io/multigroup_ctwas/articles/running_ctwas_analysis.html
+[summarizing_results_tutorial]: https://xinhe-lab.github.io/multigroup_ctwas/articles/summarizing_results.html
+[postprocessing_tutorial]: https://xinhe-lab.github.io/multigroup_ctwas/articles/postprocessing.html
+[utility_functions_tutorial]:https://xinhe-lab.github.io/multigroup_ctwas/articles/utility_functions.html
 
