@@ -64,6 +64,7 @@ preprocess_weights <- function(weight_file,
                                LD_map = NULL,
                                type,
                                context,
+                               weight_name = paste0(context, "_", type),
                                weight_format = c("PredictDB", "FUSION"),
                                drop_strand_ambig = TRUE,
                                filter_protein_coding_genes = TRUE,
@@ -109,16 +110,8 @@ preprocess_weights <- function(weight_file,
 
   snp_info <- as.data.frame(rbindlist(snp_map, idcol = "region_id"))
 
-  # set default type and context
-  if (missing(type)) {
-    type <- "gene"
-  }
-
-  if (missing(context)) {
-    context <- file_path_sans_ext(basename(weight_file))
-  }
-
   loginfo("Load weight: %s", weight_file)
+  loginfo("weight_name: %s", weight_name)
   loginfo("type: %s", type)
   loginfo("context: %s", context)
 
@@ -129,10 +122,8 @@ preprocess_weights <- function(weight_file,
                                      fusion_method = fusion_method,
                                      fusion_genome_version = fusion_genome_version,
                                      ncore = ncore)
-  weight_name <- loaded_weights_res$weight_name
   weight_table <- loaded_weights_res$weight_table
   cov_table <- loaded_weights_res$cov_table
-  loginfo("weight_name: %s", weight_name)
 
   if (is.null(cov_table)) {
     load_predictdb_LD <- FALSE

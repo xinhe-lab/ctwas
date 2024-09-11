@@ -68,8 +68,6 @@ load_predictdb_weights <- function(weight_file,
   stopifnot(file.exists(weight_file))
 
   loginfo("Load PredictDB weights")
-
-  weight_name <- file_path_sans_ext(basename(weight_file))
   sqlite <- dbDriver("SQLite")
   db <- dbConnect(sqlite, weight_file)
   query <- function(...) dbGetQuery(db, ...)
@@ -105,8 +103,7 @@ load_predictdb_weights <- function(weight_file,
   }
   dbDisconnect(db)
 
-  return(list("weight_name" = weight_name,
-              "weight_table" = weight_table,
+  return(list("weight_table" = weight_table,
               "extra_table" = extra_table,
               "cov_table" = cov_table))
 }
@@ -144,7 +141,6 @@ load_fusion_weights <- function(weight_dir,
   stopifnot(dir.exists(weight_dir))
 
   loginfo("Load FUSION weights")
-  weight_name <- file_path_sans_ext(basename(weight_dir))
 
   # list FUSION weight Rdata files
   wgt_dir <- dirname(weight_dir)
@@ -196,8 +192,7 @@ load_fusion_weights <- function(weight_dir,
 
   cov_table <- NULL
 
-  return(list("weight_name" = weight_name,
-              "weight_table" = weight_table,
+  return(list("weight_table" = weight_table,
               "extra_table" = extra_table,
               "cov_table" = cov_table))
 }
@@ -403,18 +398,17 @@ convert_fusion_to_predictdb <- function(
                                             fusion_method = fusion_method,
                                             fusion_genome_version = fusion_genome_version,
                                             make_extra_table = make_extra_table)
-  weight_name <- loaded_weights_res$weight_name
   weight_table <- loaded_weights_res$weight_table
   extra_table <- loaded_weights_res$extra_table
 
-  if (missing(outname))
-    outname <- weight_name
+  if (missing(outname)){
+    outname <- file_path_sans_ext(basename(weight_dir))
+  }
 
   # write PredictDB weights
   write_predictdb(weight_table, extra_table, cov_table, outputdir, outname)
 
-  return(list("weight_name" = weight_name,
-              "weight_table" = weight_table,
+  return(list("weight_table" = weight_table,
               "extra_table" = extra_table,
               "cov_table" = cov_table))
 }

@@ -12,6 +12,7 @@ preprocess_weights(
   LD_map = NULL,
   type,
   context,
+  weight_name = paste0(context, "_", type),
   weight_format = c("PredictDB", "FUSION"),
   drop_strand_ambig = TRUE,
   filter_protein_coding_genes = TRUE,
