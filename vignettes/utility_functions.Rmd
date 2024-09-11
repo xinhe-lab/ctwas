@@ -36,9 +36,7 @@ cTWAS provides a function `convert_geno_to_LD_matrix()` to create LD matrices fr
 
 This function needs genotype files (`genotype_files`) and variant information files (`varinfo_files`) in PLINK format, and region definitions (`region_info`) as input, and it converts genotype data to LD matrices region-by-region, and save the LD correlation matrices (`.RDS` files) and corresponding variant information (`.Rvar` files) to the directory `outputdir`. It returns a data frame `region_metatable`, which contains region definitions from `region_info` and two additional columns "LD_file" and "SNP_file". "LD_file" stores the filenames to the LD matrices (`.RDS` files),  "SNP_file" stores the filenames of corresponding variant information (`.Rvar` files). 
  
-Below is an example for creating LD matrices using 1000 Genomes European genotype data.
-
-You can download the 1000 Genomes European genotype data [here](https://uchicago.box.com/s/qqfq7wsl1fcbfjrcpwvyyspvfud3h2xa).
+Below is an example for creating LD matrices in b37 using 1000 Genomes European data. 
 
 ```{r convert_geno_to_LD_matrix, eval=FALSE}
 ldref_dir <- "./1000G_EUR_Phase3_plink"
@@ -60,10 +58,9 @@ region_metatable <- convert_geno_to_LD_matrix(region_info,
 ```
 
 
-You can download the precomputed LD files using the 1000 Genomes European genotype data [here](https://uchicago.box.com/s/bi7yy7461hdd07xafyk0qlji1kwmleu7).
+We provided precomputed LD matrices in b37 for 1000 Genomes European genotype data [here](https://uchicago.box.com/s/bi7yy7461hdd07xafyk0qlji1kwmleu7). The genotype data were downloaded from the reference files of LDSC [here](https://zenodo.org/records/7768714).
 
-We provide example R scripts to create LD files for UK biobank or 1000 genomes genotype files [here](https://github.com/xinhe-lab/ctwas/tree/singlegroup/inst/extdata/scripts).
-
+We provide example R scripts to create LD matrices for UK biobank or 1000 genomes genotype data [here](https://github.com/xinhe-lab/ctwas/tree/multigroup/inst/extdata/scripts). 
 
 ### Using FUSION weights
 

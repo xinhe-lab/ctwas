@@ -72,10 +72,7 @@ repository useful for your work, please cite:
 
 ## Useful resources
 
-We have pre-computed the LD matrices of European samples from UK Biobank. 
-They can be downloaded [here](https://uchicago.box.com/s/jqocacd2fulskmhoqnasrknbt59x3xkn). 
-
-We have the lists of reference variant information from all the LD matrices in the genome in [hg38](https://uchicago.box.com/s/t089or92dkovv0epkrjvxq8r9db9ys99) and [hg19](https://uchicago.box.com/s/ufko2gjagcb693dob4khccqubuztb9pz).
+We have pre-computed reference LD matrices and variant information of European samples from UK Biobank. They can be downloaded [here](https://uchicago.box.com/s/jqocacd2fulskmhoqnasrknbt59x3xkn).  
 
 cTWAS requires the expression prediction models, or weights, of genes. 
 The pre-computed weights of GTEx expression and splicing traits can be downloaded from [PredictDB](https://predictdb.org/post/2021/07/21/gtex-v8-models-on-eqtl-and-sqtl/). 

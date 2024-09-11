@@ -24,12 +24,15 @@ convert_geno_to_LD_matrix(
 chrom, start, stop, and region_id.}
 
 \item{genotype_files}{Reference genotype files in PLINK binary genotype data
-in .pgen or .bed format.}
+in .pgen or .bed format. It should contain files for all chromosomes
+(from 1 to 22), one file per chromosome.}
 
 \item{varinfo_files}{Reference variant information files in PLINK
-.pvar or .bim format. The output will use the genome positions in \code{varinfo_files}.}
+.pvar or .bim format. It could have one file per chromosome or
+have one big file for all chromosomes.
+The output will use the genome positions in \code{varinfo_files}.}
 
-\item{chrom}{a vector of chromosomes to process genotype data.}
+\item{chrom}{a vector of chromosome numbers to process genotype data.}
 
 \item{outputdir}{Output directory.}
 
