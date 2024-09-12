@@ -74,12 +74,6 @@ The IDs of molecular traits ("id") used in cTWAS is in the format of
 
 ```{r add_molecular_ids}
 finemap_res$molecular_id <- get_molecular_ids(finemap_res)
-```
-
-
-We can also convert Z-scores to p-values, and add to the fine-mapping results. 
-```{r add_pval}
-finemap_res$p <- z2p(finemap_res$z)
 head(finemap_res)
 ```
 
@@ -113,18 +107,24 @@ ctwas_parameters
 ```
 
 
-This function returns several output: `group_prior` are the estimated prior inclusion probabilities for molecular traits and variants, `group_prior_var` are estimated prior effect size variance for molecular traits and variants, `enrichment` are estimated enrichment of molecular traits over variants, defined as ratios of prior inclusion probabilities. Other output parameters are related to the proportion of variance explained (PVE) by molecular traits or variants: `group_pve` are PVE of molecular traits and variants, `total_pve` is the total PVE from all molecular traits and variants (sum of `group_pve`) - basically heritability from all included variables (effectively all common variants), `attributable_pve` are the proportion of heritability mediated by molecular traits and variants.  
+This function returns several output: `group_prior` are the estimated prior inclusion probabilities for molecular traits and variants; `group_prior_var` are estimated prior effect size variance for molecular traits and variants; `enrichment` are estimated enrichment of molecular traits over variants, defined as ratios of prior inclusion probabilities. Other output parameters are related to the proportion of variance explained (PVE) by molecular traits or variants: `group_pve` are PVE of molecular traits and variants; `total_pve` is the total PVE from all molecular traits and variants (sum of `group_pve`) - basically heritability from all included variables (effectively all common variants); `attributable_pve` are the proportion of heritability mediated by molecular traits and variants.  
 
 These PVE values allow us to compute how heritability of the phenotype is partitioned among variants and groups of molecular traits. From our experience, in single-tissue gene expression analysis, genes typically explain around 5-15% of the total heritability of the trait. In multi-group analysis, the heritability of genes could become lower. 
 
 ## Inspecting and summarizing the cTWAS results
+
+We can add p-values (computed from Z-scores) to the fine-mapping results. 
+```{r add_pval}
+finemap_res$p <- z2p(finemap_res$z)
+head(finemap_res)
+```
+
 
 We can view the molecular traits above a certain PIP cutoff, e.g. PIP > 0.8. We also generally recommend limiting the results to molecular traits within credible sets. 
 
 ```{r interpret_res}
 subset(finemap_res, group != "SNP" & susie_pip > 0.8 & cs_index != 0)
 ```
-
 
 Below we describe how to aggregate the information from molecular traits targeting the same genes, to compute the evidence of a gene being causal (denoted as gene PIPs below). Additionally, we will show how to add annotations (e.g. gene names and positions) to the cTWAS results that may be needed in downstream analysis. 
 
@@ -229,12 +229,13 @@ finemap_res <- anno_finemap_res(finemap_res,
 
 We could use the `combine_gene_pips()` function to compute gene PIPs across different types of molecular traits. Here we use `group_by = "gene_name"`, because molecular traits are mapped to their corresponding genes by the "gene_name" column.  
 
-```{r combined_pip_by_type, eval=FALSE}
+```{r combined_pip_by_type}
 combined_pip_by_type <- combine_gene_pips(finemap_res,
                                           group_by = "gene_name",
                                           by = "type",
                                           method = "combine_cs",
                                           filter_cs = TRUE)
+subset(combined_pip_by_type, combined_pip > 0.8)
 ```
 
 
@@ -248,7 +249,7 @@ We make locus plots to visualize the association of variants and molecular trait
 
 We use the `make_locusplot()` function to make locus plots for regions of interest. We need the fine-mapping result with position information, region ID, Ensembl gene annotation database (`ens_db`) for plotting the gene track, and optionally, preprocessed weights (`weights`) for plotting the QTL track. 
 
-```{r locus_plot_no_coloring, fig.width=10, fig.height=8}
+```{r locus_plot_1, fig.width=10, fig.height=8}
 make_locusplot(finemap_res,
                region_id = "16_71020125_72901251",
                ens_db = ens_db,
@@ -256,13 +257,16 @@ make_locusplot(finemap_res,
                highlight_pip = 0.8,
                filter_protein_coding_genes = TRUE,
                filter_cs = TRUE,
-               color_PIP_by_cs = TRUE)
+               color_pval_by = "cs",
+               color_pip_by = "cs")
 ```
 
 
-The locus plot shows several tracks in the example region in chromosome 6. The top one shows -log10(p-value) of the association of variants (from GWAS) and molecular traits (from the package computed z-scores) with the phenotype. We limit results to protein coding genes by default. The data points are colored by the correlations with the focal gene (by default, it uses the gene with the highest PIP, HPR in this case). Users could specify the focal gene by setting the argument `focal_gene`, e.g. `focal_gene = HPR`; or specify the focal ID by setting `focal_id`. The next track shows the PIPs of variants and molecular traits. By default, we limit results to credible sets in the PIP track (`filter_cs = TRUE`), and color data points by the "cs_index" (`color_PIP_by_cs = TRUE`).  We can draw a red dotted line to show the PIP cutoff of 0.8 by setting `highlight_pip = 0.8`. The next track shows the QTLs of the focal gene. You can set `weights = NULL`, if you don't want to plot the QTL track. The bottom is the gene track.
+The locus plot shows several tracks in the example region. The top one shows -log10(p-value) of the association of variants (from GWAS) and molecular traits (from the package computed z-scores) with the phenotype. The next track shows the PIPs of variants and molecular traits. By default, we limit PIP results to credible sets in the PIP track (`filter_cs = TRUE`). The next track shows the QTLs of the focal gene. By default, it chooses the molecular trait with the highest PIP ("HPR" in this case). We could specify the focal gene by setting the `focal_id` to the "ID" of interest, or `focal_gene` to the gene name of interest. If there are multiple molecular traits or contexts of the focal gene, it will automatically use the one with the highest PIP.  The bottom is the gene track. We limit results to protein coding genes by default. We can draw a red dotted line to show the PIP cutoff of 0.8 by setting `highlight_pip = 0.8`.
 
-The plotting function could color the molecular traits and SNPs based on the correlations among them. If we have saved correlation matrices in `cor_dir` when running cTWAS with LD, we could simply load those precomputed correlation matrices of the region using the function `load_region_cor()`. 
+There are a few ways to color the data points in the p-value and PIP tracks, by setting `color_pval_by` and `color_pip_by` options.  "cs" would color the data points by credible sets (default option); "LD" would color data points by correlations with the focal gene; "none" would use the same colors for all data points, except for the focal gene. 
+
+To color data points by correlations with the focal gene, We need correlation matrices among molecular traits and SNPs. If we have saved correlation matrices in `cor_dir` when running cTWAS with LD, we could simply load those precomputed correlation matrices of the region using the function `load_region_cor()`. 
 
 ```{r load_region_cor_res}
 region_id <- "16_71020125_72901251"
@@ -284,7 +288,7 @@ cor_res <- get_region_cor(region_id,
 ```
 
 
-The locus plot shows the whole region by default. We could zoom in a region of interest by specifying the `locus_range` argument: 
+The locus plot above shows the whole region. We could zoom in a region of interest by specifying the `locus_range` argument. In the example below, we zoom in the region, color the p-value track by correlations with the focal gene, and color the PIP track by credible sets.
 
 ```{r locus_plot_2, fig.width=10, fig.height=8}
 make_locusplot(finemap_res,
@@ -297,13 +301,14 @@ make_locusplot(finemap_res,
                R_gene = cor_res$R_gene,
                filter_protein_coding_genes = TRUE,
                filter_cs = TRUE,
-               color_PIP_by_cs = TRUE)
+               color_pval_by = "LD",
+               color_pip_by = "cs")
 ```
 
 
 In this plot, one can see that there are several genes with good associations with the phenotype (top panel), but only HPR in liver and HP in adipose are prioritized by cTWAS (second panel). This is because once HPR, HP and other likely causal variants are selected by cTWAS, there is no remaining association left in other molecular traits. This means that other associations are likely due to their correlations with the prioritized genes rather than representing independent signals.
 
-For the "no-LD" version, we could still make the locus plot. The difference is that it could not color the data points based on the correlations to the focal gene, and could not limit results in the PIP track to credible sets.
+For the "no-LD" version, we could still make the locus plot. The difference is that it could not limit results to credible sets, and could not color the data points by correlations or credible set information.
 
 [minimal_tutorial]: https://xinhe-lab.github.io/multigroup_ctwas/articles/minimal_tutorial.html
 [preparing_input_data_tutorial]: https://xinhe-lab.github.io/multigroup_ctwas/articles/preparing_input_data.html
