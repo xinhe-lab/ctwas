@@ -25,7 +25,21 @@
 #'
 #' @param filter_cs If TRUE, limits to credible sets.
 #'
-#' @param color_PIP_by_cs If TRUE, color PIP track by credible sets.
+#' @param color_pval_by Options to color the p-value track.
+#' "LD": colors the p-value track by the correlations to the focal gene.
+#' "cs": colors the p-value track by the credible sets.
+#' "none": uses the same color for non-focal genes.
+#'
+#' @param color_pip_by Options to color the PIP track.
+#' "LD": colors the PIP track by the correlations to the focal gene.
+#' "cs": colors the PIP track by the credible sets.
+#' "none": uses the same color for non-focal genes.
+#'
+#' @param LD.colors Colors for correlation levels.
+#'
+#' @param cs.colors Colors for credible sets.
+#'
+#' @param focal.colors Colors for non-focal and focal gene.
 #'
 #' @param label_QTLs If TRUE, label SNP IDs in the QTL panel.
 #'
@@ -49,6 +63,8 @@
 #' @param legend.text.size Font size for legend text
 #'
 #' @param legend.position position to put legends. If "none", no legends will be shown.
+#'
+#' @param genelabel.cex.text Size for gene label text.
 #'
 #' @param panel.heights Relative heights of the panels.
 #'
@@ -97,35 +113,53 @@ make_locusplot <- function(finemap_res,
                            focal_gene = NULL,
                            filter_protein_coding_genes = TRUE,
                            filter_cs = TRUE,
-                           color_PIP_by_cs = TRUE,
+                           color_pval_by = c("cs", "LD", "none"),
+                           color_pip_by = c("cs", "LD", "none"),
+                           LD.colors = c("grey", "blue", "purple", "salmon"),
+                           cs.colors = c("grey", "firebrick", "dodgerblue", "forestgreen", "darkmagenta", "darkorange"),
+                           focal.colors = c("grey", "salmon"),
                            label_QTLs = TRUE,
                            highlight_pval = NULL,
                            highlight_pip = 0.8,
                            highlight_pos = NULL,
-                           point.sizes = c(1, 3.5),
+                           point.sizes = c(1, 3),
                            point.alpha = c(0.4, 0.6),
                            point.shapes = c(16, 15, 18, 17, 10, 12, 14, 11),
                            label.text.size = 2.5,
                            max.overlaps = 10,
-                           legend.text.size = 10,
+                           axis.text.size = 8,
+                           axis.title.size = 10,
+                           legend.text.size = 9,
                            legend.position = "top",
+                           genelabel.cex.text = 0.7,
                            panel.heights = c(4, 4, 1, 4),
                            verbose = FALSE) {
 
-  if (is.null(finemap_res$chrom) || is.null(finemap_res$pos)){
-    stop("Please add 'chrom' and 'pos' columns to finemapping result!")
-  }
+  color_pval_by <- match.arg(color_pval_by)
+  color_pip_by <- match.arg(color_pip_by)
 
-  if (anyNA(finemap_res$pos)){
+  if (!inherits(ens_db,"EnsDb"))
+    stop("'ens_db' should be a EnsDb object.")
+
+  if (is.null(finemap_res$chrom) || is.null(finemap_res$pos))
+    stop("Please add 'chrom' and 'pos' columns to finemapping result!")
+
+  if (anyNA(finemap_res$pos))
     stop("Missing values found in the 'pos' column of finemapping result!")
-  }
 
   # input data should be a data frame
   finemap_res <- as.data.frame(finemap_res)
   # select finemapping result for the target region
   finemap_region_res <- finemap_res[which(finemap_res$region_id==region_id), ]
-  # convert z to -log10(pval)
-  finemap_region_res$p <- z2p(finemap_region_res$z, neg_log10_p = TRUE)
+
+  if (is.null(finemap_region_res$p)){
+    # convert z to -log10(pval)
+    finemap_region_res$p <- z2p(finemap_region_res$z, neg_log10_p = TRUE)
+  } else {
+    if (max(finemap_region_res$p) <= 1) {
+      finemap_region_res$p <- -log10(finemap_region_res$p)
+    }
+  }
 
   # add object_type to plot SNP and non-SNP categories with different sizes and alphas
   finemap_region_res$object_type <- finemap_region_res$type
@@ -197,31 +231,46 @@ make_locusplot <- function(finemap_res,
   chrom <- unique(finemap_region_res$chrom)
   loginfo("Range of locus: chr%s:%s-%s", chrom, locus_range[1], locus_range[2])
 
-  # set colors for correlations to focal gene
-  if (!is.null(R_gene) && !is.null(R_snp_gene)) {
-    color_r2 <- TRUE
-    finemap_region_res$r2 <- NA
-    finemap_region_res$r2[finemap_region_res$type!="SNP"] <- R_gene[finemap_region_res$id[finemap_region_res$type!="SNP"], focal_id]^2
-    finemap_region_res$r2[finemap_region_res$type=="SNP"] <- R_snp_gene[finemap_region_res$id[finemap_region_res$type=="SNP"], focal_id]^2
-    finemap_region_res$r2[finemap_region_res$id == focal_id] <- 100
-    # r2 colors: lead gene: salmon, 0.4~1: purple, 0.2-0.4: "#7FC97F", others: gray
-    r2_colors <- c("0-0.1" = "gray50", "0.1-0.4" = "blue", "0.4-1" = "purple", "1" = "salmon")
-    finemap_region_res$r2_levels <- cut(finemap_region_res$r2,
-                                        breaks = c(0, 0.1, 0.4, 1, Inf),
-                                        labels = names(r2_colors))
-    finemap_region_res$r2_levels <- factor(finemap_region_res$r2_levels, levels = rev(names(r2_colors)))
-  } else{
-    color_r2 <- FALSE
-    r2_colors <- c("0-1" = "gray50", "1" = "salmon")
-    finemap_region_res$r2 <- 0.1
-    finemap_region_res$r2[finemap_region_res$id == focal_id] <- 100
-    finemap_region_res$r2_levels <- cut(finemap_region_res$r2,
-                                        breaks = c(0, 1, Inf),
-                                        labels = names(r2_colors))
-    finemap_region_res$r2_levels <- factor(finemap_region_res$r2_levels, levels = rev(names(r2_colors)))
+  # set colors for LD with focal gene
+  if (color_pval_by == "LD" || color_pip_by == "LD") {
+    if (is.null(R_gene) || is.null(R_snp_gene)) {
+      loginfo("'R_gene' or 'R_snp_gene' not available. Cannot color by LD!")
+      color_pval_by[color_pval_by == "LD"] <- "none"
+      color_pip_by[color_pip_by == "LD"] <- "none"
+    } else {
+      finemap_region_res$r2 <- NA
+      finemap_region_res$r2[finemap_region_res$type!="SNP"] <- R_gene[finemap_region_res$id[finemap_region_res$type!="SNP"], focal_id]^2
+      finemap_region_res$r2[finemap_region_res$type=="SNP"] <- R_snp_gene[finemap_region_res$id[finemap_region_res$type=="SNP"], focal_id]^2
+      finemap_region_res$r2[finemap_region_res$id == focal_id] <- 100
+      LD_colors <- c("0-0.2" = LD.colors[1], "0.2-0.4" = LD.colors[2],
+                     "0.4-1" = LD.colors[3], "1" = LD.colors[4])
+      finemap_region_res$r2_levels <- cut(finemap_region_res$r2,
+                                          breaks = c(0, 0.2, 0.4, 1, Inf),
+                                          labels = names(LD_colors))
+      finemap_region_res$r2_levels <- factor(finemap_region_res$r2_levels, levels = rev(names(LD_colors)))
+    }
   }
 
-  # group levels
+  # set colors for credible sets
+  if (color_pval_by == "cs" || color_pip_by == "cs") {
+    if (is.null(finemap_region_res$cs_index)){
+      stop("'cs_index' not available. Cannot coloring by cs!")
+      color_pval_by[color_pval_by == "cs"] <- "none"
+      color_pip_by[color_pip_by == "cs"] <- "none"
+    } else {
+      cs_colors <- c("0" = cs.colors[1], "1" = cs.colors[2], "2" = cs.colors[3], "3" = cs.colors[4], "4" = cs.colors[5], "5" = cs.colors[6])
+      finemap_region_res$cs_index <- factor(finemap_region_res$cs_index, levels = names(cs_colors))
+    }
+  }
+
+  # set colors for focal and non-focal genes
+  if (color_pval_by == "none" || color_pip_by == "none") {
+    focal_colors <- c("non-focal" = focal.colors[1], "focal" = focal.colors[2])
+    finemap_region_res$focal_levels <- "non-focal"
+    finemap_region_res$focal_levels[finemap_region_res$id == focal_id] <- "focal"
+  }
+
+  # set shapes, sizes, and alpha for data points
   finemap_region_res$group <- factor(finemap_region_res$group,
                                      levels = c(setdiff(unique(finemap_region_res$group), "SNP"), "SNP"))
 
@@ -239,7 +288,6 @@ make_locusplot <- function(finemap_res,
   region_group <- levels(finemap_region_res$group)
   region_nonSNP_types <- setdiff(region_types, "SNP")
 
-  # set shapes, sizes, and alpha for data points
   point.shapes <- point.shapes[1:length(region_types)]
   names(point.shapes) <- c("SNP", region_nonSNP_types)
 
@@ -274,31 +322,44 @@ make_locusplot <- function(finemap_res,
   pval_plot_data <- loc$data
   p_pval <- ggplot(pval_plot_data, aes(x=.data$pos/1e6, y=.data$p, shape=.data$type,
                                        size=.data$object_type, alpha=.data$object_type)) +
-    geom_point(aes(color=.data$r2_levels)) +
-    geom_text_repel(aes(label=.data$label), size=label.text.size, color="black", max.overlaps = max.overlaps, na.rm = TRUE) +
+    geom_text_repel(aes(label=.data$label), size=label.text.size, color="black",
+                    max.overlaps = max.overlaps, na.rm = TRUE) +
     scale_shape_manual(values = point.shapes) +
     scale_alpha_manual(values = point.alpha, guide="none") +
     scale_size_manual(values = point.sizes, guide="none") +
     xlim(loc$xrange/1e6) +
-    labs(x = "", y = expression(-log[10]("p-val")), shape = "", color = expression(R^2)) +
+    labs(x = "", y = expression(-log[10]("p-val")), shape = "") +
     theme_bw() +
     theme(legend.position = legend.position,
-          legend.spacing.x = grid::unit(1.0, 'cm'),
+          legend.spacing.x = unit(1.0, 'cm'),
+          legend.title = element_text(size=legend.text.size),
           legend.text = element_text(size=legend.text.size),
+          axis.title = element_text(size=axis.title.size),
+          axis.text = element_text(size=axis.text.size),
           axis.ticks.x = element_blank(),
           axis.text.x = element_blank(),
           panel.border= element_blank(),
           axis.line = element_line(colour = "black"),
           plot.margin = margin(b=0, l=10, t=10, r=10))
 
-  if (color_r2) {
+  if (color_pval_by == "cs") {
     p_pval <- p_pval +
-      scale_color_manual(values = r2_colors) +
+      geom_point(aes(color=.data$cs_index)) +
+      scale_color_manual(values = cs_colors) +
+      labs(color = "CS") +
+      guides(shape = guide_legend(order = 1, override.aes = list(size = legend.sizes)),
+             color = guide_legend(order = 2))
+  } else if (color_pval_by == "LD") {
+    p_pval <- p_pval +
+      geom_point(aes(color=.data$r2_levels)) +
+      scale_color_manual(values = LD_colors) +
+      labs(color = expression(R^2)) +
       guides(shape = guide_legend(order = 1, override.aes = list(size = legend.sizes)),
              color = guide_legend(order = 2))
   } else {
     p_pval <- p_pval +
-      scale_color_manual(values = r2_colors, guide="none") +
+      geom_point(aes(color=.data$focal_levels)) +
+      scale_color_manual(values = focal_colors, guide="none") +
       guides(shape = guide_legend(override.aes = list(size = legend.sizes)))
   }
 
@@ -312,17 +373,10 @@ make_locusplot <- function(finemap_res,
     loginfo("Making PIP panel ...")
   }
   pip_plot_data <- loc$data
-  if (!is.null(pip_plot_data$cs_index)){
-    # pip_plot_data$cs_index <- as.factor(pip_plot_data$cs_index)
-    cs_colors <- c("0" = "gray50", "1" = "firebrick", "2" = "dodgerblue", "3" = "forestgreen", "4" = "darkmagenta", "5" = "darkorange")
-    pip_plot_data$cs_index <- factor(pip_plot_data$cs_index, levels = names(cs_colors))
-    # limit to credible sets (if cs_index is available)
-    if (filter_cs) {
-      loginfo("Limit PIPs to credible sets")
-      pip_plot_data <- pip_plot_data[pip_plot_data$cs_index!=0,]
-    }
-  } else {
-    color_PIP_by_cs <- FALSE
+  # limit to credible sets (if cs_index is available)
+  if (filter_cs && !is.null(pip_plot_data$cs_index)) {
+    loginfo("Limit PIPs to credible sets")
+    pip_plot_data <- pip_plot_data[pip_plot_data$cs_index!=0,]
   }
 
   p_pip <- ggplot(pip_plot_data, aes(x=.data$pos/1e6, y=.data$susie_pip, shape=.data$type,
@@ -333,34 +387,34 @@ make_locusplot <- function(finemap_res,
     scale_size_manual(values = point.sizes, guide="none") +
     xlim(loc$xrange/1e6) +
     ylim(0,1) +
+    labs(x = "", y = "cTWAS PIP", shape = "") +
     theme_bw() +
     theme(legend.position = legend.position,
-          legend.spacing.x = grid::unit(1.0, 'cm'),
+          legend.spacing.x = unit(1.0, 'cm'),
+          legend.title = element_text(size=legend.text.size),
           legend.text = element_text(size=legend.text.size),
+          axis.title = element_text(size=axis.title.size),
+          axis.text = element_text(size=axis.text.size),
           axis.ticks.x = element_blank(),
           axis.text.x = element_blank(),
           panel.border= element_blank(),
           axis.line = element_line(colour = "black"),
           plot.margin = margin(b=0, l=10, t=10, r=10))
 
-  if (color_PIP_by_cs){
+  if (color_pip_by == "cs") {
     p_pip <- p_pip +
       geom_point(aes(color=.data$cs_index)) +
-      labs(color = "cs") +
-      labs(x = "", y = "cTWAS PIP", shape = "", color = "CS") +
-      scale_color_manual(values = cs_colors)
+      scale_color_manual(values = cs_colors) +
+      labs(color = "CS")
+  } else if (color_pip_by == "LD") {
+    p_pip <- p_pip +
+      geom_point(aes(color=.data$r2_levels)) +
+      scale_color_manual(values = LD_colors) +
+      labs(color = expression(R^2))
   } else {
-    if (color_r2) {
-      p_pip <- p_pip +
-        geom_point(aes(color=.data$r2_levels)) +
-        scale_color_manual(values = r2_colors) +
-        labs(x = "", y = "cTWAS PIP", shape = "", color = expression(R^2))
-    } else {
-      p_pip <- p_pip +
-        geom_point(aes(color=.data$r2_levels)) +
-        scale_color_manual(values = r2_colors, guide="none") +
-        labs(x = "", y = "cTWAS PIP", shape = "")
-    }
+    p_pip <- p_pip +
+      geom_point(aes(color=.data$focal_levels)) +
+      scale_color_manual(values = focal_colors, guide="none")
   }
 
   if (!is.null(highlight_pip)) {
@@ -376,25 +430,26 @@ make_locusplot <- function(finemap_res,
     p_qtl <- ggplot(finemap_qtl_res, aes(x=.data$pos/1e6)) +
       geom_rect(aes(xmin=loc$xrange[1]/1e6, xmax=loc$xrange[2]/1e6, ymin=0, ymax=1),
                 fill="gray90") +
-      geom_segment(aes(x=.data$pos/1e6, xend=.data$pos/1e6, y=0, yend=1), color="salmon") +
+      geom_segment(aes(x=.data$pos/1e6, xend=.data$pos/1e6, y=0, yend=1), color=focal.colors[2]) +
       labs(title = paste(focal_gene_name, focal_gene_context, focal_gene_type),
            y = "QTL") +
       theme(axis.title.x = element_blank(),
             axis.text.x = element_blank(),
             axis.text.y = element_blank(),
+            axis.title = element_text(size=axis.title.size),
+            axis.text = element_text(size=axis.text.size),
             axis.ticks.x = element_blank(),
             axis.ticks.y = element_blank(),
-            plot.title = element_text(hjust = 0.5, size=10),
+            plot.title = element_text(hjust = 0.5, size=legend.text.size),
             panel.background = element_blank(),
             panel.grid = element_blank(),
             panel.border = element_blank(),
-            # strip.text.y.left = element_text(angle=0, size=8),
-            # strip.background = element_blank(),
             plot.margin = margin(b=0, l=10, t=0, r=10))
 
     if (label_QTLs){
       p_qtl <- p_qtl +
-        geom_text_repel(aes(y=0.5, label=.data$id), size=label.text.size, color="black", max.overlaps = max.overlaps)
+        geom_text_repel(aes(y=0.5, label=.data$id), size=label.text.size,
+                        color="black", max.overlaps = max.overlaps)
     }
   } else {
     p_qtl <- NULL
@@ -405,13 +460,16 @@ make_locusplot <- function(finemap_res,
     loginfo("Making gene track panel ...")
   }
   p_genes <- gg_genetracks(loc,
-                           filter_gene_biotype=filter_gene_biotype,
-                           xticks=FALSE,
-                           text_pos="top") +
+                           filter_gene_biotype = filter_gene_biotype,
+                           xticks = FALSE,
+                           text_pos = "top",
+                           cex.text = genelabel.cex.text) +
     labs(x = paste0("chr", chrom)) +
     theme_bw() +
     theme(legend.position = "none",
-          panel.border= element_blank(),
+          panel.border = element_blank(),
+          axis.title = element_text(size=axis.text.size+1),
+          axis.text = element_text(size=axis.text.size),
           plot.margin = margin(b=10, l=10, t=0, r=10))
 
   if (!is.null(highlight_pos)){
@@ -419,16 +477,16 @@ make_locusplot <- function(finemap_res,
     highlight_pos <- as.integer(highlight_pos)
 
     p_pvalue <- p_pvalue +
-      geom_vline(xintercept = highlight_pos/1e6, linetype="dotted", color = "blue", size=0.5)
+      geom_vline(xintercept = highlight_pos/1e6, linetype="dotted", color = "cyan", size=0.5)
 
     p_pip <- p_pip +
-      geom_vline(xintercept = highlight_pos/1e6, linetype="dotted", color = "blue", size=0.5)
+      geom_vline(xintercept = highlight_pos/1e6, linetype="dotted", color = "cyan", size=0.5)
 
     p_qtl <- p_qtl +
-      geom_vline(xintercept = highlight_pos/1e6, linetype="dotted", color = "blue", size=0.5)
+      geom_vline(xintercept = highlight_pos/1e6, linetype="dotted", color = "cyan", size=0.5)
 
     p_genes <- p_genes +
-      geom_vline(xintercept = highlight_pos/1e6, linetype="dotted", color = "blue", size=0.5)
+      geom_vline(xintercept = highlight_pos/1e6, linetype="dotted", color = "cyan", size=0.5)
   }
 
   if (verbose) {

@@ -16,18 +16,26 @@ make_locusplot(
   focal_gene = NULL,
   filter_protein_coding_genes = TRUE,
   filter_cs = TRUE,
-  color_PIP_by_cs = TRUE,
+  color_pval_by = c("cs", "LD", "none"),
+  color_pip_by = c("cs", "LD", "none"),
+  LD.colors = c("grey", "blue", "purple", "salmon"),
+  cs.colors = c("grey", "firebrick", "dodgerblue", "forestgreen", "darkmagenta",
+    "darkorange"),
+  focal.colors = c("grey", "salmon"),
   label_QTLs = TRUE,
   highlight_pval = NULL,
   highlight_pip = 0.8,
   highlight_pos = NULL,
-  point.sizes = c(1, 3.5),
+  point.sizes = c(1, 3),
   point.alpha = c(0.4, 0.6),
   point.shapes = c(16, 15, 18, 17, 10, 12, 14, 11),
   label.text.size = 2.5,
   max.overlaps = 10,
-  legend.text.size = 10,
+  axis.text.size = 8,
+  axis.title.size = 10,
+  legend.text.size = 9,
   legend.position = "top",
+  genelabel.cex.text = 0.7,
   panel.heights = c(4, 4, 1, 4),
   verbose = FALSE
 )
@@ -57,7 +65,21 @@ If NULL, the entire region will be plotted (with 100 bp flanks on both sides).}
 
 \item{filter_cs}{If TRUE, limits to credible sets.}
 
-\item{color_PIP_by_cs}{If TRUE, color PIP track by credible sets.}
+\item{color_pval_by}{Options to color the p-value track.
+"LD": colors the p-value track by the correlations to the focal gene.
+"cs": colors the p-value track by the credible sets.
+"none": uses the same color for non-focal genes.}
+
+\item{color_pip_by}{Options to color the PIP track.
+"LD": colors the PIP track by the correlations to the focal gene.
+"cs": colors the PIP track by the credible sets.
+"none": uses the same color for non-focal genes.}
+
+\item{LD.colors}{Colors for correlation levels.}
+
+\item{cs.colors}{Colors for credible sets.}
+
+\item{focal.colors}{Colors for non-focal and focal gene.}
 
 \item{label_QTLs}{If TRUE, label SNP IDs in the QTL panel.}
 
@@ -81,6 +103,8 @@ Exclude text labels when they overlap too many other things.}
 \item{legend.text.size}{Font size for legend text}
 
 \item{legend.position}{position to put legends. If "none", no legends will be shown.}
+
+\item{genelabel.cex.text}{Size for gene label text.}
 
 \item{panel.heights}{Relative heights of the panels.}
 
