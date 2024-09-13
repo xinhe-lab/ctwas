@@ -139,8 +139,8 @@ We have several ways of combining PIPs:
 
 + "combine_cs": it first sums PIPs of molecular traits of a genes in each credible set, and then combine PIPs using the following formula: $1 - \prod_k (1 - \text{PIP}_k)$, where $\text{PIP}_k$ is the summed PIP of the $k$-th credible set of a gene. This is the default option for combining PIPs from fine-mapping with LD. 
 We also provide two other options:
-+ "sum": sum over PIPs of all molecular traits for the same gene. We will use this option for for combining PIPs from fine-mapping without LD. 
-+ "combine_all":  use the above formula for all molecular traits for the same gene, where $\text{PIP}_k$ is the PIP of the $k$-th molecular traits or contexts of a gene. 
++ "sum": sum over PIPs of all molecular traits for the same gene. This summation is the expected number of causal molecular traits in this gene, and could be higher than 1. We will use this option for combining PIPs from fine-mapping without LD. 
++ "combine_all": use the above formula for all molecular traits for the same gene, where $\text{PIP}_k$ is the PIP of the $k$-th molecular traits or contexts of a gene. 
 
 For example, when using gene expression (eQTL) data from multiple tissues, we can use the function to compute combined PIPs across contexts, using the "combine_cs" method. By default, we limit the results to molecular traits within credible sets (`filter_cs = TRUE`) . 
 
