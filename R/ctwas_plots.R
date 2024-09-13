@@ -19,6 +19,8 @@
 #' @param locus_range a vector of start and end positions to define the region boundary to be plotted.
 #' If NULL, the entire region will be plotted (with 100 bp flanks on both sides).
 #'
+#' @param focal_id the focal ID.
+#'
 #' @param focal_gene the focal gene name. By default, use the gene with the highest PIP.
 #'
 #' @param filter_protein_coding_genes If TRUE, limits to protein coding genes only.
@@ -60,7 +62,11 @@
 #' @param max.overlaps Setting for geom_text_repel() function to label texts.
 #' Exclude text labels when they overlap too many other things.
 #'
-#' @param legend.text.size Font size for legend text
+#' @param axis.text.size Font size for axis label text.
+#'
+#' @param axis.title.size Font size for axis title text.
+#'
+#' @param legend.text.size Font size for legend text.
 #'
 #' @param legend.position position to put legends. If "none", no legends will be shown.
 #'
@@ -170,7 +176,7 @@ make_locusplot <- function(finemap_res,
   if (is.null(finemap_region_res$gene_name)){
     loginfo("'gene_name' not found in finemap_res. Use 'molecular_id' instead.")
     if (is.null(finemap_region_res$molecular_id)) {
-      finemap_region_res$molecular_id <- add_molecular_ids(finemap_region_res)
+      finemap_region_res$molecular_id <- get_molecular_ids(finemap_region_res)
     }
     finemap_region_res$gene_name <- finemap_region_res$molecular_id
   }

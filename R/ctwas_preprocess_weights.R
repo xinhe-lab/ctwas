@@ -13,11 +13,14 @@
 #' @param LD_map a data frame with filenames of LD matrices and SNP information for the regions.
 #' Required when \code{load_predictdb_LD = FALSE}.
 #'
-#' @param type a string, specifying QTL type of each weight file, e.g. expression, splicing, protein.
+#' @param type a string, specifying QTL type of the weight file, e.g. expression, splicing, protein.
 #'
-#' @param context a string, specifying tissue/cell type/condition of each weight file, e.g. Liver, Lung, Brain.
+#' @param context a string, specifying context (tissue/cell type) of the weight file, e.g. Liver, Lung, Brain.
 #'
-#' @param weight_format a string, specifying format of each weight file, e.g. PredictDB, FUSION.
+#' @param weight_name a string, specifying name of the weight file.
+#' By default, it is \code{weight_name = paste0(context, "_", type)}
+#'
+#' @param weight_format a string, specifying format of the weight file, e.g. PredictDB, FUSION.
 #'
 #' @param drop_strand_ambig If TRUE remove strand ambiguous variants (A/T, G/C).
 #'

@@ -59,6 +59,8 @@ color data points with correlations with the focal gene.}
 \item{locus_range}{a vector of start and end positions to define the region boundary to be plotted.
 If NULL, the entire region will be plotted (with 100 bp flanks on both sides).}
 
+\item{focal_id}{the focal ID.}
+
 \item{focal_gene}{the focal gene name. By default, use the gene with the highest PIP.}
 
 \item{filter_protein_coding_genes}{If TRUE, limits to protein coding genes only.}
@@ -100,7 +102,11 @@ If NULL, the entire region will be plotted (with 100 bp flanks on both sides).}
 \item{max.overlaps}{Setting for geom_text_repel() function to label texts.
 Exclude text labels when they overlap too many other things.}
 
-\item{legend.text.size}{Font size for legend text}
+\item{axis.text.size}{Font size for axis label text.}
+
+\item{axis.title.size}{Font size for axis title text.}
+
+\item{legend.text.size}{Font size for legend text.}
 
 \item{legend.position}{position to put legends. If "none", no legends will be shown.}
 
