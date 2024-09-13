@@ -104,7 +104,7 @@
       <h1 data-toc-skip>Preparing cTWAS input data</h1>
                         <h4 data-toc-skip class="author">Kaixuan Luo, Sheng Qian</h4>
             
-            <h4 data-toc-skip class="date">2024-09-12</h4>
+            <h4 data-toc-skip class="date">2024-09-13</h4>
       
       <small class="dont-index">Source: <a href="https://github.com/xinhe-lab/ctwas/blob/multigroup/vignettes/preparing_input_data.Rmd" class="external-link"><code>vignettes/preparing_input_data.Rmd</code></a></small>
       <div class="hidden name"><code>preparing_input_data.Rmd</code></div>
@@ -244,12 +244,12 @@
 <div class="section level3">
 <h3 id="harmonizing-gwas-z-scores-and-the-reference-data">Harmonizing GWAS z-scores and the reference data<a class="anchor" aria-label="anchor" href="#harmonizing-gwas-z-scores-and-the-reference-data"></a>
 </h3>
-<p>The <code><a href="../reference/preprocess_z_snp.html">preprocess_z_snp()</a></code> function harmonizes GWAS z-scores and the reference data based on the included allele information. It will remove variants not included in the reference data.</p>
+<p>The <code><a href="../reference/preprocess_z_snp.html">preprocess_z_snp()</a></code> function harmonizes GWAS z-scores and the reference data based on the included allele information.</p>
 <div class="sourceCode" id="cb10"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">z_snp</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/preprocess_z_snp.html">preprocess_z_snp</a></span><span class="op">(</span><span class="va">z_snp</span>, <span class="va">snp_map</span>, </span>
 <span>                          drop_multiallelic <span class="op">=</span> <span class="cn">TRUE</span>, </span>
 <span>                          drop_strand_ambig <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span></code></pre></div>
-<p>By default, it will drop multiallelic variants and strand ambiguous variants. You can change these by setting the options <code>drop_multiallelic</code> and <code>drop_strand_ambig</code>.</p>
+<p>It will filter out variants not included in the reference data. It will also drop multiallelic variants and strand ambiguous variants, by default. You can change these by setting the options <code>drop_multiallelic</code> and <code>drop_strand_ambig</code>.</p>
 </div>
 <div class="section level3">
 <h3 id="harmonizing-prediction-models-and-the-reference-data">Harmonizing prediction models and the reference data<a class="anchor" aria-label="anchor" href="#harmonizing-prediction-models-and-the-reference-data"></a>
