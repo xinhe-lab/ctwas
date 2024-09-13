@@ -1,5 +1,5 @@
 ---
-title: "Software updates in multi-group cTWAS"
+title: "Software updates"
 author: "Kaixuan Luo"
 date: "`r Sys.Date()`"
 output: rmarkdown::html_vignette

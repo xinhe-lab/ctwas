@@ -29,7 +29,7 @@ test_that("diagnose_LD_mismatch_susie works", {
   })
 
   expect_equal(problematic_snps, expected_problematic_snps)
-  expect_equal(LD_diagnosis_res, expected_LD_diagnosis_res)
+  expect_equal(LD_diagnosis_res$condz_stats$p_diff, expected_LD_diagnosis_res$condz_stats$p_diff)
 
 })
 

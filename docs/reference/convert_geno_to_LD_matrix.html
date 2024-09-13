@@ -18,7 +18,7 @@ saves LD matrices as .RDS files and SNP info as .Rvar files"><!-- mathjax --><sc
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">ctwas</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">0.4.11</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">0.4.12</span>
       </span>
     </div>
 
@@ -49,6 +49,19 @@ saves LD matrices as .RDS files and SNP info as .Rvar files"><!-- mathjax --><sc
     </li>
     <li>
       <a href="../articles/utility_functions.html">cTWAS utility functions</a>
+    </li>
+  </ul></li>
+<li>
+  <a href="../articles/FAQ.html">FAQ</a>
+</li>
+<li class="dropdown">
+  <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+    News
+
+    <span class="caret"></span>
+  </a>
+  <ul class="dropdown-menu" role="menu"><li>
+      <a href="../articles/software_updates.html">Software updates</a>
     </li>
   </ul></li>
       </ul><ul class="nav navbar-nav navbar-right"><li>
@@ -100,16 +113,19 @@ chrom, start, stop, and region_id.</p></dd>
 
 <dt id="arg-genotype-files">genotype_files<a class="anchor" aria-label="anchor" href="#arg-genotype-files"></a></dt>
 <dd><p>Reference genotype files in PLINK binary genotype data
-in .pgen or .bed format.</p></dd>
+in .pgen or .bed format. It should contain files for all chromosomes
+(from 1 to 22), one file per chromosome.</p></dd>
 
 
 <dt id="arg-varinfo-files">varinfo_files<a class="anchor" aria-label="anchor" href="#arg-varinfo-files"></a></dt>
 <dd><p>Reference variant information files in PLINK
-.pvar or .bim format. The output will use the genome positions in <code>varinfo_files</code>.</p></dd>
+.pvar or .bim format. It could have one file per chromosome or
+have one big file for all chromosomes.
+The output will use the genome positions in <code>varinfo_files</code>.</p></dd>
 
 
 <dt id="arg-chrom">chrom<a class="anchor" aria-label="anchor" href="#arg-chrom"></a></dt>
-<dd><p>a vector of chromosomes to process genotype data.</p></dd>
+<dd><p>a vector of chromosome numbers to process genotype data.</p></dd>
 
 
 <dt id="arg-outputdir">outputdir<a class="anchor" aria-label="anchor" href="#arg-outputdir"></a></dt>
