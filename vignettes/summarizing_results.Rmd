@@ -288,7 +288,7 @@ cor_res <- get_region_cor(region_id,
 ```
 
 
-The locus plot above shows the whole region. We could zoom in a region of interest by specifying the `locus_range` argument. In the example below, we zoom in the region, color the p-value track by correlations with the focal gene, and color the PIP track by credible sets.
+The locus plot above shows the whole region. We could zoom in a region of interest by specifying the `locus_range` argument. In the example below, we zoom in the region, color the p-value track by correlations with the focal gene, and color the PIP track by credible sets. We could also highlight positions of interest by setting `highlight_pos`, for example, we highlight the position of HPR gene below.  
 
 ```{r locus_plot_2, fig.width=10, fig.height=8}
 make_locusplot(finemap_res,
@@ -297,6 +297,7 @@ make_locusplot(finemap_res,
                weights = weights,
                locus_range = c(71.6e6,72.4e6),
                highlight_pip = 0.8,
+               highlight_pos = 72070235,
                R_snp_gene = cor_res$R_snp_gene,
                R_gene = cor_res$R_gene,
                filter_protein_coding_genes = TRUE,

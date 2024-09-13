@@ -195,7 +195,7 @@ Below we describe several functions to harmonize the input datasets.
 
 ### Harmonizing GWAS z-scores and the reference data
 
-The `preprocess_z_snp()` function harmonizes GWAS z-scores and the reference data based on the included allele information. It will remove variants not included in the reference data. 
+The `preprocess_z_snp()` function harmonizes GWAS z-scores and the reference data based on the included allele information. 
 
 ```{r preprocess_z_snp, eval=FALSE}
 z_snp <- preprocess_z_snp(z_snp, snp_map, 
@@ -204,7 +204,7 @@ z_snp <- preprocess_z_snp(z_snp, snp_map,
 ```
 
 
-By default, it will drop multiallelic variants and strand ambiguous variants. You can change these by setting the options `drop_multiallelic` and `drop_strand_ambig`.
+It will filter out variants not included in the reference data. It will also drop multiallelic variants and strand ambiguous variants, by default. You can change these by setting the options `drop_multiallelic` and `drop_strand_ambig`.
 
 ### Harmonizing prediction models and the reference data
 

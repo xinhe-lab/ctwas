@@ -45,11 +45,13 @@
 #'
 #' @param label_QTLs If TRUE, label SNP IDs in the QTL panel.
 #'
-#' @param highlight_pval pvalue to highlight with a horizontal line
+#' @param highlight_pval p-value to highlight with a horizontal line
 #'
 #' @param highlight_pip PIP to highlight with a horizontal line
 #'
 #' @param highlight_pos genomic positions to highlight with vertical lines
+#'
+#' @param highlight.colors colors for highlight lines in p-value track, PIP track, and positions.
 #'
 #' @param point.sizes size values for SNP and non-SNP data points in the scatter plots
 #'
@@ -128,6 +130,8 @@ make_locusplot <- function(finemap_res,
                            highlight_pval = NULL,
                            highlight_pip = 0.8,
                            highlight_pos = NULL,
+                           highlight.color = "red",
+                           highlight.pos.color = "cyan2",
                            point.sizes = c(1, 3),
                            point.alpha = c(0.4, 0.6),
                            point.shapes = c(16, 15, 18, 17, 10, 12, 14, 11),
@@ -371,7 +375,7 @@ make_locusplot <- function(finemap_res,
 
   if (!is.null(highlight_pval)) {
     p_pval <- p_pval +
-      geom_hline(yintercept=-log10(highlight_pval), linetype="dashed", color = "red")
+      geom_hline(yintercept=-log10(highlight_pval), linetype="dashed", color = highlight.color)
   }
 
   # PIP panel
@@ -425,7 +429,7 @@ make_locusplot <- function(finemap_res,
 
   if (!is.null(highlight_pip)) {
     p_pip <- p_pip +
-      geom_hline(yintercept=highlight_pip, linetype="dashed", color = "red")
+      geom_hline(yintercept=highlight_pip, linetype="dashed", color = highlight.color)
   }
 
   # QTL panel
@@ -482,17 +486,17 @@ make_locusplot <- function(finemap_res,
     loginfo("highlight positions: %s", highlight_pos)
     highlight_pos <- as.integer(highlight_pos)
 
-    p_pvalue <- p_pvalue +
-      geom_vline(xintercept = highlight_pos/1e6, linetype="dotted", color = "cyan", size=0.5)
+    p_pval <- p_pval +
+      geom_vline(xintercept = highlight_pos/1e6, linetype="dashed", color = highlight.pos.color)
 
     p_pip <- p_pip +
-      geom_vline(xintercept = highlight_pos/1e6, linetype="dotted", color = "cyan", size=0.5)
+      geom_vline(xintercept = highlight_pos/1e6, linetype="dashed", color = highlight.pos.color)
 
     p_qtl <- p_qtl +
-      geom_vline(xintercept = highlight_pos/1e6, linetype="dotted", color = "cyan", size=0.5)
+      geom_vline(xintercept = highlight_pos/1e6, linetype="dashed", color = highlight.pos.color)
 
     p_genes <- p_genes +
-      geom_vline(xintercept = highlight_pos/1e6, linetype="dotted", color = "cyan", size=0.5)
+      geom_vline(xintercept = highlight_pos/1e6, linetype="dashed", color = highlight.pos.color)
   }
 
   if (verbose) {

@@ -110,7 +110,7 @@ We set `ncore` to parallelize the computation.
 
 ### Harmonizing GWAS summary statistics 
 
-The GWAS summary statistics needs to be “harmonized” before use. This means, for example, the allele definitions need to be consistent with the reference SNP data in `snp_map`. Harmonization is achieved through the `preprocess_z_snp()` function. We filter out multiallelic variants and strand-ambiguous variants by default.
+The GWAS summary statistics needs to be “harmonized” before use. This means, for example, the allele definitions need to be consistent with the reference SNP data in `snp_map`. Harmonization is achieved through the `preprocess_z_snp()` function.  We filter out multiallelic variants and strand-ambiguous variants by default. Variants not included in the reference SNP data will also be filtered out. 
 
 ```{r preprocess_z_snp}
 z_snp <- preprocess_z_snp(z_snp, snp_map)
