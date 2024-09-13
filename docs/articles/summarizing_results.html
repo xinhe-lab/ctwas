@@ -274,7 +274,7 @@
 <p>We have several ways of combining PIPs:</p>
 <ul>
 <li>“combine_cs”: it first sums PIPs of molecular traits of a genes in each credible set, and then combine PIPs using the following formula: <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mn>1</mn><mo>−</mo><msub><mo>∏</mo><mi>k</mi></msub><mo stretchy="false" form="prefix">(</mo><mn>1</mn><mo>−</mo><msub><mtext mathvariant="normal">PIP</mtext><mi>k</mi></msub><mo stretchy="false" form="postfix">)</mo></mrow><annotation encoding="application/x-tex">1 - \prod_k (1 - \text{PIP}_k)</annotation></semantics></math>, where <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msub><mtext mathvariant="normal">PIP</mtext><mi>k</mi></msub><annotation encoding="application/x-tex">\text{PIP}_k</annotation></semantics></math> is the summed PIP of the <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>k</mi><annotation encoding="application/x-tex">k</annotation></semantics></math>-th credible set of a gene. This is the default option for combining PIPs from fine-mapping with LD. We also provide two other options:</li>
-<li>“sum”: sum over PIPs of all molecular traits for the same gene. We will use this option for for combining PIPs from fine-mapping without LD.</li>
+<li>“sum”: sum over PIPs of all molecular traits for the same gene. This summation is the expected number of causal molecular traits in this gene, and could be higher than 1. We will use this option for combining PIPs from fine-mapping without LD.</li>
 <li>“combine_all”: use the above formula for all molecular traits for the same gene, where <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msub><mtext mathvariant="normal">PIP</mtext><mi>k</mi></msub><annotation encoding="application/x-tex">\text{PIP}_k</annotation></semantics></math> is the PIP of the <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>k</mi><annotation encoding="application/x-tex">k</annotation></semantics></math>-th molecular traits or contexts of a gene.</li>
 </ul>
 <p>For example, when using gene expression (eQTL) data from multiple tissues, we can use the function to compute combined PIPs across contexts, using the “combine_cs” method. By default, we limit the results to molecular traits within credible sets (<code>filter_cs = TRUE</code>) .</p>
@@ -284,7 +284,7 @@
 <span>                                             by <span class="op">=</span> <span class="st">"context"</span>,</span>
 <span>                                             method <span class="op">=</span> <span class="st">"combine_cs"</span>,</span>
 <span>                                             filter_cs <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span></code></pre></div>
-<pre><code><span><span class="co">## 2024-09-13 10:51:43 INFO::Limit gene results to credible sets</span></span></code></pre>
+<pre><code><span><span class="co">## 2024-09-13 12:29:14 INFO::Limit gene results to credible sets</span></span></code></pre>
 <div class="sourceCode" id="cb15"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/subset.html" class="external-link">subset</a></span><span class="op">(</span><span class="va">combined_pip_by_context</span>, <span class="va">combined_pip</span> <span class="op">&gt;</span> <span class="fl">0.8</span><span class="op">)</span></span></code></pre></div>
 <pre><code><span><span class="co">##         molecular_id adipose_pip liver_pip combined_pip</span></span>
@@ -323,10 +323,10 @@
 <span>                                drop_unmapped <span class="op">=</span> <span class="cn">TRUE</span>,</span>
 <span>                                add_position <span class="op">=</span> <span class="cn">TRUE</span>,</span>
 <span>                                use_gene_pos <span class="op">=</span> <span class="st">"mid"</span><span class="op">)</span></span></code></pre></div>
-<pre><code><span><span class="co">## 2024-09-13 10:51:44 INFO::Annotating fine-mapping result ...</span></span>
-<span><span class="co">## 2024-09-13 10:51:44 INFO::Map molecular traits to genes</span></span>
-<span><span class="co">## 2024-09-13 10:51:44 INFO::Add gene positions</span></span>
-<span><span class="co">## 2024-09-13 10:51:44 INFO::Add SNP positions</span></span></code></pre>
+<pre><code><span><span class="co">## 2024-09-13 12:29:15 INFO::Annotating fine-mapping result ...</span></span>
+<span><span class="co">## 2024-09-13 12:29:15 INFO::Map molecular traits to genes</span></span>
+<span><span class="co">## 2024-09-13 12:29:15 INFO::Add gene positions</span></span>
+<span><span class="co">## 2024-09-13 12:29:16 INFO::Add SNP positions</span></span></code></pre>
 <p>If <code>add_gene_annot = TRUE</code>, it joins the fine-mapping result table (<code>finemap_res</code>) with the <code>gene_annot</code> table, by the “molecular ids” column (set in <code>map_by</code>), and adds additional columns of gene annotations to the fine-mapping results By default, we drop the genes not found in <code>gene_annot</code> (<code>drop_unmapped = TRUE</code>). If <code>add_position = TRUE</code>, it adds positional information to the fine-mapping results. The positional information of variants can be found in the data structure of reference SNPs: <code>snp_map</code>. The users need to provide positional information of molecular traits, through <code>mapping_table</code>. In our example, we use <code>gene_annot</code>, which has gene positions. By default, we will use the midpoint positions for genes. You could also use “start” or “end” positions by setting the <code>use_gene_pos</code> argument.</p>
 <p>With the added gene information, we could limit results to protein coding genes, and view the prioritized genes with additional information:</p>
 <div class="sourceCode" id="cb21"><pre class="downlit sourceCode r">
@@ -377,7 +377,7 @@
 <span>                                          by <span class="op">=</span> <span class="st">"type"</span>,</span>
 <span>                                          method <span class="op">=</span> <span class="st">"combine_cs"</span>,</span>
 <span>                                          filter_cs <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span></code></pre></div>
-<pre><code><span><span class="co">## 2024-09-13 10:51:45 INFO::Limit gene results to credible sets</span></span></code></pre>
+<pre><code><span><span class="co">## 2024-09-13 12:29:16 INFO::Limit gene results to credible sets</span></span></code></pre>
 <div class="sourceCode" id="cb27"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/subset.html" class="external-link">subset</a></span><span class="op">(</span><span class="va">combined_pip_by_type</span>, <span class="va">combined_pip</span> <span class="op">&gt;</span> <span class="fl">0.8</span><span class="op">)</span></span></code></pre></div>
 <pre><code><span><span class="co">##   gene_name expression_pip combined_pip</span></span>
@@ -402,12 +402,12 @@
 <span>               filter_cs <span class="op">=</span> <span class="cn">TRUE</span>,</span>
 <span>               color_pval_by <span class="op">=</span> <span class="st">"cs"</span>,</span>
 <span>               color_pip_by <span class="op">=</span> <span class="st">"cs"</span><span class="op">)</span></span></code></pre></div>
-<pre><code><span><span class="co">## 2024-09-13 10:51:45 INFO::Limit to protein coding genes</span></span>
-<span><span class="co">## 2024-09-13 10:51:45 INFO::focal id: ENSG00000261701.6|liver_expression</span></span>
-<span><span class="co">## 2024-09-13 10:51:45 INFO::focal molecular trait: HPR liver expression</span></span>
-<span><span class="co">## 2024-09-13 10:51:45 INFO::Range of locus: chr16:71020348-72900542</span></span>
-<span><span class="co">## 2024-09-13 10:51:45 INFO::focal molecular trait QTL positions: 72063820,72063928</span></span>
-<span><span class="co">## 2024-09-13 10:51:45 INFO::Limit PIPs to credible sets</span></span></code></pre>
+<pre><code><span><span class="co">## 2024-09-13 12:29:16 INFO::Limit to protein coding genes</span></span>
+<span><span class="co">## 2024-09-13 12:29:16 INFO::focal id: ENSG00000261701.6|liver_expression</span></span>
+<span><span class="co">## 2024-09-13 12:29:16 INFO::focal molecular trait: HPR liver expression</span></span>
+<span><span class="co">## 2024-09-13 12:29:16 INFO::Range of locus: chr16:71020348-72900542</span></span>
+<span><span class="co">## 2024-09-13 12:29:16 INFO::focal molecular trait QTL positions: 72063820,72063928</span></span>
+<span><span class="co">## 2024-09-13 12:29:16 INFO::Limit PIPs to credible sets</span></span></code></pre>
 <div class="figure" style="text-align: center">
 <img src="summarizing_results_files/figure-html/locus_plot_1-1.png" alt="&amp;nbsp;" width="1200"><p class="caption">
  
@@ -444,13 +444,13 @@
 <span>               filter_cs <span class="op">=</span> <span class="cn">TRUE</span>,</span>
 <span>               color_pval_by <span class="op">=</span> <span class="st">"LD"</span>,</span>
 <span>               color_pip_by <span class="op">=</span> <span class="st">"cs"</span><span class="op">)</span></span></code></pre></div>
-<pre><code><span><span class="co">## 2024-09-13 10:51:49 INFO::Limit to protein coding genes</span></span>
-<span><span class="co">## 2024-09-13 10:51:49 INFO::focal id: ENSG00000261701.6|liver_expression</span></span>
-<span><span class="co">## 2024-09-13 10:51:49 INFO::focal molecular trait: HPR liver expression</span></span>
-<span><span class="co">## 2024-09-13 10:51:49 INFO::Range of locus: chr16:71600000-72400000</span></span>
-<span><span class="co">## 2024-09-13 10:51:49 INFO::focal molecular trait QTL positions: 72063820,72063928</span></span>
-<span><span class="co">## 2024-09-13 10:51:49 INFO::Limit PIPs to credible sets</span></span>
-<span><span class="co">## 2024-09-13 10:51:50 INFO::highlight positions: 72070235</span></span></code></pre>
+<pre><code><span><span class="co">## 2024-09-13 12:29:20 INFO::Limit to protein coding genes</span></span>
+<span><span class="co">## 2024-09-13 12:29:20 INFO::focal id: ENSG00000261701.6|liver_expression</span></span>
+<span><span class="co">## 2024-09-13 12:29:20 INFO::focal molecular trait: HPR liver expression</span></span>
+<span><span class="co">## 2024-09-13 12:29:20 INFO::Range of locus: chr16:71600000-72400000</span></span>
+<span><span class="co">## 2024-09-13 12:29:20 INFO::focal molecular trait QTL positions: 72063820,72063928</span></span>
+<span><span class="co">## 2024-09-13 12:29:20 INFO::Limit PIPs to credible sets</span></span>
+<span><span class="co">## 2024-09-13 12:29:20 INFO::highlight positions: 72070235</span></span></code></pre>
 <div class="figure" style="text-align: center">
 <img src="summarizing_results_files/figure-html/locus_plot_2-1.png" alt="&amp;nbsp;" width="1200"><p class="caption">
  
