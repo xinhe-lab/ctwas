@@ -26,6 +26,8 @@ make_locusplot(
   highlight_pval = NULL,
   highlight_pip = 0.8,
   highlight_pos = NULL,
+  highlight.color = "red",
+  highlight.pos.color = "cyan2",
   point.sizes = c(1, 3),
   point.alpha = c(0.4, 0.6),
   point.shapes = c(16, 15, 18, 17, 10, 12, 14, 11),
@@ -85,7 +87,7 @@ If NULL, the entire region will be plotted (with 100 bp flanks on both sides).}
 
 \item{label_QTLs}{If TRUE, label SNP IDs in the QTL panel.}
 
-\item{highlight_pval}{pvalue to highlight with a horizontal line}
+\item{highlight_pval}{p-value to highlight with a horizontal line}
 
 \item{highlight_pip}{PIP to highlight with a horizontal line}
 
@@ -115,6 +117,8 @@ Exclude text labels when they overlap too many other things.}
 \item{panel.heights}{Relative heights of the panels.}
 
 \item{verbose}{If TRUE, print detail messages.}
+
+\item{highlight.colors}{colors for highlight lines in p-value track, PIP track, and positions.}
 }
 \description{
 Plots the cTWAS result for a single locus
