@@ -46,18 +46,12 @@ anno_susie <- function(susie_res,
                        g_type = "gene",
                        g_context = "gene",
                        g_group = "gene",
-                       gene_ids = NULL,
                        region_id = NULL,
                        z = NULL,
                        include_cs_index = TRUE) {
 
   gene_df <- data.frame(id = gids, type = g_type, context = g_context, group = g_group)
   snp_df <- data.frame(id = sids, type = "SNP", context = "SNP", group = "SNP")
-
-  if (!is.null(gene_ids)) {
-    gene_df$gene_id <- gene_ids
-    snp_df$gene_id <- NA
-  }
 
   susie_res_df <- rbind(gene_df, snp_df)
 

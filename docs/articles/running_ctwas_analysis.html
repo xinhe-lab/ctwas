@@ -32,7 +32,7 @@
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">ctwas</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">0.4.11</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">0.4.12</span>
       </span>
     </div>
 
@@ -68,6 +68,21 @@
     </li>
   </ul>
 </li>
+<li>
+  <a href="../articles/FAQ.html">FAQ</a>
+</li>
+<li class="dropdown">
+  <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+    News
+
+    <span class="caret"></span>
+  </a>
+  <ul class="dropdown-menu" role="menu">
+<li>
+      <a href="../articles/software_updates.html">Software updates</a>
+    </li>
+  </ul>
+</li>
       </ul>
 <ul class="nav navbar-nav navbar-right">
 <li>
@@ -89,7 +104,7 @@
       <h1 data-toc-skip>Running cTWAS analysis</h1>
                         <h4 data-toc-skip class="author">Kaixuan Luo, Sheng Qian</h4>
             
-            <h4 data-toc-skip class="date">2024-08-28</h4>
+            <h4 data-toc-skip class="date">2024-09-12</h4>
       
       <small class="dont-index">Source: <a href="https://github.com/xinhe-lab/ctwas/blob/multigroup/vignettes/running_ctwas_analysis.Rmd" class="external-link"><code>vignettes/running_ctwas_analysis.Rmd</code></a></small>
       <div class="hidden name"><code>running_ctwas_analysis.Rmd</code></div>
@@ -100,7 +115,7 @@
     
 <p>Running cTWAS analysis involves several major steps: preparing input data, computing associations of molecular traits with the phenotype, estimating parameters, screening for candidate genomic regions, and fine-mapping these regions.</p>
 <p>In this version of cTWAS, we allow the joint analysis of multiple groups of molecular traits. This could be: eQTL of multiple tissues; or eQTLs, splicing QTLs and other types of QTLs in a single tissue. In a more complex setting, multiple types of QTL data from multiple tissues/cell types. Each group is defined by its “type” (kind of molecular traits), and “context” (tissue, cell type, condition, etc.).</p>
-<p>We require first running the data preprocessing and harmonization steps. Please follow the “Preparing cTWAS input data” tutorial.</p>
+<p>We require first running the data preprocessing and harmonization steps. Please follow the <a href="https://xinhe-lab.github.io/multigroup_ctwas/articles/preparing_input_data.html" class="external-link">“Preparing cTWAS input data”</a> tutorial.</p>
 <p>Load the packages</p>
 <div class="sourceCode" id="cb1"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://github.com/xinhe-lab/ctwas/" class="external-link">ctwas</a></span><span class="op">)</span></span></code></pre></div>
@@ -149,19 +164,19 @@
 <li><p><code>group_prior_var_stucture</code>: options to control how the effect size variance parameters are shared among groups. For example, “shared_type” (default option) allows all groups in one molecular QTL type to share the same variance parameter. “independent” allows all groups to have their own separate variance parameters. More options can be found in the “Estimating parameters” section below.</p></li>
 <li><p><code>filter_L</code>: if <code>filter_L = TRUE</code> (the default option), cTWAS will first estimate the number of causal signals (<code>L</code>) for each region. This step is done using uniform prior, treating all variants and genes equally. From the results, we obtain the number of credible sets (<code>L</code>). We then select regions with at least one credible set, L &gt; 0.</p></li>
 <li><p><code>filter_nonSNP_PIP</code> and <code>min_nonSNP_PIP</code>: if <code>filter_nonSNP_PIP = TRUE</code>, it will compute the non-SNP PIP, i.e. the total PIP of all molecular traits, for each region (using the estimated parameters) and select regions with non-SNP PIP &gt; <code>min_nonSNP_PIP</code> (0.5 by default).</p></li>
-<li><p><code>min_abs_corr</code>: Minimum absolute correlation allowed in a credible set. cTWAs jointly fine-maps both SNPs and molecular traits, the correlations between SNPs and molecular traits could be lower than standard fine-mapping with SNPs. We use a lower cutoff (0.1 by default).</p></li>
+<li><p><code>min_abs_corr</code>: Minimum absolute correlation allowed in a credible set. cTWAS jointly fine-maps both SNPs and molecular traits, the correlations between SNPs and molecular traits could be lower than standard fine-mapping with SNPs. We use a lower cutoff (0.1 by default).</p></li>
 <li><p><code>ncore</code>: computation of genomic regions can be performed in parallel. This parameter controls how many cores are used in the parallelization.</p></li>
 <li><p><code>ncore_LD</code>: this sets the number of cores in parallelization when LD matrices are needed. In screening regions and fine-mapping steps, we need larger memory to load and process LD matrices. We recommend using fewer cores in <code>ncore_LD</code> than <code>ncore</code>.</p></li>
-<li><p><code>cor_dir</code>, <code>save_cor</code>, and <code>force_compute_cor</code>: we need correlation matrices during fine-mapping and visualizing the results with LD. If <code>cor_dir</code> is provided, cTWAS will check <code>cor_dir</code>. If precomputed correlation matrices are available in <code>cor_dir</code>, cTWAS will simply load those. Otherwise, it will compute the correlation matrices and save to the <code>cor_dir</code> directory if <code>save_cor = TRUE</code>. You can set <code>force_compute_cor = TRUE</code> so that it always computes the correlation matrices. The correlation matrices are large datasets, so they are not saved by default.</p></li>
+<li><p><code>cor_dir</code>, <code>save_cor</code>, and <code>force_compute_cor</code>: we need correlation matrices during fine-mapping and visualizing the results with LD. If <code>cor_dir</code> is provided, cTWAS will check the <code>cor_dir</code> directory. If precomputed correlation matrices are available in <code>cor_dir</code>, cTWAS will simply load those. Otherwise, it will compute the correlation matrices and save to the <code>cor_dir</code> directory if <code>save_cor = TRUE</code>. You can set <code>force_compute_cor = TRUE</code> so that it always computes the correlation matrices. The correlation matrices are large datasets, so they are not saved by default. <em>Note</em>: you should use a different <code>cor_dir</code> directory for each cTWAS analysis; otherwise, it would cause mismatch between Z-scores and correlation matrices in the old <code>cor_dir</code>.</p></li>
 </ul>
-<p>To understand and summarize the results from cTWAS, please read the tutorial “Summarizing and visualizing cTWAS results”.</p>
-<p><em>Note:</em> One can run cTWAS without using reference LD data. See “A minimal tutorial of running cTWAS without LD”. That tutorial describes how to run cTWAS in a single step.</p>
+<p>To understand and summarize the results from cTWAS, please read the tutorial <a href="https://xinhe-lab.github.io/multigroup_ctwas/articles/summarizing_results.html" class="external-link">“Summarizing and visualizing cTWAS results”</a>.</p>
+<p><em>Note:</em> One can run cTWAS without using reference LD data. See <a href="https://xinhe-lab.github.io/multigroup_ctwas/articles/minimal_tutorial.html" class="external-link">“A minimal tutorial of running cTWAS without LD”</a>. That tutorial describes how to run cTWAS in a single step.</p>
 </div>
 <div class="section level2">
 <h2 id="running-ctwas-modules">Running cTWAS modules<a class="anchor" aria-label="anchor" href="#running-ctwas-modules"></a>
 </h2>
 <p>This section describes how to perform cTWAS analysis by running each of the modules separately. This would allow more flexible controls of the cTWAS modules, e.g. running each module with different settings (memory, parallelization, etc.). We could also save the results from each module for future access, that way, we can re-run just one module, if necessary, without running the entire process. One useful way of running cTWAS is to first run the first few steps to estimate model parameters and assess their values. If this step does not converge, or the parameters look strange, it is best to pause and understand why.</p>
-<p>We note that one can also run cTWAS without using LD information - see the tutorial “A minimal tutorial of running cTWAS without LD”. It is also possible to do this analysis one step at a time. We describe below how each step can be done in appropriate places.</p>
+<p>We note that one can also run cTWAS without using LD information - see the tutorial <a href="https://xinhe-lab.github.io/multigroup_ctwas/articles/minimal_tutorial.html" class="external-link">“A minimal tutorial of running cTWAS without LD”</a>. It is also possible to do this analysis one step at a time. We describe below how each step can be done in appropriate places.</p>
 <div class="section level3">
 <h3 id="computing-z-scores-of-molecular-traits">Computing Z-scores of molecular traits<a class="anchor" aria-label="anchor" href="#computing-z-scores-of-molecular-traits"></a>
 </h3>
@@ -209,7 +224,7 @@
 <span>                   ncore <span class="op">=</span> <span class="fl">6</span><span class="op">)</span></span>
 <span><span class="va">group_prior</span> <span class="op">&lt;-</span> <span class="va">param</span><span class="op">$</span><span class="va">group_prior</span></span>
 <span><span class="va">group_prior_var</span> <span class="op">&lt;-</span> <span class="va">param</span><span class="op">$</span><span class="va">group_prior_var</span></span></code></pre></div>
-<p><em>Note:</em> we used sample data (from chr16) in this example, however, in real data analysis, parameter estimation should be done using data from the <em>entire genome</em>.</p>
+<p><em>Note</em>: we used sample data (from chr16) in this example, however, in real data analysis, parameter estimation should be done using data from the <em>entire genome</em>.</p>
 </div>
 <div class="section level3">
 <h3 id="screening-regions">Screening regions<a class="anchor" aria-label="anchor" href="#screening-regions"></a>
@@ -234,7 +249,7 @@
 <span><span class="va">screened_region_L</span> <span class="op">&lt;-</span> <span class="va">screen_res</span><span class="op">$</span><span class="va">screened_region_L</span></span>
 <span><span class="va">screen_summary</span> <span class="op">&lt;-</span> <span class="va">screen_res</span><span class="op">$</span><span class="va">screen_summary</span></span></code></pre></div>
 <p>It returns <code>screened_region_data</code> which contains a subset of region data for selected regions. It also returns the estimated L (number of credible sets) for the selected regions, which could be used in the fine-mapping step to set L for each region. In addition, it returns a data frame <code>screen_summary</code>, which includes the estimated L and non-SNP PIPs for all the regions.</p>
-<p>Note: cTWAs jointly fine-maps both SNPs and molecular traits, the correlations between SNPs and molecular traits could be lower than standard fine-mapping with SNPs. Thus, we set a lower purity cutoff (default option: <code>min_abs_corr = 0.1</code>) for obtaining credible sets to avoid missing causal genes.</p>
+<p>Note: cTWAS jointly fine-maps both SNPs and molecular traits, the correlations between SNPs and molecular traits could be lower than standard fine-mapping with SNPs. Thus, we set a lower purity cutoff (default option: <code>min_abs_corr = 0.1</code>) for obtaining credible sets to avoid missing causal genes.</p>
 <p>Option 2: screening by non-SNP PIPs. If <code>filter_nonSNP_PIP = TRUE</code> and <code>filter_L = FALSE</code>, cTWAS will compute the non-SNP PIP, i.e. total PIP of all molecular traits, for each region (using estimated priors). It then selects regions by applying a <code>min_nonSNP_PIP</code> cutoff (0.5, by default).</p>
 <div class="sourceCode" id="cb8"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">screen_res</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/screen_regions.html">screen_regions</a></span><span class="op">(</span><span class="va">region_data</span>,</span>

@@ -327,9 +327,6 @@ finemap_single_region <- function(region_data,
   groups <- regiondata$groups
   rm(regiondata)
 
-  # get original gene IDs
-  gene_ids <- sapply(strsplit(gids, split = "[|]"), "[[", 1)
-
   if (verbose){
     loginfo("%d genes, %d SNPs in the region", length(gids), length(sids))
     loginfo("L = %d", L)
@@ -391,7 +388,6 @@ finemap_single_region <- function(region_data,
                              g_type = g_type,
                              g_context = g_context,
                              g_group = g_group,
-                             gene_ids = gene_ids,
                              region_id = region_id,
                              z = z,
                              include_cs_index = include_cs_index)
@@ -454,9 +450,6 @@ finemap_single_region_noLD <- function(region_data,
   groups <- regiondata$groups
   rm(regiondata)
 
-  # get original gene IDs
-  gene_ids <- sapply(strsplit(gids, split = "[|]"), "[[", 1)
-
   if (verbose){
     loginfo("%d genes, %d SNPs in the region", length(gids), length(sids))
     loginfo("L = 1")
@@ -503,7 +496,6 @@ finemap_single_region_noLD <- function(region_data,
                              g_type = g_type,
                              g_context = g_context,
                              g_group = g_group,
-                             gene_ids = gene_ids,
                              region_id = region_id,
                              z = z,
                              include_cs_index = FALSE)

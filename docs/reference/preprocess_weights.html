@@ -17,7 +17,7 @@
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">ctwas</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">0.4.11</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">0.4.12</span>
       </span>
     </div>
 
@@ -50,6 +50,19 @@
       <a href="../articles/utility_functions.html">cTWAS utility functions</a>
     </li>
   </ul></li>
+<li>
+  <a href="../articles/FAQ.html">FAQ</a>
+</li>
+<li class="dropdown">
+  <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+    News
+
+    <span class="caret"></span>
+  </a>
+  <ul class="dropdown-menu" role="menu"><li>
+      <a href="../articles/software_updates.html">Software updates</a>
+    </li>
+  </ul></li>
       </ul><ul class="nav navbar-nav navbar-right"><li>
   <a href="https://github.com/xinhe-lab/ctwas/tree/multigroup" class="external-link">Source</a>
 </li>
@@ -80,6 +93,7 @@
 <span>  LD_map <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  <span class="va">type</span>,</span>
 <span>  <span class="va">context</span>,</span>
+<span>  weight_name <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/paste.html" class="external-link">paste0</a></span><span class="op">(</span><span class="va">context</span>, <span class="st">"_"</span>, <span class="va">type</span><span class="op">)</span>,</span>
 <span>  weight_format <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"PredictDB"</span>, <span class="st">"FUSION"</span><span class="op">)</span>,</span>
 <span>  drop_strand_ambig <span class="op">=</span> <span class="cn">TRUE</span>,</span>
 <span>  filter_protein_coding_genes <span class="op">=</span> <span class="cn">TRUE</span>,</span>
@@ -122,15 +136,20 @@ Required when <code>load_predictdb_LD = FALSE</code>.</p></dd>
 
 
 <dt id="arg-type">type<a class="anchor" aria-label="anchor" href="#arg-type"></a></dt>
-<dd><p>a string, specifying QTL type of each weight file, e.g. expression, splicing, protein.</p></dd>
+<dd><p>a string, specifying QTL type of the weight file, e.g. expression, splicing, protein.</p></dd>
 
 
 <dt id="arg-context">context<a class="anchor" aria-label="anchor" href="#arg-context"></a></dt>
-<dd><p>a string, specifying tissue/cell type/condition of each weight file, e.g. Liver, Lung, Brain.</p></dd>
+<dd><p>a string, specifying context (tissue/cell type) of the weight file, e.g. Liver, Lung, Brain.</p></dd>
+
+
+<dt id="arg-weight-name">weight_name<a class="anchor" aria-label="anchor" href="#arg-weight-name"></a></dt>
+<dd><p>a string, specifying name of the weight file.
+By default, it is <code>weight_name = paste0(context, "_", type)</code></p></dd>
 
 
 <dt id="arg-weight-format">weight_format<a class="anchor" aria-label="anchor" href="#arg-weight-format"></a></dt>
-<dd><p>a string, specifying format of each weight file, e.g. PredictDB, FUSION.</p></dd>
+<dd><p>a string, specifying format of the weight file, e.g. PredictDB, FUSION.</p></dd>
 
 
 <dt id="arg-drop-strand-ambig">drop_strand_ambig<a class="anchor" aria-label="anchor" href="#arg-drop-strand-ambig"></a></dt>

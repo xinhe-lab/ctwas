@@ -6,12 +6,15 @@
 #' chrom, start, stop, and region_id.
 #'
 #' @param genotype_files Reference genotype files in PLINK binary genotype data
-#' in .pgen or .bed format.
+#' in .pgen or .bed format. It should contain files for all chromosomes
+#' (from 1 to 22), one file per chromosome.
 #'
 #' @param varinfo_files Reference variant information files in PLINK
-#' .pvar or .bim format. The output will use the genome positions in \code{varinfo_files}.
+#' .pvar or .bim format. It could have one file per chromosome or
+#' have one big file for all chromosomes.
+#' The output will use the genome positions in \code{varinfo_files}.
 #'
-#' @param chrom a vector of chromosomes to process genotype data.
+#' @param chrom a vector of chromosome numbers to process genotype data.
 #'
 #' @param outputdir Output directory.
 #'
@@ -83,7 +86,7 @@ convert_geno_to_LD_matrix <- function(region_info,
   ref_snpinfo_all <- do.call(rbind, lapply(varinfo_files, read_var_info))
 
   # read genotype files and prepare pvar files accompanying the genotype table
-  pvar_files <- sapply(genotype_files, prep_pvar, outputdir = outputdir)
+  # pvar_files <- sapply(genotype_files, prep_pvar, outputdir = outputdir)
 
   region_metatable <- region_info
   region_metatable$LD_file <- NA
@@ -96,8 +99,11 @@ convert_geno_to_LD_matrix <- function(region_info,
 
     ref_snpinfo_chr <- ref_snpinfo_all[ref_snpinfo_all$chrom == chr,]
 
-    pgen <- prep_pgen(genotype_files[chr], pvar_files[chr])
-    snpinfo <- read_pvar(pvar_files[chr])
+    # read genotype file and prepare pvar file accompanying the genotype table
+    pgen_file <- genotype_files[chr]
+    pvar_file <- prep_pvar(pgen_file, outputdir)
+    pgen <- prep_pgen(pgen_file, pvar_file)
+    snpinfo <- read_pvar(pvar_file)
 
     if (unique(snpinfo$chrom) != chr) {
       stop("Input genotype file not split by chromosome or not in correct order")

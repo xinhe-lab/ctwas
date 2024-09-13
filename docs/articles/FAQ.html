@@ -32,7 +32,7 @@
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">ctwas</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">0.4.11</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">0.4.12</span>
       </span>
     </div>
 
@@ -68,6 +68,21 @@
     </li>
   </ul>
 </li>
+<li>
+  <a href="../articles/FAQ.html">FAQ</a>
+</li>
+<li class="dropdown">
+  <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+    News
+
+    <span class="caret"></span>
+  </a>
+  <ul class="dropdown-menu" role="menu">
+<li>
+      <a href="../articles/software_updates.html">Software updates</a>
+    </li>
+  </ul>
+</li>
       </ul>
 <ul class="nav navbar-nav navbar-right">
 <li>
@@ -87,9 +102,9 @@
   <div class="col-md-9 contents">
     <div class="page-header toc-ignore">
       <h1 data-toc-skip>FAQ</h1>
-                        <h4 data-toc-skip class="author">Kaixuan Luo, Sheng Qian</h4>
+                        <h4 data-toc-skip class="author">Kaixuan Luo</h4>
             
-            <h4 data-toc-skip class="date">2024-08-28</h4>
+            <h4 data-toc-skip class="date">2024-09-12</h4>
       
       <small class="dont-index">Source: <a href="https://github.com/xinhe-lab/ctwas/blob/multigroup/vignettes/FAQ.Rmd" class="external-link"><code>vignettes/FAQ.Rmd</code></a></small>
       <div class="hidden name"><code>FAQ.Rmd</code></div>
@@ -99,16 +114,63 @@
     
     
 <div class="section level2">
-<h2 id="installation">Installation<a class="anchor" aria-label="anchor" href="#installation"></a>
+<h2 id="common-questions">Common questions<a class="anchor" aria-label="anchor" href="#common-questions"></a>
 </h2>
+<div class="section level3">
+<h3 id="can-i-run-ctwas-if-my-gwas-data-and-prediction-models-have-different-genome-builds">Can I run cTWAS if my GWAS data and prediction models have different genome builds?<a class="anchor" aria-label="anchor" href="#can-i-run-ctwas-if-my-gwas-data-and-prediction-models-have-different-genome-builds"></a>
+</h3>
+<p>It is critical that the genome build (e.g. hg38) of the LD reference matches the genome build used to train the prediction models. The genome build of the GWAS summary statistics does not matter because variant positions are determined by the LD reference.</p>
+</div>
+<div class="section level3">
+<h3 id="can-i-use-my-own-ld-matrices-as-reference">Can I use my own LD matrices as reference?<a class="anchor" aria-label="anchor" href="#can-i-use-my-own-ld-matrices-as-reference"></a>
+</h3>
+<p>By default, we use our own LD matrices in “.RDS” format. We also support other common formats, such as “.Rdata”, “.mtx”, “.csv”, “.txt”. If you already have LD matrices in custom format, you could directly load your own LD matrices, and don’t need to save those in our LD matrix format. To do this, you could write a loader function that loads your LD matrices into our LD matrix format. Then set <code>LD_format = "custom"</code> and pass your loader function to the argument <code>LD_loader_fun</code>.</p>
+</div>
+<div class="section level3">
+<h3 id="how-can-i-create-my-own-ld-matrices-as-references-from-genotype-data">How can I create my own LD matrices as references from genotype data?<a class="anchor" aria-label="anchor" href="#how-can-i-create-my-own-ld-matrices-as-references-from-genotype-data"></a>
+</h3>
+<p>cTWAS provides a function <code><a href="../reference/convert_geno_to_LD_matrix.html">convert_geno_to_LD_matrix()</a></code> to create LD matrices from individual level genotype data. See the tutorial <a href="https://xinhe-lab.github.io/multigroup_ctwas/articles/utility_functions.html" class="external-link">“cTWAS utility functions”</a> for details.</p>
+</div>
+<div class="section level3">
+<h3 id="can-i-use-ctwas-to-analyze-gwas-from-non-european-ancestry">Can I use cTWAS to analyze GWAS from non-European ancestry?<a class="anchor" aria-label="anchor" href="#can-i-use-ctwas-to-analyze-gwas-from-non-european-ancestry"></a>
+</h3>
+<p>Running cTWAS with a different ancestry is under development. For now, we recommend using LD reference matching the GWAS samples (not the weights).</p>
+</div>
+<div class="section level3">
+<h3 id="is-there-any-way-to-speed-up-the-computation">Is there any way to speed up the computation?<a class="anchor" aria-label="anchor" href="#is-there-any-way-to-speed-up-the-computation"></a>
+</h3>
+<p>To save running time, we parallelized computations when running cTWAS main function and several other modular functions. We currently use the forking approach for parallelization, so it does not work on Windows.</p>
+<p>You could set <code>ncore</code> to control how many cores are used in the parallelization. When processing LD matrices, especially during screening regions and fine-mapping, we recommend using larger memory. If you use the cTWAS main function, we have an argument <code>ncore_LD</code>, which allows using a lower number of cores during screening regions and fine-mapping steps, so more memory will be allocated for those steps.</p>
+</div>
 </div>
 <div class="section level2">
-<h2 id="use-custom-format-ld-matrices">Use custom format LD matrices<a class="anchor" aria-label="anchor" href="#use-custom-format-ld-matrices"></a>
+<h2 id="potential-error-messages-when-running-ctwas">Potential error messages when running cTWAS<a class="anchor" aria-label="anchor" href="#potential-error-messages-when-running-ctwas"></a>
 </h2>
+<div class="section level3">
+<h3 id="error-message-some-snps-in-weights-not-found-in-z_snp-when-running-compute_gene_z-function">Error message: “Some SNPs in weights not found in z_snp!” when running compute_gene_z() function<a class="anchor" aria-label="anchor" href="#error-message-some-snps-in-weights-not-found-in-z_snp-when-running-compute_gene_z-function"></a>
+</h3>
+<p>We limit variants in the processed weights to the processed variants in <code>z_snp</code> (by setting <code>gwas_snp_ids = z_snp$id</code>), so you should first run <code><a href="../reference/preprocess_z_snp.html">preprocess_z_snp()</a></code>, and then run <code><a href="../reference/preprocess_weights.html">preprocess_weights()</a></code> after getting processed variants. If you later changed the SNPs included in <code>z_snp</code>, you would need to rerun preprocess_weights() with <code>gwas_snp_ids</code> set to the updated <code>z_snp$id</code>.</p>
 </div>
-<div class="section level2">
-<h2 id="memory-and-parallelization">Memory and parallelization<a class="anchor" aria-label="anchor" href="#memory-and-parallelization"></a>
-</h2>
+<div class="section level3">
+<h3 id="error-message-r-matrix-dimension-does-not-match-with-z">Error message: “R matrix dimension does not match with z!”<a class="anchor" aria-label="anchor" href="#error-message-r-matrix-dimension-does-not-match-with-z"></a>
+</h3>
+<p>This message suggests conflicts between the correlation matrices and the Z-scores when running fine-mapping. This often happens when you run cTWAS main function or fine-mapping using new data but load correlation matrices saved from an earlier analysis. By default, cTWAS will automatically load correlation matrices saved in <code>cor_dir</code>, so it will cause conflicts when you run different cTWAS analyses with the same <code>cor_dir</code>. So please make sure to save correlation matrices to a new directory when running new cTWAS analyses. Each cTWAS analysis should use a separate <code>cor_dir</code> to store the correlation matrices.</p>
+</div>
+<div class="section level3">
+<h3 id="error-message-viewport-has-zero-dimensions-when-making-the-locus-plots-">Error message: “Viewport has zero dimension(s)” when making the locus plots.<a class="anchor" aria-label="anchor" href="#error-message-viewport-has-zero-dimensions-when-making-the-locus-plots-"></a>
+</h3>
+<p>If you get an error message “Viewport has zero dimension(s)” when making locus plots, it usually suggests the R viewer window is too small. You can try increasing the size of the viewer window size and try again.</p>
+</div>
+<div class="section level3">
+<h3 id="missing-shapes-in-the-legend-of-locus-plots-when-including-many-types-of-molecular-traits">Missing shapes in the legend of locus plots when including many types of molecular traits<a class="anchor" aria-label="anchor" href="#missing-shapes-in-the-legend-of-locus-plots-when-including-many-types-of-molecular-traits"></a>
+</h3>
+<p>We included several default shapes to represent different types of molecular traits. If you have more types of molecular traits or if you want to change the shapes, you can set the <code>point.shapes</code>argument in the function <code><a href="../reference/make_locusplot.html">make_locusplot()</a></code>.</p>
+</div>
+<div class="section level3">
+<h3 id="error-message-null-found-in-mclapply-output--results-may-be-incomplete">Error message: " ‘NULL’ found in mclapply output. Results may be incomplete!"**<a class="anchor" aria-label="anchor" href="#error-message-null-found-in-mclapply-output--results-may-be-incomplete"></a>
+</h3>
+<p>This message is often caused by insufficient memory when running cTWAS with multiple cores in parallel. You could use a larger memory, or set a lower <code>ncore</code>. If you still get this error message, try <code>ncore=1</code> to run without parallelization.</p>
+</div>
 </div>
   </div>
 

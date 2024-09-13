@@ -68,15 +68,13 @@ load_predictdb_weights <- function(weight_file,
   stopifnot(file.exists(weight_file))
 
   loginfo("Load PredictDB weights")
-
-  weight_name <- file_path_sans_ext(basename(weight_file))
   sqlite <- dbDriver("SQLite")
   db <- dbConnect(sqlite, weight_file)
   query <- function(...) dbGetQuery(db, ...)
   weight_table <- query("select * from weights")
   extra_table <- query("select * from extra")
 
-  loginfo("Number of genes in weights: %s", length(unique(weight_table$gene)))
+  loginfo("Number of molecular traits in weights: %s", length(unique(weight_table$gene)))
 
   # subset to protein coding genes only
   if (filter_protein_coding_genes) {
@@ -85,7 +83,7 @@ load_predictdb_weights <- function(weight_file,
       loginfo("Limit to protein coding genes")
       extra_table <- extra_table[extra_table$gene_type=="protein_coding",,drop=FALSE]
       weight_table <- weight_table[weight_table$gene %in% extra_table$gene,]
-      loginfo("Number of genes in weights after filtering protein coding genes: %s", length(unique(weight_table$gene)))
+      loginfo("Number of molecular traits in weights after filtering protein coding genes: %s", length(unique(weight_table$gene)))
     } else {
       loginfo("No 'protein_coding' in 'extra_table$gene_type'. Skipped filtering protein coding genes.")
     }
@@ -105,8 +103,7 @@ load_predictdb_weights <- function(weight_file,
   }
   dbDisconnect(db)
 
-  return(list("weight_name" = weight_name,
-              "weight_table" = weight_table,
+  return(list("weight_table" = weight_table,
               "extra_table" = extra_table,
               "cov_table" = cov_table))
 }
@@ -144,7 +141,6 @@ load_fusion_weights <- function(weight_dir,
   stopifnot(dir.exists(weight_dir))
 
   loginfo("Load FUSION weights")
-  weight_name <- file_path_sans_ext(basename(weight_dir))
 
   # list FUSION weight Rdata files
   wgt_dir <- dirname(weight_dir)
@@ -196,8 +192,7 @@ load_fusion_weights <- function(weight_dir,
 
   cov_table <- NULL
 
-  return(list("weight_name" = weight_name,
-              "weight_table" = weight_table,
+  return(list("weight_table" = weight_table,
               "extra_table" = extra_table,
               "cov_table" = cov_table))
 }
@@ -403,18 +398,17 @@ convert_fusion_to_predictdb <- function(
                                             fusion_method = fusion_method,
                                             fusion_genome_version = fusion_genome_version,
                                             make_extra_table = make_extra_table)
-  weight_name <- loaded_weights_res$weight_name
   weight_table <- loaded_weights_res$weight_table
   extra_table <- loaded_weights_res$extra_table
 
-  if (missing(outname))
-    outname <- weight_name
+  if (missing(outname)){
+    outname <- file_path_sans_ext(basename(weight_dir))
+  }
 
   # write PredictDB weights
   write_predictdb(weight_table, extra_table, cov_table, outputdir, outname)
 
-  return(list("weight_name" = weight_name,
-              "weight_table" = weight_table,
+  return(list("weight_table" = weight_table,
               "extra_table" = extra_table,
               "cov_table" = cov_table))
 }
@@ -544,9 +538,9 @@ compute_weight_LD_from_ref <- function(weights,
     stop("'LD_map' should be a data frame!")
 
   weight_info <- lapply(names(weights), function(x){
-    as.data.frame(weights[[x]][c("chrom", "p0","p1", "gene_id", "weight_name", "type","context")])})
+    as.data.frame(weights[[x]][c("chrom", "p0","p1", "molecular_id", "weight_name", "type","context")])})
   weight_info <- do.call(rbind, weight_info)
-  weight_info$weight_id <- paste0(weight_info$gene_id, "|", weight_name)
+  weight_info$weight_id <- paste0(weight_info$molecular_id, "|", weight_name)
   # get the regions overlapping with each gene
   for (k in 1:nrow(weight_info)) {
     chrom <- weight_info[k, "chrom"]

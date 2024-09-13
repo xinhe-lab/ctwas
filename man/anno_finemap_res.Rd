@@ -6,20 +6,32 @@
 \usage{
 anno_finemap_res(
   finemap_res,
-  mapping_table = NULL,
-  map_by = "gene_id",
-  drop_unmapped_genes = TRUE
+  snp_map,
+  mapping_table,
+  map_by = "molecular_id",
+  add_gene_annot = TRUE,
+  add_position = TRUE,
+  use_gene_pos = c("mid", "start", "end"),
+  drop_unmapped = TRUE
 )
 }
 \arguments{
 \item{finemap_res}{a data frame of cTWAS finemapping results.}
 
+\item{snp_map}{a list of data frames with SNP-to-region map for the reference.}
+
 \item{mapping_table}{a data frame of mapping between molecular traits and genes,
-with required columns: "gene_id", "gene_name".}
+with required columns: "molecular_id", "gene_name".}
 
-\item{map_by}{column name to be mapped by (default: "gene_id").}
+\item{map_by}{column name to be mapped by (default: "molecular_id").}
 
-\item{drop_unmapped_genes}{If TRUE, remove unmapped genes.}
+\item{add_gene_annot}{If TRUE, add annotations}
+
+\item{add_position}{If TRUE, add positions}
+
+\item{use_gene_pos}{Use mid (midpoint), start, or end positions as gene positions.}
+
+\item{drop_unmapped}{If TRUE, remove unmapped genes.}
 }
 \value{
 a data frame of annotated finemapping result.

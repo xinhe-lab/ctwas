@@ -7,11 +7,12 @@
 <url><loc>/articles/postprocessing.html</loc></url>
 <url><loc>/articles/preparing_input_data.html</loc></url>
 <url><loc>/articles/running_ctwas_analysis.html</loc></url>
+<url><loc>/articles/software_updates.html</loc></url>
 <url><loc>/articles/summarizing_results.html</loc></url>
 <url><loc>/articles/utility_functions.html</loc></url>
 <url><loc>/authors.html</loc></url>
 <url><loc>/index.html</loc></url>
-<url><loc>/reference/add_pos_to_finemap_res.html</loc></url>
+<url><loc>/reference/add_pos.html</loc></url>
 <url><loc>/reference/anno_finemap_res.html</loc></url>
 <url><loc>/reference/assemble_region_data.html</loc></url>
 <url><loc>/reference/combine_gene_pips.html</loc></url>
@@ -30,7 +31,6 @@
 <url><loc>/reference/estimate_region_L.html</loc></url>
 <url><loc>/reference/estimate_s_rss.html</loc></url>
 <url><loc>/reference/expand_region_data.html</loc></url>
-<url><loc>/reference/filter_finemap_res.html</loc></url>
 <url><loc>/reference/finemap_regions.html</loc></url>
 <url><loc>/reference/finemap_regions_noLD.html</loc></url>
 <url><loc>/reference/finemap_single_region.html</loc></url>
@@ -38,6 +38,7 @@
 <url><loc>/reference/fit_EM.html</loc></url>
 <url><loc>/reference/get_cs_correlation.html</loc></url>
 <url><loc>/reference/get_gene_annot_from_ens_db.html</loc></url>
+<url><loc>/reference/get_molecular_ids.html</loc></url>
 <url><loc>/reference/get_problematic_genes.html</loc></url>
 <url><loc>/reference/get_region_cor.html</loc></url>
 <url><loc>/reference/harmonize_weights.html</loc></url>
@@ -62,5 +63,6 @@
 <url><loc>/reference/susie.html</loc></url>
 <url><loc>/reference/susie_get_methods.html</loc></url>
 <url><loc>/reference/susie_rss.html</loc></url>
+<url><loc>/reference/z2p.html</loc></url>
 </urlset>
 

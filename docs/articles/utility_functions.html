@@ -32,7 +32,7 @@
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">ctwas</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">0.4.11</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">0.4.12</span>
       </span>
     </div>
 
@@ -68,6 +68,21 @@
     </li>
   </ul>
 </li>
+<li>
+  <a href="../articles/FAQ.html">FAQ</a>
+</li>
+<li class="dropdown">
+  <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+    News
+
+    <span class="caret"></span>
+  </a>
+  <ul class="dropdown-menu" role="menu">
+<li>
+      <a href="../articles/software_updates.html">Software updates</a>
+    </li>
+  </ul>
+</li>
       </ul>
 <ul class="nav navbar-nav navbar-right">
 <li>
@@ -89,7 +104,7 @@
       <h1 data-toc-skip>cTWAS utility functions</h1>
                         <h4 data-toc-skip class="author">Kaixuan Luo, Sheng Qian</h4>
             
-            <h4 data-toc-skip class="date">2024-08-28</h4>
+            <h4 data-toc-skip class="date">2024-09-12</h4>
       
       <small class="dont-index">Source: <a href="https://github.com/xinhe-lab/ctwas/blob/multigroup/vignettes/utility_functions.Rmd" class="external-link"><code>vignettes/utility_functions.Rmd</code></a></small>
       <div class="hidden name"><code>utility_functions.Rmd</code></div>
@@ -106,9 +121,9 @@
 <h4 id="creating-ld-matrices-from-individual-level-genotype-data">Creating LD matrices from individual level genotype data<a class="anchor" aria-label="anchor" href="#creating-ld-matrices-from-individual-level-genotype-data"></a>
 </h4>
 <p>cTWAS provides a function <code><a href="../reference/convert_geno_to_LD_matrix.html">convert_geno_to_LD_matrix()</a></code> to create LD matrices from individual level genotype data.</p>
-<p>This function needs genotype files (<code>genotype_files</code>) and variant information files (<code>varinfo_files</code>) in PLINK format, and region definitions (<code>region_info</code>) as input, and it converts genotype data to LD matrices region-by-region, and save the LD correlation matrices (<code>.RDS</code> files) and corresponding variant information (<code>.Rvar</code> files) to the directory <code>outputdir</code>. It returns a data frame <code>region_metatable</code>, which contains region definitions from <code>region_info</code> and two additional columns “LD_file” and “SNP_file”. “LD_file” stores the filenames to the LD matrices (<code>.RDS</code> files), “SNP_file” stores the filenames of corresponding variant information (<code>.Rvar</code> files).</p>
-<p>Below is an example for creating LD matrices using 1000 Genomes European genotype data.</p>
-<p>You can download the 1000 Genomes European genotype data <a href="https://uchicago.box.com/s/qqfq7wsl1fcbfjrcpwvyyspvfud3h2xa" class="external-link">here</a>.</p>
+<p>This function needs genotype files (<code>genotype_files</code>) and variant information files (<code>varinfo_files</code>) in PLINK format, and region definitions (<code>region_info</code>) as input. It converts genotype data to LD matrices region-by-region, and save the LD correlation matrices (<code>.RDS</code> files) and corresponding variant information (<code>.Rvar</code> files) to the directory <code>outputdir</code>. It returns a data frame <code>region_metatable</code>, which contains region definitions from <code>region_info</code> and two additional columns “LD_file” and “SNP_file”. “LD_file” stores the filenames to the LD matrices (<code>.RDS</code> files), “SNP_file” stores the filenames of corresponding variant information (<code>.Rvar</code> files).</p>
+<p>Below is an example for creating LD matrices in b37 using 1000 Genomes European data.</p>
+<p><code>genotype_files</code> need to have genotype files for all chromosomes (one file per chromosome). <code>varinfo_files</code> could have one variant information file for each chromosome or have one big file with variant information from all chromosomes. By default, it will process all chromosomes from 1 to 22. You could process only one chromosome or several chromosomes by specifying <code>chrom</code>.</p>
 <div class="sourceCode" id="cb2"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">ldref_dir</span> <span class="op">&lt;-</span> <span class="st">"./1000G_EUR_Phase3_plink"</span></span>
 <span><span class="va">genotype_files</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/paste.html" class="external-link">paste0</a></span><span class="op">(</span><span class="st">"1000G.EUR.QC."</span>, <span class="fl">1</span><span class="op">:</span><span class="fl">22</span>, <span class="st">".bed"</span><span class="op">)</span></span>
@@ -126,13 +141,13 @@
 <span>                                              chrom <span class="op">=</span> <span class="fl">1</span><span class="op">:</span><span class="fl">22</span>,</span>
 <span>                                              outputdir <span class="op">=</span> <span class="va">outputdir</span>,</span>
 <span>                                              outname <span class="op">=</span> <span class="va">outname</span><span class="op">)</span></span></code></pre></div>
-<p>You can download the precomputed LD files using the 1000 Genomes European genotype data <a href="https://uchicago.box.com/s/bi7yy7461hdd07xafyk0qlji1kwmleu7" class="external-link">here</a>.</p>
-<p>We provide example R scripts to create LD files for UK biobank or 1000 genomes genotype files <a href="https://github.com/xinhe-lab/ctwas/tree/singlegroup/inst/extdata/scripts" class="external-link">here</a>.</p>
+<p>We provided precomputed LD matrices in b37 for 1000 Genomes European genotype data <a href="https://uchicago.box.com/s/bi7yy7461hdd07xafyk0qlji1kwmleu7" class="external-link">here</a>. The genotype data were downloaded from the reference files of LDSC <a href="https://zenodo.org/records/7768714" class="external-link">here</a>.</p>
+<p>We provide example R scripts to create LD matrices for UK biobank or 1000 genomes genotype data <a href="https://github.com/xinhe-lab/ctwas/tree/multigroup/inst/extdata/scripts" class="external-link">here</a>.</p>
 </div>
 <div class="section level3">
 <h3 id="using-fusion-weights">Using FUSION weights<a class="anchor" aria-label="anchor" href="#using-fusion-weights"></a>
 </h3>
-<p>PredictDB is the recommended format for cTWAS, and we introduced how to use PredictDB weights in the tutorial “Preparing cTWAS input data”. Here, we will discuss how to use FUSION weights.</p>
+<p>PredictDB is the recommended format for cTWAS, and we introduced how to use PredictDB weights in the tutorial <a href="https://xinhe-lab.github.io/multigroup_ctwas/articles/preparing_input_data.html" class="external-link">“Preparing cTWAS input data”</a>. Here, we will discuss how to use FUSION weights.</p>
 <p>Please check <a href="http://gusevlab.org/projects/fusion/#compute-your-own-predictive-models" class="external-link">FUSION/TWAS</a> for the format of FUSION weights. You can download <a href="http://gusevlab.org/projects/fusion/#download-pre-computed-predictive-models" class="external-link">precomputed FUSION models</a>.</p>
 <p>For example, we download an example GTEx whole blood data:</p>
 <div class="sourceCode" id="cb3"><pre class="sourceCode bash"><code class="sourceCode bash"><span id="cb3-1"><a href="#cb3-1"></a><span class="fu">wget</span> https://data.broadinstitute.org/alkesgroup/FUSION/WGT/GTEx.Whole_Blood.tar.bz2</span>
@@ -140,7 +155,7 @@
 <span id="cb3-3"><a href="#cb3-3"></a><span class="fu">tar</span> xjf GTEx.Whole_Blood.tar.bz2</span></code></pre></div>
 <p>After unpacking the package, we will see a folder named <code>GTEx.Whole_Blood</code>, which contains the <code>.wgt.RDat</code> files of the precomputed weights. We will also see a file <code>GTEx.Whole_Blood.pos</code> (outside the weight folder), which points to the individual <code>.wgt.RDat</code> weight files, their gene IDs, and genomic positions.</p>
 <p>We use the <code>preprocess_weight()</code> function to harmonize the prediction models and LD reference. To use the FUSION format, we need to specify the weight directory that contains the <code>.wgt.RDat</code> files. We specify <code>weight_format = 'FUSION'</code> and specify the prediction models in FUSION by <code>fusion_method</code>. It supports the following models: “lasso” (default), “enet”, “top1”, “blup”, “bslmm”, and also “best.cv”, which will choose the best model for each gene based on the cross-validation performance.</p>
-<p>This function also takes a few other inputs, including the definition of regions (<code>region_info</code>), the list of variants from GWAS (<code>z_snp$id</code>), the list of SNPs and information of LD matrix of each region (<code>snp_map</code> and <code>LD_map</code>), type (<code>type</code>) and context (<code>context</code>) of the weights. Please refer to the tutorial `Preparing input data” about these data structures.</p>
+<p>This function also takes a few other inputs, including the definition of regions (<code>region_info</code>), the list of variants from GWAS (<code>z_snp$id</code>), the list of SNPs and information of LD matrix of each region (<code>snp_map</code> and <code>LD_map</code>), type (<code>type</code>) and context (<code>context</code>) of the weights. Please refer to the tutorial <a href="https://xinhe-lab.github.io/multigroup_ctwas/articles/preparing_input_data.html" class="external-link">`Preparing input data”</a> about these data structures.</p>
 <div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">weights</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/preprocess_weights.html">preprocess_weights</a></span><span class="op">(</span><span class="st">"./GTEx.Whole_Blood"</span>,</span>
 <span>                              <span class="va">region_info</span>,</span>
@@ -158,7 +173,7 @@
 <span>                              scale_predictdb_weights <span class="op">=</span> <span class="cn">FALSE</span>,</span>
 <span>                              load_predictdb_LD <span class="op">=</span> <span class="cn">FALSE</span>,</span>
 <span>                              ncore <span class="op">=</span> <span class="fl">4</span><span class="op">)</span></span></code></pre></div>
-<p>We drop strand ambiguous variants (<code>drop_strand_ambig = TRUE</code>) by default. FUSION weights are already on the standardized scale, so we don’t scale weights by the variance. For FUSION models, we don’t have precomputed covariances between variants. So we calculate correlations between weight variants using the LD reference. This usually takes a while, so it is helpful to set <code>ncore</code> to parallelize the computation. FUSION weights do not contain gene type information, so we don’t limit to protein coding genes. By default, we use all variants in the prediction models. If you have dense prediction models and want to use only the top few variants for each gene in the weights, you could set the number in <code>fusion_top_n_snps</code> (<code>fusion_top_n_snps = 5</code> will use the top 5 variants for each gene). We could set the genome build of the FUSION models in <code>fusion_genome_version</code>. This is only used when creating the “varID” of the variants to be consistent with PredictDB format, but does not affect the preprocessed weights.</p>
+<p>We drop strand ambiguous variants (<code>drop_strand_ambig = TRUE</code>) by default. FUSION weights are already on the standardized scale, so we don’t scale weights by the variance. For FUSION models, we don’t have precomputed covariances between variants. So we calculate correlations between weight variants using the LD reference. This usually takes a while, so it is helpful to set <code>ncore</code> to parallelize the computation. FUSION weights do not contain gene type information, so we don’t limit to protein coding genes. By default, we use all variants in the prediction models. If you have dense prediction models and want to use only the top variants for each gene in the weights, you could set the number in <code>fusion_top_n_snps</code> (<code>fusion_top_n_snps = 5</code> will use the top five variants for each gene). We could set the genome build of the FUSION models in <code>fusion_genome_version</code>. This is only used when creating the “varID” of the variants to be consistent with PredictDB format, but does not affect the preprocessed weights.</p>
 </div>
 <div class="section level3">
 <h3 id="creating-prediction-models-from-qtl-lists">Creating prediction models from QTL lists<a class="anchor" aria-label="anchor" href="#creating-prediction-models-from-qtl-lists"></a>

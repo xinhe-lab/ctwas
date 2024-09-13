@@ -17,7 +17,7 @@
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">ctwas</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">0.4.11</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">0.4.12</span>
       </span>
     </div>
 
@@ -50,6 +50,19 @@
       <a href="../articles/utility_functions.html">cTWAS utility functions</a>
     </li>
   </ul></li>
+<li>
+  <a href="../articles/FAQ.html">FAQ</a>
+</li>
+<li class="dropdown">
+  <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+    News
+
+    <span class="caret"></span>
+  </a>
+  <ul class="dropdown-menu" role="menu"><li>
+      <a href="../articles/software_updates.html">Software updates</a>
+    </li>
+  </ul></li>
       </ul><ul class="nav navbar-nav navbar-right"><li>
   <a href="https://github.com/xinhe-lab/ctwas/tree/multigroup" class="external-link">Source</a>
 </li>
@@ -74,9 +87,13 @@
     <div id="ref-usage">
     <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="fu">anno_finemap_res</span><span class="op">(</span></span>
 <span>  <span class="va">finemap_res</span>,</span>
-<span>  mapping_table <span class="op">=</span> <span class="cn">NULL</span>,</span>
-<span>  map_by <span class="op">=</span> <span class="st">"gene_id"</span>,</span>
-<span>  drop_unmapped_genes <span class="op">=</span> <span class="cn">TRUE</span></span>
+<span>  <span class="va">snp_map</span>,</span>
+<span>  <span class="va">mapping_table</span>,</span>
+<span>  map_by <span class="op">=</span> <span class="st">"molecular_id"</span>,</span>
+<span>  add_gene_annot <span class="op">=</span> <span class="cn">TRUE</span>,</span>
+<span>  add_position <span class="op">=</span> <span class="cn">TRUE</span>,</span>
+<span>  use_gene_pos <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"mid"</span>, <span class="st">"start"</span>, <span class="st">"end"</span><span class="op">)</span>,</span>
+<span>  drop_unmapped <span class="op">=</span> <span class="cn">TRUE</span></span>
 <span><span class="op">)</span></span></code></pre></div>
     </div>
 
@@ -88,16 +105,32 @@
 <dd><p>a data frame of cTWAS finemapping results.</p></dd>
 
 
+<dt id="arg-snp-map">snp_map<a class="anchor" aria-label="anchor" href="#arg-snp-map"></a></dt>
+<dd><p>a list of data frames with SNP-to-region map for the reference.</p></dd>
+
+
 <dt id="arg-mapping-table">mapping_table<a class="anchor" aria-label="anchor" href="#arg-mapping-table"></a></dt>
 <dd><p>a data frame of mapping between molecular traits and genes,
-with required columns: "gene_id", "gene_name".</p></dd>
+with required columns: "molecular_id", "gene_name".</p></dd>
 
 
 <dt id="arg-map-by">map_by<a class="anchor" aria-label="anchor" href="#arg-map-by"></a></dt>
-<dd><p>column name to be mapped by (default: "gene_id").</p></dd>
+<dd><p>column name to be mapped by (default: "molecular_id").</p></dd>
 
 
-<dt id="arg-drop-unmapped-genes">drop_unmapped_genes<a class="anchor" aria-label="anchor" href="#arg-drop-unmapped-genes"></a></dt>
+<dt id="arg-add-gene-annot">add_gene_annot<a class="anchor" aria-label="anchor" href="#arg-add-gene-annot"></a></dt>
+<dd><p>If TRUE, add annotations</p></dd>
+
+
+<dt id="arg-add-position">add_position<a class="anchor" aria-label="anchor" href="#arg-add-position"></a></dt>
+<dd><p>If TRUE, add positions</p></dd>
+
+
+<dt id="arg-use-gene-pos">use_gene_pos<a class="anchor" aria-label="anchor" href="#arg-use-gene-pos"></a></dt>
+<dd><p>Use mid (midpoint), start, or end positions as gene positions.</p></dd>
+
+
+<dt id="arg-drop-unmapped">drop_unmapped<a class="anchor" aria-label="anchor" href="#arg-drop-unmapped"></a></dt>
 <dd><p>If TRUE, remove unmapped genes.</p></dd>
 
 </dl></div>

@@ -33,7 +33,7 @@
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="index.html">ctwas</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">0.4.11</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">0.4.12</span>
       </span>
     </div>
 
@@ -69,6 +69,21 @@
     </li>
   </ul>
 </li>
+<li>
+  <a href="articles/FAQ.html">FAQ</a>
+</li>
+<li class="dropdown">
+  <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+    News
+
+    <span class="caret"></span>
+  </a>
+  <ul class="dropdown-menu" role="menu">
+<li>
+      <a href="articles/software_updates.html">Software updates</a>
+    </li>
+  </ul>
+</li>
       </ul>
 <ul class="nav navbar-nav navbar-right">
 <li>
@@ -93,6 +108,7 @@
 <p>Expression quantitative trait loci (eQTLs) have often been used to nominate candidate genes from genome-wide association studies (GWAS). However, commonly used methods are susceptible to false positives largely due to linkage disequilibrium (LD) of eQTLs with causal variants acting on the phenotype directly.</p>
 <p>Our method, “causal-TWAS” (cTWAS), addresses this challenge by borrowing ideas from statistical fine-mapping. It is a generalization of methods for transcriptome-wide association studies (TWAS), but when analyzing any gene, it adjusts for other nearby genes <em>and all nearby genetic variants.</em></p>
 <p>While the <a href="https://doi.org/10.1038/s41588-023-01648-9" class="external-link">published paper</a> analyzes a single eQTL dataset, the latest version of cTWAS extends the method to integrate multiple groups of prediction models, allowing for joint analysis of multiple types of molecular traits, across potentially different tissues, cell types or conditions.</p>
+<p>If you have already run cTWAS before, see <a href="https://xinhe-lab.github.io/multigroup_ctwas/articles/software_updates.html" class="external-link">this page</a> for the software updates.</p>
 <div class="section level2">
 <h2 id="install-ctwas">Install ctwas<a class="anchor" aria-label="anchor" href="#install-ctwas"></a>
 </h2>
@@ -125,6 +141,8 @@
 </ul>
 <p>In addition, we have some useful functions to help run cTWAS, e.g. for creating your own reference LD data:</p>
 <ul><li><a href="https://xinhe-lab.github.io/multigroup_ctwas/articles/utility_functions.html" class="external-link">cTWAS utility functions</a></li></ul>
+<p>We also have a FAQ page for some common questions:</p>
+<ul><li><a href="https://xinhe-lab.github.io/multigroup_ctwas/articles/FAQ.html" class="external-link">FAQ</a></li></ul>
 <p>You can <a href="https://github.com/xinhe-lab/ctwas/tree/multigroup" class="external-link">browse source code</a> and <a href="https://github.com/xinhe-lab/ctwas/issues" class="external-link">report a bug</a> here.</p>
 <p><img style="display:block;margin:auto" width="700" height="300" src="reference/figures/workflow.png"></p>
 </div>
@@ -137,8 +155,7 @@
 <div class="section level2">
 <h2 id="useful-resources">Useful resources<a class="anchor" aria-label="anchor" href="#useful-resources"></a>
 </h2>
-<p>We have pre-computed the LD matrices of European samples from UK Biobank. They can be downloaded <a href="https://uchicago.box.com/s/jqocacd2fulskmhoqnasrknbt59x3xkn" class="external-link">here</a>.</p>
-<p>We have the lists of reference variant information from all the LD matrices in the genome in <a href="https://uchicago.box.com/s/t089or92dkovv0epkrjvxq8r9db9ys99" class="external-link">hg38</a> and <a href="https://uchicago.box.com/s/ufko2gjagcb693dob4khccqubuztb9pz" class="external-link">hg19</a>.</p>
+<p>We have pre-computed reference LD matrices and variant information of European samples from UK Biobank. They can be downloaded <a href="https://uchicago.box.com/s/jqocacd2fulskmhoqnasrknbt59x3xkn" class="external-link">here</a>.</p>
 <p>cTWAS requires the expression prediction models, or weights, of genes. The pre-computed weights of GTEx expression and splicing traits can be downloaded from <a href="https://predictdb.org/post/2021/07/21/gtex-v8-models-on-eqtl-and-sqtl/" class="external-link">PredictDB</a>.</p>
 </div>
 <div class="section level2">

@@ -7,24 +7,37 @@
 make_locusplot(
   finemap_res,
   region_id,
-  weights,
   ens_db,
+  weights = NULL,
   R_snp_gene = NULL,
   R_gene = NULL,
   locus_range = NULL,
+  focal_id = NULL,
   focal_gene = NULL,
-  filter_genetrack_biotype = "protein_coding",
+  filter_protein_coding_genes = TRUE,
+  filter_cs = TRUE,
+  color_pval_by = c("cs", "LD", "none"),
+  color_pip_by = c("cs", "LD", "none"),
+  LD.colors = c("grey", "blue", "purple", "salmon"),
+  cs.colors = c("grey", "firebrick", "dodgerblue", "forestgreen", "darkmagenta",
+    "darkorange"),
+  focal.colors = c("grey", "salmon"),
+  label_QTLs = TRUE,
   highlight_pval = NULL,
   highlight_pip = 0.8,
   highlight_pos = NULL,
-  label_QTLs = TRUE,
-  point.sizes = c(1, 3.5),
+  point.sizes = c(1, 3),
   point.alpha = c(0.4, 0.6),
-  point.shapes = c(16, 15, 18, 17),
+  point.shapes = c(16, 15, 18, 17, 10, 12, 14, 11),
   label.text.size = 2.5,
-  legend.text.size = 10,
+  max.overlaps = 10,
+  axis.text.size = 8,
+  axis.title.size = 10,
+  legend.text.size = 9,
   legend.position = "top",
-  panel.heights = c(4, 4, 1, 4)
+  genelabel.cex.text = 0.7,
+  panel.heights = c(4, 4, 1, 4),
+  verbose = FALSE
 )
 }
 \arguments{
@@ -32,9 +45,10 @@ make_locusplot(
 
 \item{region_id}{region ID to be plotted}
 
-\item{weights}{a list of proprocessed weights}
-
 \item{ens_db}{Ensembl database}
+
+\item{weights}{a list of proprocessed weights, used to plot QTL track.
+If NULL, will not plot the QTL track.}
 
 \item{R_snp_gene}{SNP-gene correlation matrix of the region.
 If both R_snp_gene and R_gene are available,
@@ -45,19 +59,37 @@ color data points with correlations with the focal gene.}
 \item{locus_range}{a vector of start and end positions to define the region boundary to be plotted.
 If NULL, the entire region will be plotted (with 100 bp flanks on both sides).}
 
-\item{focal_gene}{the focal gene name.
-If NULL, choose the gene with the highest PIP.}
+\item{focal_id}{the focal ID.}
 
-\item{filter_genetrack_biotype}{biotype to be displayed in gene tracks.
-By default, limits to protein coding genes. If NULL, display all possible ones.}
+\item{focal_gene}{the focal gene name. By default, use the gene with the highest PIP.}
+
+\item{filter_protein_coding_genes}{If TRUE, limits to protein coding genes only.}
+
+\item{filter_cs}{If TRUE, limits to credible sets.}
+
+\item{color_pval_by}{Options to color the p-value track.
+"LD": colors the p-value track by the correlations to the focal gene.
+"cs": colors the p-value track by the credible sets.
+"none": uses the same color for non-focal genes.}
+
+\item{color_pip_by}{Options to color the PIP track.
+"LD": colors the PIP track by the correlations to the focal gene.
+"cs": colors the PIP track by the credible sets.
+"none": uses the same color for non-focal genes.}
+
+\item{LD.colors}{Colors for correlation levels.}
+
+\item{cs.colors}{Colors for credible sets.}
+
+\item{focal.colors}{Colors for non-focal and focal gene.}
+
+\item{label_QTLs}{If TRUE, label SNP IDs in the QTL panel.}
 
 \item{highlight_pval}{pvalue to highlight with a horizontal line}
 
 \item{highlight_pip}{PIP to highlight with a horizontal line}
 
 \item{highlight_pos}{genomic positions to highlight with vertical lines}
-
-\item{label_QTLs}{If TRUE, label SNP IDs in the QTL panel.}
 
 \item{point.sizes}{size values for SNP and non-SNP data points in the scatter plots}
 
@@ -67,11 +99,22 @@ By default, limits to protein coding genes. If NULL, display all possible ones.}
 
 \item{label.text.size}{Font size for gene and SNP label text}
 
-\item{legend.text.size}{Font size for legend text}
+\item{max.overlaps}{Setting for geom_text_repel() function to label texts.
+Exclude text labels when they overlap too many other things.}
+
+\item{axis.text.size}{Font size for axis label text.}
+
+\item{axis.title.size}{Font size for axis title text.}
+
+\item{legend.text.size}{Font size for legend text.}
 
 \item{legend.position}{position to put legends. If "none", no legends will be shown.}
 
+\item{genelabel.cex.text}{Size for gene label text.}
+
 \item{panel.heights}{Relative heights of the panels.}
+
+\item{verbose}{If TRUE, print detail messages.}
 }
 \description{
 Plots the cTWAS result for a single locus

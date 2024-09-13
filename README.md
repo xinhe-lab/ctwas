@@ -8,6 +8,8 @@ Our method, "causal-TWAS" (cTWAS), addresses this challenge by borrowing ideas f
 
 While the [published paper](https://doi.org/10.1038/s41588-023-01648-9) analyzes a single eQTL dataset, the latest version of cTWAS extends the method to integrate multiple groups of prediction models, allowing for joint analysis of multiple types of molecular traits, across potentially different tissues, cell types or conditions.
 
+If you have already run cTWAS before, see [this page](https://xinhe-lab.github.io/multigroup_ctwas/articles/software_updates.html) for the software updates.
+
 ## Install ctwas
 
 Use "remotes" to install the latest version of ctwas from GitHub: 
@@ -54,6 +56,11 @@ In addition, we have some useful functions to help run cTWAS, e.g. for creating 
 
 - [cTWAS utility functions](https://xinhe-lab.github.io/multigroup_ctwas/articles/utility_functions.html)
 
+We also have a FAQ page for some common questions: 
+
+- [FAQ](https://xinhe-lab.github.io/multigroup_ctwas/articles/FAQ.html)
+
+
 You can [browse source code](https://github.com/xinhe-lab/ctwas/tree/multigroup) and [report a bug](https://github.com/xinhe-lab/ctwas/issues) here. 
 
 <img style="display:block;margin:auto" width="700" height="300" src="man/figures/workflow.png">
@@ -72,10 +79,7 @@ repository useful for your work, please cite:
 
 ## Useful resources
 
-We have pre-computed the LD matrices of European samples from UK Biobank. 
-They can be downloaded [here](https://uchicago.box.com/s/jqocacd2fulskmhoqnasrknbt59x3xkn). 
-
-We have the lists of reference variant information from all the LD matrices in the genome in [hg38](https://uchicago.box.com/s/t089or92dkovv0epkrjvxq8r9db9ys99) and [hg19](https://uchicago.box.com/s/ufko2gjagcb693dob4khccqubuztb9pz).
+We have pre-computed reference LD matrices and variant information of European samples from UK Biobank. They can be downloaded [here](https://uchicago.box.com/s/jqocacd2fulskmhoqnasrknbt59x3xkn).  
 
 cTWAS requires the expression prediction models, or weights, of genes. 
 The pre-computed weights of GTEx expression and splicing traits can be downloaded from [PredictDB](https://predictdb.org/post/2021/07/21/gtex-v8-models-on-eqtl-and-sqtl/). 

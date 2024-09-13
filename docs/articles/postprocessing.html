@@ -32,7 +32,7 @@
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">ctwas</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">0.4.11</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">0.4.12</span>
       </span>
     </div>
 
@@ -68,6 +68,21 @@
     </li>
   </ul>
 </li>
+<li>
+  <a href="../articles/FAQ.html">FAQ</a>
+</li>
+<li class="dropdown">
+  <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+    News
+
+    <span class="caret"></span>
+  </a>
+  <ul class="dropdown-menu" role="menu">
+<li>
+      <a href="../articles/software_updates.html">Software updates</a>
+    </li>
+  </ul>
+</li>
       </ul>
 <ul class="nav navbar-nav navbar-right">
 <li>
@@ -89,7 +104,7 @@
       <h1 data-toc-skip>Post-processing cTWAS results</h1>
                         <h4 data-toc-skip class="author">Kaixuan Luo, Sheng Qian</h4>
             
-            <h4 data-toc-skip class="date">2024-08-28</h4>
+            <h4 data-toc-skip class="date">2024-09-12</h4>
       
       <small class="dont-index">Source: <a href="https://github.com/xinhe-lab/ctwas/blob/multigroup/vignettes/postprocessing.Rmd" class="external-link"><code>vignettes/postprocessing.Rmd</code></a></small>
       <div class="hidden name"><code>postprocessing.Rmd</code></div>
@@ -168,7 +183,7 @@
 <span><span class="va">merged_region_id_map</span> <span class="op">&lt;-</span> <span class="va">merge_region_res</span><span class="op">$</span><span class="va">merged_region_id_map</span></span>
 <span><span class="va">merged_region_L</span> <span class="op">&lt;-</span> <span class="va">merge_region_res</span><span class="op">$</span><span class="va">merged_region_L</span></span></code></pre></div>
 <p>When <code>estimate_L = TRUE</code>, we estimate the number of credible sets (<code>merged_region_L</code>) for the merged regions. This information will be used later in the fine-mapping step. We could set <code>maxSNP</code> to limit the number of SNPs in the region, if merged regions contain too many SNPs,</p>
-<p>Next, we run fine-mapping again for these merged regions, similar to the section “Fine-mapping screened regions” in the tutorial “Running cTWAS analysis”.</p>
+<p>Next, we run fine-mapping again for these merged regions, similar to the section “Fine-mapping screened regions” in the tutorial <a href="https://xinhe-lab.github.io/multigroup_ctwas/articles/running_ctwas_analysis.html" class="external-link">“Running cTWAS analysis”</a>.</p>
 <div class="sourceCode" id="cb7"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">finemap_merged_regions_res</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/finemap_regions.html">finemap_regions</a></span><span class="op">(</span><span class="va">merged_region_data</span>,</span>
 <span>                                              LD_map <span class="op">=</span> <span class="va">merged_LD_map</span>,</span>
@@ -212,7 +227,7 @@
 <div class="sourceCode" id="cb10"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">nonSNP_PIPs</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/compute_region_nonSNP_PIPs.html">compute_region_nonSNP_PIPs</a></span><span class="op">(</span><span class="va">finemap_res</span>, filter_cs <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span>
 <span><span class="va">selected_region_ids</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/names.html" class="external-link">names</a></span><span class="op">(</span><span class="va">nonSNP_PIPs</span><span class="op">)</span><span class="op">[</span><span class="va">nonSNP_PIPs</span> <span class="op">&gt;</span> <span class="fl">0.8</span><span class="op">]</span></span></code></pre></div>
-<p>We use the function <code><a href="../reference/diagnose_LD_mismatch_susie.html">diagnose_LD_mismatch_susie()</a></code> to perform LD mismatch diagnosis for these regions. This function uses SuSiE RSS to detect problematic SNPs among all variants in a region. Basically, it infers the expected statistic of a variant, based on the statistics of nearby variants and their LD from the reference, and compares this with the observed statistic. Inconsistency between the two would suggest potential LD mismatch.</p>
+<p>We use the function <code><a href="../reference/diagnose_LD_mismatch_susie.html">diagnose_LD_mismatch_susie()</a></code> to perform LD mismatch diagnosis for these regions. This function uses <a href="https://stephenslab.github.io/susieR/articles/susierss_diagnostic.html" class="external-link">SuSiE-RSS</a> to detect problematic SNPs among all variants in a region. Basically, it infers the expected statistic of a variant, based on the statistics of nearby variants and their LD from the reference, and compares this with the observed statistic. Inconsistency between the two would suggest potential LD mismatch.</p>
 <div class="sourceCode" id="cb11"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">res</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/diagnose_LD_mismatch_susie.html">diagnose_LD_mismatch_susie</a></span><span class="op">(</span>region_ids <span class="op">=</span> <span class="va">selected_region_ids</span>, </span>
 <span>                                  z_snp <span class="op">=</span> <span class="va">z_snp</span>, </span>
@@ -223,7 +238,7 @@
 <span><span class="va">problematic_snps</span> <span class="op">&lt;-</span> <span class="va">res</span><span class="op">$</span><span class="va">problematic_snps</span></span>
 <span><span class="va">flipped_snps</span> <span class="op">&lt;-</span> <span class="va">res</span><span class="op">$</span><span class="va">flipped_snps</span></span>
 <span><span class="va">condz_stats</span> <span class="op">&lt;-</span> <span class="va">res</span><span class="op">$</span><span class="va">condz_stats</span></span></code></pre></div>
-<p>This returns a list of problematic SNPs (diagnostic test <code>p-value &lt; 5e-8</code>, by default), flipped SNPs, and the test statistics of <code>kriging_rss</code> function from SuSiE-RSS.</p>
+<p>This returns a list of problematic SNPs (diagnostic test <code>p-value &lt; 5e-8</code>, by default), flipped SNPs, and the test statistics of <code>kriging_rss</code> function from <a href="https://stephenslab.github.io/susieR/articles/susierss_diagnostic.html" class="external-link">SuSiE-RSS</a>.</p>
 <p>Our basic strategy of dealing with LD mismatch is: we use the list of problematic SNPs to identify the molecular traits whose results may be affected by LD-mismatch. We would then run SuSiE fine-mapping with L = 1 in the regions containing these molecular traits, assuming a single causal signal in such a region. The fine-mapping results in this setting would be independent of LD.</p>
 <p>We choose the genes with some plausibility of being risk genes (<code>abs(Z-score) &gt; 3</code>, by default) and problematic SNPs in their weights. We would then select regions containing these problematic genes.</p>
 <div class="sourceCode" id="cb12"><pre class="downlit sourceCode r">

@@ -17,7 +17,7 @@
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">ctwas</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">0.4.11</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">0.4.12</span>
       </span>
     </div>
 
@@ -50,6 +50,19 @@
       <a href="../articles/utility_functions.html">cTWAS utility functions</a>
     </li>
   </ul></li>
+<li>
+  <a href="../articles/FAQ.html">FAQ</a>
+</li>
+<li class="dropdown">
+  <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+    News
+
+    <span class="caret"></span>
+  </a>
+  <ul class="dropdown-menu" role="menu"><li>
+      <a href="../articles/software_updates.html">Software updates</a>
+    </li>
+  </ul></li>
       </ul><ul class="nav navbar-nav navbar-right"><li>
   <a href="https://github.com/xinhe-lab/ctwas/tree/multigroup" class="external-link">Source</a>
 </li>
@@ -75,24 +88,37 @@
     <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="fu">make_locusplot</span><span class="op">(</span></span>
 <span>  <span class="va">finemap_res</span>,</span>
 <span>  <span class="va">region_id</span>,</span>
-<span>  <span class="va">weights</span>,</span>
 <span>  <span class="va">ens_db</span>,</span>
+<span>  weights <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  R_snp_gene <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  R_gene <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  locus_range <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  focal_id <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  focal_gene <span class="op">=</span> <span class="cn">NULL</span>,</span>
-<span>  filter_genetrack_biotype <span class="op">=</span> <span class="st">"protein_coding"</span>,</span>
+<span>  filter_protein_coding_genes <span class="op">=</span> <span class="cn">TRUE</span>,</span>
+<span>  filter_cs <span class="op">=</span> <span class="cn">TRUE</span>,</span>
+<span>  color_pval_by <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"cs"</span>, <span class="st">"LD"</span>, <span class="st">"none"</span><span class="op">)</span>,</span>
+<span>  color_pip_by <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"cs"</span>, <span class="st">"LD"</span>, <span class="st">"none"</span><span class="op">)</span>,</span>
+<span>  LD.colors <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"grey"</span>, <span class="st">"blue"</span>, <span class="st">"purple"</span>, <span class="st">"salmon"</span><span class="op">)</span>,</span>
+<span>  cs.colors <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"grey"</span>, <span class="st">"firebrick"</span>, <span class="st">"dodgerblue"</span>, <span class="st">"forestgreen"</span>, <span class="st">"darkmagenta"</span>,</span>
+<span>    <span class="st">"darkorange"</span><span class="op">)</span>,</span>
+<span>  focal.colors <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"grey"</span>, <span class="st">"salmon"</span><span class="op">)</span>,</span>
+<span>  label_QTLs <span class="op">=</span> <span class="cn">TRUE</span>,</span>
 <span>  highlight_pval <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  highlight_pip <span class="op">=</span> <span class="fl">0.8</span>,</span>
 <span>  highlight_pos <span class="op">=</span> <span class="cn">NULL</span>,</span>
-<span>  label_QTLs <span class="op">=</span> <span class="cn">TRUE</span>,</span>
-<span>  point.sizes <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">1</span>, <span class="fl">3.5</span><span class="op">)</span>,</span>
+<span>  point.sizes <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">1</span>, <span class="fl">3</span><span class="op">)</span>,</span>
 <span>  point.alpha <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">0.4</span>, <span class="fl">0.6</span><span class="op">)</span>,</span>
-<span>  point.shapes <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">16</span>, <span class="fl">15</span>, <span class="fl">18</span>, <span class="fl">17</span><span class="op">)</span>,</span>
+<span>  point.shapes <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">16</span>, <span class="fl">15</span>, <span class="fl">18</span>, <span class="fl">17</span>, <span class="fl">10</span>, <span class="fl">12</span>, <span class="fl">14</span>, <span class="fl">11</span><span class="op">)</span>,</span>
 <span>  label.text.size <span class="op">=</span> <span class="fl">2.5</span>,</span>
-<span>  legend.text.size <span class="op">=</span> <span class="fl">10</span>,</span>
+<span>  max.overlaps <span class="op">=</span> <span class="fl">10</span>,</span>
+<span>  axis.text.size <span class="op">=</span> <span class="fl">8</span>,</span>
+<span>  axis.title.size <span class="op">=</span> <span class="fl">10</span>,</span>
+<span>  legend.text.size <span class="op">=</span> <span class="fl">9</span>,</span>
 <span>  legend.position <span class="op">=</span> <span class="st">"top"</span>,</span>
-<span>  panel.heights <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">4</span>, <span class="fl">4</span>, <span class="fl">1</span>, <span class="fl">4</span><span class="op">)</span></span>
+<span>  genelabel.cex.text <span class="op">=</span> <span class="fl">0.7</span>,</span>
+<span>  panel.heights <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">4</span>, <span class="fl">4</span>, <span class="fl">1</span>, <span class="fl">4</span><span class="op">)</span>,</span>
+<span>  verbose <span class="op">=</span> <span class="cn">FALSE</span></span>
 <span><span class="op">)</span></span></code></pre></div>
     </div>
 
@@ -108,12 +134,13 @@
 <dd><p>region ID to be plotted</p></dd>
 
 
-<dt id="arg-weights">weights<a class="anchor" aria-label="anchor" href="#arg-weights"></a></dt>
-<dd><p>a list of proprocessed weights</p></dd>
-
-
 <dt id="arg-ens-db">ens_db<a class="anchor" aria-label="anchor" href="#arg-ens-db"></a></dt>
 <dd><p>Ensembl database</p></dd>
+
+
+<dt id="arg-weights">weights<a class="anchor" aria-label="anchor" href="#arg-weights"></a></dt>
+<dd><p>a list of proprocessed weights, used to plot QTL track.
+If NULL, will not plot the QTL track.</p></dd>
 
 
 <dt id="arg-r-snp-gene">R_snp_gene<a class="anchor" aria-label="anchor" href="#arg-r-snp-gene"></a></dt>
@@ -131,14 +158,50 @@ color data points with correlations with the focal gene.</p></dd>
 If NULL, the entire region will be plotted (with 100 bp flanks on both sides).</p></dd>
 
 
+<dt id="arg-focal-id">focal_id<a class="anchor" aria-label="anchor" href="#arg-focal-id"></a></dt>
+<dd><p>the focal ID.</p></dd>
+
+
 <dt id="arg-focal-gene">focal_gene<a class="anchor" aria-label="anchor" href="#arg-focal-gene"></a></dt>
-<dd><p>the focal gene name.
-If NULL, choose the gene with the highest PIP.</p></dd>
+<dd><p>the focal gene name. By default, use the gene with the highest PIP.</p></dd>
 
 
-<dt id="arg-filter-genetrack-biotype">filter_genetrack_biotype<a class="anchor" aria-label="anchor" href="#arg-filter-genetrack-biotype"></a></dt>
-<dd><p>biotype to be displayed in gene tracks.
-By default, limits to protein coding genes. If NULL, display all possible ones.</p></dd>
+<dt id="arg-filter-protein-coding-genes">filter_protein_coding_genes<a class="anchor" aria-label="anchor" href="#arg-filter-protein-coding-genes"></a></dt>
+<dd><p>If TRUE, limits to protein coding genes only.</p></dd>
+
+
+<dt id="arg-filter-cs">filter_cs<a class="anchor" aria-label="anchor" href="#arg-filter-cs"></a></dt>
+<dd><p>If TRUE, limits to credible sets.</p></dd>
+
+
+<dt id="arg-color-pval-by">color_pval_by<a class="anchor" aria-label="anchor" href="#arg-color-pval-by"></a></dt>
+<dd><p>Options to color the p-value track.
+"LD": colors the p-value track by the correlations to the focal gene.
+"cs": colors the p-value track by the credible sets.
+"none": uses the same color for non-focal genes.</p></dd>
+
+
+<dt id="arg-color-pip-by">color_pip_by<a class="anchor" aria-label="anchor" href="#arg-color-pip-by"></a></dt>
+<dd><p>Options to color the PIP track.
+"LD": colors the PIP track by the correlations to the focal gene.
+"cs": colors the PIP track by the credible sets.
+"none": uses the same color for non-focal genes.</p></dd>
+
+
+<dt id="arg-ld-colors">LD.colors<a class="anchor" aria-label="anchor" href="#arg-ld-colors"></a></dt>
+<dd><p>Colors for correlation levels.</p></dd>
+
+
+<dt id="arg-cs-colors">cs.colors<a class="anchor" aria-label="anchor" href="#arg-cs-colors"></a></dt>
+<dd><p>Colors for credible sets.</p></dd>
+
+
+<dt id="arg-focal-colors">focal.colors<a class="anchor" aria-label="anchor" href="#arg-focal-colors"></a></dt>
+<dd><p>Colors for non-focal and focal gene.</p></dd>
+
+
+<dt id="arg-label-qtls">label_QTLs<a class="anchor" aria-label="anchor" href="#arg-label-qtls"></a></dt>
+<dd><p>If TRUE, label SNP IDs in the QTL panel.</p></dd>
 
 
 <dt id="arg-highlight-pval">highlight_pval<a class="anchor" aria-label="anchor" href="#arg-highlight-pval"></a></dt>
@@ -151,10 +214,6 @@ By default, limits to protein coding genes. If NULL, display all possible ones.<
 
 <dt id="arg-highlight-pos">highlight_pos<a class="anchor" aria-label="anchor" href="#arg-highlight-pos"></a></dt>
 <dd><p>genomic positions to highlight with vertical lines</p></dd>
-
-
-<dt id="arg-label-qtls">label_QTLs<a class="anchor" aria-label="anchor" href="#arg-label-qtls"></a></dt>
-<dd><p>If TRUE, label SNP IDs in the QTL panel.</p></dd>
 
 
 <dt id="arg-point-sizes">point.sizes<a class="anchor" aria-label="anchor" href="#arg-point-sizes"></a></dt>
@@ -173,16 +232,37 @@ By default, limits to protein coding genes. If NULL, display all possible ones.<
 <dd><p>Font size for gene and SNP label text</p></dd>
 
 
+<dt id="arg-max-overlaps">max.overlaps<a class="anchor" aria-label="anchor" href="#arg-max-overlaps"></a></dt>
+<dd><p>Setting for geom_text_repel() function to label texts.
+Exclude text labels when they overlap too many other things.</p></dd>
+
+
+<dt id="arg-axis-text-size">axis.text.size<a class="anchor" aria-label="anchor" href="#arg-axis-text-size"></a></dt>
+<dd><p>Font size for axis label text.</p></dd>
+
+
+<dt id="arg-axis-title-size">axis.title.size<a class="anchor" aria-label="anchor" href="#arg-axis-title-size"></a></dt>
+<dd><p>Font size for axis title text.</p></dd>
+
+
 <dt id="arg-legend-text-size">legend.text.size<a class="anchor" aria-label="anchor" href="#arg-legend-text-size"></a></dt>
-<dd><p>Font size for legend text</p></dd>
+<dd><p>Font size for legend text.</p></dd>
 
 
 <dt id="arg-legend-position">legend.position<a class="anchor" aria-label="anchor" href="#arg-legend-position"></a></dt>
 <dd><p>position to put legends. If "none", no legends will be shown.</p></dd>
 
 
+<dt id="arg-genelabel-cex-text">genelabel.cex.text<a class="anchor" aria-label="anchor" href="#arg-genelabel-cex-text"></a></dt>
+<dd><p>Size for gene label text.</p></dd>
+
+
 <dt id="arg-panel-heights">panel.heights<a class="anchor" aria-label="anchor" href="#arg-panel-heights"></a></dt>
 <dd><p>Relative heights of the panels.</p></dd>
+
+
+<dt id="arg-verbose">verbose<a class="anchor" aria-label="anchor" href="#arg-verbose"></a></dt>
+<dd><p>If TRUE, print detail messages.</p></dd>
 
 </dl></div>
 

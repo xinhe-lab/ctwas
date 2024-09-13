@@ -13,11 +13,14 @@
 #' @param LD_map a data frame with filenames of LD matrices and SNP information for the regions.
 #' Required when \code{load_predictdb_LD = FALSE}.
 #'
-#' @param type a string, specifying QTL type of each weight file, e.g. expression, splicing, protein.
+#' @param type a string, specifying QTL type of the weight file, e.g. expression, splicing, protein.
 #'
-#' @param context a string, specifying tissue/cell type/condition of each weight file, e.g. Liver, Lung, Brain.
+#' @param context a string, specifying context (tissue/cell type) of the weight file, e.g. Liver, Lung, Brain.
 #'
-#' @param weight_format a string, specifying format of each weight file, e.g. PredictDB, FUSION.
+#' @param weight_name a string, specifying name of the weight file.
+#' By default, it is \code{weight_name = paste0(context, "_", type)}
+#'
+#' @param weight_format a string, specifying format of the weight file, e.g. PredictDB, FUSION.
 #'
 #' @param drop_strand_ambig If TRUE remove strand ambiguous variants (A/T, G/C).
 #'
@@ -64,6 +67,7 @@ preprocess_weights <- function(weight_file,
                                LD_map = NULL,
                                type,
                                context,
+                               weight_name = paste0(context, "_", type),
                                weight_format = c("PredictDB", "FUSION"),
                                drop_strand_ambig = TRUE,
                                filter_protein_coding_genes = TRUE,
@@ -109,16 +113,8 @@ preprocess_weights <- function(weight_file,
 
   snp_info <- as.data.frame(rbindlist(snp_map, idcol = "region_id"))
 
-  # set default type and context
-  if (missing(type)) {
-    type <- "gene"
-  }
-
-  if (missing(context)) {
-    context <- file_path_sans_ext(basename(weight_file))
-  }
-
   loginfo("Load weight: %s", weight_file)
+  loginfo("weight_name: %s", weight_name)
   loginfo("type: %s", type)
   loginfo("context: %s", context)
 
@@ -129,10 +125,8 @@ preprocess_weights <- function(weight_file,
                                      fusion_method = fusion_method,
                                      fusion_genome_version = fusion_genome_version,
                                      ncore = ncore)
-  weight_name <- loaded_weights_res$weight_name
   weight_table <- loaded_weights_res$weight_table
   cov_table <- loaded_weights_res$cov_table
-  loginfo("weight_name: %s", weight_name)
 
   if (is.null(cov_table)) {
     load_predictdb_LD <- FALSE
@@ -142,28 +136,28 @@ preprocess_weights <- function(weight_file,
   if (load_predictdb_LD && !is.null(cov_table)) {
     genes_without_predictdb_LD <- setdiff(weight_table$gene, cov_table$GENE)
     if (length(genes_without_predictdb_LD) > 0){
-      loginfo("Remove %d genes without predictdb LD", length(genes_without_predictdb_LD))
+      loginfo("Remove %d molecular traits without predictdb LD", length(genes_without_predictdb_LD))
       weight_table <- weight_table[!weight_table$gene %in% genes_without_predictdb_LD, ]
     }
   }
-  gene_ids <- unique(weight_table$gene)
-  loginfo("Number of genes in weights: %d", length(gene_ids))
+  molecular_ids <- unique(weight_table$gene)
+  loginfo("Number of molecular traits in weights: %d", length(molecular_ids))
   snp_ids <- unique(weight_table$rsid)
   loginfo("Number of variants in weights: %d", length(snp_ids))
 
   # take the intersection of SNPs in weights, LD reference and GWAS SNPs
   snp_ids <- Reduce(intersect, list(snp_ids, snp_info$id, gwas_snp_ids))
   weight_table <- weight_table[weight_table$rsid %in% snp_ids, ]
-  gene_ids <- unique(weight_table$gene)
-  loginfo("%d genes and %d variants left after filtering by GWAS and the reference.",
-          length(gene_ids), length(snp_ids))
+  molecular_ids <- unique(weight_table$gene)
+  loginfo("%d molecular traits and %d variants left after filtering by GWAS and the reference.",
+          length(molecular_ids), length(snp_ids))
   # subset to variants in weight table
   snp_info <- snp_info[snp_info$id %in% weight_table$rsid,]
 
   loginfo("Harmonizing and processing weights ...")
 
-  weights <- mclapply_check(gene_ids, function(gene_id){
-    process_weight(gene_id,
+  weights <- mclapply_check(molecular_ids, function(molecular_id){
+    process_weight(molecular_id,
                    type = type,
                    context = context,
                    weight_name = weight_name,
@@ -175,11 +169,11 @@ preprocess_weights <- function(weight_file,
                    drop_strand_ambig = drop_strand_ambig,
                    scale_predictdb_weights = scale_predictdb_weights)
   }, mc.cores = ncore)
-  names(weights) <- paste0(gene_ids, "|", weight_name)
+  names(weights) <- paste0(molecular_ids, "|", weight_name)
 
   empty_wgt_idx <- which(sapply(weights, "[[", "n_wgt") == 0)
   if (any(empty_wgt_idx)) {
-    loginfo("Remove %d genes with no weights after harmonization", length(empty_wgt_idx))
+    loginfo("Remove %d molecular traits with no weights after harmonization", length(empty_wgt_idx))
     weights[empty_wgt_idx] <- NULL
   }
 
@@ -194,7 +188,7 @@ preprocess_weights <- function(weight_file,
                                           ncore = ncore)
   }
 
-  loginfo("Number of genes in weights after preprocessing: %d", length(weights))
+  loginfo("Number of molecular traits in weights after preprocessing: %d", length(weights))
 
   return(weights)
 }
@@ -203,7 +197,7 @@ preprocess_weights <- function(weight_file,
 #' @importFrom readr parse_number
 #' @importFrom stats complete.cases
 #' @importFrom utils head
-process_weight <- function(gene_id,
+process_weight <- function(molecular_id,
                            type,
                            context,
                            weight_name,
@@ -226,13 +220,13 @@ process_weight <- function(gene_id,
          paste(target_header, collapse = " "))
   }
 
-  g_weight_table <- weight_table[weight_table$gene==gene_id,]
+  g_weight_table <- weight_table[weight_table$gene==molecular_id,]
   wgt.matrix <- as.matrix(g_weight_table[, "weight", drop = FALSE])
   rownames(wgt.matrix) <- g_weight_table$rsid
   chrom <- sapply(strsplit(g_weight_table$varID, "_"), "[[", 1)
   chrom <- unique(parse_number(chrom))
   if (length(chrom) > 1) {
-    stop("More than one chrom in weight for %s!", gene_id)
+    stop("More than one chrom in weight for %s!", molecular_id)
   }
 
   snp_pos <- as.integer(snp_info$pos[match(g_weight_table$rsid, snp_info$id)])
@@ -282,7 +276,7 @@ process_weight <- function(gene_id,
     # Add LD matrix of weights
     if (!is.null(cov_table)) {
       # get pre-computed LD matrix from predictedDB weights
-      g_cov_table <- cov_table[cov_table$GENE == gene_id,]
+      g_cov_table <- cov_table[cov_table$GENE == molecular_id,]
       R_wgt <- get_LD_matrix_from_predictdb(g_cov_table,
                                             g_weight_table,
                                             convert_cov_to_cor = TRUE)
@@ -300,7 +294,7 @@ process_weight <- function(gene_id,
               "p1" = p1,
               "wgt" = wgt,
               "R_wgt" = R_wgt,
-              "gene_id" = gene_id,
+              "molecular_id" = molecular_id,
               "weight_name" = weight_name,
               "type" = type,
               "context" = context,

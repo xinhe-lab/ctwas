@@ -12,6 +12,7 @@ preprocess_weights(
   LD_map = NULL,
   type,
   context,
+  weight_name = paste0(context, "_", type),
   weight_format = c("PredictDB", "FUSION"),
   drop_strand_ambig = TRUE,
   filter_protein_coding_genes = TRUE,
@@ -39,11 +40,14 @@ or the directory containing '.wgt.RDat' files for FUSION weights.}
 \item{LD_map}{a data frame with filenames of LD matrices and SNP information for the regions.
 Required when \code{load_predictdb_LD = FALSE}.}
 
-\item{type}{a string, specifying QTL type of each weight file, e.g. expression, splicing, protein.}
+\item{type}{a string, specifying QTL type of the weight file, e.g. expression, splicing, protein.}
 
-\item{context}{a string, specifying tissue/cell type/condition of each weight file, e.g. Liver, Lung, Brain.}
+\item{context}{a string, specifying context (tissue/cell type) of the weight file, e.g. Liver, Lung, Brain.}
 
-\item{weight_format}{a string, specifying format of each weight file, e.g. PredictDB, FUSION.}
+\item{weight_name}{a string, specifying name of the weight file.
+By default, it is \code{weight_name = paste0(context, "_", type)}}
+
+\item{weight_format}{a string, specifying format of the weight file, e.g. PredictDB, FUSION.}
 
 \item{drop_strand_ambig}{If TRUE remove strand ambiguous variants (A/T, G/C).}
 

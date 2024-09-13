@@ -1,0 +1,48 @@
+---
+title: "Software updates"
+author: "Kaixuan Luo"
+date: "`r Sys.Date()`"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{Software updates}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+
+While the [published paper](https://doi.org/10.1038/s41588-023-01648-9) analyzes a single eQTL dataset, the latest version of cTWAS extends the method to integrate multiple groups of prediction models, allowing for joint analysis of multiple types of molecular traits, across potentially different tissues, cell types or conditions.
+
+Below are major updates in the multi-group cTWAS:
+
+- Extended cTWAS method to multiple types of molecular traits, across different contexts. 
+
+- Redesigned the software interface to be more modular. We now have separate modular functions for several key tasks of cTWAS. A user now has the option of running cTWAS either in a single step (main function) or in several steps.  
+
+- Implemented "no-LD" version, which allows running cTWAS analysis without LD reference.
+
+- Improved the computational efficiency of the software by more than 10-fold, allowing it to handle large numbers of molecular traits. 
+
+- Provide support to several formats of prediction models: including PredictDB, FUSION and top-QTL.  
+- Created new methods for estimating parameters, which allows sharing of the prior effect variance parameters among groups.
+
+- Updated functions for interpreting cTWAS results, including methods for combining evidence of all the molecular traits affecting a target gene across all types and contexts. 
+
+Other changes include: 
+
+- Created new functions to perform LD-mismatch diagnosis using SuSiE-RSS in the post-processing step. 
+
+- Created utility functions for creating LD matrices from individual level genotype data, and loading LD matrices of different formats, including custom formats. 
+
+- Created new functions for preprocessing and harmonizing input data (GWAS Z-scores, prediction models, reference data, etc.)
+
+- Created new ways for screening regions with likely causal signals in molecular traits. 
+
+- Updated functions for running cTWAS version of fine-mapping. It uses estimated parameters and estimated numbers of causal signals. It also allows fine-mapping a single region or multiple regions, with or without LD. 
+
+- Updated functions for visualizing cTWAS results, allowing gene tracks to be plotted together with cTWAS result panels.
+
+- Addressed the “cross-region” problem by performing “region merging” as a post-processing step.
+
+*Note*: this updated cTWAS version currently only works for GWAS summary statistics. To use individual level data, please refer to the old cTWAS version for now. We will release a new version that will work with individual level data later. 
+
+

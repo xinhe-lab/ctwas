@@ -5,7 +5,7 @@ repo:
 
 navbar:
   structure:
-    left:  [reference, tutorial]
+    left:  [reference, tutorial, FAQ, news]
     right: [source]
   components:
     tutorial:
@@ -23,6 +23,14 @@ navbar:
         href: articles/postprocessing.html
       - text: cTWAS utility functions
         href: articles/utility_functions.html
+    FAQ:
+      text: FAQ
+      href: articles/FAQ.html
+    news:
+      text: News
+      menu:
+      - text: Software updates
+        href: articles/software_updates.html
     source:
       text: Source
       href: https://github.com/xinhe-lab/ctwas/tree/multigroup
