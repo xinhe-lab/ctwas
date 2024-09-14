@@ -260,8 +260,8 @@ get_gene_annot_from_ens_db <- function(ens_db, gene_ids) {
 #' "combine_cs" (default):
 #' first sums PIPs of molecular traits of a genes in each credible set,
 #' and then combine PIPs using the following formula:
-#' $1 - \prod_k (1 - \text{PIP}_k)$,
-#' where $\text{PIP}_k$ is the summed PIP of the $k$-th credible set of a gene.
+#' \eqn{1 - \prod_k (1 - \text{PIP}_k)},
+#' where \eqn{\text{PIP}_k} is the summed PIP of the \eqn{k}-th credible set of a gene.
 #' This is the default option for combining PIPs from fine-mapping with LD.
 #' "sum": sum over PIPs of all molecular traits for the same gene.
 #' This summation is the expected number of causal molecular traits in this gene,

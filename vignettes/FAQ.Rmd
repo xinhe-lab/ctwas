@@ -47,7 +47,7 @@ You could set `ncore` to control how many cores are used in the parallelization.
 
 ### My parameters look strange. What should I do? 
 
-The most important parameters of cTWAS are the “enrichment” parameters, the ratio of prior inclusion probabilities of molecular traits vs. variants. In our experience, these numbers usually range from 20 - 200. If the numbers are outside this range, check the prior variance parameters. When the variance parameters are very different between molecular traits and variants, you can get exceedingly large enrichment. In that case, you can specify the same prior variance parameters for molecular traits and genes, by setting `group_prior_var`. If `group_prior_var = NULL`, it will use uniform prior variance parameters, with default value set to 50.
+The most important parameters of cTWAS are the “enrichment” parameters, the ratio of prior inclusion probabilities of molecular traits vs. variants. In our experience, these numbers usually range from 20 - 200. If the numbers are outside this range, check the prior variance parameters. When the variance parameters are very different between molecular traits and variants, you can get exceedingly large enrichment. In that case, you can specify the same prior variance parameters for molecular traits and genes, by setting `group_prior_var_structure = shared_all`. 
 
 ## Potential error messages when running cTWAS
 
