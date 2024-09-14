@@ -162,12 +162,12 @@ make_locusplot <- function(finemap_res,
   # select finemapping result for the target region
   finemap_region_res <- finemap_res[which(finemap_res$region_id==region_id), ]
 
-  if (is.null(finemap_region_res$p)){
+  if (!"pval" %in% names(finemap_region_res)){
     # convert z to -log10(pval)
-    finemap_region_res$p <- z2p(finemap_region_res$z, neg_log10_p = TRUE)
+    finemap_region_res$pval <- z2p(finemap_region_res$z, neg_log10_p = TRUE)
   } else {
-    if (max(finemap_region_res$p) <= 1) {
-      finemap_region_res$p <- -log10(finemap_region_res$p)
+    if (max(finemap_region_res$pval) <= 1) {
+      finemap_region_res$pval <- -log10(finemap_region_res$pval)
     }
   }
 
@@ -330,7 +330,7 @@ make_locusplot <- function(finemap_res,
     loginfo("Making p-value panel ...")
   }
   pval_plot_data <- loc$data
-  p_pval <- ggplot(pval_plot_data, aes(x=.data$pos/1e6, y=.data$p, shape=.data$type,
+  p_pval <- ggplot(pval_plot_data, aes(x=.data$pos/1e6, y=.data$pval, shape=.data$type,
                                        size=.data$object_type, alpha=.data$object_type)) +
     geom_text_repel(aes(label=.data$label), size=label.text.size, color="black",
                     max.overlaps = max.overlaps, na.rm = TRUE) +

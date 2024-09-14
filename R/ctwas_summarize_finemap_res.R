@@ -257,10 +257,16 @@ get_gene_annot_from_ens_db <- function(ens_db, gene_ids) {
 #'
 #' @param method method to combine PIPs of molecular traits targeting the same gene.
 #' options:
-#' "combine_cs" (default): first sum PIPs of molecular traits for the same gene in the same CS,
-#' then apply the multiplication formula across CS.
-#' "sum" sum over PIPs of all molecular traits for the same gene;
-#' "combine_all" use the multiplication formula for all molecular traits for the same gene.
+#' "combine_cs" (default):
+#' first sums PIPs of molecular traits of a genes in each credible set,
+#' and then combine PIPs using the following formula:
+#' $1 - \prod_k (1 - \text{PIP}_k)$,
+#' where $\text{PIP}_k$ is the summed PIP of the $k$-th credible set of a gene.
+#' This is the default option for combining PIPs from fine-mapping with LD.
+#' "sum": sum over PIPs of all molecular traits for the same gene.
+#' This summation is the expected number of causal molecular traits in this gene,
+#' and could be higher than 1.
+#' We will use this option for combining PIPs from fine-mapping without LD.
 #'
 #' @param filter_cs If TRUE, limits gene results to credible sets.
 #'
@@ -276,7 +282,7 @@ get_gene_annot_from_ens_db <- function(ens_db, gene_ids) {
 combine_gene_pips <- function(finemap_res,
                               group_by = "gene_name",
                               by = c("context", "type", "group"),
-                              method = c("combine_cs", "combine_all", "sum"),
+                              method = c("combine_cs", "sum"),
                               filter_cs = TRUE,
                               missing_value = NA){
 
@@ -379,7 +385,7 @@ combine_pips <- function(pips){
 # "combine_all" use the multiplication formula for all molecular traits for the same gene.
 compute_combined_pips <- function(finemap_gene_res,
                                   group_by = "gene_name",
-                                  method = c("combine_cs", "combine_all", "sum"),
+                                  method = c("combine_cs", "sum"),
                                   filter_cs = TRUE){
 
   method <- match.arg(method)
@@ -392,11 +398,6 @@ compute_combined_pips <- function(finemap_gene_res,
     combined_gene_pips <- aggregate(data.frame(susie_pip = finemap_gene_res$susie_pip),
                                     by = list(gene = finemap_gene_res[,group_by]),
                                     FUN = sum)
-    colnames(combined_gene_pips) <- c(group_by, "combined_pip")
-  } else if (method == "combine_all") {
-    combined_gene_pips <- aggregate(data.frame(susie_pip = finemap_gene_res$susie_pip),
-                                    by = list(gene = finemap_gene_res[,group_by]),
-                                    FUN = combine_pips)
     colnames(combined_gene_pips) <- c(group_by, "combined_pip")
   } else if (method == "combine_cs") {
     finemap_gene_res$cs_id <- paste0(finemap_gene_res$region_id, ".", finemap_gene_res$cs_index)

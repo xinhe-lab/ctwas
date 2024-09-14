@@ -8,7 +8,7 @@ combine_gene_pips(
   finemap_res,
   group_by = "gene_name",
   by = c("context", "type", "group"),
-  method = c("combine_cs", "combine_all", "sum"),
+  method = c("combine_cs", "sum"),
   filter_cs = TRUE,
   missing_value = NA
 )
@@ -22,10 +22,16 @@ combine_gene_pips(
 
 \item{method}{method to combine PIPs of molecular traits targeting the same gene.
 options:
-"combine_cs" (default): first sum PIPs of molecular traits for the same gene in the same CS,
-then apply the multiplication formula across CS.
-"sum" sum over PIPs of all molecular traits for the same gene;
-"combine_all" use the multiplication formula for all molecular traits for the same gene.}
+"combine_cs" (default):
+first sums PIPs of molecular traits of a genes in each credible set,
+and then combine PIPs using the following formula:
+$1 - \prod_k (1 - \text{PIP}_k)$,
+where $\text{PIP}_k$ is the summed PIP of the $k$-th credible set of a gene.
+This is the default option for combining PIPs from fine-mapping with LD.
+"sum": sum over PIPs of all molecular traits for the same gene.
+This summation is the expected number of causal molecular traits in this gene,
+and could be higher than 1.
+We will use this option for combining PIPs from fine-mapping without LD.}
 
 \item{filter_cs}{If TRUE, limits gene results to credible sets.}
 

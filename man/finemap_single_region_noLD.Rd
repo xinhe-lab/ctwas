@@ -10,6 +10,8 @@ finemap_single_region_noLD(
   group_prior = NULL,
   group_prior_var = NULL,
   use_null_weight = TRUE,
+  coverage = 0.95,
+  include_cs_index = TRUE,
   snps_only = FALSE,
   verbose = FALSE,
   ...
@@ -25,6 +27,10 @@ finemap_single_region_noLD(
 \item{group_prior_var}{a vector of two prior variances for SNPs and gene effects.}
 
 \item{use_null_weight}{If TRUE, allow for a probability of no effect in susie}
+
+\item{coverage}{A number between 0 and 1 specifying the \dQuote{coverage} of the estimated confidence sets}
+
+\item{include_cs_index}{If TRUE, add cs_index to finemapping results.}
 
 \item{snps_only}{If TRUE, use only SNPs in the region data.}
 

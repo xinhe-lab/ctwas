@@ -13,12 +13,17 @@ ctwas_susie_rss <- function(z,
                             ...){
 
   if (missing(R)) {
-    if (L == 1){
+    if (L == 1) {
       # R does not matter for susie when L = 1
       R <- diag(length(z))
     } else {
       stop("R (correlation matrix) is required when L > 1")
     }
+  }
+
+  if (L == 1) {
+    # turn off purity cutoff when L = 1
+    min_abs_corr <- 0
   }
 
   # in susie, prior_variance is under standardized scale (if performed)

@@ -86,7 +86,7 @@ It also produces other output:
 
 + `screen_res`: screening regions results, including the data of all SNPs and molecular traits of the selected regions, estimated numbers of causal signals (`L`) for selected regions, and a data frame with estimated `L` and non-SNP PIPs for all regions.
 
-We focus on examples from running cTWAS with LD here, but the steps below also mostly work for running without LD, with one exception that we could not limit results to credible sets in the "no-LD" version of cTWAS results.
+We focus on examples from running cTWAS with LD here, but the steps below also mostly work for running without LD.
 
 ## Assessing parameters and computing PVE
 
@@ -115,7 +115,7 @@ These PVE values allow us to compute how heritability of the phenotype is partit
 
 We can add p-values (computed from Z-scores) to the fine-mapping results. 
 ```{r add_pval}
-finemap_res$p <- z2p(finemap_res$z)
+finemap_res$pval <- z2p(finemap_res$z)
 head(finemap_res)
 ```
 
@@ -309,7 +309,7 @@ make_locusplot(finemap_res,
 
 In this plot, one can see that there are several genes with good associations with the phenotype (top panel), but only HPR in liver and HP in adipose are prioritized by cTWAS (second panel). This is because once HPR, HP and other likely causal variants are selected by cTWAS, there is no remaining association left in other molecular traits. This means that other associations are likely due to their correlations with the prioritized genes rather than representing independent signals.
 
-For the "no-LD" version, we could still make the locus plot. The difference is that it could not limit results to credible sets, and could not color the data points by correlations or credible set information.
+For the "no-LD" version, we could still make the locus plot. The difference is that it could not color the data points by correlations with the focal gene.
 
 [minimal_tutorial]: https://xinhe-lab.github.io/multigroup_ctwas/articles/minimal_tutorial.html
 [preparing_input_data_tutorial]: https://xinhe-lab.github.io/multigroup_ctwas/articles/preparing_input_data.html
