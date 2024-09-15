@@ -61,7 +61,7 @@ We also have a FAQ page for some common questions:
 - [FAQ](https://xinhe-lab.github.io/multigroup_ctwas/articles/FAQ.html)
 
 
-You can [browse source code](https://github.com/xinhe-lab/ctwas/tree/multigroup) and [report a bug](https://github.com/xinhe-lab/ctwas/issues) here. 
+You can [browse source code](https://github.com/xinhe-lab/ctwas/tree/multigroup) and [report a bug](https://github.com/xinhe-lab/ctwas/issues) here. You can also join our [Google Group](https://groups.google.com/g/ctwas_users) to receive notifications of software updates.
 
 <img style="display:block;margin:auto" width="700" height="300" src="man/figures/workflow.png">
 

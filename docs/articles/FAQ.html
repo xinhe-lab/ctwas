@@ -104,7 +104,7 @@
       <h1 data-toc-skip>FAQ</h1>
                         <h4 data-toc-skip class="author">Kaixuan Luo</h4>
             
-            <h4 data-toc-skip class="date">2024-09-14</h4>
+            <h4 data-toc-skip class="date">2024-09-15</h4>
       
       <small class="dont-index">Source: <a href="https://github.com/xinhe-lab/ctwas/blob/multigroup/vignettes/FAQ.Rmd" class="external-link"><code>vignettes/FAQ.Rmd</code></a></small>
       <div class="hidden name"><code>FAQ.Rmd</code></div>
@@ -145,7 +145,7 @@
 <div class="section level3">
 <h3 id="my-parameters-look-strange--what-should-i-do">My parameters look strange. What should I do?<a class="anchor" aria-label="anchor" href="#my-parameters-look-strange--what-should-i-do"></a>
 </h3>
-<p>The most important parameters of cTWAS are the “enrichment” parameters, the ratio of prior inclusion probabilities of molecular traits vs. variants. In our experience, these numbers usually range from 20 - 200. If the numbers are outside this range, check the prior variance parameters. When the variance parameters are very different between molecular traits and variants, you can get exceedingly large enrichment. In that case, you can specify the same prior variance parameters for molecular traits and genes, by setting <code>group_prior_var_structure = shared_all</code>.</p>
+<p>The most important parameters of cTWAS are the “enrichment” parameters, the ratio of prior inclusion probabilities of molecular traits vs. variants. In our experience, these numbers usually range from 20 - 200. If the numbers are outside this range, check the prior variance parameters. When the variance parameters are very different between molecular traits and variants, you can get exceedingly large enrichment. In that case, you can specify the same prior variance parameters for molecular traits and genes, by setting <code>group_prior_var_structure = "shared_all"</code>.</p>
 </div>
 </div>
 <div class="section level2">
