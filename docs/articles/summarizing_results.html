@@ -32,7 +32,7 @@
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">ctwas</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">0.4.12</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">0.4.13</span>
       </span>
     </div>
 
@@ -104,7 +104,7 @@
       <h1 data-toc-skip>Summarizing and visualizing cTWAS results</h1>
                         <h4 data-toc-skip class="author">Kaixuan Luo, Sheng Qian</h4>
             
-            <h4 data-toc-skip class="date">2024-09-13</h4>
+            <h4 data-toc-skip class="date">2024-09-14</h4>
       
       <small class="dont-index">Source: <a href="https://github.com/xinhe-lab/ctwas/blob/multigroup/vignettes/summarizing_results.Rmd" class="external-link"><code>vignettes/summarizing_results.Rmd</code></a></small>
       <div class="hidden name"><code>summarizing_results.Rmd</code></div>
@@ -176,7 +176,7 @@
 <li><p><code>region_data</code>: assembled region data, including Z scores of SNPs and molecular traits, for all the regions. Note that only data of the subset of SNPs used in screening regions are included.</p></li>
 <li><p><code>screen_res</code>: screening regions results, including the data of all SNPs and molecular traits of the selected regions, estimated numbers of causal signals (<code>L</code>) for selected regions, and a data frame with estimated <code>L</code> and non-SNP PIPs for all regions.</p></li>
 </ul>
-<p>We focus on examples from running cTWAS with LD here, but the steps below also mostly work for running without LD, with one exception that we could not limit results to credible sets in the “no-LD” version of cTWAS results.</p>
+<p>We focus on examples from running cTWAS with LD here, but the steps below also mostly work for running without LD.</p>
 <div class="section level2">
 <h2 id="assessing-parameters-and-computing-pve">Assessing parameters and computing PVE<a class="anchor" aria-label="anchor" href="#assessing-parameters-and-computing-pve"></a>
 </h2>
@@ -227,7 +227,7 @@
 </h2>
 <p>We can add p-values (computed from Z-scores) to the fine-mapping results.</p>
 <div class="sourceCode" id="cb9"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">finemap_res</span><span class="op">$</span><span class="va">p</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/z2p.html">z2p</a></span><span class="op">(</span><span class="va">finemap_res</span><span class="op">$</span><span class="va">z</span><span class="op">)</span></span>
+<code class="sourceCode R"><span><span class="va">finemap_res</span><span class="op">$</span><span class="va">pval</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/z2p.html">z2p</a></span><span class="op">(</span><span class="va">finemap_res</span><span class="op">$</span><span class="va">z</span><span class="op">)</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">head</a></span><span class="op">(</span><span class="va">finemap_res</span><span class="op">)</span></span></code></pre></div>
 <pre><code><span><span class="co">##                                    id       type context            group</span></span>
 <span><span class="co">## 1 ENSG00000103494.12|liver_expression expression   liver liver|expression</span></span>
@@ -243,7 +243,7 @@
 <span><span class="co">## 4 16_53348660_55869862 -1.3879522 3.341393e-06 2.761976        0</span></span>
 <span><span class="co">## 5 16_53348660_55869862  0.5507643 1.526124e-06 1.248505        0</span></span>
 <span><span class="co">## 6 16_53348660_55869862 -0.6042867 1.572364e-06 1.306151        0</span></span>
-<span><span class="co">##         molecular_id         p</span></span>
+<span><span class="co">##         molecular_id      pval</span></span>
 <span><span class="co">## 1 ENSG00000103494.12 0.6490397</span></span>
 <span><span class="co">## 2 ENSG00000177508.11 0.6955898</span></span>
 <span><span class="co">## 3 ENSG00000087245.12 0.5729703</span></span>
@@ -261,7 +261,7 @@
 <span><span class="co">## 7766  adipose|expression 16_55869862_57630418  13.749840 0.9996953 177.2574</span></span>
 <span><span class="co">## 17155   liver|expression 16_71020125_72901251 -18.403150 1.0000000 689.1921</span></span>
 <span><span class="co">## 17168 adipose|expression 16_71020125_72901251  -4.810203 0.9991837 453.5788</span></span>
-<span><span class="co">##       cs_index       molecular_id            p</span></span>
+<span><span class="co">##       cs_index       molecular_id         pval</span></span>
 <span><span class="co">## 7766         1 ENSG00000087237.10 5.104261e-43</span></span>
 <span><span class="co">## 17155        1  ENSG00000261701.6 1.239454e-75</span></span>
 <span><span class="co">## 17168        3  ENSG00000257017.8 1.507768e-06</span></span></code></pre>
@@ -284,7 +284,7 @@
 <span>                                             by <span class="op">=</span> <span class="st">"context"</span>,</span>
 <span>                                             method <span class="op">=</span> <span class="st">"combine_cs"</span>,</span>
 <span>                                             filter_cs <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span></code></pre></div>
-<pre><code><span><span class="co">## 2024-09-13 12:29:14 INFO::Limit gene results to credible sets</span></span></code></pre>
+<pre><code><span><span class="co">## 2024-09-14 17:19:45 INFO::Limit gene results to credible sets</span></span></code></pre>
 <div class="sourceCode" id="cb15"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/subset.html" class="external-link">subset</a></span><span class="op">(</span><span class="va">combined_pip_by_context</span>, <span class="va">combined_pip</span> <span class="op">&gt;</span> <span class="fl">0.8</span><span class="op">)</span></span></code></pre></div>
 <pre><code><span><span class="co">##         molecular_id adipose_pip liver_pip combined_pip</span></span>
@@ -323,10 +323,10 @@
 <span>                                drop_unmapped <span class="op">=</span> <span class="cn">TRUE</span>,</span>
 <span>                                add_position <span class="op">=</span> <span class="cn">TRUE</span>,</span>
 <span>                                use_gene_pos <span class="op">=</span> <span class="st">"mid"</span><span class="op">)</span></span></code></pre></div>
-<pre><code><span><span class="co">## 2024-09-13 12:29:15 INFO::Annotating fine-mapping result ...</span></span>
-<span><span class="co">## 2024-09-13 12:29:15 INFO::Map molecular traits to genes</span></span>
-<span><span class="co">## 2024-09-13 12:29:15 INFO::Add gene positions</span></span>
-<span><span class="co">## 2024-09-13 12:29:16 INFO::Add SNP positions</span></span></code></pre>
+<pre><code><span><span class="co">## 2024-09-14 17:19:46 INFO::Annotating fine-mapping result ...</span></span>
+<span><span class="co">## 2024-09-14 17:19:46 INFO::Map molecular traits to genes</span></span>
+<span><span class="co">## 2024-09-14 17:19:46 INFO::Add gene positions</span></span>
+<span><span class="co">## 2024-09-14 17:19:47 INFO::Add SNP positions</span></span></code></pre>
 <p>If <code>add_gene_annot = TRUE</code>, it joins the fine-mapping result table (<code>finemap_res</code>) with the <code>gene_annot</code> table, by the “molecular ids” column (set in <code>map_by</code>), and adds additional columns of gene annotations to the fine-mapping results By default, we drop the genes not found in <code>gene_annot</code> (<code>drop_unmapped = TRUE</code>). If <code>add_position = TRUE</code>, it adds positional information to the fine-mapping results. The positional information of variants can be found in the data structure of reference SNPs: <code>snp_map</code>. The users need to provide positional information of molecular traits, through <code>mapping_table</code>. In our example, we use <code>gene_annot</code>, which has gene positions. By default, we will use the midpoint positions for genes. You could also use “start” or “end” positions by setting the <code>use_gene_pos</code> argument.</p>
 <p>With the added gene information, we could limit results to protein coding genes, and view the prioritized genes with additional information:</p>
 <div class="sourceCode" id="cb21"><pre class="downlit sourceCode r">
@@ -339,7 +339,7 @@
 <span><span class="co">## 51  16_55869862_57630418  13.749840 0.9996953 177.2574        1</span></span>
 <span><span class="co">## 111 16_71020125_72901251 -18.403150 1.0000000 689.1921        1</span></span>
 <span><span class="co">## 124 16_71020125_72901251  -4.810203 0.9991837 453.5788        3</span></span>
-<span><span class="co">##           molecular_id            p gene_name      gene_type chrom    start</span></span>
+<span><span class="co">##           molecular_id         pval gene_name      gene_type chrom    start</span></span>
 <span><span class="co">## 51  ENSG00000087237.10 5.104261e-43      CETP protein_coding    16 56961850</span></span>
 <span><span class="co">## 111  ENSG00000261701.6 1.239454e-75       HPR protein_coding    16 72063224</span></span>
 <span><span class="co">## 124  ENSG00000257017.8 1.507768e-06        HP protein_coding    16 72054592</span></span>
@@ -377,7 +377,7 @@
 <span>                                          by <span class="op">=</span> <span class="st">"type"</span>,</span>
 <span>                                          method <span class="op">=</span> <span class="st">"combine_cs"</span>,</span>
 <span>                                          filter_cs <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span></code></pre></div>
-<pre><code><span><span class="co">## 2024-09-13 12:29:16 INFO::Limit gene results to credible sets</span></span></code></pre>
+<pre><code><span><span class="co">## 2024-09-14 17:19:47 INFO::Limit gene results to credible sets</span></span></code></pre>
 <div class="sourceCode" id="cb27"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/subset.html" class="external-link">subset</a></span><span class="op">(</span><span class="va">combined_pip_by_type</span>, <span class="va">combined_pip</span> <span class="op">&gt;</span> <span class="fl">0.8</span><span class="op">)</span></span></code></pre></div>
 <pre><code><span><span class="co">##   gene_name expression_pip combined_pip</span></span>
@@ -402,12 +402,12 @@
 <span>               filter_cs <span class="op">=</span> <span class="cn">TRUE</span>,</span>
 <span>               color_pval_by <span class="op">=</span> <span class="st">"cs"</span>,</span>
 <span>               color_pip_by <span class="op">=</span> <span class="st">"cs"</span><span class="op">)</span></span></code></pre></div>
-<pre><code><span><span class="co">## 2024-09-13 12:29:16 INFO::Limit to protein coding genes</span></span>
-<span><span class="co">## 2024-09-13 12:29:16 INFO::focal id: ENSG00000261701.6|liver_expression</span></span>
-<span><span class="co">## 2024-09-13 12:29:16 INFO::focal molecular trait: HPR liver expression</span></span>
-<span><span class="co">## 2024-09-13 12:29:16 INFO::Range of locus: chr16:71020348-72900542</span></span>
-<span><span class="co">## 2024-09-13 12:29:16 INFO::focal molecular trait QTL positions: 72063820,72063928</span></span>
-<span><span class="co">## 2024-09-13 12:29:16 INFO::Limit PIPs to credible sets</span></span></code></pre>
+<pre><code><span><span class="co">## 2024-09-14 17:19:47 INFO::Limit to protein coding genes</span></span>
+<span><span class="co">## 2024-09-14 17:19:47 INFO::focal id: ENSG00000261701.6|liver_expression</span></span>
+<span><span class="co">## 2024-09-14 17:19:47 INFO::focal molecular trait: HPR liver expression</span></span>
+<span><span class="co">## 2024-09-14 17:19:47 INFO::Range of locus: chr16:71020348-72900542</span></span>
+<span><span class="co">## 2024-09-14 17:19:47 INFO::focal molecular trait QTL positions: 72063820,72063928</span></span>
+<span><span class="co">## 2024-09-14 17:19:47 INFO::Limit PIPs to credible sets</span></span></code></pre>
 <div class="figure" style="text-align: center">
 <img src="summarizing_results_files/figure-html/locus_plot_1-1.png" alt="&amp;nbsp;" width="1200"><p class="caption">
  
@@ -444,20 +444,20 @@
 <span>               filter_cs <span class="op">=</span> <span class="cn">TRUE</span>,</span>
 <span>               color_pval_by <span class="op">=</span> <span class="st">"LD"</span>,</span>
 <span>               color_pip_by <span class="op">=</span> <span class="st">"cs"</span><span class="op">)</span></span></code></pre></div>
-<pre><code><span><span class="co">## 2024-09-13 12:29:20 INFO::Limit to protein coding genes</span></span>
-<span><span class="co">## 2024-09-13 12:29:20 INFO::focal id: ENSG00000261701.6|liver_expression</span></span>
-<span><span class="co">## 2024-09-13 12:29:20 INFO::focal molecular trait: HPR liver expression</span></span>
-<span><span class="co">## 2024-09-13 12:29:20 INFO::Range of locus: chr16:71600000-72400000</span></span>
-<span><span class="co">## 2024-09-13 12:29:20 INFO::focal molecular trait QTL positions: 72063820,72063928</span></span>
-<span><span class="co">## 2024-09-13 12:29:20 INFO::Limit PIPs to credible sets</span></span>
-<span><span class="co">## 2024-09-13 12:29:20 INFO::highlight positions: 72070235</span></span></code></pre>
+<pre><code><span><span class="co">## 2024-09-14 17:19:52 INFO::Limit to protein coding genes</span></span>
+<span><span class="co">## 2024-09-14 17:19:52 INFO::focal id: ENSG00000261701.6|liver_expression</span></span>
+<span><span class="co">## 2024-09-14 17:19:52 INFO::focal molecular trait: HPR liver expression</span></span>
+<span><span class="co">## 2024-09-14 17:19:52 INFO::Range of locus: chr16:71600000-72400000</span></span>
+<span><span class="co">## 2024-09-14 17:19:52 INFO::focal molecular trait QTL positions: 72063820,72063928</span></span>
+<span><span class="co">## 2024-09-14 17:19:52 INFO::Limit PIPs to credible sets</span></span>
+<span><span class="co">## 2024-09-14 17:19:52 INFO::highlight positions: 72070235</span></span></code></pre>
 <div class="figure" style="text-align: center">
 <img src="summarizing_results_files/figure-html/locus_plot_2-1.png" alt="&amp;nbsp;" width="1200"><p class="caption">
  
 </p>
 </div>
 <p>In this plot, one can see that there are several genes with good associations with the phenotype (top panel), but only HPR in liver and HP in adipose are prioritized by cTWAS (second panel). This is because once HPR, HP and other likely causal variants are selected by cTWAS, there is no remaining association left in other molecular traits. This means that other associations are likely due to their correlations with the prioritized genes rather than representing independent signals.</p>
-<p>For the “no-LD” version, we could still make the locus plot. The difference is that it could not limit results to credible sets, and could not color the data points by correlations or credible set information.</p>
+<p>For the “no-LD” version, we could still make the locus plot. The difference is that it could not color the data points by correlations with the focal gene.</p>
 </div>
   </div>
 

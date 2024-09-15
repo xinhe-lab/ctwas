@@ -17,7 +17,7 @@
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">ctwas</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">0.4.12</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">0.4.13</span>
       </span>
     </div>
 
@@ -89,7 +89,7 @@
 <span>  <span class="va">finemap_res</span>,</span>
 <span>  group_by <span class="op">=</span> <span class="st">"gene_name"</span>,</span>
 <span>  by <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"context"</span>, <span class="st">"type"</span>, <span class="st">"group"</span><span class="op">)</span>,</span>
-<span>  method <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"combine_cs"</span>, <span class="st">"combine_all"</span>, <span class="st">"sum"</span><span class="op">)</span>,</span>
+<span>  method <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"combine_cs"</span>, <span class="st">"sum"</span><span class="op">)</span>,</span>
 <span>  filter_cs <span class="op">=</span> <span class="cn">TRUE</span>,</span>
 <span>  missing_value <span class="op">=</span> <span class="cn">NA</span></span>
 <span><span class="op">)</span></span></code></pre></div>
@@ -114,10 +114,16 @@
 <dt id="arg-method">method<a class="anchor" aria-label="anchor" href="#arg-method"></a></dt>
 <dd><p>method to combine PIPs of molecular traits targeting the same gene.
 options:
-"combine_cs" (default): first sum PIPs of molecular traits for the same gene in the same CS,
-then apply the multiplication formula across CS.
-"sum" sum over PIPs of all molecular traits for the same gene;
-"combine_all" use the multiplication formula for all molecular traits for the same gene.</p></dd>
+"combine_cs" (default):
+first sums PIPs of molecular traits of a genes in each credible set,
+and then combine PIPs using the following formula:
+\(1 - \prod_k (1 - \text{PIP}_k)\),
+where \(\text{PIP}_k\) is the summed PIP of the \(k\)-th credible set of a gene.
+This is the default option for combining PIPs from fine-mapping with LD.
+"sum": sum over PIPs of all molecular traits for the same gene.
+This summation is the expected number of causal molecular traits in this gene,
+and could be higher than 1.
+We will use this option for combining PIPs from fine-mapping without LD.</p></dd>
 
 
 <dt id="arg-filter-cs">filter_cs<a class="anchor" aria-label="anchor" href="#arg-filter-cs"></a></dt>

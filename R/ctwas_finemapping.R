@@ -409,6 +409,10 @@ finemap_single_region <- function(region_data,
 #'
 #' @param use_null_weight If TRUE, allow for a probability of no effect in susie
 #'
+#' @param coverage A number between 0 and 1 specifying the \dQuote{coverage} of the estimated confidence sets
+#'
+#' @param include_cs_index If TRUE, add cs_index to finemapping results.
+#'
 #' @param snps_only If TRUE, use only SNPs in the region data.
 #'
 #' @param verbose If TRUE, print detail messages
@@ -427,6 +431,8 @@ finemap_single_region_noLD <- function(region_data,
                                        group_prior = NULL,
                                        group_prior_var = NULL,
                                        use_null_weight = TRUE,
+                                       coverage = 0.95,
+                                       include_cs_index = TRUE,
                                        snps_only = FALSE,
                                        verbose = FALSE,
                                        ...){
@@ -488,6 +494,8 @@ finemap_single_region_noLD <- function(region_data,
                                prior_variance = V,
                                L = 1,
                                null_weight = null_weight,
+                               coverage = coverage,
+                               min_abs_corr = 0,
                                ...)
 
   susie_res_df <- anno_susie(susie_res,
@@ -498,7 +506,7 @@ finemap_single_region_noLD <- function(region_data,
                              g_group = g_group,
                              region_id = region_id,
                              z = z,
-                             include_cs_index = FALSE)
+                             include_cs_index = include_cs_index)
 
   return(susie_res_df)
 
