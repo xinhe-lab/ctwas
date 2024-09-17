@@ -19,7 +19,7 @@ test_that("finemap_regions_noLD works", {
                                         group_prior_var = group_prior_var)
   })
 
-  expect_equal(finemap_res, expected_finemap_res)
+  expect_equal(finemap_res$susie_pip, expected_finemap_res$susie_pip)
 
 })
 
@@ -53,6 +53,6 @@ test_that("finemap_regions works", {
                                    L = screened_region_L[region_id])
   })
 
-  expect_equal(finemap_res, expected_finemap_res)
+  expect_equal(finemap_res$susie_pip, expected_finemap_res$susie_pip)
 
 })

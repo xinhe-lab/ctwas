@@ -578,7 +578,7 @@ compute_weight_LD_from_ref <- function(weights,
         # load SNP info of the region
         SNP_info_files <- LD_map$SNP_file[curr_region_idx]
         stopifnot(all(file.exists(SNP_info_files)))
-        snpinfo <- read_snp_info_files(SNP_info_files, snpinfo_loader_fun)
+        snpinfo <- read_snp_info_files(SNP_info_files, snpinfo_loader_fun = snpinfo_loader_fun)
         rownames(R_snp) <- snpinfo$id
         colnames(R_snp) <- snpinfo$id
 

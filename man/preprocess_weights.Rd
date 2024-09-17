@@ -20,7 +20,7 @@ preprocess_weights(
   load_predictdb_LD = TRUE,
   fusion_method = c("lasso", "enet", "top1", "blup", "bslmm", "best.cv"),
   fusion_genome_version = NA,
-  fusion_top_n_snps = NULL,
+  top_n_snps = NULL,
   LD_format = c("rds", "rdata", "csv", "txt", "custom"),
   LD_loader_fun = NULL,
   snpinfo_loader_fun = NULL,
@@ -68,8 +68,8 @@ This option is only for PredictDB weights.}
 
 \item{fusion_genome_version}{a string, specifying the genome version of FUSION models}
 
-\item{fusion_top_n_snps}{a number, specifying the top n weight SNPs included in FUSION models.
-By default, use all weight SNPs.}
+\item{top_n_snps}{a number, specifying the top n SNPs included in weight models.
+By default, use all SNPs in weights.}
 
 \item{LD_format}{file format for LD matrix. If "custom", use a user defined
 \code{LD_loader_fun()} function to load LD matrix.}

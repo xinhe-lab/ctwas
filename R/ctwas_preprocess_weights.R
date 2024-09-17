@@ -40,8 +40,8 @@
 #'
 #' @param fusion_genome_version a string, specifying the genome version of FUSION models
 #'
-#' @param fusion_top_n_snps a number, specifying the top n weight SNPs included in FUSION models.
-#' By default, use all weight SNPs.
+#' @param top_n_snps a number, specifying the top n SNPs included in weight models.
+#' By default, use all SNPs in weights.
 #'
 #' @param LD_format file format for LD matrix. If "custom", use a user defined
 #' \code{LD_loader_fun()} function to load LD matrix.
@@ -78,7 +78,7 @@ preprocess_weights <- function(weight_file,
                                load_predictdb_LD = TRUE,
                                fusion_method = c("lasso","enet","top1","blup","bslmm","best.cv"),
                                fusion_genome_version = NA,
-                               fusion_top_n_snps = NULL,
+                               top_n_snps = NULL,
                                LD_format = c("rds", "rdata", "csv", "txt", "custom"),
                                LD_loader_fun = NULL,
                                snpinfo_loader_fun = NULL,
@@ -169,7 +169,7 @@ preprocess_weights <- function(weight_file,
                    cov_table = cov_table,
                    snp_info = snp_info,
                    weight_format = weight_format,
-                   fusion_top_n_snps = fusion_top_n_snps,
+                   top_n_snps = top_n_snps,
                    drop_strand_ambig = drop_strand_ambig,
                    scale_predictdb_weights = scale_predictdb_weights)
   }, mc.cores = ncore)
@@ -210,7 +210,7 @@ process_weight <- function(molecular_id,
                            cov_table,
                            snp_info,
                            weight_format = c("PredictDB", "FUSION"),
-                           fusion_top_n_snps = NULL,
+                           top_n_snps = NULL,
                            drop_strand_ambig = TRUE,
                            scale_predictdb_weights = TRUE) {
 
@@ -257,14 +257,14 @@ process_weight <- function(molecular_id,
   wgt.idx <- match(snp_ids, rownames(wgt.matrix))
   wgt <- wgt.matrix[wgt.idx, "weight", drop = FALSE]
 
-  if (weight_format == "FUSION") {
-    wgt <- wgt[order(-abs(wgt[,"weight"])), , drop = FALSE]
-    if (!is.null(fusion_top_n_snps)) {
-      wgt <- head(wgt,fusion_top_n_snps)
-    }
+  # use top n snps in weights
+  if (!is.null(top_n_snps)) {
+    wgt <- wgt[order(-abs(wgt[,"weight"])), ]
+    wgt <- head(wgt,top_n_snps)
     snp_ids <- rownames(wgt)
   }
 
+  # scale weights by variance from LD reference
   if (weight_format == "PredictDB") {
     if (scale_predictdb_weights){
       wgt_snp_var <- snp_info$variance[match(snp_ids, snp_info$id)]
