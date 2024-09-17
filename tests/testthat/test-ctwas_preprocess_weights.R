@@ -90,7 +90,7 @@ test_that("preprocess_weights with FUSION weights works", {
                                   scale_predictdb_weights = FALSE,
                                   load_predictdb_LD = FALSE,
                                   filter_protein_coding_genes = FALSE,
-                                  ncore = 2)
+                                  ncore = 1)
   })
 
   expect_equal(weights, expected_weights)

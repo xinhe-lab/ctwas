@@ -517,12 +517,33 @@ convert_predictdb_cov_to_cor <- function(cov_table){
   return(R_table)
 }
 
-# Computes LD for weight variants using reference LD
+#' @title Computes LD for weight variants using reference LD
+#'
+#' @param weights a list of preprocessed weights.
+#'
+#' @param region_info a data frame of region definitions.
+#'
+#' @param LD_map a data frame with filenames of LD matrices and SNP information for the regions.
+#' Required when \code{load_predictdb_LD = FALSE}.
+#'
+#' @param LD_format file format for LD matrix. If "custom", use a user defined
+#' \code{LD_loader_fun()} function to load LD matrix.
+#'
+#' @param LD_loader_fun a user defined function to load LD matrix when \code{LD_format = "custom"}.
+#'
+#' @param snpinfo_loader_fun a user defined function to load SNP information file,
+#' if SNP information files are not in standard cTWAS reference format.
+#'
+#' @param ncore The number of cores used to parallelize computation.
+#'
 #' @importFrom parallel mclapply
 #' @importFrom Matrix bdiag
 #' @importFrom logging loginfo
+#'
+#' @return a list of processed weights, with LD of weight variants included.
+#'
+#' @export
 compute_weight_LD_from_ref <- function(weights,
-                                       weight_name,
                                        region_info,
                                        LD_map,
                                        LD_format = c("rds", "rdata", "mtx", "csv", "txt", "custom"),
@@ -541,7 +562,7 @@ compute_weight_LD_from_ref <- function(weights,
   weight_info <- lapply(names(weights), function(x){
     as.data.frame(weights[[x]][c("chrom", "p0","p1", "molecular_id", "weight_name", "type","context")])})
   weight_info <- do.call(rbind, weight_info)
-  weight_info$weight_id <- paste0(weight_info$molecular_id, "|", weight_name)
+  weight_info$weight_id <- paste0(weight_info$molecular_id, "|", weight_info$weight_name)
   # get the regions overlapping with each gene
   for (k in 1:nrow(weight_info)) {
     chrom <- weight_info[k, "chrom"]

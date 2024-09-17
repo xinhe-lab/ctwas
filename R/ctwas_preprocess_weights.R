@@ -184,7 +184,6 @@ preprocess_weights <- function(weight_file,
   if (!load_predictdb_LD) {
     loginfo("Computing LD for variants in weights using reference LD matrices ...")
     weights <- compute_weight_LD_from_ref(weights,
-                                          weight_name,
                                           region_info = region_info,
                                           LD_map = LD_map,
                                           LD_format = LD_format,
