@@ -7,7 +7,7 @@
 load_LD(
   file,
   format = c("rds", "rdata", "mtx", "csv", "txt", "custom"),
-  LD_loader_fun
+  LD_loader_fun = NULL
 )
 }
 \arguments{

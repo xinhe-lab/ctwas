@@ -18,6 +18,9 @@
 #'
 #' @param LD_loader_fun a user defined function to load LD matrix when \code{LD_format = "custom"}.
 #'
+#' @param snpinfo_loader_fun a user defined function to load SNP information file,
+#' if SNP information files are not in standard cTWAS reference format.
+#'
 #' @param ncore The number of cores used to parallelize susie over regions
 #'
 #' @param verbose If TRUE, print detail messages
@@ -37,7 +40,8 @@ estimate_region_L <- function(region_data,
                               min_abs_corr = 0.1,
                               snps_only = FALSE,
                               LD_format = c("rds", "rdata", "mtx", "csv", "txt", "custom"),
-                              LD_loader_fun,
+                              LD_loader_fun = NULL,
+                              snpinfo_loader_fun = NULL,
                               ncore = 1,
                               verbose = FALSE,
                               ...) {
@@ -58,6 +62,7 @@ estimate_region_L <- function(region_data,
                                             snps_only = snps_only,
                                             LD_format = LD_format,
                                             LD_loader_fun = LD_loader_fun,
+                                            snpinfo_loader_fun = snpinfo_loader_fun,
                                             ncore = ncore,
                                             verbose = verbose,
                                             ...)

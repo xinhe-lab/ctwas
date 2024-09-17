@@ -4,11 +4,13 @@
 \alias{create_snp_LD_map}
 \title{Map SNPs to regions using region meta table.}
 \usage{
-create_snp_LD_map(region_metatable)
+create_snp_LD_map(region_metatable, snpinfo_loader_fun = NULL)
 }
 \arguments{
 \item{region_metatable}{a data frame of region meta table, with columns:
 "chrom", "start", "stop", "region_id", "LD_file", "SNP_file".}
+
+\item{snpinfo_loader_fun}{IF not NULL, use custom loader function to read SNP files.}
 }
 \description{
 Map SNPs to regions using region meta table.

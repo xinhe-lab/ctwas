@@ -23,6 +23,7 @@ preprocess_weights(
   fusion_top_n_snps = NULL,
   LD_format = c("rds", "rdata", "csv", "txt", "custom"),
   LD_loader_fun = NULL,
+  snpinfo_loader_fun = NULL,
   ncore = 1,
   logfile = NULL
 )
@@ -74,6 +75,9 @@ By default, use all weight SNPs.}
 \code{LD_loader_fun()} function to load LD matrix.}
 
 \item{LD_loader_fun}{a user defined function to load LD matrix when \code{LD_format = "custom"}.}
+
+\item{snpinfo_loader_fun}{a user defined function to load SNP information file,
+if SNP information files are not in standard cTWAS reference format.}
 
 \item{ncore}{The number of cores used to parallelize computation.}
 

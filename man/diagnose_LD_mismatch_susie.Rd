@@ -11,7 +11,8 @@ diagnose_LD_mismatch_susie(
   gwas_n,
   p_diff_thresh = 5e-08,
   LD_format = c("rds", "rdata", "mtx", "csv", "txt", "custom"),
-  LD_loader_fun,
+  LD_loader_fun = NULL,
+  snpinfo_loader_fun = NULL,
   ncore = 1,
   logfile = NULL
 )
@@ -33,6 +34,9 @@ with significant difference between observed z-scores and estimated values}
 \code{LD_loader_fun()} function to load LD matrix.}
 
 \item{LD_loader_fun}{a user defined function to load LD matrix when \code{LD_format = "custom"}.}
+
+\item{snpinfo_loader_fun}{a user defined function to load SNP information file,
+if SNP information files are not in standard cTWAS reference format.}
 
 \item{ncore}{integer, number of cores for parallel computing.}
 

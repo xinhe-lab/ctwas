@@ -12,8 +12,13 @@ read_snp_info_file <- function (file){
 }
 
 # Read all SNP info files as a data frame
-read_snp_info_files <- function (files){
-  snp_info <- do.call(rbind, lapply(files, read_snp_info_file))
+read_snp_info_files <- function (files,
+                                 snpinfo_loader_fun = NULL){
+  if (!is.null(snpinfo_loader_fun)){
+    snp_info <- do.call(rbind, lapply(files, snpinfo_loader_fun))
+  } else {
+    snp_info <- do.call(rbind, lapply(files, read_snp_info_file))
+  }
   snp_info <- unique(as.data.frame(snp_info))
   return(snp_info)
 }
@@ -36,7 +41,7 @@ read_snp_info_files <- function (files){
 #'
 load_LD <- function (file,
                      format = c("rds", "rdata", "mtx", "csv", "txt", "custom"),
-                     LD_loader_fun) {
+                     LD_loader_fun = NULL) {
 
   format <- match.arg(format)
 

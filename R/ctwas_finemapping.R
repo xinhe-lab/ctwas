@@ -33,6 +33,9 @@
 #'
 #' @param LD_loader_fun a user defined function to load LD matrix when \code{LD_format = "custom"}.
 #'
+#' @param snpinfo_loader_fun a user defined function to load SNP information file,
+#' if SNP information files are not in standard cTWAS reference format.
+#'
 #' @param ncore The number of cores used to parallelize computation over regions
 #'
 #' @param verbose If TRUE, print detail messages
@@ -63,7 +66,8 @@ finemap_regions <- function(region_data,
                             save_cor = FALSE,
                             cor_dir = NULL,
                             LD_format = c("rds", "rdata", "mtx", "csv", "txt", "custom"),
-                            LD_loader_fun,
+                            LD_loader_fun = NULL,
+                            snpinfo_loader_fun = NULL,
                             ncore = 1,
                             verbose = FALSE,
                             logfile = NULL,
@@ -141,6 +145,7 @@ finemap_regions <- function(region_data,
                           cor_dir = cor_dir,
                           LD_format = LD_format,
                           LD_loader_fun = LD_loader_fun,
+                          snpinfo_loader_fun = snpinfo_loader_fun,
                           verbose = verbose,
                           ...)
 
@@ -265,6 +270,9 @@ finemap_regions_noLD <- function(region_data,
 #'
 #' @param LD_loader_fun a user defined function to load LD matrix when \code{LD_format = "custom"}.
 #'
+#' @param snpinfo_loader_fun a user defined function to load SNP information file,
+#' if SNP information files are not in standard cTWAS reference format.
+#'
 #' @param verbose If TRUE, print detail messages
 #'
 #' @param ... Additional arguments of \code{susie_rss}.
@@ -292,7 +300,8 @@ finemap_single_region <- function(region_data,
                                   save_cor = FALSE,
                                   cor_dir = NULL,
                                   LD_format = c("rds", "rdata", "mtx", "csv", "txt", "custom"),
-                                  LD_loader_fun,
+                                  LD_loader_fun = NULL,
+                                  snpinfo_loader_fun = NULL,
                                   verbose = FALSE,
                                   ...){
 
@@ -358,6 +367,7 @@ finemap_single_region <- function(region_data,
                             cor_dir = cor_dir,
                             LD_format = LD_format,
                             LD_loader_fun = LD_loader_fun,
+                            snpinfo_loader_fun = snpinfo_loader_fun,
                             verbose = verbose)
   # gene first then SNPs
   R <- rbind(cbind(cor_res$R_gene, t(cor_res$R_snp_gene)),

@@ -28,7 +28,8 @@ ctwas_sumstats(
   coverage = 0.95,
   min_abs_corr = 0.1,
   LD_format = c("rds", "rdata", "mtx", "csv", "txt", "custom"),
-  LD_loader_fun,
+  LD_loader_fun = NULL,
+  snpinfo_loader_fun = NULL,
   force_compute_cor = FALSE,
   save_cor = FALSE,
   cor_dir = NULL,
@@ -100,6 +101,9 @@ the estimated confidence sets.}
 \code{LD_loader_fun()} function to load LD matrix.}
 
 \item{LD_loader_fun}{a user defined function to load LD matrix when \code{LD_format = "custom"}.}
+
+\item{snpinfo_loader_fun}{a user defined function to load SNP information file,
+if SNP information files are not in standard cTWAS reference format.}
 
 \item{force_compute_cor}{If TRUE, force computing correlation (R) matrices.}
 

@@ -48,6 +48,9 @@
 #'
 #' @param LD_loader_fun a user defined function to load LD matrix when \code{LD_format = "custom"}.
 #'
+#' @param snpinfo_loader_fun a user defined function to load SNP information file,
+#' if SNP information files are not in standard cTWAS reference format.
+#'
 #' @param ncore The number of cores used to parallelize computation.
 #'
 #' @param logfile The log filename. If NULL, will print log info on screen.
@@ -78,6 +81,7 @@ preprocess_weights <- function(weight_file,
                                fusion_top_n_snps = NULL,
                                LD_format = c("rds", "rdata", "csv", "txt", "custom"),
                                LD_loader_fun = NULL,
+                               snpinfo_loader_fun = NULL,
                                ncore = 1,
                                logfile = NULL){
   if (!is.null(logfile)) {
@@ -185,6 +189,7 @@ preprocess_weights <- function(weight_file,
                                           LD_map = LD_map,
                                           LD_format = LD_format,
                                           LD_loader_fun = LD_loader_fun,
+                                          snpinfo_loader_fun = snpinfo_loader_fun,
                                           ncore = ncore)
   }
 

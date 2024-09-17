@@ -69,11 +69,14 @@ create_snp_map <- function(region_info,
 #' @param region_metatable a data frame of region meta table, with columns:
 #' "chrom", "start", "stop", "region_id", "LD_file", "SNP_file".
 #'
+#' @param snpinfo_loader_fun IF not NULL, use custom loader function to read SNP files.
+#'
 #' @importFrom readr parse_number
 #'
 #' @export
 #'
-create_snp_LD_map <- function(region_metatable) {
+create_snp_LD_map <- function(region_metatable,
+                              snpinfo_loader_fun = NULL) {
 
   # check inputs
   region_metatable <- as.data.frame(region_metatable)
@@ -105,7 +108,11 @@ create_snp_LD_map <- function(region_metatable) {
 
   # map SNPs to regions
   stopifnot(all(file.exists(region_metatable$SNP_file)))
-  snp_map <- lapply(region_metatable$SNP_file, read_snp_info_file)
+  if (!is.null(snpinfo_loader_fun)){
+    snp_map <- lapply(region_metatable$SNP_file, snpinfo_loader_fun)
+  } else {
+    snp_map <- lapply(region_metatable$SNP_file, read_snp_info_file)
+  }
   names(snp_map) <- region_metatable$region_id
 
   # map LD to regions

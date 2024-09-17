@@ -26,6 +26,9 @@
 #'
 #' @param LD_loader_fun a user defined function to load LD matrix when \code{LD_format = "custom"}.
 #'
+#' @param snpinfo_loader_fun a user defined function to load SNP information file,
+#' if SNP information files are not in standard cTWAS reference format.
+#'
 #' @param verbose If TRUE, print detail messages
 #'
 #' @return correlation matrices (R_snp, R_snp_gene and R_gene)
@@ -43,7 +46,8 @@ get_region_cor <- function(region_id,
                            save_cor = FALSE,
                            cor_dir = NULL,
                            LD_format = c("rds", "rdata", "mtx", "csv", "txt", "custom"),
-                           LD_loader_fun,
+                           LD_loader_fun = NULL,
+                           snpinfo_loader_fun = NULL,
                            verbose = FALSE) {
 
   LD_format <- match.arg(LD_format)
@@ -107,7 +111,7 @@ get_region_cor <- function(region_id,
     # load SNP info of the region
     SNP_info_files <- unlist(strsplit(LD_map$SNP_file[LD_map$region_id == region_id], split = ";"))
     stopifnot(all(file.exists(SNP_info_files)))
-    snpinfo <- read_snp_info_files(SNP_info_files)
+    snpinfo <- read_snp_info_files(SNP_info_files, snpinfo_loader_fun = snpinfo_loader_fun)
 
     # compute correlation matrices
     res <- compute_region_cor(sids, gids, R_snp, snpinfo$id, weights)
