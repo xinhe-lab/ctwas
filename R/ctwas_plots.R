@@ -194,7 +194,7 @@ make_locusplot <- function(finemap_res,
     } else {
       loginfo("Limit to protein coding genes")
       drop_idx <- which(finemap_region_res$group!="SNP" & finemap_region_res$gene_type!="protein_coding")
-      finemap_region_res[drop_idx, ] <- NULL
+      finemap_region_res <- finemap_region_res[-drop_idx,]
     }
     filter_gene_biotype <- "protein_coding"
   } else{
