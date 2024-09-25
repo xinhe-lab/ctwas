@@ -57,6 +57,8 @@
 <url><loc>/reference/merge_region_data_noLD.html</loc></url>
 <url><loc>/reference/preprocess_weights.html</loc></url>
 <url><loc>/reference/preprocess_z_snp.html</loc></url>
+<url><loc>/reference/read_snp_info_file.html</loc></url>
+<url><loc>/reference/read_snp_info_files.html</loc></url>
 <url><loc>/reference/screen_regions.html</loc></url>
 <url><loc>/reference/screen_regions_noLD.html</loc></url>
 <url><loc>/reference/single_effect_regression.html</loc></url>

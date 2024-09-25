@@ -85,7 +85,7 @@ region_info <- readRDS(region_file)
 
 Additionally, we require `ref_snp_info` as a “reference” of the variants. `ref_snp_info` is a data frame, containing the positions and allele information of all the variants from the entire genome. This reference data needs to be mapped to the regions, i.e. we will need a structure to store the information of which variants are located in which regions. To do this, we provide a function, `create_snp_map()`.  It takes input of `region_info` and `ref_snp_info`. It maps variants to regions based on the variant locations, and returns the result as `snp_map`, a list object containing variant information in each of the regions. In addition, the function checks the format of `region_info` to ensure that it matches the format required by cTWAS (e.g. adding "region_id" column if not available), and returns the output as updated `region_info`. 
 
-We have the lists of reference variant information from UK Biobank European population from all the LD regions in the genome in [hg38](https://uchicago.box.com/s/t089or92dkovv0epkrjvxq8r9db9ys99) and [hg19](https://uchicago.box.com/s/ufko2gjagcb693dob4khccqubuztb9pz). They are also available on the University of Chicago RCC cluster at `/project2/xinhe/shared_data/multigroup_ctwas/LD_reference/`. 
+We have the reference variant information from UK Biobank European population available [here](https://uchicago.box.com/s/w3j3w49a5y5p1rhlti95u324g8ro6kkn). They are also available on the University of Chicago RCC cluster at `/project2/xinhe/shared_data/cTWAS/ref_snp_info/`. 
 
 In this tutorial, we use chr16 as an example, so we specify `chrom = 16`. In real cTWAS analysis, you should run the entire genome. 
 
