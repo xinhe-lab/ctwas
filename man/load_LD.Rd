@@ -11,7 +11,7 @@ load_LD(
 )
 }
 \arguments{
-\item{file}{path to LD matrix}
+\item{file}{LD matrix file name.}
 
 \item{format}{file format for LD matrix. If "custom", use a user defined
 \code{LD_loader_fun()} function to load LD matrix.}

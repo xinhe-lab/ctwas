@@ -1,8 +1,23 @@
 
-# Read a single SNP info file as a data frame
+#' @title Read a single SNP info file as a data frame
+#'
+#' @param file SNP info file name.
+#'
 #' @importFrom data.table fread
-read_snp_info_file <- function (file){
-  snp_info <- as.data.frame(fread(file, header = TRUE))
+#'
+#' @return a data frame of SNP info
+#'
+#' @export
+read_snp_info_file <- function (file,
+                                snpinfo_loader_fun = NULL){
+
+  if (!is.null(snpinfo_loader_fun)){
+    snp_info <- snpinfo_loader_fun(file)
+  } else {
+    snp_info <- fread(file, header = TRUE)
+  }
+  snp_info <- unique(as.data.frame(snp_info))
+
   target_header <- c("chrom", "id", "pos", "alt", "ref")
   if (!all(target_header %in% colnames(snp_info))){
     stop("The SNP file needs to contain the following columns: ",
@@ -11,7 +26,15 @@ read_snp_info_file <- function (file){
   return(snp_info)
 }
 
-# Read all SNP info files as a data frame
+#' @title Read multiple single SNP info files as a data frame
+#'
+#' @param files a vector of file names for SNP info in all regions
+#'
+#' @importFrom data.table fread
+#'
+#' @return a data frame of SNP info from all files
+#'
+#' @export
 read_snp_info_files <- function (files,
                                  snpinfo_loader_fun = NULL){
   if (!is.null(snpinfo_loader_fun)){
@@ -20,12 +43,18 @@ read_snp_info_files <- function (files,
     snp_info <- do.call(rbind, lapply(files, read_snp_info_file))
   }
   snp_info <- unique(as.data.frame(snp_info))
+
+  target_header <- c("chrom", "id", "pos", "alt", "ref")
+  if (!all(target_header %in% colnames(snp_info))){
+    stop("The SNP file needs to contain the following columns: ",
+         paste(target_header, collapse = " "))
+  }
   return(snp_info)
 }
 
-#' Load LD matrix
+#' @title Load LD matrix
 #'
-#' @param file path to LD matrix
+#' @param file LD matrix file name.
 #'
 #' @param format file format for LD matrix. If "custom", use a user defined
 #' \code{LD_loader_fun()} function to load LD matrix.
