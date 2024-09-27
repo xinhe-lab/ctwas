@@ -14,6 +14,8 @@
 #'
 #' @param min_var minimum number of variables (SNPs and genes) in a region.
 #'
+#' @param min_gene minimum number of genes in a region.
+#'
 #' @param filter_L If TRUE, screening regions with estimated L > 0.
 #'
 #' @param filter_nonSNP_PIP If TRUE, screening regions with
@@ -57,6 +59,7 @@ screen_regions <- function(region_data,
                            group_prior_var = NULL,
                            L = 5,
                            min_var = 2,
+                           min_gene = 1,
                            filter_L = TRUE,
                            filter_nonSNP_PIP = FALSE,
                            min_nonSNP_PIP = 0.5,
@@ -118,6 +121,15 @@ screen_regions <- function(region_data,
     skip_region_ids <- region_ids[(n_sids + n_gids) < min_var]
     if (length(skip_region_ids) > 0){
       loginfo("Skip %d regions with number of variables < %d.", length(skip_region_ids), min_var)
+      region_data[skip_region_ids] <- NULL
+    }
+  }
+
+  # skip regions with fewer than min_gene genes
+  if (min_gene > 0) {
+    skip_region_ids <- region_ids[n_gids < min_gene]
+    if (length(skip_region_ids) > 0){
+      loginfo("Remove %d regions with number of genes < %d.", length(skip_region_ids), min_gene)
       region_data[skip_region_ids] <- NULL
     }
   }
@@ -201,6 +213,8 @@ screen_regions <- function(region_data,
 #'
 #' @param min_var minimum number of variables (SNPs and genes) in a region.
 #'
+#' @param min_gene minimum number of genes in a region.
+#'
 #' @param min_nonSNP_PIP If screening by non-SNP PIPs,
 #' regions with total non-SNP PIP >= \code{min_nonSNP_PIP}
 #' will be selected to run finemapping using full SNPs.
@@ -224,6 +238,7 @@ screen_regions_noLD <- function(region_data,
                                 group_prior = NULL,
                                 group_prior_var = NULL,
                                 min_var = 2,
+                                min_gene = 1,
                                 min_nonSNP_PIP = 0.5,
                                 ncore = 1,
                                 logfile = NULL,
@@ -270,6 +285,15 @@ screen_regions_noLD <- function(region_data,
     skip_region_ids <- region_ids[(n_sids + n_gids) < min_var]
     if (length(skip_region_ids) > 0){
       loginfo("Skip %d regions with number of variables < %d.", length(skip_region_ids), min_var)
+      region_data[skip_region_ids] <- NULL
+    }
+  }
+
+  # skip regions with fewer than min_gene genes
+  if (min_gene > 0) {
+    skip_region_ids <- region_ids[n_gids < min_gene]
+    if (length(skip_region_ids) > 0){
+      loginfo("Remove %d regions with number of genes < %d.", length(skip_region_ids), min_gene)
       region_data[skip_region_ids] <- NULL
     }
   }
