@@ -32,7 +32,7 @@
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">ctwas</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">0.4.13</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">0.4.14</span>
       </span>
     </div>
 
@@ -104,7 +104,7 @@
       <h1 data-toc-skip>cTWAS utility functions</h1>
                         <h4 data-toc-skip class="author">Kaixuan Luo, Sheng Qian</h4>
             
-            <h4 data-toc-skip class="date">2024-09-14</h4>
+            <h4 data-toc-skip class="date">2024-09-17</h4>
       
       <small class="dont-index">Source: <a href="https://github.com/xinhe-lab/ctwas/blob/multigroup/vignettes/utility_functions.Rmd" class="external-link"><code>vignettes/utility_functions.Rmd</code></a></small>
       <div class="hidden name"><code>utility_functions.Rmd</code></div>
@@ -167,13 +167,13 @@
 <span>                              weight_format <span class="op">=</span> <span class="st">"FUSION"</span>,</span>
 <span>                              fusion_method <span class="op">=</span> <span class="st">"lasso"</span>,</span>
 <span>                              fusion_genome_version <span class="op">=</span> <span class="st">"b37"</span>,</span>
-<span>                              fusion_top_n_snps <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>                              top_n_snps <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>                              drop_strand_ambig <span class="op">=</span> <span class="cn">TRUE</span>,</span>
 <span>                              filter_protein_coding_genes <span class="op">=</span> <span class="cn">FALSE</span>,</span>
 <span>                              scale_predictdb_weights <span class="op">=</span> <span class="cn">FALSE</span>,</span>
 <span>                              load_predictdb_LD <span class="op">=</span> <span class="cn">FALSE</span>,</span>
 <span>                              ncore <span class="op">=</span> <span class="fl">4</span><span class="op">)</span></span></code></pre></div>
-<p>We drop strand ambiguous variants (<code>drop_strand_ambig = TRUE</code>) by default. FUSION weights are already on the standardized scale, so we don’t scale weights by the variance. For FUSION models, we don’t have precomputed covariances between variants. So we calculate correlations between weight variants using the LD reference. This usually takes a while, so it is helpful to set <code>ncore</code> to parallelize the computation. FUSION weights do not contain gene type information, so we don’t limit to protein coding genes. By default, we use all variants in the prediction models. If you have dense prediction models and want to use only the top variants for each gene in the weights, you could set the number in <code>fusion_top_n_snps</code> (<code>fusion_top_n_snps = 5</code> will use the top five variants for each gene). We could set the genome build of the FUSION models in <code>fusion_genome_version</code>. This is only used when creating the “varID” of the variants to be consistent with PredictDB format, but does not affect the preprocessed weights.</p>
+<p>We drop strand ambiguous variants (<code>drop_strand_ambig = TRUE</code>) by default. FUSION weights are already on the standardized scale, so we don’t scale weights by the variance. For FUSION models, we don’t have precomputed covariances between variants. So we calculate correlations between weight variants using the LD reference. This usually takes a while, so it is helpful to set <code>ncore</code> to parallelize the computation. FUSION weights do not contain gene type information, so we don’t limit to protein coding genes. By default, we use all variants in the prediction models. If you have dense prediction models and want to use only the top variants for each gene in the weights, you could set the number in <code>top_n_snps</code> (<code>top_n_snps = 5</code> will use the top five variants for each gene). We could set the genome build of the FUSION models in <code>fusion_genome_version</code>. This is only used when creating the “varID” of the variants to be consistent with PredictDB format, but does not affect the preprocessed weights.</p>
 </div>
 <div class="section level3">
 <h3 id="creating-prediction-models-from-qtl-lists">Creating prediction models from QTL lists<a class="anchor" aria-label="anchor" href="#creating-prediction-models-from-qtl-lists"></a>

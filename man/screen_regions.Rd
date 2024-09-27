@@ -17,7 +17,8 @@ screen_regions(
   min_nonSNP_PIP = 0.5,
   min_abs_corr = 0.1,
   LD_format = c("rds", "rdata", "mtx", "csv", "txt", "custom"),
-  LD_loader_fun,
+  LD_loader_fun = NULL,
+  snpinfo_loader_fun = NULL,
   ncore = 1,
   logfile = NULL,
   verbose = FALSE,
@@ -55,6 +56,9 @@ will be selected to run finemapping using full SNPs.}
 
 \item{LD_loader_fun}{a user defined function to load LD matrix
 when \code{LD_format = "custom"}.}
+
+\item{snpinfo_loader_fun}{a user defined function to load SNP information file,
+if SNP information files are not in standard cTWAS reference format.}
 
 \item{ncore}{The number of cores used to parallelize susie over regions.}
 

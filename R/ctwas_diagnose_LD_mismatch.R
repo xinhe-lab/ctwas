@@ -18,6 +18,9 @@
 #'
 #' @param LD_loader_fun a user defined function to load LD matrix when \code{LD_format = "custom"}.
 #'
+#' @param snpinfo_loader_fun a user defined function to load SNP information file,
+#' if SNP information files are not in standard cTWAS reference format.
+#'
 #' @param ncore integer, number of cores for parallel computing.
 #'
 #' @param logfile the log file, if NULL will print log info on screen
@@ -37,7 +40,8 @@ diagnose_LD_mismatch_susie <- function(region_ids,
                                        gwas_n,
                                        p_diff_thresh = 5e-8,
                                        LD_format = c("rds", "rdata", "mtx", "csv", "txt", "custom"),
-                                       LD_loader_fun,
+                                       LD_loader_fun = NULL,
+                                       snpinfo_loader_fun = NULL,
                                        ncore = 1,
                                        logfile = NULL){
 
@@ -51,7 +55,8 @@ diagnose_LD_mismatch_susie <- function(region_ids,
   condz_list <- mclapply_check(region_ids, function(region_id){
     compute_region_condz(region_id, z_snp, LD_map, gwas_n,
                          LD_format = LD_format,
-                         LD_loader_fun = LD_loader_fun)
+                         LD_loader_fun = LD_loader_fun,
+                         snpinfo_loader_fun = snpinfo_loader_fun)
   }, mc.cores = ncore, stop_if_missing = TRUE)
 
   names(condz_list) <- region_ids
@@ -77,7 +82,8 @@ compute_region_condz <- function(region_id,
                                  LD_map,
                                  gwas_n,
                                  LD_format = c("rds", "rdata", "mtx", "csv", "txt", "custom"),
-                                 LD_loader_fun){
+                                 LD_loader_fun = NULL,
+                                 snpinfo_loader_fun = NULL){
 
   LD_format <- match.arg(LD_format)
 
@@ -95,7 +101,7 @@ compute_region_condz <- function(region_id,
   # load SNP info of the region
   SNP_info_files <- unlist(strsplit(LD_map$SNP_file[LD_map$region_id == region_id], split = ";"))
   stopifnot(all(file.exists(SNP_info_files)))
-  snpinfo <- read_snp_info_files(SNP_info_files)
+  snpinfo <- read_snp_info_files(SNP_info_files, snpinfo_loader_fun = snpinfo_loader_fun)
 
   # Match GWAS sumstats with LD reference files. Only keep variants included in LD reference.
   region_z_snp <- z_snp[z_snp$id %in% snpinfo$id,]

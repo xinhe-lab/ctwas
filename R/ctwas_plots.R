@@ -51,7 +51,9 @@
 #'
 #' @param highlight_pos genomic positions to highlight with vertical lines
 #'
-#' @param highlight.colors colors for highlight lines in p-value track, PIP track, and positions.
+#' @param highlight.color color for horizontal lines highlighting p-values and PIPs.
+#'
+#' @param highlight.pos.color color for vertical lines highlighting genomic positions.
 #'
 #' @param point.sizes size values for SNP and non-SNP data points in the scatter plots
 #'
@@ -194,7 +196,9 @@ make_locusplot <- function(finemap_res,
     } else {
       loginfo("Limit to protein coding genes")
       drop_idx <- which(finemap_region_res$group!="SNP" & finemap_region_res$gene_type!="protein_coding")
-      finemap_region_res[drop_idx, ] <- NULL
+      if (length(drop_idx) > 0) {
+        finemap_region_res <- finemap_region_res[-drop_idx, , drop=FALSE]
+      }
     }
     filter_gene_biotype <- "protein_coding"
   } else{

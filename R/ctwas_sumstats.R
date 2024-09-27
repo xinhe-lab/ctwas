@@ -58,6 +58,9 @@
 #'
 #' @param LD_loader_fun a user defined function to load LD matrix when \code{LD_format = "custom"}.
 #'
+#' @param snpinfo_loader_fun a user defined function to load SNP information file,
+#' if SNP information files are not in standard cTWAS reference format.
+#'
 #' @param force_compute_cor If TRUE, force computing correlation (R) matrices.
 #'
 #' @param save_cor If TRUE, save correlation (R) matrices to \code{cor_dir}.
@@ -112,7 +115,8 @@ ctwas_sumstats <- function(
     coverage = 0.95,
     min_abs_corr = 0.1,
     LD_format = c("rds", "rdata", "mtx", "csv", "txt", "custom"),
-    LD_loader_fun,
+    LD_loader_fun = NULL,
+    snpinfo_loader_fun = NULL,
     force_compute_cor = FALSE,
     save_cor = FALSE,
     cor_dir = NULL,
@@ -231,6 +235,7 @@ ctwas_sumstats <- function(
                                min_abs_corr = min_abs_corr,
                                LD_format = LD_format,
                                LD_loader_fun = LD_loader_fun,
+                               snpinfo_loader_fun = snpinfo_loader_fun,
                                ncore = ncore_LD,
                                verbose = verbose,
                                ...)
@@ -268,6 +273,7 @@ ctwas_sumstats <- function(
                                    cor_dir = cor_dir,
                                    LD_format = LD_format,
                                    LD_loader_fun = LD_loader_fun,
+                                   snpinfo_loader_fun = snpinfo_loader_fun,
                                    include_cs_index = TRUE,
                                    ncore = ncore_LD,
                                    verbose = verbose,

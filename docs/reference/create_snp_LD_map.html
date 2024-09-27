@@ -17,7 +17,7 @@
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">ctwas</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">0.4.13</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">0.4.14</span>
       </span>
     </div>
 
@@ -85,7 +85,7 @@
     </div>
 
     <div id="ref-usage">
-    <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="fu">create_snp_LD_map</span><span class="op">(</span><span class="va">region_metatable</span><span class="op">)</span></span></code></pre></div>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="fu">create_snp_LD_map</span><span class="op">(</span><span class="va">region_metatable</span>, snpinfo_loader_fun <span class="op">=</span> <span class="cn">NULL</span><span class="op">)</span></span></code></pre></div>
     </div>
 
     <div id="arguments">
@@ -95,6 +95,10 @@
 <dl><dt id="arg-region-metatable">region_metatable<a class="anchor" aria-label="anchor" href="#arg-region-metatable"></a></dt>
 <dd><p>a data frame of region meta table, with columns:
 "chrom", "start", "stop", "region_id", "LD_file", "SNP_file".</p></dd>
+
+
+<dt id="arg-snpinfo-loader-fun">snpinfo_loader_fun<a class="anchor" aria-label="anchor" href="#arg-snpinfo-loader-fun"></a></dt>
+<dd><p>IF not NULL, use custom loader function to read SNP files.</p></dd>
 
 </dl></div>
 

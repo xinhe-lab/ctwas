@@ -19,6 +19,7 @@
 <url><loc>/reference/compute_gene_z.html</loc></url>
 <url><loc>/reference/compute_region_cor.html</loc></url>
 <url><loc>/reference/compute_region_nonSNP_PIPs.html</loc></url>
+<url><loc>/reference/compute_weight_LD_from_ref.html</loc></url>
 <url><loc>/reference/convert_fusion_to_predictdb.html</loc></url>
 <url><loc>/reference/convert_geno_to_LD_matrix.html</loc></url>
 <url><loc>/reference/create_predictdb_from_QTLs.html</loc></url>
@@ -56,6 +57,8 @@
 <url><loc>/reference/merge_region_data_noLD.html</loc></url>
 <url><loc>/reference/preprocess_weights.html</loc></url>
 <url><loc>/reference/preprocess_z_snp.html</loc></url>
+<url><loc>/reference/read_snp_info_file.html</loc></url>
+<url><loc>/reference/read_snp_info_files.html</loc></url>
 <url><loc>/reference/screen_regions.html</loc></url>
 <url><loc>/reference/screen_regions_noLD.html</loc></url>
 <url><loc>/reference/single_effect_regression.html</loc></url>

@@ -93,6 +93,10 @@ If NULL, the entire region will be plotted (with 100 bp flanks on both sides).}
 
 \item{highlight_pos}{genomic positions to highlight with vertical lines}
 
+\item{highlight.color}{color for horizontal lines highlighting p-values and PIPs.}
+
+\item{highlight.pos.color}{color for vertical lines highlighting genomic positions.}
+
 \item{point.sizes}{size values for SNP and non-SNP data points in the scatter plots}
 
 \item{point.alpha}{alpha values for SNP and non-SNP data points in the scatter plots}
@@ -117,8 +121,6 @@ Exclude text labels when they overlap too many other things.}
 \item{panel.heights}{Relative heights of the panels.}
 
 \item{verbose}{If TRUE, print detail messages.}
-
-\item{highlight.colors}{colors for highlight lines in p-value track, PIP track, and positions.}
 }
 \description{
 Plots the cTWAS result for a single locus

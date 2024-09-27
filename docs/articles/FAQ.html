@@ -32,7 +32,7 @@
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">ctwas</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">0.4.13</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">0.4.14</span>
       </span>
     </div>
 
@@ -104,7 +104,7 @@
       <h1 data-toc-skip>FAQ</h1>
                         <h4 data-toc-skip class="author">Kaixuan Luo</h4>
             
-            <h4 data-toc-skip class="date">2024-09-15</h4>
+            <h4 data-toc-skip class="date">2024-09-17</h4>
       
       <small class="dont-index">Source: <a href="https://github.com/xinhe-lab/ctwas/blob/multigroup/vignettes/FAQ.Rmd" class="external-link"><code>vignettes/FAQ.Rmd</code></a></small>
       <div class="hidden name"><code>FAQ.Rmd</code></div>
@@ -125,6 +125,7 @@
 <h3 id="can-i-use-my-own-ld-matrices-as-reference">Can I use my own LD matrices as reference?<a class="anchor" aria-label="anchor" href="#can-i-use-my-own-ld-matrices-as-reference"></a>
 </h3>
 <p>By default, we use our own LD matrices in “.RDS” format. We also support other common formats, such as “.Rdata”, “.mtx”, “.csv”, “.txt”. If you already have LD matrices in custom format, you could directly load your own LD matrices, and don’t need to save those in our LD matrix format. To do this, you could write a loader function that loads your LD matrices into our LD matrix format. Then set <code>LD_format = "custom"</code> and pass your loader function to the argument <code>LD_loader_fun</code>.</p>
+<p>If your variant information files are custom format, you can also write a loader function to read your own variant information files, and then pass your loader function to the argument <code>snpinfo_loader_fun</code>.</p>
 </div>
 <div class="section level3">
 <h3 id="how-can-i-create-my-own-ld-matrices-as-references-from-genotype-data">How can I create my own LD matrices as references from genotype data?<a class="anchor" aria-label="anchor" href="#how-can-i-create-my-own-ld-matrices-as-references-from-genotype-data"></a>
