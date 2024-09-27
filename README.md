@@ -10,6 +10,10 @@ While the [published paper](https://doi.org/10.1038/s41588-023-01648-9) analyzes
 
 If you have already run cTWAS before, see [this page](https://xinhe-lab.github.io/multigroup_ctwas/articles/software_updates.html) for the software updates.
 
+You can [browse source code](https://github.com/xinhe-lab/ctwas/tree/multigroup) and [report a bug](https://github.com/xinhe-lab/ctwas/issues) here. 
+
+You can also join our [Google Group](https://groups.google.com/g/ctwas_users) to ask questions, report issues, or receive notifications of software updates.
+
 ## Install ctwas
 
 Use "remotes" to install the latest version of ctwas from GitHub: 
@@ -59,9 +63,6 @@ In addition, we have some useful functions to help run cTWAS, e.g. for creating 
 We also have a FAQ page for some common questions: 
 
 - [FAQ](https://xinhe-lab.github.io/multigroup_ctwas/articles/FAQ.html)
-
-
-You can [browse source code](https://github.com/xinhe-lab/ctwas/tree/multigroup) and [report a bug](https://github.com/xinhe-lab/ctwas/issues) here. You can also join our [Google Group](https://groups.google.com/g/ctwas_users) to receive notifications of software updates.
 
 <img style="display:block;margin:auto" width="700" height="300" src="man/figures/workflow.png">
 
