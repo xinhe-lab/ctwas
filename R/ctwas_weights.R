@@ -164,7 +164,7 @@ load_fusion_weights <- function(weight_dir,
     stop("No FUSION '.wgt.RDat' files found.")
   }
 
-  loginfo("Load %d FUSION '.wgt.RDat' files", length(wgt_rdata_files))
+  loginfo("Load %d FUSION 'wgt' files", length(wgt_rdata_files))
   weight_table <- mclapply_check(1:length(wgt_rdata_files), function(i){
     loaded_wgt_res <- load_fusion_wgt_data(
       wgt_rdata_files[i],
@@ -526,6 +526,9 @@ convert_predictdb_cov_to_cor <- function(cov_table){
 #' @param LD_map a data frame with filenames of LD matrices and SNP information for the regions.
 #' Required when \code{load_predictdb_LD = FALSE}.
 #'
+#' @param snp_map a list of SNP-to-region map for the reference.
+#' If NUll, it will reads SNP info from the "SNP_file" column of LD_map.
+#'
 #' @param LD_format file format for LD matrix. If "custom", use a user defined
 #' \code{LD_loader_fun()} function to load LD matrix.
 #'
@@ -546,6 +549,7 @@ convert_predictdb_cov_to_cor <- function(cov_table){
 compute_weight_LD_from_ref <- function(weights,
                                        region_info,
                                        LD_map,
+                                       snp_map = NULL,
                                        LD_format = c("rds", "rdata", "mtx", "csv", "txt", "custom"),
                                        LD_loader_fun = NULL,
                                        snpinfo_loader_fun = NULL,
@@ -597,12 +601,18 @@ compute_weight_LD_from_ref <- function(weights,
         }
 
         # load SNP info of the region
-        SNP_info_files <- LD_map$SNP_file[curr_region_idx]
-        stopifnot(all(file.exists(SNP_info_files)))
-        snpinfo <- read_snp_info_files(SNP_info_files, snpinfo_loader_fun = snpinfo_loader_fun)
+        # if snp_map is available, reads SNP info from snp_map;
+        # otherwise, reads SNP info from the "SNP_file" column of LD_map.
+        if (!is.null(snp_map)){
+          snpinfo <- as.data.frame(rbindlist(snp_map[curr_region_ids], idcol = "region_id"))
+        } else {
+          SNP_info_files <- LD_map$SNP_file[curr_region_idx]
+          stopifnot(all(file.exists(SNP_info_files)))
+          snpinfo <- read_snp_info_files(SNP_info_files, snpinfo_loader_fun = snpinfo_loader_fun)
+        }
+
         rownames(R_snp) <- snpinfo$id
         colnames(R_snp) <- snpinfo$id
-
         weight_ids <- weightinfo[weightinfo$region_id == x, "weight_id"]
 
         for (weight_id in weight_ids) {

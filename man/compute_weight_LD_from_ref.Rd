@@ -8,6 +8,7 @@ compute_weight_LD_from_ref(
   weights,
   region_info,
   LD_map,
+  snp_map = NULL,
   LD_format = c("rds", "rdata", "mtx", "csv", "txt", "custom"),
   LD_loader_fun = NULL,
   snpinfo_loader_fun = NULL,
@@ -21,6 +22,9 @@ compute_weight_LD_from_ref(
 
 \item{LD_map}{a data frame with filenames of LD matrices and SNP information for the regions.
 Required when \code{load_predictdb_LD = FALSE}.}
+
+\item{snp_map}{a list of SNP-to-region map for the reference.
+If NUll, it will reads SNP info from the "SNP_file" column of LD_map.}
 
 \item{LD_format}{file format for LD matrix. If "custom", use a user defined
 \code{LD_loader_fun()} function to load LD matrix.}
