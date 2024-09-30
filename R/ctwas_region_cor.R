@@ -13,6 +13,9 @@
 #'
 #' @param LD_map a data frame with filenames of LD matrices and SNP information for the regions.
 #'
+#' @param snp_map a list of SNP-to-region map for the reference.
+#' If NUll, it will reads SNP info from the "SNP_file" column of LD_map.
+#'
 #' @param weights a list of preprocessed weights
 #'
 #' @param force_compute_cor If TRUE, force computing correlation (R) matrices
@@ -41,6 +44,7 @@ get_region_cor <- function(region_id,
                            sids,
                            gids,
                            LD_map,
+                           snp_map = NULL,
                            weights,
                            force_compute_cor = FALSE,
                            save_cor = FALSE,
@@ -109,9 +113,15 @@ get_region_cor <- function(region_id,
     }
 
     # load SNP info of the region
-    SNP_info_files <- unlist(strsplit(LD_map$SNP_file[LD_map$region_id == region_id], split = ";"))
-    stopifnot(all(file.exists(SNP_info_files)))
-    snpinfo <- read_snp_info_files(SNP_info_files, snpinfo_loader_fun = snpinfo_loader_fun)
+    # if snp_map is available, reads SNP info from snp_map;
+    # otherwise, reads SNP info from the "SNP_file" column of LD_map.
+    if (!is.null(snp_map)){
+      snpinfo <- snp_map[[region_id]]
+    } else {
+      SNP_info_files <- unlist(strsplit(LD_map$SNP_file[LD_map$region_id == region_id], split = ";"))
+      stopifnot(all(file.exists(SNP_info_files)))
+      snpinfo <- read_snp_info_files(SNP_info_files, snpinfo_loader_fun = snpinfo_loader_fun)
+    }
 
     # compute correlation matrices
     res <- compute_region_cor(sids, gids, R_snp, snpinfo$id, weights)

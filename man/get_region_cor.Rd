@@ -9,6 +9,7 @@ get_region_cor(
   sids,
   gids,
   LD_map,
+  snp_map = NULL,
   weights,
   force_compute_cor = FALSE,
   save_cor = FALSE,
@@ -27,6 +28,9 @@ get_region_cor(
 \item{gids}{gene IDs in the region}
 
 \item{LD_map}{a data frame with filenames of LD matrices and SNP information for the regions.}
+
+\item{snp_map}{a list of SNP-to-region map for the reference.
+If NUll, it will reads SNP info from the "SNP_file" column of LD_map.}
 
 \item{weights}{a list of preprocessed weights}
 

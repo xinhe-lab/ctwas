@@ -8,6 +8,7 @@ screen_regions(
   region_data,
   LD_map,
   weights,
+  snp_map = NULL,
   group_prior = NULL,
   group_prior_var = NULL,
   L = 5,
@@ -32,6 +33,9 @@ screen_regions(
 \item{LD_map}{a data frame with filenames of LD matrices and SNP information for each of the regions.}
 
 \item{weights}{a list of preprocessed weights.}
+
+\item{snp_map}{a list of SNP-to-region map for the reference.
+If NUll, it will reads SNP info from the "SNP_file" column of LD_map.}
 
 \item{group_prior}{a vector of two prior inclusion probabilities for SNPs and genes.}
 

@@ -6,6 +6,9 @@
 #'
 #' @param weights a list of preprocessed weights.
 #'
+#' @param snp_map a list of SNP-to-region map for the reference.
+#' If NUll, it will reads SNP info from the "SNP_file" column of LD_map.
+#'
 #' @param L the number of effects or a vector of number of effects for each region.
 #'
 #' @param group_prior a vector of two prior inclusion probabilities for SNPs and genes.
@@ -54,6 +57,7 @@
 finemap_regions <- function(region_data,
                             LD_map,
                             weights,
+                            snp_map = NULL,
                             L = 5,
                             group_prior = NULL,
                             group_prior_var = NULL,
@@ -132,6 +136,7 @@ finemap_regions <- function(region_data,
                           region_id = region_id,
                           LD_map = LD_map,
                           weights = weights,
+                          snp_map = snp_map,
                           L = L[region_id],
                           group_prior = group_prior,
                           group_prior_var = group_prior_var,
@@ -243,6 +248,9 @@ finemap_regions_noLD <- function(region_data,
 #'
 #' @param weights a list of preprocessed weights.
 #'
+#' @param snp_map a list of SNP-to-region map for the reference.
+#' If NUll, it will reads SNP info from the "SNP_file" column of LD_map.
+#'
 #' @param L the number of effects for susie during the fine mapping
 #'
 #' @param group_prior a vector of two prior inclusion probabilities for SNPs and genes.
@@ -288,6 +296,7 @@ finemap_single_region <- function(region_data,
                                   region_id,
                                   LD_map,
                                   weights,
+                                  snp_map = NULL,
                                   L = 5,
                                   group_prior = NULL,
                                   group_prior_var = NULL,
@@ -361,6 +370,7 @@ finemap_single_region <- function(region_data,
                             sids = sids,
                             gids = gids,
                             LD_map = LD_map,
+                            snp_map = snp_map,
                             weights = weights,
                             force_compute_cor = force_compute_cor,
                             save_cor = save_cor,

@@ -262,6 +262,7 @@ ctwas_sumstats <- function(
     finemap_res <- finemap_regions(screened_region_data,
                                    LD_map = LD_map,
                                    weights = weights,
+                                   snp_map = snp_map,
                                    group_prior = group_prior,
                                    group_prior_var = group_prior_var,
                                    L = screened_region_L,
