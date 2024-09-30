@@ -7,6 +7,9 @@
 #'
 #' @param weights a list of preprocessed weights.
 #'
+#' @param snp_map a list of SNP-to-region map for the reference.
+#' If NUll, it will reads SNP info from the "SNP_file" column of LD_map.
+#'
 #' @param init_L upper bound of the number of causal signals
 #'
 #' @param min_abs_corr Minimum absolute correlation allowed in a credible set.
@@ -36,6 +39,7 @@
 estimate_region_L <- function(region_data,
                               LD_map,
                               weights,
+                              snp_map = NULL,
                               init_L = 5,
                               min_abs_corr = 0.1,
                               snps_only = FALSE,
@@ -56,6 +60,7 @@ estimate_region_L <- function(region_data,
   finemap_unif_prior_res <- finemap_regions(region_data,
                                             LD_map = LD_map,
                                             weights = weights,
+                                            snp_map = snp_map,
                                             L = init_L,
                                             min_abs_corr = min_abs_corr,
                                             include_cs_index = TRUE,

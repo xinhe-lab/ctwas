@@ -6,6 +6,9 @@
 #'
 #' @param weights a list of preprocessed weights.
 #'
+#' @param snp_map a list of SNP-to-region map for the reference.
+#' If NUll, it will reads SNP info from the "SNP_file" column of LD_map.
+#'
 #' @param group_prior a vector of two prior inclusion probabilities for SNPs and genes.
 #'
 #' @param group_prior_var a vector of two prior variances for SNPs and gene effects.
@@ -55,6 +58,7 @@
 screen_regions <- function(region_data,
                            LD_map,
                            weights,
+                           snp_map = NULL,
                            group_prior = NULL,
                            group_prior_var = NULL,
                            L = 5,
@@ -142,6 +146,7 @@ screen_regions <- function(region_data,
     all_estimated_L <- estimate_region_L(region_data = region_data,
                                          LD_map = LD_map,
                                          weights = weights,
+                                         snp_map = snp_map,
                                          init_L = L,
                                          min_abs_corr = min_abs_corr,
                                          snps_only = FALSE,
@@ -172,6 +177,7 @@ screen_regions <- function(region_data,
     finemap_screening_res <- finemap_regions(screened_region_data,
                                              LD_map = LD_map,
                                              weights = weights,
+                                             snp_map = snp_map,
                                              L = L,
                                              group_prior = group_prior,
                                              group_prior_var = group_prior_var,

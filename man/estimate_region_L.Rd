@@ -8,6 +8,7 @@ estimate_region_L(
   region_data,
   LD_map,
   weights,
+  snp_map = NULL,
   init_L = 5,
   min_abs_corr = 0.1,
   snps_only = FALSE,
@@ -25,6 +26,9 @@ estimate_region_L(
 \item{LD_map}{a data frame with filenames of LD matrices for each of the regions.}
 
 \item{weights}{a list of preprocessed weights.}
+
+\item{snp_map}{a list of SNP-to-region map for the reference.
+If NUll, it will reads SNP info from the "SNP_file" column of LD_map.}
 
 \item{init_L}{upper bound of the number of causal signals}
 
