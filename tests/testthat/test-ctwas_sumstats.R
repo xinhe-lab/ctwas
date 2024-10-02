@@ -19,16 +19,17 @@ test_that("ctwas_sumstats works", {
                                 thin = 0.1,
                                 maxSNP = 20000,
                                 min_abs_corr = 0.1,
-                                ncore = 2,
-                                ncore_LD = 2)
+                                ncore = 6,
+                                ncore_LD = 4)
   })
 
   # expect_equal(ctwas_res, expected_ctwas_res)
   expect_equal(ctwas_res$z_gene, expected_ctwas_res$z_gene)
   expect_equal(ctwas_res$param, expected_ctwas_res$param)
-  expect_equal(ctwas_res$finemap_res$susie_pip, expected_ctwas_res$finemap_res$susie_pip)
+  expect_equal(ctwas_res$region_data, expected_ctwas_res$region_data)
   expect_equal(ctwas_res$boundary_genes, expected_ctwas_res$boundary_genes)
   expect_equal(ctwas_res$screen_res$screened_region_data, expected_ctwas_res$screen_res$screened_region_data)
+  expect_equal(ctwas_res$finemap_res$susie_pip, expected_ctwas_res$finemap_res$susie_pip)
 
 })
 
@@ -63,8 +64,9 @@ test_that("ctwas_sumstats with nonSNP_PIP filtering works", {
   # expect_equal(ctwas_res, expected_ctwas_res)
   expect_equal(ctwas_res$z_gene, expected_ctwas_res$z_gene)
   expect_equal(ctwas_res$param, expected_ctwas_res$param)
-  expect_equal(ctwas_res$finemap_res$susie_pip, expected_ctwas_res$finemap_res$susie_pip)
+  expect_equal(ctwas_res$region_data, expected_ctwas_res$region_data)
   expect_equal(ctwas_res$boundary_genes, expected_ctwas_res$boundary_genes)
   expect_equal(ctwas_res$screen_res$screened_region_data, expected_ctwas_res$screen_res$screened_region_data)
+  expect_equal(ctwas_res$finemap_res$susie_pip, expected_ctwas_res$finemap_res$susie_pip)
 
 })

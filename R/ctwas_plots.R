@@ -39,8 +39,6 @@
 #'
 #' @param LD.colors Colors for correlation levels.
 #'
-#' @param cs.colors Colors for credible sets.
-#'
 #' @param focal.colors Colors for non-focal and focal gene.
 #'
 #' @param label_QTLs If TRUE, label SNP IDs in the QTL panel.
@@ -82,7 +80,7 @@
 #'
 #' @importFrom magrittr %>%
 #' @importFrom locuszoomr locus gg_genetracks
-#' @importFrom logging loginfo
+#' @importFrom logging loginfo logwarn
 #' @importFrom cowplot plot_grid theme_cowplot
 #' @importFrom ggplot2 ggplot
 #' @importFrom ggplot2 aes
@@ -126,7 +124,6 @@ make_locusplot <- function(finemap_res,
                            color_pval_by = c("cs", "LD", "none"),
                            color_pip_by = c("cs", "LD", "none"),
                            LD.colors = c("grey", "blue", "purple", "salmon"),
-                           cs.colors = c("grey", "firebrick", "dodgerblue", "forestgreen", "darkmagenta", "darkorange"),
                            focal.colors = c("grey", "salmon"),
                            label_QTLs = TRUE,
                            highlight_pval = NULL,
@@ -266,14 +263,17 @@ make_locusplot <- function(finemap_res,
   }
 
   # set colors for credible sets
+  # cs.colors <- c("firebrick", "dodgerblue", "forestgreen", "darkmagenta", "darkorange")
+
   if (color_pval_by == "cs" || color_pip_by == "cs") {
-    if (is.null(finemap_region_res$cs_index)){
-      stop("'cs_index' not available. Cannot coloring by cs!")
+    if (is.null(finemap_region_res$cs)){
+      logwarn("'cs' not available. Cannot coloring by cs!")
       color_pval_by[color_pval_by == "cs"] <- "none"
       color_pip_by[color_pip_by == "cs"] <- "none"
     } else {
-      cs_colors <- c("0" = cs.colors[1], "1" = cs.colors[2], "2" = cs.colors[3], "3" = cs.colors[4], "4" = cs.colors[5], "5" = cs.colors[6])
-      finemap_region_res$cs_index <- factor(finemap_region_res$cs_index, levels = names(cs_colors))
+      # cs_colors <- c("L1" = cs.colors[1], "L2" = cs.colors[2], "L3" = cs.colors[3], "L4" = cs.colors[4], "L5" = cs.colors[5])
+      # finemap_region_res$cs <- factor(finemap_region_res$cs, levels = names(cs_colors))
+      finemap_region_res$cs <- factor(finemap_region_res$cs)
     }
   }
 
@@ -358,8 +358,8 @@ make_locusplot <- function(finemap_res,
 
   if (color_pval_by == "cs") {
     p_pval <- p_pval +
-      geom_point(aes(color=.data$cs_index)) +
-      scale_color_manual(values = cs_colors) +
+      geom_point(aes(color=.data$cs)) +
+      # scale_color_manual(values = cs_colors) +
       labs(color = "CS") +
       guides(shape = guide_legend(order = 1, override.aes = list(size = legend.sizes)),
              color = guide_legend(order = 2))
@@ -387,10 +387,10 @@ make_locusplot <- function(finemap_res,
     loginfo("Making PIP panel ...")
   }
   pip_plot_data <- loc$data
-  # limit to credible sets (if cs_index is available)
-  if (filter_cs && !is.null(pip_plot_data$cs_index)) {
+  # limit to credible sets (if cs is available)
+  if (filter_cs && !is.null(pip_plot_data$cs)) {
     loginfo("Limit PIPs to credible sets")
-    pip_plot_data <- pip_plot_data[pip_plot_data$cs_index!=0,]
+    pip_plot_data <- pip_plot_data[!is.na(pip_plot_data$cs),]
   }
 
   p_pip <- ggplot(pip_plot_data, aes(x=.data$pos/1e6, y=.data$susie_pip, shape=.data$type,
@@ -417,8 +417,8 @@ make_locusplot <- function(finemap_res,
 
   if (color_pip_by == "cs") {
     p_pip <- p_pip +
-      geom_point(aes(color=.data$cs_index)) +
-      scale_color_manual(values = cs_colors) +
+      geom_point(aes(color=.data$cs)) +
+      # scale_color_manual(values = cs_colors) +
       labs(color = "CS")
   } else if (color_pip_by == "LD") {
     p_pip <- p_pip +
@@ -517,6 +517,8 @@ make_locusplot <- function(finemap_res,
   }
 
 }
+
+
 
 #' @title Make convergence plots for the estimated parameters
 #'

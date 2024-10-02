@@ -9,8 +9,10 @@
 #' @param L the number of effects or a vector of number of effects for each region.
 #'
 #' @param group_prior a vector of two prior inclusion probabilities for SNPs and genes.
+#' If NULL, it will use uniform prior.
 #'
 #' @param group_prior_var a vector of two prior variances for SNPs and gene effects.
+#' If NULL, it will use uniform prior.
 #'
 #' @param use_null_weight If TRUE, allow for a probability of no effect in susie
 #'
@@ -18,7 +20,9 @@
 #'
 #' @param min_abs_corr Minimum absolute correlation allowed in a credible set.
 #'
-#' @param include_cs_index If TRUE, add cs_index to finemapping results.
+#' @param include_cs If TRUE, add credible sets (CS) to finemapping results.
+#'
+#' @param get_susie_alpha If TRUE, get susie alpha matrix from finemapping results.
 #'
 #' @param snps_only If TRUE, use only SNPs in the region data.
 #'
@@ -60,7 +64,8 @@ finemap_regions <- function(region_data,
                             use_null_weight = TRUE,
                             coverage = 0.95,
                             min_abs_corr = 0.1,
-                            include_cs_index = TRUE,
+                            include_cs = TRUE,
+                            get_susie_alpha = TRUE,
                             snps_only = FALSE,
                             force_compute_cor = FALSE,
                             save_cor = FALSE,
@@ -126,8 +131,7 @@ finemap_regions <- function(region_data,
 
   region_ids <- names(region_data)
 
-  finemap_res <- mclapply_check(region_ids, function(region_id){
-
+  res <- mclapply_check(region_ids, function(region_id){
     finemap_single_region(region_data = region_data,
                           region_id = region_id,
                           LD_map = LD_map,
@@ -138,7 +142,8 @@ finemap_regions <- function(region_data,
                           use_null_weight = use_null_weight,
                           coverage = coverage,
                           min_abs_corr = min_abs_corr,
-                          include_cs_index = include_cs_index,
+                          include_cs = include_cs,
+                          get_susie_alpha = get_susie_alpha,
                           snps_only = snps_only,
                           force_compute_cor = force_compute_cor,
                           save_cor = save_cor,
@@ -148,13 +153,21 @@ finemap_regions <- function(region_data,
                           snpinfo_loader_fun = snpinfo_loader_fun,
                           verbose = verbose,
                           ...)
-
   }, mc.cores = ncore, stop_if_missing = TRUE)
 
-  finemap_res <- do.call(rbind, finemap_res)
+  finemap_res <- do.call(rbind, lapply(res, "[[", 1))
   rownames(finemap_res) <- NULL
 
-  return(finemap_res)
+  if (get_susie_alpha) {
+    susie_alpha_res <- do.call(rbind, lapply(res, "[[", 2))
+    rownames(susie_alpha_res) <- NULL
+  } else {
+    susie_alpha_res <- NULL
+  }
+
+
+  return(list("finemap_res" = finemap_res,
+              "susie_alpha_res" = susie_alpha_res))
 }
 
 #' @title Runs cTWAS fine-mapping for regions without LD (L = 1)
@@ -162,10 +175,14 @@ finemap_regions <- function(region_data,
 #' @param region_data region_data to be finemapped
 #'
 #' @param group_prior a vector of two prior inclusion probabilities for SNPs and genes.
+#' If NULL, it will use uniform prior.
 #'
 #' @param group_prior_var a vector of two prior variances for SNPs and gene effects.
+#' If NULL, it will use uniform prior.
 #'
 #' @param use_null_weight If TRUE, allow for a probability of no effect in susie
+#'
+#' @param get_susie_alpha If TRUE, get susie alpha matrix from finemapping results.
 #'
 #' @param snps_only If TRUE, use only SNPs in the region data.
 #'
@@ -188,6 +205,7 @@ finemap_regions_noLD <- function(region_data,
                                  group_prior = NULL,
                                  group_prior_var = NULL,
                                  use_null_weight = TRUE,
+                                 get_susie_alpha = TRUE,
                                  snps_only = FALSE,
                                  ncore = 1,
                                  verbose = FALSE,
@@ -214,23 +232,30 @@ finemap_regions_noLD <- function(region_data,
 
   region_ids <- names(region_data)
 
-  finemap_res <- mclapply_check(region_ids, function(region_id){
-
+  res <- mclapply_check(region_ids, function(region_id){
     finemap_single_region_noLD(region_data = region_data,
                                region_id = region_id,
                                group_prior = group_prior,
                                group_prior_var = group_prior_var,
                                use_null_weight = use_null_weight,
+                               get_susie_alpha = get_susie_alpha,
                                snps_only = snps_only,
                                verbose = verbose,
                                ...)
-
   }, mc.cores = ncore, stop_if_missing = TRUE)
 
-  finemap_res <- do.call(rbind, finemap_res)
+  finemap_res <- do.call(rbind, lapply(res, "[[", 1))
   rownames(finemap_res) <- NULL
 
-  return(finemap_res)
+  if (get_susie_alpha) {
+    susie_alpha_res <- do.call(rbind, lapply(res, "[[", 2))
+    rownames(susie_alpha_res) <- NULL
+  } else {
+    susie_alpha_res <- NULL
+  }
+
+  return(list("finemap_res" = finemap_res,
+              "susie_alpha_res" = susie_alpha_res))
 }
 
 #' @title Runs cTWAS finemapping for a single region
@@ -246,8 +271,10 @@ finemap_regions_noLD <- function(region_data,
 #' @param L the number of effects for susie during the fine mapping
 #'
 #' @param group_prior a vector of two prior inclusion probabilities for SNPs and genes.
+#' If NULL, it will use uniform prior.
 #'
 #' @param group_prior_var a vector of two prior variances for SNPs and gene effects.
+#' If NULL, it will use uniform prior.
 #'
 #' @param use_null_weight TRUE/FALSE. If TRUE, allow for a probability of no effect in susie
 #'
@@ -255,7 +282,9 @@ finemap_regions_noLD <- function(region_data,
 #'
 #' @param min_abs_corr Minimum absolute correlation allowed in a credible set.
 #'
-#' @param include_cs_index If TRUE, add cs_index to finemapping results.
+#' @param include_cs If TRUE, add credible sets (CS) to finemapping results.
+#'
+#' @param get_susie_alpha If TRUE, get susie alpha matrix from finemapping results.
 #'
 #' @param snps_only If TRUE, use only SNPs in the region data.
 #'
@@ -281,6 +310,7 @@ finemap_regions_noLD <- function(region_data,
 #'
 #' @importFrom logging loginfo
 #' @importFrom Matrix bdiag
+#' @importFrom tidyr pivot_longer
 #'
 #' @keywords internal
 #'
@@ -294,7 +324,8 @@ finemap_single_region <- function(region_data,
                                   use_null_weight = TRUE,
                                   coverage = 0.95,
                                   min_abs_corr = 0.1,
-                                  include_cs_index = TRUE,
+                                  include_cs = TRUE,
+                                  get_susie_alpha = TRUE,
                                   snps_only = FALSE,
                                   force_compute_cor = FALSE,
                                   save_cor = FALSE,
@@ -393,16 +424,24 @@ finemap_single_region <- function(region_data,
                                ...)
 
   susie_res_df <- anno_susie(susie_res,
-                             gids = gids,
-                             sids = sids,
-                             g_type = g_type,
-                             g_context = g_context,
-                             g_group = g_group,
-                             region_id = region_id,
-                             z = z,
-                             include_cs_index = include_cs_index)
+                               gids = gids,
+                               sids = sids,
+                               g_type = g_type,
+                               g_context = g_context,
+                               g_group = g_group,
+                               region_id = region_id,
+                               z = z,
+                               include_cs = include_cs)
 
-  return(susie_res_df)
+  if (get_susie_alpha) {
+    # extract alpha matrix from susie result
+    susie_alpha_df <- get_susie_alpha_res(susie_res, susie_res_df, keep_genes_only = TRUE)
+  } else {
+    susie_alpha_df <- NULL
+  }
+
+  return(list("susie_res_df" = susie_res_df,
+              "susie_alpha_df" = susie_alpha_df))
 
 }
 
@@ -414,14 +453,18 @@ finemap_single_region <- function(region_data,
 #' @param region_id a character string of region id to be finemapped
 #'
 #' @param group_prior a vector of two prior inclusion probabilities for SNPs and genes.
+#' If NULL, it will use uniform prior.
 #'
 #' @param group_prior_var a vector of two prior variances for SNPs and gene effects.
+#' If NULL, it will use uniform prior.
 #'
 #' @param use_null_weight If TRUE, allow for a probability of no effect in susie
 #'
 #' @param coverage A number between 0 and 1 specifying the \dQuote{coverage} of the estimated confidence sets
 #'
-#' @param include_cs_index If TRUE, add cs_index to finemapping results.
+#' @param include_cs If TRUE, add credible sets (CS) to finemapping results.
+#'
+#' @param get_susie_alpha If TRUE, get susie alpha matrix from finemapping results.
 #'
 #' @param snps_only If TRUE, use only SNPs in the region data.
 #'
@@ -442,7 +485,8 @@ finemap_single_region_noLD <- function(region_data,
                                        group_prior_var = NULL,
                                        use_null_weight = TRUE,
                                        coverage = 0.95,
-                                       include_cs_index = TRUE,
+                                       include_cs = TRUE,
+                                       get_susie_alpha = TRUE,
                                        snps_only = FALSE,
                                        verbose = FALSE,
                                        ...){
@@ -509,17 +553,24 @@ finemap_single_region_noLD <- function(region_data,
                                ...)
 
   susie_res_df <- anno_susie(susie_res,
-                             gids = gids,
-                             sids = sids,
-                             g_type = g_type,
-                             g_context = g_context,
-                             g_group = g_group,
-                             region_id = region_id,
-                             z = z,
-                             include_cs_index = include_cs_index)
+                               gids = gids,
+                               sids = sids,
+                               g_type = g_type,
+                               g_context = g_context,
+                               g_group = g_group,
+                               region_id = region_id,
+                               z = z,
+                               include_cs = include_cs)
 
-  return(susie_res_df)
+  if (get_susie_alpha) {
+    # extract alpha matrix from susie result
+    susie_alpha_df <- get_susie_alpha_res(susie_res, susie_res_df, keep_genes_only = TRUE)
+  } else {
+    susie_alpha_df <- NULL
+  }
 
+  return(list("susie_res_df" = susie_res_df,
+              "susie_alpha_df" = susie_alpha_df))
 }
 
 # finemap a single region with L = 1 without LD, used in EM
@@ -567,13 +618,13 @@ fast_finemap_single_region_L1_noLD <- function(region_data,
 
   # annotate susie result
   susie_res_df <- anno_susie(susie_res,
-                             gids = gids,
-                             sids = sids,
-                             g_type = g_type,
-                             g_context = g_context,
-                             g_group = g_group,
-                             region_id = region_id,
-                             include_cs_index = FALSE)
+                               gids = gids,
+                               sids = sids,
+                               g_type = g_type,
+                               g_context = g_context,
+                               g_group = g_group,
+                               region_id = region_id,
+                               include_cs = FALSE)
 
   return(susie_res_df)
 }

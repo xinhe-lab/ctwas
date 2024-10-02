@@ -53,34 +53,43 @@ estimate_region_L <- function(region_data,
     loginfo("Use SNPs only when estimating L")
 
   # fine-mapping using uniform prior
-  finemap_unif_prior_res <- finemap_regions(region_data,
-                                            LD_map = LD_map,
-                                            weights = weights,
-                                            L = init_L,
-                                            min_abs_corr = min_abs_corr,
-                                            include_cs_index = TRUE,
-                                            snps_only = snps_only,
-                                            LD_format = LD_format,
-                                            LD_loader_fun = LD_loader_fun,
-                                            snpinfo_loader_fun = snpinfo_loader_fun,
-                                            ncore = ncore,
-                                            verbose = verbose,
-                                            ...)
-  all_estimated_L <- get_L(finemap_unif_prior_res)
+  res <- finemap_regions(region_data,
+                         LD_map = LD_map,
+                         weights = weights,
+                         L = init_L,
+                         min_abs_corr = min_abs_corr,
+                         include_cs = TRUE,
+                         get_susie_alpha = FALSE,
+                         snps_only = snps_only,
+                         LD_format = LD_format,
+                         LD_loader_fun = LD_loader_fun,
+                         snpinfo_loader_fun = snpinfo_loader_fun,
+                         ncore = ncore,
+                         verbose = verbose,
+                         ...)
+  finemap_res <- res$finemap_res
+  rm(res)
+  all_estimated_L <- get_L(finemap_res)
 
   return(all_estimated_L)
 }
 
 # get L for each region from finemapping result
 get_L <- function(finemap_res){
+
   region_ids <- unique(finemap_res$region_id)
   if (length(region_ids) == 0) {
     stop("No region_ids in finemap_res!")
   }
   # get L for each region
   region_L <- sapply(region_ids, function(x){
-    region_cs_index <- unique(finemap_res[finemap_res$region_id == x, "cs_index"])
-    length(which(region_cs_index > 0))
+    region_cs <- unique(na.omit(finemap_res[finemap_res$region_id == x, "cs"]))
+    if (length(region_cs) > 0){
+      n_cs <- length(unique(unlist(strsplit(region_cs, ","))))
+    } else {
+      n_cs <- 0
+    }
+    n_cs
   })
   names(region_L) <- region_ids
   return(region_L)
@@ -105,7 +114,7 @@ compute_region_nonSNP_PIPs <- function(finemap_res, filter_cs = TRUE){
   nonSNP_PIPs <- sapply(region_ids, function(x){
     finemap_region_res <- finemap_res[finemap_res$region_id == x,]
     if (filter_cs) {
-      finemap_region_res <- finemap_region_res[finemap_region_res$cs_index != 0,,drop=FALSE]
+      finemap_region_res <- finemap_region_res[!is.na(finemap_region_res$cs),,drop=FALSE]
     }
     nonSNP_PIP <- sum(finemap_region_res$susie_pip[finemap_region_res$group != "SNP"])
     nonSNP_PIP[is.na(nonSNP_PIP)] <- 0 # 0 if nonSNP_PIP is NA
@@ -134,6 +143,7 @@ compute_region_p_single_effect <- function(region_data, group_prior){
     p1
   })
   names(p_single_effect) <- region_ids
+
   return(p_single_effect)
 }
 

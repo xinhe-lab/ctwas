@@ -147,6 +147,96 @@ anno_finemap_res <- function(finemap_res,
   return(finemap_res)
 }
 
+#' @title Map molecular traits to genes in susie alpha result.
+#'
+#' @param susie_alpha_res a data frame of susie alpha result.
+#'
+#' @param snp_map a list of data frames with SNP-to-region map for the reference.
+#'
+#' @param mapping_table a data frame of mapping between molecular traits and genes,
+#' with required columns: "molecular_id", "gene_name".
+#'
+#' @param map_by column name to be mapped by (default: "molecular_id").
+#'
+#' @param add_gene_annot If TRUE, add annotations
+#'
+#' @param add_position If TRUE, add positions
+#'
+#' @param use_gene_pos Use mid (midpoint), start, or end positions as gene positions.
+#'
+#' @param drop_unmapped If TRUE, remove unmapped genes.
+#'
+#' @return a data frame of annotated finemapping result.
+#'
+#' @importFrom stats na.omit
+#' @importFrom logging loginfo
+#' @importFrom data.table rbindlist
+#' @importFrom readr parse_number
+#' @importFrom magrittr %>%
+#' @importFrom dplyr left_join mutate select group_by ungroup n
+#' @importFrom rlang .data
+#'
+#' @export
+#'
+anno_susie_alpha_res <- function(susie_alpha_res,
+                                 mapping_table,
+                                 map_by = "molecular_id",
+                                 drop_unmapped = TRUE){
+
+  loginfo("Annotating susie alpha result ...")
+
+  # map molecular traits to genes
+  # there could be n-to-1 and 1-to-n mapping
+  if (!is.null(susie_alpha_res$gene_name)){
+    loginfo("'gene_name' is already available. Skip annotating genes.")
+  } else {
+    if (!map_by %in% colnames(susie_alpha_res)) {
+      stop(paste("column", map_by, "cannot be found in susie_alpha_res!"))
+    }
+
+    if (!map_by %in% colnames(mapping_table)) {
+      stop(paste("column", map_by, "cannot be found in mapping_table!"))
+    }
+
+    # gene results
+    susie_alpha_res <- susie_alpha_res[susie_alpha_res$group!="SNP",]
+
+    # extract gene ids
+    if (is.null(susie_alpha_res$molecular_id)) {
+      susie_alpha_res$molecular_id <- sapply(strsplit(susie_alpha_res$id, split = "[|]"), "[[", 1)
+    }
+
+    # Map molecular traits to genes by joining finemap_gene_res with mapping_table
+    loginfo("Map molecular traits to genes")
+    susie_alpha_res <- susie_alpha_res %>%
+      left_join(mapping_table, by = map_by, multiple = "all")
+
+    if (drop_unmapped) {
+      unmapped_idx <- which(is.na(susie_alpha_res$gene_name))
+      if ( length(unmapped_idx) > 0){
+        loginfo("Drop %d rows that are unmapped", length(unmapped_idx))
+        susie_alpha_res <- susie_alpha_res[-unmapped_idx, , drop=FALSE]
+      }
+    }
+
+    # add a column with both ID and susie set information
+    susie_alpha_res$tmp_id <- paste0(susie_alpha_res$id, ".", susie_alpha_res$susie_set)
+
+    # split PIPs for molecular traits (e.g. introns) mapped to multiple genes
+    if (any(duplicated(susie_alpha_res$tmp_id))) {
+      loginfo("Split PIPs for molecular traits mapped to multiple genes")
+      susie_alpha_res <- susie_alpha_res %>%
+        group_by(.data$tmp_id) %>%
+        mutate(susie_alpha = ifelse(n() > 1, .data$susie_alpha / n(), .data$susie_alpha)) %>%
+        ungroup() %>%
+        select(-tmp_id)
+      susie_alpha_res <- as.data.frame(susie_alpha_res)
+    }
+
+  }
+
+  return(susie_alpha_res)
+}
 
 
 
@@ -245,174 +335,5 @@ get_gene_annot_from_ens_db <- function(ens_db, gene_ids) {
   gene_annot <- gene_annot[, c("gene_id", "gene_name", "gene_type", "chrom", "start", "end")]
 
   return(gene_annot)
-}
-
-#' @title Combines gene PIPs by context, type or group.
-#'
-#' @param finemap_res a data frame of annotated cTWAS finemapping result
-#'
-#' @param group_by column name to group genes by.
-#'
-#' @param by option to combine PIPs by: "context" (default), "type", or "group".
-#'
-#' @param method method to combine PIPs of molecular traits targeting the same gene.
-#' options:
-#' "combine_cs" (default):
-#' first sums PIPs of molecular traits of a genes in each credible set,
-#' and then combine PIPs using the following formula:
-#' \eqn{1 - \prod_k (1 - \text{PIP}_k)},
-#' where \eqn{\text{PIP}_k} is the summed PIP of the \eqn{k}-th credible set of a gene.
-#' This is the default option for combining PIPs from fine-mapping with LD.
-#' "sum": sum over PIPs of all molecular traits for the same gene.
-#' This summation is the expected number of causal molecular traits in this gene,
-#' and could be higher than 1.
-#' We will use this option for combining PIPs from fine-mapping without LD.
-#'
-#' @param filter_cs If TRUE, limits gene results to credible sets.
-#'
-#' @param missing_value set missing value as (default: NA)
-#'
-#' @return a data frame of combined gene PIPs for each context, type or group
-#'
-#' @importFrom magrittr %>%
-#' @importFrom stats aggregate
-#' @importFrom dplyr left_join
-#'
-#' @export
-combine_gene_pips <- function(finemap_res,
-                              group_by = "gene_name",
-                              by = c("context", "type", "group"),
-                              method = c("combine_cs", "sum"),
-                              filter_cs = TRUE,
-                              missing_value = NA){
-
-  by <- match.arg(by)
-  method <- match.arg(method)
-
-  # Check to see if gene_name and gene_type are already in finemap_res
-  if (!(group_by %in% colnames(finemap_res))){
-    stop(paste("Cannot find the column", group_by, "in finemap_res!"))
-  }
-
-  # cannot filter CS or combine CS for finemapping results from "no-LD" version
-  if (is.null(finemap_res$cs_index)){
-    filter_cs <- FALSE
-    method <- "sum"
-  }
-
-  # work with gene results below
-  finemap_gene_res <- finemap_res[finemap_res$group!="SNP",]
-
-  # limit genes to credible sets
-  if (filter_cs) {
-    loginfo("Limit gene results to credible sets")
-    finemap_gene_res <- finemap_gene_res[finemap_gene_res$cs_index!=0,]
-  }
-
-  # combine PIPs across all contexts or types
-  combined_gene_pips <- compute_combined_pips(finemap_gene_res,
-                                              group_by = group_by,
-                                              method = method,
-                                              filter_cs = filter_cs)
-  colnames(combined_gene_pips) <- c(group_by, "combined_pip")
-
-  if (by == "context"){
-    # combine PIPs for each context
-    contexts <- unique(finemap_gene_res$context)
-    for (context in contexts){
-      tmp_finemap_gene_res <- finemap_gene_res[finemap_gene_res$context==context,,drop=FALSE]
-      tmp_combined_gene_pips <- compute_combined_pips(tmp_finemap_gene_res,
-                                                      group_by = group_by,
-                                                      method = method,
-                                                      filter_cs = filter_cs)
-      colnames(tmp_combined_gene_pips) <- c(group_by, paste0(context, "_pip"))
-      combined_gene_pips <- combined_gene_pips %>%
-        left_join(tmp_combined_gene_pips, by = group_by)
-    }
-  } else if (by == "type") {
-    # combine PIPs for each type
-    types <- unique(finemap_gene_res$type)
-    for (type in types){
-      tmp_finemap_gene_res <- finemap_gene_res[finemap_gene_res$type==type,,drop=FALSE]
-      tmp_combined_gene_pips <- compute_combined_pips(tmp_finemap_gene_res,
-                                                      group_by = group_by,
-                                                      method = method,
-                                                      filter_cs = filter_cs)
-      colnames(tmp_combined_gene_pips) <- c(group_by, paste0(type, "_pip"))
-      combined_gene_pips <- combined_gene_pips %>%
-        left_join(tmp_combined_gene_pips, by = group_by)
-    }
-  } else if (by == "group") {
-    # combine PIPs for each group
-    groups <- unique(finemap_gene_res$group)
-    for (group in groups){
-      tmp_finemap_gene_res <- finemap_gene_res[finemap_gene_res$group==group,,drop=FALSE]
-      tmp_combined_gene_pips <- compute_combined_pips(tmp_finemap_gene_res,
-                                                      group_by = group_by,
-                                                      method = method,
-                                                      filter_cs = filter_cs)
-      colnames(tmp_combined_gene_pips) <- c(group_by, paste0(group, "_pip"))
-      combined_gene_pips <- combined_gene_pips %>%
-        left_join(tmp_combined_gene_pips, by = group_by)
-    }
-  }
-
-  if (!is.na(missing_value)) {
-    combined_gene_pips[is.na(combined_gene_pips)] <- missing_value
-  }
-
-  # order by combined PIP
-  combined_gene_pips <- combined_gene_pips[order(-combined_gene_pips$combined_pip),]
-  rownames(combined_gene_pips) <- NULL
-
-  new_colnames <- c(setdiff(colnames(combined_gene_pips), "combined_pip"), "combined_pip")
-  combined_gene_pips <- combined_gene_pips[, new_colnames]
-
-  return(combined_gene_pips)
-}
-
-# Compute combined gene PIP using the multiplication formula
-# combined gene PIP = 1 - \prod_k (1 - PIP_k).
-# PIP_k is the PIP of the k-th molecular trait of a gene.
-combine_pips <- function(pips){
-  return(1 - prod(1 - pips))
-}
-
-# Computes combined gene PIPs.
-# "combine_cs" (default): first sum PIPs of molecular traits for the same gene in the same CS,
-# then apply the multiplication formula across CS.
-# "sum" sum over PIPs of all molecular traits for the same gene;
-# "combine_all" use the multiplication formula for all molecular traits for the same gene.
-compute_combined_pips <- function(finemap_gene_res,
-                                  group_by = "gene_name",
-                                  method = c("combine_cs", "sum"),
-                                  filter_cs = TRUE){
-
-  method <- match.arg(method)
-
-  if (filter_cs) {
-    finemap_gene_res <- finemap_gene_res[finemap_gene_res$cs_index!=0,]
-  }
-
-  if (method == "sum") {
-    combined_gene_pips <- aggregate(data.frame(susie_pip = finemap_gene_res$susie_pip),
-                                    by = list(gene = finemap_gene_res[,group_by]),
-                                    FUN = sum)
-    colnames(combined_gene_pips) <- c(group_by, "combined_pip")
-  } else if (method == "combine_cs") {
-    finemap_gene_res$cs_id <- paste0(finemap_gene_res$region_id, ".", finemap_gene_res$cs_index)
-    # for each gene, first sum PIPs within the same credible sets
-    summed_gene_pips <- aggregate(data.frame(susie_pip = finemap_gene_res$susie_pip),
-                                  by = list(gene = finemap_gene_res[,group_by],
-                                            cs_id = finemap_gene_res[,"cs_id"]),
-                                  FUN = sum)
-    # then combine PIPs using the multiplication formula across credible sets
-    combined_gene_pips <- aggregate(data.frame(susie_pip = summed_gene_pips$susie_pip),
-                                    by = list(gene = summed_gene_pips$gene),
-                                    FUN = combine_pips)
-    colnames(combined_gene_pips) <- c(group_by, "combined_pip")
-  }
-
-  return(combined_gene_pips)
 }
 
