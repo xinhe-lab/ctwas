@@ -39,7 +39,7 @@ summarize_param <- function(param, gwas_n){
               enrichment = enrichment,
               group_pve = group_pve,
               total_pve = sum(group_pve),
-              attributable_pve = group_pve/sum(group_pve))
+              prop_heritability = group_pve/sum(group_pve))
 
   return(res)
 }
