@@ -2,6 +2,12 @@
 #'
 #' @param region_data a list object with the susie input data for each region
 #'
+#' @param groups a vector of the groups to estimate parameters
+#'
+#' @param types a vector of the types to estimate parameters
+#'
+#' @param contexts a vector of the contexts to estimate parameters
+#'
 #' @param niter the number of iterations of the E-M algorithm to perform
 #'
 #' @param init_group_prior a vector of initial prior inclusion probabilities for SNPs and genes.
@@ -31,6 +37,9 @@
 #'
 fit_EM <- function(
     region_data,
+    groups,
+    types,
+    contexts,
     niter = 20,
     init_group_prior = NULL,
     init_group_prior_var = NULL,
@@ -41,9 +50,20 @@ fit_EM <- function(
     ...){
 
   # get groups, types and contexts from region_data
-  groups <- unique(unlist(lapply(region_data, "[[", "groups")))
-  types <- unique(unlist(lapply(region_data, "[[", "types")))
-  contexts <- unique(unlist(lapply(region_data, "[[", "contexts")))
+  if (missing(groups)){
+    groups <- unique(unlist(lapply(region_data, "[[", "groups")))
+    groups <- c(setdiff(groups, "SNP"), "SNP")
+  }
+
+  if (missing(types)){
+    types <- unique(unlist(lapply(region_data, "[[", "types")))
+    types <- c(setdiff(types, "SNP"), "SNP")
+  }
+
+  if (missing(contexts)){
+    contexts <- unique(unlist(lapply(region_data, "[[", "contexts")))
+    contexts <- c(setdiff(contexts, "SNP"), "SNP")
+  }
 
   # set pi_prior and V_prior based on init_group_prior and init_group_prior_var
   res <- initiate_group_priors(init_group_prior[groups], init_group_prior_var[groups], groups)

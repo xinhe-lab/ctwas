@@ -33,13 +33,17 @@ summarize_param <- function(param, gwas_n){
     group_prior_iters[rownames(group_prior_iters)==x,]/group_prior_iters[rownames(group_prior_iters)=="SNP"]}))
   enrichment <- enrichment_iters[,ncol(enrichment_iters)]
 
+  total_pve <- sum(group_pve, na.rm = TRUE)
+
+  prop_heritability <- group_pve/total_pve
+
   res <- list(group_size = group_size,
               group_prior = group_prior,
               group_prior_var = group_prior_var,
               enrichment = enrichment,
               group_pve = group_pve,
-              total_pve = sum(group_pve),
-              prop_heritability = group_pve/sum(group_pve))
+              total_pve = total_pve,
+              prop_heritability = prop_heritability)
 
   return(res)
 }

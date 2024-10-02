@@ -585,6 +585,7 @@ make_convergence_plots <- function(param,
                    group = rep(rownames(group_prior_iters), each=ncol(group_prior_iters)))
   factor_levels <- c(setdiff(rownames(group_prior_iters), "SNP"), "SNP")
   df$group <- factor(df$group, levels = factor_levels)
+  df <- na.omit(df)
 
   p_pi <- ggplot(df, aes(x=.data$niter, y=.data$value, group=.data$group, color=.data$group)) +
     geom_line() +
@@ -605,6 +606,7 @@ make_convergence_plots <- function(param,
                    value = unlist(lapply(1:nrow(group_prior_var_iters), function(x){group_prior_var_iters[x,]})),
                    group = rep(rownames(group_prior_var_iters), each=ncol(group_prior_var_iters)))
   df$group <- factor(df$group, levels = factor_levels)
+  df <- na.omit(df)
 
   p_sigma2 <- ggplot(df, aes(x=.data$niter, y=.data$value, group=.data$group, color=.data$group)) +
     geom_line() +
@@ -625,6 +627,7 @@ make_convergence_plots <- function(param,
                    value = unlist(lapply(1:nrow(enrichment_iters), function(x){enrichment_iters[x,]})),
                    group = rep(rownames(enrichment_iters), each=ncol(enrichment_iters)))
   df$group <- factor(df$group, levels = factor_levels[factor_levels!="SNP"])
+  df <- na.omit(df)
 
   p_enrich <- ggplot(df, aes(x=.data$niter, y=.data$value, group=.data$group, color=.data$group)) +
     geom_line() +
@@ -645,6 +648,7 @@ make_convergence_plots <- function(param,
                    value = unlist(lapply(1:nrow(group_pve_iters), function(x){group_pve_iters[x,]})),
                    group = rep(rownames(group_pve_iters), each=ncol(group_pve_iters)))
   df$group <- factor(df$group, levels = factor_levels)
+  df <- na.omit(df)
 
   p_pve <- ggplot(df, aes(x=.data$niter, y=.data$value, group=.data$group, color=.data$group)) +
     geom_line() +

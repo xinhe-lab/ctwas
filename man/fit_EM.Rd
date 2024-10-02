@@ -6,6 +6,9 @@
 \usage{
 fit_EM(
   region_data,
+  groups,
+  types,
+  contexts,
   niter = 20,
   init_group_prior = NULL,
   init_group_prior_var = NULL,
@@ -19,6 +22,12 @@ fit_EM(
 }
 \arguments{
 \item{region_data}{a list object with the susie input data for each region}
+
+\item{groups}{a vector of the groups to estimate parameters}
+
+\item{types}{a vector of the types to estimate parameters}
+
+\item{contexts}{a vector of the contexts to estimate parameters}
 
 \item{niter}{the number of iterations of the E-M algorithm to perform}
 
