@@ -108,8 +108,8 @@ anno_finemap_res <- function(finemap_res,
       if (drop_unmapped) {
         unmapped_idx <- which(is.na(finemap_gene_res$gene_name))
         if ( length(unmapped_idx) > 0){
-          # unmapped_finemap_res <- finemap_gene_res[unmapped_idx, ]
-          loginfo("Drop %d unmapped molecular IDs", length(unmapped_idx))
+          unmapped_molecular_ids <- unique(finemap_gene_res$molecular_id[unmapped_idx])
+          loginfo("Drop %d unmapped molecular traits", length(unmapped_molecular_ids))
           finemap_gene_res <- finemap_gene_res[-unmapped_idx, , drop=FALSE]
         }
       }
@@ -201,7 +201,7 @@ anno_susie_alpha_res <- function(susie_alpha_res,
     # gene results
     susie_alpha_res <- susie_alpha_res[susie_alpha_res$group!="SNP",]
 
-    # extract gene ids
+    # extract molecular ids
     if (is.null(susie_alpha_res$molecular_id)) {
       susie_alpha_res$molecular_id <- sapply(strsplit(susie_alpha_res$id, split = "[|]"), "[[", 1)
     }
@@ -214,7 +214,8 @@ anno_susie_alpha_res <- function(susie_alpha_res,
     if (drop_unmapped) {
       unmapped_idx <- which(is.na(susie_alpha_res$gene_name))
       if ( length(unmapped_idx) > 0){
-        loginfo("Drop %d rows that are unmapped", length(unmapped_idx))
+        unmapped_molecular_ids <- unique(susie_alpha_res$molecular_id[unmapped_idx])
+        loginfo("Drop %d unmapped molecular traits", length(unmapped_molecular_ids))
         susie_alpha_res <- susie_alpha_res[-unmapped_idx, , drop=FALSE]
       }
     }
@@ -228,10 +229,10 @@ anno_susie_alpha_res <- function(susie_alpha_res,
       susie_alpha_res <- susie_alpha_res %>%
         group_by(.data$tmp_id) %>%
         mutate(susie_alpha = ifelse(n() > 1, .data$susie_alpha / n(), .data$susie_alpha)) %>%
-        ungroup() %>%
-        select(-tmp_id)
-      susie_alpha_res <- as.data.frame(susie_alpha_res)
+        ungroup()
     }
+
+    susie_alpha_res <- susie_alpha_res %>% select(-tmp_id) %>% as.data.frame()
 
   }
 

@@ -1,7 +1,7 @@
 
 #' @title Combines gene PIPs by context, type or group.
 #'
-#' @param finemap_res a data frame of annotated cTWAS finemapping result
+#' @param susie_alpha_res a data frame of annotated susie alpha result.
 #'
 #' @param group_by column name to group genes by.
 #'
@@ -53,7 +53,7 @@ combine_gene_pips <- function(susie_alpha_res,
   }
 
   # cannot filter CS or combine CS for finemapping results from "no-LD" version
-  if (is.null(finemap_res$cs)){
+  if (is.null(susie_alpha_res$cs)){
     filter_cs <- FALSE
     method <- "sum"
   }
