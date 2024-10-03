@@ -23,11 +23,11 @@ test_that("merge_region_data_noLD works", {
                                                maxSNP = 20000)
   })
 
-  expect_equal(merge_region_res, expected_merge_region_res)
-  # expect_equal(merge_region_res$merged_region_data, expected_merge_region_res$merged_region_data)
-  # expect_equal(merge_region_res$merged_region_info, expected_merge_region_res$merged_region_info)
-  # expect_equal(merge_region_res$merged_snp_map, expected_merge_region_res$merged_snp_map)
-  # expect_equal(merge_region_res$merged_region_id_map, expected_merge_region_res$merged_region_id_map)
+  # expect_equal(merge_region_res, expected_merge_region_res)
+  expect_equal(merge_region_res$merged_region_data, expected_merge_region_res$merged_region_data)
+  expect_equal(merge_region_res$merged_region_info, expected_merge_region_res$merged_region_info)
+  expect_equal(merge_region_res$merged_snp_map, expected_merge_region_res$merged_snp_map)
+  expect_equal(merge_region_res$merged_region_id_map, expected_merge_region_res$merged_region_id_map)
 
 })
 
@@ -63,10 +63,10 @@ test_that("merge_region_data works", {
                                           maxSNP = 20000)
   })
 
-  expect_equal(merge_region_res, expected_merge_region_res)
-  # expect_equal(merge_region_res$merged_region_data, expected_merge_region_res$merged_region_data)
-  # expect_equal(merge_region_res$merged_region_info, expected_merge_region_res$merged_region_info)
-  # expect_equal(merge_region_res$merged_snp_map, expected_merge_region_res$merged_snp_map)
-  # expect_equal(merge_region_res$merged_region_id_map, expected_merge_region_res$merged_region_id_map)
+  # expect_equal(merge_region_res, expected_merge_region_res)
+  expect_equal(merge_region_res$merged_region_data, expected_merge_region_res$merged_region_data)
+  expect_equal(merge_region_res$merged_region_info, expected_merge_region_res$merged_region_info)
+  expect_equal(merge_region_res$merged_snp_map, expected_merge_region_res$merged_snp_map)
+  expect_equal(merge_region_res$merged_region_id_map, expected_merge_region_res$merged_region_id_map)
 
 })

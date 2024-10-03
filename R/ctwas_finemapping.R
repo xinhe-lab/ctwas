@@ -9,10 +9,10 @@
 #' @param L the number of effects or a vector of number of effects for each region.
 #'
 #' @param group_prior a vector of two prior inclusion probabilities for SNPs and genes.
-#' If NULL, it will use uniform prior.
+#' If NULL, it will use uniform prior inclusion probabilities.
 #'
 #' @param group_prior_var a vector of two prior variances for SNPs and gene effects.
-#' If NULL, it will use uniform prior.
+#' If NULL, it will set prior variance = 50 as the default in \code{susie_rss}.
 #'
 #' @param use_null_weight If TRUE, allow for a probability of no effect in susie
 #'
@@ -175,10 +175,10 @@ finemap_regions <- function(region_data,
 #' @param region_data region_data to be finemapped
 #'
 #' @param group_prior a vector of two prior inclusion probabilities for SNPs and genes.
-#' If NULL, it will use uniform prior.
+#' If NULL, it will use uniform prior inclusion probabilities.
 #'
 #' @param group_prior_var a vector of two prior variances for SNPs and gene effects.
-#' If NULL, it will use uniform prior.
+#' If NULL, it will set prior variance = 50 as the default in \code{susie_rss}.
 #'
 #' @param use_null_weight If TRUE, allow for a probability of no effect in susie
 #'
@@ -271,10 +271,10 @@ finemap_regions_noLD <- function(region_data,
 #' @param L the number of effects for susie during the fine mapping
 #'
 #' @param group_prior a vector of two prior inclusion probabilities for SNPs and genes.
-#' If NULL, it will use uniform prior.
+#' If NULL, it will use uniform prior inclusion probabilities.
 #'
 #' @param group_prior_var a vector of two prior variances for SNPs and gene effects.
-#' If NULL, it will use uniform prior.
+#' If NULL, it will set prior variance = 50 as the default in \code{susie_rss}.
 #'
 #' @param use_null_weight TRUE/FALSE. If TRUE, allow for a probability of no effect in susie
 #'
@@ -453,10 +453,10 @@ finemap_single_region <- function(region_data,
 #' @param region_id a character string of region id to be finemapped
 #'
 #' @param group_prior a vector of two prior inclusion probabilities for SNPs and genes.
-#' If NULL, it will use uniform prior.
+#' If NULL, it will use uniform prior inclusion probabilities.
 #'
 #' @param group_prior_var a vector of two prior variances for SNPs and gene effects.
-#' If NULL, it will use uniform prior.
+#' If NULL, it will set prior variance = 50 as the default in \code{susie_rss}.
 #'
 #' @param use_null_weight If TRUE, allow for a probability of no effect in susie
 #'

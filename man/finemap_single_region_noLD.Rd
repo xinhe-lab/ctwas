@@ -24,10 +24,10 @@ finemap_single_region_noLD(
 \item{region_id}{a character string of region id to be finemapped}
 
 \item{group_prior}{a vector of two prior inclusion probabilities for SNPs and genes.
-If NULL, it will use uniform prior.}
+If NULL, it will use uniform prior inclusion probabilities.}
 
 \item{group_prior_var}{a vector of two prior variances for SNPs and gene effects.
-If NULL, it will use uniform prior.}
+If NULL, it will set prior variance = 50 as the default in \code{susie_rss}.}
 
 \item{use_null_weight}{If TRUE, allow for a probability of no effect in susie}
 

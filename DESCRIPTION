@@ -33,6 +33,7 @@ Imports:
     mixsqp,
     magrittr,
     dplyr,
+    tidyr,
     ggplot2,
     ggrepel,
     rlang,

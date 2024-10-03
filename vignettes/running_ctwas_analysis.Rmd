@@ -186,7 +186,7 @@ After parameter estimation, we use the `screen_regions()` function to perform a 
 
 cTWAS have two options to screen regions: 1) screening by the number of causal signals, 2) screening by non-SNP PIPs. 
 
-Option 1: screening by the number of causal signals. If `filter_L = TRUE` and `filter_nonSNP_PIP = FALSE` (the default option), cTWAS will estimate the number of causal signals (`L`) for each region. This step is done by running fine-mapping using uniform prior  (`group_prior = NULL` and `group_prior_var = NULL`), treating all variants and molecular traits equally. From the results, we obtain the number of credible sets (`L`). We then select regions with at least one credible set, L > 0. 
+Option 1: screening by the number of causal signals. If `filter_L = TRUE` and `filter_nonSNP_PIP = FALSE` (the default option), cTWAS will estimate the number of causal signals (`L`) for each region. This step is done by running fine-mapping using uniform prior, treating all variants and molecular traits equally. To use uniform prior,  we set `group_prior = NULL` (uniform prior  inclusion probabilities) and `group_prior_var = NULL` (prior variance = 50 as the default in `susie_rss`). From the results, we obtain the number of credible sets (`L`). We then select regions with at least one credible set, L > 0. 
 
 ```{r screen_regions_filter_L, eval=FALSE}
 screen_res <- screen_regions(region_data,
@@ -270,16 +270,18 @@ The `finemap_regions()` function performs fine-mapping for the regions in the `s
 It first computes correlation matrices among all variables included in fine-mapping (SNPs, and molecular traits), then runs fine-mapping with estimated parameters (`group_prior` and `group_prior_var`) and estimated number of causal signals (`screened_region_L`), and returns a data frame with fine-mapping results for the regions. 
 
 ```{r finemap_regions, eval=FALSE}
-finemap_res <- finemap_regions(screened_region_data,
-                               LD_map = LD_map,
-                               weights = weights,
-                               group_prior = group_prior,
-                               group_prior_var = group_prior_var,
-                               L = screened_region_L,
-                               min_abs_corr = 0.1, 
-                               save_cor = TRUE,
-                               cor_dir = "./cor_matrix",
-                               ncore = 4)
+res <- finemap_regions(screened_region_data,
+                       LD_map = LD_map,
+                       weights = weights,
+                       group_prior = group_prior,
+                       group_prior_var = group_prior_var,
+                       L = screened_region_L,
+                       min_abs_corr = 0.1, 
+                       save_cor = TRUE,
+                       cor_dir = "./cor_matrix",
+                       ncore = 4)
+finemap_res <- res$finemap_res
+susie_alpha_res <- res$susie_alpha_res
 ```
 
 
@@ -287,15 +289,19 @@ cTWAS will automatically check `cor_dir`. If precomputed correlation matrices ar
 
 *Note*: when screening regions and fine-mapping with LD, we need larger memory to load LD matrices and compute correlation matrices. So we recommend increasing memory or reducing the number of `ncore` for these steps.
 
+It is possible to run fine-mapping using uniform prior, treating all variants and molecular traits equally. To do this,  we set `group_prior = NULL` (uniform prior inclusion probabilities) and `group_prior_var = NULL` (prior variance = 50 as the default in `susie_rss`).
+
 #### Fine-mapping regions without LD
 
 *Note*: we could use the `finemap_regions_noLD()` function to run fine-mapping without LD.
 
 ```{r finemap_regions_noLD, eval=FALSE}
-finemap_res <- finemap_regions_noLD(screened_region_data,
-                                    group_prior = group_prior,
-                                    group_prior_var = group_prior_var,
-                                    ncore = 6)
+res <- finemap_regions_noLD(screened_region_data,
+                            group_prior = group_prior,
+                            group_prior_var = group_prior_var,
+                            ncore = 6)
+finemap_res <- res$finemap_res
+susie_alpha_res <- res$susie_alpha_res
 ```
 
 
@@ -317,23 +323,27 @@ selected_region_L <- screened_region_L[region_id]
 We could then perform fine-mapping for this region of interest:
 
 ```{r finemap_single_region, eval=FALSE}
-finemap_region_res <- finemap_regions(selected_region_data,
-                                      LD_map = LD_map,
-                                      weights = weights,
-                                      group_prior = group_prior,
-                                      group_prior_var = group_prior_var,
-                                      L = selected_region_L,
-                                      save_cor = TRUE,
-                                      cor_dir = "./cor_matrix")
+res <- finemap_regions(selected_region_data,
+                       LD_map = LD_map,
+                       weights = weights,
+                       group_prior = group_prior,
+                       group_prior_var = group_prior_var,
+                       L = selected_region_L,
+                       save_cor = TRUE,
+                       cor_dir = "./cor_matrix")
+finemap_res <- res$finemap_res
+susie_alpha_res <- res$susie_alpha_res
 ```
 
 
 We could also perform fine-mapping without LD:
 
 ```{r finemap_single_region_noLD, eval=FALSE}
-finemap_region_res <- finemap_regions_noLD(selected_region_data,
-                                           group_prior = group_prior,
-                                           group_prior_var = group_prior_var)
+res <- finemap_regions_noLD(selected_region_data,
+                            group_prior = group_prior,
+                            group_prior_var = group_prior_var)
+finemap_res <- res$finemap_res
+susie_alpha_res <- res$susie_alpha_res
 ```
 
 

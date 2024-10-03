@@ -11,11 +11,13 @@ combine_gene_pips(
   method = c("combine_cs", "sum"),
   filter_cs = TRUE,
   keep_alpha_in_cs_only = FALSE,
-  include_set_id = FALSE,
+  include_set_id = TRUE,
   missing_value = NA
 )
 }
 \arguments{
+\item{susie_alpha_res}{a data frame of annotated susie alpha result.}
+
 \item{group_by}{column name to group genes by.}
 
 \item{by}{option to combine PIPs by: "context" (default), "type", or "group".}
@@ -41,8 +43,6 @@ when calculating combined PIP. This is similar to \code{prune_by_cs} in susie.}
 \item{include_set_id}{If TRUE, include credible set IDs of the genes in the output}
 
 \item{missing_value}{set missing value as (default: NA)}
-
-\item{finemap_res}{a data frame of annotated cTWAS finemapping result}
 }
 \value{
 a data frame of combined gene PIPs for each context, type or group

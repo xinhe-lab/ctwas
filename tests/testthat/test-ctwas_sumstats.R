@@ -19,8 +19,8 @@ test_that("ctwas_sumstats works", {
                                 thin = 0.1,
                                 maxSNP = 20000,
                                 min_abs_corr = 0.1,
-                                ncore = 6,
-                                ncore_LD = 4)
+                                ncore = 2,
+                                ncore_LD = 2)
   })
 
   # expect_equal(ctwas_res, expected_ctwas_res)
