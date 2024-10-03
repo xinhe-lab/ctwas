@@ -41,7 +41,7 @@ combine_gene_pips <- function(susie_alpha_res,
                               method = c("combine_cs", "sum"),
                               filter_cs = TRUE,
                               keep_alpha_in_cs_only = FALSE,
-                              include_set_id = FALSE,
+                              include_set_id = TRUE,
                               missing_value = NA){
 
   by <- match.arg(by)
@@ -163,7 +163,6 @@ combine_gene_pips <- function(susie_alpha_res,
 # then apply the multiplication formula across CS.
 # "sum" sum over alpha of all molecular traits for the same gene;
 #' @importFrom magrittr %>%
-#' @importFrom stats aggregate
 #' @importFrom dplyr left_join group_by summarise
 #'
 compute_combined_pips <- function(susie_alpha_res,
