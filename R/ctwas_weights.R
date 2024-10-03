@@ -573,7 +573,7 @@ compute_weight_LD_from_ref <- function(weights,
     p0 <- weight_info[k, "p0"]
     p1 <- weight_info[k, "p1"]
     idx <- which(region_info$chrom == chrom & region_info$start <= p1 & region_info$stop > p0)
-    weight_info[k, "region_id"] <- paste(sort(region_info[idx, "region_id"]), collapse = ";")
+    weight_info[k, "region_id"] <- paste(sort(region_info[idx, "region_id"]), collapse = ",")
   }
 
   # compute LD for weight variants on each chromosome
@@ -587,7 +587,7 @@ compute_weight_LD_from_ref <- function(weights,
         # load the R_snp and SNP info for the region
         # and extract LD for the weight variants
         curr_region_LD_list <- list()
-        curr_region_ids <- unlist(strsplit(x, ";"))
+        curr_region_ids <- unlist(strsplit(x, ","))
         curr_region_idx <- match(curr_region_ids, LD_map$region_id)
 
         LD_matrix_files <- LD_map$LD_file[curr_region_idx]

@@ -95,7 +95,7 @@ get_gene_regions <- function(gene_info, region_info){
     region.idx <- which(region_info$chrom == chrom & region_info$start <= p1 & region_info$stop > p0)
     gene_info[i, "region_start"] <- min(region_info[region.idx,"start"])
     gene_info[i, "region_stop"] <- max(region_info[region.idx,"stop"])
-    gene_info[i, "region_id"] <- paste(sort(region_info[region.idx, "region_id"]), collapse = ";")
+    gene_info[i, "region_id"] <- paste(sort(region_info[region.idx, "region_id"]), collapse = ",")
     gene_info[i, "n_regions"] <- length(region.idx)
   }
   return(gene_info)
