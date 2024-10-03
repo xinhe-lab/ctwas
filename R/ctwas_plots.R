@@ -39,6 +39,8 @@
 #'
 #' @param LD.colors Colors for correlation levels.
 #'
+#' @param cs.colors Colors for credible sets.
+#'
 #' @param focal.colors Colors for non-focal and focal gene.
 #'
 #' @param label_QTLs If TRUE, label SNP IDs in the QTL panel.
@@ -124,6 +126,7 @@ make_locusplot <- function(finemap_res,
                            color_pval_by = c("cs", "LD", "none"),
                            color_pip_by = c("cs", "LD", "none"),
                            LD.colors = c("grey", "blue", "purple", "salmon"),
+                           cs.colors = c("firebrick", "dodgerblue", "forestgreen", "darkmagenta", "darkorange"),
                            focal.colors = c("grey", "salmon"),
                            label_QTLs = TRUE,
                            highlight_pval = NULL,
@@ -263,17 +266,18 @@ make_locusplot <- function(finemap_res,
   }
 
   # set colors for credible sets
-  # cs.colors <- c("firebrick", "dodgerblue", "forestgreen", "darkmagenta", "darkorange")
-
   if (color_pval_by == "cs" || color_pip_by == "cs") {
     if (is.null(finemap_region_res$cs)){
       logwarn("'cs' not available. Cannot coloring by cs!")
       color_pval_by[color_pval_by == "cs"] <- "none"
       color_pip_by[color_pip_by == "cs"] <- "none"
     } else {
-      # cs_colors <- c("L1" = cs.colors[1], "L2" = cs.colors[2], "L3" = cs.colors[3], "L4" = cs.colors[4], "L5" = cs.colors[5])
-      # finemap_region_res$cs <- factor(finemap_region_res$cs, levels = names(cs_colors))
-      finemap_region_res$cs <- factor(finemap_region_res$cs)
+      cs_colors <- c("L1" = cs.colors[1], "L2" = cs.colors[2], "L3" = cs.colors[3], "L4" = cs.colors[4], "L5" = cs.colors[5])
+      # if there are multiple CSs, use the first one
+      if (any(grepl(",", finemap_region_res$cs))){
+        finemap_region_res$cs <- sapply(strsplit(finemap_region_res$cs, ","), "[[", 1)
+      }
+      finemap_region_res$cs <- factor(finemap_region_res$cs, levels = names(cs_colors))
     }
   }
 
@@ -359,7 +363,7 @@ make_locusplot <- function(finemap_res,
   if (color_pval_by == "cs") {
     p_pval <- p_pval +
       geom_point(aes(color=.data$cs)) +
-      # scale_color_manual(values = cs_colors) +
+      scale_color_manual(values = cs_colors) +
       labs(color = "CS") +
       guides(shape = guide_legend(order = 1, override.aes = list(size = legend.sizes)),
              color = guide_legend(order = 2))
@@ -418,7 +422,7 @@ make_locusplot <- function(finemap_res,
   if (color_pip_by == "cs") {
     p_pip <- p_pip +
       geom_point(aes(color=.data$cs)) +
-      # scale_color_manual(values = cs_colors) +
+      scale_color_manual(values = cs_colors) +
       labs(color = "CS")
   } else if (color_pip_by == "LD") {
     p_pip <- p_pip +

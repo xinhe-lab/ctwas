@@ -19,6 +19,7 @@ make_locusplot(
   color_pval_by = c("cs", "LD", "none"),
   color_pip_by = c("cs", "LD", "none"),
   LD.colors = c("grey", "blue", "purple", "salmon"),
+  cs.colors = c("firebrick", "dodgerblue", "forestgreen", "darkmagenta", "darkorange"),
   focal.colors = c("grey", "salmon"),
   label_QTLs = TRUE,
   highlight_pval = NULL,
@@ -78,6 +79,8 @@ If NULL, the entire region will be plotted (with 100 bp flanks on both sides).}
 "none": uses the same color for non-focal genes.}
 
 \item{LD.colors}{Colors for correlation levels.}
+
+\item{cs.colors}{Colors for credible sets.}
 
 \item{focal.colors}{Colors for non-focal and focal gene.}
 
