@@ -3,6 +3,9 @@
 #'
 #' @param file SNP info file name.
 #'
+#' @param snpinfo_loader_fun a user defined function to load SNP information file,
+#' if SNP information files are not in standard cTWAS reference format.
+#'
 #' @importFrom data.table fread
 #'
 #' @return a data frame of SNP info
@@ -29,6 +32,9 @@ read_snp_info_file <- function (file,
 #' @title Read multiple single SNP info files as a data frame
 #'
 #' @param files a vector of file names for SNP info in all regions
+#'
+#' @param snpinfo_loader_fun a user defined function to load SNP information file,
+#' if SNP information files are not in standard cTWAS reference format.
 #'
 #' @importFrom data.table fread
 #'
@@ -270,4 +276,27 @@ mclapply_check <- function(X, FUN, mc.cores = 1, stop_if_missing = FALSE){
   return(res)
 }
 
+#' @title Convert variant IDs from Open GWAS format or PredictDB weight format
+# to UKB reference variant format.
+#'
+#' @param varIDs a vector of variant IDs from Open GWAS format
+#' ("chr_pos_ref_alt") or PredictDB weight format
+#' (“chr_pos_ref_alt_build” or “chr:pos_ref_alt_build”)
+#'
+#' @return a vector of variant IDs in the format of "chr:pos_ref_alt"
+#' @export
+#'
+convert_to_ukb_varIDs <- function(varIDs){
+
+  varID_list <- strsplit(varIDs, split = "_|:")
+  new_varIDs <- unlist(lapply(varID_list, function(x){
+    if (length(x) >= 4) {
+      sprintf("%s:%s_%s_%s", x[1], x[2], x[3], x[4])
+    } else {
+      x
+    }
+  }))
+
+  return(new_varIDs)
+}
 

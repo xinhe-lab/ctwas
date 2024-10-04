@@ -8,6 +8,9 @@ read_snp_info_file(file, snpinfo_loader_fun = NULL)
 }
 \arguments{
 \item{file}{SNP info file name.}
+
+\item{snpinfo_loader_fun}{a user defined function to load SNP information file,
+if SNP information files are not in standard cTWAS reference format.}
 }
 \value{
 a data frame of SNP info

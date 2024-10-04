@@ -9,18 +9,22 @@ preprocess_z_snp(
   snp_map,
   drop_multiallelic = TRUE,
   drop_strand_ambig = TRUE,
+  varID_converter_fun = NULL,
   logfile = NULL
 )
 }
 \arguments{
-\item{z_snp}{A data frame with two columns: "id", "A1", "A2", "z". giving the z scores for
-snps. "A1" is effect allele. "A2" is the other allele.}
+\item{z_snp}{A data frame with two columns: "id", "A1", "A2", "z".
+giving the z scores for snps. "A1" is effect allele. "A2" is the other allele.}
 
 \item{snp_map}{a list of SNP-to-region map for the reference.}
 
 \item{drop_multiallelic}{If TRUE, multiallelic variants will be dropped from the summary statistics.}
 
 \item{drop_strand_ambig}{If TRUE remove strand ambiguous variants (A/T, G/C).}
+
+\item{varID_converter_fun}{a user defined function to convert
+GWAS variant IDs to the reference variant format.}
 
 \item{logfile}{The log filename. If NULL, print log info on screen.}
 }

@@ -8,6 +8,9 @@ read_snp_info_files(files, snpinfo_loader_fun = NULL)
 }
 \arguments{
 \item{files}{a vector of file names for SNP info in all regions}
+
+\item{snpinfo_loader_fun}{a user defined function to load SNP information file,
+if SNP information files are not in standard cTWAS reference format.}
 }
 \value{
 a data frame of SNP info from all files
