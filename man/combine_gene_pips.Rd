@@ -11,7 +11,8 @@ combine_gene_pips(
   method = c("combine_cs", "sum"),
   filter_cs = TRUE,
   keep_alpha_in_cs_only = FALSE,
-  include_set_id = TRUE,
+  include_cs_id = TRUE,
+  include_set_id = FALSE,
   missing_value = NA
 )
 }
@@ -40,7 +41,9 @@ We will use this option for combining PIPs from fine-mapping without LD.}
 \item{keep_alpha_in_cs_only}{If TRUE, only keep single effects (alpha) in credible sets
 when calculating combined PIP. This is similar to \code{prune_by_cs} in susie.}
 
-\item{include_set_id}{If TRUE, include credible set IDs of the genes in the output}
+\item{include_cs_id}{If TRUE, include credible set IDs of the genes in the output}
+
+\item{include_set_id}{If TRUE, include susie set IDs of the genes in the output}
 
 \item{missing_value}{set missing value as (default: NA)}
 }

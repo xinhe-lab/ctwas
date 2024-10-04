@@ -25,7 +25,9 @@
 #' @param keep_alpha_in_cs_only If TRUE, only keep single effects (alpha) in credible sets
 #' when calculating combined PIP. This is similar to \code{prune_by_cs} in susie.
 #'
-#' @param include_set_id If TRUE, include credible set IDs of the genes in the output
+#' @param include_cs_id If TRUE, include credible set IDs of the genes in the output
+#'
+#' @param include_set_id If TRUE, include susie set IDs of the genes in the output
 #'
 #' @param missing_value set missing value as (default: NA)
 #'
@@ -41,7 +43,8 @@ combine_gene_pips <- function(susie_alpha_res,
                               method = c("combine_cs", "sum"),
                               filter_cs = TRUE,
                               keep_alpha_in_cs_only = FALSE,
-                              include_set_id = TRUE,
+                              include_cs_id = TRUE,
+                              include_set_id = FALSE,
                               missing_value = NA){
 
   by <- match.arg(by)
@@ -52,9 +55,10 @@ combine_gene_pips <- function(susie_alpha_res,
     stop(paste("Cannot find the column", group_by, "in susie_alpha_res!"))
   }
 
-  # cannot filter CS or combine CS for finemapping results from "no-LD" version
+  # use sum option if there is no CS information
   if (is.null(susie_alpha_res$cs)){
     filter_cs <- FALSE
+    include_cs_id <- FALSE
     method <- "sum"
   }
 
@@ -67,9 +71,14 @@ combine_gene_pips <- function(susie_alpha_res,
                                               method = method,
                                               filter_cs = filter_cs,
                                               keep_alpha_in_cs_only = keep_alpha_in_cs_only,
-                                              include_set_id = include_set_id)
+                                              include_set_id = include_set_id,
+                                              include_cs_id = include_cs_id)
   if (include_set_id) {
     colnames(combined_gene_pips)[colnames(combined_gene_pips) == "set_id"] <- "combined_set_id"
+  }
+
+  if (include_cs_id) {
+    colnames(combined_gene_pips)[colnames(combined_gene_pips) == "cs_id"] <- "combined_cs_id"
   }
 
   if (by == "context"){
@@ -82,7 +91,8 @@ combine_gene_pips <- function(susie_alpha_res,
                                                       method = method,
                                                       filter_cs = filter_cs,
                                                       keep_alpha_in_cs_only = keep_alpha_in_cs_only,
-                                                      include_set_id = include_set_id)
+                                                      include_set_id = include_set_id,
+                                                      include_cs_id = include_cs_id)
 
       colnames(tmp_combined_gene_pips)[colnames(tmp_combined_gene_pips) == "combined_pip"] <-
         paste0(context, "_pip")
@@ -90,6 +100,11 @@ combine_gene_pips <- function(susie_alpha_res,
       if (include_set_id) {
         colnames(tmp_combined_gene_pips)[colnames(tmp_combined_gene_pips) == "set_id"] <-
           paste0(context, "_set_id")
+      }
+
+      if (include_cs_id) {
+        colnames(tmp_combined_gene_pips)[colnames(tmp_combined_gene_pips) == "cs_id"] <-
+          paste0(context, "_cs_id")
       }
 
       combined_gene_pips <- combined_gene_pips %>%
@@ -105,7 +120,8 @@ combine_gene_pips <- function(susie_alpha_res,
                                                       method = method,
                                                       filter_cs = filter_cs,
                                                       keep_alpha_in_cs_only = keep_alpha_in_cs_only,
-                                                      include_set_id = include_set_id)
+                                                      include_set_id = include_set_id,
+                                                      include_cs_id = include_cs_id)
 
       colnames(tmp_combined_gene_pips)[colnames(tmp_combined_gene_pips) == "combined_pip"] <-
         paste0(type, "_pip")
@@ -113,6 +129,11 @@ combine_gene_pips <- function(susie_alpha_res,
       if (include_set_id) {
         colnames(tmp_combined_gene_pips)[colnames(tmp_combined_gene_pips) == "set_id"] <-
           paste0(type, "_set_id")
+      }
+
+      if (include_cs_id) {
+        colnames(tmp_combined_gene_pips)[colnames(tmp_combined_gene_pips) == "cs_id"] <-
+          paste0(type, "_cs_id")
       }
 
       combined_gene_pips <- combined_gene_pips %>%
@@ -128,7 +149,8 @@ combine_gene_pips <- function(susie_alpha_res,
                                                       method = method,
                                                       filter_cs = filter_cs,
                                                       keep_alpha_in_cs_only = keep_alpha_in_cs_only,
-                                                      include_set_id = include_set_id)
+                                                      include_set_id = include_set_id,
+                                                      include_cs_id = include_cs_id)
 
       colnames(tmp_combined_gene_pips)[colnames(tmp_combined_gene_pips) == "combined_pip"] <-
         paste0(group, "_pip")
@@ -136,6 +158,11 @@ combine_gene_pips <- function(susie_alpha_res,
       if (include_set_id) {
         colnames(tmp_combined_gene_pips)[colnames(tmp_combined_gene_pips) == "set_id"] <-
           paste0(group, "_set_id")
+      }
+
+      if (include_cs_id) {
+        colnames(tmp_combined_gene_pips)[colnames(tmp_combined_gene_pips) == "cs_id"] <-
+          paste0(group, "_cs_id")
       }
 
       combined_gene_pips <- combined_gene_pips %>%
@@ -170,7 +197,8 @@ compute_combined_pips <- function(susie_alpha_res,
                                   method = c("combine_cs", "sum"),
                                   filter_cs = TRUE,
                                   keep_alpha_in_cs_only = FALSE,
-                                  include_set_id = TRUE){
+                                  include_cs_id = TRUE,
+                                  include_set_id = FALSE){
 
   method <- match.arg(method)
 
@@ -188,35 +216,40 @@ compute_combined_pips <- function(susie_alpha_res,
   }
 
   susie_alpha_res$set_id <- paste0(susie_alpha_res$region_id, ".", susie_alpha_res$susie_set)
+  susie_alpha_res$cs_id <- paste0(susie_alpha_res$region_id, ".", susie_alpha_res$cs)
+  susie_alpha_res$cs_id[which(is.na(susie_alpha_res$cs))] <- ""
 
   if (method == "sum") {
     combined_gene_pips <- susie_alpha_res %>%
       group_by(.data[[group_by]]) %>%
-      summarise(set_id = paste(.data$set_id, collapse = ","),
+      summarise(set_id = paste(unique(.data$set_id), collapse = ","),
+                cs_id = paste(unique(.data$cs_id[.data$cs_id!=""]), collapse = ","),
                 combined_pip = sum(.data$susie_alpha))
-
-    if (!include_set_id) {
-      combined_gene_pips <- combined_gene_pips[, colnames(combined_gene_pips)!="set_id"]
-    }
 
   } else if (method == "combine_cs") {
     # for each gene, first sum PIPs within the same sets
     summed_gene_pips <- susie_alpha_res %>%
       group_by(.data[[group_by]], .data$set_id) %>%
-      summarise(summed_pip = sum(.data$susie_alpha))
+      summarise(summed_pip = sum(.data$susie_alpha),
+                cs_id = paste(unique(.data$cs_id[.data$cs_id!=""]), collapse = ","))
 
     # then combine PIPs using the multiplication formula across sets
     combined_gene_pips <- summed_gene_pips %>%
       group_by(.data[[group_by]]) %>%
-      summarise(set_id = paste(.data$set_id, collapse = ","),
+      summarise(set_id = paste(unique(.data$set_id), collapse = ","),
+                cs_id = paste(unique(.data$cs_id[.data$cs_id!=""]), collapse = ","),
                 combined_pip = combine_pips_fun(.data$summed_pip))
-
-    if (!include_set_id) {
-      combined_gene_pips <- combined_gene_pips[, colnames(combined_gene_pips)!="set_id"]
-    }
   }
 
   combined_gene_pips <- as.data.frame(combined_gene_pips)
+
+  if (!include_set_id) {
+    combined_gene_pips <- combined_gene_pips[, colnames(combined_gene_pips)!="set_id"]
+  }
+
+  if (!include_cs_id) {
+    combined_gene_pips <- combined_gene_pips[, colnames(combined_gene_pips)!="cs_id"]
+  }
 
   return(combined_gene_pips)
 }
