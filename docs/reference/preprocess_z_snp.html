@@ -17,7 +17,7 @@
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">ctwas</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">0.4.14</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">0.4.15</span>
       </span>
     </div>
 
@@ -90,6 +90,7 @@
 <span>  <span class="va">snp_map</span>,</span>
 <span>  drop_multiallelic <span class="op">=</span> <span class="cn">TRUE</span>,</span>
 <span>  drop_strand_ambig <span class="op">=</span> <span class="cn">TRUE</span>,</span>
+<span>  varID_converter_fun <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  logfile <span class="op">=</span> <span class="cn">NULL</span></span>
 <span><span class="op">)</span></span></code></pre></div>
     </div>
@@ -99,8 +100,8 @@
 
 
 <dl><dt id="arg-z-snp">z_snp<a class="anchor" aria-label="anchor" href="#arg-z-snp"></a></dt>
-<dd><p>A data frame with two columns: "id", "A1", "A2", "z". giving the z scores for
-snps. "A1" is effect allele. "A2" is the other allele.</p></dd>
+<dd><p>A data frame with two columns: "id", "A1", "A2", "z".
+giving the z scores for snps. "A1" is effect allele. "A2" is the other allele.</p></dd>
 
 
 <dt id="arg-snp-map">snp_map<a class="anchor" aria-label="anchor" href="#arg-snp-map"></a></dt>
@@ -113,6 +114,11 @@ snps. "A1" is effect allele. "A2" is the other allele.</p></dd>
 
 <dt id="arg-drop-strand-ambig">drop_strand_ambig<a class="anchor" aria-label="anchor" href="#arg-drop-strand-ambig"></a></dt>
 <dd><p>If TRUE remove strand ambiguous variants (A/T, G/C).</p></dd>
+
+
+<dt id="arg-varid-converter-fun">varID_converter_fun<a class="anchor" aria-label="anchor" href="#arg-varid-converter-fun"></a></dt>
+<dd><p>a user defined function to convert
+GWAS variant IDs to the reference variant format.</p></dd>
 
 
 <dt id="arg-logfile">logfile<a class="anchor" aria-label="anchor" href="#arg-logfile"></a></dt>

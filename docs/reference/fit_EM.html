@@ -17,7 +17,7 @@
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">ctwas</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">0.4.14</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">0.4.15</span>
       </span>
     </div>
 
@@ -87,6 +87,9 @@
     <div id="ref-usage">
     <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="fu">fit_EM</span><span class="op">(</span></span>
 <span>  <span class="va">region_data</span>,</span>
+<span>  <span class="va">groups</span>,</span>
+<span>  <span class="va">types</span>,</span>
+<span>  <span class="va">contexts</span>,</span>
 <span>  niter <span class="op">=</span> <span class="fl">20</span>,</span>
 <span>  init_group_prior <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  init_group_prior_var <span class="op">=</span> <span class="cn">NULL</span>,</span>
@@ -105,6 +108,18 @@
 
 <dl><dt id="arg-region-data">region_data<a class="anchor" aria-label="anchor" href="#arg-region-data"></a></dt>
 <dd><p>a list object with the susie input data for each region</p></dd>
+
+
+<dt id="arg-groups">groups<a class="anchor" aria-label="anchor" href="#arg-groups"></a></dt>
+<dd><p>a vector of the groups to estimate parameters</p></dd>
+
+
+<dt id="arg-types">types<a class="anchor" aria-label="anchor" href="#arg-types"></a></dt>
+<dd><p>a vector of the types to estimate parameters</p></dd>
+
+
+<dt id="arg-contexts">contexts<a class="anchor" aria-label="anchor" href="#arg-contexts"></a></dt>
+<dd><p>a vector of the contexts to estimate parameters</p></dd>
 
 
 <dt id="arg-niter">niter<a class="anchor" aria-label="anchor" href="#arg-niter"></a></dt>

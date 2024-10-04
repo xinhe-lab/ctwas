@@ -17,7 +17,7 @@
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">ctwas</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">0.4.14</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">0.4.15</span>
       </span>
     </div>
 
@@ -89,6 +89,7 @@
 <span>  <span class="va">weights</span>,</span>
 <span>  <span class="va">region_info</span>,</span>
 <span>  <span class="va">LD_map</span>,</span>
+<span>  snp_map <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  LD_format <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"rds"</span>, <span class="st">"rdata"</span>, <span class="st">"mtx"</span>, <span class="st">"csv"</span>, <span class="st">"txt"</span>, <span class="st">"custom"</span><span class="op">)</span>,</span>
 <span>  LD_loader_fun <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  snpinfo_loader_fun <span class="op">=</span> <span class="cn">NULL</span>,</span>
@@ -111,6 +112,11 @@
 <dt id="arg-ld-map">LD_map<a class="anchor" aria-label="anchor" href="#arg-ld-map"></a></dt>
 <dd><p>a data frame with filenames of LD matrices and SNP information for the regions.
 Required when <code>load_predictdb_LD = FALSE</code>.</p></dd>
+
+
+<dt id="arg-snp-map">snp_map<a class="anchor" aria-label="anchor" href="#arg-snp-map"></a></dt>
+<dd><p>a list of SNP-to-region map for the reference.
+If NUll, it will reads SNP info from the "SNP_file" column of LD_map.</p></dd>
 
 
 <dt id="arg-ld-format">LD_format<a class="anchor" aria-label="anchor" href="#arg-ld-format"></a></dt>

@@ -134,10 +134,10 @@ We use the function `combine_gene_pips()` to compute combined PIPs. It groups mo
 
 We have several ways of combining PIPs:
 
-+ "combine_cs": it first sums PIPs of molecular traits of a genes in each credible set, and then combine PIPs using the following formula: $1 - \prod_k (1 - \text{PIP}_k)$, where $\text{PIP}_k$ is the summed PIP of the $k$-th credible set of a gene. This is the default option for combining PIPs from fine-mapping with LD. 
-+ "sum": sum over PIPs of all molecular traits for the same gene. This summation is the expected number of causal molecular traits in this gene, and could be higher than 1. We will use this option for combining PIPs from fine-mapping without LD. 
++ "combine_cs" (default option): it first sums PIPs of molecular traits of a genes in each credible set, and then combine PIPs using the following formula: $1 - \prod_k (1 - \text{PIP}_k)$, where $\text{PIP}_k$ is the summed PIP of the $k$-th credible set of a gene. 
++ "sum": sum over PIPs of all molecular traits for the same gene. This summation is the expected number of causal molecular traits in this gene, and could be higher than 1. 
 
-For example, when using gene expression (eQTL) data from multiple tissues, we can use the function to compute combined PIPs across contexts, using the "combine_cs" method. By default, we limit the results to molecular traits within credible sets (`filter_cs = TRUE`). We can report the credible set information of each molecular trait in the output (`include_set_id = TRUE`), which allows us to understand how gene PIPs are obtained.
+For example, when using gene expression (eQTL) data from multiple tissues, we can use the function to compute combined PIPs across contexts, using the "combine_cs" method. By default, we limit the results to molecular traits within credible sets (`filter_cs = TRUE`). We also report the credible set information of each molecular trait in the output (`include_cs_id = TRUE`), which allows us to understand how gene PIPs are obtained.
 
 ```{r combine_pips_by_context}
 combined_pip_by_context <- combine_gene_pips(susie_alpha_res, 
@@ -145,12 +145,10 @@ combined_pip_by_context <- combine_gene_pips(susie_alpha_res,
                                              by = "context",
                                              method = "combine_cs",
                                              filter_cs = TRUE,
-                                             include_set_id = FALSE)
+                                             include_cs_id = TRUE)
 subset(combined_pip_by_context, combined_pip > 0.8)
 ```
 
-
-If `include_set_id = TRUE`, it will also output the credible sets that got combined when computing the combined PIPs. 
 
 In this example, we have gene IDs in the "molecular_id" column, so we could use that column to group genes. If the gene IDs are not provided, we will need to map molecular traits to their target genes in order to compute gene PIPs, as described below.
 
@@ -244,7 +242,7 @@ combined_pip_by_type <- combine_gene_pips(susie_alpha_res,
                                           by = "type",
                                           method = "combine_cs",
                                           filter_cs = TRUE,
-                                          include_set_id = TRUE)
+                                          include_cs_id = TRUE)
 subset(combined_pip_by_type, combined_pip > 0.8)
 ```
 

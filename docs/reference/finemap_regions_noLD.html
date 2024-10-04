@@ -17,7 +17,7 @@
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">ctwas</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">0.4.14</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">0.4.15</span>
       </span>
     </div>
 
@@ -90,6 +90,7 @@
 <span>  group_prior <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  group_prior_var <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  use_null_weight <span class="op">=</span> <span class="cn">TRUE</span>,</span>
+<span>  get_susie_alpha <span class="op">=</span> <span class="cn">TRUE</span>,</span>
 <span>  snps_only <span class="op">=</span> <span class="cn">FALSE</span>,</span>
 <span>  ncore <span class="op">=</span> <span class="fl">1</span>,</span>
 <span>  verbose <span class="op">=</span> <span class="cn">FALSE</span>,</span>
@@ -107,15 +108,21 @@
 
 
 <dt id="arg-group-prior">group_prior<a class="anchor" aria-label="anchor" href="#arg-group-prior"></a></dt>
-<dd><p>a vector of two prior inclusion probabilities for SNPs and genes.</p></dd>
+<dd><p>a vector of two prior inclusion probabilities for SNPs and genes.
+If NULL, it will use uniform prior inclusion probabilities.</p></dd>
 
 
 <dt id="arg-group-prior-var">group_prior_var<a class="anchor" aria-label="anchor" href="#arg-group-prior-var"></a></dt>
-<dd><p>a vector of two prior variances for SNPs and gene effects.</p></dd>
+<dd><p>a vector of two prior variances for SNPs and gene effects.
+If NULL, it will set prior variance = 50 as the default in <code>susie_rss</code>.</p></dd>
 
 
 <dt id="arg-use-null-weight">use_null_weight<a class="anchor" aria-label="anchor" href="#arg-use-null-weight"></a></dt>
 <dd><p>If TRUE, allow for a probability of no effect in susie</p></dd>
+
+
+<dt id="arg-get-susie-alpha">get_susie_alpha<a class="anchor" aria-label="anchor" href="#arg-get-susie-alpha"></a></dt>
+<dd><p>If TRUE, get susie alpha matrix from finemapping results.</p></dd>
 
 
 <dt id="arg-snps-only">snps_only<a class="anchor" aria-label="anchor" href="#arg-snps-only"></a></dt>
