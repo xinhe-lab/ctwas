@@ -54,10 +54,7 @@ z2p <- function(z, neg_log10_p = FALSE){
 #'
 #' @return a data frame of annotated finemapping result.
 #'
-#' @importFrom stats na.omit
 #' @importFrom logging loginfo
-#' @importFrom data.table rbindlist
-#' @importFrom readr parse_number
 #' @importFrom magrittr %>%
 #' @importFrom dplyr left_join mutate select group_by ungroup n
 #' @importFrom rlang .data
@@ -151,27 +148,16 @@ anno_finemap_res <- function(finemap_res,
 #'
 #' @param susie_alpha_res a data frame of susie alpha result.
 #'
-#' @param snp_map a list of data frames with SNP-to-region map for the reference.
-#'
 #' @param mapping_table a data frame of mapping between molecular traits and genes,
 #' with required columns: "molecular_id", "gene_name".
 #'
 #' @param map_by column name to be mapped by (default: "molecular_id").
 #'
-#' @param add_gene_annot If TRUE, add annotations
-#'
-#' @param add_position If TRUE, add positions
-#'
-#' @param use_gene_pos Use mid (midpoint), start, or end positions as gene positions.
-#'
 #' @param drop_unmapped If TRUE, remove unmapped genes.
 #'
 #' @return a data frame of annotated finemapping result.
 #'
-#' @importFrom stats na.omit
 #' @importFrom logging loginfo
-#' @importFrom data.table rbindlist
-#' @importFrom readr parse_number
 #' @importFrom magrittr %>%
 #' @importFrom dplyr left_join mutate select group_by ungroup n
 #' @importFrom rlang .data
@@ -232,7 +218,8 @@ anno_susie_alpha_res <- function(susie_alpha_res,
         ungroup()
     }
 
-    susie_alpha_res <- susie_alpha_res %>% select(-tmp_id) %>% as.data.frame()
+    susie_alpha_res <- susie_alpha_res[, colnames(susie_alpha_res)!="tmp_id"]
+    susie_alpha_res <- as.data.frame(susie_alpha_res)
 
   }
 

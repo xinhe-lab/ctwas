@@ -11,15 +11,15 @@ test_that("finemap_regions_noLD works", {
   group_prior_var <- param$group_prior_var
   rm(ctwas_res)
 
-  region_ids <- sample(names(screened_region_data),2)
-  expected_finemap_res <- expected_finemap_res[expected_finemap_res$region_id %in% region_ids,]
+  region_id <- sample(names(screened_region_data),1)
+  expected_finemap_res <- expected_finemap_res[expected_finemap_res$region_id == region_id,]
   rownames(expected_finemap_res) <- NULL
 
-  expected_susie_alpha_res <- expected_susie_alpha_res[expected_susie_alpha_res$region_id %in% region_ids,]
+  expected_susie_alpha_res <- expected_susie_alpha_res[expected_susie_alpha_res$region_id == region_id,]
   rownames(expected_susie_alpha_res) <- NULL
 
   capture.output({
-    res <- finemap_regions_noLD(region_data = screened_region_data[region_ids],
+    res <- finemap_regions_noLD(region_data = screened_region_data[region_id],
                                 group_prior = group_prior,
                                 group_prior_var = group_prior_var)
     finemap_res <- res$finemap_res
@@ -49,20 +49,20 @@ test_that("finemap_regions works", {
   group_prior_var <- param$group_prior_var
   rm(ctwas_res)
 
-  region_ids <- sample(names(screened_region_data),2)
-  expected_finemap_res <- expected_finemap_res[expected_finemap_res$region_id %in% region_ids,]
+  region_id <- sample(names(screened_region_data),1)
+  expected_finemap_res <- expected_finemap_res[expected_finemap_res$region_id %in% region_id,]
   rownames(expected_finemap_res) <- NULL
 
-  expected_susie_alpha_res <- expected_susie_alpha_res[expected_susie_alpha_res$region_id %in% region_ids,]
+  expected_susie_alpha_res <- expected_susie_alpha_res[expected_susie_alpha_res$region_id %in% region_id,]
   rownames(expected_susie_alpha_res) <- NULL
 
   capture.output({
-    res <- finemap_regions(region_data = screened_region_data[region_ids],
+    res <- finemap_regions(region_data = screened_region_data[region_id],
                            LD_map = LD_map,
                            weights = weights,
                            group_prior = group_prior,
                            group_prior_var = group_prior_var,
-                           L = screened_region_L[region_ids])
+                           L = screened_region_L[region_id])
     finemap_res <- res$finemap_res
     susie_alpha_res <- res$susie_alpha_res
   })

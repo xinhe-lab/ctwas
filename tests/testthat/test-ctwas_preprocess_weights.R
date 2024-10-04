@@ -20,7 +20,8 @@ test_that("preprocess_weights with PredictDB weights works", {
                                   drop_strand_ambig = TRUE,
                                   scale_predictdb_weights = TRUE,
                                   load_predictdb_LD = TRUE,
-                                  filter_protein_coding_genes = TRUE)
+                                  filter_protein_coding_genes = TRUE,
+                                  varID_converter_fun = convert_to_ukb_varIDs)
   })
 
   expect_equal(weights, expected_weights)
@@ -43,7 +44,8 @@ test_that("preprocess_weights with PredictDB weights works", {
                                         snp_map,
                                         type = "expression",
                                         context = "liver",
-                                        weight_name = "liver_expression")
+                                        weight_name = "liver_expression",
+                                        varID_converter_fun = convert_to_ukb_varIDs)
 
     weight_adipose_file <- system.file("extdata/sample_data", "expression_Adipose_Subcutaneous.db", package = "ctwas")
     weights_adipose <- preprocess_weights(weight_adipose_file,
@@ -52,7 +54,8 @@ test_that("preprocess_weights with PredictDB weights works", {
                                           snp_map,
                                           type = "expression",
                                           context = "adipose",
-                                          weight_name = "adipose_expression")
+                                          weight_name = "adipose_expression",
+                                          varID_converter_fun = convert_to_ukb_varIDs)
     weights <- c(weights_liver, weights_adipose)
   })
 
@@ -90,7 +93,8 @@ test_that("preprocess_weights with FUSION weights works", {
                                   scale_predictdb_weights = FALSE,
                                   load_predictdb_LD = FALSE,
                                   filter_protein_coding_genes = FALSE,
-                                  ncore = 1)
+                                  varID_converter_fun = convert_to_ukb_varIDs,
+                                  ncore = 2)
   })
 
   expect_equal(weights, expected_weights)

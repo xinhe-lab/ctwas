@@ -20,7 +20,8 @@ test_that("merge_region_data_noLD works", {
                                                z_snp = z_snp,
                                                z_gene = z_gene,
                                                expand = TRUE,
-                                               maxSNP = 20000)
+                                               maxSNP = 20000,
+                                               ncore = 2)
   })
 
   # expect_equal(merge_region_res, expected_merge_region_res)
@@ -60,7 +61,8 @@ test_that("merge_region_data works", {
                                           z_snp = z_snp,
                                           z_gene = z_gene,
                                           expand = TRUE,
-                                          maxSNP = 20000)
+                                          maxSNP = 20000,
+                                          ncore = 2)
   })
 
   # expect_equal(merge_region_res, expected_merge_region_res)

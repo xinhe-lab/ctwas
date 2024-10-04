@@ -19,8 +19,8 @@ test_that("ctwas_sumstats works", {
                                 thin = 0.1,
                                 maxSNP = 20000,
                                 min_abs_corr = 0.1,
-                                ncore = 2,
-                                ncore_LD = 2)
+                                ncore = 6,
+                                ncore_LD = 4)
   })
 
   # expect_equal(ctwas_res, expected_ctwas_res)
@@ -57,8 +57,8 @@ test_that("ctwas_sumstats with nonSNP_PIP filtering works", {
                                 filter_nonSNP_PIP = TRUE,
                                 min_nonSNP_PIP = 0.5,
                                 min_abs_corr = 0.1,
-                                ncore = 2,
-                                ncore_LD = 2)
+                                ncore = 6,
+                                ncore_LD = 4)
   })
 
   # expect_equal(ctwas_res, expected_ctwas_res)

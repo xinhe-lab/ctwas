@@ -192,27 +192,27 @@ compute_combined_pips <- function(susie_alpha_res,
   if (method == "sum") {
     combined_gene_pips <- susie_alpha_res %>%
       group_by(.data[[group_by]]) %>%
-      summarise(set_id = paste(set_id, collapse = ","),
-                combined_pip = sum(susie_alpha))
+      summarise(set_id = paste(.data$set_id, collapse = ","),
+                combined_pip = sum(.data$susie_alpha))
 
     if (!include_set_id) {
-      combined_gene_pips <- combined_gene_pips %>% select(-set_id)
+      combined_gene_pips <- combined_gene_pips[, colnames(combined_gene_pips)!="set_id"]
     }
 
   } else if (method == "combine_cs") {
     # for each gene, first sum PIPs within the same sets
     summed_gene_pips <- susie_alpha_res %>%
       group_by(.data[[group_by]], .data$set_id) %>%
-      summarise(summed_pip = sum(susie_alpha))
+      summarise(summed_pip = sum(.data$susie_alpha))
 
     # then combine PIPs using the multiplication formula across sets
     combined_gene_pips <- summed_gene_pips %>%
       group_by(.data[[group_by]]) %>%
-      summarise(set_id = paste(set_id, collapse = ","),
-                combined_pip = combine_pips_fun(summed_pip))
+      summarise(set_id = paste(.data$set_id, collapse = ","),
+                combined_pip = combine_pips_fun(.data$summed_pip))
 
     if (!include_set_id) {
-      combined_gene_pips <- combined_gene_pips %>% select(-set_id)
+      combined_gene_pips <- combined_gene_pips[, colnames(combined_gene_pips)!="set_id"]
     }
   }
 

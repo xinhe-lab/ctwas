@@ -145,7 +145,7 @@ combined_pip_by_context <- combine_gene_pips(susie_alpha_res,
                                              by = "context",
                                              method = "combine_cs",
                                              filter_cs = TRUE,
-                                             include_set_id = TRUE)
+                                             include_set_id = FALSE)
 subset(combined_pip_by_context, combined_pip > 0.8)
 ```
 
@@ -316,7 +316,7 @@ make_locusplot(finemap_res,
 ```
 
 
-In this plot, one can see that there are several genes with good associations with the phenotype (top panel), but only HPR in liver and HP in adipose are prioritized by cTWAS (second panel). This is because once HPR, HP and other likely causal variants are selected by cTWAS, there is no remaining association left in other molecular traits. This means that other associations are likely due to their correlations with the prioritized genes rather than representing independent signals.
+In this plot, one can see that there are several genes with good associations with the phenotype (top panel), but only HPR in liver is prioritized by cTWAS (second panel).  This suggests that other associations are likely due to their correlations with the prioritized genes rather than representing independent signals.
 
 For the "no-LD" version, we could still make the locus plot. The difference is that it could not color the data points by correlations with the focal gene.
 

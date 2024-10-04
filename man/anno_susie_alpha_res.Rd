@@ -20,14 +20,6 @@ with required columns: "molecular_id", "gene_name".}
 \item{map_by}{column name to be mapped by (default: "molecular_id").}
 
 \item{drop_unmapped}{If TRUE, remove unmapped genes.}
-
-\item{snp_map}{a list of data frames with SNP-to-region map for the reference.}
-
-\item{add_gene_annot}{If TRUE, add annotations}
-
-\item{add_position}{If TRUE, add positions}
-
-\item{use_gene_pos}{Use mid (midpoint), start, or end positions as gene positions.}
 }
 \value{
 a data frame of annotated finemapping result.

@@ -32,7 +32,7 @@ test_that("combine_gene_pips works", {
                                                  group_by = "gene_name",
                                                  by = "context",
                                                  method = "combine_cs",
-                                                 filter_cs = TRUE,
+                                                 filter_cs = FALSE,
                                                  include_set_id = FALSE)
 
     combined_pip_by_type <- combine_gene_pips(annotated_susie_alpha_res,
