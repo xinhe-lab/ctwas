@@ -24,6 +24,7 @@ preprocess_weights(
   LD_format = c("rds", "rdata", "csv", "txt", "custom"),
   LD_loader_fun = NULL,
   snpinfo_loader_fun = NULL,
+  varID_converter_fun = NULL,
   ncore = 1,
   logfile = NULL
 )
@@ -78,6 +79,9 @@ By default, use all SNPs in weights.}
 
 \item{snpinfo_loader_fun}{a user defined function to load SNP information file,
 if SNP information files are not in standard cTWAS reference format.}
+
+\item{varID_converter_fun}{a user defined function to convert
+weight variant IDs to the reference variant format.}
 
 \item{ncore}{The number of cores used to parallelize computation.}
 

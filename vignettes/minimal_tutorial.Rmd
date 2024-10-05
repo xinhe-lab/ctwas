@@ -167,6 +167,7 @@ ctwas_res <- ctwas_sumstats_noLD(z_snp,
 z_gene <- ctwas_res$z_gene
 param <- ctwas_res$param
 finemap_res <- ctwas_res$finemap_res
+susie_alpha_res <- ctwas_res$susie_alpha_res
 boundary_genes <- ctwas_res$boundary_genes
 region_data <- ctwas_res$region_data
 screen_res <- ctwas_res$screen_res
@@ -182,6 +183,8 @@ screen_res <- ctwas_res$screen_res
 + `finemap_res`: fine-mapping results,
 
 It also produces other output: 
+
++ `susie_alpha_res`: a data frame with finemapping results of molecular traits and the single effect probabilities (alpha) in all credible sets. This will be used later when computing combined gene PIPs. 
 
 + `boundary_genes`: the genes/molecular traits whose weights cross region boundaries (we will need these in the post-processing step). 
 

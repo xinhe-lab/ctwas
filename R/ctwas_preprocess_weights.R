@@ -51,6 +51,9 @@
 #' @param snpinfo_loader_fun a user defined function to load SNP information file,
 #' if SNP information files are not in standard cTWAS reference format.
 #'
+#' @param varID_converter_fun a user defined function to convert
+#' weight variant IDs to the reference variant format.
+#'
 #' @param ncore The number of cores used to parallelize computation.
 #'
 #' @param logfile The log filename. If NULL, will print log info on screen.
@@ -82,6 +85,7 @@ preprocess_weights <- function(weight_file,
                                LD_format = c("rds", "rdata", "csv", "txt", "custom"),
                                LD_loader_fun = NULL,
                                snpinfo_loader_fun = NULL,
+                               varID_converter_fun = NULL,
                                ncore = 1,
                                logfile = NULL){
   if (!is.null(logfile)) {
@@ -122,15 +126,27 @@ preprocess_weights <- function(weight_file,
   loginfo("type: %s", type)
   loginfo("context: %s", context)
 
-  loaded_weights_res <- load_weights(weight_file,
-                                     weight_format,
-                                     filter_protein_coding_genes = filter_protein_coding_genes,
-                                     load_predictdb_LD = load_predictdb_LD,
-                                     fusion_method = fusion_method,
-                                     fusion_genome_version = fusion_genome_version,
-                                     ncore = ncore)
-  weight_table <- loaded_weights_res$weight_table
-  cov_table <- loaded_weights_res$cov_table
+  res <- load_weights(weight_file,
+                      weight_format,
+                      filter_protein_coding_genes = filter_protein_coding_genes,
+                      load_predictdb_LD = load_predictdb_LD,
+                      fusion_method = fusion_method,
+                      fusion_genome_version = fusion_genome_version,
+                      ncore = ncore)
+  weight_table <- res$weight_table
+  cov_table <- res$cov_table
+  rm(res)
+
+  # convert variant IDs in weights to reference variant format
+  if (!is.null(varID_converter_fun)) {
+    loginfo("Convert variant IDs")
+    weight_table$rsid <- varID_converter_fun(weight_table$rsid)
+    weight_table$varID <- varID_converter_fun(weight_table$varID)
+    if (!is.null(cov_table)) {
+      cov_table$RSID1 <- varID_converter_fun(cov_table$RSID1)
+      cov_table$RSID2 <- varID_converter_fun(cov_table$RSID2)
+    }
+  }
 
   if (is.null(cov_table)) {
     load_predictdb_LD <- FALSE
@@ -186,6 +202,7 @@ preprocess_weights <- function(weight_file,
     weights <- compute_weight_LD_from_ref(weights,
                                           region_info = region_info,
                                           LD_map = LD_map,
+                                          snp_map = snp_map,
                                           LD_format = LD_format,
                                           LD_loader_fun = LD_loader_fun,
                                           snpinfo_loader_fun = snpinfo_loader_fun,

@@ -197,27 +197,32 @@ ctwas_sumstats_noLD <- function(
 
   # Run fine-mapping for regions with strong gene signals using full SNPs
   if (length(screened_region_data) > 0){
-    finemap_res <- finemap_regions_noLD(screened_region_data,
-                                        group_prior = group_prior,
-                                        group_prior_var = group_prior_var,
-                                        use_null_weight = use_null_weight,
-                                        ncore = ncore,
-                                        verbose = verbose,
-                                        ...)
+    res <- finemap_regions_noLD(screened_region_data,
+                                group_prior = group_prior,
+                                group_prior_var = group_prior_var,
+                                use_null_weight = use_null_weight,
+                                ncore = ncore,
+                                verbose = verbose,
+                                ...)
+    finemap_res <- res$finemap_res
+    susie_alpha_res <- res$susie_alpha_res
+
     if (!is.null(outputdir)) {
       saveRDS(finemap_res, file.path(outputdir, paste0(outname, ".finemap_res.RDS")))
+      saveRDS(susie_alpha_res, file.path(outputdir, paste0(outname, ".susie_alpha_res.RDS")))
     }
   } else {
-    loginfo("No regions selected for finemapping.")
+    loginfo("No regions selected for fine-mapping.")
     finemap_res <- NULL
+    susie_alpha_res <- NULL
   }
 
   return(list("z_gene" = z_gene,
               "param" = param,
               "finemap_res" = finemap_res,
+              "susie_alpha_res" = susie_alpha_res,
               "region_data" = region_data,
               "boundary_genes" = boundary_genes,
               "screen_res" = screen_res))
-
 }
 

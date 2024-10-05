@@ -17,7 +17,7 @@
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">ctwas</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">0.4.14</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">0.4.15</span>
       </span>
     </div>
 
@@ -105,6 +105,7 @@
 <span>  LD_format <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"rds"</span>, <span class="st">"rdata"</span>, <span class="st">"csv"</span>, <span class="st">"txt"</span>, <span class="st">"custom"</span><span class="op">)</span>,</span>
 <span>  LD_loader_fun <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  snpinfo_loader_fun <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  varID_converter_fun <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  ncore <span class="op">=</span> <span class="fl">1</span>,</span>
 <span>  logfile <span class="op">=</span> <span class="cn">NULL</span></span>
 <span><span class="op">)</span></span></code></pre></div>
@@ -200,6 +201,11 @@ By default, use all SNPs in weights.</p></dd>
 <dt id="arg-snpinfo-loader-fun">snpinfo_loader_fun<a class="anchor" aria-label="anchor" href="#arg-snpinfo-loader-fun"></a></dt>
 <dd><p>a user defined function to load SNP information file,
 if SNP information files are not in standard cTWAS reference format.</p></dd>
+
+
+<dt id="arg-varid-converter-fun">varID_converter_fun<a class="anchor" aria-label="anchor" href="#arg-varid-converter-fun"></a></dt>
+<dd><p>a user defined function to convert
+weight variant IDs to the reference variant format.</p></dd>
 
 
 <dt id="arg-ncore">ncore<a class="anchor" aria-label="anchor" href="#arg-ncore"></a></dt>

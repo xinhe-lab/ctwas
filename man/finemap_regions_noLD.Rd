@@ -9,6 +9,7 @@ finemap_regions_noLD(
   group_prior = NULL,
   group_prior_var = NULL,
   use_null_weight = TRUE,
+  get_susie_alpha = TRUE,
   snps_only = FALSE,
   ncore = 1,
   verbose = FALSE,
@@ -19,11 +20,15 @@ finemap_regions_noLD(
 \arguments{
 \item{region_data}{region_data to be finemapped}
 
-\item{group_prior}{a vector of two prior inclusion probabilities for SNPs and genes.}
+\item{group_prior}{a vector of two prior inclusion probabilities for SNPs and genes.
+If NULL, it will use uniform prior inclusion probabilities.}
 
-\item{group_prior_var}{a vector of two prior variances for SNPs and gene effects.}
+\item{group_prior_var}{a vector of two prior variances for SNPs and gene effects.
+If NULL, it will set prior variance = 50 as the default in \code{susie_rss}.}
 
 \item{use_null_weight}{If TRUE, allow for a probability of no effect in susie}
+
+\item{get_susie_alpha}{If TRUE, get susie alpha matrix from finemapping results.}
 
 \item{snps_only}{If TRUE, use only SNPs in the region data.}
 

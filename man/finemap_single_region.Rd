@@ -15,7 +15,8 @@ finemap_single_region(
   use_null_weight = TRUE,
   coverage = 0.95,
   min_abs_corr = 0.1,
-  include_cs_index = TRUE,
+  include_cs = TRUE,
+  get_susie_alpha = TRUE,
   snps_only = FALSE,
   force_compute_cor = FALSE,
   save_cor = FALSE,
@@ -38,9 +39,11 @@ finemap_single_region(
 
 \item{L}{the number of effects for susie during the fine mapping}
 
-\item{group_prior}{a vector of two prior inclusion probabilities for SNPs and genes.}
+\item{group_prior}{a vector of two prior inclusion probabilities for SNPs and genes.
+If NULL, it will use uniform prior inclusion probabilities.}
 
-\item{group_prior_var}{a vector of two prior variances for SNPs and gene effects.}
+\item{group_prior_var}{a vector of two prior variances for SNPs and gene effects.
+If NULL, it will set prior variance = 50 as the default in \code{susie_rss}.}
 
 \item{use_null_weight}{TRUE/FALSE. If TRUE, allow for a probability of no effect in susie}
 
@@ -48,7 +51,9 @@ finemap_single_region(
 
 \item{min_abs_corr}{Minimum absolute correlation allowed in a credible set.}
 
-\item{include_cs_index}{If TRUE, add cs_index to finemapping results.}
+\item{include_cs}{If TRUE, add credible sets (CS) to finemapping results.}
+
+\item{get_susie_alpha}{If TRUE, get susie alpha matrix from finemapping results.}
 
 \item{snps_only}{If TRUE, use only SNPs in the region data.}
 

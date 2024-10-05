@@ -20,14 +20,15 @@ test_that("merge_region_data_noLD works", {
                                                z_snp = z_snp,
                                                z_gene = z_gene,
                                                expand = TRUE,
-                                               maxSNP = 20000)
+                                               maxSNP = 20000,
+                                               ncore = 2)
   })
 
-  expect_equal(merge_region_res, expected_merge_region_res)
-  # expect_equal(merge_region_res$merged_region_data, expected_merge_region_res$merged_region_data)
-  # expect_equal(merge_region_res$merged_region_info, expected_merge_region_res$merged_region_info)
-  # expect_equal(merge_region_res$merged_snp_map, expected_merge_region_res$merged_snp_map)
-  # expect_equal(merge_region_res$merged_region_id_map, expected_merge_region_res$merged_region_id_map)
+  # expect_equal(merge_region_res, expected_merge_region_res)
+  expect_equal(merge_region_res$merged_region_data, expected_merge_region_res$merged_region_data)
+  expect_equal(merge_region_res$merged_region_info, expected_merge_region_res$merged_region_info)
+  expect_equal(merge_region_res$merged_snp_map, expected_merge_region_res$merged_snp_map)
+  expect_equal(merge_region_res$merged_region_id_map, expected_merge_region_res$merged_region_id_map)
 
 })
 
@@ -60,13 +61,14 @@ test_that("merge_region_data works", {
                                           z_snp = z_snp,
                                           z_gene = z_gene,
                                           expand = TRUE,
-                                          maxSNP = 20000)
+                                          maxSNP = 20000,
+                                          ncore = 2)
   })
 
-  expect_equal(merge_region_res, expected_merge_region_res)
-  # expect_equal(merge_region_res$merged_region_data, expected_merge_region_res$merged_region_data)
-  # expect_equal(merge_region_res$merged_region_info, expected_merge_region_res$merged_region_info)
-  # expect_equal(merge_region_res$merged_snp_map, expected_merge_region_res$merged_snp_map)
-  # expect_equal(merge_region_res$merged_region_id_map, expected_merge_region_res$merged_region_id_map)
+  # expect_equal(merge_region_res, expected_merge_region_res)
+  expect_equal(merge_region_res$merged_region_data, expected_merge_region_res$merged_region_data)
+  expect_equal(merge_region_res$merged_region_info, expected_merge_region_res$merged_region_info)
+  expect_equal(merge_region_res$merged_snp_map, expected_merge_region_res$merged_snp_map)
+  expect_equal(merge_region_res$merged_region_id_map, expected_merge_region_res$merged_region_id_map)
 
 })

@@ -14,6 +14,8 @@
 #'
 #' @param min_var minimum number of variables (SNPs and genes) in a region.
 #'
+#' @param min_gene minimum number of genes in a region.
+#'
 #' @param filter_L If TRUE, screening regions with estimated L > 0.
 #'
 #' @param filter_nonSNP_PIP If TRUE, screening regions with
@@ -57,6 +59,7 @@ screen_regions <- function(region_data,
                            group_prior_var = NULL,
                            L = 5,
                            min_var = 2,
+                           min_gene = 1,
                            filter_L = TRUE,
                            filter_nonSNP_PIP = FALSE,
                            min_nonSNP_PIP = 0.5,
@@ -122,6 +125,15 @@ screen_regions <- function(region_data,
     }
   }
 
+  # skip regions with fewer than min_gene genes
+  if (min_gene > 0) {
+    skip_region_ids <- region_ids[n_gids < min_gene]
+    if (length(skip_region_ids) > 0){
+      loginfo("Remove %d regions with number of genes < %d.", length(skip_region_ids), min_gene)
+      region_data[skip_region_ids] <- NULL
+    }
+  }
+
   # run finemapping for all regions with thinned SNPs using uniform prior
   # estimate L for each region
   # select regions with L > 0
@@ -157,22 +169,24 @@ screen_regions <- function(region_data,
   # select regions with total non-SNP PIPs > 0.5
   if (filter_nonSNP_PIP) {
     loginfo("Computing non-SNP PIPs ...")
-    finemap_screening_res <- finemap_regions(screened_region_data,
-                                             LD_map = LD_map,
-                                             weights = weights,
-                                             L = L,
-                                             group_prior = group_prior,
-                                             group_prior_var = group_prior_var,
-                                             include_cs_index = FALSE,
-                                             LD_format = LD_format,
-                                             LD_loader_fun = LD_loader_fun,
-                                             snpinfo_loader_fun = snpinfo_loader_fun,
-                                             ncore = ncore,
-                                             verbose = verbose,
-                                             ...)
+    res <- finemap_regions(screened_region_data,
+                           LD_map = LD_map,
+                           weights = weights,
+                           L = L,
+                           group_prior = group_prior,
+                           group_prior_var = group_prior_var,
+                           include_cs = FALSE,
+                           get_susie_alpha = FALSE,
+                           LD_format = LD_format,
+                           LD_loader_fun = LD_loader_fun,
+                           snpinfo_loader_fun = snpinfo_loader_fun,
+                           ncore = ncore,
+                           verbose = verbose,
+                           ...)
+    finemap_screening_res <- res$finemap_res
+    rm(res)
     # select regions based on total non-SNP PIPs
     all_nonSNP_PIPs <- compute_region_nonSNP_PIPs(finemap_screening_res, filter_cs = FALSE)
-
     screened_region_ids <- names(all_nonSNP_PIPs[all_nonSNP_PIPs >= min_nonSNP_PIP])
     screened_region_data <- region_data[screened_region_ids]
     loginfo("Selected %d regions with non-SNP PIP >= %s", length(screened_region_data), min_nonSNP_PIP)
@@ -201,6 +215,8 @@ screen_regions <- function(region_data,
 #'
 #' @param min_var minimum number of variables (SNPs and genes) in a region.
 #'
+#' @param min_gene minimum number of genes in a region.
+#'
 #' @param min_nonSNP_PIP If screening by non-SNP PIPs,
 #' regions with total non-SNP PIP >= \code{min_nonSNP_PIP}
 #' will be selected to run finemapping using full SNPs.
@@ -224,6 +240,7 @@ screen_regions_noLD <- function(region_data,
                                 group_prior = NULL,
                                 group_prior_var = NULL,
                                 min_var = 2,
+                                min_gene = 1,
                                 min_nonSNP_PIP = 0.5,
                                 ncore = 1,
                                 logfile = NULL,
@@ -274,15 +291,27 @@ screen_regions_noLD <- function(region_data,
     }
   }
 
+  # skip regions with fewer than min_gene genes
+  if (min_gene > 0) {
+    skip_region_ids <- region_ids[n_gids < min_gene]
+    if (length(skip_region_ids) > 0){
+      loginfo("Remove %d regions with number of genes < %d.", length(skip_region_ids), min_gene)
+      region_data[skip_region_ids] <- NULL
+    }
+  }
+
   # run finemapping for all regions with thinned SNPs using estimated priors
   # select regions with total non-SNP PIPs > 0.5
   loginfo("Computing non-SNP PIPs ...")
-  finemap_screening_res <- finemap_regions_noLD(region_data,
-                                                group_prior = group_prior,
-                                                group_prior_var = group_prior_var,
-                                                ncore = ncore,
-                                                verbose = verbose,
-                                                ...)
+  res <- finemap_regions_noLD(region_data,
+                              group_prior = group_prior,
+                              group_prior_var = group_prior_var,
+                              get_susie_alpha = FALSE,
+                              ncore = ncore,
+                              verbose = verbose,
+                              ...)
+  finemap_screening_res <- res$finemap_res
+  rm(res)
   # select regions based on total non-SNP PIPs
   all_nonSNP_PIPs <- compute_region_nonSNP_PIPs(finemap_screening_res, filter_cs = FALSE)
   screened_region_ids <- names(all_nonSNP_PIPs[all_nonSNP_PIPs >= min_nonSNP_PIP])

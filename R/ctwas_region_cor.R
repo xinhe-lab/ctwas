@@ -98,7 +98,7 @@ get_region_cor <- function(region_id,
       stop("LD_map is required for computing correlation matrices")
 
     # load LD matrix of the region
-    LD_matrix_files <- unlist(strsplit(LD_map$LD_file[LD_map$region_id == region_id], split = ";"))
+    LD_matrix_files <- unlist(strsplit(LD_map$LD_file[LD_map$region_id == region_id], split = ","))
     stopifnot(all(file.exists(LD_matrix_files)))
 
     if (length(LD_matrix_files) > 1) {
@@ -109,7 +109,7 @@ get_region_cor <- function(region_id,
     }
 
     # load SNP info of the region
-    SNP_info_files <- unlist(strsplit(LD_map$SNP_file[LD_map$region_id == region_id], split = ";"))
+    SNP_info_files <- unlist(strsplit(LD_map$SNP_file[LD_map$region_id == region_id], split = ","))
     stopifnot(all(file.exists(SNP_info_files)))
     snpinfo <- read_snp_info_files(SNP_info_files, snpinfo_loader_fun = snpinfo_loader_fun)
 

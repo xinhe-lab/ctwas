@@ -94,7 +94,7 @@ merge_region_data <- function(boundary_genes,
     new_region_id <- merged_regioninfo$region_id
 
     old_region_ids <- merged_region_id_map$old_region_ids[merged_region_id_map$region_id == new_region_id]
-    old_region_ids <- unlist(strsplit(old_region_ids, ";"))
+    old_region_ids <- unlist(strsplit(old_region_ids, ","))
 
     new_chrom <- merged_regioninfo$chrom
     new_start <- merged_regioninfo$start
@@ -223,7 +223,7 @@ merge_region_data_noLD <- function(boundary_genes,
     new_region_id <- merged_regioninfo$region_id
 
     old_region_ids <- merged_region_id_map$old_region_ids[merged_region_id_map$region_id == new_region_id]
-    old_region_ids <- unlist(strsplit(old_region_ids, ";"))
+    old_region_ids <- unlist(strsplit(old_region_ids, ","))
 
     new_chrom <- merged_regioninfo$chrom
     new_start <- merged_regioninfo$start
@@ -330,7 +330,7 @@ create_merged_snp_LD_map <- function(boundary_genes,
     new_region_stop <- max(df$region_stop)
     new_region_id <- paste0(new_region_chrom, "_", new_region_start, "_", new_region_stop)
 
-    old_region_ids <- unique(unlist(strsplit(df[df$merge_label == merge_label, "region_id"], split = ";")))
+    old_region_ids <- unique(unlist(strsplit(df[df$merge_label == merge_label, "region_id"], split = ",")))
 
     merged_region_info <- rbind(merged_region_info,
                                 data.frame(chrom = new_region_chrom,
@@ -338,8 +338,8 @@ create_merged_snp_LD_map <- function(boundary_genes,
                                            stop = new_region_stop,
                                            region_id = new_region_id))
 
-    old_LD_files <- paste(LD_map$LD_file[match(old_region_ids, LD_map$region_id)], collapse = ";")
-    old_SNP_files <- paste(LD_map$SNP_file[match(old_region_ids, LD_map$region_id)], collapse = ";")
+    old_LD_files <- paste(LD_map$LD_file[match(old_region_ids, LD_map$region_id)], collapse = ",")
+    old_SNP_files <- paste(LD_map$SNP_file[match(old_region_ids, LD_map$region_id)], collapse = ",")
     merged_LD_map <- rbind(merged_LD_map,
                            data.frame(region_id = new_region_id,
                                       LD_file = old_LD_files,
@@ -349,7 +349,7 @@ create_merged_snp_LD_map <- function(boundary_genes,
 
     merged_region_id_map <- rbind(merged_region_id_map,
                                   data.frame(region_id = new_region_id,
-                                             old_region_ids = paste(old_region_ids, collapse = ";")))
+                                             old_region_ids = paste(old_region_ids, collapse = ",")))
 
   }
 
@@ -382,7 +382,7 @@ create_merged_snp_map <- function(boundary_genes,
     new_region_stop <- max(df$region_stop)
     new_region_id <- paste0(new_region_chrom, "_", new_region_start, "_", new_region_stop)
 
-    old_region_ids <- unique(unlist(strsplit(df[df$merge_label == merge_label, "region_id"], split = ";")))
+    old_region_ids <- unique(unlist(strsplit(df[df$merge_label == merge_label, "region_id"], split = ",")))
 
     merged_region_info <- rbind(merged_region_info,
                                 data.frame(chrom = new_region_chrom,
@@ -394,7 +394,7 @@ create_merged_snp_map <- function(boundary_genes,
 
     merged_region_id_map <- rbind(merged_region_id_map,
                                   data.frame(region_id = new_region_id,
-                                             old_region_ids = paste(old_region_ids, collapse = ";")))
+                                             old_region_ids = paste(old_region_ids, collapse = ",")))
 
   }
 
@@ -412,7 +412,7 @@ update_merged_regions_finemap_res <- function(finemap_res,
                                               merged_region_id_map){
   for(region_id in merged_region_id_map$region_id){
     old_region_ids <- merged_region_id_map$old_region_ids[merged_region_id_map$region_id == region_id]
-    old_region_ids <- unlist(strsplit(old_region_ids, ";"))
+    old_region_ids <- unlist(strsplit(old_region_ids, ","))
     finemap_res[finemap_res$region_id %in% old_region_ids, ] <-
       finemap_merged_regions_res[finemap_merged_regions_res$region_id==region_id, ]
   }

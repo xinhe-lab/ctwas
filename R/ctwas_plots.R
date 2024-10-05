@@ -82,7 +82,7 @@
 #'
 #' @importFrom magrittr %>%
 #' @importFrom locuszoomr locus gg_genetracks
-#' @importFrom logging loginfo
+#' @importFrom logging loginfo logwarn
 #' @importFrom cowplot plot_grid theme_cowplot
 #' @importFrom ggplot2 ggplot
 #' @importFrom ggplot2 aes
@@ -126,7 +126,7 @@ make_locusplot <- function(finemap_res,
                            color_pval_by = c("cs", "LD", "none"),
                            color_pip_by = c("cs", "LD", "none"),
                            LD.colors = c("grey", "blue", "purple", "salmon"),
-                           cs.colors = c("grey", "firebrick", "dodgerblue", "forestgreen", "darkmagenta", "darkorange"),
+                           cs.colors = c("firebrick", "dodgerblue", "forestgreen", "darkmagenta", "darkorange"),
                            focal.colors = c("grey", "salmon"),
                            label_QTLs = TRUE,
                            highlight_pval = NULL,
@@ -267,13 +267,17 @@ make_locusplot <- function(finemap_res,
 
   # set colors for credible sets
   if (color_pval_by == "cs" || color_pip_by == "cs") {
-    if (is.null(finemap_region_res$cs_index)){
-      stop("'cs_index' not available. Cannot coloring by cs!")
+    if (is.null(finemap_region_res$cs)){
+      logwarn("'cs' not available. Cannot coloring by cs!")
       color_pval_by[color_pval_by == "cs"] <- "none"
       color_pip_by[color_pip_by == "cs"] <- "none"
     } else {
-      cs_colors <- c("0" = cs.colors[1], "1" = cs.colors[2], "2" = cs.colors[3], "3" = cs.colors[4], "4" = cs.colors[5], "5" = cs.colors[6])
-      finemap_region_res$cs_index <- factor(finemap_region_res$cs_index, levels = names(cs_colors))
+      cs_colors <- c("L1" = cs.colors[1], "L2" = cs.colors[2], "L3" = cs.colors[3], "L4" = cs.colors[4], "L5" = cs.colors[5])
+      # if there are multiple CSs, use the first one
+      if (any(grepl(",", finemap_region_res$cs))){
+        finemap_region_res$cs <- sapply(strsplit(finemap_region_res$cs, ","), "[[", 1)
+      }
+      finemap_region_res$cs <- factor(finemap_region_res$cs, levels = names(cs_colors))
     }
   }
 
@@ -358,7 +362,7 @@ make_locusplot <- function(finemap_res,
 
   if (color_pval_by == "cs") {
     p_pval <- p_pval +
-      geom_point(aes(color=.data$cs_index)) +
+      geom_point(aes(color=.data$cs)) +
       scale_color_manual(values = cs_colors) +
       labs(color = "CS") +
       guides(shape = guide_legend(order = 1, override.aes = list(size = legend.sizes)),
@@ -387,10 +391,10 @@ make_locusplot <- function(finemap_res,
     loginfo("Making PIP panel ...")
   }
   pip_plot_data <- loc$data
-  # limit to credible sets (if cs_index is available)
-  if (filter_cs && !is.null(pip_plot_data$cs_index)) {
+  # limit to credible sets (if cs is available)
+  if (filter_cs && !is.null(pip_plot_data$cs)) {
     loginfo("Limit PIPs to credible sets")
-    pip_plot_data <- pip_plot_data[pip_plot_data$cs_index!=0,]
+    pip_plot_data <- pip_plot_data[!is.na(pip_plot_data$cs),]
   }
 
   p_pip <- ggplot(pip_plot_data, aes(x=.data$pos/1e6, y=.data$susie_pip, shape=.data$type,
@@ -417,7 +421,7 @@ make_locusplot <- function(finemap_res,
 
   if (color_pip_by == "cs") {
     p_pip <- p_pip +
-      geom_point(aes(color=.data$cs_index)) +
+      geom_point(aes(color=.data$cs)) +
       scale_color_manual(values = cs_colors) +
       labs(color = "CS")
   } else if (color_pip_by == "LD") {
@@ -518,6 +522,8 @@ make_locusplot <- function(finemap_res,
 
 }
 
+
+
 #' @title Make convergence plots for the estimated parameters
 #'
 #' @param param a list of cTWAS parameter estimation result from \code{est_param}
@@ -583,6 +589,7 @@ make_convergence_plots <- function(param,
                    group = rep(rownames(group_prior_iters), each=ncol(group_prior_iters)))
   factor_levels <- c(setdiff(rownames(group_prior_iters), "SNP"), "SNP")
   df$group <- factor(df$group, levels = factor_levels)
+  df <- na.omit(df)
 
   p_pi <- ggplot(df, aes(x=.data$niter, y=.data$value, group=.data$group, color=.data$group)) +
     geom_line() +
@@ -603,6 +610,7 @@ make_convergence_plots <- function(param,
                    value = unlist(lapply(1:nrow(group_prior_var_iters), function(x){group_prior_var_iters[x,]})),
                    group = rep(rownames(group_prior_var_iters), each=ncol(group_prior_var_iters)))
   df$group <- factor(df$group, levels = factor_levels)
+  df <- na.omit(df)
 
   p_sigma2 <- ggplot(df, aes(x=.data$niter, y=.data$value, group=.data$group, color=.data$group)) +
     geom_line() +
@@ -623,6 +631,7 @@ make_convergence_plots <- function(param,
                    value = unlist(lapply(1:nrow(enrichment_iters), function(x){enrichment_iters[x,]})),
                    group = rep(rownames(enrichment_iters), each=ncol(enrichment_iters)))
   df$group <- factor(df$group, levels = factor_levels[factor_levels!="SNP"])
+  df <- na.omit(df)
 
   p_enrich <- ggplot(df, aes(x=.data$niter, y=.data$value, group=.data$group, color=.data$group)) +
     geom_line() +
@@ -643,6 +652,7 @@ make_convergence_plots <- function(param,
                    value = unlist(lapply(1:nrow(group_pve_iters), function(x){group_pve_iters[x,]})),
                    group = rep(rownames(group_pve_iters), each=ncol(group_pve_iters)))
   df$group <- factor(df$group, levels = factor_levels)
+  df <- na.omit(df)
 
   p_pve <- ggplot(df, aes(x=.data$niter, y=.data$value, group=.data$group, color=.data$group)) +
     geom_line() +

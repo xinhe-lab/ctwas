@@ -49,26 +49,22 @@ wget https://gwas.mrcieu.ac.uk/files/ukb-d-30780_irnt/ukb-d-30780_irnt.vcf.gz
 ```
 
 
-cTWAS needs a data frame `z_snp` as input, with columns "id", "A1", "A2", "z". Each row has data of a variant.  We use rsIDs as the variant IDs. The naming of variant IDs should be consistent between summary statistics, LD reference and weights. `A1` is the alternate allele, and `A2` is the reference allele. `z` is the Z-scores of variants in GWAS. In the GWAS summary statistics VCF file we downloaded here, Z-scores are not available, so we need to compute them from the effect sizes and standard errors. 
+cTWAS needs a data frame `z_snp` as input, with columns "id", "A1", "A2", "z". Each row has data of a variant.  We use the function `read_gwas()` to read GWAS summary statistics and convert it to the `z_snp` data frame. The variant IDs (`id`) in our reference are in the UK Biobank format ("chr:pos_ref_alt"). The naming of variant IDs should be consistent between GWAS summary statistics, LD reference and weights. See the section "Data harmonization" below on how to convert the formats of variant IDs.  `A1` is the alternate allele, and `A2` is the reference allele. `z` is the Z-scores of variants in GWAS. In the GWAS summary statistics VCF file we downloaded here, Z-scores are not available, so we need to compute them from the effect sizes and standard errors. 
 
-Let us read the GWAS summary statistics and convert it to the `z_snp` data frame. We will also collect the sample size, which will be used later. 
- 
-```{r read_sumstats, eval=FALSE}
-z_snp <- VariantAnnotation::readVcf("ukb-d-30780_irnt.vcf.gz")
-z_snp <- as.data.frame(gwasvcf::vcf_to_tibble(z_snp))
-
-z_snp$Z <- z_snp$ES/z_snp$SE
-
-gwas_n <- as.numeric(names(sort(table(z_snp$SS),decreasing=TRUE)[1]))
-cat("gwas_n =", gwas_n, "\n")
-
-
-z_snp <- z_snp[,c("rsid", "ALT", "REF", "Z")]
-colnames(z_snp) <- c("id", "A1", "A2", "z")
+```{r read_gwas, eval=FALSE}
+gwas <- VariantAnnotation::readVcf("ukb-d-30780_irnt.vcf.gz")
+gwas <- as.data.frame(gwasvcf::vcf_to_tibble(gwas))
+z_snp <- read_gwas(gwas, id = 'rsid', A1 = 'ALT', A2 = 'REF', 
+                   beta = 'ES', se = 'SE')
 ```
 
 
-If your GWAS summary statistics is of other formats, please extract relevant columns (rsid, alternative allele, reference allele, Z-score) and convert it to the format shown above. 
+We also collect the sample size, which will be used later. 
+```{r gwas_n, eval=FALSE}
+gwas_n <- as.numeric(names(sort(table(gwas$SS),decreasing=TRUE)[1]))
+cat("gwas_n =", gwas_n, "\n")
+```
+
 
 ## Prediction models
 
@@ -200,11 +196,14 @@ The `preprocess_z_snp()` function harmonizes GWAS z-scores and the reference dat
 ```{r preprocess_z_snp, eval=FALSE}
 z_snp <- preprocess_z_snp(z_snp, snp_map, 
                           drop_multiallelic = TRUE, 
-                          drop_strand_ambig = TRUE)
+                          drop_strand_ambig = TRUE,
+                          varID_converter_fun = convert_to_ukb_varIDs)
 ```
 
 
 It will filter out variants not included in the reference data. It will also drop multiallelic variants and strand ambiguous variants, by default. You can change these by setting the options `drop_multiallelic` and `drop_strand_ambig`.
+
+We use a converter function `convert_to_ukb_varIDs()` that converts variant IDs from the Open GWAS format to UK Biobank format. To convert the formats for other variant ID formats, you can pass your own converter function to the `varID_converter_fun` argument. 
 
 ### Harmonizing prediction models and the reference data
 
@@ -227,6 +226,7 @@ weights_liver <- preprocess_weights(weight_liver_file,
                                     scale_predictdb_weights = TRUE,
                                     load_predictdb_LD = TRUE,
                                     filter_protein_coding_genes = TRUE,
+                                    varID_converter_fun = convert_to_ukb_varIDs,
                                     ncore = 6)
 
 weights_adipose <- preprocess_weights(weight_adipose_file,
@@ -241,6 +241,7 @@ weights_adipose <- preprocess_weights(weight_adipose_file,
                                       scale_predictdb_weights = TRUE,
                                       load_predictdb_LD = TRUE,
                                       filter_protein_coding_genes = TRUE,
+                                      varID_converter_fun = convert_to_ukb_varIDs,
                                       ncore = 6)
 
 weights <- c(weights_liver, weights_adipose)
@@ -251,7 +252,9 @@ This function returns `weights`, which contains the effect sizes of the variants
 
 In the function above, we specify the weight format in `weight_format`. We use PredictDB format by default, and we recommend [MASHR-based models](https://predictdb.org/post/2021/07/21/gtex-v8-models-on-eqtl-and-sqtl/#mashr-based-models). We set `load_predictdb_LD = TRUE` to load pre-computed covariances between variants in PredictDB weights (`.txt.gz`). PredictDB weights assume that variant genotypes are not standardized, but our implementation assumes standardized variant genotypes. Thus, we set `scale_predictdb_weights = TRUE`, to scale PredictDB weights by the variance before computing Z-scores of molecular traits. If weights are already on the standardized scale (e.g. FUSION weights or PredictDB weights converted from eQTLs), this scaling should be turned off.
 
-We limit variants in weights, reference (`snp_map`) and GWAS SNPs (`z_snp$id`). We drop strand ambiguous variants (`drop_strand_ambig = TRUE`) by default. We could limit weights to protein coding genes (`filter_protein_coding_genes = TRUE`) based on the `gene_type` information in the "extra table" of PredictDB weights. We could set `ncore` to parallelize the computation.
+We limit variants in weights, reference (`snp_map`) and GWAS SNPs (`z_snp$id`). We drop strand ambiguous variants (`drop_strand_ambig = TRUE`) by default. We could limit weights to protein coding genes (`filter_protein_coding_genes = TRUE`) based on the `gene_type` information in the "extra table" of PredictDB weights. We set `ncore` to parallelize the computation.
+
+We use a converter function `convert_to_ukb_varIDs()` that converts variant IDs from the PredictDB format to UK Biobank format. To convert the formats for other variant ID formats, you can pass your own converter function to the `varID_converter_fun` argument. 
 
 [reference]: https://xinhe-lab.github.io/ctwas/reference/index.html
 [UKBB_LD_ref]: https://uchicago.box.com/s/jqocacd2fulskmhoqnasrknbt59x3xkn

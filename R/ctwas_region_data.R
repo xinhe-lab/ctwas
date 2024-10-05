@@ -351,7 +351,7 @@ adjust_boundary_genes <- function(boundary_genes,
   # assign boundary gene to the region with max weights
   for (i in 1:nrow(boundary_genes)){
     gname <- boundary_genes[i, "id"]
-    region_ids <- unlist(strsplit(boundary_genes[i, "region_id"], split = ";"))
+    region_ids <- unlist(strsplit(boundary_genes[i, "region_id"], split = ","))
     wgt <- weights[[gname]][["wgt"]]
 
     region_sum_wgt <- sapply(region_ids, function(region_id){
