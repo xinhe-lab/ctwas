@@ -14,3 +14,18 @@ test_that("preprocess_z_snp works", {
   expect_equal(preprocessed_z_snp, expected_preprocessed_z_snp)
 
 })
+
+test_that("read_gwas works", {
+
+  gwas <- readRDS(system.file("extdata/sample_data", "LDL_example.gwas.sumstats.RDS", package = "ctwas"))
+  snp_map <- readRDS(system.file("extdata/sample_data", "LDL_example.snp_map.RDS", package = "ctwas"))
+  expected_z_snp <- readRDS(system.file("extdata/sample_data", "LDL_example.z_snp.RDS", package = "ctwas"))
+
+  capture.output({
+    z_snp <- read_gwas(gwas, id = 'rsid', A1 = 'ALT', A2 = 'REF',
+                       beta = 'ES', se = 'SE')
+  })
+
+  expect_equal(z_snp, expected_z_snp)
+
+})

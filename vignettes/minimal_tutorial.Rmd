@@ -54,16 +54,20 @@ The "no-LD" version of cTWAS requires several input datasets: (i) GWAS summary s
 
 For GWAS summary statistics, we use sample GWAS data of LDL on chromosome 16. These data are provided in the R package. 
 
-Here we assume the `z_snp` (a data frame of GWAS summary statistics) is available. Please see the section "GWAS Z-score"  in the ["Preparing cTWAS input data"][preparing_input_data_tutorial] tutorial for details. 
+We use the function `read_gwas()` to read GWAS summary statistics and convert it to the `z_snp` data frame. The variant IDs (`id`) in our reference are in the UK Biobank format ("chr:pos_ref_alt"). The naming of variant IDs should be consistent between GWAS, LD reference and weights. See the section "Data harmonization" below on how to convert the formats of variant IDs. In the GWAS summary statistics here, Z-scores are not available, so we need to compute them from the effect sizes and standard errors. Please see the section "GWAS Z-scores"  in the ["Preparing cTWAS input data"][preparing_input_data_tutorial] tutorial for more details. 
 
-```{r load_z_snp}
-z_snp <- readRDS(system.file("extdata/sample_data", "LDL_example.z_snp.RDS", package = "ctwas"))
+```{r read_gwas}
+gwas <- readRDS(system.file("extdata/sample_data", "LDL_example.gwas.sumstats.RDS", package = "ctwas"))
+head(gwas)
+z_snp <- read_gwas(gwas, id = 'rsid', A1 = 'ALT', A2 = 'REF', beta = 'ES', se = 'SE')
+head(z_snp)
 ```
 
 
-We also need the GWAS sample size for summarizing the cTWAS result.
+We also collect the sample size, which will be used later. 
 ```{r gwas_n}
-gwas_n <- 343621
+gwas_n <- as.numeric(names(sort(table(gwas$SS),decreasing=TRUE)[1]))
+cat("gwas_n =", gwas_n, "\n")
 ```
 
 
@@ -112,9 +116,13 @@ We set `ncore` to parallelize the computation.
 
 The GWAS summary statistics needs to be “harmonized” before use. This means, for example, the allele definitions need to be consistent with the reference SNP data in `snp_map`. Harmonization is achieved through the `preprocess_z_snp()` function.  We filter out multiallelic variants and strand-ambiguous variants by default. Variants not included in the reference SNP data will also be filtered out. 
 
+The naming of variant IDs should be consistent between GWAS, LD reference and weights. We use a converter function `convert_to_ukb_varIDs()` that converts variant IDs in GWAS from the Open GWAS format ("chr_pos_ref_alt") to our reference format from UK Biobank ("chr:pos_ref_alt"). To convert the formats for other variant ID formats, you can pass your own converter function to the `varID_converter_fun` argument. 
+
 ```{r preprocess_z_snp}
-z_snp <- preprocess_z_snp(z_snp, snp_map)
+z_snp <- preprocess_z_snp(z_snp, snp_map,
+                          varID_converter_fun = convert_to_ukb_varIDs)
 ```
+
 
 
 ###  Prediction models of molecular traits 
@@ -125,6 +133,7 @@ In this version of cTWAS, we allow the joint analysis of multiple groups of mole
 
 In this example, we use liver and subcutaneous adipose gene expression models. We specify the `type` and `context` arguments for each weight file. We preprocess each of the weight files, and then simply concatenate them to `weights`, a list object containing all processed weights from different types or contexts.
 
+Similar to `preprocess_z_snp()`, we use a converter function `convert_to_ukb_varIDs()` that converts variant IDs in weights from the PredictDB format ("chr_pos_ref_alt_build") to our reference format from UK Biobank ("chr:pos_ref_alt"). To convert the formats for other variant ID formats, you can pass your own converter function to the `varID_converter_fun` argument. 
 
 ```{r preprocess_weights}
 weight_liver_file <- system.file("extdata/sample_data", "expression_Liver.db", package = "ctwas")
@@ -134,6 +143,7 @@ weights_liver <- preprocess_weights(weight_liver_file,
                                     snp_map,
                                     type = "expression",
                                     context = "liver",
+                                    varID_converter_fun = convert_to_ukb_varIDs,
                                     ncore = 6)
 
 weight_adipose_file <- system.file("extdata/sample_data", "expression_Adipose_Subcutaneous.db", package = "ctwas")
@@ -143,6 +153,7 @@ weights_adipose <- preprocess_weights(weight_adipose_file,
                                       snp_map,
                                       type = "expression",
                                       context = "adipose", 
+                                      varID_converter_fun = convert_to_ukb_varIDs,
                                       ncore = 6)
 
 weights <- c(weights_liver, weights_adipose)
@@ -184,7 +195,7 @@ screen_res <- ctwas_res$screen_res
 
 It also produces other output: 
 
-+ `susie_alpha_res`: a data frame with finemapping results of molecular traits and the single effect probabilities (alpha) in all credible sets. This will be used later when computing combined gene PIPs. 
++ `susie_alpha_res`: a data frame with finemapping results of molecular traits and the single effect probabilities (alpha) in all credible sets. This will be used later when summarizing the cTWAS result. 
 
 + `boundary_genes`: the genes/molecular traits whose weights cross region boundaries (we will need these in the post-processing step). 
 
