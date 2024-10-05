@@ -125,6 +125,8 @@ preprocess_z_snp <- function(z_snp,
     loginfo("%d variants left after preprocessing and harmonization.", length(z_snp$id))
   }
 
+  rownames(z_snp) <- NULL
+
   return(z_snp)
 }
 
