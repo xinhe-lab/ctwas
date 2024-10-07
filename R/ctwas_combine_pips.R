@@ -205,6 +205,10 @@ compute_combined_pips <- function(susie_alpha_res,
   # Only keep gene results
   susie_alpha_res <- susie_alpha_res[susie_alpha_res$group!="SNP",,drop=FALSE]
 
+  susie_alpha_res$set_id <- paste0(susie_alpha_res$region_id, ".", susie_alpha_res$susie_set)
+  susie_alpha_res$cs_id <- paste0(susie_alpha_res$region_id, ".", susie_alpha_res$cs)
+  susie_alpha_res$cs_id[which(is.na(susie_alpha_res$cs))] <- ""
+
   if (filter_cs) {
     # limit to genes in credible sets
     susie_alpha_res <- susie_alpha_res[!is.na(susie_alpha_res$cs),,drop=FALSE]
@@ -214,10 +218,6 @@ compute_combined_pips <- function(susie_alpha_res,
     # only keep alpha in credible sets
     susie_alpha_res <- susie_alpha_res[susie_alpha_res$in_cs == TRUE,,drop=FALSE]
   }
-
-  susie_alpha_res$set_id <- paste0(susie_alpha_res$region_id, ".", susie_alpha_res$susie_set)
-  susie_alpha_res$cs_id <- paste0(susie_alpha_res$region_id, ".", susie_alpha_res$cs)
-  susie_alpha_res$cs_id[which(is.na(susie_alpha_res$cs))] <- ""
 
   if (method == "sum") {
     combined_gene_pips <- susie_alpha_res %>%
