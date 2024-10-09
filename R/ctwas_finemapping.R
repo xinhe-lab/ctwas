@@ -90,6 +90,9 @@ finemap_regions <- function(region_data,
   if (!inherits(region_data,"list"))
     stop("'region_data' should be a list.")
 
+  if (anyDuplicated(names(region_data)))
+    logwarn("Duplicated names of region_data found! Please use unique names for region_data!")
+
   if (missing(LD_map))
     stop("'LD_map' is required when running with LD!")
 
@@ -130,7 +133,6 @@ finemap_regions <- function(region_data,
   }
 
   region_ids <- names(region_data)
-
   res <- mclapply_check(region_ids, function(region_id){
     finemap_single_region(region_data = region_data,
                           region_id = region_id,
@@ -196,7 +198,7 @@ finemap_regions <- function(region_data,
 #'
 #' @return a data frame of cTWAS finemapping results.
 #'
-#' @importFrom logging addHandler loginfo writeToFile
+#' @importFrom logging addHandler loginfo logwarn writeToFile
 #' @importFrom parallel mclapply
 #'
 #' @export
@@ -221,6 +223,9 @@ finemap_regions_noLD <- function(region_data,
   if (!inherits(region_data,"list"))
     stop("'region_data' should be a list!")
 
+  if (anyDuplicated(names(region_data)))
+    logwarn("Duplicated names of region_data found! Please use unique names for region_data!")
+
   if (verbose) {
     if (is.null(group_prior)) {
       loginfo("Use uniform prior.")
@@ -231,7 +236,6 @@ finemap_regions_noLD <- function(region_data,
   }
 
   region_ids <- names(region_data)
-
   res <- mclapply_check(region_ids, function(region_id){
     finemap_single_region_noLD(region_data = region_data,
                                region_id = region_id,
@@ -592,7 +596,8 @@ fast_finemap_single_region_L1_noLD <- function(region_data,
   rm(regiondata)
 
   if (length(z) < 2) {
-    stop(paste(length(z), "variables in the region. At least two variables in a region are needed to run susie"))
+    stop(paste(length(z), "variables in the region", region_id, "\n",
+               "At least two variables in a region are needed to run susie"))
   }
 
   # update priors, prior variances and null_weight

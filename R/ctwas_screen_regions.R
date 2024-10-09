@@ -232,7 +232,7 @@ screen_regions <- function(region_data,
 #' @return a list, containing a data frame of selected region data,
 #' and a data frame of screening summary for all regions.
 #'
-#' @importFrom logging addHandler loginfo writeToFile
+#' @importFrom logging addHandler loginfo logwarn writeToFile
 #'
 #' @export
 #'
@@ -267,6 +267,9 @@ screen_regions_noLD <- function(region_data,
   if (!inherits(region_data,"list"))
     stop("'region_data' should be a list.")
 
+  if (anyDuplicated(names(region_data)))
+    logwarn("Duplicated names of region_data found! Please use unique names for region_data!")
+
   # adjust group_prior to account for thin argument
   if (!is.null(group_prior)){
     group_prior["SNP"] <- group_prior["SNP"]/thin
@@ -274,6 +277,7 @@ screen_regions_noLD <- function(region_data,
 
   # create a data frame for screening summary
   region_ids <- names(region_data)
+
   n_gids <- sapply(region_data, function(x){length(x$gid)})
   n_sids <- sapply(region_data, function(x){length(x$sid)})
   screen_summary <- data.frame(region_id = region_ids,
@@ -287,7 +291,7 @@ screen_regions_noLD <- function(region_data,
     skip_region_ids <- region_ids[(n_sids + n_gids) < min_var]
     if (length(skip_region_ids) > 0){
       loginfo("Skip %d regions with number of variables < %d.", length(skip_region_ids), min_var)
-      region_data[skip_region_ids] <- NULL
+      region_data <- region_data[!names(region_data) %in% skip_region_ids]
     }
   }
 
@@ -295,8 +299,8 @@ screen_regions_noLD <- function(region_data,
   if (min_gene > 0) {
     skip_region_ids <- region_ids[n_gids < min_gene]
     if (length(skip_region_ids) > 0){
-      loginfo("Remove %d regions with number of genes < %d.", length(skip_region_ids), min_gene)
-      region_data[skip_region_ids] <- NULL
+      loginfo("Skip %d regions with number of genes < %d.", length(skip_region_ids), min_gene)
+      region_data <- region_data[!names(region_data) %in% skip_region_ids]
     }
   }
 
