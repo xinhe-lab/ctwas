@@ -34,7 +34,7 @@
 #'
 #' @param ... Additional arguments of \code{susie_rss}.
 #'
-#' @importFrom logging addHandler loginfo writeToFile
+#' @importFrom logging addHandler loginfo logwarn writeToFile
 #'
 #' @return a list with estimated parameters
 #'
@@ -65,9 +65,11 @@ est_param <- function(
   # check inputs
   group_prior_var_structure <- match.arg(group_prior_var_structure)
 
-  if (!inherits(region_data,"list")){
+  if (!inherits(region_data,"list"))
     stop("'region_data' should be a list.")
-  }
+
+  if (anyDuplicated(names(region_data)))
+    logwarn("Duplicated names of region_data found! Please use unique names for region_data!")
 
   # extract thin value from region_data
   thin <- unique(sapply(region_data, "[[", "thin"))
@@ -103,7 +105,7 @@ est_param <- function(
     skip_region_ids <- region_ids[(n_sids + n_gids) < min_var]
     if (length(skip_region_ids) > 0){
       loginfo("Skip %d regions with number of variables < %d.", length(skip_region_ids), min_var)
-      region_data[skip_region_ids] <- NULL
+      region_data <- region_data[!names(region_data) %in% skip_region_ids]
     }
   }
 
@@ -111,8 +113,8 @@ est_param <- function(
   if (min_gene > 0) {
     skip_region_ids <- region_ids[n_gids < min_gene]
     if (length(skip_region_ids) > 0){
-      loginfo("Remove %d regions with number of genes < %d.", length(skip_region_ids), min_gene)
-      region_data[skip_region_ids] <- NULL
+      loginfo("Skip %d regions with number of genes < %d.", length(skip_region_ids), min_gene)
+      region_data <- region_data[!names(region_data) %in% skip_region_ids]
     }
   }
 
