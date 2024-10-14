@@ -71,3 +71,4 @@ test_that("finemap_regions works", {
   expect_equal(susie_alpha_res$susie_alpha, expected_susie_alpha_res$susie_alpha)
 
 })
+

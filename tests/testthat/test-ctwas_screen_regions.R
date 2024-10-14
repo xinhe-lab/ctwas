@@ -107,7 +107,7 @@ test_that("screen_regions (filter by non-SNP PIPs) works", {
                                  filter_L = FALSE,
                                  filter_nonSNP_PIP = TRUE,
                                  min_nonSNP_PIP = 0.5,
-                                 ncore = 1)
+                                 ncore = 2)
     screened_region_data <- screen_res$screened_region_data
 
     # expand selected regions with all SNPs

@@ -69,6 +69,7 @@ ctwas_res <- ctwas_sumstats(z_snp,
                             snp_map, 
                             thin = 0.1,
                             maxSNP = 20000,
+                            min_group_size = 100, 
                             group_prior_var_structure = "shared_type", 
                             filter_L = TRUE,
                             filter_nonSNP_PIP = FALSE,
@@ -89,6 +90,8 @@ Important arguments that control how this function is executed:
 + `thin`: the fraction of SNPs used to estimate parameters and screen regions likely containing signals. By sampling a fraction of SNPs, this speeds up computation. By default, we use `thin = 0.1`, i.e. 10% of the SNPs. To use all SNPs in parameter estimation and screening regions, one could change the `thin` parameter to 1. 
 
 + `maxSNP`: maximum number of SNPs in a region (e.g. 20000). Default is Inf, no limit. This can be useful if there are too many SNPs in a region and you don't have enough memory to run the program.
+
++ `min_group_size`: minimum number of variables in a region (default is 100). Groups with fewer variables will be removed from cTWAS analysis, because parameters cannot be reliably estimated for groups with too few variables.  
 
 + `group_prior_var_stucture`: options to control how the effect size variance parameters are shared among groups. For example, "shared_type" (default option) allows all groups in one molecular QTL type to share the same variance parameter.  "independent" allows all groups to have their own separate variance parameters. More options can be found in the "Estimating parameters" section below.
 
@@ -126,6 +129,11 @@ z_gene <- compute_gene_z(z_snp, weights, ncore = 6)
 ```
 
 
+We recommend filtering out groups with too few variables (molecular traits), as parameters cannot be reliably estimated for groups with too few variables. 
+```{r filter_z_gene_by_group_size, eval=FALSE}
+z_gene <- filter_z_gene_by_group_size(z_gene, min_group_size = 100)
+```
+
 
 ### Assemble input data for the regions
 
@@ -138,14 +146,15 @@ res <- assemble_region_data(region_info,
                             weights, 
                             snp_map,
                             thin = 0.1, 
-                            maxSNP = 20000, 
+                            maxSNP = 20000,
+                            min_group_size = 100, 
                             ncore = 6)
 region_data <- res$region_data
 boundary_genes <- res$boundary_genes
 ```
 
 
-The function has a few arguments to control its behavior. The `thin` argument randomly selects a subset of variants (10% when thin = 0.1) to use during parameter estimation and screening for candidate regions. This helps reduce computation. If `thin = 1`, it will use all the SNPs. `maxSNP` sets a maximum on the number of variants that can be in a single region to prevent memory issues during fine-mapping. If the number of SNPs in a region is more than `maxSNP`, It will choose `maxSNP` SNPs (randomly, by default) in the region. `ncore` specifies the number of cores to use when parallelizing over regions.
+The function has a few arguments to control its behavior. The `thin` argument randomly selects a subset of variants (10% when thin = 0.1) to use during parameter estimation and screening for candidate regions. This helps reduce computation. If `thin = 1`, it will use all the SNPs. `maxSNP` sets a maximum on the number of variants that can be in a single region to prevent memory issues during fine-mapping. If the number of SNPs in a region is more than `maxSNP`, It will choose `maxSNP` SNPs (randomly, by default) in the region. `min_group_size` sets the minimum number of variables in a group. Groups with fewer variables will be removed from the analysis, because cTWAS cannot reliably estimate parameters for groups with too few variables.  `ncore` specifies the number of cores to use when parallelizing over regions.
 
 This function returns `region_data`, a list object containing input data (IDs of molecular traits and variants, their Z-scores, genomic boundaries, etc.) for each of the regions. It also returns 
 a data frame `boundary_genes`, containing the information of molecular traits whose weights cross region boundaries. The information would be used in later analysis and post-processing. 
@@ -163,13 +172,14 @@ As described in the Introduction, cTWAS can analyze multiple groups of molecular
 - "shared_all" allows all groups, including SNPs, to share the same variance parameter.
 - "independent" allows all groups to have their own separate variance parameters.
 
-This step will run the EM algorithm to estimate parameters and return the estimated parameters (`group_prior`, `group_prior_var`, etc.). For technical reasons (see Methods of the cTWAS paper), it will run two rounds of EM algorithm. In the first round, it uses fewer iterations (`niter_prefit=3` by default) to get rough parameter estimates, and using these values, select regions for the analysis in the second run of EM. We use more iterations in the second round (`niter=30` by default) to get accurate parameter estimates. 
+This step will run the EM algorithm to estimate parameters and return the estimated parameters (`group_prior`, `group_prior_var`, etc.). For technical reasons (see Methods of the cTWAS paper), it will run two rounds of EM algorithm. In the first round, it uses fewer iterations (`niter_prefit=3` by default) to get rough parameter estimates, and using these values, select regions for the analysis in the second run of EM. We use more iterations in the second round (`niter=30` by default) to get accurate parameter estimates. `min_group_size` sets the minimum number of variables in a group, as parameters cannot be reliably estimated for groups with too few variables. 
 
 ```{r est_param, eval=FALSE}
 param <- est_param(region_data, 
                    group_prior_var_structure = "shared_type", 
                    niter_prefit = 3,
                    niter = 30, 
+                   min_group_size = 100,
                    ncore = 6)
 group_prior <- param$group_prior
 group_prior_var <- param$group_prior_var

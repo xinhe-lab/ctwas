@@ -9,26 +9,26 @@ test_that("preprocess_weights with PredictDB weights works", {
   weight_file <- system.file("extdata/sample_data", "expression_Liver.db", package = "ctwas")
 
   capture.output({
-    weights <- preprocess_weights(weight_file,
-                                  region_info,
-                                  z_snp$id,
-                                  snp_map,
-                                  type = "expression",
-                                  context = "liver",
-                                  weight_name = "liver_expression",
-                                  weight_format = "PredictDB",
-                                  drop_strand_ambig = TRUE,
-                                  scale_predictdb_weights = TRUE,
-                                  load_predictdb_LD = TRUE,
-                                  filter_protein_coding_genes = TRUE,
-                                  varID_converter_fun = convert_to_ukb_varIDs)
+      weights <- preprocess_weights(weight_file,
+                                    region_info,
+                                    z_snp$id,
+                                    snp_map,
+                                    type = "expression",
+                                    context = "liver",
+                                    weight_name = "liver_expression",
+                                    weight_format = "PredictDB",
+                                    drop_strand_ambig = TRUE,
+                                    scale_predictdb_weights = TRUE,
+                                    load_predictdb_LD = TRUE,
+                                    filter_protein_coding_genes = TRUE,
+                                    varID_converter_fun = convert_to_ukb_varIDs)
   })
 
   expect_equal(weights, expected_weights)
 
 })
 
-test_that("preprocess_weights with PredictDB weights works", {
+test_that("preprocess_weights with multiple PredictDB weights works", {
 
   region_info <- readRDS(system.file("extdata/sample_data", "LDL_example.region_info.RDS", package = "ctwas"))
   snp_map <- readRDS(system.file("extdata/sample_data", "LDL_example.snp_map.RDS", package = "ctwas"))

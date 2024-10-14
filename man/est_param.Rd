@@ -16,6 +16,7 @@ est_param(
   use_null_weight = TRUE,
   min_var = 2,
   min_gene = 0,
+  min_group_size = 100,
   ncore = 1,
   logfile = NULL,
   verbose = FALSE,
@@ -48,6 +49,8 @@ having at most one causal effect will be used selected for the complete paramete
 \item{min_var}{minimum number of variables (SNPs and genes) in a region.}
 
 \item{min_gene}{minimum number of genes in a region.}
+
+\item{min_group_size}{Minimum number of variables in a group.}
 
 \item{ncore}{The number of cores used to parallelize computation over regions.}
 

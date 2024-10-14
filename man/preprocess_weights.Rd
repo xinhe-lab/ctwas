@@ -26,7 +26,8 @@ preprocess_weights(
   snpinfo_loader_fun = NULL,
   varID_converter_fun = NULL,
   ncore = 1,
-  logfile = NULL
+  logfile = NULL,
+  verbose = FALSE
 )
 }
 \arguments{
@@ -86,6 +87,8 @@ weight variant IDs to the reference variant format.}
 \item{ncore}{The number of cores used to parallelize computation.}
 
 \item{logfile}{The log filename. If NULL, will print log info on screen.}
+
+\item{verbose}{If TRUE, print detail messages.}
 }
 \value{
 a list of processed weights
