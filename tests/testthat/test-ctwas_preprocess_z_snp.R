@@ -9,6 +9,11 @@ test_that("preprocess_z_snp works", {
                                            drop_multiallelic = TRUE,
                                            drop_strand_ambig = TRUE,
                                            varID_converter_fun = convert_to_ukb_varIDs)
+
+    preprocessed_z_snp2 <- preprocess_z_snp(z_snp, snp_map,
+                                           drop_multiallelic = TRUE,
+                                           drop_strand_ambig = TRUE,
+                                           varID_converter_fun = NULL)
   })
 
   expect_equal(preprocessed_z_snp, expected_preprocessed_z_snp)

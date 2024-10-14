@@ -130,3 +130,21 @@ combine_z <- function(z_snp, z_gene){
   rownames(z_df) <- NULL
   return(z_df)
 }
+
+
+# filter z_gene by group size
+filter_z_gene_by_group_size <- function(z_gene, min_group_size){
+  gene_group_size <- table(z_gene$group)
+  if (any(gene_group_size < min_group_size)){
+    groups_dropped <- names(gene_group_size)[gene_group_size < min_group_size]
+    loginfo("Filter groups with group size < %d from z_gene", min_group_size)
+    z_gene <- z_gene[!z_gene$group %in% groups_dropped, , drop=FALSE]
+    if (nrow(z_gene) == 0){
+      stop("No genes left after group size filtering!")
+    }
+    gene_group_size <- table(z_gene$group)
+    loginfo("Group sizes in z_gene after filtering \n {%s}: {%s}",
+            names(gene_group_size), gene_group_size)
+  }
+  return(z_gene)
+}

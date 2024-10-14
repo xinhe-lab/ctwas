@@ -6,19 +6,20 @@
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Preparing cTWAS input data • ctwas</title>
-<!-- jquery --><script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.7.1/jquery.min.js" integrity="sha512-v2CJ7UaYy4JwqLDIrZUI/4hqeoQieOmAZNXBeQyjo21dadnwR+8ZaIJVT8EE2iyI61OV8e6M8PP2/4hpQINQ/g==" crossorigin="anonymous" referrerpolicy="no-referrer"></script><!-- Bootstrap --><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/3.4.1/css/bootstrap.min.css" integrity="sha256-bZLfwXAP04zRMK2BjiO8iu9pf4FbLqX6zitd+tIvLhE=" crossorigin="anonymous">
+<!-- jquery --><script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.4.1/jquery.min.js" integrity="sha256-CSXorXvZcTkaix6Yvo6HppcZGetbYMGWSFlBw8HfCJo=" crossorigin="anonymous"></script><!-- Bootstrap --><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/3.4.1/css/bootstrap.min.css" integrity="sha256-bZLfwXAP04zRMK2BjiO8iu9pf4FbLqX6zitd+tIvLhE=" crossorigin="anonymous">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/3.4.1/js/bootstrap.min.js" integrity="sha256-nuL8/2cJ5NDSSwnKD8VqreErSWHtnEP9E7AySL+1ev4=" crossorigin="anonymous"></script><!-- bootstrap-toc --><link rel="stylesheet" href="../bootstrap-toc.css">
 <script src="../bootstrap-toc.js"></script><!-- Font Awesome icons --><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.12.1/css/all.min.css" integrity="sha256-mmgLkCYLUQbXn0B1SRqzHar6dCnv9oZFPEC1g1cwlkk=" crossorigin="anonymous">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.12.1/css/v4-shims.min.css" integrity="sha256-wZjR52fzng1pJHwx4aV2AO3yyTOXrcDW7jBpJtTwVxw=" crossorigin="anonymous">
 <!-- clipboard.js --><script src="https://cdnjs.cloudflare.com/ajax/libs/clipboard.js/2.0.6/clipboard.min.js" integrity="sha256-inc5kl9MA1hkeYUt+EC3BhlIgyp/2jDIyBLS6k3UxPI=" crossorigin="anonymous"></script><!-- headroom.js --><script src="https://cdnjs.cloudflare.com/ajax/libs/headroom/0.11.0/headroom.min.js" integrity="sha256-AsUX4SJE1+yuDu5+mAVzJbuYNPHj/WroHuZ8Ir/CkE0=" crossorigin="anonymous"></script><script src="https://cdnjs.cloudflare.com/ajax/libs/headroom/0.11.0/jQuery.headroom.min.js" integrity="sha256-ZX/yNShbjqsohH1k95liqY9Gd8uOiE1S4vZc+9KQ1K4=" crossorigin="anonymous"></script><!-- pkgdown --><link href="../pkgdown.css" rel="stylesheet">
 <script src="../pkgdown.js"></script><meta property="og:title" content="Preparing cTWAS input data">
+<meta property="og:description" content="ctwas">
 <!-- mathjax --><script src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/MathJax.js" integrity="sha256-nvJJv9wWKEm88qvoQl9ekL2J+k/RWIsaSScxxlsrv8k=" crossorigin="anonymous"></script><script src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/config/TeX-AMS-MML_HTMLorMML.js" integrity="sha256-84DKXVJXs0/F8OTMzX4UR909+jtl4G7SPypPavF+GfA=" crossorigin="anonymous"></script><!--[if lt IE 9]>
 <script src="https://oss.maxcdn.com/html5shiv/3.7.3/html5shiv.min.js"></script>
 <script src="https://oss.maxcdn.com/respond/1.4.2/respond.min.js"></script>
 <![endif]-->
 </head>
 <body data-spy="scroll" data-target="#toc">
-
+    
 
     <div class="container template-article">
       <header><div class="navbar navbar-default navbar-fixed-top" role="navigation">
@@ -32,7 +33,7 @@
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">ctwas</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">0.4.15</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">0.4.16</span>
       </span>
     </div>
 
@@ -44,7 +45,7 @@
 <li class="dropdown">
   <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
     Tutorial
-
+     
     <span class="caret"></span>
   </a>
   <ul class="dropdown-menu" role="menu">
@@ -74,7 +75,7 @@
 <li class="dropdown">
   <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
     News
-
+     
     <span class="caret"></span>
   </a>
   <ul class="dropdown-menu" role="menu">
@@ -96,7 +97,7 @@
 </div>
 <!--/.navbar -->
 
-
+      
 
       </header><script src="preparing_input_data_files/accessible-code-block-0.0.1/empty-anchor.js"></script><div class="row">
   <div class="col-md-9 contents">
@@ -104,7 +105,7 @@
       <h1 data-toc-skip>Preparing cTWAS input data</h1>
                         <h4 data-toc-skip class="author">Kaixuan Luo, Sheng Qian</h4>
             
-            <h4 data-toc-skip class="date">2024-10-05</h4>
+            <h4 data-toc-skip class="date">2024-10-14</h4>
       
       <small class="dont-index">Source: <a href="https://github.com/xinhe-lab/ctwas/blob/multigroup/vignettes/preparing_input_data.Rmd" class="external-link"><code>vignettes/preparing_input_data.Rmd</code></a></small>
       <div class="hidden name"><code>preparing_input_data.Rmd</code></div>
@@ -130,9 +131,9 @@
 <div class="sourceCode" id="cb2"><pre class="sourceCode bash"><code class="sourceCode bash"><span id="cb2-1"><a href="#cb2-1"></a><span class="fu">wget</span> https://gwas.mrcieu.ac.uk/files/ukb-d-30780_irnt/ukb-d-30780_irnt.vcf.gz</span></code></pre></div>
 <p>We use <code>VariantAnnotation</code> and <code>gwasvcf</code> packages to read the VCF files.</p>
 <div class="sourceCode" id="cb3"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">gwas</span> <span class="op">&lt;-</span> <span class="fu">VariantAnnotation</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/VariantAnnotation/man/readVcf-methods.html" class="external-link">readVcf</a></span><span class="op">(</span><span class="st">"ukb-d-30780_irnt.vcf.gz"</span><span class="op">)</span></span>
-<span><span class="va">gwas</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/as.data.frame.html" class="external-link">as.data.frame</a></span><span class="op">(</span><span class="fu">gwasvcf</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/gwasvcf/man/vcf_to_tibble.html" class="external-link">vcf_to_tibble</a></span><span class="op">(</span><span class="va">gwas</span><span class="op">)</span><span class="op">)</span></span></code></pre></div>
-<p>cTWAS needs a data frame <code>z_snp</code> as input, with columns “id”, “A1”, “A2”, “z”. Each row has data of a variant. The variant IDs (<code>id</code>) in our reference are in the UK Biobank format (“chr:pos_ref_alt”). The naming of variant IDs should be consistent between GWAS summary statistics, LD reference and weights. See the section “Data harmonization” below on how to convert the formats of variant IDs. <code>A1</code> is the alternate allele, and <code>A2</code> is the reference allele. <code>z</code> is the Z-scores of variants in GWAS. In the GWAS summary statistics VCF file we downloaded here, Z-scores are not available, so we need to compute them from the effect sizes and standard errors.</p>
+<code class="sourceCode R"><span><span class="va">gwas</span> <span class="op">&lt;-</span> <span class="fu">VariantAnnotation</span><span class="fu">::</span><span class="fu">readVcf</span><span class="op">(</span><span class="st">"ukb-d-30780_irnt.vcf.gz"</span><span class="op">)</span></span>
+<span><span class="va">gwas</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/as.data.frame.html" class="external-link">as.data.frame</a></span><span class="op">(</span><span class="fu">gwasvcf</span><span class="fu">::</span><span class="fu">vcf_to_tibble</span><span class="op">(</span><span class="va">gwas</span><span class="op">)</span><span class="op">)</span></span></code></pre></div>
+<p>cTWAS needs a data frame <code>z_snp</code> as input, with columns “id”, “A1”, “A2”, “z”. Each row has data of a variant. cTWAS uses rsIDs as variant IDs (<code>id</code>) by default, for those variants without rsIDs, the variant IDs in our reference data are in the UK Biobank format (“chr:pos_ref_alt”). The naming of variant IDs should be consistent between GWAS summary statistics, LD reference and prediction models. See the section “Data harmonization” below on how to convert the formats of variant IDs. <code>A1</code> is the alternate allele, and <code>A2</code> is the reference allele. <code>z</code> is the Z-scores of variants in GWAS. In the GWAS summary statistics VCF file we downloaded here, Z-scores are not available, so we need to compute them from the effect sizes and standard errors.</p>
 <p>In the tutorial below, we use sample data from chr16. We use the function <code><a href="../reference/read_gwas.html">read_gwas()</a></code> to read GWAS summary statistics, and compute Z-scores.</p>
 <div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">gwas</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/readRDS.html" class="external-link">readRDS</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/system.file.html" class="external-link">system.file</a></span><span class="op">(</span><span class="st">"extdata/sample_data"</span>, <span class="st">"LDL_example.gwas.sumstats.RDS"</span>, package <span class="op">=</span> <span class="st">"ctwas"</span><span class="op">)</span><span class="op">)</span></span>
@@ -191,14 +192,22 @@
 <h2 id="reference-data">Reference data<a class="anchor" aria-label="anchor" href="#reference-data"></a>
 </h2>
 <p>The reference data include definitions of genomic regions, and the LD reference. Note that the choice of LD reference population is important for fine-mapping. Best practice for fine-mapping is to use an in-sample LD reference (LD computed using the subjects in the GWAS sample). If this is not available, the LD reference should be as representative of the population in the GWAS sample as possible.</p>
-<p>It is critical that the genome build (e.g. hg38) of the LD reference matches the genome build used to train the prediction models. The genome build of the GWAS summary statistics does not matter because variant positions are determined by the LD reference.</p>
+<p>It is critical that the genome build of the LD reference matches the genome build used to train the prediction models, so that variants without rsIDs will not be filtered out due to inconsistent variant IDs.</p>
+<p>We can use the function <code><a href="../reference/get_predictdb_genome_build.html">get_predictdb_genome_build()</a></code> to read the genome build of PredictDB weight file:</p>
+<div class="sourceCode" id="cb11"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">weight_liver_file</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/system.file.html" class="external-link">system.file</a></span><span class="op">(</span><span class="st">"extdata/sample_data"</span>, </span>
+<span><span class="st">"expression_Liver.db"</span>, package <span class="op">=</span> <span class="st">"ctwas"</span><span class="op">)</span></span>
+<span></span>
+<span><span class="fu"><a href="../reference/get_predictdb_genome_build.html">get_predictdb_genome_build</a></span><span class="op">(</span><span class="va">weight_liver_file</span><span class="op">)</span></span></code></pre></div>
+<pre><code><span><span class="co">## [1] "b38"</span></span></code></pre>
+<p>The variant positions of the GWAS summary statistics do not matter because cTWAS use variant positions from the LD reference.</p>
 <div class="section level3">
 <h3 id="defining-regions">Defining regions<a class="anchor" aria-label="anchor" href="#defining-regions"></a>
 </h3>
 <p>cTWAS assumes that the genome is partitioned into approximately independent LD regions.</p>
 <p>We included in the package predefined regions based on European (EUR), Asian (ASN), or African (AFR) populations, using either genome build b38 or b37. These regions were previously generated using <a href="https://doi.org/10.1093/bioinformatics/btv546" class="external-link">LDetect</a>.</p>
 <p>Here we use the b38 European LDetect blocks, which is again included in the R package.</p>
-<div class="sourceCode" id="cb11"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb13"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">region_file</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/system.file.html" class="external-link">system.file</a></span><span class="op">(</span><span class="st">"extdata/ldetect"</span>, <span class="st">"EUR.b38.ldetect.regions.RDS"</span>, package <span class="op">=</span> <span class="st">"ctwas"</span><span class="op">)</span></span>
 <span><span class="va">region_info</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/readRDS.html" class="external-link">readRDS</a></span><span class="op">(</span><span class="va">region_file</span><span class="op">)</span></span>
 <span><span class="va">region_info</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/subset.html" class="external-link">subset</a></span><span class="op">(</span><span class="va">region_info</span>, <span class="va">chrom</span> <span class="op">==</span> <span class="fl">16</span><span class="op">)</span></span>
@@ -217,7 +226,7 @@
 <h3 id="reference-variants-and-ld-matrices">Reference variants and LD matrices<a class="anchor" aria-label="anchor" href="#reference-variants-and-ld-matrices"></a>
 </h3>
 <p>cTWAS performs its analysis region-by-region. The preferred way to run cTWAS is to provide pre-computed LD matrices for each region. If you run cTWAS without using LD matrices, please jump to the section “Mapping reference SNPs to regions” below.</p>
-<p>By default, we need a LD matrix file for each region (preferably in <code>.RDS</code> format) and a variant information table accompanying each LD matrix. The <code>.RDS</code> files store the LD correlation matrix (R) for each region (a <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>p</mi><mo>×</mo><mi>p</mi></mrow><annotation encoding="application/x-tex">p \times p</annotation></semantics></math> matrix, <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>p</mi><annotation encoding="application/x-tex">p</annotation></semantics></math> is the number of variants in the region). The accompanying <code>.Rvar</code> files include variant information for the region, and the order of its rows should match the order of rows and columns in the <code>.RDS</code> file.</p>
+<p>By default, we need a LD matrix file for each region (preferably in <code>.RDS</code> format) and a variant information table accompanying each LD matrix. The <code>.RDS</code> files store the LD correlation matrix (R) for each region (a <span class="math inline">\(p \times p\)</span> matrix, <span class="math inline">\(p\)</span> is the number of variants in the region). The accompanying <code>.Rvar</code> files include variant information for the region, and the order of its rows should match the order of rows and columns in the <code>.RDS</code> file.</p>
 <p>We have precomputed reference LD matrices (<code>.RDS</code> files) and the variant information tables (<code>.Rvar</code> files) accompanying the LD matrices for UK Biobank. LD matrices were computed on 10% of the UK Biobank independent, White British samples for variants with MAF &gt; 1%.</p>
 <p>The complete LD matrices of European individuals from UK Biobank can be downloaded <a href="https://uchicago.box.com/s/jqocacd2fulskmhoqnasrknbt59x3xkn" class="external-link">here</a>. On the University of Chicago RCC cluster, the b38 reference is available at <code>/project2/mstephens/wcrouse/UKB_LDR_0.1/</code> and the b37 reference is available at <code>/project2/mstephens/wcrouse/UKB_LDR_0.1_b37/</code>.</p>
 <p>The columns of the <code>.Rvar</code> file include information on chromosome, variant name, position in base pairs, and the alternative and reference alleles. The “variance” column is the variance of each variant prior to standardization; this is required for PredictDB weights but not FUSION weights. We’ve also included information on allele frequency (for the alternative alleles) in the variant info, but this is optional and not used in the program.</p>
@@ -228,7 +237,7 @@
 </h3>
 <p>We will need to link the reference SNP and LD files to the regions. To do this, we add two additional columns “LD_file” and “SNP_file” to <code>region_info</code>: “LD_file” stores the filenames to the precomputed LD (R) matrices (<code>.RDS</code> files in our precomputed reference LD files), “SNP_file” stores the filenames of corresponding variant information (<code>.Rvar</code> files). The result is stored in a data frame <code>region_metatable</code>.</p>
 <p>The following paths and filenames were from the University of Chicago RCC cluster, please replace them with your own paths.</p>
-<div class="sourceCode" id="cb13"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb15"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">LD_dir</span> <span class="op">&lt;-</span> <span class="st">"/project2/mstephens/wcrouse/UKB_LDR_0.1"</span></span>
 <span><span class="va">genome_version</span> <span class="op">&lt;-</span> <span class="st">"b38"</span></span>
 <span></span>
@@ -238,7 +247,7 @@
 <span><span class="va">region_metatable</span><span class="op">$</span><span class="va">LD_file</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/file.path.html" class="external-link">file.path</a></span><span class="op">(</span><span class="va">LD_dir</span>, <span class="fu"><a href="https://rdrr.io/r/base/paste.html" class="external-link">paste0</a></span><span class="op">(</span><span class="va">LD_filestem</span>, <span class="st">".RDS"</span><span class="op">)</span><span class="op">)</span></span>
 <span><span class="va">region_metatable</span><span class="op">$</span><span class="va">SNP_file</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/file.path.html" class="external-link">file.path</a></span><span class="op">(</span><span class="va">LD_dir</span>, <span class="fu"><a href="https://rdrr.io/r/base/paste.html" class="external-link">paste0</a></span><span class="op">(</span><span class="va">LD_filestem</span>, <span class="st">".Rvar"</span><span class="op">)</span><span class="op">)</span></span></code></pre></div>
 <p>The <code><a href="../reference/create_snp_LD_map.html">create_snp_LD_map()</a></code> function takes <code>region_metatable</code> as input, extracts the region definitions, ensures that it matches the format required by cTWAS (e.g. adding “region_id” column if not available), and returns updated <code>region_info</code>. It reads the variant information from the regions, and returns the result as <code>snp_map</code>. <code>snp_map</code> will be used when we need reference SNP information. The function also checks the “LD_file” and “SNP_file” columns of <code>region_metatable</code> to make sure the files are available. It then returns <code>LD_map</code>, a data frame with the “region_id”, “LD_file” and “SNP_file” columns of <code>region_metatable</code>. <code>LD_map</code> will be used when we need LD matrices, e.g. when computing correlations for fine-mapping.</p>
-<div class="sourceCode" id="cb14"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb16"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">res</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/create_snp_LD_map.html">create_snp_LD_map</a></span><span class="op">(</span><span class="va">region_metatable</span><span class="op">)</span></span>
 <span><span class="va">region_info</span> <span class="op">&lt;-</span> <span class="va">res</span><span class="op">$</span><span class="va">region_info</span></span>
 <span><span class="va">snp_map</span> <span class="op">&lt;-</span> <span class="va">res</span><span class="op">$</span><span class="va">snp_map</span></span>
@@ -252,7 +261,7 @@
 <p>We have the reference variant information from UK Biobank European population available <a href="https://uchicago.box.com/s/w3j3w49a5y5p1rhlti95u324g8ro6kkn" class="external-link">here</a>.</p>
 <p>On the University of Chicago RCC cluster, the reference variant information is available at <code>/project2/xinhe/shared_data/cTWAS/ref_snp_info/</code>.</p>
 <p>We then use the <code><a href="../reference/create_snp_map.html">create_snp_map()</a></code> function to preprocess region definitions, and map variants from the LD reference to regions, which returns processed <code>region_info</code> and <code>snp_map</code>.</p>
-<div class="sourceCode" id="cb15"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb17"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">ref_snp_info_file</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/system.file.html" class="external-link">system.file</a></span><span class="op">(</span><span class="st">"extdata/sample_data"</span>, <span class="st">"ukb_b38_0.1_chr16_var_info.Rvar.gz"</span>, package <span class="op">=</span> <span class="st">"ctwas"</span><span class="op">)</span></span>
 <span></span>
 <span><span class="va">ref_snp_info</span> <span class="op">&lt;-</span> <span class="fu">data.table</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/data.table/man/fread.html" class="external-link">fread</a></span><span class="op">(</span><span class="va">ref_snp_info_file</span>, sep <span class="op">=</span> <span class="st">"\t"</span><span class="op">)</span></span>
@@ -274,20 +283,20 @@
 <h3 id="harmonizing-gwas-z-scores-and-the-reference-data">Harmonizing GWAS z-scores and the reference data<a class="anchor" aria-label="anchor" href="#harmonizing-gwas-z-scores-and-the-reference-data"></a>
 </h3>
 <p>The <code><a href="../reference/preprocess_z_snp.html">preprocess_z_snp()</a></code> function harmonizes GWAS z-scores and the reference data based on the included allele information.</p>
-<div class="sourceCode" id="cb16"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb18"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">z_snp</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/preprocess_z_snp.html">preprocess_z_snp</a></span><span class="op">(</span><span class="va">z_snp</span>, <span class="va">snp_map</span>, </span>
 <span>                          drop_multiallelic <span class="op">=</span> <span class="cn">TRUE</span>, </span>
 <span>                          drop_strand_ambig <span class="op">=</span> <span class="cn">TRUE</span>,</span>
 <span>                          varID_converter_fun <span class="op">=</span> <span class="va">convert_to_ukb_varIDs</span><span class="op">)</span></span></code></pre></div>
-<pre><code><span><span class="co">## 2024-10-05 18:07:15 INFO::Preprocessing z_snp...</span></span>
-<span><span class="co">## 2024-10-05 18:07:15 INFO::z_snp has 407828 variants in total</span></span>
-<span><span class="co">## 2024-10-05 18:07:15 INFO::Convert variant IDs</span></span>
-<span><span class="co">## 2024-10-05 18:07:16 INFO::271976 variants left after filtering by the reference SNPs.</span></span>
-<span><span class="co">## 2024-10-05 18:07:16 INFO::Remove 30 multiallelic variants</span></span>
-<span><span class="co">## 2024-10-05 18:07:17 INFO::Harmonize 271946 variants between GWAS and the reference</span></span>
-<span><span class="co">## 2024-10-05 18:07:18 INFO::Flip signs for 271904 (99.98%) variants</span></span>
-<span><span class="co">## 2024-10-05 18:07:18 INFO::Remove 45738 strand ambiguous variants</span></span>
-<span><span class="co">## 2024-10-05 18:07:18 INFO::226208 variants left after preprocessing and harmonization.</span></span></code></pre>
+<pre><code><span><span class="co">## 2024-10-14 15:10:24 INFO::Preprocessing z_snp...</span></span>
+<span><span class="co">## 2024-10-14 15:10:24 INFO::z_snp has 407828 variants in total</span></span>
+<span><span class="co">## 2024-10-14 15:10:24 INFO::Convert variant IDs</span></span>
+<span><span class="co">## 2024-10-14 15:10:24 INFO::271976 variants left after filtering by the reference SNPs.</span></span>
+<span><span class="co">## 2024-10-14 15:10:24 INFO::Remove 30 multiallelic variants</span></span>
+<span><span class="co">## 2024-10-14 15:10:24 INFO::Harmonize 271946 variants between GWAS and the reference</span></span>
+<span><span class="co">## 2024-10-14 15:10:25 INFO::Flip signs for 271904 (99.98%) variants</span></span>
+<span><span class="co">## 2024-10-14 15:10:26 INFO::Remove 45738 strand ambiguous variants</span></span>
+<span><span class="co">## 2024-10-14 15:10:26 INFO::226208 variants left after preprocessing and harmonization.</span></span></code></pre>
 <p>It will filter out variants not included in the reference data. It will also drop multiallelic variants and strand ambiguous variants, by default. You can change these by setting the options <code>drop_multiallelic</code> and <code>drop_strand_ambig</code>.</p>
 <p>The naming of variant IDs should be consistent between GWAS, LD reference and weights. We use a converter function <code><a href="../reference/convert_to_ukb_varIDs.html">convert_to_ukb_varIDs()</a></code> that converts variant IDs in GWAS from the Open GWAS format (“chr_pos_ref_alt”) to our reference format from UK Biobank (“chr:pos_ref_alt”). To convert the formats for other variant ID formats, you can pass your own converter function to the <code>varID_converter_fun</code> argument.</p>
 </div>
@@ -297,7 +306,7 @@
 <p>We use the <code>preprocess_weight()</code> function to harmonize the PredictDB/FUSION prediction models and LD reference.</p>
 <p>In this version of cTWAS, we allow the joint analysis of multiple groups of molecular traits. This could be: eQTL of multiple tissues; or eQTLs, splicing QTLs and other types of QTLs in a single tissue. In a more complex setting, multiple types of QTL data from multiple tissues/cell types. Each group is defined by its “type” (kind of molecular traits), and “context” (tissue, cell type, condition, etc.). So, we specify the <code>type</code> and <code>context</code> arguments for each weight file as the example below. We also assign a <code>weight_name</code> to represent each weight file. By default, <code>weight_name</code> is set to <context_type>.</context_type></p>
 <p>We get a list of processed weights for each weight file, and then we simply concatenate them to get a list of all processed weights from different types or contexts.</p>
-<div class="sourceCode" id="cb18"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb20"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">weights_liver</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/preprocess_weights.html">preprocess_weights</a></span><span class="op">(</span><span class="va">weight_liver_file</span>,</span>
 <span>                                    <span class="va">region_info</span>,</span>
 <span>                                    gwas_snp_ids <span class="op">=</span> <span class="va">z_snp</span><span class="op">$</span><span class="va">id</span>,</span>
@@ -312,23 +321,23 @@
 <span>                                    filter_protein_coding_genes <span class="op">=</span> <span class="cn">TRUE</span>,</span>
 <span>                                    varID_converter_fun <span class="op">=</span> <span class="va">convert_to_ukb_varIDs</span>,</span>
 <span>                                    ncore <span class="op">=</span> <span class="fl">6</span><span class="op">)</span></span></code></pre></div>
-<pre><code><span><span class="co">## 2024-10-05 18:07:18 INFO::Load weight: /tmp/jobs/42954279/RtmpmxOVV6/temp_libpatha9b672a24a25/ctwas/extdata/sample_data/expression_Liver.db</span></span>
-<span><span class="co">## 2024-10-05 18:07:18 INFO::weight_name: liver_expression</span></span>
-<span><span class="co">## 2024-10-05 18:07:18 INFO::type: expression</span></span>
-<span><span class="co">## 2024-10-05 18:07:18 INFO::context: liver</span></span>
-<span><span class="co">## 2024-10-05 18:07:18 INFO::Load PredictDB weights</span></span>
-<span><span class="co">## 2024-10-05 18:07:18 INFO::Number of molecular traits in weights: 12714</span></span>
-<span><span class="co">## 2024-10-05 18:07:18 INFO::Limit to protein coding genes</span></span>
-<span><span class="co">## 2024-10-05 18:07:18 INFO::Number of molecular traits in weights after filtering protein coding genes: 11502</span></span>
-<span><span class="co">## 2024-10-05 18:07:18 INFO::Load PredictDB LD</span></span>
-<span><span class="co">## 2024-10-05 18:07:18 INFO::Convert variant IDs</span></span>
-<span><span class="co">## 2024-10-05 18:07:19 INFO::Remove 1 molecular traits without predictdb LD</span></span>
-<span><span class="co">## 2024-10-05 18:07:19 INFO::Number of molecular traits in weights: 11501</span></span>
-<span><span class="co">## 2024-10-05 18:07:19 INFO::Number of variants in weights: 16953</span></span>
-<span><span class="co">## 2024-10-05 18:07:19 INFO::410 molecular traits and 529 variants left after filtering by GWAS and the reference.</span></span>
-<span><span class="co">## 2024-10-05 18:07:19 INFO::Harmonizing and processing weights ...</span></span>
-<span><span class="co">## 2024-10-05 18:07:19 INFO::Number of molecular traits in weights after preprocessing: 410</span></span></code></pre>
-<div class="sourceCode" id="cb20"><pre class="downlit sourceCode r">
+<pre><code><span><span class="co">## 2024-10-14 15:10:26 INFO::Load weight: /tmp/jobs/43037946/RtmpesyLKY/temp_libpatha3c436005678/ctwas/extdata/sample_data/expression_Liver.db</span></span>
+<span><span class="co">## 2024-10-14 15:10:26 INFO::weight_name: liver_expression</span></span>
+<span><span class="co">## 2024-10-14 15:10:26 INFO::type: expression</span></span>
+<span><span class="co">## 2024-10-14 15:10:26 INFO::context: liver</span></span>
+<span><span class="co">## 2024-10-14 15:10:26 INFO::Load PredictDB weights</span></span>
+<span><span class="co">## 2024-10-14 15:10:26 INFO::Number of molecular traits in weights: 12714</span></span>
+<span><span class="co">## 2024-10-14 15:10:26 INFO::Limit to protein coding genes</span></span>
+<span><span class="co">## 2024-10-14 15:10:26 INFO::Number of molecular traits in weights after filtering protein coding genes: 11502</span></span>
+<span><span class="co">## 2024-10-14 15:10:26 INFO::Load PredictDB LD</span></span>
+<span><span class="co">## 2024-10-14 15:10:26 INFO::Convert variant IDs</span></span>
+<span><span class="co">## 2024-10-14 15:10:27 INFO::Remove 1 molecular traits without predictdb LD</span></span>
+<span><span class="co">## 2024-10-14 15:10:27 INFO::Number of molecular traits in weights: 11501</span></span>
+<span><span class="co">## 2024-10-14 15:10:27 INFO::Number of variants in weights: 16953</span></span>
+<span><span class="co">## 2024-10-14 15:10:27 INFO::410 molecular traits and 529 variants left after filtering by GWAS and the reference.</span></span>
+<span><span class="co">## 2024-10-14 15:10:27 INFO::Harmonizing and processing weights ...</span></span>
+<span><span class="co">## 2024-10-14 15:10:27 INFO::Number of molecular traits in weights after preprocessing: 410</span></span></code></pre>
+<div class="sourceCode" id="cb22"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">weights_adipose</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/preprocess_weights.html">preprocess_weights</a></span><span class="op">(</span><span class="va">weight_adipose_file</span>,</span>
 <span>                                      <span class="va">region_info</span>,</span>
 <span>                                      gwas_snp_ids <span class="op">=</span> <span class="va">z_snp</span><span class="op">$</span><span class="va">id</span>,</span>
@@ -343,22 +352,22 @@
 <span>                                      filter_protein_coding_genes <span class="op">=</span> <span class="cn">TRUE</span>,</span>
 <span>                                      varID_converter_fun <span class="op">=</span> <span class="va">convert_to_ukb_varIDs</span>,</span>
 <span>                                      ncore <span class="op">=</span> <span class="fl">6</span><span class="op">)</span></span></code></pre></div>
-<pre><code><span><span class="co">## 2024-10-05 18:07:19 INFO::Load weight: /tmp/jobs/42954279/RtmpmxOVV6/temp_libpatha9b672a24a25/ctwas/extdata/sample_data/expression_Adipose_Subcutaneous.db</span></span>
-<span><span class="co">## 2024-10-05 18:07:19 INFO::weight_name: adipose_expression</span></span>
-<span><span class="co">## 2024-10-05 18:07:19 INFO::type: expression</span></span>
-<span><span class="co">## 2024-10-05 18:07:19 INFO::context: adipose</span></span>
-<span><span class="co">## 2024-10-05 18:07:19 INFO::Load PredictDB weights</span></span>
-<span><span class="co">## 2024-10-05 18:07:20 INFO::Number of molecular traits in weights: 14732</span></span>
-<span><span class="co">## 2024-10-05 18:07:20 INFO::Limit to protein coding genes</span></span>
-<span><span class="co">## 2024-10-05 18:07:20 INFO::Number of molecular traits in weights after filtering protein coding genes: 13113</span></span>
-<span><span class="co">## 2024-10-05 18:07:20 INFO::Load PredictDB LD</span></span>
-<span><span class="co">## 2024-10-05 18:07:20 INFO::Convert variant IDs</span></span>
-<span><span class="co">## 2024-10-05 18:07:21 INFO::Number of molecular traits in weights: 13113</span></span>
-<span><span class="co">## 2024-10-05 18:07:21 INFO::Number of variants in weights: 23759</span></span>
-<span><span class="co">## 2024-10-05 18:07:21 INFO::484 molecular traits and 720 variants left after filtering by GWAS and the reference.</span></span>
-<span><span class="co">## 2024-10-05 18:07:21 INFO::Harmonizing and processing weights ...</span></span>
-<span><span class="co">## 2024-10-05 18:07:21 INFO::Number of molecular traits in weights after preprocessing: 484</span></span></code></pre>
-<div class="sourceCode" id="cb22"><pre class="downlit sourceCode r">
+<pre><code><span><span class="co">## 2024-10-14 15:10:27 INFO::Load weight: /tmp/jobs/43037946/RtmpesyLKY/temp_libpatha3c436005678/ctwas/extdata/sample_data/expression_Adipose_Subcutaneous.db</span></span>
+<span><span class="co">## 2024-10-14 15:10:27 INFO::weight_name: adipose_expression</span></span>
+<span><span class="co">## 2024-10-14 15:10:27 INFO::type: expression</span></span>
+<span><span class="co">## 2024-10-14 15:10:27 INFO::context: adipose</span></span>
+<span><span class="co">## 2024-10-14 15:10:27 INFO::Load PredictDB weights</span></span>
+<span><span class="co">## 2024-10-14 15:10:27 INFO::Number of molecular traits in weights: 14732</span></span>
+<span><span class="co">## 2024-10-14 15:10:27 INFO::Limit to protein coding genes</span></span>
+<span><span class="co">## 2024-10-14 15:10:27 INFO::Number of molecular traits in weights after filtering protein coding genes: 13113</span></span>
+<span><span class="co">## 2024-10-14 15:10:27 INFO::Load PredictDB LD</span></span>
+<span><span class="co">## 2024-10-14 15:10:27 INFO::Convert variant IDs</span></span>
+<span><span class="co">## 2024-10-14 15:10:28 INFO::Number of molecular traits in weights: 13113</span></span>
+<span><span class="co">## 2024-10-14 15:10:28 INFO::Number of variants in weights: 23759</span></span>
+<span><span class="co">## 2024-10-14 15:10:28 INFO::484 molecular traits and 720 variants left after filtering by GWAS and the reference.</span></span>
+<span><span class="co">## 2024-10-14 15:10:28 INFO::Harmonizing and processing weights ...</span></span>
+<span><span class="co">## 2024-10-14 15:10:29 INFO::Number of molecular traits in weights after preprocessing: 484</span></span></code></pre>
+<div class="sourceCode" id="cb24"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">weights</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="va">weights_liver</span>, <span class="va">weights_adipose</span><span class="op">)</span></span></code></pre></div>
 <p>This function returns <code>weights</code>, which contains the effect sizes of the variants in the prediction models, LD of variants in the weights, the first and last QTL positions of molecular traits.</p>
 <p>In the function above, we specify the weight format in <code>weight_format</code>. We use PredictDB format by default, and we recommend <a href="https://predictdb.org/post/2021/07/21/gtex-v8-models-on-eqtl-and-sqtl/#mashr-based-models" class="external-link">MASHR-based models</a>. We set <code>load_predictdb_LD = TRUE</code> to load pre-computed covariances between variants in PredictDB weights (<code>.txt.gz</code>). PredictDB weights assume that variant genotypes are not standardized, but our implementation assumes standardized variant genotypes. Thus, we set <code>scale_predictdb_weights = TRUE</code>, to scale PredictDB weights by the variance before computing Z-scores of molecular traits. If weights are already on the standardized scale (e.g. FUSION weights or PredictDB weights converted from eQTLs), this scaling should be turned off.</p>
@@ -370,7 +379,9 @@
 
   <div class="col-md-3 hidden-xs hidden-sm" id="pkgdown-sidebar">
 
-      </div>
+        <nav id="toc" data-toggle="toc"><h2 data-toc-skip>Contents</h2>
+    </nav>
+</div>
 
 </div>
 
@@ -383,16 +394,16 @@
 
 <div class="pkgdown">
   <p></p>
-<p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.1.0.</p>
+<p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.0.7.</p>
 </div>
 
       </footer>
 </div>
 
+  
 
 
-
-
+  
 
   </body>
 </html>

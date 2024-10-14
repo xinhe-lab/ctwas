@@ -19,7 +19,7 @@ jobs:
           command: |
             mkdir -p ~/R/Library
             Rscript -e 'install.packages(c("logging","mixsqp","magrittr","dplyr","tidyr","ggplot2","cowplot","ggrepel","rlang","readr","data.table","R.utils","RSQLite","locuszoomr","pgenlibr","Rfast","knitr","rmarkdown","testthat","BiocManager"))'
-            Rscript -e 'BiocManager::install(c("GenomicRanges","ensembldb","AnnotationFilter","EnsDb.Hsapiens.v86"))'
+            Rscript -e 'BiocManager::install(c("GenomicRanges","ensembldb","AnnotationFilter","EnsDb.Hsapiens.v86","EnsDb.Hsapiens.v75"))'
       - run:
           name: Session information and installed package versions
           command: |

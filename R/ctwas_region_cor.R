@@ -216,32 +216,44 @@ compute_region_cor <- function(sids, gids, R_snp, LD_sids, weights) {
   })
   names(wgtlist) <- names(weights)
 
+  # subset LD matrix to SNPs (sids) in the region and SNPs in weights
+  all_wgt_snps <- unique(as.character(unlist(lapply(wgtlist, function(x){rownames(x)}))))
+  sidx <- which(LD_sids %in% c(sids, all_wgt_snps))
+  LD_sids <- LD_sids[sidx]
+  R_snp <- R_snp[sidx, sidx]
+  rm(all_wgt_snps)
+  rm(sidx)
+
   # compute correlation matrices
   R_snp_gene <- matrix(NA, nrow = nrow(R_snp), ncol = length(gids))
   R_gene <- diag(length(gids))
 
   if (length(gids) > 0) {
-    ldr <- list()
+    wgt_sidx_list <- list()
     # compute SNP-gene correlation matrix
     for (i in 1:length(gids)){
       gid <- gids[i]
       wgt <- wgtlist[[gid]]
-      snpnames <- rownames(wgt)
-      ld.idx <- match(snpnames, LD_sids)
-      ldr[[gid]] <- ld.idx
-      R.s <- R_snp[ld.idx, ld.idx]
+      wgt_snps <- rownames(wgt)
+      wgt_sidx <- match(wgt_snps, LD_sids)
+      wgt_sidx_list[[gid]] <- wgt_sidx
+      R.s <- R_snp[wgt_sidx, wgt_sidx]
       R_snp_gene[,i] <- sapply(1:nrow(R_snp),
-                               function(x){t(wgt)%*%R_snp[ld.idx,x]/sqrt(t(wgt)%*%R.s%*%wgt*R_snp[x,x])})
+                               function(x){t(wgt)%*%R_snp[wgt_sidx,x]/sqrt(t(wgt)%*%R.s%*%wgt*R_snp[x,x])})
     }
 
     # compute gene-gene correlation matrix
     if (length(gids) > 1){
       gene_pairs <- combn(length(gids), 2)
-      wgtr <- wgtlist[gids]
       gene_corrs <- apply(gene_pairs, 2, function(x){
-        t(wgtr[[x[1]]])%*%R_snp[ldr[[x[1]]], ldr[[x[2]]]]%*%wgtr[[x[2]]]/(
-          sqrt(t(wgtr[[x[1]]])%*%R_snp[ldr[[x[1]]], ldr[[x[1]]]]%*%wgtr[[x[1]]]) *
-            sqrt(t(wgtr[[x[2]]])%*%R_snp[ldr[[x[2]]], ldr[[x[2]]]]%*%wgtr[[x[2]]]))})
+        wgt1 <- wgtlist[[x[1]]]
+        wgt2 <- wgtlist[[x[2]]]
+        wgt1_sidx <- wgt_sidx_list[[x[1]]]
+        wgt2_sidx <- wgt_sidx_list[[x[2]]]
+        t(wgt1)%*%R_snp[wgt1_sidx, wgt2_sidx]%*%wgt2/(
+          sqrt(t(wgt1)%*%R_snp[wgt1_sidx, wgt1_sidx]%*%wgt1) *
+            sqrt(t(wgt2)%*%R_snp[wgt2_sidx, wgt2_sidx]%*%wgt2))
+      })
       R_gene[t(gene_pairs)] <- gene_corrs
       R_gene[t(gene_pairs[c(2,1),])] <- gene_corrs
     }

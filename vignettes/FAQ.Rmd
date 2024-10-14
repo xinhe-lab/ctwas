@@ -25,7 +25,9 @@ knitr::opts_chunk$set(message = FALSE,
 
 ###  Can I run cTWAS if my GWAS data and prediction models have different genome builds?
 
-It is critical that the genome build (e.g. hg38) of the LD reference matches the genome build used to train the prediction models. The genome build of the GWAS summary statistics does not matter because variant positions are determined by the LD reference.
+It is critical that the genome build (e.g. hg38) of the LD reference matches the genome build used to train the prediction models.  You can use the function `get_predictdb_genome_build()` to check the genome build of PredictDB weight file.
+
+The genome build of the GWAS summary statistics does not matter because variant positions are determined by the LD reference.
 
 ### Can I use my own LD matrices as reference?
 

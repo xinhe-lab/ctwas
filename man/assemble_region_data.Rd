@@ -12,6 +12,7 @@ assemble_region_data(
   snp_map,
   thin = 0.1,
   maxSNP = Inf,
+  min_group_size = 100,
   trim_by = c("random", "z"),
   thin_by = c("ref", "gwas"),
   adjust_boundary_genes = TRUE,
@@ -40,6 +41,8 @@ The fine mapping step is rerun using full SNPs for regions with strong gene sign
 Inf, no limit. This can be useful if there are many SNPs in a region and you don't
 have enough memory to run the program. This applies to the last rerun step
 (using full SNPs and rerun susie for regions with strong gene signals) only.}
+
+\item{min_group_size}{Minimum number of genes for a group to be included.}
 
 \item{trim_by}{remove SNPs if the total number of SNPs exceeds limit,
 options: "random", or "z" (trim SNPs with lower |z|).

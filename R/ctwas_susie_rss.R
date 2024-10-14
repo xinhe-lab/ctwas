@@ -77,7 +77,7 @@ anno_susie <- function(susie_res,
   susie_res_df$susie_pip <- susie_res$pip
 
   p <- length(gids) + length(sids)
-  susie_res_df$mu2 <- colSums(susie_res$mu2[, seq(1, p)[1:p!=susie_res$null_index], drop = FALSE]) #WARN: not sure for L>1
+  susie_res_df$mu2 <- colSums(susie_res$mu2[, seq(1, p)[1:p!=susie_res$null_index], drop = FALSE]) # WARN: not sure for L>1
 
   if (include_cs) {
     susie_res_df$cs <- NA
@@ -198,7 +198,7 @@ initiate_group_priors <- function(group_prior = NULL, group_prior_var = NULL, gr
   }
 
   if ( !setequal(names(group_prior), groups) || !setequal(names(group_prior_var), groups) ) {
-    stop("names of group_prior or group_prior_var do not match with groups")
+    stop("Names of group_prior or group_prior_var do not match with groups")
   }
 
   pi_prior <- list()
@@ -216,7 +216,8 @@ initiate_group_priors <- function(group_prior = NULL, group_prior_var = NULL, gr
 
 
 # set prior and prior variance values for the region
-set_region_susie_priors <- function(pi_prior, V_prior, gs_group, L, use_null_weight = TRUE){
+set_region_susie_priors <- function(pi_prior, V_prior, gs_group, L,
+                                    use_null_weight = TRUE){
 
   if (length(gs_group) < 2) {
     stop(paste(length(gs_group), "variables in the region. At least two variables in a region are needed to run susie"))
@@ -231,8 +232,8 @@ set_region_susie_priors <- function(pi_prior, V_prior, gs_group, L, use_null_wei
   }
 
   if (any(is.na(V_prior))){
-    V <- matrix(rep(50, L * p), nrow = L)
     # following the default in susie_rss of susieR
+    V <- matrix(rep(50, L * p), nrow = L)
   } else{
     V <- unname(V_prior[gs_group])
     V <- matrix(rep(V, each = L), nrow=L)

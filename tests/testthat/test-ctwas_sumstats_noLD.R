@@ -20,9 +20,9 @@ test_that("ctwas_sumstats_noLD works", {
 
   # expect_equal(ctwas_res, expected_ctwas_res)
   expect_equal(ctwas_res$z_gene, expected_ctwas_res$z_gene)
-  expect_equal(ctwas_res$param, expected_ctwas_res$param)
   expect_equal(ctwas_res$region_data, expected_ctwas_res$region_data)
   expect_equal(ctwas_res$boundary_genes, expected_ctwas_res$boundary_genes)
+  expect_equal(ctwas_res$param, expected_ctwas_res$param)
   expect_equal(ctwas_res$screen_res$screened_region_data, expected_ctwas_res$screen_res$screened_region_data)
   expect_equal(ctwas_res$finemap_res$susie_pip, expected_ctwas_res$finemap_res$susie_pip)
 

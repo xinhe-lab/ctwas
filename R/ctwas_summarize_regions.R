@@ -135,6 +135,13 @@ compute_region_p_single_effect <- function(region_data, group_prior){
   if (length(region_ids) == 0)
     stop("No region_ids in region_data!")
 
+  groups <- unique(unlist(lapply(region_data, "[[", "groups")))
+  groups_without_prior <- setdiff(groups, names(group_prior))
+  if (length(groups_without_prior) > 0) {
+    stop(paste("Missing group_prior for group:", groups_without_prior, "!"))
+  }
+  group_prior <- group_prior[names(group_prior) %in% groups]
+
   p_single_effect <- sapply(region_ids, function(region_id){
     gs_group <- extract_region_data(region_data, region_id)$gs_group
     group_size <- table(gs_group)[names(group_prior)]
