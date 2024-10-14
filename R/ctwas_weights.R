@@ -89,6 +89,10 @@ load_predictdb_weights <- function(weight_file,
     }
   }
 
+  if (anyNA(weight_table)) {
+    stop("weight_table contains NAs!")
+  }
+
   # load pre-computed covariances from PredictDB LD file
   if (load_predictdb_LD) {
     loginfo("Load PredictDB LD")
@@ -96,7 +100,10 @@ load_predictdb_weights <- function(weight_file,
     if (!file.exists(predictdb_LD_file)){
       stop(paste("PredictDB LD file", predictdb_LD_file, "does not exist!"))
     }
-    cov_table <- read.table(gzfile(predictdb_LD_file), header=T)
+    cov_table <- read.table(gzfile(predictdb_LD_file), header=TRUE)
+    if (anyNA(cov_table)) {
+      stop("cov_table contains NAs!")
+    }
   }
   else{
     cov_table <- NULL
@@ -173,8 +180,11 @@ load_fusion_weights <- function(weight_dir,
       fusion_genome_version = fusion_genome_version)
     loaded_wgt_res$weight_table
   }, mc.cores = ncore)
-
   weight_table <- do.call(rbind, weight_table)
+
+  if (anyNA(weight_table)) {
+    stop("weight_table contains NAs!")
+  }
 
   if (make_extra_table) {
     extra_table <- weight_table %>% group_by(.data$gene) %>%
@@ -631,3 +641,26 @@ compute_weight_LD_from_ref <- function(weights,
   }
   return(weights)
 }
+
+#' @title Get genome build of PredictDB weight
+#'
+#' @param weight_file a string, pointing path to weights in PredictDB format.
+#'
+#' @importFrom RSQLite dbDriver dbConnect dbGetQuery dbDisconnect
+#'
+#' @export
+#'
+get_predictdb_genome_build <- function(weight_file){
+
+  # read the PredictDB weights
+  stopifnot(file.exists(weight_file))
+  sqlite <- dbDriver("SQLite")
+  db <- dbConnect(sqlite, weight_file)
+  query <- function(...) dbGetQuery(db, ...)
+  weight_table <- query("select * from weights")
+  varID_genomebuild <- unique(sapply(strsplit(weight_table$varID, split = "_"), "[[", 5))
+  dbDisconnect(db)
+
+  return(varID_genomebuild)
+}
+
