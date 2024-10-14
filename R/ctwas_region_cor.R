@@ -70,7 +70,7 @@ get_region_cor <- function(region_id,
 
   if (cor_files_exist && !force_compute_cor) {
     if (verbose)
-      loginfo("Load correlation matrices for region %s", region_id)
+      loginfo("Load precomputed correlation matrices for region %s", region_id)
 
     # load precomputed correlation matrices
     R_snp_gene <- load_LD(R_sg_file)
@@ -79,9 +79,6 @@ get_region_cor <- function(region_id,
   } else {
     # if no precomputed correlation matrices, or force_compute_cor = TRUE,
     # compute correlation matrices
-    if (verbose)
-      loginfo("Compute correlation matrices for region %s", region_id)
-
     if (missing(sids))
       stop("'sids' is required for computing correlation matrices")
 
@@ -100,7 +97,8 @@ get_region_cor <- function(region_id,
     # load LD matrix of the region
     LD_matrix_files <- unlist(strsplit(LD_map$LD_file[LD_map$region_id == region_id], split = ","))
     stopifnot(all(file.exists(LD_matrix_files)))
-
+    if (verbose)
+      loginfo("Load LD matrix for region %s", region_id)
     if (length(LD_matrix_files) > 1) {
       R_snp <- lapply(LD_matrix_files, load_LD, format = LD_format, LD_loader_fun = LD_loader_fun)
       R_snp <- suppressWarnings(as.matrix(bdiag(R_snp)))
@@ -109,11 +107,15 @@ get_region_cor <- function(region_id,
     }
 
     # load SNP info of the region
+    if (verbose)
+      loginfo("Load SNP info for region %s", region_id)
     SNP_info_files <- unlist(strsplit(LD_map$SNP_file[LD_map$region_id == region_id], split = ","))
     stopifnot(all(file.exists(SNP_info_files)))
     snpinfo <- read_snp_info_files(SNP_info_files, snpinfo_loader_fun = snpinfo_loader_fun)
 
     # compute correlation matrices
+    if (verbose)
+      loginfo("Compute correlation matrices")
     res <- compute_region_cor(sids, gids, R_snp, snpinfo$id, weights)
     R_snp <- res$R_snp
     R_snp_gene <- res$R_snp_gene
@@ -121,6 +123,8 @@ get_region_cor <- function(region_id,
     rm(res)
     # save correlation matrices
     if (isTRUE(save_cor && !is.null(cor_dir))) {
+      if (verbose)
+        loginfo("Save correlation matrices")
       saveRDS(R_snp_gene, file=R_sg_file)
       saveRDS(R_gene, file=R_g_file)
       saveRDS(R_snp, file=R_s_file)
