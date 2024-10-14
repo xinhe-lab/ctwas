@@ -26,6 +26,8 @@
 #'
 #' @param min_gene minimum number of genes in a region.
 #'
+#' @param min_group_size Minimum number of variables in a group.
+#'
 #' @param ncore The number of cores used to parallelize computation over regions.
 #'
 #' @param logfile The log filename. If NULL, print log info on screen.
@@ -51,6 +53,7 @@ est_param <- function(
     use_null_weight = TRUE,
     min_var = 2,
     min_gene = 0,
+    min_group_size = 100,
     ncore = 1,
     logfile = NULL,
     verbose = FALSE,
@@ -84,21 +87,19 @@ est_param <- function(
     init_group_prior["SNP"] <- init_group_prior["SNP"]/thin
   }
 
+  # filter groups with number of variables < min_group_size
+  group_size_thinned <- get_group_size_from_region_data(region_data)
+  if (any(group_size_thinned < min_group_size)){
+    group_size_drop <- group_size_thinned[group_size_thinned < min_group_size]
+    logwarn("Groups with group size < %d:\n {%s}: {%s}", min_group_size, names(group_size_drop), group_size_drop)
+    stop("Parameters may not be reliable for groups with too few variables! Remove those groups from z_gene!")
+  }
+
   region_ids <- names(region_data)
   n_gids <- sapply(region_data, function(x){length(x$gid)})
   n_sids <- sapply(region_data, function(x){length(x$sid)})
   p_single_effect_df <- data.frame(region_id = region_ids,
                                    p_single_effect = NA)
-
-  # get groups, types and contexts
-  groups <- unique(unlist(lapply(region_data, "[[", "groups")))
-  groups <- c(setdiff(groups, "SNP"), "SNP")
-
-  types <- unique(unlist(lapply(region_data, "[[", "types")))
-  types <- c(setdiff(types, "SNP"), "SNP")
-
-  contexts <- unique(unlist(lapply(region_data, "[[", "contexts")))
-  contexts <- c(setdiff(contexts, "SNP"), "SNP")
 
   # skip regions with fewer than min_var variables
   if (min_var > 0) {
@@ -126,9 +127,6 @@ est_param <- function(
   }
   EM_prefit_res <- fit_EM(region_data,
                           niter = niter_prefit,
-                          groups = groups,
-                          types = types,
-                          contexts = contexts,
                           init_group_prior = init_group_prior,
                           init_group_prior_var = init_group_prior_var,
                           group_prior_var_structure = group_prior_var_structure,
@@ -138,6 +136,7 @@ est_param <- function(
                           ...)
   adjusted_EM_prefit_group_prior <- EM_prefit_res$group_prior
   group_size <- EM_prefit_res$group_size
+  # adjust thin
   if (thin != 1){
     adjusted_EM_prefit_group_prior["SNP"] <- EM_prefit_res$group_prior["SNP"] * thin
     group_size["SNP"] <- group_size["SNP"]/thin
@@ -166,9 +165,6 @@ est_param <- function(
   }
   EM_res <- fit_EM(selected_region_data,
                    niter = niter,
-                   groups = groups,
-                   types = types,
-                   contexts = contexts,
                    init_group_prior = EM_prefit_res$group_prior,
                    init_group_prior_var = EM_prefit_res$group_prior_var,
                    group_prior_var_structure = group_prior_var_structure,
@@ -193,8 +189,12 @@ est_param <- function(
   loginfo("Estimated group_prior {%s}: {%s}", names(group_prior), format(group_prior, digits = 4))
   loginfo("Estimated group_prior_var {%s}: {%s}", names(group_prior_var), format(group_prior_var, digits = 4))
 
-  if (any(group_size < 100)){
-    logwarn("Parameters may not be accurate for these groups (group size < 100): \n%s", names(group_size)[group_size < 100])
+  if (anyNA(group_prior)) {
+    stop("Estimated group_prior contains NAs!")
+  }
+
+  if (anyNA(group_prior_var)) {
+    stop("Estimated group_prior_var contains NAs!")
   }
 
   param <- list("group_prior" = group_prior,

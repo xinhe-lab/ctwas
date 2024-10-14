@@ -32,6 +32,8 @@
 #' Inf, no limit. This can be useful if there are many SNPs in a region and you don't
 #' have enough memory to run the program.
 #'
+#' @param min_group_size Minimum number of genes for a group to be included.
+#'
 #' @param min_nonSNP_PIP Regions with non-SNP PIP >= \code{min_nonSNP_PIP}
 #' will be selected to run finemapping using full SNPs.
 #'
@@ -75,6 +77,7 @@ ctwas_sumstats_noLD <- function(
     init_group_prior_var = NULL,
     group_prior_var_structure = c("shared_type", "shared_context", "shared_nonSNP", "shared_all", "independent"),
     maxSNP = Inf,
+    min_group_size = 100,
     min_nonSNP_PIP = 0.5,
     min_p_single_effect = 0.8,
     use_null_weight = TRUE,
@@ -120,9 +123,14 @@ ctwas_sumstats_noLD <- function(
   # Compute gene z-scores
   if (is.null(z_gene)) {
     z_gene <- compute_gene_z(z_snp, weights, ncore = ncore)
+    # filter groups with too few genes
+    z_gene <- filter_z_gene_by_group_size(z_gene, min_group_size)
     if (!is.null(outputdir)) {
       saveRDS(z_gene, file.path(outputdir, paste0(outname, ".z_gene.RDS")))
     }
+  } else {
+    # filter groups with too few genes
+    z_gene <- filter_z_gene_by_group_size(z_gene, min_group_size)
   }
 
   if (anyNA(z_gene))
@@ -139,6 +147,7 @@ ctwas_sumstats_noLD <- function(
                                           snp_map,
                                           thin = thin,
                                           maxSNP = maxSNP,
+                                          min_group_size = min_group_size,
                                           trim_by = "random",
                                           adjust_boundary_genes = TRUE,
                                           ncore = ncore,
@@ -159,6 +168,9 @@ ctwas_sumstats_noLD <- function(
                      group_prior_var_structure = group_prior_var_structure,
                      niter_prefit = niter_prefit,
                      niter = niter,
+                     min_var = 2,
+                     min_gene = 0,
+                     min_group_size = min_group_size,
                      min_p_single_effect = min_p_single_effect,
                      ncore = ncore,
                      verbose = verbose)
@@ -175,6 +187,8 @@ ctwas_sumstats_noLD <- function(
   screen_res <- screen_regions_noLD(region_data,
                                     group_prior = group_prior,
                                     group_prior_var = group_prior_var,
+                                    min_var = 2,
+                                    min_gene = 1,
                                     min_nonSNP_PIP = min_nonSNP_PIP,
                                     ncore = ncore,
                                     verbose = verbose,

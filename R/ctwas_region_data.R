@@ -20,6 +20,8 @@
 #' have enough memory to run the program. This applies to the last rerun step
 #' (using full SNPs and rerun susie for regions with strong gene signals) only.
 #'
+#' @param min_group_size Minimum number of genes for a group to be included.
+#'
 #' @param trim_by remove SNPs if the total number of SNPs exceeds limit,
 #' options: "random", or "z" (trim SNPs with lower |z|).
 #' See parameter `maxSNP` for more information.
@@ -51,6 +53,7 @@ assemble_region_data <- function(region_info,
                                  snp_map,
                                  thin = 0.1,
                                  maxSNP = Inf,
+                                 min_group_size = 100,
                                  trim_by = c("random", "z"),
                                  thin_by = c("ref", "gwas"),
                                  adjust_boundary_genes = TRUE,
@@ -96,6 +99,9 @@ assemble_region_data <- function(region_info,
 
   # get gene info from weights
   gene_info <- get_gene_info(weights)
+
+  # filter groups with too few genes
+  z_gene <- filter_z_gene_by_group_size(z_gene, min_group_size)
 
   # remove genes not in z_gene
   gene_info <- gene_info[gene_info$id %in% z_gene$id, , drop=FALSE]
@@ -448,6 +454,7 @@ expand_region_data <- function(region_data,
 # extract data for a region from region_data
 extract_region_data <- function(region_data,
                                 region_id,
+                                groups,
                                 snps_only = FALSE){
 
   if (!inherits(region_data,"list")){
@@ -473,57 +480,68 @@ extract_region_data <- function(region_data,
     regiondata$contexts <- "SNP"
     regiondata$groups <- "SNP"
   } else {
-    if (is.null(regiondata$z))
-      regiondata$z <- c(regiondata$z_gene$z, regiondata$z_snp$z)
-
-    if (is.null(regiondata$gs_type))
-      regiondata$gs_type <- c(regiondata$z_gene$type, regiondata$z_snp$type)
-
-    if (is.null(regiondata$gs_context))
-      regiondata$gs_context <- c(regiondata$z_gene$context, regiondata$z_snp$context)
-
-    if (is.null(regiondata$gs_group))
-      regiondata$gs_group <- c(regiondata$z_gene$group, regiondata$z_snp$group)
-
-    if (is.null(regiondata$g_type))
-      regiondata$g_type <- regiondata$z_gene$type
-
-    if (is.null(regiondata$g_context))
-      regiondata$g_context <- regiondata$z_gene$context
-
-    if (is.null(regiondata$g_group))
-      regiondata$g_group <- regiondata$z_gene$group
-
-    if (is.null(regiondata$types))
-      regiondata$types <- unique(regiondata$gs_type)
-
-    if (is.null(regiondata$contexts))
-      regiondata$contexts <- unique(regiondata$gs_context)
-
-    if (is.null(regiondata$groups))
-      regiondata$groups <- unique(regiondata$gs_group)
+    if (!missing(groups)) {
+      regiondata$z_gene <- regiondata$z_gene[regiondata$z_gene$group %in% groups,,drop=FALSE]
+      regiondata$z_snp <- regiondata$z_snp[regiondata$z_snp$group %in% groups,,drop=FALSE]
+    }
+    regiondata$gid <- regiondata$z_gene$id
+    regiondata$sid <- regiondata$z_snp$id
+    regiondata$z <- c(regiondata$z_gene$z, regiondata$z_snp$z)
+    regiondata$gs_type <- c(regiondata$z_gene$type, regiondata$z_snp$type)
+    regiondata$gs_context <- c(regiondata$z_gene$context, regiondata$z_snp$context)
+    regiondata$gs_group <- c(regiondata$z_gene$group, regiondata$z_snp$group)
+    regiondata$g_type <- regiondata$z_gene$type
+    regiondata$g_context <- regiondata$z_gene$context
+    regiondata$g_group <- regiondata$z_gene$group
+    regiondata$types <- unique(regiondata$gs_type)
+    regiondata$contexts <- unique(regiondata$gs_context)
+    regiondata$groups <- unique(regiondata$gs_group)
   }
 
   return(regiondata)
 }
 
-# create fine-mapping input region data of the earlier version
-create_finemap_input_region_data <- function(region_data,
-                                             snps_only = FALSE){
-
-  if (!inherits(region_data,"list"))
-    stop("'region_data' should be a list.")
-
-  if (snps_only)
-    loginfo("Keep SNPs only")
-
+# filter region_data in selected groups
+filter_region_data <- function(region_data, groups) {
   region_ids <- names(region_data)
-
   region_data2 <- lapply(region_ids, function(region_id){
-    regiondata <- extract_region_data(region_data, region_id,
-                                      snps_only = snps_only)
+    regiondata <- region_data[[region_id]]
+    regiondata$z_gene <- regiondata$z_gene[regiondata$z_gene$group %in% groups,,drop=FALSE]
+    regiondata$z_snp <- regiondata$z_snp[regiondata$z_snp$group %in% groups,,drop=FALSE]
+    regiondata$gid <- regiondata$z_gene$id
+    regiondata$sid <- regiondata$z_snp$id
+    regiondata$z <- c(regiondata$z_gene$z, regiondata$z_snp$z)
+    regiondata$gs_type <- c(regiondata$z_gene$type, regiondata$z_snp$type)
+    regiondata$gs_context <- c(regiondata$z_gene$context, regiondata$z_snp$context)
+    regiondata$gs_group <- c(regiondata$z_gene$group, regiondata$z_snp$group)
+    regiondata$g_type <- regiondata$z_gene$type
+    regiondata$g_context <- regiondata$z_gene$context
+    regiondata$g_group <- regiondata$z_gene$group
+    regiondata$types <- unique(regiondata$gs_type)
+    regiondata$contexts <- unique(regiondata$gs_context)
+    regiondata$groups <- unique(regiondata$gs_group)
+    regiondata
   })
   names(region_data2) <- region_ids
 
   return(region_data2)
+}
+
+# get group sizes from region data
+get_group_size_from_region_data <- function(region_data) {
+  z_gene_all <- lapply(region_data, "[[", "z_gene")
+  z_gene_all <- as.data.frame(rbindlist(z_gene_all, idcol = "region_id"))
+
+  z_snp_all <- lapply(region_data, "[[", "z_snp")
+  z_snp_all <- as.data.frame(rbindlist(z_snp_all, idcol = "region_id"))
+
+  z_df <- combine_z(z_snp_all, z_gene_all)
+  group_size <- table(z_df$group)
+  group_names <- names(group_size)
+  group_size <- as.numeric(group_size)
+  names(group_size) <- group_names
+  group_names <- c(setdiff(group_names, "SNP"), "SNP")
+  group_size <- group_size[group_names]
+
+  return(group_size)
 }
