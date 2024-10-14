@@ -32,6 +32,7 @@ jobs:
           BiocManager::install("ensembldb",ask = FALSE)
           BiocManager::install("AnnotationFilter",ask = FALSE)
           BiocManager::install("EnsDb.Hsapiens.v86",ask = FALSE)
+          BiocManager::install("EnsDb.Hsapiens.v75",ask = FALSE)
         shell: Rscript {0}
       - name: Check
         run: |
