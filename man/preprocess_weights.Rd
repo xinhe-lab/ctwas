@@ -18,6 +18,7 @@ preprocess_weights(
   filter_protein_coding_genes = TRUE,
   scale_predictdb_weights = TRUE,
   load_predictdb_LD = TRUE,
+  include_weight_LD = TRUE,
   fusion_method = c("lasso", "enet", "top1", "blup", "bslmm", "best.cv"),
   fusion_genome_version = NA,
   top_n_snps = NULL,
@@ -64,6 +65,11 @@ This option is only for PredictDB weights.}
 
 \item{load_predictdb_LD}{If TRUE, load pre-computed LD among weight SNPs.
 This option is only for PredictDB weights.}
+
+\item{include_weight_LD}{If TRUE, include LD of variants in weights (R_wgt) in the weights object.
+R_wgt is used for computing gene Z-scores.
+If FALSE, will skip computing R_wgt. This could save running time
+when using precomputed gene Z-scores.}
 
 \item{fusion_method}{a string, specifying the method to choose in FUSION models.
 "best.cv" option will use the best model (smallest p-value) under cross-validation.}

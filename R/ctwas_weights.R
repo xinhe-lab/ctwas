@@ -57,6 +57,8 @@ load_weights <- function(weight_file,
 #' @importFrom tools file_path_sans_ext
 #' @importFrom RSQLite dbDriver dbConnect dbGetQuery dbDisconnect
 #' @importFrom utils read.table
+#' @importFrom data.table fread
+#' @importFrom logging loginfo logwarn
 #'
 #' @export
 #'
@@ -90,7 +92,7 @@ load_predictdb_weights <- function(weight_file,
   }
 
   if (anyNA(weight_table)) {
-    stop("weight_table contains NAs!")
+    logwarn("weight_table contains NAs!")
   }
 
   # load pre-computed covariances from PredictDB LD file
@@ -100,9 +102,9 @@ load_predictdb_weights <- function(weight_file,
     if (!file.exists(predictdb_LD_file)){
       stop(paste("PredictDB LD file", predictdb_LD_file, "does not exist!"))
     }
-    cov_table <- read.table(gzfile(predictdb_LD_file), header=TRUE)
+    cov_table <- as.data.frame(fread(predictdb_LD_file, header=TRUE))
     if (anyNA(cov_table)) {
-      stop("cov_table contains NAs!")
+      logwarn("cov_table contains NAs!")
     }
   }
   else{
@@ -135,6 +137,7 @@ load_predictdb_weights <- function(weight_file,
 #' @importFrom magrittr %>%
 #' @importFrom dplyr group_by summarise n ungroup
 #' @importFrom rlang .data
+#' @importFrom logging loginfo logwarn
 #'
 #' @export
 #'
@@ -183,7 +186,7 @@ load_fusion_weights <- function(weight_dir,
   weight_table <- do.call(rbind, weight_table)
 
   if (anyNA(weight_table)) {
-    stop("weight_table contains NAs!")
+    logwarn("weight_table contains NAs!")
   }
 
   if (make_extra_table) {
@@ -354,7 +357,7 @@ create_predictdb_from_QTLs <- function(weight_table,
     gene_table$pred.perf.pval <- NA
     gene_table$pred.perf.qval <- NA
     gene_table <- gene_table[, c("gene", "genename", "gene_type", "n.snps.in.model",
-                                   "pred.perf.R2", "pred.perf.pval", "pred.perf.qval")]
+                                 "pred.perf.R2", "pred.perf.pval", "pred.perf.qval")]
   }
 
   if (use_top_QTL) {
@@ -477,54 +480,66 @@ write_predictdb <- function(weight_table,
 
 
 # Gets LD for a gene from precomputed PredictDB covariances
-#' @importFrom stats setNames
-get_LD_matrix_from_predictdb <- function (R_table,
-                                          weight_table,
+#' @importFrom utils combn
+get_weight_LD_from_predictdb <- function (g.cov_table,
+                                          g.weight_table,
                                           convert_cov_to_cor = TRUE){
 
   # convert covariances to correlations
   if (convert_cov_to_cor){
-    R_table <- convert_predictdb_cov_to_cor(R_table)
+    g.cov_table <- convert_predictdb_cov_to_cor(g.cov_table)
+  }
+
+  # use the "rsid" column in g.weight_table if cov_table uses rsIDs
+  if (any(grepl("rs", g.cov_table$RSID1))) {
+    g.weight_table$varID <- g.weight_table$rsid
+  }
+
+  if (!all(g.weight_table$varID %in% unique(c(g.cov_table$RSID1, g.cov_table$RSID2)))){
+    stop("Not all variants in weight_table are in cov_table!")
   }
 
   # convert correlation table to LD matrix
-  R_varIDs <- unique(c(R_table$RSID1, R_table$RSID2))
-  R_varIDs <- intersect(R_varIDs, weight_table$varID)
-  n <- length(R_varIDs)
-  R_wgt <- matrix(NA, nrow = n, ncol = n)
+  varIDs <- g.weight_table$varID
+  n_wgt <- length(varIDs)
 
-  # Fill in the correlation values
-  for (i in 1:n) {
-    for (j in i:n) {  # Only iterate over half of the matrix
-      if (i == j) {
-        R_wgt[i, j] <- 1  # Diagonal elements have R = 1
-      } else {
-        # Check if there are any matches for the RSID combination
-        match.idx <- which(R_table$RSID1 == R_varIDs[i] & R_table$RSID2 == R_varIDs[j])
-        if (length(match.idx) > 0) {
-          R_wgt[i, j] <- R_wgt[j, i] <- R_table[match.idx, "VALUE"]  # Set symmetric value
-        } else {
-          R_wgt[i, j] <- R_wgt[j, i] <- NA  # No correlation value found
-        }
-      }
-    }
+  if (n_wgt == 0) {
+    return(NULL)
   }
 
-  snp_idx <- match(R_varIDs, weight_table$varID)
-  rownames(R_wgt) <- weight_table$rsid[snp_idx]
-  colnames(R_wgt) <- weight_table$rsid[snp_idx]
+  R_wgt <- diag(n_wgt)
+
+  if (n_wgt > 1) {
+    snp_pairs <- combn(length(varIDs), 2)
+    R_snp_pairs <- apply(snp_pairs, 2, function(x){
+      match.idx <- which(g.cov_table$RSID1 == varIDs[x[1]] & g.cov_table$RSID2 == varIDs[x[2]])
+      if (length(match.idx) == 0){
+        match.idx <- which(g.cov_table$RSID1 == varIDs[x[2]] & g.cov_table$RSID2 == varIDs[x[1]])
+      }
+      if (length(match.idx) > 0) {
+        g.cov_table[match.idx, "VALUE"]
+      } else {
+        NA
+      }
+    })
+    R_wgt[t(snp_pairs)] <- R_snp_pairs
+    R_wgt[t(snp_pairs[c(2,1),])] <- R_snp_pairs
+  }
+
+  rownames(R_wgt) <- g.weight_table$rsid
+  colnames(R_wgt) <- g.weight_table$rsid
 
   return(R_wgt)
 }
 
 # Converts predictDB covariance to correlation
+#' @importFrom stats setNames
 convert_predictdb_cov_to_cor <- function(cov_table){
   stdev_table <- cov_table[cov_table$RSID1==cov_table$RSID2,]
   stdev_table <- setNames(sqrt(stdev_table$VALUE), stdev_table$RSID1)
-  R_table <- cov_table
-  R_table$VALUE <- cov_table$VALUE/(stdev_table[cov_table$RSID1]*stdev_table[cov_table$RSID2])
+  cov_table$VALUE <- cov_table$VALUE/(stdev_table[cov_table$RSID1]*stdev_table[cov_table$RSID2])
 
-  return(R_table)
+  return(cov_table)
 }
 
 #' @title Computes LD for weight variants using reference LD
