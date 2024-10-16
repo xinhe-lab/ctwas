@@ -127,7 +127,7 @@ z_snp <- preprocess_z_snp(z_snp, snp_map,
 
 ###  Prediction models of molecular traits 
 
-We need `weights`, a list object containing preprocessed weights for the molecular traits. The weights can be in the PredictDB (default, used in this tutorial) or FUSION format. In this tutorial, we used the weights from GTEx liver eQTL data from PredictDB. We provide a function `preprocess_weight()` to harmonize the prediction models and LD reference. 
+We need `weights`, a list object containing preprocessed weights for the molecular traits. The weights can be in the PredictDB (default, used in this tutorial) or FUSION format. In this tutorial, we used the weights from GTEx liver eQTL data from PredictDB (in hg38). We provide a function `preprocess_weight()` to harmonize the prediction models and LD reference. 
 
 In this version of cTWAS, we allow the joint analysis of multiple groups of molecular traits. This could be: eQTLs of multiple tissues; or eQTLs, splicing QTLs and other types of QTLs in a single tissue. In a more complex setting, multiple types of QTL data from multiple tissues/cell types. Each group of molecular traits is defined by its “type” (kind of molecular traits), and “context” (tissue, cell type, condition, etc.).  So, we specify the `type` and `context` arguments for each weight file. 
 
@@ -159,6 +159,8 @@ weights_adipose <- preprocess_weights(weight_adipose_file,
 weights <- c(weights_liver, weights_adipose)
 ```
 
+
+Note, FUSION weights do not contain LD information, so LD is required when using FUSION weights. 
 
 ## Running the cTWAS analysis 
 
