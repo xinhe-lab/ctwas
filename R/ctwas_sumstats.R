@@ -46,7 +46,14 @@
 #' Inf, no limit. This can be useful if there are many SNPs in a region and you don't
 #' have enough memory to run the program.
 #'
-#' @param min_group_size Minimum number of genes for a group to be included.
+#' @param min_var minimum number of variables (SNPs and genes) in a region
+#' when estimating paramters and screening regions.
+#'
+#' @param min_gene minimum number of genes in a region
+#' when estimating paramters and screening regions.
+#'
+#' @param min_group_size Minimum number of genes in a group.
+#' Groups with number of genes < \code{min_group_size} will be removed for the analysis.
 #'
 #' @param use_null_weight If TRUE, allow for a probability of no effect in susie.
 #'
@@ -113,6 +120,8 @@ ctwas_sumstats <- function(
     min_nonSNP_PIP = 0.5,
     min_p_single_effect = 0.8,
     maxSNP = Inf,
+    min_var = 2,
+    min_gene = 1,
     min_group_size = 100,
     use_null_weight = TRUE,
     coverage = 0.95,
@@ -220,7 +229,7 @@ ctwas_sumstats <- function(
                      niter_prefit = niter_prefit,
                      niter = niter,
                      min_var = 2,
-                     min_gene = 0,
+                     min_gene = 1,
                      min_group_size = min_group_size,
                      min_p_single_effect = min_p_single_effect,
                      ncore = ncore,
