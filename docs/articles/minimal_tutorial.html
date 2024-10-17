@@ -33,7 +33,7 @@
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">ctwas</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">0.4.16</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">0.4.17</span>
       </span>
     </div>
 
@@ -60,6 +60,9 @@
     </li>
     <li>
       <a href="../articles/summarizing_results.html">Summarizing and visualizing cTWAS results</a>
+    </li>
+    <li>
+      <a href="../articles/sample_report.html">Sample report of cTWAS results</a>
     </li>
     <li>
       <a href="../articles/postprocessing.html">Post-processing cTWAS results</a>
@@ -105,7 +108,7 @@
       <h1 data-toc-skip>A minimal tutorial of running cTWAS without LD</h1>
                         <h4 data-toc-skip class="author">Kaixuan Luo, Sheng Qian</h4>
             
-            <h4 data-toc-skip class="date">2024-10-14</h4>
+            <h4 data-toc-skip class="date">2024-10-16</h4>
       
       <small class="dont-index">Source: <a href="https://github.com/xinhe-lab/ctwas/blob/multigroup/vignettes/minimal_tutorial.Rmd" class="external-link"><code>vignettes/minimal_tutorial.Rmd</code></a></small>
       <div class="hidden name"><code>minimal_tutorial.Rmd</code></div>
@@ -120,7 +123,7 @@
 <p>First, install <code>ctwas</code> if you haven’t already:</p>
 <div class="sourceCode" id="cb1"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># install.packages("remotes")</span></span>
-<span><span class="fu">remotes</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/remotes/man/install_github.html" class="external-link">install_github</a></span><span class="op">(</span><span class="st">"xinhe-lab/ctwas"</span>,ref <span class="op">=</span> <span class="st">"multigroup"</span><span class="op">)</span></span></code></pre></div>
+<span><span class="fu">remotes</span><span class="fu">::</span><span class="fu"><a href="https://remotes.r-lib.org/reference/install_github.html" class="external-link">install_github</a></span><span class="op">(</span><span class="st">"xinhe-lab/ctwas"</span>,ref <span class="op">=</span> <span class="st">"multigroup"</span><span class="op">)</span></span></code></pre></div>
 <p>Currently, <code>ctwas</code> has only been tested on Linux systems.</p>
 <p>We recommend running <code>ctwas</code> on a High-Performance Computing system.</p>
 <p>Now load the <code>ctwas</code> package and a few other packages needed to perform the analysis in the tutorial:</p>
@@ -190,22 +193,13 @@
 <span></span>
 <span><span class="va">ref_snp_info_file</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/system.file.html" class="external-link">system.file</a></span><span class="op">(</span><span class="st">"extdata/sample_data"</span>, <span class="st">"ukb_b38_0.1_chr16_var_info.Rvar.gz"</span>, package <span class="op">=</span> <span class="st">"ctwas"</span><span class="op">)</span></span>
 <span></span>
-<span><span class="va">ref_snp_info</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/data.table/man/fread.html" class="external-link">fread</a></span><span class="op">(</span><span class="va">ref_snp_info_file</span>, sep <span class="op">=</span> <span class="st">"\t"</span><span class="op">)</span></span>
+<span><span class="va">ref_snp_info</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdatatable.gitlab.io/data.table/reference/fread.html" class="external-link">fread</a></span><span class="op">(</span><span class="va">ref_snp_info_file</span>, sep <span class="op">=</span> <span class="st">"\t"</span><span class="op">)</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/class.html" class="external-link">class</a></span><span class="op">(</span><span class="va">ref_snp_info</span><span class="op">)</span> <span class="op">&lt;-</span> <span class="st">"data.frame"</span></span>
 <span><span class="va">region_info</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/subset.html" class="external-link">subset</a></span><span class="op">(</span><span class="va">region_info</span>, <span class="va">chrom</span> <span class="op">==</span> <span class="va">example_chrom</span><span class="op">)</span></span>
 <span></span>
 <span><span class="va">res</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/create_snp_map.html">create_snp_map</a></span><span class="op">(</span><span class="va">region_info</span>, <span class="va">ref_snp_info</span>, ncore <span class="op">=</span> <span class="fl">6</span><span class="op">)</span></span>
 <span><span class="va">region_info</span> <span class="op">&lt;-</span> <span class="va">res</span><span class="op">$</span><span class="va">region_info</span></span>
-<span><span class="va">snp_map</span> <span class="op">&lt;-</span> <span class="va">res</span><span class="op">$</span><span class="va">snp_map</span></span>
-<span></span>
-<span><span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">head</a></span><span class="op">(</span><span class="va">region_info</span><span class="op">)</span></span></code></pre></div>
-<pre><code><span><span class="co">##   chrom   start    stop          region_id</span></span>
-<span><span class="co">## 1    16   10054 1157206   16_10054_1157206</span></span>
-<span><span class="co">## 2    16 1157206 2714828 16_1157206_2714828</span></span>
-<span><span class="co">## 3    16 2714828 3951195 16_2714828_3951195</span></span>
-<span><span class="co">## 4    16 3951195 5068344 16_3951195_5068344</span></span>
-<span><span class="co">## 5    16 5068344 5841579 16_5068344_5841579</span></span>
-<span><span class="co">## 6    16 5841579 6843550 16_5841579_6843550</span></span></code></pre>
+<span><span class="va">snp_map</span> <span class="op">&lt;-</span> <span class="va">res</span><span class="op">$</span><span class="va">snp_map</span></span></code></pre></div>
 <p>We set <code>ncore</code> to parallelize the computation.</p>
 </div>
 <div class="section level3">
@@ -213,27 +207,18 @@
 </h3>
 <p>The GWAS summary statistics needs to be “harmonized” before use. This means, for example, the allele definitions need to be consistent with the reference SNP data in <code>snp_map</code>. Harmonization is achieved through the <code><a href="../reference/preprocess_z_snp.html">preprocess_z_snp()</a></code> function. We filter out multiallelic variants and strand-ambiguous variants by default. Variants not included in the reference SNP data will also be filtered out.</p>
 <p>The naming of variant IDs should be consistent between GWAS, LD reference and weights. We use a converter function <code><a href="../reference/convert_to_ukb_varIDs.html">convert_to_ukb_varIDs()</a></code> that converts variant IDs in GWAS from the Open GWAS format (“chr_pos_ref_alt”) to our reference format from UK Biobank (“chr:pos_ref_alt”). To convert the formats for other variant ID formats, you can pass your own converter function to the <code>varID_converter_fun</code> argument.</p>
-<div class="sourceCode" id="cb12"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb11"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">z_snp</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/preprocess_z_snp.html">preprocess_z_snp</a></span><span class="op">(</span><span class="va">z_snp</span>, <span class="va">snp_map</span>,</span>
 <span>                          varID_converter_fun <span class="op">=</span> <span class="va">convert_to_ukb_varIDs</span><span class="op">)</span></span></code></pre></div>
-<pre><code><span><span class="co">## 2024-10-14 15:07:06 INFO::Preprocessing z_snp...</span></span>
-<span><span class="co">## 2024-10-14 15:07:06 INFO::z_snp has 407828 variants in total</span></span>
-<span><span class="co">## 2024-10-14 15:07:06 INFO::Convert variant IDs</span></span>
-<span><span class="co">## 2024-10-14 15:07:07 INFO::271976 variants left after filtering by the reference SNPs.</span></span>
-<span><span class="co">## 2024-10-14 15:07:07 INFO::Remove 30 multiallelic variants</span></span>
-<span><span class="co">## 2024-10-14 15:07:08 INFO::Harmonize 271946 variants between GWAS and the reference</span></span>
-<span><span class="co">## 2024-10-14 15:07:08 INFO::Flip signs for 271904 (99.98%) variants</span></span>
-<span><span class="co">## 2024-10-14 15:07:09 INFO::Remove 45738 strand ambiguous variants</span></span>
-<span><span class="co">## 2024-10-14 15:07:09 INFO::226208 variants left after preprocessing and harmonization.</span></span></code></pre>
 </div>
 <div class="section level3">
 <h3 id="prediction-models-of-molecular-traits">Prediction models of molecular traits<a class="anchor" aria-label="anchor" href="#prediction-models-of-molecular-traits"></a>
 </h3>
-<p>We need <code>weights</code>, a list object containing preprocessed weights for the molecular traits. The weights can be in the PredictDB (default, used in this tutorial) or FUSION format. In this tutorial, we used the weights from GTEx liver eQTL data from PredictDB. We provide a function <code>preprocess_weight()</code> to harmonize the prediction models and LD reference.</p>
+<p>We need <code>weights</code>, a list object containing preprocessed weights for the molecular traits. The weights can be in the PredictDB (default, used in this tutorial) or FUSION format. In this tutorial, we used the weights from GTEx liver eQTL data from PredictDB (in hg38). We provide a function <code>preprocess_weight()</code> to harmonize the prediction models and LD reference.</p>
 <p>In this version of cTWAS, we allow the joint analysis of multiple groups of molecular traits. This could be: eQTLs of multiple tissues; or eQTLs, splicing QTLs and other types of QTLs in a single tissue. In a more complex setting, multiple types of QTL data from multiple tissues/cell types. Each group of molecular traits is defined by its “type” (kind of molecular traits), and “context” (tissue, cell type, condition, etc.). So, we specify the <code>type</code> and <code>context</code> arguments for each weight file.</p>
 <p>In this example, we use liver and subcutaneous adipose gene expression models. We specify the <code>type</code> and <code>context</code> arguments for each weight file. We preprocess each of the weight files, and then simply concatenate them to <code>weights</code>, a list object containing all processed weights from different types or contexts.</p>
 <p>Similar to <code><a href="../reference/preprocess_z_snp.html">preprocess_z_snp()</a></code>, we use a converter function <code><a href="../reference/convert_to_ukb_varIDs.html">convert_to_ukb_varIDs()</a></code> that converts variant IDs in weights from the PredictDB format (“chr_pos_ref_alt_build”) to our reference format from UK Biobank (“chr:pos_ref_alt”). To convert the formats for other variant ID formats, you can pass your own converter function to the <code>varID_converter_fun</code> argument.</p>
-<div class="sourceCode" id="cb14"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb12"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">weight_liver_file</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/system.file.html" class="external-link">system.file</a></span><span class="op">(</span><span class="st">"extdata/sample_data"</span>, <span class="st">"expression_Liver.db"</span>, package <span class="op">=</span> <span class="st">"ctwas"</span><span class="op">)</span></span>
 <span><span class="va">weights_liver</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/preprocess_weights.html">preprocess_weights</a></span><span class="op">(</span><span class="va">weight_liver_file</span>,</span>
 <span>                                    <span class="va">region_info</span>,</span>
@@ -242,25 +227,9 @@
 <span>                                    type <span class="op">=</span> <span class="st">"expression"</span>,</span>
 <span>                                    context <span class="op">=</span> <span class="st">"liver"</span>,</span>
 <span>                                    varID_converter_fun <span class="op">=</span> <span class="va">convert_to_ukb_varIDs</span>,</span>
-<span>                                    ncore <span class="op">=</span> <span class="fl">6</span><span class="op">)</span></span></code></pre></div>
-<pre><code><span><span class="co">## 2024-10-14 15:07:09 INFO::Load weight: /tmp/jobs/43037946/RtmpesyLKY/temp_libpatha3c436005678/ctwas/extdata/sample_data/expression_Liver.db</span></span>
-<span><span class="co">## 2024-10-14 15:07:09 INFO::weight_name: liver_expression</span></span>
-<span><span class="co">## 2024-10-14 15:07:09 INFO::type: expression</span></span>
-<span><span class="co">## 2024-10-14 15:07:09 INFO::context: liver</span></span>
-<span><span class="co">## 2024-10-14 15:07:09 INFO::Load PredictDB weights</span></span>
-<span><span class="co">## 2024-10-14 15:07:09 INFO::Number of molecular traits in weights: 12714</span></span>
-<span><span class="co">## 2024-10-14 15:07:09 INFO::Limit to protein coding genes</span></span>
-<span><span class="co">## 2024-10-14 15:07:09 INFO::Number of molecular traits in weights after filtering protein coding genes: 11502</span></span>
-<span><span class="co">## 2024-10-14 15:07:09 INFO::Load PredictDB LD</span></span>
-<span><span class="co">## 2024-10-14 15:07:10 INFO::Convert variant IDs</span></span>
-<span><span class="co">## 2024-10-14 15:07:10 INFO::Remove 1 molecular traits without predictdb LD</span></span>
-<span><span class="co">## 2024-10-14 15:07:10 INFO::Number of molecular traits in weights: 11501</span></span>
-<span><span class="co">## 2024-10-14 15:07:10 INFO::Number of variants in weights: 16953</span></span>
-<span><span class="co">## 2024-10-14 15:07:10 INFO::410 molecular traits and 529 variants left after filtering by GWAS and the reference.</span></span>
-<span><span class="co">## 2024-10-14 15:07:10 INFO::Harmonizing and processing weights ...</span></span>
-<span><span class="co">## 2024-10-14 15:07:11 INFO::Number of molecular traits in weights after preprocessing: 410</span></span></code></pre>
-<div class="sourceCode" id="cb16"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">weight_adipose_file</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/system.file.html" class="external-link">system.file</a></span><span class="op">(</span><span class="st">"extdata/sample_data"</span>, <span class="st">"expression_Adipose_Subcutaneous.db"</span>, package <span class="op">=</span> <span class="st">"ctwas"</span><span class="op">)</span></span>
+<span>                                    ncore <span class="op">=</span> <span class="fl">6</span><span class="op">)</span></span>
+<span></span>
+<span><span class="va">weight_adipose_file</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/system.file.html" class="external-link">system.file</a></span><span class="op">(</span><span class="st">"extdata/sample_data"</span>, <span class="st">"expression_Adipose_Subcutaneous.db"</span>, package <span class="op">=</span> <span class="st">"ctwas"</span><span class="op">)</span></span>
 <span><span class="va">weights_adipose</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/preprocess_weights.html">preprocess_weights</a></span><span class="op">(</span><span class="va">weight_adipose_file</span>,</span>
 <span>                                      <span class="va">region_info</span>,</span>
 <span>                                      <span class="va">z_snp</span><span class="op">$</span><span class="va">id</span>,</span>
@@ -268,38 +237,24 @@
 <span>                                      type <span class="op">=</span> <span class="st">"expression"</span>,</span>
 <span>                                      context <span class="op">=</span> <span class="st">"adipose"</span>, </span>
 <span>                                      varID_converter_fun <span class="op">=</span> <span class="va">convert_to_ukb_varIDs</span>,</span>
-<span>                                      ncore <span class="op">=</span> <span class="fl">6</span><span class="op">)</span></span></code></pre></div>
-<pre><code><span><span class="co">## 2024-10-14 15:07:11 INFO::Load weight: /tmp/jobs/43037946/RtmpesyLKY/temp_libpatha3c436005678/ctwas/extdata/sample_data/expression_Adipose_Subcutaneous.db</span></span>
-<span><span class="co">## 2024-10-14 15:07:11 INFO::weight_name: adipose_expression</span></span>
-<span><span class="co">## 2024-10-14 15:07:11 INFO::type: expression</span></span>
-<span><span class="co">## 2024-10-14 15:07:11 INFO::context: adipose</span></span>
-<span><span class="co">## 2024-10-14 15:07:11 INFO::Load PredictDB weights</span></span>
-<span><span class="co">## 2024-10-14 15:07:11 INFO::Number of molecular traits in weights: 14732</span></span>
-<span><span class="co">## 2024-10-14 15:07:11 INFO::Limit to protein coding genes</span></span>
-<span><span class="co">## 2024-10-14 15:07:11 INFO::Number of molecular traits in weights after filtering protein coding genes: 13113</span></span>
-<span><span class="co">## 2024-10-14 15:07:11 INFO::Load PredictDB LD</span></span>
-<span><span class="co">## 2024-10-14 15:07:11 INFO::Convert variant IDs</span></span>
-<span><span class="co">## 2024-10-14 15:07:12 INFO::Number of molecular traits in weights: 13113</span></span>
-<span><span class="co">## 2024-10-14 15:07:12 INFO::Number of variants in weights: 23759</span></span>
-<span><span class="co">## 2024-10-14 15:07:12 INFO::484 molecular traits and 720 variants left after filtering by GWAS and the reference.</span></span>
-<span><span class="co">## 2024-10-14 15:07:12 INFO::Harmonizing and processing weights ...</span></span>
-<span><span class="co">## 2024-10-14 15:07:13 INFO::Number of molecular traits in weights after preprocessing: 484</span></span></code></pre>
-<div class="sourceCode" id="cb18"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">weights</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="va">weights_liver</span>, <span class="va">weights_adipose</span><span class="op">)</span></span></code></pre></div>
+<span>                                      ncore <span class="op">=</span> <span class="fl">6</span><span class="op">)</span></span>
+<span></span>
+<span><span class="va">weights</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="va">weights_liver</span>, <span class="va">weights_adipose</span><span class="op">)</span></span></code></pre></div>
+<p>Note, FUSION weights do not contain LD information, so LD is required when using FUSION weights.</p>
 </div>
 </div>
 <div class="section level2">
 <h2 id="running-the-ctwas-analysis">Running the cTWAS analysis<a class="anchor" aria-label="anchor" href="#running-the-ctwas-analysis"></a>
 </h2>
 <p>We use the function <code><a href="../reference/ctwas_sumstats_noLD.html">ctwas_sumstats_noLD()</a></code> to run cTWAS analysis without LD. It takes as input preprocessed GWAS z-scores (<code>z_snp</code>), <code>weights</code>, <code>region_info</code>, <code>snp_map</code>, and will perform the main steps: (i) computing Z-scores of molecular traits - effectively performing TWAS; (i) estimating model parameters; (iii) screening regions potentially containing causal molecular traits, and (iv) fine-mapping those regions. Note that cTWAS uses a strategy to speed up computation. It initially estimates parameters in step (ii), using a fraction of SNPs (by default, we use <code>thin = 0.1</code>, i.e. 10% of the SNPs) , and then in step (iii) select regions likely containing signals. After that, it includes all SNPs in the selected regions to do full fine-mapping analysis in step (iv).</p>
-<div class="sourceCode" id="cb19"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb13"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">ctwas_res</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/ctwas_sumstats_noLD.html">ctwas_sumstats_noLD</a></span><span class="op">(</span><span class="va">z_snp</span>,</span>
 <span>                                 <span class="va">weights</span>,</span>
 <span>                                 <span class="va">region_info</span>,</span>
 <span>                                 <span class="va">snp_map</span>,</span>
 <span>                                 thin <span class="op">=</span> <span class="fl">0.1</span>, </span>
 <span>                                 ncore <span class="op">=</span> <span class="fl">6</span><span class="op">)</span></span></code></pre></div>
-<div class="sourceCode" id="cb20"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb14"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">z_gene</span> <span class="op">&lt;-</span> <span class="va">ctwas_res</span><span class="op">$</span><span class="va">z_gene</span></span>
 <span><span class="va">param</span> <span class="op">&lt;-</span> <span class="va">ctwas_res</span><span class="op">$</span><span class="va">param</span></span>
 <span><span class="va">finemap_res</span> <span class="op">&lt;-</span> <span class="va">ctwas_res</span><span class="op">$</span><span class="va">finemap_res</span></span>
@@ -323,6 +278,11 @@
 <p><em>Note</em>: we used sample data (from chr16) in this example, however, in real data analysis, we should use data from the <em>entire genome</em> to estimate parameters.</p>
 <p>To interpret and visualize the results, please see the tutorial <a href="https://xinhe-lab.github.io/multigroup_ctwas/articles/summarizing_results.html" class="external-link">“Summarizing and visualizing cTWAS results”</a> for details.</p>
 <p>One potential issue of cTWAS is the “cross-region” genes. These are genes whose variants in the weight models span two LD regions. Under the current setting of running cTWAS without LD, this is likely not a concern. Nevertheless, it might be helpful to check the tutorial <a href="https://xinhe-lab.github.io/multigroup_ctwas/articles/postprocessing.html" class="external-link">“Post-processing cTWAS results”</a> - see the section “Cross-region LD”. We note that “LD mismatch” is not an issue when running without LD.</p>
+</div>
+<div class="section level2">
+<h2 id="sample-report-of-the-ctwas-results">Sample report of the cTWAS results<a class="anchor" aria-label="anchor" href="#sample-report-of-the-ctwas-results"></a>
+</h2>
+<p>We present a <a href="https://xinhe-lab.github.io/multigroup_ctwas/articles/sample_report.html" class="external-link">sample cTWAS report</a> based on real data analysis.</p>
 </div>
   </div>
 

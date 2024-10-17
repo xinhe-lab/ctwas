@@ -8,7 +8,7 @@ test_that("est_param works", {
     param <- est_param(region_data,
                        niter_prefit = 3,
                        niter = 30,
-                       min_gene = 0,
+                       min_gene = 1,
                        ncore = 2)
   })
 

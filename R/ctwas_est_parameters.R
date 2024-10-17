@@ -52,7 +52,7 @@ est_param <- function(
     min_p_single_effect = 0.8,
     use_null_weight = TRUE,
     min_var = 2,
-    min_gene = 0,
+    min_gene = 1,
     min_group_size = 100,
     ncore = 1,
     logfile = NULL,
@@ -105,7 +105,7 @@ est_param <- function(
   if (min_var > 0) {
     skip_region_ids <- region_ids[(n_sids + n_gids) < min_var]
     if (length(skip_region_ids) > 0){
-      loginfo("Skip %d regions with number of variables < %d.", length(skip_region_ids), min_var)
+      loginfo("Skip %d regions with number of variables < %d", length(skip_region_ids), min_var)
       region_data <- region_data[!names(region_data) %in% skip_region_ids]
     }
   }
@@ -114,7 +114,7 @@ est_param <- function(
   if (min_gene > 0) {
     skip_region_ids <- region_ids[n_gids < min_gene]
     if (length(skip_region_ids) > 0){
-      loginfo("Skip %d regions with number of genes < %d.", length(skip_region_ids), min_gene)
+      loginfo("Skip %d regions with number of genes < %d", length(skip_region_ids), min_gene)
       region_data <- region_data[!names(region_data) %in% skip_region_ids]
     }
   }

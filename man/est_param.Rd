@@ -15,7 +15,7 @@ est_param(
   min_p_single_effect = 0.8,
   use_null_weight = TRUE,
   min_var = 2,
-  min_gene = 0,
+  min_gene = 1,
   min_group_size = 100,
   ncore = 1,
   logfile = NULL,

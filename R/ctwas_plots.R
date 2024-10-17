@@ -306,11 +306,11 @@ make_locusplot <- function(finemap_res,
   region_group <- levels(finemap_region_res$group)
   region_nonSNP_types <- setdiff(region_types, "SNP")
 
-  point.shapes <- point.shapes[1:length(region_types)]
-  names(point.shapes) <- c("SNP", region_nonSNP_types)
+  point.shapes <- c(point.shapes[2:length(region_types)], point.shapes[1])
+  names(point.shapes) <- c(region_nonSNP_types, "SNP")
 
-  point.alpha <- c("SNP" = point.alpha[1], "non-SNP" = point.alpha[2])
-  point.sizes <- c("SNP" = point.sizes[1], "non-SNP" = point.sizes[2])
+  point.alpha <- c("non-SNP" = point.alpha[2], "SNP" = point.alpha[1])
+  point.sizes <- c("non-SNP" = point.sizes[2], "SNP" = point.sizes[1])
 
   legend.sizes <- c(rep(3.5, length(region_nonSNP_types)), 2)
   names(legend.sizes) <- c(region_nonSNP_types, "SNP")
@@ -366,14 +366,14 @@ make_locusplot <- function(finemap_res,
       scale_color_manual(values = cs_colors) +
       labs(color = "CS") +
       guides(shape = guide_legend(order = 1, override.aes = list(size = legend.sizes)),
-             color = guide_legend(order = 2))
+             color = guide_legend(order = 2, override.aes = list(size = 1)))
   } else if (color_pval_by == "LD") {
     p_pval <- p_pval +
       geom_point(aes(color=.data$r2_levels)) +
       scale_color_manual(values = LD_colors) +
       labs(color = expression(R^2)) +
       guides(shape = guide_legend(order = 1, override.aes = list(size = legend.sizes)),
-             color = guide_legend(order = 2))
+             color = guide_legend(order = 2, override.aes = list(size = 1)))
   } else {
     p_pval <- p_pval +
       geom_point(aes(color=.data$focal_levels)) +
@@ -423,12 +423,14 @@ make_locusplot <- function(finemap_res,
     p_pip <- p_pip +
       geom_point(aes(color=.data$cs)) +
       scale_color_manual(values = cs_colors) +
-      labs(color = "CS")
+      labs(color = "CS") +
+      guides(color = guide_legend(override.aes = list(size = 1)))
   } else if (color_pip_by == "LD") {
     p_pip <- p_pip +
       geom_point(aes(color=.data$r2_levels)) +
       scale_color_manual(values = LD_colors) +
-      labs(color = expression(R^2))
+      labs(color = expression(R^2)) +
+      guides(color = guide_legend(override.aes = list(size = 1)))
   } else {
     p_pip <- p_pip +
       geom_point(aes(color=.data$focal_levels)) +

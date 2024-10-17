@@ -5,12 +5,12 @@
 \title{Harmonize weight to match LD reference genotypes.
 Flip signs when reverse complement matches, remove ambiguous variants from the prediction models}
 \usage{
-harmonize_weights(wgt.matrix, snps, snp_info, drop_strand_ambig = TRUE)
+harmonize_weights(wgt.matrix, wgt.snpinfo, snp_info, drop_strand_ambig = TRUE)
 }
 \arguments{
 \item{wgt.matrix}{a matrix of the weights}
 
-\item{snps}{a data frame of the weight variants
+\item{wgt.snpinfo}{a data frame of the weight variants
 with columns "chrom", "id", "cm", "pos", "alt", "ref". "alt" is the effect allele.}
 
 \item{snp_info}{a data frame of SNP info for the reference,
@@ -19,7 +19,7 @@ with columns "chrom", "id", "pos", "alt", "ref".}
 \item{drop_strand_ambig}{If TRUE, remove strand ambiguous variants (A/T, G/C).}
 }
 \value{
-wgt.matrix and snps with alleles flipped to match
+wgt.matrix and wgt.snpinfo with alleles flipped to match
 }
 \description{
 Harmonize weight to match LD reference genotypes.

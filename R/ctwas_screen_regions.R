@@ -85,7 +85,7 @@ screen_regions <- function(region_data,
   thin <- unique(sapply(region_data, "[[", "thin"))
   if (length(thin) > 1) {
     thin <- min(thin)
-    loginfo("thin has more than one value in region_data, use the minimum thin value.")
+    loginfo("thin has more than one value in region_data, use the minimum thin value")
   }
   loginfo("thin = %s", thin)
 
@@ -120,7 +120,7 @@ screen_regions <- function(region_data,
   if (min_var > 0) {
     skip_region_ids <- region_ids[(n_sids + n_gids) < min_var]
     if (length(skip_region_ids) > 0){
-      loginfo("Skip %d regions with number of variables < %d.", length(skip_region_ids), min_var)
+      loginfo("Skip %d regions with number of variables < %d", length(skip_region_ids), min_var)
       region_data[skip_region_ids] <- NULL
     }
   }
@@ -129,7 +129,7 @@ screen_regions <- function(region_data,
   if (min_gene > 0) {
     skip_region_ids <- region_ids[n_gids < min_gene]
     if (length(skip_region_ids) > 0){
-      loginfo("Remove %d regions with number of genes < %d.", length(skip_region_ids), min_gene)
+      loginfo("Remove %d regions with number of genes < %d", length(skip_region_ids), min_gene)
       region_data[skip_region_ids] <- NULL
     }
   }

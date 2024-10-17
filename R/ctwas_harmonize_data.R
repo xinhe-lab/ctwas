@@ -54,7 +54,7 @@ harmonize_z <- function(z_snp, snp_info, drop_strand_ambig = TRUE){
 #'
 #' @param wgt.matrix a matrix of the weights
 #'
-#' @param snps a data frame of the weight variants
+#' @param wgt.snpinfo a data frame of the weight variants
 #' with columns "chrom", "id", "cm", "pos", "alt", "ref". "alt" is the effect allele.
 #'
 #' @param snp_info a data frame of SNP info for the reference,
@@ -62,13 +62,16 @@ harmonize_z <- function(z_snp, snp_info, drop_strand_ambig = TRUE){
 #'
 #' @param drop_strand_ambig If TRUE, remove strand ambiguous variants (A/T, G/C).
 #'
-#' @return wgt.matrix and snps with alleles flipped to match
+#' @return wgt.matrix and wgt.snpinfo with alleles flipped to match
 #
 #' @importFrom data.table rbindlist
 #'
 #' @keywords internal
 #'
-harmonize_weights <- function (wgt.matrix, snps, snp_info, drop_strand_ambig = TRUE){
+harmonize_weights <- function (wgt.matrix,
+                               wgt.snpinfo,
+                               snp_info,
+                               drop_strand_ambig = TRUE){
 
   # Check LD reference SNP info
   target_header <- c("chrom", "id", "pos", "alt", "ref")
@@ -77,28 +80,28 @@ harmonize_weights <- function (wgt.matrix, snps, snp_info, drop_strand_ambig = T
          paste(target_header, collapse = " "))
   }
 
-  snps <- snps[match(rownames(wgt.matrix), snps$id), ]
-  snpnames <- intersect(snps$id, snp_info$id)
+  wgt.snpinfo <- wgt.snpinfo[match(rownames(wgt.matrix), wgt.snpinfo$id), ]
+  snpnames <- intersect(wgt.snpinfo$id, snp_info$id)
 
   if (length(snpnames) != 0) {
-    snps.idx <- match(snpnames, snps$id)
+    snps.idx <- match(snpnames, wgt.snpinfo$id)
     ld.idx <- match(snpnames, snp_info$id)
-    qc <- allele.qc(snps[snps.idx,]$alt, snps[snps.idx,]$ref, snp_info[ld.idx,]$alt, snp_info[ld.idx,]$ref)
+    qc <- allele.qc(wgt.snpinfo[snps.idx,]$alt, wgt.snpinfo[snps.idx,]$ref, snp_info[ld.idx,]$alt, snp_info[ld.idx,]$ref)
     ifflip <- qc[["flip"]]
     ifremove <- !qc[["keep"]]
     flip.idx <- snps.idx[ifflip]
-    snps[flip.idx, c("alt", "ref")] <- snps[flip.idx, c("ref", "alt")]
+    wgt.snpinfo[flip.idx, c("alt", "ref")] <- wgt.snpinfo[flip.idx, c("ref", "alt")]
     wgt.matrix[flip.idx, ] <- -wgt.matrix[flip.idx, ]
 
     if (drop_strand_ambig && any(ifremove)){
       # if dropping ambiguous variants, or >2 ambiguous variants and 0 unambiguous variants,
       # discard the ambiguous variants
       remove.idx <- snps.idx[ifremove]
-      snps <- snps[-remove.idx, , drop = FALSE]
+      wgt.snpinfo <- wgt.snpinfo[-remove.idx, , drop = FALSE]
       wgt.matrix <- wgt.matrix[-remove.idx, , drop = FALSE]
     }
   }
-  return(list(wgt.matrix = wgt.matrix, snps = snps))
+  return(list(wgt.matrix = wgt.matrix, wgt.snpinfo = wgt.snpinfo))
 }
 
 # flip alleles

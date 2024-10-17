@@ -107,7 +107,7 @@ get_predictdb_genome_build(weight_liver_file)
 ```
 
 
-The variant positions of the GWAS summary statistics do not matter because cTWAS use variant positions from the LD reference.
+The variant positions of the GWAS summary statistics do not matter because cTWAS use variant positions from the LD reference. 
 
 ### Defining regions
 
@@ -211,7 +211,7 @@ Below we describe several functions to harmonize the input datasets.
 
 The `preprocess_z_snp()` function harmonizes GWAS z-scores and the reference data based on the included allele information. 
 
-```{r preprocess_z_snp}
+```{r preprocess_z_snp, eval=FALSE}
 z_snp <- preprocess_z_snp(z_snp, snp_map, 
                           drop_multiallelic = TRUE, 
                           drop_strand_ambig = TRUE,
@@ -231,7 +231,7 @@ In this version of cTWAS, we allow the joint analysis of multiple groups of mole
 
 We get a list of processed weights for each weight file, and then we simply concatenate them to  get a list of all processed weights from different types or contexts.
 
-```{r preprocess_weights}
+```{r preprocess_weights, eval=FALSE}
 weights_liver <- preprocess_weights(weight_liver_file,
                                     region_info,
                                     gwas_snp_ids = z_snp$id,
@@ -268,11 +268,14 @@ weights <- c(weights_liver, weights_adipose)
 
 This function returns `weights`, which contains the effect sizes of the variants in the prediction models, LD of variants in the weights, the first and last QTL positions of molecular traits. 
 
-In the function above, we specify the weight format in `weight_format`. We use PredictDB format by default, and we recommend [MASHR-based models](https://predictdb.org/post/2021/07/21/gtex-v8-models-on-eqtl-and-sqtl/#mashr-based-models). We set `load_predictdb_LD = TRUE` to load pre-computed covariances between variants in PredictDB weights (`.txt.gz`). PredictDB weights assume that variant genotypes are not standardized, but our implementation assumes standardized variant genotypes. Thus, we set `scale_predictdb_weights = TRUE`, to scale PredictDB weights by the variance before computing Z-scores of molecular traits. If weights are already on the standardized scale (e.g. FUSION weights or PredictDB weights converted from eQTLs), this scaling should be turned off.
+In the function above, we specify the weight format in `weight_format`. We use PredictDB format by default, and we recommend [MASHR-based models](https://predictdb.org/post/2021/07/21/gtex-v8-models-on-eqtl-and-sqtl/#mashr-based-models). When `load_predictdb_LD = TRUE` (default option for PredictDB weights), cTWAS will compute LD of variants in weights (`R_wgt`) using pre-computed covariances between variants in PredictDB weights (`.txt.gz`). LD in weights will be used when computing gene Z-scores later. When using FUSION weights, or when `load_predictdb_LD = FALSE`, cTWAS will compute LD for variants in weights using reference LD matrices, thus `LD_map` will be required.
+
+PredictDB weights assume that variant genotypes are not standardized, but our implementation assumes standardized variant genotypes. Thus, we set `scale_predictdb_weights = TRUE`, to scale PredictDB weights by the variance before computing Z-scores of molecular traits. If weights are already on the standardized scale (e.g. FUSION weights or PredictDB weights converted from eQTLs), this scaling should be turned off.
 
 We limit variants in weights, reference (`snp_map`) and GWAS SNPs (`z_snp$id`). We drop strand ambiguous variants (`drop_strand_ambig = TRUE`) by default. We could limit weights to protein coding genes (`filter_protein_coding_genes = TRUE`) based on the `gene_type` information in the "extra table" of PredictDB weights. We set `ncore` to parallelize the computation.
 
 Similar to `preprocess_z_snp()`, we use a converter function `convert_to_ukb_varIDs()` that converts variant IDs in weights from the PredictDB format ("chr_pos_ref_alt_build") to our reference format from UK Biobank ("chr:pos_ref_alt"). To convert the formats for other variant ID formats, you can pass your own converter function to the `varID_converter_fun` argument. 
+
 
 [reference]: https://xinhe-lab.github.io/ctwas/reference/index.html
 [UKBB_LD_ref]: https://uchicago.box.com/s/jqocacd2fulskmhoqnasrknbt59x3xkn
@@ -286,6 +289,7 @@ Similar to `preprocess_z_snp()`, we use a converter function `convert_to_ukb_var
 [preparing_input_data_tutorial]: https://xinhe-lab.github.io/multigroup_ctwas/articles/preparing_input_data.html
 [running_ctwas_analysis_tutorial]: https://xinhe-lab.github.io/multigroup_ctwas/articles/running_ctwas_analysis.html
 [summarizing_results_tutorial]: https://xinhe-lab.github.io/multigroup_ctwas/articles/summarizing_results.html
+[sample_report_tutorial]: https://xinhe-lab.github.io/multigroup_ctwas/articles/sample_report.html
 [postprocessing_tutorial]: https://xinhe-lab.github.io/multigroup_ctwas/articles/postprocessing.html
 [utility_functions_tutorial]:https://xinhe-lab.github.io/multigroup_ctwas/articles/utility_functions.html
 

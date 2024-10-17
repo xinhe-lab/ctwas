@@ -18,6 +18,8 @@ ctwas_sumstats_noLD(
   group_prior_var_structure = c("shared_type", "shared_context", "shared_nonSNP",
     "shared_all", "independent"),
   maxSNP = Inf,
+  min_var = 2,
+  min_gene = 1,
   min_group_size = 100,
   min_nonSNP_PIP = 0.5,
   min_p_single_effect = 0.8,
@@ -64,7 +66,14 @@ giving the z scores for SNPs. "A1" is effect allele. "A2" is the other allele.}
 Inf, no limit. This can be useful if there are many SNPs in a region and you don't
 have enough memory to run the program.}
 
-\item{min_group_size}{Minimum number of genes for a group to be included.}
+\item{min_var}{minimum number of variables (SNPs and genes) in a region
+when estimating paramters and screening regions.}
+
+\item{min_gene}{minimum number of genes in a region
+when estimating paramters and screening regions.}
+
+\item{min_group_size}{Minimum number of genes in a group.
+Groups with number of genes < \code{min_group_size} will be removed for the analysis.}
 
 \item{min_nonSNP_PIP}{Regions with non-SNP PIP >= \code{min_nonSNP_PIP}
 will be selected to run finemapping using full SNPs.}

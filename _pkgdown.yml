@@ -19,6 +19,8 @@ navbar:
         href: articles/running_ctwas_analysis.html
       - text: Summarizing and visualizing cTWAS results
         href: articles/summarizing_results.html
+      - text: Sample report of cTWAS results
+        href: articles/sample_report.html
       - text: Post-processing cTWAS results
         href: articles/postprocessing.html
       - text: cTWAS utility functions

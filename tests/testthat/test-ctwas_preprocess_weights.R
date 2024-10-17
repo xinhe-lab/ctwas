@@ -15,7 +15,6 @@ test_that("preprocess_weights with PredictDB weights works", {
                                     snp_map,
                                     type = "expression",
                                     context = "liver",
-                                    weight_name = "liver_expression",
                                     weight_format = "PredictDB",
                                     drop_strand_ambig = TRUE,
                                     scale_predictdb_weights = TRUE,
