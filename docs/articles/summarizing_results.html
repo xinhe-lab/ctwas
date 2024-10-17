@@ -108,7 +108,7 @@
       <h1 data-toc-skip>Summarizing and visualizing cTWAS results</h1>
                         <h4 data-toc-skip class="author">Kaixuan Luo, Sheng Qian</h4>
             
-            <h4 data-toc-skip class="date">2024-10-16</h4>
+            <h4 data-toc-skip class="date">2024-10-17</h4>
       
       <small class="dont-index">Source: <a href="https://github.com/xinhe-lab/ctwas/blob/multigroup/vignettes/summarizing_results.Rmd" class="external-link"><code>vignettes/summarizing_results.Rmd</code></a></small>
       <div class="hidden name"><code>summarizing_results.Rmd</code></div>
@@ -302,10 +302,10 @@
 <span>                                drop_unmapped <span class="op">=</span> <span class="cn">TRUE</span>,</span>
 <span>                                add_position <span class="op">=</span> <span class="cn">TRUE</span>,</span>
 <span>                                use_gene_pos <span class="op">=</span> <span class="st">"mid"</span><span class="op">)</span></span></code></pre></div>
-<pre><code><span><span class="co">## 2024-10-16 18:22:57 INFO::Annotating fine-mapping result ...</span></span>
-<span><span class="co">## 2024-10-16 18:22:57 INFO::Map molecular traits to genes</span></span>
-<span><span class="co">## 2024-10-16 18:22:57 INFO::Add gene positions</span></span>
-<span><span class="co">## 2024-10-16 18:22:57 INFO::Add SNP positions</span></span></code></pre>
+<pre><code><span><span class="co">## 2024-10-17 10:48:29 INFO::Annotating fine-mapping result ...</span></span>
+<span><span class="co">## 2024-10-17 10:48:29 INFO::Map molecular traits to genes</span></span>
+<span><span class="co">## 2024-10-17 10:48:30 INFO::Add gene positions</span></span>
+<span><span class="co">## 2024-10-17 10:48:30 INFO::Add SNP positions</span></span></code></pre>
 <p>If <code>add_gene_annot = TRUE</code>, it joins the fine-mapping result table (<code>finemap_res</code>) with the <code>gene_annot</code> table, by the “molecular ids” column (set in <code>map_by</code>), and adds additional columns of gene annotations to the fine-mapping results By default, we drop the genes not found in <code>gene_annot</code> (<code>drop_unmapped = TRUE</code>). If <code>add_position = TRUE</code>, it adds positional information to the fine-mapping results. The positional information of variants can be found in the data structure of reference SNPs: <code>snp_map</code>. The users need to provide positional information of molecular traits, through <code>mapping_table</code>. In our example, we use <code>gene_annot</code>, which has gene positions. By default, we will use the midpoint positions for genes. You could also use “start” or “end” positions by setting the <code>use_gene_pos</code> argument.</p>
 <p>With the added gene information, we could limit results to protein coding genes, and view the prioritized genes with additional information:</p>
 <div class="sourceCode" id="cb17"><pre class="downlit sourceCode r">
@@ -324,16 +324,28 @@
 <h3 id="integrating-multiple-types-of-molecular-traits">Integrating multiple types of molecular traits<a class="anchor" aria-label="anchor" href="#integrating-multiple-types-of-molecular-traits"></a>
 </h3>
 <p>For more complex settings that involve different types of molecular traits, we will need to map molecular traits to their corresponding genes in order to compute gene PIPs.</p>
-<p>To map molecular traits to their corresponding genes, we need a data frame <code>mapping_table</code>, with IDs of molecular traits (“molecular_id”), and the corresponding gene names (“gene_name”). It is helpful to include additional gene information, such as gene types and gene positions. Below is an example for splicing trait:</p>
-<pre><code><span><span class="st">"</span></span>
-<span><span class="st">                 molecular_id gene_name      gene_type  chrom      start       end</span></span>
-<span><span class="st"> intron_1_151895194_151910954     THEM4 protein_coding      1  151895194 151910954</span></span>
-<span><span class="st">  intron_15_43038232_43043215      UBR1 protein_coding     15   43038232  43043215</span></span>
-<span><span class="st">  intron_15_43043395_43047161      UBR1 protein_coding     15   43043395  43047161</span></span>
-<span><span class="st">  intron_15_43047289_43048392      UBR1 protein_coding     15   43047289  43048392</span></span>
-<span><span class="st">"</span></span></code></pre>
+<p>To map molecular traits to their corresponding genes, we need a data frame <code>mapping_table</code>, with IDs of molecular traits (“molecular_id”), and the corresponding gene names (“gene_name”). It is helpful to include additional gene information, such as gene types and gene positions. We provide a <code>mapping_table</code> to map introns to genes for PredictDB expression and slicing data <a href="https://uchicago.box.com/s/gx7raqf5c9jp6tgvm5tpc2ej7zr6bnxz" class="external-link">here</a>. The mapping file is also available on UChicago RCC server: <code>/project2/xinhe/shared_data/multigroup_ctwas/weights/mapping_files/PredictDB_mapping.RDS</code> .</p>
+<p>For example:</p>
+<div class="sourceCode" id="cb19"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">mapping_table</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/readRDS.html" class="external-link">readRDS</a></span><span class="op">(</span><span class="st">"/project2/xinhe/shared_data/multigroup_ctwas/weights/mapping_files/PredictDB_mapping.RDS"</span><span class="op">)</span></span>
+<span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">head</a></span><span class="op">(</span><span class="va">mapping_table</span><span class="op">[</span><span class="va">mapping_table</span><span class="op">$</span><span class="va">gene_name</span> <span class="op">==</span> <span class="st">"UBR1"</span>,<span class="op">]</span><span class="op">)</span></span></code></pre></div>
+<pre><code><span><span class="co">##                       molecular_id gene_name      gene_type chrom    start</span></span>
+<span><span class="co">## 310222          ENSG00000159459.11      UBR1 protein_coding    15 42942897</span></span>
+<span><span class="co">## 173881 intron_15_43038232_43043215      UBR1 protein_coding    15 43038232</span></span>
+<span><span class="co">## 173882 intron_15_43043395_43047161      UBR1 protein_coding    15 43043395</span></span>
+<span><span class="co">## 173883 intron_15_43047289_43048392      UBR1 protein_coding    15 43047289</span></span>
+<span><span class="co">## 173884 intron_15_43048491_43054742      UBR1 protein_coding    15 43048491</span></span>
+<span><span class="co">## 173885 intron_15_43054899_43056344      UBR1 protein_coding    15 43054899</span></span>
+<span><span class="co">##             end</span></span>
+<span><span class="co">## 310222 43106113</span></span>
+<span><span class="co">## 173881 43043215</span></span>
+<span><span class="co">## 173882 43047161</span></span>
+<span><span class="co">## 173883 43048392</span></span>
+<span><span class="co">## 173884 43054742</span></span>
+<span><span class="co">## 173885 43056344</span></span></code></pre>
 <p>Using this mapping table, we can use the <code><a href="../reference/anno_finemap_res.html">anno_finemap_res()</a></code> function to add additional columns to the fine-mapping results. If a molecular trait is mapped to multiple genes, it splits the PIP of that molecular trait to its target genes. We use <code>gene_annot</code> below as the mapping table between expression traits and the corresponding gene names.</p>
-<div class="sourceCode" id="cb20"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb21"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">finemap_res</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/anno_finemap_res.html">anno_finemap_res</a></span><span class="op">(</span><span class="va">finemap_res</span>,</span>
 <span>                                snp_map <span class="op">=</span> <span class="va">snp_map</span>,</span>
 <span>                                mapping_table <span class="op">=</span> <span class="va">gene_annot</span>,</span>
@@ -343,15 +355,15 @@
 <span>                                add_position <span class="op">=</span> <span class="cn">TRUE</span>,</span>
 <span>                                use_gene_pos <span class="op">=</span> <span class="st">"mid"</span><span class="op">)</span></span></code></pre></div>
 <p>Similarly, we use the function <code><a href="../reference/anno_susie_alpha_res.html">anno_susie_alpha_res()</a></code> to add additional columns to <code>susie_alpha_res</code>.</p>
-<div class="sourceCode" id="cb21"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb22"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">susie_alpha_res</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/anno_susie_alpha_res.html">anno_susie_alpha_res</a></span><span class="op">(</span><span class="va">susie_alpha_res</span>,</span>
 <span>                                        mapping_table <span class="op">=</span> <span class="va">gene_annot</span>,</span>
 <span>                                        map_by <span class="op">=</span> <span class="st">"molecular_id"</span>,</span>
 <span>                                        drop_unmapped <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span></code></pre></div>
-<pre><code><span><span class="co">## 2024-10-16 18:22:57 INFO::Annotating susie alpha result ...</span></span>
-<span><span class="co">## 2024-10-16 18:22:57 INFO::Map molecular traits to genes</span></span></code></pre>
+<pre><code><span><span class="co">## 2024-10-17 10:48:32 INFO::Annotating susie alpha result ...</span></span>
+<span><span class="co">## 2024-10-17 10:48:32 INFO::Map molecular traits to genes</span></span></code></pre>
 <p>We could use the <code><a href="../reference/combine_gene_pips.html">combine_gene_pips()</a></code> function to compute gene PIPs across different types of molecular traits. Here we use <code>group_by = "gene_name"</code>, because molecular traits are mapped to their corresponding genes by the “gene_name” column.</p>
-<div class="sourceCode" id="cb23"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb24"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">combined_pip_by_type</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/combine_gene_pips.html">combine_gene_pips</a></span><span class="op">(</span><span class="va">susie_alpha_res</span>,</span>
 <span>                                          group_by <span class="op">=</span> <span class="st">"gene_name"</span>,</span>
 <span>                                          by <span class="op">=</span> <span class="st">"type"</span>,</span>
@@ -373,7 +385,7 @@
 <p>It is often useful to visualize the results of cTWAS. This would help one understand the rationale of how cTWAS chooses a particular molecular trait and identify issues when cTWAS doesn’t behave properly.</p>
 <p>We make locus plots to visualize the association of variants and molecular traits, cTWAS PIP results, and other information, such as QTLs and gene annotations. We illustrate this with an example below.</p>
 <p>We use the <code><a href="../reference/make_locusplot.html">make_locusplot()</a></code> function to make locus plots for regions of interest. We need the fine-mapping result with position information, region ID, Ensembl gene annotation database (<code>ens_db</code>) for plotting the gene track, and optionally, preprocessed weights (<code>weights</code>) for plotting the QTL track.</p>
-<div class="sourceCode" id="cb25"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb26"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="../reference/make_locusplot.html">make_locusplot</a></span><span class="op">(</span><span class="va">finemap_res</span>,</span>
 <span>               region_id <span class="op">=</span> <span class="st">"16_71020125_72901251"</span>,</span>
 <span>               ens_db <span class="op">=</span> <span class="va">ens_db</span>,</span>
@@ -383,12 +395,12 @@
 <span>               filter_cs <span class="op">=</span> <span class="cn">TRUE</span>,</span>
 <span>               color_pval_by <span class="op">=</span> <span class="st">"cs"</span>,</span>
 <span>               color_pip_by <span class="op">=</span> <span class="st">"cs"</span><span class="op">)</span></span></code></pre></div>
-<pre><code><span><span class="co">## 2024-10-16 18:22:58 INFO::Limit to protein coding genes</span></span>
-<span><span class="co">## 2024-10-16 18:22:58 INFO::focal id: ENSG00000261701.6|liver_expression</span></span>
-<span><span class="co">## 2024-10-16 18:22:58 INFO::focal molecular trait: HPR liver expression</span></span>
-<span><span class="co">## 2024-10-16 18:22:58 INFO::Range of locus: chr16:71020348-72900542</span></span>
-<span><span class="co">## 2024-10-16 18:22:58 INFO::focal molecular trait QTL positions: 72063820,72063928</span></span>
-<span><span class="co">## 2024-10-16 18:22:58 INFO::Limit PIPs to credible sets</span></span></code></pre>
+<pre><code><span><span class="co">## 2024-10-17 10:48:32 INFO::Limit to protein coding genes</span></span>
+<span><span class="co">## 2024-10-17 10:48:32 INFO::focal id: ENSG00000261701.6|liver_expression</span></span>
+<span><span class="co">## 2024-10-17 10:48:32 INFO::focal molecular trait: HPR liver expression</span></span>
+<span><span class="co">## 2024-10-17 10:48:32 INFO::Range of locus: chr16:71020348-72900542</span></span>
+<span><span class="co">## 2024-10-17 10:48:33 INFO::focal molecular trait QTL positions: 72063820,72063928</span></span>
+<span><span class="co">## 2024-10-17 10:48:33 INFO::Limit PIPs to credible sets</span></span></code></pre>
 <div class="figure" style="text-align: center">
 <img src="summarizing_results_files/figure-html/locus_plot_1-1.png" alt="&amp;nbsp;" width="1200"><p class="caption">
  
@@ -397,12 +409,12 @@
 <p>The locus plot shows several tracks in the example region. The top one shows -log10(p-value) of the association of variants (from GWAS) and molecular traits (from the package computed z-scores) with the phenotype. The next track shows the PIPs of variants and molecular traits. By default, we limit PIP results to credible sets in the PIP track (<code>filter_cs = TRUE</code>). The next track shows the QTLs of the focal gene. By default, it chooses the molecular trait with the highest PIP (“HPR” in this case). We could specify the focal gene by setting the <code>focal_id</code> to the “ID” of interest, or <code>focal_gene</code> to the gene name of interest. If there are multiple molecular traits or contexts of the focal gene, it will automatically use the one with the highest PIP. The bottom is the gene track. We limit results to protein coding genes by default. We can draw a red dotted line to show the PIP cutoff of 0.8 by setting <code>highlight_pip = 0.8</code>.</p>
 <p>There are a few ways to color the data points in the p-value and PIP tracks, by setting <code>color_pval_by</code> and <code>color_pip_by</code> options. “cs” would color the data points by credible sets (default option); “LD” would color data points by correlations with the focal gene; “none” would use the same colors for all data points, except for the focal gene.</p>
 <p>To color data points by correlations with the focal gene, We need correlation matrices among molecular traits and SNPs. If we have saved correlation matrices in <code>cor_dir</code> when running cTWAS with LD, we could simply load those precomputed correlation matrices of the region using the function <code><a href="../reference/load_region_cor.html">load_region_cor()</a></code>.</p>
-<div class="sourceCode" id="cb27"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb28"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">region_id</span> <span class="op">&lt;-</span> <span class="st">"16_71020125_72901251"</span></span>
 <span><span class="va">cor_dir</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/system.file.html" class="external-link">system.file</a></span><span class="op">(</span><span class="st">"extdata/sample_data"</span>, <span class="st">"cor_matrix"</span>, package <span class="op">=</span> <span class="st">"ctwas"</span><span class="op">)</span></span>
 <span><span class="va">cor_res</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/load_region_cor.html">load_region_cor</a></span><span class="op">(</span><span class="va">region_id</span>, cor_dir <span class="op">=</span> <span class="va">cor_dir</span><span class="op">)</span></span></code></pre></div>
 <p>If we don’t have precomputed correlation matrices, we could compute the correlation matrices of the region using the function <code><a href="../reference/get_region_cor.html">get_region_cor()</a></code>. We will need the region data with all SNPs (<code>screened_region_data</code>), <code>LD_map</code> and <code>weights</code>.</p>
-<div class="sourceCode" id="cb28"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb29"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">screened_region_data</span> <span class="op">&lt;-</span> <span class="va">screen_res</span><span class="op">$</span><span class="va">screened_region_data</span></span>
 <span><span class="va">region_id</span> <span class="op">&lt;-</span> <span class="st">"16_71020125_72901251"</span></span>
 <span><span class="va">cor_res</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/get_region_cor.html">get_region_cor</a></span><span class="op">(</span><span class="va">region_id</span>,</span>
@@ -411,7 +423,7 @@
 <span>                          LD_map <span class="op">=</span> <span class="va">LD_map</span>,</span>
 <span>                          weights <span class="op">=</span> <span class="va">weights</span><span class="op">)</span></span></code></pre></div>
 <p>The locus plot above shows the whole region. We could zoom in a region of interest by specifying the <code>locus_range</code> argument. In the example below, we zoom in the region, color the p-value track by correlations with the focal gene, and color the PIP track by credible sets. We could also highlight positions of interest by setting <code>highlight_pos</code>, for example, we highlight the position of HPR gene below.</p>
-<div class="sourceCode" id="cb29"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb30"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="../reference/make_locusplot.html">make_locusplot</a></span><span class="op">(</span><span class="va">finemap_res</span>,</span>
 <span>               region_id <span class="op">=</span> <span class="st">"16_71020125_72901251"</span>,</span>
 <span>               ens_db <span class="op">=</span> <span class="va">ens_db</span>, </span>
@@ -425,13 +437,13 @@
 <span>               filter_cs <span class="op">=</span> <span class="cn">TRUE</span>,</span>
 <span>               color_pval_by <span class="op">=</span> <span class="st">"LD"</span>,</span>
 <span>               color_pip_by <span class="op">=</span> <span class="st">"cs"</span><span class="op">)</span></span></code></pre></div>
-<pre><code><span><span class="co">## 2024-10-16 18:23:03 INFO::Limit to protein coding genes</span></span>
-<span><span class="co">## 2024-10-16 18:23:03 INFO::focal id: ENSG00000261701.6|liver_expression</span></span>
-<span><span class="co">## 2024-10-16 18:23:03 INFO::focal molecular trait: HPR liver expression</span></span>
-<span><span class="co">## 2024-10-16 18:23:03 INFO::Range of locus: chr16:71600000-72400000</span></span>
-<span><span class="co">## 2024-10-16 18:23:03 INFO::focal molecular trait QTL positions: 72063820,72063928</span></span>
-<span><span class="co">## 2024-10-16 18:23:03 INFO::Limit PIPs to credible sets</span></span>
-<span><span class="co">## 2024-10-16 18:23:03 INFO::highlight positions: 72070235</span></span></code></pre>
+<pre><code><span><span class="co">## 2024-10-17 10:48:38 INFO::Limit to protein coding genes</span></span>
+<span><span class="co">## 2024-10-17 10:48:38 INFO::focal id: ENSG00000261701.6|liver_expression</span></span>
+<span><span class="co">## 2024-10-17 10:48:38 INFO::focal molecular trait: HPR liver expression</span></span>
+<span><span class="co">## 2024-10-17 10:48:38 INFO::Range of locus: chr16:71600000-72400000</span></span>
+<span><span class="co">## 2024-10-17 10:48:38 INFO::focal molecular trait QTL positions: 72063820,72063928</span></span>
+<span><span class="co">## 2024-10-17 10:48:38 INFO::Limit PIPs to credible sets</span></span>
+<span><span class="co">## 2024-10-17 10:48:38 INFO::highlight positions: 72070235</span></span></code></pre>
 <div class="figure" style="text-align: center">
 <img src="summarizing_results_files/figure-html/locus_plot_2-1.png" alt="&amp;nbsp;" width="1200"><p class="caption">
  

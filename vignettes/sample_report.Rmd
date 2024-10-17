@@ -166,18 +166,16 @@ weights <- c(weights_expression1, weights_splicing1)
 ```
 
 
-
 ## Running cTWAS analysis
 
 We use the ctwas main function `ctwas_sumstats()` to run the cTWAS analysis with LD. 
 For more details on this function, refer to the tutorial ["Running cTWAS analysis"][running_ctwas_analysis_tutorial].
 
-We use default settings:
+We use the following settings:
 
 - `group_prior_var_structure = "shared_type"` (default option): Allows all groups within a molecular QTL type to share the same variance parameter.
 - `filter_L = TRUE` (default option): Estimates the number of causal signals (L) for each region.
 
-Users can expand the code snippets below to view the exact code used.
 ```{r echo=TRUE, eval=FALSE}
 thin <- 0.1
 maxSNP <- 20000
@@ -268,11 +266,11 @@ ggplot(data = finemap_res[finemap_res$type!="SNP",], aes(x = abs(z), y = susie_p
 
 ## Fine-mapping results
 
-We process the fine-mapping results here. 
+To process the fine-mapping results, we first map introns to genes and add gene annotations to cTWAS results. We provide a  `mapping_table`  for PredictDB expression and slicing data [here](https://uchicago.box.com/s/gx7raqf5c9jp6tgvm5tpc2ej7zr6bnxz). 
 
-We first add gene annotations to cTWAS results.
 ```{r anno_finemap_res, echo=TRUE, eval=TRUE}
 mapping_table <- readRDS("/project2/xinhe/shared_data/multigroup_ctwas/weights/mapping_files/PredictDB_mapping.RDS")
+
 snp_map <- readRDS(file.path(results_dir, paste0(trait,".snp_map.RDS")))
 
 finemap_res$molecular_id <- get_molecular_ids(finemap_res)
@@ -296,7 +294,7 @@ DT::datatable(finemap_res_show,
 ```
 
 
-Next, we compute gene PIPs across different types of molecular traits
+Next, we compute gene PIPs across different types of molecular traits:
 
 ```{r combine_PIPs, echo=TRUE, eval=TRUE, message=FALSE, warning=FALSE}
 
@@ -335,7 +333,6 @@ DT::datatable(combined_pip_by_type,
 ```
 
 
-
 ## Locus plots
 
 We make a locus plot for the region ("16_71020125_72901251") containing the gene HPR.
@@ -361,7 +358,7 @@ make_locusplot(finemap_res = finemap_res,
 
 ## Gene set enrichment analysis
 
-We do enrichment analysis using the genes with PIP > 0.8:
+We do GO enrichment analysis using the genes with PIP > 0.8:
 
 ```{r GO_enrichment, echo=TRUE, eval=TRUE, message=FALSE, warning=FALSE, fig.width=8, fig.height=4}
 
@@ -406,6 +403,9 @@ DT::datatable(df,caption = htmltools::tags$caption(
   'Enriched pathways from GO_Molecular_Function_2021'),
   options = list(pageLength = 5) )
 ```
+
+
+
 
 
 [minimal_tutorial]: https://xinhe-lab.github.io/multigroup_ctwas/articles/minimal_tutorial.html
