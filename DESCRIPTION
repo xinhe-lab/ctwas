@@ -41,6 +41,7 @@ Imports:
     crayon,
     readr,
     data.table,
+    R.utils,
     RSQLite,
     locuszoomr,
     pgenlibr,
