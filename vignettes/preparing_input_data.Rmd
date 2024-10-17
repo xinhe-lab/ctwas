@@ -211,7 +211,7 @@ Below we describe several functions to harmonize the input datasets.
 
 The `preprocess_z_snp()` function harmonizes GWAS z-scores and the reference data based on the included allele information. 
 
-```{r preprocess_z_snp}
+```{r preprocess_z_snp, eval=FALSE}
 z_snp <- preprocess_z_snp(z_snp, snp_map, 
                           drop_multiallelic = TRUE, 
                           drop_strand_ambig = TRUE,
@@ -231,7 +231,7 @@ In this version of cTWAS, we allow the joint analysis of multiple groups of mole
 
 We get a list of processed weights for each weight file, and then we simply concatenate them to  get a list of all processed weights from different types or contexts.
 
-```{r preprocess_weights}
+```{r preprocess_weights, eval=FALSE}
 weights_liver <- preprocess_weights(weight_liver_file,
                                     region_info,
                                     gwas_snp_ids = z_snp$id,
@@ -289,6 +289,7 @@ Similar to `preprocess_z_snp()`, we use a converter function `convert_to_ukb_var
 [preparing_input_data_tutorial]: https://xinhe-lab.github.io/multigroup_ctwas/articles/preparing_input_data.html
 [running_ctwas_analysis_tutorial]: https://xinhe-lab.github.io/multigroup_ctwas/articles/running_ctwas_analysis.html
 [summarizing_results_tutorial]: https://xinhe-lab.github.io/multigroup_ctwas/articles/summarizing_results.html
+[sample_report_tutorial]: https://xinhe-lab.github.io/multigroup_ctwas/articles/sample_report.html
 [postprocessing_tutorial]: https://xinhe-lab.github.io/multigroup_ctwas/articles/postprocessing.html
 [utility_functions_tutorial]:https://xinhe-lab.github.io/multigroup_ctwas/articles/utility_functions.html
 

@@ -60,7 +60,7 @@ test_that("screen_regions (filter by L) works", {
                                  group_prior_var = group_prior_var,
                                  filter_L = TRUE,
                                  filter_nonSNP_PIP = FALSE,
-                                 ncore = 4)
+                                 ncore = 2)
     screened_region_data <- screen_res$screened_region_data
 
     # expand selected regions with all SNPs

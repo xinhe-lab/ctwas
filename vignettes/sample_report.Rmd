@@ -25,14 +25,15 @@ The analyzed trait is LDL cholesterol,
 the prediction models are liver gene expression and splicing models trained on 
 GTEx v8 in the PredictDB format.
 
-Load the `ctwas` package. We also need `EnsDb.Hsapiens.v86`, `ggplot2`, `dplyr`, 
-and `enrichR` packages for this tutorial. 
+Load the `ctwas` package. We also need packages: `EnsDb.Hsapiens.v86`, `ggplot2`, `dplyr`, `enrichR`, `DT` and `htmltools` for this tutorial. 
 ```{r load_packages, message=FALSE}
 library(ctwas)
 library(EnsDb.Hsapiens.v86)
 library(ggplot2)
 library(dplyr)
 library(enrichR)
+library(DT)
+library(htmltools)
 ```
 
 
@@ -338,7 +339,7 @@ DT::datatable(combined_pip_by_type,
 ## Locus plots
 
 We make a locus plot for the region ("16_71020125_72901251") containing the gene HPR.
-```{r locus_plot, fig.width=11, fig.height=8}
+```{r locus_plot, fig.width=12, fig.height=8}
 ens_db <- EnsDb.Hsapiens.v86
 weights <- readRDS(file.path(results_dir, paste0(trait,".preprocessed.weights.RDS")))
 make_locusplot(finemap_res = finemap_res,

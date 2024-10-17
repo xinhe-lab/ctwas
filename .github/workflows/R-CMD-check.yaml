@@ -27,7 +27,7 @@ jobs:
           install.packages(c("ggrepel","readr","data.table","R.utils"))
           install.packages(c("RSQLite","locuszoomr","pgenlibr","Rfast"))
           install.packages(c("knitr","rmarkdown","testthat","BiocManager"))
-          install.packages(c("crayon","rcmdcheck","tidyr"))
+          install.packages(c("crayon","rcmdcheck","tidyr", "enrichR"))
           BiocManager::install("GenomeInfoDb",ask = FALSE)
           BiocManager::install("ensembldb",ask = FALSE)
           BiocManager::install("AnnotationFilter",ask = FALSE)

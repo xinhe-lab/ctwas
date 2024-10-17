@@ -49,6 +49,9 @@ Imports:
     AnnotationFilter
 Suggests: 
     Rfast,
+    enrichR,
+    DT,
+    htmltools,
     knitr,
     rmarkdown,
     testthat (>= 3.0.0),
