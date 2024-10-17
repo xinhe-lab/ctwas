@@ -17,7 +17,7 @@
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">ctwas</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">0.4.16</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">0.4.17</span>
       </span>
     </div>
 
@@ -42,6 +42,9 @@
     </li>
     <li>
       <a href="../articles/summarizing_results.html">Summarizing and visualizing cTWAS results</a>
+    </li>
+    <li>
+      <a href="../articles/sample_report.html">Sample report of cTWAS results</a>
     </li>
     <li>
       <a href="../articles/postprocessing.html">Post-processing cTWAS results</a>
@@ -105,6 +108,8 @@
 <span>  min_nonSNP_PIP <span class="op">=</span> <span class="fl">0.5</span>,</span>
 <span>  min_p_single_effect <span class="op">=</span> <span class="fl">0.8</span>,</span>
 <span>  maxSNP <span class="op">=</span> <span class="cn">Inf</span>,</span>
+<span>  min_var <span class="op">=</span> <span class="fl">2</span>,</span>
+<span>  min_gene <span class="op">=</span> <span class="fl">1</span>,</span>
 <span>  min_group_size <span class="op">=</span> <span class="fl">100</span>,</span>
 <span>  use_null_weight <span class="op">=</span> <span class="cn">TRUE</span>,</span>
 <span>  coverage <span class="op">=</span> <span class="fl">0.95</span>,</span>
@@ -210,8 +215,19 @@ Inf, no limit. This can be useful if there are many SNPs in a region and you don
 have enough memory to run the program.</p></dd>
 
 
+<dt>min_var</dt>
+<dd><p>minimum number of variables (SNPs and genes) in a region
+when estimating paramters and screening regions.</p></dd>
+
+
+<dt>min_gene</dt>
+<dd><p>minimum number of genes in a region
+when estimating paramters and screening regions.</p></dd>
+
+
 <dt>min_group_size</dt>
-<dd><p>Minimum number of genes for a group to be included.</p></dd>
+<dd><p>Minimum number of genes in a group.
+Groups with number of genes &lt; <code>min_group_size</code> will be removed for the analysis.</p></dd>
 
 
 <dt>use_null_weight</dt>

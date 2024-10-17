@@ -20,7 +20,7 @@ Flip signs when reverse complement matches, remove ambiguous variants from the p
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">ctwas</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">0.4.16</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">0.4.17</span>
       </span>
     </div>
 
@@ -45,6 +45,9 @@ Flip signs when reverse complement matches, remove ambiguous variants from the p
     </li>
     <li>
       <a href="../articles/summarizing_results.html">Summarizing and visualizing cTWAS results</a>
+    </li>
+    <li>
+      <a href="../articles/sample_report.html">Sample report of cTWAS results</a>
     </li>
     <li>
       <a href="../articles/postprocessing.html">Post-processing cTWAS results</a>
@@ -90,7 +93,7 @@ Flip signs when reverse complement matches, remove ambiguous variants from the p
     </div>
 
     <div id="ref-usage">
-    <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="fu">harmonize_weights</span><span class="op">(</span><span class="va">wgt.matrix</span>, <span class="va">snps</span>, <span class="va">snp_info</span>, drop_strand_ambig <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span></code></pre></div>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="fu">harmonize_weights</span><span class="op">(</span><span class="va">wgt.matrix</span>, <span class="va">wgt.snpinfo</span>, <span class="va">snp_info</span>, drop_strand_ambig <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span></code></pre></div>
     </div>
 
     <div id="arguments">
@@ -99,7 +102,7 @@ Flip signs when reverse complement matches, remove ambiguous variants from the p
 <dd><p>a matrix of the weights</p></dd>
 
 
-<dt>snps</dt>
+<dt>wgt.snpinfo</dt>
 <dd><p>a data frame of the weight variants
 with columns "chrom", "id", "cm", "pos", "alt", "ref". "alt" is the effect allele.</p></dd>
 
@@ -117,7 +120,7 @@ with columns "chrom", "id", "pos", "alt", "ref".</p></dd>
     <h2>Value</h2>
     
 
-<p>wgt.matrix and snps with alleles flipped to match</p>
+<p>wgt.matrix and wgt.snpinfo with alleles flipped to match</p>
     </div>
 
   </div>

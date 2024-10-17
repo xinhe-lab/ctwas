@@ -33,7 +33,7 @@
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">ctwas</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">0.4.16</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">0.4.17</span>
       </span>
     </div>
 
@@ -60,6 +60,9 @@
     </li>
     <li>
       <a href="../articles/summarizing_results.html">Summarizing and visualizing cTWAS results</a>
+    </li>
+    <li>
+      <a href="../articles/sample_report.html">Sample report of cTWAS results</a>
     </li>
     <li>
       <a href="../articles/postprocessing.html">Post-processing cTWAS results</a>
@@ -105,7 +108,7 @@
       <h1 data-toc-skip>Preparing cTWAS input data</h1>
                         <h4 data-toc-skip class="author">Kaixuan Luo, Sheng Qian</h4>
             
-            <h4 data-toc-skip class="date">2024-10-14</h4>
+            <h4 data-toc-skip class="date">2024-10-16</h4>
       
       <small class="dont-index">Source: <a href="https://github.com/xinhe-lab/ctwas/blob/multigroup/vignettes/preparing_input_data.Rmd" class="external-link"><code>vignettes/preparing_input_data.Rmd</code></a></small>
       <div class="hidden name"><code>preparing_input_data.Rmd</code></div>
@@ -264,7 +267,7 @@
 <div class="sourceCode" id="cb17"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">ref_snp_info_file</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/system.file.html" class="external-link">system.file</a></span><span class="op">(</span><span class="st">"extdata/sample_data"</span>, <span class="st">"ukb_b38_0.1_chr16_var_info.Rvar.gz"</span>, package <span class="op">=</span> <span class="st">"ctwas"</span><span class="op">)</span></span>
 <span></span>
-<span><span class="va">ref_snp_info</span> <span class="op">&lt;-</span> <span class="fu">data.table</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/data.table/man/fread.html" class="external-link">fread</a></span><span class="op">(</span><span class="va">ref_snp_info_file</span>, sep <span class="op">=</span> <span class="st">"\t"</span><span class="op">)</span></span>
+<span><span class="va">ref_snp_info</span> <span class="op">&lt;-</span> <span class="fu">data.table</span><span class="fu">::</span><span class="fu"><a href="https://rdatatable.gitlab.io/data.table/reference/fread.html" class="external-link">fread</a></span><span class="op">(</span><span class="va">ref_snp_info_file</span>, sep <span class="op">=</span> <span class="st">"\t"</span><span class="op">)</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/class.html" class="external-link">class</a></span><span class="op">(</span><span class="va">ref_snp_info</span><span class="op">)</span> <span class="op">&lt;-</span> <span class="st">"data.frame"</span></span>
 <span></span>
 <span><span class="va">res</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/create_snp_map.html">create_snp_map</a></span><span class="op">(</span><span class="va">region_info</span>, <span class="va">ref_snp_info</span><span class="op">)</span></span>
@@ -288,15 +291,15 @@
 <span>                          drop_multiallelic <span class="op">=</span> <span class="cn">TRUE</span>, </span>
 <span>                          drop_strand_ambig <span class="op">=</span> <span class="cn">TRUE</span>,</span>
 <span>                          varID_converter_fun <span class="op">=</span> <span class="va">convert_to_ukb_varIDs</span><span class="op">)</span></span></code></pre></div>
-<pre><code><span><span class="co">## 2024-10-14 15:10:24 INFO::Preprocessing z_snp...</span></span>
-<span><span class="co">## 2024-10-14 15:10:24 INFO::z_snp has 407828 variants in total</span></span>
-<span><span class="co">## 2024-10-14 15:10:24 INFO::Convert variant IDs</span></span>
-<span><span class="co">## 2024-10-14 15:10:24 INFO::271976 variants left after filtering by the reference SNPs.</span></span>
-<span><span class="co">## 2024-10-14 15:10:24 INFO::Remove 30 multiallelic variants</span></span>
-<span><span class="co">## 2024-10-14 15:10:24 INFO::Harmonize 271946 variants between GWAS and the reference</span></span>
-<span><span class="co">## 2024-10-14 15:10:25 INFO::Flip signs for 271904 (99.98%) variants</span></span>
-<span><span class="co">## 2024-10-14 15:10:26 INFO::Remove 45738 strand ambiguous variants</span></span>
-<span><span class="co">## 2024-10-14 15:10:26 INFO::226208 variants left after preprocessing and harmonization.</span></span></code></pre>
+<pre><code><span><span class="co">## 2024-10-16 17:53:24 INFO::Preprocessing z_snp...</span></span>
+<span><span class="co">## 2024-10-16 17:53:24 INFO::z_snp has 407828 variants in total</span></span>
+<span><span class="co">## 2024-10-16 17:53:24 INFO::Convert variant IDs</span></span>
+<span><span class="co">## 2024-10-16 17:53:25 INFO::271976 variants left after filtering by the reference SNPs.</span></span>
+<span><span class="co">## 2024-10-16 17:53:25 INFO::Remove 30 multiallelic variants</span></span>
+<span><span class="co">## 2024-10-16 17:53:25 INFO::Harmonize 271946 variants between GWAS and the reference</span></span>
+<span><span class="co">## 2024-10-16 17:53:25 INFO::Flip signs for 271904 (99.98%) variants</span></span>
+<span><span class="co">## 2024-10-16 17:53:26 INFO::Remove 45738 strand ambiguous variants</span></span>
+<span><span class="co">## 2024-10-16 17:53:26 INFO::226208 variants left after preprocessing and harmonization.</span></span></code></pre>
 <p>It will filter out variants not included in the reference data. It will also drop multiallelic variants and strand ambiguous variants, by default. You can change these by setting the options <code>drop_multiallelic</code> and <code>drop_strand_ambig</code>.</p>
 <p>The naming of variant IDs should be consistent between GWAS, LD reference and weights. We use a converter function <code><a href="../reference/convert_to_ukb_varIDs.html">convert_to_ukb_varIDs()</a></code> that converts variant IDs in GWAS from the Open GWAS format (“chr_pos_ref_alt”) to our reference format from UK Biobank (“chr:pos_ref_alt”). To convert the formats for other variant ID formats, you can pass your own converter function to the <code>varID_converter_fun</code> argument.</p>
 </div>
@@ -321,22 +324,23 @@
 <span>                                    filter_protein_coding_genes <span class="op">=</span> <span class="cn">TRUE</span>,</span>
 <span>                                    varID_converter_fun <span class="op">=</span> <span class="va">convert_to_ukb_varIDs</span>,</span>
 <span>                                    ncore <span class="op">=</span> <span class="fl">6</span><span class="op">)</span></span></code></pre></div>
-<pre><code><span><span class="co">## 2024-10-14 15:10:26 INFO::Load weight: /tmp/jobs/43037946/RtmpesyLKY/temp_libpatha3c436005678/ctwas/extdata/sample_data/expression_Liver.db</span></span>
-<span><span class="co">## 2024-10-14 15:10:26 INFO::weight_name: liver_expression</span></span>
-<span><span class="co">## 2024-10-14 15:10:26 INFO::type: expression</span></span>
-<span><span class="co">## 2024-10-14 15:10:26 INFO::context: liver</span></span>
-<span><span class="co">## 2024-10-14 15:10:26 INFO::Load PredictDB weights</span></span>
-<span><span class="co">## 2024-10-14 15:10:26 INFO::Number of molecular traits in weights: 12714</span></span>
-<span><span class="co">## 2024-10-14 15:10:26 INFO::Limit to protein coding genes</span></span>
-<span><span class="co">## 2024-10-14 15:10:26 INFO::Number of molecular traits in weights after filtering protein coding genes: 11502</span></span>
-<span><span class="co">## 2024-10-14 15:10:26 INFO::Load PredictDB LD</span></span>
-<span><span class="co">## 2024-10-14 15:10:26 INFO::Convert variant IDs</span></span>
-<span><span class="co">## 2024-10-14 15:10:27 INFO::Remove 1 molecular traits without predictdb LD</span></span>
-<span><span class="co">## 2024-10-14 15:10:27 INFO::Number of molecular traits in weights: 11501</span></span>
-<span><span class="co">## 2024-10-14 15:10:27 INFO::Number of variants in weights: 16953</span></span>
-<span><span class="co">## 2024-10-14 15:10:27 INFO::410 molecular traits and 529 variants left after filtering by GWAS and the reference.</span></span>
-<span><span class="co">## 2024-10-14 15:10:27 INFO::Harmonizing and processing weights ...</span></span>
-<span><span class="co">## 2024-10-14 15:10:27 INFO::Number of molecular traits in weights after preprocessing: 410</span></span></code></pre>
+<pre><code><span><span class="co">## 2024-10-16 17:53:26 INFO::Load weight: /tmp/jobs/43056973/Rtmp2RqH98/temp_libpath3bd66ddf5631/ctwas/extdata/sample_data/expression_Liver.db</span></span>
+<span><span class="co">## 2024-10-16 17:53:26 INFO::weight_name: liver_expression</span></span>
+<span><span class="co">## 2024-10-16 17:53:26 INFO::type: expression</span></span>
+<span><span class="co">## 2024-10-16 17:53:26 INFO::context: liver</span></span>
+<span><span class="co">## 2024-10-16 17:53:26 INFO::Load PredictDB weights</span></span>
+<span><span class="co">## 2024-10-16 17:53:26 INFO::Number of molecular traits in weights: 12714</span></span>
+<span><span class="co">## 2024-10-16 17:53:26 INFO::Limit to protein coding genes</span></span>
+<span><span class="co">## 2024-10-16 17:53:26 INFO::Number of molecular traits in weights after filtering protein coding genes: 11502</span></span>
+<span><span class="co">## 2024-10-16 17:53:26 INFO::Load PredictDB LD</span></span>
+<span><span class="co">## 2024-10-16 17:53:26 INFO::Convert variant IDs</span></span>
+<span><span class="co">## 2024-10-16 17:53:27 INFO::Remove 1 molecular traits without PredictDB LD</span></span>
+<span><span class="co">## 2024-10-16 17:53:27 INFO::Number of molecular traits in weights: 11501</span></span>
+<span><span class="co">## 2024-10-16 17:53:27 INFO::Number of variants in weights: 16953</span></span>
+<span><span class="co">## 2024-10-16 17:53:27 INFO::410 molecular traits and 529 variants in weights after filtering by GWAS and the reference.</span></span>
+<span><span class="co">## 2024-10-16 17:53:27 INFO::Harmonizing and processing weights ...</span></span>
+<span><span class="co">## 2024-10-16 17:53:27 INFO::Compute LD for variants in weights (R_wgt) using PredictDB LD ...</span></span>
+<span><span class="co">## 2024-10-16 17:53:27 INFO::Number of molecular traits in weights after preprocessing: 410</span></span></code></pre>
 <div class="sourceCode" id="cb22"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">weights_adipose</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/preprocess_weights.html">preprocess_weights</a></span><span class="op">(</span><span class="va">weight_adipose_file</span>,</span>
 <span>                                      <span class="va">region_info</span>,</span>
@@ -352,25 +356,27 @@
 <span>                                      filter_protein_coding_genes <span class="op">=</span> <span class="cn">TRUE</span>,</span>
 <span>                                      varID_converter_fun <span class="op">=</span> <span class="va">convert_to_ukb_varIDs</span>,</span>
 <span>                                      ncore <span class="op">=</span> <span class="fl">6</span><span class="op">)</span></span></code></pre></div>
-<pre><code><span><span class="co">## 2024-10-14 15:10:27 INFO::Load weight: /tmp/jobs/43037946/RtmpesyLKY/temp_libpatha3c436005678/ctwas/extdata/sample_data/expression_Adipose_Subcutaneous.db</span></span>
-<span><span class="co">## 2024-10-14 15:10:27 INFO::weight_name: adipose_expression</span></span>
-<span><span class="co">## 2024-10-14 15:10:27 INFO::type: expression</span></span>
-<span><span class="co">## 2024-10-14 15:10:27 INFO::context: adipose</span></span>
-<span><span class="co">## 2024-10-14 15:10:27 INFO::Load PredictDB weights</span></span>
-<span><span class="co">## 2024-10-14 15:10:27 INFO::Number of molecular traits in weights: 14732</span></span>
-<span><span class="co">## 2024-10-14 15:10:27 INFO::Limit to protein coding genes</span></span>
-<span><span class="co">## 2024-10-14 15:10:27 INFO::Number of molecular traits in weights after filtering protein coding genes: 13113</span></span>
-<span><span class="co">## 2024-10-14 15:10:27 INFO::Load PredictDB LD</span></span>
-<span><span class="co">## 2024-10-14 15:10:27 INFO::Convert variant IDs</span></span>
-<span><span class="co">## 2024-10-14 15:10:28 INFO::Number of molecular traits in weights: 13113</span></span>
-<span><span class="co">## 2024-10-14 15:10:28 INFO::Number of variants in weights: 23759</span></span>
-<span><span class="co">## 2024-10-14 15:10:28 INFO::484 molecular traits and 720 variants left after filtering by GWAS and the reference.</span></span>
-<span><span class="co">## 2024-10-14 15:10:28 INFO::Harmonizing and processing weights ...</span></span>
-<span><span class="co">## 2024-10-14 15:10:29 INFO::Number of molecular traits in weights after preprocessing: 484</span></span></code></pre>
+<pre><code><span><span class="co">## 2024-10-16 17:53:27 INFO::Load weight: /tmp/jobs/43056973/Rtmp2RqH98/temp_libpath3bd66ddf5631/ctwas/extdata/sample_data/expression_Adipose_Subcutaneous.db</span></span>
+<span><span class="co">## 2024-10-16 17:53:27 INFO::weight_name: adipose_expression</span></span>
+<span><span class="co">## 2024-10-16 17:53:27 INFO::type: expression</span></span>
+<span><span class="co">## 2024-10-16 17:53:27 INFO::context: adipose</span></span>
+<span><span class="co">## 2024-10-16 17:53:27 INFO::Load PredictDB weights</span></span>
+<span><span class="co">## 2024-10-16 17:53:27 INFO::Number of molecular traits in weights: 14732</span></span>
+<span><span class="co">## 2024-10-16 17:53:27 INFO::Limit to protein coding genes</span></span>
+<span><span class="co">## 2024-10-16 17:53:27 INFO::Number of molecular traits in weights after filtering protein coding genes: 13113</span></span>
+<span><span class="co">## 2024-10-16 17:53:27 INFO::Load PredictDB LD</span></span>
+<span><span class="co">## 2024-10-16 17:53:27 INFO::Convert variant IDs</span></span>
+<span><span class="co">## 2024-10-16 17:53:28 INFO::Number of molecular traits in weights: 13113</span></span>
+<span><span class="co">## 2024-10-16 17:53:28 INFO::Number of variants in weights: 23759</span></span>
+<span><span class="co">## 2024-10-16 17:53:28 INFO::484 molecular traits and 720 variants in weights after filtering by GWAS and the reference.</span></span>
+<span><span class="co">## 2024-10-16 17:53:28 INFO::Harmonizing and processing weights ...</span></span>
+<span><span class="co">## 2024-10-16 17:53:28 INFO::Compute LD for variants in weights (R_wgt) using PredictDB LD ...</span></span>
+<span><span class="co">## 2024-10-16 17:53:29 INFO::Number of molecular traits in weights after preprocessing: 484</span></span></code></pre>
 <div class="sourceCode" id="cb24"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">weights</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="va">weights_liver</span>, <span class="va">weights_adipose</span><span class="op">)</span></span></code></pre></div>
 <p>This function returns <code>weights</code>, which contains the effect sizes of the variants in the prediction models, LD of variants in the weights, the first and last QTL positions of molecular traits.</p>
-<p>In the function above, we specify the weight format in <code>weight_format</code>. We use PredictDB format by default, and we recommend <a href="https://predictdb.org/post/2021/07/21/gtex-v8-models-on-eqtl-and-sqtl/#mashr-based-models" class="external-link">MASHR-based models</a>. We set <code>load_predictdb_LD = TRUE</code> to load pre-computed covariances between variants in PredictDB weights (<code>.txt.gz</code>). PredictDB weights assume that variant genotypes are not standardized, but our implementation assumes standardized variant genotypes. Thus, we set <code>scale_predictdb_weights = TRUE</code>, to scale PredictDB weights by the variance before computing Z-scores of molecular traits. If weights are already on the standardized scale (e.g. FUSION weights or PredictDB weights converted from eQTLs), this scaling should be turned off.</p>
+<p>In the function above, we specify the weight format in <code>weight_format</code>. We use PredictDB format by default, and we recommend <a href="https://predictdb.org/post/2021/07/21/gtex-v8-models-on-eqtl-and-sqtl/#mashr-based-models" class="external-link">MASHR-based models</a>. When <code>load_predictdb_LD = TRUE</code> (default option for PredictDB weights), cTWAS will compute LD of variants in weights (<code>R_wgt</code>) using pre-computed covariances between variants in PredictDB weights (<code>.txt.gz</code>). LD in weights will be used when computing gene Z-scores later. When using FUSION weights, or when <code>load_predictdb_LD = FALSE</code>, cTWAS will compute LD for variants in weights using reference LD matrices, thus <code>LD_map</code> will be required.</p>
+<p>PredictDB weights assume that variant genotypes are not standardized, but our implementation assumes standardized variant genotypes. Thus, we set <code>scale_predictdb_weights = TRUE</code>, to scale PredictDB weights by the variance before computing Z-scores of molecular traits. If weights are already on the standardized scale (e.g. FUSION weights or PredictDB weights converted from eQTLs), this scaling should be turned off.</p>
 <p>We limit variants in weights, reference (<code>snp_map</code>) and GWAS SNPs (<code>z_snp$id</code>). We drop strand ambiguous variants (<code>drop_strand_ambig = TRUE</code>) by default. We could limit weights to protein coding genes (<code>filter_protein_coding_genes = TRUE</code>) based on the <code>gene_type</code> information in the “extra table” of PredictDB weights. We set <code>ncore</code> to parallelize the computation.</p>
 <p>Similar to <code><a href="../reference/preprocess_z_snp.html">preprocess_z_snp()</a></code>, we use a converter function <code><a href="../reference/convert_to_ukb_varIDs.html">convert_to_ukb_varIDs()</a></code> that converts variant IDs in weights from the PredictDB format (“chr_pos_ref_alt_build”) to our reference format from UK Biobank (“chr:pos_ref_alt”). To convert the formats for other variant ID formats, you can pass your own converter function to the <code>varID_converter_fun</code> argument.</p>
 </div>

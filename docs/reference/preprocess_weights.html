@@ -17,7 +17,7 @@
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">ctwas</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">0.4.16</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">0.4.17</span>
       </span>
     </div>
 
@@ -42,6 +42,9 @@
     </li>
     <li>
       <a href="../articles/summarizing_results.html">Summarizing and visualizing cTWAS results</a>
+    </li>
+    <li>
+      <a href="../articles/sample_report.html">Sample report of cTWAS results</a>
     </li>
     <li>
       <a href="../articles/postprocessing.html">Post-processing cTWAS results</a>
@@ -99,6 +102,7 @@
 <span>  filter_protein_coding_genes <span class="op">=</span> <span class="cn">TRUE</span>,</span>
 <span>  scale_predictdb_weights <span class="op">=</span> <span class="cn">TRUE</span>,</span>
 <span>  load_predictdb_LD <span class="op">=</span> <span class="cn">TRUE</span>,</span>
+<span>  include_weight_LD <span class="op">=</span> <span class="cn">TRUE</span>,</span>
 <span>  fusion_method <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"lasso"</span>, <span class="st">"enet"</span>, <span class="st">"top1"</span>, <span class="st">"blup"</span>, <span class="st">"bslmm"</span>, <span class="st">"best.cv"</span><span class="op">)</span>,</span>
 <span>  fusion_genome_version <span class="op">=</span> <span class="cn">NA</span>,</span>
 <span>  top_n_snps <span class="op">=</span> <span class="cn">NULL</span>,</span>
@@ -172,6 +176,13 @@ This option is only for PredictDB weights.</p></dd>
 <dt>load_predictdb_LD</dt>
 <dd><p>If TRUE, load pre-computed LD among weight SNPs.
 This option is only for PredictDB weights.</p></dd>
+
+
+<dt>include_weight_LD</dt>
+<dd><p>If TRUE, include LD of variants in weights (R_wgt) in the weights object.
+R_wgt is used for computing gene Z-scores.
+If FALSE, will skip computing R_wgt. This could save running time
+when using precomputed gene Z-scores.</p></dd>
 
 
 <dt>fusion_method</dt>
