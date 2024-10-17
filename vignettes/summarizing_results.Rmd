@@ -197,16 +197,15 @@ subset(finemap_res, group != "SNP" & gene_type == "protein_coding" & susie_pip >
 
 For more complex settings that involve different types of molecular traits, we will need to map molecular traits to their corresponding genes in order to compute gene PIPs. 
 
-To map molecular traits to their corresponding genes, we need a data frame `mapping_table`, with IDs of molecular traits ("molecular_id"), and the corresponding gene names ("gene_name"). It is helpful to include additional gene information, such as gene types and gene positions. Below is an example for splicing trait: 
+To map molecular traits to their corresponding genes, we need a data frame `mapping_table`, with IDs of molecular traits ("molecular_id"), and the corresponding gene names ("gene_name"). It is helpful to include additional gene information, such as gene types and gene positions. 
+We provide a  `mapping_table`  to map introns to genes for PredictDB expression and slicing data [here](https://uchicago.box.com/s/gx7raqf5c9jp6tgvm5tpc2ej7zr6bnxz). The mapping file is also available on UChicago RCC server: `/project2/xinhe/shared_data/multigroup_ctwas/weights/mapping_files/PredictDB_mapping.RDS` .
 
-```{}
-"
-                 molecular_id gene_name      gene_type  chrom      start       end
- intron_1_151895194_151910954     THEM4 protein_coding      1  151895194 151910954
-  intron_15_43038232_43043215      UBR1 protein_coding     15   43038232  43043215
-  intron_15_43043395_43047161      UBR1 protein_coding     15   43043395  43047161
-  intron_15_43047289_43048392      UBR1 protein_coding     15   43047289  43048392
-"
+For example: 
+
+```{r mapping_table_splicing}
+mapping_table <- readRDS("/project2/xinhe/shared_data/multigroup_ctwas/weights/mapping_files/PredictDB_mapping.RDS")
+
+head(mapping_table[mapping_table$gene_name == "UBR1",])
 ```
 
 
@@ -321,6 +320,9 @@ For the "no-LD" version, we could still make the locus plot. The difference is t
 ## Sample report of the cTWAS results
 
 We present a [sample cTWAS report][sample_report_tutorial] based on real data analysis. The analyzed trait is LDL cholesterol, the prediction models are liver gene expression and splicing models trained on GTEx v8 in the PredictDB format.
+
+
+
 
 [minimal_tutorial]: https://xinhe-lab.github.io/multigroup_ctwas/articles/minimal_tutorial.html
 [preparing_input_data_tutorial]: https://xinhe-lab.github.io/multigroup_ctwas/articles/preparing_input_data.html
