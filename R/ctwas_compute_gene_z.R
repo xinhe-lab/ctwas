@@ -66,7 +66,13 @@ compute_gene_z <- function (z_snp,
   return(z_gene)
 }
 
-# get gene info from weights
+#' @title Get gene info from weights
+#'
+#' @param weights a list of preprocessed weights
+#'
+#' @return a data frame of gene info
+#'
+#' @export
 get_gene_info <- function(weights){
 
   if (!inherits(weights,"list")){
@@ -84,7 +90,15 @@ get_gene_info <- function(weights){
   return(gene_info)
 }
 
-# get regions for each gene
+#' @title Get regions for each gene
+#'
+#' @param gene_info a data frame of gene info
+#'
+#' @param region_info a data frame of region definitions
+#'
+#' @return a data frame of gene info with regions overlapping each gene
+#'
+#' @export
 get_gene_regions <- function(gene_info, region_info){
 
   gene_info <- gene_info[gene_info$chrom %in% unique(region_info$chrom), , drop=FALSE]
@@ -93,10 +107,18 @@ get_gene_regions <- function(gene_info, region_info){
     p0 <- gene_info[i, "p0"]
     p1 <- gene_info[i, "p1"]
     region.idx <- which(region_info$chrom == chrom & region_info$start <= p1 & region_info$stop > p0)
-    gene_info[i, "region_start"] <- min(region_info[region.idx,"start"])
-    gene_info[i, "region_stop"] <- max(region_info[region.idx,"stop"])
-    gene_info[i, "region_id"] <- paste(sort(region_info[region.idx, "region_id"]), collapse = ",")
-    gene_info[i, "n_regions"] <- length(region.idx)
+    if (length(region.idx) > 0) {
+      gene_info[i, "region_start"] <- min(region_info[region.idx,"start"])
+      gene_info[i, "region_stop"] <- max(region_info[region.idx,"stop"])
+      gene_info[i, "region_id"] <- paste(sort(region_info[region.idx, "region_id"]), collapse = ",")
+      gene_info[i, "n_regions"] <- length(region.idx)
+    } else {
+      warning(paste("No regions overlapping with", gene_info[i, "id"]))
+      gene_info[i, "region_start"] <- NA
+      gene_info[i, "region_stop"] <- NA
+      gene_info[i, "region_id"] <- NA
+      gene_info[i, "n_regions"] <- length(region.idx)
+    }
   }
   return(gene_info)
 }
@@ -132,7 +154,16 @@ combine_z <- function(z_snp, z_gene){
 }
 
 
-# filter z_gene by group size
+#' @title Filter z_gene by group size
+#'
+#' @param z_gene a data frame of gene z-scores, with columns: "id", "z", "type",
+#' "context", "group".
+#'
+#' @param min_group_size Minimum number of variables in a group.
+#'
+#' @return a data frame of gene z-scores.
+#'
+#' @export
 filter_z_gene_by_group_size <- function(z_gene, min_group_size){
   gene_group_size <- table(z_gene$group)
   if (any(gene_group_size < min_group_size)){
