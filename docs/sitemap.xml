@@ -112,6 +112,9 @@
     <loc>/reference/extract_susie_alpha.html</loc>
   </url>
   <url>
+    <loc>/reference/filter_z_gene_by_group_size.html</loc>
+  </url>
+  <url>
     <loc>/reference/finemap_regions.html</loc>
   </url>
   <url>
@@ -131,6 +134,12 @@
   </url>
   <url>
     <loc>/reference/get_gene_annot_from_ens_db.html</loc>
+  </url>
+  <url>
+    <loc>/reference/get_gene_info.html</loc>
+  </url>
+  <url>
+    <loc>/reference/get_gene_regions.html</loc>
   </url>
   <url>
     <loc>/reference/get_molecular_ids.html</loc>

@@ -353,7 +353,7 @@ create_merged_snp_LD_map <- function(boundary_genes,
 
   }
 
-  loginfo("Merged %d boundary genes into %d regions", nrow(boundary_genes), nrow(merged_region_info))
+  loginfo("Merge %d boundary genes into %d regions", nrow(boundary_genes), nrow(merged_region_info))
 
   return(list("merged_region_info" = merged_region_info,
               "merged_LD_map" = merged_LD_map,
@@ -398,7 +398,7 @@ create_merged_snp_map <- function(boundary_genes,
 
   }
 
-  loginfo("Merged %d boundary genes into %d regions", nrow(boundary_genes), nrow(merged_region_info))
+  loginfo("Merge %d boundary genes into %d regions", nrow(boundary_genes), nrow(merged_region_info))
 
   return(list("merged_region_info" = merged_region_info,
               "merged_snp_map" = merged_snp_map,
