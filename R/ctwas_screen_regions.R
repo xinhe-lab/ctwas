@@ -331,6 +331,8 @@ screen_regions_noLD <- function(region_data,
   idx <- match(names(all_nonSNP_PIPs), screen_summary$region_id)
   screen_summary$nonSNP_PIP[idx] <- all_nonSNP_PIPs
 
+  rownames(screen_summary) <- NULL
+
   return(list("screened_region_data" = screened_region_data,
               "screen_summary" = screen_summary))
 }

@@ -137,9 +137,6 @@ finemap_regions <- function(region_data,
   if (verbose) {
     if (is.null(group_prior)) {
       loginfo("Use uniform prior")
-    } else {
-      loginfo("group_prior {%s}: {%s}", names(group_prior), format(group_prior, digits = 4))
-      loginfo("group_prior_var {%s}: {%s}", names(group_prior_var), format(group_prior_var, digits = 4))
     }
     loginfo("coverage = %s", coverage)
     loginfo("min_abs_corr = %s", min_abs_corr)
@@ -257,9 +254,6 @@ finemap_regions_noLD <- function(region_data,
   if (verbose) {
     if (is.null(group_prior)) {
       loginfo("Use uniform prior")
-    } else {
-      loginfo("group_prior {%s}: {%s}", names(group_prior), format(group_prior, digits = 4))
-      loginfo("group_prior_var {%s}: {%s}", names(group_prior_var), format(group_prior_var, digits = 4))
     }
   }
 
