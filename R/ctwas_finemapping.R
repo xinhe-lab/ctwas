@@ -388,8 +388,7 @@ finemap_single_region <- function(region_data,
                             cor_dir = cor_dir,
                             LD_format = LD_format,
                             LD_loader_fun = LD_loader_fun,
-                            snpinfo_loader_fun = snpinfo_loader_fun,
-                            verbose = verbose)
+                            snpinfo_loader_fun = snpinfo_loader_fun)
 
   # gene first then SNPs
   R <- rbind(cbind(cor_res$R_gene, t(cor_res$R_snp_gene)),
@@ -417,9 +416,6 @@ finemap_single_region <- function(region_data,
                                min_abs_corr = min_abs_corr,
                                ...)
 
-  if (verbose){
-    loginfo("annotate susie result")
-  }
   susie_res_df <- anno_susie(susie_res,
                              gids = gids,
                              sids = sids,
@@ -432,9 +428,6 @@ finemap_single_region <- function(region_data,
 
   if (get_susie_alpha) {
     # extract alpha matrix from susie result
-    if (verbose){
-      loginfo("get susie alpha")
-    }
     susie_alpha_df <- get_susie_alpha_res(susie_res, susie_res_df, keep_genes_only = TRUE)
   } else {
     susie_alpha_df <- NULL
@@ -566,9 +559,7 @@ finemap_single_region_noLD <- function(region_data,
                                coverage = coverage,
                                min_abs_corr = 0,
                                ...)
-  if (verbose){
-    loginfo("annotate susie result")
-  }
+
   susie_res_df <- anno_susie(susie_res,
                              gids = gids,
                              sids = sids,
@@ -581,9 +572,6 @@ finemap_single_region_noLD <- function(region_data,
 
   if (get_susie_alpha) {
     # extract alpha matrix from susie result
-    if (verbose){
-      loginfo("get susie alpha")
-    }
     susie_alpha_df <- get_susie_alpha_res(susie_res, susie_res_df, keep_genes_only = TRUE)
   } else {
     susie_alpha_df <- NULL
