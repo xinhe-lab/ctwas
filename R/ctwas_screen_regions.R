@@ -204,6 +204,11 @@ screen_regions <- function(region_data,
     screen_summary$nonSNP_PIP[idx] <- all_nonSNP_PIPs
   }
 
+  # if min_L = 0, set regions with L = 0 to 1
+  if (min_L == 0) {
+    screened_region_L[screened_region_L == 0] <- 1
+  }
+
   rownames(screen_summary) <- NULL
 
   return(list("screened_region_data" = screened_region_data,
