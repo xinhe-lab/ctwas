@@ -16,10 +16,15 @@
 #'
 #' @param min_gene minimum number of genes in a region.
 #'
-#' @param filter_L If TRUE, screening regions with estimated L > 0.
+#' @param filter_L If TRUE, screening regions with estimated credible sets
+#' (L) = \code{min_L}.
 #'
 #' @param filter_nonSNP_PIP If TRUE, screening regions with
 #' total non-SNP PIP >= \code{min_nonSNP_PIP}.
+#'
+#' @param min_L If screening by nubmer of credible sets (L),
+#' regions with L >= \code{min_L}
+#' will be selected to run finemapping using full SNPs.
 #'
 #' @param min_nonSNP_PIP If screening by non-SNP PIPs,
 #' regions with total non-SNP PIP >= \code{min_nonSNP_PIP}
@@ -62,6 +67,7 @@ screen_regions <- function(region_data,
                            min_gene = 1,
                            filter_L = TRUE,
                            filter_nonSNP_PIP = FALSE,
+                           min_L = 1,
                            min_nonSNP_PIP = 0.5,
                            min_abs_corr = 0.1,
                            LD_format = c("rds", "rdata", "mtx", "csv", "txt", "custom"),
@@ -151,11 +157,10 @@ screen_regions <- function(region_data,
                                          ncore = ncore,
                                          verbose = verbose,
                                          ...)
-    screened_region_ids <- names(all_estimated_L[all_estimated_L > 0])
+    screened_region_ids <- names(all_estimated_L[all_estimated_L >= min_L])
     screened_region_data <- region_data[screened_region_ids]
-    loginfo("Selected %d regions with L > 0", length(screened_region_data))
+    loginfo("Selected %d regions with L >= %d", length(screened_region_data), min_L)
     screened_region_L <- all_estimated_L[screened_region_ids]
-
     idx <- match(names(all_estimated_L), screen_summary$region_id)
     screen_summary$L[idx] <- all_estimated_L
   } else {
@@ -198,6 +203,13 @@ screen_regions <- function(region_data,
     idx <- match(names(all_nonSNP_PIPs), screen_summary$region_id)
     screen_summary$nonSNP_PIP[idx] <- all_nonSNP_PIPs
   }
+
+  # if min_L = 0, set regions with L = 0 to 1
+  if (min_L == 0) {
+    screened_region_L[screened_region_L == 0] <- 1
+  }
+
+  rownames(screen_summary) <- NULL
 
   return(list("screened_region_data" = screened_region_data,
               "screened_region_L" = screened_region_L,
@@ -323,6 +335,8 @@ screen_regions_noLD <- function(region_data,
   loginfo("Selected %d regions with non-SNP PIP >= %s", length(screened_region_data), min_nonSNP_PIP)
   idx <- match(names(all_nonSNP_PIPs), screen_summary$region_id)
   screen_summary$nonSNP_PIP[idx] <- all_nonSNP_PIPs
+
+  rownames(screen_summary) <- NULL
 
   return(list("screened_region_data" = screened_region_data,
               "screen_summary" = screen_summary))

@@ -15,6 +15,7 @@ screen_regions(
   min_gene = 1,
   filter_L = TRUE,
   filter_nonSNP_PIP = FALSE,
+  min_L = 1,
   min_nonSNP_PIP = 0.5,
   min_abs_corr = 0.1,
   LD_format = c("rds", "rdata", "mtx", "csv", "txt", "custom"),
@@ -43,10 +44,15 @@ screen_regions(
 
 \item{min_gene}{minimum number of genes in a region.}
 
-\item{filter_L}{If TRUE, screening regions with estimated L > 0.}
+\item{filter_L}{If TRUE, screening regions with estimated credible sets
+(L) = \code{min_L}.}
 
 \item{filter_nonSNP_PIP}{If TRUE, screening regions with
 total non-SNP PIP >= \code{min_nonSNP_PIP}.}
+
+\item{min_L}{If screening by nubmer of credible sets (L),
+regions with L >= \code{min_L}
+will be selected to run finemapping using full SNPs.}
 
 \item{min_nonSNP_PIP}{If screening by non-SNP PIPs,
 regions with total non-SNP PIP >= \code{min_nonSNP_PIP}

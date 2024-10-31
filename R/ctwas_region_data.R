@@ -120,6 +120,10 @@ assemble_region_data <- function(region_info,
     # read SNPs in the chromosome
     snp_info_chr <- snp_info[snp_info$chrom == b, ]
 
+    if (nrow(snp_info_chr) == 0) {
+      stop(paste("No reference SNP info in chrom", b, "!"))
+    }
+
     # select genes in the chromosome
     gene_info_chr <- gene_info[gene_info$chrom == b, ]
 

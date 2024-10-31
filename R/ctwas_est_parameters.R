@@ -197,6 +197,8 @@ est_param <- function(
     stop("Estimated group_prior_var contains NAs!")
   }
 
+  rownames(p_single_effect_df) <- NULL
+
   param <- list("group_prior" = group_prior,
                 "group_prior_var" = group_prior_var,
                 "group_prior_iters" = group_prior_iters,
