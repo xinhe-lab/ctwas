@@ -205,8 +205,7 @@ We choose the genes with some plausibility of being risk genes (gene PIP > 0.5 o
 problematic_genes <- get_problematic_genes(problematic_snps, 
                                            weights, 
                                            finemap_res,
-                                           z_gene,
-                                           pip_thresh = 0.1,
+                                           pip_thresh = 0.5,
                                            z_thresh = 3)
 
 problematic_region_ids <- unique(finemap_res[finemap_res$id %in% problematic_genes, "region_id"])

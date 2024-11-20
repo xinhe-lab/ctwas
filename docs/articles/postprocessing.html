@@ -253,8 +253,7 @@
 <code class="sourceCode R"><span><span class="va">problematic_genes</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/get_problematic_genes.html">get_problematic_genes</a></span><span class="op">(</span><span class="va">problematic_snps</span>, </span>
 <span>                                           <span class="va">weights</span>, </span>
 <span>                                           <span class="va">finemap_res</span>,</span>
-<span>                                           <span class="va">z_gene</span>,</span>
-<span>                                           pip_thresh <span class="op">=</span> <span class="fl">0.1</span>,</span>
+<span>                                           pip_thresh <span class="op">=</span> <span class="fl">0.5</span>,</span>
 <span>                                           z_thresh <span class="op">=</span> <span class="fl">3</span><span class="op">)</span></span>
 <span></span>
 <span><span class="va">problematic_region_ids</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/unique.html" class="external-link">unique</a></span><span class="op">(</span><span class="va">finemap_res</span><span class="op">[</span><span class="va">finemap_res</span><span class="op">$</span><span class="va">id</span> <span class="op"><a href="https://rdrr.io/r/base/match.html" class="external-link">%in%</a></span> <span class="va">problematic_genes</span>, <span class="st">"region_id"</span><span class="op">]</span><span class="op">)</span></span>

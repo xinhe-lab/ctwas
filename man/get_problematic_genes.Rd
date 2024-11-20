@@ -8,19 +8,16 @@ get_problematic_genes(
   problematic_snps,
   weights,
   finemap_res,
-  z_gene,
   pip_thresh = 0.5,
   z_thresh = 3
 )
 }
 \arguments{
-\item{problematic_snps}{a character vector of problematic SNP rsIDs.}
+\item{problematic_snps}{a character vector of problematic SNP rsIDs}
 
 \item{weights}{a list of weights}
 
-\item{finemap_res}{a data frame of cTWAS finemapping results.}
-
-\item{z_gene}{A data frame with columns: "id", "z", giving the z-scores for genes.}
+\item{finemap_res}{a data frame of cTWAS finemapping results}
 
 \item{pip_thresh}{cutoff of gene PIP to select genes}
 

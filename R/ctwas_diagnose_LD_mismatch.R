@@ -121,13 +121,11 @@ compute_region_condz <- function(region_id,
 
 #' @title Gets problematic genes from problematic SNPs
 #'
-#' @param problematic_snps a character vector of problematic SNP rsIDs.
+#' @param problematic_snps a character vector of problematic SNP rsIDs
 #'
 #' @param weights a list of weights
 #'
-#' @param finemap_res a data frame of cTWAS finemapping results.
-#'
-#' @param z_gene A data frame with columns: "id", "z", giving the z-scores for genes.
+#' @param finemap_res a data frame of cTWAS finemapping results
 #'
 #' @param pip_thresh cutoff of gene PIP to select genes
 #'
@@ -142,7 +140,6 @@ compute_region_condz <- function(region_id,
 get_problematic_genes <- function(problematic_snps,
                                   weights,
                                   finemap_res,
-                                  z_gene,
                                   pip_thresh = 0.5,
                                   z_thresh = 3){
 
@@ -152,17 +149,19 @@ get_problematic_genes <- function(problematic_snps,
   }else{
     loginfo('Number of problematic SNPs: %d', length(problematic_snps))
 
-    # find high PIP genes with problematic SNPs in its weights
     finemap_gene_res <- finemap_res[finemap_res$group!="SNP",]
+
+    # find high PIP genes with problematic SNPs in its weights
     high_pip_gids <- finemap_gene_res$id[finemap_gene_res$susie_pip >= pip_thresh]
 
     # find high |z| genes with problematic SNPs in its weights
-    large_z_gids <- z_gene[abs(z_gene$z) > z_thresh, "id"]
+    large_z_gids <- finemap_gene_res$id[abs(finemap_gene_res$z) >= z_thresh]
 
+    # check both high PIP genes and high |z| genes
     selected_gids <- unique(c(high_pip_gids, large_z_gids))
 
     selected_weights <- weights[selected_gids]
-    # extract snp ids in weights, and find genes with problematic SNPs in weights
+    # extract SNP ids in weights, and find genes with problematic SNPs in weights
     problematic_genes <- c()
     if (length(selected_weights) > 0){
       for (i in 1:length(selected_weights)){
