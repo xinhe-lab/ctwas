@@ -199,12 +199,14 @@ This returns a list of problematic SNPs (diagnostic test `p-value < 5e-8`, by de
 
 Our basic strategy of dealing with LD mismatch is: we use the list of problematic SNPs to identify the molecular traits whose results may be affected by LD-mismatch. We would then run SuSiE fine-mapping with L = 1 in the regions containing these molecular traits, assuming a single causal signal in such a region. The fine-mapping results in this setting would be independent of LD. 
 
-We choose the genes with some plausibility of being risk genes (`abs(Z-score) > 3`, by default) and problematic SNPs in their weights. We would then select regions containing these problematic genes.
+We choose the genes with some plausibility of being risk genes (gene PIP > 0.5 or `abs(Z-score) > 3`, by default) and problematic SNPs in their weights. We would then select regions containing these problematic genes.
 
 ```{r problematic_region_ids, eval=FALSE}
 problematic_genes <- get_problematic_genes(problematic_snps, 
                                            weights, 
+                                           finemap_res,
                                            z_gene,
+                                           pip_thresh = 0.1,
                                            z_thresh = 3)
 
 problematic_region_ids <- unique(finemap_res[finemap_res$id %in% problematic_genes, "region_id"])

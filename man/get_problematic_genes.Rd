@@ -4,16 +4,27 @@
 \alias{get_problematic_genes}
 \title{Gets problematic genes from problematic SNPs}
 \usage{
-get_problematic_genes(problematic_snps, weights, z_gene, z_thresh = 3)
+get_problematic_genes(
+  problematic_snps,
+  weights,
+  finemap_res,
+  z_gene,
+  pip_thresh = 0.5,
+  z_thresh = 3
+)
 }
 \arguments{
 \item{problematic_snps}{a character vector of problematic SNP rsIDs.}
 
 \item{weights}{a list of weights}
 
+\item{finemap_res}{a data frame of cTWAS finemapping results.}
+
 \item{z_gene}{A data frame with columns: "id", "z", giving the z-scores for genes.}
 
-\item{z_thresh}{cutoff of abs(z-scores) to select genes with large effect sizes}
+\item{pip_thresh}{cutoff of gene PIP to select genes}
+
+\item{z_thresh}{cutoff of abs(z-scores) to select genes}
 }
 \value{
 a vector of problematic genes
