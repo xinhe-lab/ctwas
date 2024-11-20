@@ -17,7 +17,7 @@
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">ctwas</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">0.4.18</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">0.4.19</span>
       </span>
     </div>
 
@@ -88,7 +88,14 @@
     </div>
 
     <div id="ref-usage">
-    <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="fu">get_problematic_genes</span><span class="op">(</span><span class="va">problematic_snps</span>, <span class="va">weights</span>, <span class="va">z_gene</span>, z_thresh <span class="op">=</span> <span class="fl">3</span><span class="op">)</span></span></code></pre></div>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="fu">get_problematic_genes</span><span class="op">(</span></span>
+<span>  <span class="va">problematic_snps</span>,</span>
+<span>  <span class="va">weights</span>,</span>
+<span>  <span class="va">finemap_res</span>,</span>
+<span>  <span class="va">z_gene</span>,</span>
+<span>  pip_thresh <span class="op">=</span> <span class="fl">0.5</span>,</span>
+<span>  z_thresh <span class="op">=</span> <span class="fl">3</span></span>
+<span><span class="op">)</span></span></code></pre></div>
     </div>
 
     <div id="arguments">
@@ -101,12 +108,20 @@
 <dd><p>a list of weights</p></dd>
 
 
+<dt>finemap_res</dt>
+<dd><p>a data frame of cTWAS finemapping results.</p></dd>
+
+
 <dt>z_gene</dt>
 <dd><p>A data frame with columns: "id", "z", giving the z-scores for genes.</p></dd>
 
 
+<dt>pip_thresh</dt>
+<dd><p>cutoff of gene PIP to select genes</p></dd>
+
+
 <dt>z_thresh</dt>
-<dd><p>cutoff of abs(z-scores) to select genes with large effect sizes</p></dd>
+<dd><p>cutoff of abs(z-scores) to select genes</p></dd>
 
 </dl></div>
     <div id="value">
