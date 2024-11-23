@@ -600,7 +600,7 @@ fast_finemap_single_region_L1_noLD <- function(region_data,
   return(susie_res_df)
 }
 
-#' Updates cTWAS finemapping result
+#' Updates cTWAS finemapping result for selected regions
 #'
 #' @param finemap_res a data frame of original finemapping result.
 #' @param susie_alpha_res a data frame of original susie alpha result.
@@ -662,7 +662,7 @@ update_merged_region_finemap_res <- function(finemap_res,
     old_region_ids <- unlist(strsplit(old_region_ids, ","))
 
     finemap_res[finemap_res$region_id %in% old_region_ids, ] <-
-      finemap_merged_regions_res[finemap_merged_regions_res$region_id==region_id, ]
+      merged_region_finemap_res[merged_region_finemap_res$region_id==region_id, ]
 
     susie_alpha_res[susie_alpha_res$region_id %in% old_region_ids, ] <-
       merged_region_susie_alpha_res[merged_region_susie_alpha_res$region_id==region_id, ]
