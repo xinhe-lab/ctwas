@@ -41,7 +41,7 @@ If NULL, it will set prior variance = 50 as the default in \code{susie_rss}.}
 \item{...}{Additional arguments of \code{susie_rss}.}
 }
 \value{
-a data frame of cTWAS finemapping results.
+a list with cTWAS finemapping results.
 }
 \description{
 Runs cTWAS fine-mapping for regions without LD (L = 1)

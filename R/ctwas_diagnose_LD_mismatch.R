@@ -67,9 +67,9 @@ diagnose_LD_mismatch_susie <- function(region_ids,
   problematic_snps <- condz_stats$id[which(condz_stats$p_diff < p_diff_thresh)]
   flipped_snps <- condz_stats$id[which(condz_stats$logLR > 2 & abs(condz_stats$z) > 2)]
 
-  return(list(condz_stats = condz_stats,
-              problematic_snps = problematic_snps,
-              flipped_snps = flipped_snps))
+  return(list("condz_stats" = condz_stats,
+              "problematic_snps" = problematic_snps,
+              "flipped_snps" = flipped_snps))
 }
 
 # Compute expected z-scores based on conditional distribution of
@@ -179,16 +179,3 @@ get_problematic_genes <- function(problematic_snps,
   return(problematic_genes)
 }
 
-# Updates finemapping result
-update_finemap_res <- function(finemap_res, new_finemap_res){
-
-  if (!all(colnames(finemap_res) == colnames(new_finemap_res))) {
-    stop("columns of finemap_res and new_finemap_res do not match!")
-  }
-
-  updated_region_ids <- unique(new_finemap_res$region_id)
-  kept_finemap_res <- finemap_res[!finemap_res$region_id %in% updated_region_ids, ]
-  updated_finemap_res <- rbind(kept_finemap_res, new_finemap_res)
-
-  return(updated_finemap_res)
-}

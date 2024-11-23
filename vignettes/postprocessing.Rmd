@@ -84,7 +84,7 @@ We address this “cross-region” problem by performing “region merging” as
 We first select the genes to merge. This could be all genes whose weights span two or more regions. In practice, the genes that are unlikely to be causal for the phenotype generally wouldn’t cause problems. So we can limit to the cross-boundary genes that are plausible risk genes. The results of cTWAS contain the list of genes with cross-boundary weights, `boundary_genes`. We can then select among these genes, the ones above a PIP cutoff and in credible sets. 
 
 ```{r selected_boundary_genes, eval=FALSE}
-high_PIP_finemap_gene_res <- subset(finemap_res, group != "SNP" & susie_pip > 0.5 & !is.na(cs))
+high_PIP_finemap_gene_res <- subset(finemap_res, group != "SNP" & susie_pip > 0.5 & cs_index != 0)
 high_PIP_genes <- unique(high_PIP_finemap_gene_res$id)
 
 selected_boundary_genes <- boundary_genes[boundary_genes$id %in% high_PIP_genes, , drop=FALSE]
@@ -96,16 +96,16 @@ selected_boundary_genes <- boundary_genes[boundary_genes$id %in% high_PIP_genes,
 Next, we use the function `merge_region_data()` to perform region merging.  It first identifies overlapping regions from the selected genes, then creates the data about the merged region(s) needed for fine-mapping. The data includes:  `merged_region_data`,  `merged_region_info`, and the variant and LD information of the merged region(s), `merged_snp_map` and `merged_LD_map`. The function expands the merged regions with all SNPs if the `region_data` contains thinned SNPs. It also creates `merged_region_id_map`, a data frame containing region IDs for merged regions and the original region IDs, so that one could keep track of the regions that were merged.  
 
 ```{r merge_region_data, eval=FALSE}
-merge_region_res <- merge_region_data(selected_boundary_genes,
-                                      region_data,
-                                      region_info = region_info,
-                                      LD_map = LD_map,
-                                      snp_map = snp_map,
-                                      weights = weights,
-                                      z_snp = z_snp,
-                                      z_gene = z_gene,
-                                      estimate_L = TRUE,
-                                      maxSNP = 20000)
+ merge_region_res <- merge_region_data(selected_boundary_genes,
+                                       region_data,
+                                       region_info = region_info,
+                                       LD_map = LD_map,
+                                       snp_map = snp_map,
+                                       weights = weights,
+                                       z_snp = z_snp,
+                                       z_gene = z_gene,
+                                       estimate_L = TRUE,
+                                       maxSNP = 20000)
 merged_region_data <- merge_region_res$merged_region_data
 merged_region_info <- merge_region_res$merged_region_info
 merged_LD_map <- merge_region_res$merged_LD_map
@@ -120,16 +120,14 @@ When `estimate_L = TRUE`, we estimate the number of credible sets (`merged_regio
 Next, we run fine-mapping again for these merged regions, similar to the section "Fine-mapping screened regions" in the tutorial ["Running cTWAS analysis"][running_ctwas_analysis_tutorial].
 
 ```{r finemap_merged_regions, eval=FALSE}
-res <- finemap_regions(merged_region_data,
-                       LD_map = merged_LD_map,
-                       weights = weights,
-                       group_prior = group_prior,
-                       group_prior_var = group_prior_var,
-                       L = merged_region_L,
-                       save_cor = TRUE,
-                       cor_dir = "./cor_matrix")
-merged_region_finemap_res <- res$finemap_res
-merged_region_susie_alpha_res <- res$susie_alpha_res
+finemap_merged_regions_res <- finemap_regions(merged_region_data,
+                                              LD_map = merged_LD_map,
+                                              weights = weights,
+                                              group_prior = group_prior,
+                                              group_prior_var = group_prior_var,
+                                              L = merged_region_L,
+                                              save_cor = TRUE,
+                                              cor_dir = "./cor_matrix")
 ```
 
 
@@ -157,13 +155,23 @@ merged_region_id_map <- merge_region_res$merged_region_id_map
 We can then run fine-mapping (without LD) on the merged region data:
 
 ```{r screen_merged_regions_noLD, eval=FALSE}
-res <- finemap_regions_noLD(merged_region_data,                                                     
-                            group_prior = group_prior,
-                            group_prior_var = group_prior_var)
-merged_region_finemap_res <- res$finemap_res
-merged_region_susie_alpha_res <- res$susie_alpha_res
+finemap_merged_regions_res <- finemap_regions_noLD(merged_region_data,                                                     
+                                                   group_prior = group_prior,
+                                                   group_prior_var = group_prior_var)
 ```
 
+
+
+We can replace the fine-mapping results for the merged regions:
+```{r update_merged_region_finemap_res, eval=FALSE}
+res <- update_merged_region_finemap_res(finemap_res, 
+                                        susie_alpha_res, 
+                                        merged_region_finemap_res, 
+                                        merged_region_susie_alpha_res,
+                                        merged_region_id_map)
+updated_finemap_res <- res$finemap_res
+updated_susie_alpha_res <- res$susie_alpha_res
+```
 
 
 ## Dealing with LD mismatch
@@ -204,7 +212,7 @@ We choose the genes with some plausibility of being risk genes (gene PIP > 0.5 o
 ```{r problematic_region_ids, eval=FALSE}
 problematic_genes <- get_problematic_genes(problematic_snps, 
                                            weights, 
-                                           finemap_res,
+                                           finemap_res, 
                                            pip_thresh = 0.5,
                                            z_thresh = 3)
 
@@ -214,21 +222,36 @@ finemap_res[finemap_res$id %in% problematic_genes,]
 ```
 
 We then rerun the fine-mapping without LD information for the problematic regions, using the  `finemap_regions_noLD()` function:
-
+ 
 ```{r rerun_finemap_problematic_regions, eval=FALSE}
 if (length(problematic_region_ids) > 0) {
   rerun_region_data <- screen_res$screened_region_data[problematic_region_ids]
-  finemap_noLD_res <- finemap_regions_noLD(rerun_region_data, 
-                                           group_prior = group_prior,
-                                           group_prior_var = group_prior_var)
+  res <- finemap_regions_noLD(rerun_region_data, 
+                              group_prior = group_prior,
+                              group_prior_var = group_prior_var)
+  rerun_finemap_res <- res$finemap_res
+  rerun_susie_alpha_res <- res$susie_alpha_res
 }
 ```
 
 
 We can check the fine-mapping results (without LD) for the problematic genes:
-```{r check_finemap_noLD_res, eval=FALSE}
-finemap_noLD_res[finemap_noLD_res$id %in% problematic_genes,]
+```{r check_finemap_rerun_res, eval=FALSE}
+rerun_finemap_res[rerun_finemap_res$id %in% problematic_genes,]
 ```
+
+
+We can replace the fine-mapping results for the problematic regions:
+```{r update_finemap_noLD_res, eval=FALSE}
+res <- update_finemap_res(finemap_res, 
+                          susie_alpha_res, 
+                          rerun_finemap_res, 
+                          rerun_susie_alpha_res,
+                          updated_region_ids = problematic_region_ids)
+updated_finemap_res <- res$finemap_res
+updated_susie_alpha_res <- res$susie_alpha_res
+```
+
 
 
 

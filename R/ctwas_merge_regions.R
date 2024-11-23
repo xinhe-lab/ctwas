@@ -406,16 +406,3 @@ create_merged_snp_map <- function(boundary_genes,
 }
 
 
-# Updates finemapping result for merged regions
-update_merged_regions_finemap_res <- function(finemap_res,
-                                              finemap_merged_regions_res,
-                                              merged_region_id_map){
-  for(region_id in merged_region_id_map$region_id){
-    old_region_ids <- merged_region_id_map$old_region_ids[merged_region_id_map$region_id == region_id]
-    old_region_ids <- unlist(strsplit(old_region_ids, ","))
-    finemap_res[finemap_res$region_id %in% old_region_ids, ] <-
-      finemap_merged_regions_res[finemap_merged_regions_res$region_id==region_id, ]
-  }
-  return(finemap_res)
-}
-

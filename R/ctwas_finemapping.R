@@ -48,7 +48,7 @@
 #'
 #' @param ... Additional arguments of \code{susie_rss}.
 #'
-#' @return a data frame of cTWAS finemapping results.
+#' @return a list with cTWAS finemapping results.
 #'
 #' @importFrom logging addHandler loginfo writeToFile
 #' @importFrom parallel mclapply
@@ -205,7 +205,7 @@ finemap_regions <- function(region_data,
 #'
 #' @param ... Additional arguments of \code{susie_rss}.
 #'
-#' @return a data frame of cTWAS finemapping results.
+#' @return a list with cTWAS finemapping results.
 #'
 #' @importFrom logging addHandler loginfo logwarn writeToFile
 #' @importFrom parallel mclapply
@@ -433,39 +433,7 @@ finemap_single_region <- function(region_data,
 }
 
 
-#' @title Runs cTWAS finemapping for a single region without LD
-#'
-#' @param region_data a list object with data for the regions
-#'
-#' @param region_id a character string of region id to be finemapped
-#'
-#' @param group_prior a vector of two prior inclusion probabilities for SNPs and genes.
-#' If NULL, it will use uniform prior inclusion probabilities.
-#'
-#' @param group_prior_var a vector of two prior variances for SNPs and gene effects.
-#' If NULL, it will set prior variance = 50 as the default in \code{susie_rss}.
-#'
-#' @param use_null_weight If TRUE, allow for a probability of no effect in susie
-#'
-#' @param coverage A number between 0 and 1 specifying the \dQuote{coverage} of the estimated confidence sets
-#'
-#' @param include_cs If TRUE, add credible sets (CS) to finemapping results.
-#'
-#' @param get_susie_alpha If TRUE, get susie alpha matrix from finemapping results.
-#'
-#' @param snps_only If TRUE, use only SNPs in the region data.
-#'
-#' @param verbose If TRUE, print detail messages
-#'
-#' @param ... Additional arguments of \code{susie_rss}.
-#'
-#' @return a data frame of finemapping results.
-#'
-#' @importFrom logging loginfo
-#' @importFrom Matrix bdiag
-#'
-#' @keywords internal
-#'
+# Runs cTWAS finemapping for a single region without LD
 finemap_single_region_noLD <- function(region_data,
                                        region_id,
                                        group_prior = NULL,
@@ -630,4 +598,79 @@ fast_finemap_single_region_L1_noLD <- function(region_data,
                              include_cs = FALSE)
 
   return(susie_res_df)
+}
+
+#' Updates cTWAS finemapping result
+#'
+#' @param finemap_res a data frame of original finemapping result.
+#' @param susie_alpha_res a data frame of original susie alpha result.
+#' @param new_finemap_res a data frame of new finemapping result.
+#' @param new_susie_alpha_res a data frame of new susie alpha result.
+#' @param updated_region_ids a vector of region ids to be updated.
+#'
+#' @return a list with updated cTWAS finemapping result.
+#'
+#' @export
+update_finemap_res <- function(finemap_res,
+                               susie_alpha_res,
+                               new_finemap_res,
+                               new_susie_alpha_res,
+                               updated_region_ids){
+
+  if (!all(colnames(finemap_res) == colnames(new_finemap_res)))
+    stop("columns of finemap_res and new_finemap_res do not match!")
+
+  if (!all(colnames(susie_alpha_res) == colnames(new_susie_alpha_res)))
+    stop("columns of susie_alpha_res and new_susie_alpha_res do not match!")
+
+  if (missing(updated_region_ids)){
+    updated_region_ids <- unique(new_finemap_res$region_id)
+  }
+
+  kept_finemap_res <- finemap_res[!finemap_res$region_id %in% updated_region_ids, ]
+  new_finemap_res <- new_finemap_res[new_finemap_res$region_id %in% updated_region_ids, ]
+  finemap_res <- rbind(kept_finemap_res, new_finemap_res)
+
+  kept_susie_alpha_res <- susie_alpha_res[!susie_alpha_res$region_id %in% updated_region_ids, ]
+  new_susie_alpha_res <- new_susie_alpha_res[new_susie_alpha_res$region_id %in% updated_region_ids, ]
+  susie_alpha_res <- rbind(kept_susie_alpha_res, new_susie_alpha_res)
+
+  return(list("finemap_res" = finemap_res,
+              "susie_alpha_res" = susie_alpha_res))
+}
+
+
+#' Updates cTWAS finemapping result for merged regions
+#'
+#' @param finemap_res a data frame of original finemapping result.
+#' @param susie_alpha_res a data frame of original susie alpha result.
+#' @param merged_region_finemap_res a data frame of finemapping result for merged regions.
+#' @param merged_region_susie_alpha_res a data frame of susie alpha result for merged regions.
+#' @param merged_region_id_map a data frame of new region IDs and original regions IDs.
+#'
+#' @return a list with updated cTWAS finemapping result.
+#'
+#' @export
+#'
+update_merged_region_finemap_res <- function(finemap_res,
+                                             susie_alpha_res,
+                                             merged_region_finemap_res,
+                                             merged_region_susie_alpha_res,
+                                             merged_region_id_map){
+  for(region_id in merged_region_id_map$region_id){
+    old_region_ids <- merged_region_id_map$old_region_ids[merged_region_id_map$region_id == region_id]
+    old_region_ids <- unlist(strsplit(old_region_ids, ","))
+
+    finemap_res[finemap_res$region_id %in% old_region_ids, ] <-
+      finemap_merged_regions_res[finemap_merged_regions_res$region_id==region_id, ]
+
+    susie_alpha_res[susie_alpha_res$region_id %in% old_region_ids, ] <-
+      merged_region_susie_alpha_res[merged_region_susie_alpha_res$region_id==region_id, ]
+  }
+
+  finemap_res <- unique(finemap_res)
+  susie_alpha_res <- unique(susie_alpha_res)
+
+  return(list("finemap_res" = finemap_res,
+              "susie_alpha_res" = susie_alpha_res))
 }

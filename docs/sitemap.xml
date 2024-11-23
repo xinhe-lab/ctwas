@@ -229,6 +229,12 @@
     <loc>/reference/susie_rss.html</loc>
   </url>
   <url>
+    <loc>/reference/update_finemap_res.html</loc>
+  </url>
+  <url>
+    <loc>/reference/update_merged_region_finemap_res.html</loc>
+  </url>
+  <url>
     <loc>/reference/z2p.html</loc>
   </url>
 </urlset>

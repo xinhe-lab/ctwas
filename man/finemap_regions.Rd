@@ -79,7 +79,7 @@ if SNP information files are not in standard cTWAS reference format.}
 \item{...}{Additional arguments of \code{susie_rss}.}
 }
 \value{
-a data frame of cTWAS finemapping results.
+a list with cTWAS finemapping results.
 }
 \description{
 Runs cTWAS fine-mapping for regions
