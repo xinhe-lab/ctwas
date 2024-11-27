@@ -2,7 +2,7 @@
 % Please edit documentation in R/ctwas_finemapping.R
 \name{update_finemap_res}
 \alias{update_finemap_res}
-\title{Updates cTWAS finemapping result}
+\title{Updates cTWAS finemapping result for selected regions}
 \usage{
 update_finemap_res(
   finemap_res,
@@ -27,5 +27,5 @@ update_finemap_res(
 a list with updated cTWAS finemapping result.
 }
 \description{
-Updates cTWAS finemapping result
+Updates cTWAS finemapping result for selected regions
 }

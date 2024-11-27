@@ -84,7 +84,7 @@ We address this “cross-region” problem by performing “region merging” as
 We first select the genes to merge. This could be all genes whose weights span two or more regions. In practice, the genes that are unlikely to be causal for the phenotype generally wouldn’t cause problems. So we can limit to the cross-boundary genes that are plausible risk genes. The results of cTWAS contain the list of genes with cross-boundary weights, `boundary_genes`. We can then select among these genes, the ones above a PIP cutoff and in credible sets. 
 
 ```{r selected_boundary_genes, eval=FALSE}
-high_PIP_finemap_gene_res <- subset(finemap_res, group != "SNP" & susie_pip > 0.5 & cs_index != 0)
+high_PIP_finemap_gene_res <- subset(finemap_res, group != "SNP" & susie_pip > 0.5 & !is.na(cs))
 high_PIP_genes <- unique(high_PIP_finemap_gene_res$id)
 
 selected_boundary_genes <- boundary_genes[boundary_genes$id %in% high_PIP_genes, , drop=FALSE]
