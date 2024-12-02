@@ -85,6 +85,7 @@ We first select the genes to merge. This could be all genes whose weights span t
 
 ```{r selected_boundary_genes, eval=FALSE}
 high_PIP_finemap_gene_res <- subset(finemap_res, group != "SNP" & susie_pip > 0.5 & !is.na(cs))
+
 high_PIP_genes <- unique(high_PIP_finemap_gene_res$id)
 
 selected_boundary_genes <- boundary_genes[boundary_genes$id %in% high_PIP_genes, , drop=FALSE]
@@ -161,17 +162,48 @@ finemap_merged_regions_res <- finemap_regions_noLD(merged_region_data,
 ```
 
 
+### Update fine-mapping results after region merging
 
-We can replace the fine-mapping results for the merged regions:
+We can update the fine-mapping results after region merging:
 ```{r update_merged_region_finemap_res, eval=FALSE}
 res <- update_merged_region_finemap_res(finemap_res, 
                                         susie_alpha_res, 
                                         merged_region_finemap_res, 
                                         merged_region_susie_alpha_res,
                                         merged_region_id_map)
-updated_finemap_res <- res$finemap_res
-updated_susie_alpha_res <- res$susie_alpha_res
+updated_merged_finemap_res <- res$finemap_res
+updated_merged_susie_alpha_res <- res$susie_alpha_res
 ```
+
+
+After region merging, we can also update the region data (and other input data), which could be used in later, e.g. LD mismatch analysis:
+
+```{r update_merged_region_data, eval=FALSE}
+updated_data_res <- update_merged_region_data(region_data, merged_region_data,
+                                              region_info, merged_region_info,
+                                              LD_map, merged_LD_map,
+                                              snp_map, merged_snp_map,
+                                              screened_region_L, merged_region_L,
+                                              merged_region_id_map)
+updated_region_data <- updated_data_res$updated_region_data
+updated_region_info <- updated_data_res$updated_region_info
+updated_LD_map <- updated_data_res$updated_LD_map
+updated_snp_map <- updated_data_res$updated_snp_map
+updated_region_L <- updated_data_res$updated_region_L
+```
+
+
+Similarly, we could update region data when running without LD:
+```{r update_merged_region_data_noLD, eval=FALSE}
+updated_data_res <- update_merged_region_data_noLD(region_data, merged_region_data,
+                                                   region_info, merged_region_info,
+                                                   snp_map, merged_snp_map,
+                                                   merged_region_id_map)
+updated_region_data <- updated_data_res$updated_region_data
+updated_region_info <- updated_data_res$updated_region_info
+updated_snp_map <- updated_data_res$updated_snp_map
+```
+
 
 
 ## Dealing with LD mismatch
@@ -241,7 +273,7 @@ rerun_finemap_res[rerun_finemap_res$id %in% problematic_genes,]
 ```
 
 
-We can replace the fine-mapping results for the problematic regions:
+We can update the fine-mapping results for the problematic regions:
 ```{r update_finemap_noLD_res, eval=FALSE}
 res <- update_finemap_res(finemap_res, 
                           susie_alpha_res, 
@@ -253,7 +285,7 @@ updated_susie_alpha_res <- res$susie_alpha_res
 ```
 
 
-
+In practice, it could be helpful to first run region merging, and then perform the LD-mismatch analysis. We could first update the region data after region merging, and then run LD-mismatch analysis using the updated region data. 
 
 [reference]: https://xinhe-lab.github.io/ctwas/reference/index.html
 [UKBB_LD_ref]: https://uchicago.box.com/s/jqocacd2fulskmhoqnasrknbt59x3xkn
