@@ -406,3 +406,136 @@ create_merged_snp_map <- function(boundary_genes,
 }
 
 
+
+#' Updates cTWAS finemapping result for merged regions
+#'
+#' @param finemap_res a data frame of original finemapping result.
+#' @param susie_alpha_res a data frame of original susie alpha result.
+#' @param merged_region_finemap_res a data frame of finemapping result for merged regions.
+#' @param merged_region_susie_alpha_res a data frame of susie alpha result for merged regions.
+#' @param merged_region_id_map a data frame of new region IDs and original regions IDs.
+#'
+#' @return a list with updated cTWAS finemapping result.
+#'
+#' @export
+#'
+update_merged_region_finemap_res <- function(finemap_res,
+                                             susie_alpha_res,
+                                             merged_region_finemap_res,
+                                             merged_region_susie_alpha_res,
+                                             merged_region_id_map){
+
+  new_region_ids <- merged_region_id_map$region_id
+  old_region_ids <- unlist(strsplit(merged_region_id_map$old_region_ids, ","))
+
+  kept_finemap_res <- finemap_res[!finemap_res$region_id %in% old_region_ids, ]
+  new_finemap_res <- merged_region_finemap_res[merged_region_finemap_res$region_id %in% new_region_ids, ]
+  finemap_res <- rbind(kept_finemap_res, new_finemap_res)
+
+  kept_susie_alpha_res <- susie_alpha_res[!susie_alpha_res$region_id %in% old_region_ids, ]
+  new_susie_alpha_res <- merged_region_susie_alpha_res[merged_region_susie_alpha_res$region_id %in% new_region_ids, ]
+  susie_alpha_res <- rbind(kept_susie_alpha_res, new_susie_alpha_res)
+
+  finemap_res <- unique(finemap_res)
+  rownames(finemap_res) <- NULL
+
+  susie_alpha_res <- unique(susie_alpha_res)
+  rownames(susie_alpha_res) <- NULL
+
+  if (!setequal(finemap_res$id[finemap_res$group != "SNP"], susie_alpha_res$id))
+    stop("finemap_res$id do not match with susie_alpha_res$id!")
+
+  return(list("finemap_res" = finemap_res,
+              "susie_alpha_res" = susie_alpha_res))
+}
+
+
+#' Updates cTWAS input data with merged region data
+#'
+#' @param region_data a list of original region data.
+#' @param merged_region_data a list of merged region data.
+#' @param region_info a data frame of original region definitions.
+#' @param merged_region_info a data frame of original region definitions.
+#' @param LD_map a data frame of original LD map.
+#' @param merged_LD_map a data frame of merged LD map.
+#' @param snp_map a list of original SNP info.
+#' @param merged_snp_map a list of merged SNP info.
+#' @param screened_region_L a vector of L for original screened regions.
+#' @param merged_region_L a vector of L for merged regions.
+#' @param merged_region_id_map a data frame of new region IDs and original regions IDs.
+#'
+#' @return a list with updated region_data, region_info, LD_map, snp_map, and L.
+#'
+#' @export
+#'
+update_merged_region_data <- function(region_data, merged_region_data,
+                                      region_info, merged_region_info,
+                                      LD_map, merged_LD_map,
+                                      snp_map, merged_snp_map,
+                                      screened_region_L, merged_region_L,
+                                      merged_region_id_map){
+
+  new_region_ids <- merged_region_id_map$region_id
+  old_region_ids <- unlist(strsplit(merged_region_id_map$old_region_ids, ","))
+
+  kept_region_info <- region_info[!region_info$region_id %in% old_region_ids, ]
+  new_region_info <- merged_region_info[merged_region_info$region_id %in% new_region_ids, ]
+  region_info <- rbind(kept_region_info, new_region_info)
+
+  LD_map <- rbind(LD_map, merged_LD_map)
+  idx <- match(region_info$region_id, LD_map$region_id)
+  LD_map <- LD_map[idx, ]
+
+  snp_map <- c(snp_map, merged_snp_map)
+  snp_map <- snp_map[region_info$region_id]
+
+  region_data <- c(region_data, merged_region_data)
+  region_data <- region_data[region_info$region_id]
+
+  kept_screened_region_L <- screened_region_L[!names(screened_region_L) %in% old_region_ids]
+  new_region_L <- merged_region_L[new_region_ids]
+  screened_region_L <- c(kept_screened_region_L, new_region_L)
+
+  return(list("updated_region_data" = region_data,
+              "updated_region_info" = region_info,
+              "updated_LD_map" = LD_map,
+              "updated_snp_map" = snp_map,
+              "updated_region_L" = screened_region_L))
+}
+
+#' Updates cTWAS input data without LD with merged region data
+#'
+#' @param region_data a list of original region data.
+#' @param merged_region_data a list of merged region data.
+#' @param region_info a data frame of original region definitions.
+#' @param merged_region_info a data frame of original region definitions.
+#' @param snp_map a list of original SNP info.
+#' @param merged_snp_map a list of merged SNP info.
+#' @param merged_region_id_map a data frame of new region IDs and original regions IDs.
+#'
+#' @return a list with updated region_data, region_info, snp_map.
+#'
+#' @export
+#'
+update_merged_region_data_noLD <- function(region_data, merged_region_data,
+                                           region_info, merged_region_info,
+                                           snp_map, merged_snp_map,
+                                           merged_region_id_map){
+
+  new_region_ids <- merged_region_id_map$region_id
+  old_region_ids <- unlist(strsplit(merged_region_id_map$old_region_ids, ","))
+
+  kept_region_info <- region_info[!region_info$region_id %in% old_region_ids, ]
+  new_region_info <- merged_region_info[merged_region_info$region_id %in% new_region_ids, ]
+  region_info <- rbind(kept_region_info, new_region_info)
+
+  snp_map <- c(snp_map, merged_snp_map)
+  snp_map <- snp_map[region_info$region_id]
+
+  region_data <- c(region_data, merged_region_data)
+  region_data <- region_data[region_info$region_id]
+
+  return(list("updated_region_data" = region_data,
+              "updated_region_info" = region_info,
+              "updated_snp_map" = snp_map))
+}
