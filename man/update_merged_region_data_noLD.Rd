@@ -30,7 +30,7 @@ update_merged_region_data_noLD(
 \item{merged_region_id_map}{a data frame of new region IDs and original regions IDs.}
 }
 \value{
-a list with updated region_info, LD_map, snp_map, region_data and L.
+a list with updated region_data, region_info, snp_map.
 }
 \description{
 Updates cTWAS input data without LD with merged region data
