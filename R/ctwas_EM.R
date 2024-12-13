@@ -120,6 +120,7 @@ fit_EM <- function(
       tmp_EM_susie_res <- EM_susie_res[EM_susie_res$group!="SNP",]
       V_prior[names(V_prior)!="SNP"] <- sum(tmp_EM_susie_res$susie_pip*tmp_EM_susie_res$mu2)/sum(tmp_EM_susie_res$susie_pip)
     } else if (group_prior_var_structure=="shared_all") {
+      tmp_EM_susie_res <- EM_susie_res
       V_prior[names(V_prior)] <- sum(tmp_EM_susie_res$susie_pip*tmp_EM_susie_res$mu2)/sum(tmp_EM_susie_res$susie_pip)
     } else if (group_prior_var_structure=="shared_type") {
       tmp_EM_susie_res <- EM_susie_res[EM_susie_res$group=="SNP",]

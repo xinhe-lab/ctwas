@@ -329,6 +329,7 @@ create_predictdb_from_QTLs <- function(weight_table,
   loginfo("Makes PredictDB weights from QTL data")
 
   # check and clean the QTL data
+  weight_table <- as.data.frame(weight_table)
   required_cols <- c("gene", "rsid", "varID", "ref_allele", "eff_allele", "weight")
   if (!all(required_cols %in% colnames(weight_table))){
     stop("QTL_data needs to contain the following columns: ",
@@ -342,7 +343,7 @@ create_predictdb_from_QTLs <- function(weight_table,
     weight_table <- weight_table[!duplicated(weight_table$gene), ]
   }
 
-  weight_table <- weight_table[weight_table[, "weight"] != 0, ,drop = FALSE]
+  weight_table <- weight_table[weight_table$weight != 0, ,drop = FALSE]
   weight_table <- weight_table[complete.cases(weight_table), ,drop = FALSE]
 
   # if NULL, create a simply extra_table based on weight_table
