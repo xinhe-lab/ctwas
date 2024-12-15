@@ -326,16 +326,14 @@ update_region_z <- function(region_data,
   region_ids <- names(region_data)
   region_data2 <- mclapply_check(region_ids, function(region_id){
     regiondata <- region_data[[region_id]]
-
-    # filter gids and sids with z_gene and z_snp
-    regiondata[["gid"]] <- intersect(regiondata[["gid"]], z_gene$id)
-    regiondata[["sid"]] <- intersect(regiondata[["sid"]], z_snp$id)
     gid <- regiondata[["gid"]]
     sid <- regiondata[["sid"]]
     region_z_df <- z_df[z_df$id %in% c(gid, sid), , drop=FALSE]
 
     # update z-scores for genes
     if (update == "genes" || update == "all") {
+      gid <- intersect(gid, region_z_df$id)
+      regiondata[["gid"]] <- gid
       region_z_gene <- region_z_df[match(gid, region_z_df$id), ]
       region_z_gene <- region_z_gene[complete.cases(region_z_gene),]
       regiondata[["z_gene"]] <- region_z_gene
@@ -344,6 +342,8 @@ update_region_z <- function(region_data,
 
     # update z-scores for snps
     if (update == "snps" || update == "all") {
+      sid <- intersect(sid, region_z_df$id)
+      regiondata[["sid"]] <- sid
       region_z_snp <- region_z_df[match(sid, region_z_df$id), ]
       region_z_snp <- region_z_snp[complete.cases(region_z_snp),]
       regiondata[["z_snp"]] <- region_z_snp
