@@ -616,7 +616,7 @@ compute_weight_LD_from_ref <- function(weights,
         curr_region_ids <- unlist(strsplit(x, ","))
         curr_region_idx <- match(curr_region_ids, LD_map$region_id)
 
-        LD_matrix_files <- LD_map$LD_file[curr_region_idx]
+        LD_matrix_files <- unlist(strsplit(LD_map$LD_file[curr_region_idx], split = ","))
         stopifnot(all(file.exists(LD_matrix_files)))
 
         if (length(LD_matrix_files) > 1) {
