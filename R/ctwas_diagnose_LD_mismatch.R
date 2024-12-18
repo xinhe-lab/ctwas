@@ -146,7 +146,7 @@ get_problematic_genes <- function(problematic_snps,
                                   weights,
                                   finemap_res,
                                   pip_thresh = 0.5,
-                                  z_thresh = 3){
+                                  z_thresh = NULL){
 
   if (length(problematic_snps) == 0) {
     loginfo('No problematic SNPs')
@@ -157,17 +157,25 @@ get_problematic_genes <- function(problematic_snps,
     finemap_gene_res <- finemap_res[finemap_res$group!="SNP",]
 
     # find high PIP genes with problematic SNPs in its weights
-    high_pip_gids <- finemap_gene_res$id[finemap_gene_res$susie_pip >= pip_thresh]
+    if (!is.null(pip_thresh)) {
+      high_pip_gids <- finemap_gene_res$id[finemap_gene_res$susie_pip > pip_thresh]
+    } else {
+      high_pip_gids <- NULL
+    }
 
     # find high |z| genes with problematic SNPs in its weights
-    large_z_gids <- finemap_gene_res$id[abs(finemap_gene_res$z) >= z_thresh]
+    if (!is.null(z_thresh)) {
+      large_z_gids <- finemap_gene_res$id[abs(finemap_gene_res$z) > z_thresh]
+    } else {
+      large_z_gids <- NULL
+    }
 
     # check both high PIP genes and high |z| genes
     selected_gids <- unique(c(high_pip_gids, large_z_gids))
 
     selected_weights <- weights[selected_gids]
     # extract SNP ids in weights, and find genes with problematic SNPs in weights
-    problematic_genes <- c()
+    problematic_genes <- NULL
     if (length(selected_weights) > 0){
       for (i in 1:length(selected_weights)){
         gid <- names(selected_weights)[i]
