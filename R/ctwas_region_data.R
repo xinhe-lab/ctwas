@@ -280,9 +280,25 @@ trim_region_data <- function(region_data,
   return(region_data)
 }
 
-
-# add or update z_snp and z_gene in region_data
+#' @title Adds or updates z-scores in region_data based on z_snp and z_gene.
+#' this will also update sid and gid based on z_snp and z_gene.
+#
+#' @param region_data a list of region gene IDs and SNP IDs and associated file names
+#'
+#' @param z_snp A data frame with columns: "id", "z", giving the z-scores for SNPs.
+#'
+#' @param z_gene A data frame with columns: "id", "z", giving the z-scores for genes.
+#'
+#' @param update options to update z-scores in region data.
+#' "all": update all data (default),
+#' "snps": updates SNP data only,
+#' "genes": updates gene data only.
+#'
+#' @param ncore The number of cores used to parallelize susie over regions
+#'
 #' @importFrom parallel mclapply
+#'
+#' @export
 update_region_z <- function(region_data,
                             z_snp,
                             z_gene,
@@ -314,14 +330,22 @@ update_region_z <- function(region_data,
     sid <- regiondata[["sid"]]
     region_z_df <- z_df[z_df$id %in% c(gid, sid), , drop=FALSE]
 
+    # update z-scores for genes
     if (update == "genes" || update == "all") {
+      gid <- intersect(gid, region_z_df$id)
+      regiondata[["gid"]] <- gid
       region_z_gene <- region_z_df[match(gid, region_z_df$id), ]
+      region_z_gene <- region_z_gene[complete.cases(region_z_gene),]
       regiondata[["z_gene"]] <- region_z_gene
       rownames(regiondata[["z_gene"]]) <- NULL
     }
 
+    # update z-scores for snps
     if (update == "snps" || update == "all") {
+      sid <- intersect(sid, region_z_df$id)
+      regiondata[["sid"]] <- sid
       region_z_snp <- region_z_df[match(sid, region_z_df$id), ]
+      region_z_snp <- region_z_snp[complete.cases(region_z_snp),]
       regiondata[["z_snp"]] <- region_z_snp
       rownames(regiondata[["z_snp"]]) <- NULL
     }

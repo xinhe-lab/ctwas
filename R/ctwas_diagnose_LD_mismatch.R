@@ -50,6 +50,11 @@ diagnose_LD_mismatch_susie <- function(region_ids,
   }
 
   loginfo("Performing LD mismatch diagnosis for %d regions", length(region_ids))
+
+  if (!all(region_ids %in% LD_map$region_id)){
+     stop("region_ids do not match with LD_map$region_id!")
+  }
+
   LD_format <- match.arg(LD_format)
 
   condz_list <- mclapply_check(region_ids, function(region_id){
@@ -141,7 +146,7 @@ get_problematic_genes <- function(problematic_snps,
                                   weights,
                                   finemap_res,
                                   pip_thresh = 0.5,
-                                  z_thresh = 3){
+                                  z_thresh = NULL){
 
   if (length(problematic_snps) == 0) {
     loginfo('No problematic SNPs')
@@ -152,17 +157,25 @@ get_problematic_genes <- function(problematic_snps,
     finemap_gene_res <- finemap_res[finemap_res$group!="SNP",]
 
     # find high PIP genes with problematic SNPs in its weights
-    high_pip_gids <- finemap_gene_res$id[finemap_gene_res$susie_pip >= pip_thresh]
+    if (!is.null(pip_thresh)) {
+      high_pip_gids <- finemap_gene_res$id[finemap_gene_res$susie_pip > pip_thresh]
+    } else {
+      high_pip_gids <- NULL
+    }
 
     # find high |z| genes with problematic SNPs in its weights
-    large_z_gids <- finemap_gene_res$id[abs(finemap_gene_res$z) >= z_thresh]
+    if (!is.null(z_thresh)) {
+      large_z_gids <- finemap_gene_res$id[abs(finemap_gene_res$z) > z_thresh]
+    } else {
+      large_z_gids <- NULL
+    }
 
     # check both high PIP genes and high |z| genes
     selected_gids <- unique(c(high_pip_gids, large_z_gids))
 
     selected_weights <- weights[selected_gids]
     # extract SNP ids in weights, and find genes with problematic SNPs in weights
-    problematic_genes <- c()
+    problematic_genes <- NULL
     if (length(selected_weights) > 0){
       for (i in 1:length(selected_weights)){
         gid <- names(selected_weights)[i]
@@ -178,4 +191,45 @@ get_problematic_genes <- function(problematic_snps,
 
   return(problematic_genes)
 }
+
+
+#' Updates cTWAS finemapping result for selected regions
+#'
+#' @param finemap_res a data frame of original finemapping result.
+#' @param susie_alpha_res a data frame of original susie alpha result.
+#' @param new_finemap_res a data frame of new finemapping result.
+#' @param new_susie_alpha_res a data frame of new susie alpha result.
+#' @param updated_region_ids a vector of region ids to be updated.
+#'
+#' @return a list with updated cTWAS finemapping result.
+#'
+#' @export
+update_finemap_res <- function(finemap_res,
+                               susie_alpha_res,
+                               new_finemap_res,
+                               new_susie_alpha_res,
+                               updated_region_ids){
+
+  if (!all(colnames(finemap_res) == colnames(new_finemap_res)))
+    stop("columns of finemap_res and new_finemap_res do not match!")
+
+  if (!all(colnames(susie_alpha_res) == colnames(new_susie_alpha_res)))
+    stop("columns of susie_alpha_res and new_susie_alpha_res do not match!")
+
+  if (missing(updated_region_ids)){
+    updated_region_ids <- unique(new_finemap_res$region_id)
+  }
+
+  kept_finemap_res <- finemap_res[!finemap_res$region_id %in% updated_region_ids, ]
+  new_finemap_res <- new_finemap_res[new_finemap_res$region_id %in% updated_region_ids, ]
+  finemap_res <- rbind(kept_finemap_res, new_finemap_res)
+
+  kept_susie_alpha_res <- susie_alpha_res[!susie_alpha_res$region_id %in% updated_region_ids, ]
+  new_susie_alpha_res <- new_susie_alpha_res[new_susie_alpha_res$region_id %in% updated_region_ids, ]
+  susie_alpha_res <- rbind(kept_susie_alpha_res, new_susie_alpha_res)
+
+  return(list("finemap_res" = finemap_res,
+              "susie_alpha_res" = susie_alpha_res))
+}
+
 
