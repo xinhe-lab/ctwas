@@ -599,3 +599,56 @@ fast_finemap_single_region_L1_noLD <- function(region_data,
 
   return(susie_res_df)
 }
+
+#' @title Finemap regions with cTWAS SER model
+#'
+#' @param region_data a list object with the susie input data for each region.
+#'
+#' @param group_prior a vector of prior inclusion probabilities for SNPs and genes.
+#'
+#' @param group_prior_var a vector of prior variances for SNPs and gene effects.
+#'
+#' @param use_null_weight If TRUE, allow for a probability of no effect.
+#'
+#' @param null_weight_method Method to compute null weight, options: "susie" or "ctwas".
+#'
+#' @param ncore The number of cores used to parallelize over regions.
+#'
+#' @return a data frame of SER result
+#'
+#' @importFrom logging loginfo
+#' @importFrom parallel mclapply
+#'
+#' @export
+#'
+finemap_regions_ser_rss <- function(
+    region_data,
+    group_prior = NULL,
+    group_prior_var = NULL,
+    use_null_weight = TRUE,
+    null_weight_method = c("susie", "ctwas"),
+    ncore = 1){
+
+  # get groups from region_data
+  groups <- unique(unlist(lapply(region_data, "[[", "groups")))
+  groups <- c(setdiff(groups, "SNP"), "SNP")
+
+  # set pi_prior and V_prior based on group_prior and group_prior_var
+  res <- initiate_group_priors(group_prior[groups], group_prior_var[groups], groups)
+  pi_prior <- res$pi_prior
+  V_prior <- res$V_prior
+  rm(res)
+
+  region_ids <- names(region_data)
+
+  ser_res_list <- mclapply_check(region_ids, function(region_id){
+    finemap_single_region_ser_rss(region_data, region_id, pi_prior, V_prior,
+                                  use_null_weight = use_null_weight,
+                                  null_weight_method = null_weight_method,
+                                  return_full_result = TRUE)
+  }, mc.cores = ncore, stop_if_missing = TRUE)
+
+  ser_res_df <- do.call(rbind, lapply(ser_res_list, "[[", "ser_res_df"))
+
+  return(ser_res_df)
+}

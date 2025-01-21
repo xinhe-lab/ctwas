@@ -176,7 +176,8 @@ finemap_single_region_ser_rss <- function(region_data,
                                           pi_prior,
                                           V_prior,
                                           use_null_weight = TRUE,
-                                          null_weight_method = c("susie", "ctwas")){
+                                          null_weight_method = c("susie", "ctwas"),
+                                          return_full_result = FALSE){
 
   null_weight_method <- match.arg(null_weight_method)
 
@@ -228,6 +229,57 @@ finemap_single_region_ser_rss <- function(region_data,
                              region_id = region_id,
                              z = z)
 
-  return(ser_res_df)
+  if (return_full_result){
+    return(list("ser_res" = ser_res,
+                "ser_res_df" = ser_res_df))
+  }else{
+    return(ser_res_df)
+  }
+
 }
 
+# fit a single region with L = 1 without LD, used in EM
+fit_single_region_ser_rss <- function(region_data,
+                                      region_id,
+                                      pi_prior,
+                                      V_prior,
+                                      use_null_weight = TRUE,
+                                      null_weight_method = c("susie", "ctwas")){
+
+  null_weight_method <- match.arg(null_weight_method)
+
+  # load region data
+  if (!inherits(region_data,"list")){
+    stop("'region_data' should be a list.")
+  }
+
+  regiondata <- region_data[[region_id]]
+  if (is.null(regiondata$z) || is.null(regiondata$gs_group)){
+    regiondata <- extract_region_data(region_data, region_id)
+  }
+
+  z <- regiondata[["z"]]
+  gs_group <- regiondata[["gs_group"]]
+  rm(regiondata)
+
+  if (length(z) < 2) {
+    stop(paste(length(z), "variables in the region", region_id, "\n",
+               "At least two variables in a region are needed to run SER model"))
+  }
+
+  # update priors, prior variances and null_weight
+  res <- set_region_susie_priors(pi_prior, V_prior, gs_group, L = 1,
+                                 use_null_weight = FALSE)
+  prior_weights <- res$prior
+  prior_variance <- res$V
+  rm(res)
+
+  # fit SER model
+  ser_res <- ctwas_ser_rss(z = z,
+                           prior_weights = prior_weights,
+                           prior_variance = prior_variance,
+                           use_null_weight = use_null_weight,
+                           null_weight_method = null_weight_method)
+
+  return(ser_res)
+}
