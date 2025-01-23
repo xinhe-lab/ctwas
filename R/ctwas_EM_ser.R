@@ -45,7 +45,7 @@ fit_EM_ser <- function(
     niter = 20,
     init_group_prior = NULL,
     init_group_prior_var = NULL,
-    group_prior_var_structure = c("shared_type", "shared_context", "shared_nonSNP", "shared_all", "independent"),
+    group_prior_var_structure = c("shared_type", "shared_context", "shared_nonSNP", "shared_all", "independent", "fixed"),
     use_null_weight = TRUE,
     null_weight_method = c("susie", "ctwas"),
     ncore = 1,
@@ -82,19 +82,26 @@ fit_EM_ser <- function(
   rownames(group_prior_var_iters) <- groups
   colnames(group_prior_var_iters) <- paste0("iter", 1:ncol(group_prior_var_iters))
 
+  loglik_iters <- rep(NA, length = niter)
+
   region_ids <- names(region_data)
   for (iter in 1:niter) {
     if (verbose){
       loginfo("Start EM iteration %d ...", iter)
     }
 
-    EM_ser_res <- mclapply_check(region_ids, function(region_id){
+    all_ser_res_list <- mclapply_check(region_ids, function(region_id){
       finemap_single_region_ser_rss(region_data, region_id, pi_prior, V_prior,
                                     use_null_weight = use_null_weight,
-                                    null_weight_method = null_weight_method)
+                                    null_weight_method = null_weight_method,
+                                    return_full_result = TRUE)
     }, mc.cores = ncore, stop_if_missing = TRUE)
 
-    EM_ser_res <- do.call(rbind, EM_ser_res)
+    EM_ser_res <- do.call(rbind, lapply(all_ser_res_list, "[[", "ser_res_df"))
+
+    loglik_iters[iter] <- sum(sapply(lapply(all_ser_res_list, "[[", "ser_res"), "[[", "loglik"))
+
+    rm(all_ser_res_list)
 
     # update estimated group_prior from the current iteration
     pi_prior <- sapply(names(pi_prior), function(x){mean(EM_ser_res$susie_pip[EM_ser_res$group==x])})
@@ -152,7 +159,13 @@ fit_EM_ser <- function(
         V_prior[context_idx] <-
           sum(tmp_EM_ser_res$susie_pip*tmp_EM_ser_res$mu2)/sum(tmp_EM_ser_res$susie_pip)
       }
+    } else if (group_prior_var_structure=="fixed") {
+      if (is.null(init_group_prior_var)) {
+        stop("init_group_prior_var is needed when using fixed group_prior_var_structure")
+      }
+      # do not update V_prior
     }
+
     group_prior_var_iters[names(V_prior), iter] <- V_prior
 
     if (verbose){
@@ -170,7 +183,7 @@ fit_EM_ser <- function(
               "group_prior_iters" = group_prior_iters,
               "group_prior_var_iters" = group_prior_var_iters,
               "group_prior_var_structure" = group_prior_var_structure,
-              "group_size" = group_size))
+              "group_size" = group_size,
+              "loglik_iters" = loglik_iters))
 }
-
 
