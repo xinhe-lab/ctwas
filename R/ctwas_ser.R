@@ -21,6 +21,7 @@ ctwas_ser_rss <- function(z,
       prior_weights = prior_weights / (sum(prior_weights) + null_weight)
     } else if (null_weight_method == "ctwas") {
       null_weight = max(0, prod(1 - prior_weights))
+      prior_weights = prior_weights/(1-prior_weights) * null_weight
     }
   } else {
     null_weight = 0
@@ -96,6 +97,7 @@ ctwas_ser <- function(X, Y,
       prior_weights = prior_weights / (sum(prior_weights) + null_weight)
     } else if (null_weight_method == "ctwas") {
       null_weight = max(0, prod(1 - prior_weights))
+      prior_weights = prior_weights/(1-prior_weights) * null_weight
     }
   } else {
     null_weight = 0
