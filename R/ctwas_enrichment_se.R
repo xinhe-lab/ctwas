@@ -2,17 +2,20 @@
 #'
 #' @param region_data a list of assembled region data.
 #'
-#' @param param a list of parameter estimation result
+#' @param group_prior a vector of prior inclusion probabilities for different groups.
 #'
-#' @return
+#' @param group_prior_null a vector of prior inclusion probabilities for different groups under the null.
+#'
+#' @param group_prior_var a vector of prior variances for different groups.
+#'
+#' @return a list of estimated enrichment, S.E. and p-value.
 #'
 #' @export
 #'
-compute_enrichment_se <- function(region_data, param){
-
-  group_prior <- param$group_prior
-  group_prior_var <- param$group_prior_var
-  group_size <- param$group_size
+compute_enrichment_se <- function(region_data,
+                                  group_prior,
+                                  group_prior_null,
+                                  group_prior_var){
 
   # estimated enrichment
   enrichment <- group_prior[names(group_prior) != "SNP"]/group_prior[names(group_prior) == "SNP"]
@@ -24,9 +27,6 @@ compute_enrichment_se <- function(region_data, param){
 
   # null enrichment (enrichment = 1)
   enrichment_null = 1
-  group_prior_null <- rep(1/sum(group_size), length(group_prior))
-  names(group_prior_null) <- names(group_prior)
-
   loglik_null <- compute_loglik_ser(group_prior = group_prior_null,
                                     group_prior_var = group_prior_var,
                                     region_data = region_data,
