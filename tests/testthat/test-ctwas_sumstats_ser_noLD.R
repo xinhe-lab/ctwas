@@ -15,6 +15,7 @@ test_that("ctwas_sumstats_ser_noLD works", {
                                          thin = 0.1,
                                          maxSNP = 20000,
                                          min_nonSNP_PIP = 0.5,
+                                         null_method = "susie",
                                          ncore = 2)
   })
 

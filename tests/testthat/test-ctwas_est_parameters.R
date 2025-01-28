@@ -24,7 +24,8 @@ test_that("est_param_ser works", {
     param <- est_param_ser(region_data,
                            niter_prefit = 3,
                            niter = 30,
-                           ncore = 2)
+                           ncore = 2,
+                           null_method = "susie")
   })
 
   expect_equal(param, expected_param)

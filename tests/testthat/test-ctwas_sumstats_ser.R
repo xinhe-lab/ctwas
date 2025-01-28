@@ -19,6 +19,7 @@ test_that("ctwas_sumstats_ser works", {
                                     thin = 0.1,
                                     maxSNP = 20000,
                                     min_abs_corr = 0.1,
+                                    null_method = "susie",
                                     ncore = 2,
                                     ncore_LD = 2)
   })
