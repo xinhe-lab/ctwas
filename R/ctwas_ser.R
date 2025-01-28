@@ -223,6 +223,7 @@ finemap_single_region_ser_rss <- function(region_data,
                                           null_method = c("ctwas", "susie", "none"),
                                           return_full_result = FALSE){
 
+
   null_method <- match.arg(null_method)
 
   # load region data
@@ -288,7 +289,7 @@ fit_single_region_ser_rss <- function(region_data,
                                       V_prior,
                                       null_method = c("ctwas", "susie", "none")){
 
-  null_weight_method <- match.arg(null_weight_method)
+  null_method <- match.arg(null_method)
 
   # load region data
   if (!inherits(region_data,"list")){

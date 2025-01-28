@@ -632,6 +632,8 @@ finemap_regions_ser_rss <- function(
     null_method = c("ctwas", "susie", "none"),
     ncore = 1){
 
+  null_method <- match.arg(null_method)
+
   region_ids <- names(region_data)
   n_gids <- sapply(region_data, function(x){length(x$gid)})
   n_sids <- sapply(region_data, function(x){length(x$sid)})
@@ -649,10 +651,16 @@ finemap_regions_ser_rss <- function(
   if (min_gene > 0) {
     skip_region_ids <- region_ids[n_gids < min_gene]
     if (length(skip_region_ids) > 0){
-      loginfo("Remove %d regions with number of genes < %d", length(skip_region_ids), min_gene)
+      loginfo("Skip %d regions with number of genes < %d", length(skip_region_ids), min_gene)
       region_data[skip_region_ids] <- NULL
     }
   }
+
+  if (length(region_data) == 0){
+    stop("No region left for Fine-mapping.")
+  }
+
+  loginfo("Fine-mapping %d regions ...", length(region_data))
 
   # get groups from region_data
   groups <- unique(unlist(lapply(region_data, "[[", "groups")))
@@ -664,6 +672,7 @@ finemap_regions_ser_rss <- function(
   V_prior <- res$V_prior
   rm(res)
 
+  region_ids <- names(region_data)
   ser_res_list <- mclapply_check(region_ids, function(region_id){
     finemap_single_region_ser_rss(region_data, region_id, pi_prior, V_prior,
                                   null_method = null_method,
