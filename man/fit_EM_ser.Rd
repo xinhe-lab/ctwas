@@ -13,9 +13,8 @@ fit_EM_ser(
   init_group_prior = NULL,
   init_group_prior_var = NULL,
   group_prior_var_structure = c("shared_type", "shared_context", "shared_nonSNP",
-    "shared_all", "independent"),
-  use_null_weight = TRUE,
-  null_weight_method = c("susie", "ctwas"),
+    "shared_all", "independent", "fixed"),
+  null_method = c("ctwas", "susie", "none"),
   ncore = 1,
   verbose = FALSE
 )
@@ -42,9 +41,7 @@ fit_EM_ser(
 "shared_all" allows all groups to share the same variance parameter.
 "independent" allows all groups to have their own separate variance parameters.}
 
-\item{use_null_weight}{If TRUE, allow for a probability of no effect}
-
-\item{null_weight_method}{Method to compute null weight, options: "susie" or "ctwas".}
+\item{null_method}{Method to compute null weight, options: "ctwas", "susie" or "none".}
 
 \item{ncore}{The number of cores used to parallelize over regions}
 

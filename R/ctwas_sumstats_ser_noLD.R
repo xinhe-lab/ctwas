@@ -49,6 +49,8 @@
 #'
 #' @param use_null_weight If TRUE, allow for a probability of no effect in susie.
 #'
+#' @param null_method Method to compute null model, options: "ctwas", "susie" or "none".
+#'
 #' @param outputdir The directory to store output. If specified, save outputs to the directory.
 #'
 #' @param outname The output name.
@@ -90,6 +92,7 @@ ctwas_sumstats_ser_noLD <- function(
     min_nonSNP_PIP = 0.5,
     min_p_single_effect = 0.8,
     use_null_weight = TRUE,
+    null_method = c("ctwas", "susie", "none"),
     outputdir = NULL,
     outname = "ctwas_noLD",
     ncore = 1,
@@ -181,6 +184,7 @@ ctwas_sumstats_ser_noLD <- function(
                          min_gene = min_gene,
                          min_group_size = min_group_size,
                          min_p_single_effect = min_p_single_effect,
+                         null_method = null_method,
                          ncore = ncore,
                          verbose = verbose)
 

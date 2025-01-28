@@ -608,13 +608,15 @@ fast_finemap_single_region_L1_noLD <- function(region_data,
 #'
 #' @param group_prior_var a vector of prior variances for SNPs and gene effects.
 #'
-#' @param use_null_weight If TRUE, allow for a probability of no effect.
+#' @param min_var minimum number of variables (SNPs and genes) in a region.
 #'
-#' @param null_weight_method Method to compute null weight, options: "susie" or "ctwas".
+#' @param min_gene minimum number of genes in a region.
+#'
+#' @param null_method Method to compute null weight, options: "ctwas", "susie" or "none".
 #'
 #' @param ncore The number of cores used to parallelize over regions.
 #'
-#' @return a data frame of SER result
+#' @return a data frame of SER result for finemapped regions
 #'
 #' @importFrom logging loginfo
 #' @importFrom parallel mclapply
@@ -625,9 +627,32 @@ finemap_regions_ser_rss <- function(
     region_data,
     group_prior = NULL,
     group_prior_var = NULL,
-    use_null_weight = TRUE,
-    null_weight_method = c("susie", "ctwas"),
+    min_var = 2,
+    min_gene = 1,
+    null_method = c("ctwas", "susie", "none"),
     ncore = 1){
+
+  region_ids <- names(region_data)
+  n_gids <- sapply(region_data, function(x){length(x$gid)})
+  n_sids <- sapply(region_data, function(x){length(x$sid)})
+
+  # skip regions with fewer than min_var variables
+  if (min_var > 0) {
+    skip_region_ids <- region_ids[(n_sids + n_gids) < min_var]
+    if (length(skip_region_ids) > 0){
+      loginfo("Skip %d regions with number of variables < %d", length(skip_region_ids), min_var)
+      region_data[skip_region_ids] <- NULL
+    }
+  }
+
+  # skip regions with fewer than min_gene genes
+  if (min_gene > 0) {
+    skip_region_ids <- region_ids[n_gids < min_gene]
+    if (length(skip_region_ids) > 0){
+      loginfo("Remove %d regions with number of genes < %d", length(skip_region_ids), min_gene)
+      region_data[skip_region_ids] <- NULL
+    }
+  }
 
   # get groups from region_data
   groups <- unique(unlist(lapply(region_data, "[[", "groups")))
@@ -639,12 +664,9 @@ finemap_regions_ser_rss <- function(
   V_prior <- res$V_prior
   rm(res)
 
-  region_ids <- names(region_data)
-
   ser_res_list <- mclapply_check(region_ids, function(region_id){
     finemap_single_region_ser_rss(region_data, region_id, pi_prior, V_prior,
-                                  use_null_weight = use_null_weight,
-                                  null_weight_method = null_weight_method,
+                                  null_method = null_method,
                                   return_full_result = TRUE)
   }, mc.cores = ncore, stop_if_missing = TRUE)
 

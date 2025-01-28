@@ -283,7 +283,7 @@ trim_region_data <- function(region_data,
 #' @title Adds or updates z-scores in region_data based on z_snp and z_gene.
 #' this will also update sid and gid based on z_snp and z_gene.
 #
-#' @param region_data a list of region gene IDs and SNP IDs and associated file names
+#' @param region_data a list of assembled region data.
 #'
 #' @param z_snp A data frame with columns: "id", "z", giving the z-scores for SNPs.
 #'
@@ -405,7 +405,7 @@ adjust_boundary_genes <- function(boundary_genes,
 
 #' @title Expands region_data with all SNPs
 #'
-#' @param region_data a list of region gene IDs and SNP IDs and associated file names
+#' @param region_data a list of assembled region data.
 #'
 #' @param snp_map a list of data frames with SNP-to-region map for the reference.
 #'

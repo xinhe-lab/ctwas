@@ -28,6 +28,7 @@ ctwas_sumstats_ser(
   min_gene = 1,
   min_group_size = 100,
   use_null_weight = TRUE,
+  null_method = c("ctwas", "susie", "none"),
   coverage = 0.95,
   min_abs_corr = 0.1,
   LD_format = c("rds", "rdata", "mtx", "csv", "txt", "custom"),
@@ -103,6 +104,8 @@ when estimating paramters and screening regions.}
 Groups with number of genes < \code{min_group_size} will be removed for the analysis.}
 
 \item{use_null_weight}{If TRUE, allow for a probability of no effect in susie.}
+
+\item{null_method}{Method to compute null model, options: "ctwas", "susie" or "none".}
 
 \item{coverage}{A number between 0 and 1 specifying the \dQuote{coverage} of
 the estimated confidence sets.}

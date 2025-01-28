@@ -13,8 +13,7 @@ est_param_ser(
   niter_prefit = 3,
   niter = 30,
   min_p_single_effect = 0.8,
-  use_null_weight = TRUE,
-  null_weight_method = c("susie", "ctwas"),
+  null_method = c("ctwas", "susie", "none"),
   min_var = 2,
   min_gene = 1,
   min_group_size = 100,
@@ -45,9 +44,7 @@ est_param_ser(
 \item{min_p_single_effect}{Regions with probability greater than \code{min_p_single_effect} of
 having at most one causal effect will be used selected for the complete parameter estimation step.}
 
-\item{use_null_weight}{If TRUE, allow for a probability of no effect}
-
-\item{null_weight_method}{Method to compute null weight, options: "susie" or "ctwas".}
+\item{null_method}{Method to compute null model, options: "ctwas", "susie" or "none".}
 
 \item{min_var}{minimum number of variables (SNPs and genes) in a region.}
 

@@ -8,8 +8,9 @@ finemap_regions_ser_rss(
   region_data,
   group_prior = NULL,
   group_prior_var = NULL,
-  use_null_weight = TRUE,
-  null_weight_method = c("susie", "ctwas"),
+  min_var = 2,
+  min_gene = 1,
+  null_method = c("ctwas", "susie", "none"),
   ncore = 1
 )
 }
@@ -20,14 +21,16 @@ finemap_regions_ser_rss(
 
 \item{group_prior_var}{a vector of prior variances for SNPs and gene effects.}
 
-\item{use_null_weight}{If TRUE, allow for a probability of no effect.}
+\item{min_var}{minimum number of variables (SNPs and genes) in a region.}
 
-\item{null_weight_method}{Method to compute null weight, options: "susie" or "ctwas".}
+\item{min_gene}{minimum number of genes in a region.}
+
+\item{null_method}{Method to compute null weight, options: "ctwas", "susie" or "none".}
 
 \item{ncore}{The number of cores used to parallelize over regions.}
 }
 \value{
-a data frame of SER result
+a data frame of SER result for finemapped regions
 }
 \description{
 Finemap regions with cTWAS SER model

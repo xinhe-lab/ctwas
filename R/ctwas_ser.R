@@ -3,10 +3,16 @@ ctwas_ser_rss <- function(z,
                           prior_variance,
                           prior_weights = NULL,
                           residual_variance = 1,
-                          use_null_weight = TRUE,
-                          null_weight_method = c("susie", "ctwas")){
+                          null_method = c("ctwas", "susie", "none"),
+                          normalize_prior = TRUE){
 
-  null_weight_method = match.arg(null_weight_method)
+  null_method = match.arg(null_method)
+
+  if (length(prior_weights) != length(z))
+    stop("Prior weights must have length of z")
+
+  if (any(prior_weights < 0 | prior_weights > 1))
+    warning("Prior weights must be between 0 and 1")
 
   p = length(z)
   shat2 = 1
@@ -15,36 +21,49 @@ ctwas_ser_rss <- function(z,
   if (is.null(prior_weights))
     prior_weights = rep(1/p,p)
 
-  if (use_null_weight){
-    if (null_weight_method == "susie") {
-      null_weight = max(0, 1 - sum(prior_weights))
-      prior_weights = prior_weights / (sum(prior_weights) + null_weight)
-    } else if (null_weight_method == "ctwas") {
-      null_weight = max(0, prod(1 - prior_weights))
-      prior_weights = prior_weights/(1-prior_weights) * null_weight
+  if (null_method == "susie") {
+    null_weight = max(0, 1 - sum(prior_weights))
+    if (normalize_prior){
+      # rescale prior_weights and null_weight, so that they sum to 1
+      sum_prior_weights = sum(prior_weights) + null_weight
+      prior_weights = prior_weights / sum_prior_weights
+      null_weight = null_weight / sum_prior_weights
     }
-  } else {
-    null_weight = 0
-    prior_weights = prior_weights / sum(prior_weights)
+    prior_null = null_weight
+    prior_configs = prior_weights
+  } else if (null_method == "ctwas") {
+    prior_null = prod(1 - prior_weights)
+    prior_odds = prior_weights / (1-prior_weights)
+    prior_configs = prior_odds * prior_null
+  } else if (null_method == "none") {
+    prior_null = 0
+    if (normalize_prior){
+      # rescale prior_weights, so that they sum to 1
+      prior_weights = prior_weights / sum(prior_weights)
+    }
+    prior_configs = prior_weights
   }
-
-  if (length(prior_weights) != length(z))
-    stop("Prior weights must have length of z")
 
   # compute BF using the Wakefield's formula
   gamma = prior_variance / (prior_variance + shat2)
   lbf = log(sqrt(1-gamma)) - (-1/2 * z^2  * gamma)
   maxlbf = max(lbf)
+  maxbf = exp(maxlbf)
 
   # w is proportional to BF, but subtract max for numerical stability.
   w = exp(lbf - maxlbf)
 
-  null_w = null_weight/exp(maxlbf)
-
-  # Posterior prob for each variable
-  weighted_w = prior_weights * w
+  # posterior prob for each variable
+  null_w = prior_null/maxbf
+  weighted_w = prior_configs * w
   weighted_sum_w = sum(weighted_w)
-  alpha = weighted_w / (null_w + weighted_sum_w)
+
+  if (null_method == "ctwas") {
+    weighted_w_scaled = prior_odds * w
+    alpha = weighted_w_scaled / (1/maxbf + sum(weighted_w_scaled))
+  } else {
+    alpha = weighted_w / (null_w + weighted_sum_w)
+  }
 
   # compute posterior mean and second moment
   post_var = (1/prior_variance + 1/shat2)^(-1) # posterior variance
@@ -60,7 +79,9 @@ ctwas_ser_rss <- function(z,
               mu2 = post_mean2,
               lbf = lbf,
               loglik = loglik,
-              null_weight = null_weight))
+              prior_null = prior_null,
+              prior_configs = prior_configs,
+              prior_variance = prior_variance))
 }
 
 # fit cTWAS version of single effect regression (SER) model with summary statistics
@@ -68,10 +89,16 @@ ctwas_ser <- function(X, Y,
                       scaled_prior_variance,
                       prior_weights = NULL,
                       residual_variance = 1,
-                      use_null_weight = TRUE,
-                      null_weight_method = c("susie", "ctwas")){
+                      null_method = c("ctwas", "susie", "none"),
+                      normalize_prior = TRUE){
 
-  null_weight_method = match.arg(null_weight_method)
+  null_method = match.arg(null_method)
+
+  if (length(prior_weights) != ncol(X))
+    stop("Prior weights must have length of ncol(X)")
+
+  if (any(prior_weights < 0 | prior_weights > 1))
+    warning("Prior weights must be between 0 and 1")
 
   p = ncol(X)
   n = nrow(X)
@@ -91,35 +118,49 @@ ctwas_ser <- function(X, Y,
   if (is.null(prior_weights))
     prior_weights = rep(1/p,p)
 
-  if (use_null_weight){
-    if (null_weight_method == "susie") {
-      null_weight = max(0, 1 - sum(prior_weights))
-      prior_weights = prior_weights / (sum(prior_weights) + null_weight)
-    } else if (null_weight_method == "ctwas") {
-      null_weight = max(0, prod(1 - prior_weights))
-      prior_weights = prior_weights/(1-prior_weights) * null_weight
+  if (null_method == "susie") {
+    null_weight = max(0, 1 - sum(prior_weights))
+    if (normalize_prior){
+      # rescale prior_weights and null_weight, so that they sum to 1
+      sum_prior_weights = sum(prior_weights) + null_weight
+      prior_weights = prior_weights / sum_prior_weights
+      null_weight = null_weight / sum_prior_weights
     }
-  } else {
-    null_weight = 0
-    prior_weights = prior_weights / sum(prior_weights)
+    prior_null = null_weight
+    prior_configs = prior_weights
+  } else if (null_method == "ctwas") {
+    prior_null = prod(1 - prior_weights)
+    prior_odds = prior_weights / (1-prior_weights)
+    prior_configs = prior_odds * prior_null
+  } else if (null_method == "none") {
+    prior_null = 0
+    if (normalize_prior){
+      # rescale prior_weights, so that they sum to 1
+      prior_weights = prior_weights / sum(prior_weights)
+    }
+    prior_configs = prior_weights
   }
-
-  if (length(prior_weights) != ncol(X))
-    stop("Prior weights must have length of ncol(X)")
 
   # compute BF using the Wakefield's formula
   gamma = scaled_prior_variance / (scaled_prior_variance + shat2)
   lbf = log(sqrt(1-gamma)) - (-1/2 * z^2  * gamma)
   maxlbf = max(lbf)
+  maxbf = exp(maxlbf)
 
   # w is proportional to BF, but subtract max for numerical stability.
   w = exp(lbf - maxlbf)
-  null_w = null_weight/exp(maxlbf)
 
-  # Posterior prob for each variable
-  weighted_w = prior_weights * w
+  # posterior prob for each variable
+  null_w = prior_null/maxbf
+  weighted_w = prior_configs * w
   weighted_sum_w = sum(weighted_w)
-  alpha = weighted_w / (null_w + weighted_sum_w)
+
+  if (null_method == "ctwas") {
+    weighted_w_scaled = prior_odds * w
+    alpha = weighted_w_scaled / (1/maxbf + sum(weighted_w_scaled))
+  } else {
+    alpha = weighted_w / (null_w + weighted_sum_w)
+  }
 
   # compute posterior mean and second moment
   post_var = (1/scaled_prior_variance + 1/shat2)^(-1) # posterior variance
@@ -135,7 +176,9 @@ ctwas_ser <- function(X, Y,
               mu2 = post_mean2,
               lbf = lbf,
               loglik = loglik,
-              null_weight = null_weight))
+              prior_null = prior_null,
+              prior_configs = prior_configs,
+              scaled_prior_variance = scaled_prior_variance))
 }
 
 
@@ -177,11 +220,10 @@ finemap_single_region_ser_rss <- function(region_data,
                                           region_id,
                                           pi_prior,
                                           V_prior,
-                                          use_null_weight = TRUE,
-                                          null_weight_method = c("susie", "ctwas"),
+                                          null_method = c("ctwas", "susie", "none"),
                                           return_full_result = FALSE){
 
-  null_weight_method <- match.arg(null_weight_method)
+  null_method <- match.arg(null_method)
 
   # load region data
   if (!inherits(region_data,"list")){
@@ -218,8 +260,7 @@ finemap_single_region_ser_rss <- function(region_data,
   ser_res <- ctwas_ser_rss(z = z,
                            prior_weights = prior_weights,
                            prior_variance = prior_variance,
-                           use_null_weight = use_null_weight,
-                           null_weight_method = null_weight_method)
+                           null_method = null_method)
 
   # annotate SER result
   ser_res_df <- anno_ser_res(ser_res,
@@ -245,8 +286,7 @@ fit_single_region_ser_rss <- function(region_data,
                                       region_id,
                                       pi_prior,
                                       V_prior,
-                                      use_null_weight = TRUE,
-                                      null_weight_method = c("susie", "ctwas")){
+                                      null_method = c("ctwas", "susie", "none")){
 
   null_weight_method <- match.arg(null_weight_method)
 
@@ -280,8 +320,51 @@ fit_single_region_ser_rss <- function(region_data,
   ser_res <- ctwas_ser_rss(z = z,
                            prior_weights = prior_weights,
                            prior_variance = prior_variance,
-                           use_null_weight = use_null_weight,
-                           null_weight_method = null_weight_method)
+                           null_method = null_method)
 
   return(ser_res)
+}
+
+
+#' @importFrom logging addHandler loginfo logwarn writeToFile
+#'
+compute_loglik_ser <- function(
+    group_prior,
+    group_prior_var,
+    region_data,
+    groups,
+    null_method = c("ctwas", "susie", "none"),
+    ncore = 1,
+    verbose = FALSE){
+
+  # get groups, from region_data
+  if (missing(groups)){
+    groups <- unique(unlist(lapply(region_data, "[[", "groups")))
+    groups <- c(setdiff(groups, "SNP"), "SNP")
+  }
+
+  if (verbose) {
+    loginfo("group_prior {%s}: {%s}",
+            names(group_prior), format(group_prior, digits = 4))
+    loginfo("group_prior_var {%s}: {%s}",
+            names(group_prior_var), format(group_prior_var, digits = 4))
+  }
+
+  res <- initiate_group_priors(group_prior[groups], group_prior_var[groups], groups)
+  pi_prior <- res$pi_prior
+  V_prior <- res$V_prior
+  rm(res)
+
+  region_ids <- names(region_data)
+
+  EM_ser_res_list <- mclapply_check(region_ids, function(region_id){
+    finemap_single_region_ser_rss(region_data, region_id, pi_prior, V_prior,
+                                  null_method = null_method,
+                                  return_full_result = TRUE)
+  }, mc.cores = ncore, stop_if_missing = TRUE)
+
+  all_ser_res <- lapply(EM_ser_res_list, "[[", "ser_res")
+  loglik <- sum(sapply(all_ser_res, "[[", "loglik"))
+
+  return(loglik)
 }

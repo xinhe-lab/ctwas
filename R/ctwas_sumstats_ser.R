@@ -57,6 +57,8 @@
 #'
 #' @param use_null_weight If TRUE, allow for a probability of no effect in susie.
 #'
+#' @param null_method Method to compute null model, options: "ctwas", "susie" or "none".
+#'
 #' @param coverage A number between 0 and 1 specifying the \dQuote{coverage} of
 #' the estimated confidence sets.
 #'
@@ -124,6 +126,7 @@ ctwas_sumstats_ser <- function(
     min_gene = 1,
     min_group_size = 100,
     use_null_weight = TRUE,
+    null_method = c("ctwas", "susie", "none"),
     coverage = 0.95,
     min_abs_corr = 0.1,
     LD_format = c("rds", "rdata", "mtx", "csv", "txt", "custom"),
@@ -232,6 +235,7 @@ ctwas_sumstats_ser <- function(
                          min_gene = min_gene,
                          min_group_size = min_group_size,
                          min_p_single_effect = min_p_single_effect,
+                         null_method = null_method,
                          ncore = ncore,
                          verbose = verbose,
                          ...)

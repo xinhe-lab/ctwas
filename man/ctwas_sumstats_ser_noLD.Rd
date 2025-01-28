@@ -24,6 +24,7 @@ ctwas_sumstats_ser_noLD(
   min_nonSNP_PIP = 0.5,
   min_p_single_effect = 0.8,
   use_null_weight = TRUE,
+  null_method = c("ctwas", "susie", "none"),
   outputdir = NULL,
   outname = "ctwas_noLD",
   ncore = 1,
@@ -82,6 +83,8 @@ will be selected to run finemapping using full SNPs.}
 having 1 or fewer effects will be used for parameter estimation.}
 
 \item{use_null_weight}{If TRUE, allow for a probability of no effect in susie.}
+
+\item{null_method}{Method to compute null model, options: "ctwas", "susie" or "none".}
 
 \item{outputdir}{The directory to store output. If specified, save outputs to the directory.}
 

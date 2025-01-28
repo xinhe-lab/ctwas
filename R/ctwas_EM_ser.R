@@ -21,9 +21,7 @@
 #' "shared_all" allows all groups to share the same variance parameter.
 #' "independent" allows all groups to have their own separate variance parameters.
 #'
-#' @param use_null_weight If TRUE, allow for a probability of no effect
-#'
-#' @param null_weight_method Method to compute null weight, options: "susie" or "ctwas".
+#' @param null_method Method to compute null weight, options: "ctwas", "susie" or "none".
 #'
 #' @param ncore The number of cores used to parallelize over regions
 #'
@@ -46,8 +44,7 @@ fit_EM_ser <- function(
     init_group_prior = NULL,
     init_group_prior_var = NULL,
     group_prior_var_structure = c("shared_type", "shared_context", "shared_nonSNP", "shared_all", "independent", "fixed"),
-    use_null_weight = TRUE,
-    null_weight_method = c("susie", "ctwas"),
+    null_method = c("ctwas", "susie", "none"),
     ncore = 1,
     verbose = FALSE){
 
@@ -92,8 +89,7 @@ fit_EM_ser <- function(
 
     all_ser_res_list <- mclapply_check(region_ids, function(region_id){
       finemap_single_region_ser_rss(region_data, region_id, pi_prior, V_prior,
-                                    use_null_weight = use_null_weight,
-                                    null_weight_method = null_weight_method,
+                                    null_method = null_method,
                                     return_full_result = TRUE)
     }, mc.cores = ncore, stop_if_missing = TRUE)
 
