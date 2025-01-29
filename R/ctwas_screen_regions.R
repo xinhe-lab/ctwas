@@ -32,6 +32,8 @@
 #'
 #' @param min_abs_corr Minimum absolute correlation allowed in a credible set.
 #'
+#' @param null_method Method to compute null model, options: "ctwas", "susie" or "none".
+#'
 #' @param LD_format file format for LD matrix. If "custom", use a user defined
 #' \code{LD_loader_fun()} function to load LD matrix.
 #'
@@ -70,6 +72,7 @@ screen_regions <- function(region_data,
                            min_L = 1,
                            min_nonSNP_PIP = 0.5,
                            min_abs_corr = 0.1,
+                           null_method = c("ctwas", "susie", "none"),
                            LD_format = c("rds", "rdata", "mtx", "csv", "txt", "custom"),
                            LD_loader_fun = NULL,
                            snpinfo_loader_fun = NULL,
@@ -86,6 +89,7 @@ screen_regions <- function(region_data,
 
   # check input
   LD_format <- match.arg(LD_format)
+  null_method <- match.arg(null_method)
 
   # extract thin value from region_data
   thin <- unique(sapply(region_data, "[[", "thin"))
@@ -150,6 +154,7 @@ screen_regions <- function(region_data,
                                          weights = weights,
                                          init_L = L,
                                          min_abs_corr = min_abs_corr,
+                                         null_method = null_method,
                                          snps_only = FALSE,
                                          LD_format = LD_format,
                                          LD_loader_fun = LD_loader_fun,
@@ -182,6 +187,7 @@ screen_regions <- function(region_data,
                            group_prior_var = group_prior_var,
                            include_cs = FALSE,
                            get_susie_alpha = FALSE,
+                           null_method = null_method,
                            LD_format = LD_format,
                            LD_loader_fun = LD_loader_fun,
                            snpinfo_loader_fun = snpinfo_loader_fun,
@@ -254,6 +260,7 @@ screen_regions_noLD <- function(region_data,
                                 min_var = 2,
                                 min_gene = 1,
                                 min_nonSNP_PIP = 0.5,
+                                null_method = c("ctwas", "susie", "none"),
                                 ncore = 1,
                                 logfile = NULL,
                                 verbose = FALSE,
@@ -264,6 +271,7 @@ screen_regions_noLD <- function(region_data,
   }
 
   loginfo("Screening regions without LD ...")
+  null_method <- match.arg(null_method)
 
   # extract thin value from region_data
   thin <- unique(sapply(region_data, "[[", "thin"))
@@ -322,6 +330,7 @@ screen_regions_noLD <- function(region_data,
   res <- finemap_regions_noLD(region_data,
                               group_prior = group_prior,
                               group_prior_var = group_prior_var,
+                              null_method = null_method,
                               get_susie_alpha = FALSE,
                               ncore = ncore,
                               verbose = verbose,

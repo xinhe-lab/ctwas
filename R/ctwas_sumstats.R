@@ -55,7 +55,7 @@
 #' @param min_group_size Minimum number of genes in a group.
 #' Groups with number of genes < \code{min_group_size} will be removed for the analysis.
 #'
-#' @param use_null_weight If TRUE, allow for a probability of no effect in susie.
+#' @param null_method Method to compute null model, options: "ctwas", "susie" or "none".
 #'
 #' @param coverage A number between 0 and 1 specifying the \dQuote{coverage} of
 #' the estimated confidence sets.
@@ -123,7 +123,7 @@ ctwas_sumstats <- function(
     min_var = 2,
     min_gene = 1,
     min_group_size = 100,
-    use_null_weight = TRUE,
+    null_method = c("ctwas", "susie", "none"),
     coverage = 0.95,
     min_abs_corr = 0.1,
     LD_format = c("rds", "rdata", "mtx", "csv", "txt", "custom"),
@@ -151,6 +151,7 @@ ctwas_sumstats <- function(
   # check inputs
   group_prior_var_structure <- match.arg(group_prior_var_structure)
   LD_format <- match.arg(LD_format)
+  null_method <- match.arg(null_method)
 
   if (anyNA(z_snp))
     stop("z_snp contains missing values!")
@@ -232,6 +233,7 @@ ctwas_sumstats <- function(
                      min_gene = min_gene,
                      min_group_size = min_group_size,
                      min_p_single_effect = min_p_single_effect,
+                     null_method = null_method,
                      ncore = ncore,
                      verbose = verbose,
                      ...)
@@ -256,6 +258,7 @@ ctwas_sumstats <- function(
                                filter_nonSNP_PIP = filter_nonSNP_PIP,
                                min_nonSNP_PIP = min_nonSNP_PIP,
                                min_abs_corr = min_abs_corr,
+                               null_method = null_method,
                                LD_format = LD_format,
                                LD_loader_fun = LD_loader_fun,
                                snpinfo_loader_fun = snpinfo_loader_fun,
@@ -288,7 +291,7 @@ ctwas_sumstats <- function(
                            group_prior = group_prior,
                            group_prior_var = group_prior_var,
                            L = screened_region_L,
-                           use_null_weight = use_null_weight,
+                           null_method = null_method,
                            coverage = coverage,
                            min_abs_corr = min_abs_corr,
                            force_compute_cor = force_compute_cor,

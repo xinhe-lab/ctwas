@@ -217,7 +217,9 @@ initiate_group_priors <- function(group_prior = NULL, group_prior_var = NULL, gr
 
 # set prior and prior variance values for the region
 set_region_susie_priors <- function(pi_prior, V_prior, gs_group, L,
-                                    use_null_weight = TRUE){
+                                    null_method = c("ctwas", "susie", "none")){
+
+  null_method <- match.arg(null_method)
 
   if (length(gs_group) < 2) {
     stop(paste(length(gs_group), "variables in the region. At least two variables in a region are needed to run susie"))
@@ -239,10 +241,13 @@ set_region_susie_priors <- function(pi_prior, V_prior, gs_group, L,
     V <- matrix(rep(V, each = L), nrow=L)
   }
 
-  if (use_null_weight){
+  if (null_method == "susie"){
     null_weight <- max(0, 1 - sum(prior))
     prior <- prior/(1-null_weight)
-  } else {
+  } else if (null_method == "ctwas"){
+    null_weight <- 0.5
+    prior <- prior/(1-prior)
+  } else if (null_method == "none"){
     null_weight <- NULL
   }
 

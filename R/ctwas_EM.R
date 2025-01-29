@@ -1,4 +1,4 @@
-#' @title Runs EM to estimate parameters.
+#' @title Runs EM to estimate parameters using cTWAS SER model
 #'
 #' @param region_data a list object with the susie input data for each region
 #'
@@ -21,9 +21,9 @@
 #' "shared_all" allows all groups to share the same variance parameter.
 #' "independent" allows all groups to have their own separate variance parameters.
 #'
-#' @param use_null_weight If TRUE, allow for a probability of no effect in susie
+#' @param null_method Method to compute null weight, options: "ctwas", "susie" or "none".
 #'
-#' @param ncore The number of cores used to parallelize susie over regions
+#' @param ncore The number of cores used to parallelize over regions
 #'
 #' @param verbose If TRUE, print detail messages
 #'
@@ -43,11 +43,10 @@ fit_EM <- function(
     niter = 20,
     init_group_prior = NULL,
     init_group_prior_var = NULL,
-    group_prior_var_structure = c("shared_type", "shared_context", "shared_nonSNP", "shared_all", "independent"),
-    use_null_weight = TRUE,
+    group_prior_var_structure = c("shared_type", "shared_context", "shared_nonSNP", "shared_all", "independent", "fixed"),
+    null_method = c("ctwas", "susie", "none"),
     ncore = 1,
-    verbose = FALSE,
-    ...){
+    verbose = FALSE){
 
   # get groups, types and contexts from region_data
   if (missing(groups)){
@@ -80,22 +79,28 @@ fit_EM <- function(
   rownames(group_prior_var_iters) <- groups
   colnames(group_prior_var_iters) <- paste0("iter", 1:ncol(group_prior_var_iters))
 
+  loglik_iters <- rep(NA, length = niter)
+
   region_ids <- names(region_data)
   for (iter in 1:niter) {
     if (verbose){
       loginfo("Start EM iteration %d ...", iter)
     }
 
-    EM_susie_res <- mclapply_check(region_ids, function(region_id){
-      fast_finemap_single_region_L1_noLD(region_data, region_id, pi_prior, V_prior,
-                                         use_null_weight = use_null_weight,
-                                         ...)
+    all_ser_res_list <- mclapply_check(region_ids, function(region_id){
+      finemap_single_region_ser_rss(region_data, region_id, pi_prior, V_prior,
+                                    null_method = null_method,
+                                    return_full_result = TRUE)
     }, mc.cores = ncore, stop_if_missing = TRUE)
 
-    EM_susie_res <- do.call(rbind, EM_susie_res)
+    EM_ser_res <- do.call(rbind, lapply(all_ser_res_list, "[[", "ser_res_df"))
+
+    loglik_iters[iter] <- sum(sapply(lapply(all_ser_res_list, "[[", "ser_res"), "[[", "loglik"))
+
+    rm(all_ser_res_list)
 
     # update estimated group_prior from the current iteration
-    pi_prior <- sapply(names(pi_prior), function(x){mean(EM_susie_res$susie_pip[EM_susie_res$group==x])})
+    pi_prior <- sapply(names(pi_prior), function(x){mean(EM_ser_res$susie_pip[EM_ser_res$group==x])})
     group_prior_iters[names(pi_prior),iter] <- pi_prior
 
     if (verbose){
@@ -112,37 +117,51 @@ fit_EM <- function(
     # res$mu2 is identical to res2$mu2 but coefficients are on diff scale.
     if (group_prior_var_structure=="independent") {
       V_prior <- sapply(names(V_prior), function(x){
-        tmp_EM_susie_res <- EM_susie_res[EM_susie_res$group==x,];
-        sum(tmp_EM_susie_res$susie_pip*tmp_EM_susie_res$mu2)/sum(tmp_EM_susie_res$susie_pip)})
+        tmp_EM_ser_res <- EM_ser_res[EM_ser_res$group==x,];
+        sum(tmp_EM_ser_res$susie_pip*tmp_EM_ser_res$mu2)/sum(tmp_EM_ser_res$susie_pip)})
     } else if (group_prior_var_structure=="shared_nonSNP") {
-      tmp_EM_susie_res <- EM_susie_res[EM_susie_res$group=="SNP",]
-      V_prior["SNP"] <- sum(tmp_EM_susie_res$susie_pip*tmp_EM_susie_res$mu2)/sum(tmp_EM_susie_res$susie_pip)
-      tmp_EM_susie_res <- EM_susie_res[EM_susie_res$group!="SNP",]
-      V_prior[names(V_prior)!="SNP"] <- sum(tmp_EM_susie_res$susie_pip*tmp_EM_susie_res$mu2)/sum(tmp_EM_susie_res$susie_pip)
+      tmp_EM_ser_res <- EM_ser_res[EM_ser_res$group=="SNP",]
+      V_prior["SNP"] <- sum(tmp_EM_ser_res$susie_pip*tmp_EM_ser_res$mu2)/sum(tmp_EM_ser_res$susie_pip)
+      tmp_EM_ser_res <- EM_ser_res[EM_ser_res$group!="SNP",]
+      V_prior[names(V_prior)!="SNP"] <- sum(tmp_EM_ser_res$susie_pip*tmp_EM_ser_res$mu2)/sum(tmp_EM_ser_res$susie_pip)
     } else if (group_prior_var_structure=="shared_all") {
-      tmp_EM_susie_res <- EM_susie_res
-      V_prior[names(V_prior)] <- sum(tmp_EM_susie_res$susie_pip*tmp_EM_susie_res$mu2)/sum(tmp_EM_susie_res$susie_pip)
+      tmp_EM_ser_res <- EM_ser_res
+      V_prior[names(V_prior)] <- sum(tmp_EM_ser_res$susie_pip*tmp_EM_ser_res$mu2)/sum(tmp_EM_ser_res$susie_pip)
     } else if (group_prior_var_structure=="shared_type") {
-      tmp_EM_susie_res <- EM_susie_res[EM_susie_res$group=="SNP",]
-      V_prior["SNP"] <- sum(tmp_EM_susie_res$susie_pip*tmp_EM_susie_res$mu2)/sum(tmp_EM_susie_res$susie_pip)
+      tmp_EM_ser_res <- EM_ser_res[EM_ser_res$group=="SNP",]
+      V_prior["SNP"] <- sum(tmp_EM_ser_res$susie_pip*tmp_EM_ser_res$mu2)/sum(tmp_EM_ser_res$susie_pip)
       nonSNP_types <- setdiff(types, "SNP")
-      for(type in nonSNP_types){
-        tmp_EM_susie_res <- EM_susie_res[EM_susie_res$type==type,]
-        V_prior[sapply(names(V_prior), function(x){
-          unlist(strsplit(x, "[|]"))[2]})==type] <-
-          sum(tmp_EM_susie_res$susie_pip*tmp_EM_susie_res$mu2)/sum(tmp_EM_susie_res$susie_pip)
+      for (type in nonSNP_types){
+        tmp_EM_ser_res <- EM_ser_res[EM_ser_res$type==type,]
+        if (any(grepl("[|]", names(V_prior)))){
+          type_idx <- which(sapply(names(V_prior), function(x){unlist(strsplit(x, "[|]"))[2]})==type)
+        } else{
+          type_idx <- which(names(V_prior) == type)
+        }
+        V_prior[type_idx] <-
+          sum(tmp_EM_ser_res$susie_pip*tmp_EM_ser_res$mu2)/sum(tmp_EM_ser_res$susie_pip)
       }
     } else if (group_prior_var_structure=="shared_context") {
-      tmp_EM_susie_res <- EM_susie_res[EM_susie_res$group=="SNP",]
-      V_prior["SNP"] <- sum(tmp_EM_susie_res$susie_pip*tmp_EM_susie_res$mu2)/sum(tmp_EM_susie_res$susie_pip)
+      tmp_EM_ser_res <- EM_ser_res[EM_ser_res$group=="SNP",]
+      V_prior["SNP"] <- sum(tmp_EM_ser_res$susie_pip*tmp_EM_ser_res$mu2)/sum(tmp_EM_ser_res$susie_pip)
       nonSNP_contexts <- setdiff(contexts, "SNP")
-      for(context in nonSNP_contexts){
-        tmp_EM_susie_res <- EM_susie_res[EM_susie_res$context==context,]
-        V_prior[sapply(names(V_prior), function(x){
-          unlist(strsplit(x, "[|]"))[1]})==context] <-
-          sum(tmp_EM_susie_res$susie_pip*tmp_EM_susie_res$mu2)/sum(tmp_EM_susie_res$susie_pip)
+      for (context in nonSNP_contexts){
+        tmp_EM_ser_res <- EM_ser_res[EM_ser_res$context==context,]
+        if (any(grepl("[|]", names(V_prior)))){
+          context_idx <- which(sapply(names(V_prior), function(x){unlist(strsplit(x, "[|]"))[1]})==context)
+        } else{
+          context_idx <- which(names(V_prior) == context)
+        }
+        V_prior[context_idx] <-
+          sum(tmp_EM_ser_res$susie_pip*tmp_EM_ser_res$mu2)/sum(tmp_EM_ser_res$susie_pip)
       }
+    } else if (group_prior_var_structure=="fixed") {
+      if (is.null(init_group_prior_var)) {
+        stop("init_group_prior_var is needed when using fixed group_prior_var_structure")
+      }
+      # do not update V_prior
     }
+
     group_prior_var_iters[names(V_prior), iter] <- V_prior
 
     if (verbose){
@@ -150,7 +169,7 @@ fit_EM <- function(
     }
   }
 
-  group_size <- table(EM_susie_res$group)
+  group_size <- table(EM_ser_res$group)
   group_size <- group_size[rownames(group_prior_iters)]
   group_size <- as.numeric(group_size)
   names(group_size) <- rownames(group_prior_iters)
@@ -160,7 +179,7 @@ fit_EM <- function(
               "group_prior_iters" = group_prior_iters,
               "group_prior_var_iters" = group_prior_var_iters,
               "group_prior_var_structure" = group_prior_var_structure,
-              "group_size" = group_size))
+              "group_size" = group_size,
+              "loglik_iters" = loglik_iters))
 }
-
 

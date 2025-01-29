@@ -1,4 +1,4 @@
-#' @title Estimates cTWAS parameters using EM
+#' @title Estimates cTWAS parameters using EM with cTWAS SER model
 #'
 #' @param region_data a list object indexing regions, variants and genes.
 #'
@@ -20,7 +20,7 @@
 #' @param min_p_single_effect Regions with probability greater than \code{min_p_single_effect} of
 #' having at most one causal effect will be used selected for the complete parameter estimation step.
 #'
-#' @param use_null_weight If TRUE, allow for a probability of no effect in susie.
+#' @param null_method Method to compute null model, options: "ctwas", "susie" or "none".
 #'
 #' @param min_var minimum number of variables (SNPs and genes) in a region.
 #'
@@ -50,7 +50,7 @@ est_param <- function(
     niter_prefit = 3,
     niter = 30,
     min_p_single_effect = 0.8,
-    use_null_weight = TRUE,
+    null_method = c("ctwas", "susie", "none"),
     min_var = 2,
     min_gene = 1,
     min_group_size = 100,
@@ -125,15 +125,15 @@ est_param <- function(
   if (length(region_data) == 0){
     stop("No regions selected!")
   }
+
   EM_prefit_res <- fit_EM(region_data,
-                          niter = niter_prefit,
-                          init_group_prior = init_group_prior,
-                          init_group_prior_var = init_group_prior_var,
-                          group_prior_var_structure = group_prior_var_structure,
-                          use_null_weight = use_null_weight,
-                          ncore = ncore,
-                          verbose = verbose,
-                          ...)
+                              niter = niter_prefit,
+                              init_group_prior = init_group_prior,
+                              init_group_prior_var = init_group_prior_var,
+                              group_prior_var_structure = group_prior_var_structure,
+                              null_method = null_method,
+                              ncore = ncore,
+                              verbose = verbose)
   adjusted_EM_prefit_group_prior <- EM_prefit_res$group_prior
   group_size <- EM_prefit_res$group_size
   # adjust thin
@@ -163,15 +163,15 @@ est_param <- function(
   if (length(selected_region_data) == 0){
     stop("No regions selected!")
   }
+
   EM_res <- fit_EM(selected_region_data,
-                   niter = niter,
-                   init_group_prior = EM_prefit_res$group_prior,
-                   init_group_prior_var = EM_prefit_res$group_prior_var,
-                   group_prior_var_structure = group_prior_var_structure,
-                   use_null_weight = use_null_weight,
-                   ncore = ncore,
-                   verbose = verbose,
-                   ...)
+                       niter = niter,
+                       init_group_prior = EM_prefit_res$group_prior,
+                       init_group_prior_var = EM_prefit_res$group_prior_var,
+                       group_prior_var_structure = group_prior_var_structure,
+                       null_method = null_method,
+                       ncore = ncore,
+                       verbose = verbose)
   group_prior <- EM_res$group_prior
   group_prior_var <- EM_res$group_prior_var
   group_prior_var_structure <- EM_res$group_prior_var_structure
@@ -179,6 +179,9 @@ est_param <- function(
   # record estimated parameters from all iterations
   group_prior_iters <- EM_res$group_prior_iters
   group_prior_var_iters <- EM_res$group_prior_var_iters
+
+  # log-likelihood from all iterations
+  loglik_iters <- EM_res$loglik_iters
 
   # adjust parameters to account for thin
   if (thin != 1){
@@ -205,7 +208,8 @@ est_param <- function(
                 "group_prior_var_iters" = group_prior_var_iters,
                 "group_prior_var_structure" = group_prior_var_structure,
                 "group_size" = group_size,
-                "p_single_effect" = p_single_effect_df)
+                "p_single_effect" = p_single_effect_df,
+                "loglik_iters" = loglik_iters)
 
   return(param)
 }

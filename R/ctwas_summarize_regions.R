@@ -11,6 +11,8 @@
 #'
 #' @param min_abs_corr Minimum absolute correlation allowed in a credible set.
 #'
+#' @param null_method Method to compute null model, options: "ctwas", "susie" or "none".
+#'
 #' @param snps_only If TRUE, use only SNPs in the region data.
 #'
 #' @param LD_format file format for LD matrix. If "custom", use a user defined
@@ -38,6 +40,7 @@ estimate_region_L <- function(region_data,
                               weights,
                               init_L = 5,
                               min_abs_corr = 0.1,
+                              null_method = c("ctwas", "susie", "none"),
                               snps_only = FALSE,
                               LD_format = c("rds", "rdata", "mtx", "csv", "txt", "custom"),
                               LD_loader_fun = NULL,
@@ -48,6 +51,7 @@ estimate_region_L <- function(region_data,
 
   # check inputs
   LD_format <- match.arg(LD_format)
+  null_method <- match.arg(null_method)
 
   if (snps_only)
     loginfo("Use SNPs only when estimating L")
@@ -60,6 +64,7 @@ estimate_region_L <- function(region_data,
                          min_abs_corr = min_abs_corr,
                          include_cs = TRUE,
                          get_susie_alpha = FALSE,
+                         null_method = null_method,
                          snps_only = snps_only,
                          LD_format = LD_format,
                          LD_loader_fun = LD_loader_fun,

@@ -47,7 +47,7 @@
 #' @param min_p_single_effect Regions with probability greater than \code{min_p_single_effect} of
 #' having 1 or fewer effects will be used for parameter estimation.
 #'
-#' @param use_null_weight If TRUE, allow for a probability of no effect in susie.
+#' @param null_method Method to compute null model, options: "ctwas", "susie" or "none".
 #'
 #' @param outputdir The directory to store output. If specified, save outputs to the directory.
 #'
@@ -89,7 +89,7 @@ ctwas_sumstats_noLD <- function(
     min_group_size = 100,
     min_nonSNP_PIP = 0.5,
     min_p_single_effect = 0.8,
-    use_null_weight = TRUE,
+    null_method = c("ctwas", "susie", "none"),
     outputdir = NULL,
     outname = "ctwas_noLD",
     ncore = 1,
@@ -107,6 +107,7 @@ ctwas_sumstats_noLD <- function(
 
   # check inputs
   group_prior_var_structure <- match.arg(group_prior_var_structure)
+  null_method <- match.arg(null_method)
 
   if (anyNA(z_snp))
     stop("z_snp contains missing values!")
@@ -181,6 +182,7 @@ ctwas_sumstats_noLD <- function(
                      min_gene = min_gene,
                      min_group_size = min_group_size,
                      min_p_single_effect = min_p_single_effect,
+                     null_method = null_method,
                      ncore = ncore,
                      verbose = verbose)
 
@@ -199,6 +201,7 @@ ctwas_sumstats_noLD <- function(
                                     min_var = min_var,
                                     min_gene = min_gene,
                                     min_nonSNP_PIP = min_nonSNP_PIP,
+                                    null_method = null_method,
                                     ncore = ncore,
                                     verbose = verbose,
                                     ...)
@@ -223,7 +226,7 @@ ctwas_sumstats_noLD <- function(
     res <- finemap_regions_noLD(screened_region_data,
                                 group_prior = group_prior,
                                 group_prior_var = group_prior_var,
-                                use_null_weight = use_null_weight,
+                                null_method = null_method,
                                 ncore = ncore,
                                 verbose = verbose,
                                 ...)
