@@ -250,9 +250,9 @@ finemap_single_region_ser_rss <- function(region_data,
                "At least two variables in a region are needed to run SER model"))
   }
 
-  # update priors, prior variances and null_weight
+  # set priors, prior variances
   res <- set_region_susie_priors(pi_prior, V_prior, gs_group, L = 1,
-                                 use_null_weight = FALSE)
+                                 null_method = "none")
   prior_weights <- res$prior
   prior_variance <- res$V
   rm(res)
@@ -310,9 +310,9 @@ fit_single_region_ser_rss <- function(region_data,
                "At least two variables in a region are needed to run SER model"))
   }
 
-  # update priors, prior variances and null_weight
+  # set priors, prior variances
   res <- set_region_susie_priors(pi_prior, V_prior, gs_group, L = 1,
-                                 use_null_weight = FALSE)
+                                 null_method = "none")
   prior_weights <- res$prior
   prior_variance <- res$V
   rm(res)

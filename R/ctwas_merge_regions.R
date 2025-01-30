@@ -19,6 +19,8 @@
 #'
 #' @param estimate_L If TRUE, estimate L for merged regions.
 #'
+#' @param null_method Method to compute null model, options: "ctwas", "susie" or "none".
+#'
 #' @param expand If TRUE, expand merged region_data with full SNPs
 #'
 #' @param L the number of effects for susie.
@@ -59,6 +61,7 @@ merge_region_data <- function(boundary_genes,
                               z_snp,
                               z_gene,
                               estimate_L = TRUE,
+                              null_method = c("ctwas", "susie", "none"),
                               expand = TRUE,
                               L = 5,
                               maxSNP = Inf,
@@ -73,6 +76,9 @@ merge_region_data <- function(boundary_genes,
   if (!is.null(logfile)){
     addHandler(writeToFile, file= logfile, level='DEBUG')
   }
+
+  LD_format <- match.arg(LD_format)
+  null_method <- match.arg(null_method)
 
   # Identify overlapping regions and get a list of regions to be merged
   loginfo("Identify overlapping regions and create merged snp_map and LD_map.")
@@ -128,6 +134,7 @@ merge_region_data <- function(boundary_genes,
                                          LD_map = merged_LD_map,
                                          weights = weights,
                                          init_L = L,
+                                         null_method = null_method,
                                          LD_format = LD_format,
                                          LD_loader_fun = LD_loader_fun,
                                          snpinfo_loader_fun = snpinfo_loader_fun,

@@ -2,7 +2,7 @@
 % Please edit documentation in R/ctwas_est_parameters.R
 \name{est_param}
 \alias{est_param}
-\title{Estimates cTWAS parameters using EM}
+\title{Estimates cTWAS parameters using EM with cTWAS SER model}
 \usage{
 est_param(
   region_data,
@@ -13,7 +13,7 @@ est_param(
   niter_prefit = 3,
   niter = 30,
   min_p_single_effect = 0.8,
-  use_null_weight = TRUE,
+  null_method = c("ctwas", "susie", "none"),
   min_var = 2,
   min_gene = 1,
   min_group_size = 100,
@@ -44,7 +44,7 @@ est_param(
 \item{min_p_single_effect}{Regions with probability greater than \code{min_p_single_effect} of
 having at most one causal effect will be used selected for the complete parameter estimation step.}
 
-\item{use_null_weight}{If TRUE, allow for a probability of no effect in susie.}
+\item{null_method}{Method to compute null model, options: "ctwas", "susie" or "none".}
 
 \item{min_var}{minimum number of variables (SNPs and genes) in a region.}
 
@@ -64,5 +64,5 @@ having at most one causal effect will be used selected for the complete paramete
 a list with estimated parameters
 }
 \description{
-Estimates cTWAS parameters using EM
+Estimates cTWAS parameters using EM with cTWAS SER model
 }

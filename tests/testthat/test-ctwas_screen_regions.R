@@ -17,6 +17,7 @@ test_that("screen_regions_noLD works", {
                                       group_prior = group_prior,
                                       group_prior_var = group_prior_var,
                                       min_nonSNP_PIP = 0.5,
+                                      null_method = "susie",
                                       ncore = 2)
     screened_region_data <- screen_res$screened_region_data
 
@@ -60,6 +61,7 @@ test_that("screen_regions (filter by L) works", {
                                  group_prior_var = group_prior_var,
                                  filter_L = TRUE,
                                  filter_nonSNP_PIP = FALSE,
+                                 null_method = "susie",
                                  ncore = 2)
     screened_region_data <- screen_res$screened_region_data
 
@@ -107,6 +109,7 @@ test_that("screen_regions (filter by non-SNP PIPs) works", {
                                  filter_L = FALSE,
                                  filter_nonSNP_PIP = TRUE,
                                  min_nonSNP_PIP = 0.5,
+                                 null_method = "susie",
                                  ncore = 2)
     screened_region_data <- screen_res$screened_region_data
 

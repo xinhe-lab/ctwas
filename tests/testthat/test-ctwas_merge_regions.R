@@ -60,6 +60,8 @@ test_that("merge_region_data works", {
                                           weights = weights,
                                           z_snp = z_snp,
                                           z_gene = z_gene,
+                                          estimate_L = TRUE,
+                                          null_method = "susie",
                                           expand = TRUE,
                                           maxSNP = 20000,
                                           ncore = 2)
@@ -70,5 +72,6 @@ test_that("merge_region_data works", {
   expect_equal(merge_region_res$merged_region_info, expected_merge_region_res$merged_region_info)
   expect_equal(merge_region_res$merged_snp_map, expected_merge_region_res$merged_snp_map)
   expect_equal(merge_region_res$merged_region_id_map, expected_merge_region_res$merged_region_id_map)
+  expect_equal(merge_region_res$merged_region_L, expected_merge_region_res$merged_region_L)
 
 })

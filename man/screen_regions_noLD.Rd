@@ -11,6 +11,7 @@ screen_regions_noLD(
   min_var = 2,
   min_gene = 1,
   min_nonSNP_PIP = 0.5,
+  null_method = c("ctwas", "susie", "none"),
   ncore = 1,
   logfile = NULL,
   verbose = FALSE,

@@ -15,8 +15,11 @@ test_that("ctwas_sumstats_noLD works", {
                                      thin = 0.1,
                                      maxSNP = 20000,
                                      min_nonSNP_PIP = 0.5,
+                                     null_method = "susie",
                                      ncore = 2)
   })
+
+  ctwas_res$param$loglik_iters <- NULL
 
   # expect_equal(ctwas_res, expected_ctwas_res)
   expect_equal(ctwas_res$z_gene, expected_ctwas_res$z_gene)

@@ -19,9 +19,11 @@ test_that("ctwas_sumstats works", {
                                 thin = 0.1,
                                 maxSNP = 20000,
                                 min_abs_corr = 0.1,
+                                null_method = "susie",
                                 ncore = 2,
                                 ncore_LD = 2)
   })
+  ctwas_res$param$loglik_iters <- NULL
 
   # expect_equal(ctwas_res, expected_ctwas_res)
   expect_equal(ctwas_res$z_gene, expected_ctwas_res$z_gene)
@@ -57,9 +59,11 @@ test_that("ctwas_sumstats with nonSNP_PIP filtering works", {
                                 filter_nonSNP_PIP = TRUE,
                                 min_nonSNP_PIP = 0.5,
                                 min_abs_corr = 0.1,
+                                null_method = "susie",
                                 ncore = 2,
                                 ncore_LD = 2)
   })
+  ctwas_res$param$loglik_iters <- NULL
 
   # expect_equal(ctwas_res, expected_ctwas_res)
   expect_equal(ctwas_res$z_gene, expected_ctwas_res$z_gene)

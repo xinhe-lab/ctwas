@@ -1,9 +1,9 @@
 # Workflow derived from https://github.com/r-lib/actions/tree/v2/examples
 on:
   push:
-    branches: [main, master, multigroup, multigroup_test]
+    branches: [main, master, multigroup, multigroup_test, multigroup_ser]
   pull_request:
-    branches: [main, master, multigroup, multigroup_test]
+    branches: [main, master, multigroup, multigroup_test, multigroup_ser]
 
 name: R-CMD-check
 

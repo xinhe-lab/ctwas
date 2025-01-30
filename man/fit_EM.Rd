@@ -2,7 +2,7 @@
 % Please edit documentation in R/ctwas_EM.R
 \name{fit_EM}
 \alias{fit_EM}
-\title{Runs EM to estimate parameters.}
+\title{Runs EM to estimate parameters using cTWAS SER model}
 \usage{
 fit_EM(
   region_data,
@@ -13,11 +13,10 @@ fit_EM(
   init_group_prior = NULL,
   init_group_prior_var = NULL,
   group_prior_var_structure = c("shared_type", "shared_context", "shared_nonSNP",
-    "shared_all", "independent"),
-  use_null_weight = TRUE,
+    "shared_all", "independent", "fixed"),
+  null_method = c("ctwas", "susie", "none"),
   ncore = 1,
-  verbose = FALSE,
-  ...
+  verbose = FALSE
 )
 }
 \arguments{
@@ -42,9 +41,9 @@ fit_EM(
 "shared_all" allows all groups to share the same variance parameter.
 "independent" allows all groups to have their own separate variance parameters.}
 
-\item{use_null_weight}{If TRUE, allow for a probability of no effect in susie}
+\item{null_method}{Method to compute null weight, options: "ctwas", "susie" or "none".}
 
-\item{ncore}{The number of cores used to parallelize susie over regions}
+\item{ncore}{The number of cores used to parallelize over regions}
 
 \item{verbose}{If TRUE, print detail messages}
 }
@@ -52,6 +51,6 @@ fit_EM(
 a list of estimated parameters
 }
 \description{
-Runs EM to estimate parameters.
+Runs EM to estimate parameters using cTWAS SER model
 }
 \keyword{internal}

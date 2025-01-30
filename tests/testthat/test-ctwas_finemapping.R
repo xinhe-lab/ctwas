@@ -21,7 +21,8 @@ test_that("finemap_regions_noLD works", {
   capture.output({
     res <- finemap_regions_noLD(region_data = screened_region_data[region_id],
                                 group_prior = group_prior,
-                                group_prior_var = group_prior_var)
+                                group_prior_var = group_prior_var,
+                                null_method = "susie")
     finemap_res <- res$finemap_res
     susie_alpha_res <- res$susie_alpha_res
   })
@@ -62,6 +63,7 @@ test_that("finemap_regions works", {
                            weights = weights,
                            group_prior = group_prior,
                            group_prior_var = group_prior_var,
+                           null_method = "susie",
                            L = screened_region_L[region_id])
     finemap_res <- res$finemap_res
     susie_alpha_res <- res$susie_alpha_res

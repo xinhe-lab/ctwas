@@ -25,7 +25,7 @@ finemap_regions_ser_rss(
 
 \item{min_gene}{minimum number of genes in a region.}
 
-\item{null_method}{Method to compute null weight, options: "ctwas", "susie" or "none".}
+\item{null_method}{Method to compute null model, options: "ctwas", "susie" or "none".}
 
 \item{ncore}{The number of cores used to parallelize over regions.}
 }

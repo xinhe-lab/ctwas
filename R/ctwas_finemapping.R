@@ -86,7 +86,7 @@ finemap_regions <- function(region_data,
 
   # check inputs
   LD_format <- match.arg(LD_format)
-  null_method <- match.org(null_method)
+  null_method <- match.arg(null_method)
 
   if (!inherits(region_data,"list"))
     stop("'region_data' should be a list.")
@@ -231,7 +231,7 @@ finemap_regions_noLD <- function(region_data,
   loginfo("Fine-mapping %d regions without LD ...", length(region_data))
 
   # check inputs
-  null_method <- match.org(null_method)
+  null_method <- match.arg(null_method)
 
   if (!inherits(region_data,"list"))
     stop("'region_data' should be a list!")
@@ -317,7 +317,7 @@ finemap_single_region <- function(region_data,
 
   # check inputs
   LD_format <- match.arg(LD_format)
-  null_method <- match.org(null_method)
+  null_method <- match.arg(null_method)
 
   if (!inherits(region_data,"list"))
     stop("'region_data' should be a list.")
@@ -456,7 +456,7 @@ finemap_single_region_noLD <- function(region_data,
   }
 
   # check inputs
-  null_method <- match.org(null_method)
+  null_method <- match.arg(null_method)
 
   if (!inherits(region_data,"list"))
     stop("'region_data' should be a list.")
@@ -559,7 +559,7 @@ fast_finemap_single_region_L1_noLD <- function(region_data,
                                                null_method = c("ctwas", "susie", "none"),
                                                ...){
   # check inputs
-  null_method <- match.org(null_method)
+  null_method <- match.arg(null_method)
 
   # load region data
   regiondata <- extract_region_data(region_data, region_id)
@@ -644,7 +644,7 @@ finemap_regions_ser_rss <- function(
     ncore = 1){
 
   # check inputs
-  null_method <- match.org(null_method)
+  null_method <- match.arg(null_method)
 
   region_ids <- names(region_data)
   n_gids <- sapply(region_data, function(x){length(x$gid)})
