@@ -634,42 +634,41 @@ fast_finemap_single_region_L1_noLD <- function(region_data,
 #'
 #' @export
 #'
-finemap_regions_ser_rss <- function(
-    region_data,
-    group_prior = NULL,
-    group_prior_var = NULL,
-    min_var = 2,
-    min_gene = 1,
-    null_method = c("ctwas", "susie", "none"),
-    ncore = 1){
+finemap_regions_ser_rss <- function(region_data,
+                                    group_prior = NULL,
+                                    group_prior_var = NULL,
+                                    min_var = 2,
+                                    min_gene = 1,
+                                    null_method = c("ctwas", "susie", "none"),
+                                    ncore = 1){
 
   # check inputs
   null_method <- match.arg(null_method)
 
-  region_ids <- names(region_data)
-  n_gids <- sapply(region_data, function(x){length(x$gid)})
-  n_sids <- sapply(region_data, function(x){length(x$sid)})
-
   # skip regions with fewer than min_var variables
   if (min_var > 0) {
+    region_ids <- names(region_data)
+    n_gids <- sapply(region_data, function(x){length(x$gid)})
+    n_sids <- sapply(region_data, function(x){length(x$sid)})
+
     skip_region_ids <- region_ids[(n_sids + n_gids) < min_var]
     if (length(skip_region_ids) > 0){
       loginfo("Skip %d regions with number of variables < %d", length(skip_region_ids), min_var)
       region_data[skip_region_ids] <- NULL
     }
-  }
 
-  # skip regions with fewer than min_gene genes
-  if (min_gene > 0) {
-    skip_region_ids <- region_ids[n_gids < min_gene]
-    if (length(skip_region_ids) > 0){
-      loginfo("Skip %d regions with number of genes < %d", length(skip_region_ids), min_gene)
-      region_data[skip_region_ids] <- NULL
+    # skip regions with fewer than min_gene genes
+    if (min_gene > 0) {
+      skip_region_ids <- region_ids[n_gids < min_gene]
+      if (length(skip_region_ids) > 0){
+        loginfo("Skip %d regions with number of genes < %d", length(skip_region_ids), min_gene)
+        region_data[skip_region_ids] <- NULL
+      }
     }
   }
 
   if (length(region_data) == 0){
-    stop("No region left for Fine-mapping.")
+    stop("No region data for Fine-mapping.")
   }
 
   loginfo("Fine-mapping %d regions ...", length(region_data))

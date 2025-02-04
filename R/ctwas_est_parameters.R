@@ -47,6 +47,7 @@ est_param <- function(
     init_group_prior = NULL,
     init_group_prior_var = NULL,
     group_prior_var_structure = c("shared_type", "shared_context", "shared_nonSNP", "shared_all", "independent"),
+    shared_group_prior = FALSE,
     niter_prefit = 3,
     niter = 30,
     min_p_single_effect = 0.8,
@@ -127,13 +128,14 @@ est_param <- function(
   }
 
   EM_prefit_res <- fit_EM(region_data,
-                              niter = niter_prefit,
-                              init_group_prior = init_group_prior,
-                              init_group_prior_var = init_group_prior_var,
-                              group_prior_var_structure = group_prior_var_structure,
-                              null_method = null_method,
-                              ncore = ncore,
-                              verbose = verbose)
+                          niter = niter_prefit,
+                          init_group_prior = init_group_prior,
+                          init_group_prior_var = init_group_prior_var,
+                          group_prior_var_structure = group_prior_var_structure,
+                          shared_group_prior = shared_group_prior,
+                          null_method = null_method,
+                          ncore = ncore,
+                          verbose = verbose)
   adjusted_EM_prefit_group_prior <- EM_prefit_res$group_prior
   group_size <- EM_prefit_res$group_size
   # adjust thin
@@ -165,13 +167,14 @@ est_param <- function(
   }
 
   EM_res <- fit_EM(selected_region_data,
-                       niter = niter,
-                       init_group_prior = EM_prefit_res$group_prior,
-                       init_group_prior_var = EM_prefit_res$group_prior_var,
-                       group_prior_var_structure = group_prior_var_structure,
-                       null_method = null_method,
-                       ncore = ncore,
-                       verbose = verbose)
+                   niter = niter,
+                   init_group_prior = EM_prefit_res$group_prior,
+                   init_group_prior_var = EM_prefit_res$group_prior_var,
+                   group_prior_var_structure = group_prior_var_structure,
+                   shared_group_prior = shared_group_prior,
+                   null_method = null_method,
+                   ncore = ncore,
+                   verbose = verbose)
   group_prior <- EM_res$group_prior
   group_prior_var <- EM_res$group_prior_var
   group_prior_var_structure <- EM_res$group_prior_var_structure

@@ -14,6 +14,7 @@ merge_region_data(
   z_snp,
   z_gene,
   estimate_L = TRUE,
+  null_method = c("ctwas", "susie", "none"),
   expand = TRUE,
   L = 5,
   maxSNP = Inf,
@@ -44,6 +45,8 @@ merge_region_data(
 \item{z_gene}{A data frame with columns: "id", "z", giving the z-scores for genes.}
 
 \item{estimate_L}{If TRUE, estimate L for merged regions.}
+
+\item{null_method}{Method to compute null model, options: "ctwas", "susie" or "none".}
 
 \item{expand}{If TRUE, expand merged region_data with full SNPs}
 

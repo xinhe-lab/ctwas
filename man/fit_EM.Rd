@@ -14,6 +14,7 @@ fit_EM(
   init_group_prior_var = NULL,
   group_prior_var_structure = c("shared_type", "shared_context", "shared_nonSNP",
     "shared_all", "independent", "fixed"),
+  shared_group_prior = FALSE,
   null_method = c("ctwas", "susie", "none"),
   ncore = 1,
   verbose = FALSE

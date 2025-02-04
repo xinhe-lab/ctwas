@@ -46,7 +46,8 @@ Imports:
     locuszoomr,
     pgenlibr,
     ensembldb,
-    AnnotationFilter
+    AnnotationFilter,
+    AMR
 Suggests: 
     Rfast,
     enrichR,

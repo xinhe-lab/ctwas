@@ -10,6 +10,7 @@ est_param(
   init_group_prior_var = NULL,
   group_prior_var_structure = c("shared_type", "shared_context", "shared_nonSNP",
     "shared_all", "independent"),
+  shared_group_prior = FALSE,
   niter_prefit = 3,
   niter = 30,
   min_p_single_effect = 0.8,

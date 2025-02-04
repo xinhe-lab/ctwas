@@ -44,6 +44,7 @@ fit_EM <- function(
     init_group_prior = NULL,
     init_group_prior_var = NULL,
     group_prior_var_structure = c("shared_type", "shared_context", "shared_nonSNP", "shared_all", "independent", "fixed"),
+    shared_group_prior = FALSE,
     null_method = c("ctwas", "susie", "none"),
     ncore = 1,
     verbose = FALSE){
@@ -100,7 +101,12 @@ fit_EM <- function(
     rm(all_ser_res_list)
 
     # update estimated group_prior from the current iteration
-    pi_prior <- sapply(names(pi_prior), function(x){mean(EM_ser_res$susie_pip[EM_ser_res$group==x])})
+    if (shared_group_prior) {
+      pi_prior <- sapply(names(pi_prior), function(x){mean(EM_ser_res$susie_pip)})
+    } else{
+      pi_prior <- sapply(names(pi_prior), function(x){mean(EM_ser_res$susie_pip[EM_ser_res$group==x])})
+    }
+
     group_prior_iters[names(pi_prior),iter] <- pi_prior
 
     if (verbose){
