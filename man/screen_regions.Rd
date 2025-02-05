@@ -19,6 +19,7 @@ screen_regions(
   min_nonSNP_PIP = 0.5,
   min_abs_corr = 0.1,
   null_method = c("ctwas", "susie", "none"),
+  null_weight = NULL,
   LD_format = c("rds", "rdata", "mtx", "csv", "txt", "custom"),
   LD_loader_fun = NULL,
   snpinfo_loader_fun = NULL,
@@ -62,6 +63,9 @@ will be selected to run finemapping using full SNPs.}
 \item{min_abs_corr}{Minimum absolute correlation allowed in a credible set.}
 
 \item{null_method}{Method to compute null model, options: "ctwas", "susie" or "none".}
+
+\item{null_weight}{Prior probability of no effect (a number between
+0 and 1, and cannot be exactly 1). Only used when \code{null_method = "susie"}.}
 
 \item{LD_format}{file format for LD matrix. If "custom", use a user defined
 \code{LD_loader_fun()} function to load LD matrix.}

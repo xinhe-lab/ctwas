@@ -15,6 +15,7 @@ est_param(
   niter = 30,
   min_p_single_effect = 0.8,
   null_method = c("ctwas", "susie", "none"),
+  null_weight = NULL,
   min_var = 2,
   min_gene = 1,
   min_group_size = 100,
@@ -46,6 +47,9 @@ est_param(
 having at most one causal effect will be used selected for the complete parameter estimation step.}
 
 \item{null_method}{Method to compute null model, options: "ctwas", "susie" or "none".}
+
+\item{null_weight}{Prior probability of no effect (a number between
+0 and 1, and cannot be exactly 1). Only used when \code{null_method = "susie"}.}
 
 \item{min_var}{minimum number of variables (SNPs and genes) in a region.}
 

@@ -16,6 +16,9 @@
 #'
 #' @param null_method Method to compute null model, options: "ctwas", "susie" or "none".
 #'
+#' @param null_weight Prior probability of no effect (a number between
+#'   0 and 1, and cannot be exactly 1). Only used when \code{null_method = "susie"}.
+#'
 #' @param coverage A number between 0 and 1 specifying the \dQuote{coverage} of the estimated confidence sets
 #'
 #' @param min_abs_corr Minimum absolute correlation allowed in a credible set.
@@ -62,6 +65,7 @@ finemap_regions <- function(region_data,
                             group_prior = NULL,
                             group_prior_var = NULL,
                             null_method = c("ctwas", "susie", "none"),
+                            null_weight = NULL,
                             coverage = 0.95,
                             min_abs_corr = 0.1,
                             include_cs = TRUE,
@@ -153,6 +157,7 @@ finemap_regions <- function(region_data,
                           group_prior = group_prior,
                           group_prior_var = group_prior_var,
                           null_method = null_method,
+                          null_weight = null_weight,
                           coverage = coverage,
                           min_abs_corr = min_abs_corr,
                           include_cs = include_cs,
@@ -194,6 +199,9 @@ finemap_regions <- function(region_data,
 #'
 #' @param null_method Method to compute null model, options: "ctwas", "susie" or "none".
 #'
+#' @param null_weight Prior probability of no effect (a number between
+#'   0 and 1, and cannot be exactly 1). Only used when \code{null_method = "susie"}.
+#'
 #' @param get_susie_alpha If TRUE, get susie alpha matrix from finemapping results.
 #'
 #' @param snps_only If TRUE, use only SNPs in the region data.
@@ -217,6 +225,7 @@ finemap_regions_noLD <- function(region_data,
                                  group_prior = NULL,
                                  group_prior_var = NULL,
                                  null_method = c("ctwas", "susie", "none"),
+                                 null_weight = NULL,
                                  get_susie_alpha = TRUE,
                                  snps_only = FALSE,
                                  ncore = 1,
@@ -268,6 +277,7 @@ finemap_regions_noLD <- function(region_data,
                                group_prior = group_prior,
                                group_prior_var = group_prior_var,
                                null_method = null_method,
+                               null_weight = null_weight,
                                get_susie_alpha = get_susie_alpha,
                                snps_only = snps_only,
                                verbose = verbose,
@@ -297,6 +307,7 @@ finemap_single_region <- function(region_data,
                                   group_prior = NULL,
                                   group_prior_var = NULL,
                                   null_method = c("ctwas", "susie", "none"),
+                                  null_weight = NULL,
                                   coverage = 0.95,
                                   min_abs_corr = 0.1,
                                   include_cs = TRUE,
@@ -371,7 +382,8 @@ finemap_single_region <- function(region_data,
   rm(res)
 
   # set prior and prior variance values for the region
-  res <- set_region_susie_priors(pi_prior, V_prior, gs_group, L = L, null_method = null_method)
+  res <- set_region_susie_priors(pi_prior, V_prior, gs_group, L = L,
+                                 null_method = null_method, null_weight = null_weight)
   prior <- res$prior
   V <- res$V
   null_weight <- res$null_weight
@@ -444,6 +456,7 @@ finemap_single_region_noLD <- function(region_data,
                                        group_prior = NULL,
                                        group_prior_var = NULL,
                                        null_method = c("ctwas", "susie", "none"),
+                                       null_weight = NULL,
                                        coverage = 0.95,
                                        include_cs = TRUE,
                                        get_susie_alpha = TRUE,
@@ -500,7 +513,8 @@ finemap_single_region_noLD <- function(region_data,
   rm(res)
 
   # set prior and prior variance values for the region
-  res <- set_region_susie_priors(pi_prior, V_prior, gs_group, L = 1, null_method = null_method)
+  res <- set_region_susie_priors(pi_prior, V_prior, gs_group, L = 1,
+                                 null_method = null_method, null_weight = null_weight)
   prior <- res$prior
   V <- res$V
   null_weight <- res$null_weight
@@ -557,6 +571,7 @@ fast_finemap_single_region_L1_noLD <- function(region_data,
                                                pi_prior,
                                                V_prior,
                                                null_method = c("ctwas", "susie", "none"),
+                                               null_weight = NULL,
                                                ...){
   # check inputs
   null_method <- match.arg(null_method)
@@ -578,7 +593,8 @@ fast_finemap_single_region_L1_noLD <- function(region_data,
   }
 
   # update priors, prior variances and null_weight
-  res <- set_region_susie_priors(pi_prior, V_prior, gs_group, L = 1, null_method = null_method)
+  res <- set_region_susie_priors(pi_prior, V_prior, gs_group, L = 1,
+                                 null_method = null_method, null_weight = null_weight)
   prior <- res$prior
   V <- res$V
   null_weight <- res$null_weight
@@ -625,6 +641,9 @@ fast_finemap_single_region_L1_noLD <- function(region_data,
 #'
 #' @param null_method Method to compute null model, options: "ctwas", "susie" or "none".
 #'
+#' @param null_weight Prior probability of no effect (a number between
+#'   0 and 1, and cannot be exactly 1). Only used when \code{null_method = "susie"}.
+#'
 #' @param ncore The number of cores used to parallelize over regions.
 #'
 #' @return a data frame of SER result for finemapped regions
@@ -640,6 +659,7 @@ finemap_regions_ser_rss <- function(region_data,
                                     min_var = 2,
                                     min_gene = 1,
                                     null_method = c("ctwas", "susie", "none"),
+                                    null_weight = NULL,
                                     ncore = 1){
 
   # check inputs
@@ -687,6 +707,7 @@ finemap_regions_ser_rss <- function(region_data,
   ser_res_list <- mclapply_check(region_ids, function(region_id){
     finemap_single_region_ser_rss(region_data, region_id, pi_prior, V_prior,
                                   null_method = null_method,
+                                  null_weight = null_weight,
                                   return_full_result = TRUE)
   }, mc.cores = ncore, stop_if_missing = TRUE)
 

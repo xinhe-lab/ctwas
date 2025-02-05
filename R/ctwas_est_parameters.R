@@ -22,6 +22,9 @@
 #'
 #' @param null_method Method to compute null model, options: "ctwas", "susie" or "none".
 #'
+#' @param null_weight Prior probability of no effect (a number between
+#'   0 and 1, and cannot be exactly 1). Only used when \code{null_method = "susie"}.
+#'
 #' @param min_var minimum number of variables (SNPs and genes) in a region.
 #'
 #' @param min_gene minimum number of genes in a region.
@@ -52,6 +55,7 @@ est_param <- function(
     niter = 30,
     min_p_single_effect = 0.8,
     null_method = c("ctwas", "susie", "none"),
+    null_weight = NULL,
     min_var = 2,
     min_gene = 1,
     min_group_size = 100,
@@ -134,6 +138,7 @@ est_param <- function(
                           group_prior_var_structure = group_prior_var_structure,
                           shared_group_prior = shared_group_prior,
                           null_method = null_method,
+                          null_weight = null_weight,
                           ncore = ncore,
                           verbose = verbose)
   adjusted_EM_prefit_group_prior <- EM_prefit_res$group_prior
@@ -173,6 +178,7 @@ est_param <- function(
                    group_prior_var_structure = group_prior_var_structure,
                    shared_group_prior = shared_group_prior,
                    null_method = null_method,
+                   null_weight = null_weight,
                    ncore = ncore,
                    verbose = verbose)
   group_prior <- EM_res$group_prior

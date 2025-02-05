@@ -4,6 +4,7 @@ ctwas_ser_rss <- function(z,
                           prior_weights = NULL,
                           residual_variance = 1,
                           null_method = c("ctwas", "susie", "none"),
+                          null_weight = NULL,
                           normalize_prior = TRUE){
 
   null_method = match.arg(null_method)
@@ -22,7 +23,14 @@ ctwas_ser_rss <- function(z,
     prior_weights = rep(1/p,p)
 
   if (null_method == "susie") {
-    null_weight = max(0, 1 - sum(prior_weights))
+    if (!is.null(null_weight)){
+      if (!is.numeric(null_weight))
+        stop("Null weight must be numeric")
+      if (null_weight < 0 || null_weight >= 1)
+        stop("Null weight must be between 0 and 1")
+    }else{
+      null_weight = max(0, 1 - sum(prior_weights))
+    }
     if (normalize_prior){
       # rescale prior_weights and null_weight, so that they sum to 1
       sum_prior_weights = sum(prior_weights) + null_weight
@@ -90,6 +98,7 @@ ctwas_ser <- function(X, Y,
                       prior_weights = NULL,
                       residual_variance = 1,
                       null_method = c("ctwas", "susie", "none"),
+                      null_weight = NULL,
                       normalize_prior = TRUE){
 
   null_method = match.arg(null_method)
@@ -119,7 +128,14 @@ ctwas_ser <- function(X, Y,
     prior_weights = rep(1/p,p)
 
   if (null_method == "susie") {
-    null_weight = max(0, 1 - sum(prior_weights))
+    if (!is.null(null_weight)){
+      if (!is.numeric(null_weight))
+        stop("Null weight must be numeric")
+      if (null_weight < 0 || null_weight >= 1)
+        stop("Null weight must be between 0 and 1")
+    }else{
+      null_weight = max(0, 1 - sum(prior_weights))
+    }
     if (normalize_prior){
       # rescale prior_weights and null_weight, so that they sum to 1
       sum_prior_weights = sum(prior_weights) + null_weight
@@ -221,6 +237,7 @@ finemap_single_region_ser_rss <- function(region_data,
                                           pi_prior,
                                           V_prior,
                                           null_method = c("ctwas", "susie", "none"),
+                                          null_weight = NULL,
                                           return_full_result = FALSE){
 
 
@@ -261,7 +278,8 @@ finemap_single_region_ser_rss <- function(region_data,
   ser_res <- ctwas_ser_rss(z = z,
                            prior_weights = prior_weights,
                            prior_variance = prior_variance,
-                           null_method = null_method)
+                           null_method = null_method,
+                           null_weight = null_weight)
 
   # annotate SER result
   ser_res_df <- anno_ser_res(ser_res,
@@ -287,7 +305,8 @@ fit_single_region_ser_rss <- function(region_data,
                                       region_id,
                                       pi_prior,
                                       V_prior,
-                                      null_method = c("ctwas", "susie", "none")){
+                                      null_method = c("ctwas", "susie", "none"),
+                                      null_weight = NULL){
 
   null_method <- match.arg(null_method)
 
@@ -321,7 +340,8 @@ fit_single_region_ser_rss <- function(region_data,
   ser_res <- ctwas_ser_rss(z = z,
                            prior_weights = prior_weights,
                            prior_variance = prior_variance,
-                           null_method = null_method)
+                           null_method = null_method,
+                           null_weight = null_weight)
 
   return(ser_res)
 }
@@ -335,6 +355,7 @@ compute_loglik_ser <- function(
     region_data,
     groups,
     null_method = c("ctwas", "susie", "none"),
+    null_weight = NULL,
     ncore = 1,
     verbose = FALSE){
 
@@ -361,6 +382,7 @@ compute_loglik_ser <- function(
   EM_ser_res_list <- mclapply_check(region_ids, function(region_id){
     finemap_single_region_ser_rss(region_data, region_id, pi_prior, V_prior,
                                   null_method = null_method,
+                                  null_weight = null_weight,
                                   return_full_result = TRUE)
   }, mc.cores = ncore, stop_if_missing = TRUE)
 

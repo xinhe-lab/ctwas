@@ -217,7 +217,8 @@ initiate_group_priors <- function(group_prior = NULL, group_prior_var = NULL, gr
 
 # set prior and prior variance values for the region
 set_region_susie_priors <- function(pi_prior, V_prior, gs_group, L,
-                                    null_method = c("ctwas", "susie", "none")){
+                                    null_method = c("ctwas", "susie", "none"),
+                                    null_weight = NULL){
 
   null_method <- match.arg(null_method)
 
@@ -242,7 +243,14 @@ set_region_susie_priors <- function(pi_prior, V_prior, gs_group, L,
   }
 
   if (null_method == "susie"){
-    null_weight <- max(0, 1 - sum(prior))
+    if (!is.null(null_weight)){
+      if (!is.numeric(null_weight))
+        stop("Null weight must be numeric")
+      if (null_weight < 0 || null_weight >= 1)
+        stop("Null weight must be between 0 and 1")
+    }else{
+      null_weight <- max(0, 1 - sum(prior))
+    }
     prior <- prior/(1-null_weight)
   } else if (null_method == "ctwas"){
     null_weight <- 0.5

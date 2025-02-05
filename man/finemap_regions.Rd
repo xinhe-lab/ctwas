@@ -12,6 +12,7 @@ finemap_regions(
   group_prior = NULL,
   group_prior_var = NULL,
   null_method = c("ctwas", "susie", "none"),
+  null_weight = NULL,
   coverage = 0.95,
   min_abs_corr = 0.1,
   include_cs = TRUE,
@@ -45,6 +46,9 @@ If NULL, it will use uniform prior inclusion probabilities.}
 If NULL, it will set prior variance = 50 as the default in \code{susie_rss}.}
 
 \item{null_method}{Method to compute null model, options: "ctwas", "susie" or "none".}
+
+\item{null_weight}{Prior probability of no effect (a number between
+0 and 1, and cannot be exactly 1). Only used when \code{null_method = "susie"}.}
 
 \item{coverage}{A number between 0 and 1 specifying the \dQuote{coverage} of the estimated confidence sets}
 

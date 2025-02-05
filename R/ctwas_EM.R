@@ -23,6 +23,9 @@
 #'
 #' @param null_method Method to compute null weight, options: "ctwas", "susie" or "none".
 #'
+#' @param null_weight Prior probability of no effect (a number between
+#'   0 and 1, and cannot be exactly 1). Only used when \code{null_method = "susie"}.
+#'
 #' @param ncore The number of cores used to parallelize over regions
 #'
 #' @param verbose If TRUE, print detail messages
@@ -46,6 +49,7 @@ fit_EM <- function(
     group_prior_var_structure = c("shared_type", "shared_context", "shared_nonSNP", "shared_all", "independent", "fixed"),
     shared_group_prior = FALSE,
     null_method = c("ctwas", "susie", "none"),
+    null_weight = NULL,
     ncore = 1,
     verbose = FALSE){
 
@@ -91,6 +95,7 @@ fit_EM <- function(
     all_ser_res_list <- mclapply_check(region_ids, function(region_id){
       finemap_single_region_ser_rss(region_data, region_id, pi_prior, V_prior,
                                     null_method = null_method,
+                                    null_weight = null_weight,
                                     return_full_result = TRUE)
     }, mc.cores = ncore, stop_if_missing = TRUE)
 

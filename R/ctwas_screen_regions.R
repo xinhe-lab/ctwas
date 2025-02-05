@@ -34,6 +34,9 @@
 #'
 #' @param null_method Method to compute null model, options: "ctwas", "susie" or "none".
 #'
+#' @param null_weight Prior probability of no effect (a number between
+#'   0 and 1, and cannot be exactly 1). Only used when \code{null_method = "susie"}.
+#'
 #' @param LD_format file format for LD matrix. If "custom", use a user defined
 #' \code{LD_loader_fun()} function to load LD matrix.
 #'
@@ -73,6 +76,7 @@ screen_regions <- function(region_data,
                            min_nonSNP_PIP = 0.5,
                            min_abs_corr = 0.1,
                            null_method = c("ctwas", "susie", "none"),
+                           null_weight = NULL,
                            LD_format = c("rds", "rdata", "mtx", "csv", "txt", "custom"),
                            LD_loader_fun = NULL,
                            snpinfo_loader_fun = NULL,
@@ -155,6 +159,7 @@ screen_regions <- function(region_data,
                                          init_L = L,
                                          min_abs_corr = min_abs_corr,
                                          null_method = null_method,
+                                         null_weight = null_weight,
                                          snps_only = FALSE,
                                          LD_format = LD_format,
                                          LD_loader_fun = LD_loader_fun,
@@ -188,6 +193,7 @@ screen_regions <- function(region_data,
                            include_cs = FALSE,
                            get_susie_alpha = FALSE,
                            null_method = null_method,
+                           null_weight = null_weight,
                            LD_format = LD_format,
                            LD_loader_fun = LD_loader_fun,
                            snpinfo_loader_fun = snpinfo_loader_fun,
@@ -239,6 +245,11 @@ screen_regions <- function(region_data,
 #' regions with total non-SNP PIP >= \code{min_nonSNP_PIP}
 #' will be selected to run finemapping using full SNPs.
 #'
+#' @param null_method Method to compute null model, options: "ctwas", "susie" or "none".
+#'
+#' @param null_weight Prior probability of no effect (a number between
+#'   0 and 1, and cannot be exactly 1). Only used when \code{null_method = "susie"}.
+#'
 #' @param ncore The number of cores used to parallelize susie over regions.
 #'
 #' @param logfile The log filename. If NULL, print log info on screen.
@@ -261,6 +272,7 @@ screen_regions_noLD <- function(region_data,
                                 min_gene = 1,
                                 min_nonSNP_PIP = 0.5,
                                 null_method = c("ctwas", "susie", "none"),
+                                null_weight = NULL,
                                 ncore = 1,
                                 logfile = NULL,
                                 verbose = FALSE,
@@ -331,6 +343,7 @@ screen_regions_noLD <- function(region_data,
                               group_prior = group_prior,
                               group_prior_var = group_prior_var,
                               null_method = null_method,
+                              null_weight = null_weight,
                               get_susie_alpha = FALSE,
                               ncore = ncore,
                               verbose = verbose,

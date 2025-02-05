@@ -21,6 +21,9 @@
 #'
 #' @param null_method Method to compute null model, options: "ctwas", "susie" or "none".
 #'
+#' @param null_weight Prior probability of no effect (a number between
+#'   0 and 1, and cannot be exactly 1). Only used when \code{null_method = "susie"}.
+#'
 #' @param expand If TRUE, expand merged region_data with full SNPs
 #'
 #' @param L the number of effects for susie.
@@ -62,6 +65,7 @@ merge_region_data <- function(boundary_genes,
                               z_gene,
                               estimate_L = TRUE,
                               null_method = c("ctwas", "susie", "none"),
+                              null_weight = NULL,
                               expand = TRUE,
                               L = 5,
                               maxSNP = Inf,
@@ -135,6 +139,7 @@ merge_region_data <- function(boundary_genes,
                                          weights = weights,
                                          init_L = L,
                                          null_method = null_method,
+                                         null_weight = null_weight,
                                          LD_format = LD_format,
                                          LD_loader_fun = LD_loader_fun,
                                          snpinfo_loader_fun = snpinfo_loader_fun,

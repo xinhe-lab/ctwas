@@ -16,6 +16,7 @@ fit_EM(
     "shared_all", "independent", "fixed"),
   shared_group_prior = FALSE,
   null_method = c("ctwas", "susie", "none"),
+  null_weight = NULL,
   ncore = 1,
   verbose = FALSE
 )
@@ -43,6 +44,9 @@ fit_EM(
 "independent" allows all groups to have their own separate variance parameters.}
 
 \item{null_method}{Method to compute null weight, options: "ctwas", "susie" or "none".}
+
+\item{null_weight}{Prior probability of no effect (a number between
+0 and 1, and cannot be exactly 1). Only used when \code{null_method = "susie"}.}
 
 \item{ncore}{The number of cores used to parallelize over regions}
 

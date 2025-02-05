@@ -12,6 +12,7 @@ screen_regions_noLD(
   min_gene = 1,
   min_nonSNP_PIP = 0.5,
   null_method = c("ctwas", "susie", "none"),
+  null_weight = NULL,
   ncore = 1,
   logfile = NULL,
   verbose = FALSE,
@@ -32,6 +33,11 @@ screen_regions_noLD(
 \item{min_nonSNP_PIP}{If screening by non-SNP PIPs,
 regions with total non-SNP PIP >= \code{min_nonSNP_PIP}
 will be selected to run finemapping using full SNPs.}
+
+\item{null_method}{Method to compute null model, options: "ctwas", "susie" or "none".}
+
+\item{null_weight}{Prior probability of no effect (a number between
+0 and 1, and cannot be exactly 1). Only used when \code{null_method = "susie"}.}
 
 \item{ncore}{The number of cores used to parallelize susie over regions.}
 

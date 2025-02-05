@@ -15,6 +15,7 @@ merge_region_data(
   z_gene,
   estimate_L = TRUE,
   null_method = c("ctwas", "susie", "none"),
+  null_weight = NULL,
   expand = TRUE,
   L = 5,
   maxSNP = Inf,
@@ -47,6 +48,9 @@ merge_region_data(
 \item{estimate_L}{If TRUE, estimate L for merged regions.}
 
 \item{null_method}{Method to compute null model, options: "ctwas", "susie" or "none".}
+
+\item{null_weight}{Prior probability of no effect (a number between
+0 and 1, and cannot be exactly 1). Only used when \code{null_method = "susie"}.}
 
 \item{expand}{If TRUE, expand merged region_data with full SNPs}
 

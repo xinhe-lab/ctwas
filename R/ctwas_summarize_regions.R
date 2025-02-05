@@ -13,6 +13,9 @@
 #'
 #' @param null_method Method to compute null model, options: "ctwas", "susie" or "none".
 #'
+#' @param null_weight Prior probability of no effect (a number between
+#'   0 and 1, and cannot be exactly 1). Only used when \code{null_method = "susie"}.
+#'
 #' @param snps_only If TRUE, use only SNPs in the region data.
 #'
 #' @param LD_format file format for LD matrix. If "custom", use a user defined
@@ -41,6 +44,7 @@ estimate_region_L <- function(region_data,
                               init_L = 5,
                               min_abs_corr = 0.1,
                               null_method = c("ctwas", "susie", "none"),
+                              null_weight = NULL,
                               snps_only = FALSE,
                               LD_format = c("rds", "rdata", "mtx", "csv", "txt", "custom"),
                               LD_loader_fun = NULL,
@@ -65,6 +69,7 @@ estimate_region_L <- function(region_data,
                          include_cs = TRUE,
                          get_susie_alpha = FALSE,
                          null_method = null_method,
+                         null_weight = null_weight,
                          snps_only = snps_only,
                          LD_format = LD_format,
                          LD_loader_fun = LD_loader_fun,

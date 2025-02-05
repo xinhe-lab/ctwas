@@ -11,6 +11,7 @@ finemap_regions_ser_rss(
   min_var = 2,
   min_gene = 1,
   null_method = c("ctwas", "susie", "none"),
+  null_weight = NULL,
   ncore = 1
 )
 }
@@ -26,6 +27,9 @@ finemap_regions_ser_rss(
 \item{min_gene}{minimum number of genes in a region.}
 
 \item{null_method}{Method to compute null model, options: "ctwas", "susie" or "none".}
+
+\item{null_weight}{Prior probability of no effect (a number between
+0 and 1, and cannot be exactly 1). Only used when \code{null_method = "susie"}.}
 
 \item{ncore}{The number of cores used to parallelize over regions.}
 }

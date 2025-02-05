@@ -57,6 +57,9 @@
 #'
 #' @param null_method Method to compute null model, options: "ctwas", "susie" or "none".
 #'
+#' @param null_weight Prior probability of no effect (a number between
+#'   0 and 1, and cannot be exactly 1). Only used when \code{null_method = "susie"}.
+#'
 #' @param coverage A number between 0 and 1 specifying the \dQuote{coverage} of
 #' the estimated confidence sets.
 #'
@@ -124,6 +127,7 @@ ctwas_sumstats <- function(
     min_gene = 1,
     min_group_size = 100,
     null_method = c("ctwas", "susie", "none"),
+    null_weight = NULL,
     coverage = 0.95,
     min_abs_corr = 0.1,
     LD_format = c("rds", "rdata", "mtx", "csv", "txt", "custom"),
@@ -234,6 +238,7 @@ ctwas_sumstats <- function(
                      min_group_size = min_group_size,
                      min_p_single_effect = min_p_single_effect,
                      null_method = null_method,
+                     null_weight = null_weight,
                      ncore = ncore,
                      verbose = verbose,
                      ...)
@@ -259,6 +264,7 @@ ctwas_sumstats <- function(
                                min_nonSNP_PIP = min_nonSNP_PIP,
                                min_abs_corr = min_abs_corr,
                                null_method = null_method,
+                               null_weight = null_weight,
                                LD_format = LD_format,
                                LD_loader_fun = LD_loader_fun,
                                snpinfo_loader_fun = snpinfo_loader_fun,
@@ -292,6 +298,7 @@ ctwas_sumstats <- function(
                            group_prior_var = group_prior_var,
                            L = screened_region_L,
                            null_method = null_method,
+                           null_weight = null_weight,
                            coverage = coverage,
                            min_abs_corr = min_abs_corr,
                            force_compute_cor = force_compute_cor,

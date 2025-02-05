@@ -49,6 +49,9 @@
 #'
 #' @param null_method Method to compute null model, options: "ctwas", "susie" or "none".
 #'
+#' @param null_weight Prior probability of no effect (a number between
+#'   0 and 1, and cannot be exactly 1). Only used when \code{null_method = "susie"}.
+#'
 #' @param outputdir The directory to store output. If specified, save outputs to the directory.
 #'
 #' @param outname The output name.
@@ -90,6 +93,7 @@ ctwas_sumstats_noLD <- function(
     min_nonSNP_PIP = 0.5,
     min_p_single_effect = 0.8,
     null_method = c("ctwas", "susie", "none"),
+    null_weight = NULL,
     outputdir = NULL,
     outname = "ctwas_noLD",
     ncore = 1,
@@ -183,6 +187,7 @@ ctwas_sumstats_noLD <- function(
                      min_group_size = min_group_size,
                      min_p_single_effect = min_p_single_effect,
                      null_method = null_method,
+                     null_weight = null_weight,
                      ncore = ncore,
                      verbose = verbose)
 
@@ -202,6 +207,7 @@ ctwas_sumstats_noLD <- function(
                                     min_gene = min_gene,
                                     min_nonSNP_PIP = min_nonSNP_PIP,
                                     null_method = null_method,
+                                    null_weight = null_weight,
                                     ncore = ncore,
                                     verbose = verbose,
                                     ...)
@@ -227,6 +233,7 @@ ctwas_sumstats_noLD <- function(
                                 group_prior = group_prior,
                                 group_prior_var = group_prior_var,
                                 null_method = null_method,
+                                null_weight = null_weight,
                                 ncore = ncore,
                                 verbose = verbose,
                                 ...)
