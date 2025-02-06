@@ -87,7 +87,7 @@ get_enrichment_se_LRT <- function(region_data,
   # compute loglik under the null
   EM_null_res <- fit_EM(region_data,
                         niter = niter,
-                        init_group_prior = group_prior,
+                        init_group_prior = NULL,
                         init_group_prior_var = group_prior_var,
                         group_prior_var_structure = "fixed",
                         shared_group_prior = TRUE,
@@ -106,7 +106,8 @@ get_enrichment_se_LRT <- function(region_data,
   }
 
   # compute S.E. using asymptotic test based on LRT
-  enrichment.se <- sqrt( enrichment^2 / (2 * (loglik - loglik_null)) )
+  LR <- 2*(loglik - loglik_null)
+  enrichment.se <- sqrt(enrichment^2 / abs(LR))
 
   # p-value of enrichment
   enrichment.z <- (enrichment - enrichment_null) / enrichment.se
