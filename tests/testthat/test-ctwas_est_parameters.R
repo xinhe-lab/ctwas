@@ -14,7 +14,7 @@ test_that("est_param works", {
   })
   param$loglik_iters <- NULL
   param$enrichment <- NULL
-  param$enrichment.se <- NULL
-  param$enrichment.pval <- NULL
+  param$enrichment_se <- NULL
+  param$enrichment_pval <- NULL
   expect_equal(param, expected_param)
 })

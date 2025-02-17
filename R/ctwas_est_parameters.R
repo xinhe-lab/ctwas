@@ -230,8 +230,8 @@ est_param <- function(
                 "p_single_effect" = p_single_effect_df,
                 "loglik_iters" = loglik_iters,
                 "enrichment" = enrichment_res$enrichment,
-                "enrichment.se" = enrichment_res$se,
-                "enrichment.pval" = enrichment_res$p.value)
+                "enrichment_se" = enrichment_res$se,
+                "enrichment_pval" = enrichment_res$p.value)
 
   return(param)
 }
