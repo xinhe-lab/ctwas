@@ -15,10 +15,10 @@
 #' @param init_group_prior_var a vector of initial prior variances for SNPs and gene effects.
 #'
 #' @param group_prior_var_structure a string indicating the structure to put on the prior variance parameters.
+#' "shared_all" allows all groups to share the same variance parameter.
 #' "shared_type" allows all groups in one molecular QTL type to share the same variance parameter.
 #' "shared_context" allows all groups in one context (tissue, cell type, condition) to share the same variance parameter.
 #' "shared_nonSNP" allows all non-SNP groups to share the same variance parameter.
-#' "shared_all" allows all groups to share the same variance parameter.
 #' "independent" allows all groups to have their own separate variance parameters.
 #'
 #' @param null_method Method to compute null weight, options: "ctwas", "susie" or "none".
@@ -46,7 +46,7 @@ fit_EM <- function(
     niter = 20,
     init_group_prior = NULL,
     init_group_prior_var = NULL,
-    group_prior_var_structure = c("shared_type", "shared_context", "shared_nonSNP", "shared_all", "independent", "fixed"),
+    group_prior_var_structure = c("shared_all", "shared_type", "shared_context", "shared_nonSNP", "independent", "fixed"),
     shared_group_prior = FALSE,
     null_method = c("ctwas", "susie", "none"),
     null_weight = NULL,
@@ -181,9 +181,9 @@ fit_EM <- function(
   }
 
   group_size <- table(EM_ser_res$group)
-  group_size <- group_size[rownames(group_prior_iters)]
+  group_size <- group_size[groups]
   group_size <- as.numeric(group_size)
-  names(group_size) <- rownames(group_prior_iters)
+  names(group_size) <- groups
 
   return(list("group_prior"= pi_prior,
               "group_prior_var" = V_prior,

@@ -12,6 +12,7 @@ test_that("ctwas_sumstats_noLD works", {
                                      weights,
                                      region_info,
                                      snp_map,
+                                     group_prior_var_structure = "shared_type",
                                      thin = 0.1,
                                      maxSNP = 20000,
                                      min_nonSNP_PIP = 0.5,
@@ -20,6 +21,9 @@ test_that("ctwas_sumstats_noLD works", {
   })
 
   ctwas_res$param$loglik_iters <- NULL
+  ctwas_res$param$enrichment <- NULL
+  ctwas_res$param$enrichment.se <- NULL
+  ctwas_res$param$enrichment.pval <- NULL
 
   # expect_equal(ctwas_res, expected_ctwas_res)
   expect_equal(ctwas_res$z_gene, expected_ctwas_res$z_gene)

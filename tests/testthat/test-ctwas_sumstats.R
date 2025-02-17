@@ -16,6 +16,7 @@ test_that("ctwas_sumstats works", {
                                 region_info,
                                 LD_map,
                                 snp_map,
+                                group_prior_var_structure = "shared_type",
                                 thin = 0.1,
                                 maxSNP = 20000,
                                 min_abs_corr = 0.1,
@@ -24,6 +25,9 @@ test_that("ctwas_sumstats works", {
                                 ncore_LD = 2)
   })
   ctwas_res$param$loglik_iters <- NULL
+  ctwas_res$param$enrichment <- NULL
+  ctwas_res$param$enrichment.se <- NULL
+  ctwas_res$param$enrichment.pval <- NULL
 
   # expect_equal(ctwas_res, expected_ctwas_res)
   expect_equal(ctwas_res$z_gene, expected_ctwas_res$z_gene)
@@ -53,6 +57,7 @@ test_that("ctwas_sumstats with nonSNP_PIP filtering works", {
                                 region_info,
                                 LD_map,
                                 snp_map,
+                                group_prior_var_structure = "shared_type",
                                 thin = 0.1,
                                 maxSNP = 20000,
                                 filter_L = FALSE,
@@ -64,6 +69,9 @@ test_that("ctwas_sumstats with nonSNP_PIP filtering works", {
                                 ncore_LD = 2)
   })
   ctwas_res$param$loglik_iters <- NULL
+  ctwas_res$param$enrichment <- NULL
+  ctwas_res$param$enrichment.se <- NULL
+  ctwas_res$param$enrichment.pval <- NULL
 
   # expect_equal(ctwas_res, expected_ctwas_res)
   expect_equal(ctwas_res$z_gene, expected_ctwas_res$z_gene)

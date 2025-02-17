@@ -12,8 +12,8 @@ fit_EM(
   niter = 20,
   init_group_prior = NULL,
   init_group_prior_var = NULL,
-  group_prior_var_structure = c("shared_type", "shared_context", "shared_nonSNP",
-    "shared_all", "independent", "fixed"),
+  group_prior_var_structure = c("shared_all", "shared_type", "shared_context",
+    "shared_nonSNP", "independent", "fixed"),
   shared_group_prior = FALSE,
   null_method = c("ctwas", "susie", "none"),
   null_weight = NULL,
@@ -37,10 +37,10 @@ fit_EM(
 \item{init_group_prior_var}{a vector of initial prior variances for SNPs and gene effects.}
 
 \item{group_prior_var_structure}{a string indicating the structure to put on the prior variance parameters.
+"shared_all" allows all groups to share the same variance parameter.
 "shared_type" allows all groups in one molecular QTL type to share the same variance parameter.
 "shared_context" allows all groups in one context (tissue, cell type, condition) to share the same variance parameter.
 "shared_nonSNP" allows all non-SNP groups to share the same variance parameter.
-"shared_all" allows all groups to share the same variance parameter.
 "independent" allows all groups to have their own separate variance parameters.}
 
 \item{null_method}{Method to compute null weight, options: "ctwas", "susie" or "none".}

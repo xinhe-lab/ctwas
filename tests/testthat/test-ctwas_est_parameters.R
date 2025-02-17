@@ -8,10 +8,13 @@ test_that("est_param works", {
     param <- est_param(region_data,
                        niter_prefit = 3,
                        niter = 30,
+                       group_prior_var_structure = "shared_type",
                        null_method = "susie",
                        ncore = 2)
   })
   param$loglik_iters <- NULL
-
+  param$enrichment <- NULL
+  param$enrichment.se <- NULL
+  param$enrichment.pval <- NULL
   expect_equal(param, expected_param)
 })
