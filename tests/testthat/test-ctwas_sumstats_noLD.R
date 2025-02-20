@@ -24,6 +24,7 @@ test_that("ctwas_sumstats_noLD works", {
   ctwas_res$param$enrichment <- NULL
   ctwas_res$param$enrichment_se <- NULL
   ctwas_res$param$enrichment_pval <- NULL
+  ctwas_res$param$enrichment_test_res <- NULL
 
   # expect_equal(ctwas_res, expected_ctwas_res)
   expect_equal(ctwas_res$z_gene, expected_ctwas_res$z_gene)
