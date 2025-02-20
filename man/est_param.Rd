@@ -9,13 +9,14 @@ est_param(
   init_group_prior = NULL,
   init_group_prior_var = NULL,
   group_prior_var_structure = c("shared_all", "shared_type", "shared_context",
-    "shared_nonSNP", "independent"),
+    "shared_nonSNP", "independent", "fixed"),
   shared_group_prior = FALSE,
   niter_prefit = 3,
   niter = 30,
   min_p_single_effect = 0.8,
   null_method = c("ctwas", "susie", "none"),
   null_weight = NULL,
+  enrichment_test = c("G", "fisher"),
   min_var = 2,
   min_gene = 1,
   min_group_size = 100,
@@ -37,7 +38,8 @@ est_param(
 "shared_type" allows all groups in one molecular QTL type to share the same variance parameter.
 "shared_context" allows all groups in one context (tissue, cell type, condition) to share the same variance parameter.
 "shared_nonSNP" allows all non-SNP groups to share the same variance parameter.
-"independent" allows all groups to have their own separate variance parameters.}
+"independent" allows all groups to have their own separate variance parameters.
+"fixed" fixes variance parameters to values in \code{init_group_prior_var}.}
 
 \item{niter_prefit}{the number of iterations of the E-M algorithm to perform during the initial parameter estimation step.}
 

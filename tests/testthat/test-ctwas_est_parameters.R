@@ -16,5 +16,7 @@ test_that("est_param works", {
   param$enrichment <- NULL
   param$enrichment_se <- NULL
   param$enrichment_pval <- NULL
+  param$enrichment_test_res <- NULL
+
   expect_equal(param, expected_param)
 })

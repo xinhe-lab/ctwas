@@ -12,6 +12,7 @@
 #' "shared_context" allows all groups in one context (tissue, cell type, condition) to share the same variance parameter.
 #' "shared_nonSNP" allows all non-SNP groups to share the same variance parameter.
 #' "independent" allows all groups to have their own separate variance parameters.
+#' "fixed" fixes variance parameters to values in \code{init_group_prior_var}.
 #'
 #' @param niter_prefit the number of iterations of the E-M algorithm to perform during the initial parameter estimation step.
 #'
@@ -49,13 +50,14 @@ est_param <- function(
     region_data,
     init_group_prior = NULL,
     init_group_prior_var = NULL,
-    group_prior_var_structure = c("shared_all", "shared_type", "shared_context", "shared_nonSNP", "independent"),
+    group_prior_var_structure = c("shared_all", "shared_type", "shared_context", "shared_nonSNP", "independent", "fixed"),
     shared_group_prior = FALSE,
     niter_prefit = 3,
     niter = 30,
     min_p_single_effect = 0.8,
     null_method = c("ctwas", "susie", "none"),
     null_weight = NULL,
+    enrichment_test = c("G", "fisher"),
     min_var = 2,
     min_gene = 1,
     min_group_size = 100,
@@ -72,6 +74,7 @@ est_param <- function(
 
   # check inputs
   group_prior_var_structure <- match.arg(group_prior_var_structure)
+  enrichment_test <- match.arg(enrichment_test)
 
   if (!inherits(region_data,"list"))
     stop("'region_data' should be a list.")
@@ -211,11 +214,12 @@ est_param <- function(
   }
 
   # Enrichment, S.E. and G-test using estimated group_prior and group_prior_var
-  enrichment_res <- get_enrichment_se_Gtest(selected_region_data,
-                                            group_prior,
-                                            group_prior_var,
-                                            null_method = null_method,
-                                            ncore = ncore)
+  enrichment_res <- get_enrichment_se_test(selected_region_data,
+                                           group_prior,
+                                           group_prior_var,
+                                           null_method = null_method,
+                                           enrichment_test = enrichment_test,
+                                           ncore = ncore)
 
   loginfo("Estimated enrichment (log scale) {%s}: {%s}",
           names(enrichment_res$enrichment),
@@ -231,7 +235,8 @@ est_param <- function(
                 "loglik_iters" = loglik_iters,
                 "enrichment" = enrichment_res$enrichment,
                 "enrichment_se" = enrichment_res$se,
-                "enrichment_pval" = enrichment_res$p.value)
+                "enrichment_pval" = enrichment_res$p.value,
+                "enrichment_test_res" = enrichment_res$test_res)
 
   return(param)
 }
@@ -256,11 +261,14 @@ est_param <- function(
 #' @importFrom parallel mclapply
 #' @importFrom AMR g.test
 #'
-get_enrichment_se_Gtest <- function(region_data,
-                                    group_prior,
-                                    group_prior_var,
-                                    null_method = c("ctwas", "susie", "none"),
-                                    ncore = 1){
+get_enrichment_se_test <- function(region_data,
+                                   group_prior,
+                                   group_prior_var,
+                                   null_method = c("ctwas", "susie", "none"),
+                                   enrichment_test = c("G", "fisher"),
+                                   ncore = 1){
+
+  enrichment_test <- match.arg(enrichment_test)
 
   groups <- names(group_prior)
 
@@ -313,63 +321,21 @@ get_enrichment_se_Gtest <- function(region_data,
     colnames(obs) <- c("r", "k")
     rownames(obs) <- c(group, "SNP")
 
-    # evaluate statistical significance of enrichment using the G-test
-    suppressWarnings(G_test_res <- g.test(obs))
+    if (enrichment_test == "G"){
+      # evaluate statistical significance of enrichment using the G-test
+      test_res <- g.test(obs)
+      enrichment.pval[group] <- test_res$p.value
+    } else if (enrichment_test == "fisher"){
+      test_res <- fisher.test(round(obs))
+      enrichment.pval[group] <- test_res$p.value
+    }
 
-    enrichment.pval[group] <- G_test_res$p.value
   }
 
   return(list("enrichment" = enrichment,
               "se" = enrichment.se,
-              "p.value" = enrichment.pval))
-}
-
-#' Compute standard error and p-value using the G test for the SER result
-get_enrichment_se_Gtest_from_ser_res <- function(ser_res_df, groups){
-
-  group_pip <- sapply(groups, function(x){sum(ser_res_df$susie_pip[ser_res_df$group==x])})
-  names(group_pip) <- groups
-
-  group_size <- table(ser_res_df$group)
-  group_size <- group_size[groups]
-  group_size <- as.numeric(group_size)
-  names(group_size) <- groups
-
-  gene_groups <- setdiff(groups, "SNP")
-
-  enrichment <- rep(NA, length(gene_groups))
-  names(enrichment) <- gene_groups
-  enrichment.se <- rep(NA, length(gene_groups))
-  names(enrichment.se) <- gene_groups
-  enrichment.pval <- rep(NA, length(gene_groups))
-  names(enrichment.pval) <- gene_groups
-
-  for(group in gene_groups){
-    k0 <- group_size["SNP"]
-    k1 <- group_size[group]
-
-    r0 <- group_pip["SNP"]
-    r1 <- group_pip[group]
-
-    # enrichment: relative risk estimate in a 2 × 2 contingency table
-    enrichment[group] <- log((r1 * k0) / (r0 * k1))
-
-    # standard error: standard error of a relative risk
-    enrichment.se[group] <- sqrt(1/r1 + 1/r0 - 1/k1 - 1/k0)
-
-    obs <- rbind(c(r1, k1),
-                 c(r0, k0))
-    colnames(obs) <- c("r", "k")
-    rownames(obs) <- c(group, "SNP")
-
-    # evaluate statistical significance of enrichment using the G-test
-    suppressWarnings(G_test_res <- g.test(obs))
-    enrichment.pval[group] <- G_test_res$p.value
-  }
-
-  return(list("enrichment" = enrichment,
-              "se" = enrichment.se,
-              "p.value" = enrichment.pval))
+              "p.value" = enrichment.pval,
+              "test_res" = test_res))
 }
 
 # Compute standard error and p-value for enrichment using
