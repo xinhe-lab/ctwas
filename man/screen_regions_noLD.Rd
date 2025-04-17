@@ -2,7 +2,7 @@
 % Please edit documentation in R/ctwas_screen_regions.R
 \name{screen_regions_noLD}
 \alias{screen_regions_noLD}
-\title{Screens regions with strong signals without using LD (L=1).}
+\title{Screens regions with strong signals without using LD}
 \usage{
 screen_regions_noLD(
   region_data,
@@ -15,8 +15,7 @@ screen_regions_noLD(
   null_weight = NULL,
   ncore = 1,
   logfile = NULL,
-  verbose = FALSE,
-  ...
+  verbose = FALSE
 )
 }
 \arguments{
@@ -44,13 +43,11 @@ will be selected to run finemapping using full SNPs.}
 \item{logfile}{The log filename. If NULL, print log info on screen.}
 
 \item{verbose}{If TRUE, print detail messages.}
-
-\item{...}{Additional arguments of \code{susie_rss}.}
 }
 \value{
 a list, containing a data frame of selected region data,
 and a data frame of screening summary for all regions.
 }
 \description{
-Screens regions with strong signals without using LD (L=1).
+Screens regions with strong signals without using LD
 }

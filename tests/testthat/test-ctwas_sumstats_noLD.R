@@ -17,14 +17,9 @@ test_that("ctwas_sumstats_noLD works", {
                                      maxSNP = 20000,
                                      min_nonSNP_PIP = 0.5,
                                      null_method = "susie",
-                                     ncore = 2)
+                                     include_enrichment_test = FALSE,
+                                     ncore = 1)
   })
-
-  ctwas_res$param$loglik_iters <- NULL
-  ctwas_res$param$enrichment <- NULL
-  ctwas_res$param$enrichment_se <- NULL
-  ctwas_res$param$enrichment_pval <- NULL
-  ctwas_res$param$enrichment_test_res <- NULL
 
   # expect_equal(ctwas_res, expected_ctwas_res)
   expect_equal(ctwas_res$z_gene, expected_ctwas_res$z_gene)

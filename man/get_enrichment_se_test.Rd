@@ -9,7 +9,7 @@ get_enrichment_se_test(
   group_prior,
   group_prior_var,
   null_method = c("ctwas", "susie", "none"),
-  enrichment_test_method = c("G", "fisher"),
+  enrichment_test = c("G", "fisher"),
   ncore = 1
 )
 }
@@ -22,7 +22,7 @@ get_enrichment_se_test(
 
 \item{null_method}{Method to compute null model, options: "ctwas", "susie" or "none".}
 
-\item{enrichment_test_method}{Method to test enrichment,
+\item{enrichment_test}{Method to test enrichment,
 options: "G" (G-test), "fisher" (Fisher's exact test).}
 
 \item{ncore}{The number of cores used to parallelize over regions}

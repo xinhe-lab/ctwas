@@ -32,9 +32,7 @@
 #' "shared_nonSNP" allows all non-SNP groups to share the same variance parameter.
 #' "independent" allows all groups to have their own separate variance parameters.
 #'
-#' @param filter_L If TRUE, screening regions with L > 0.
-#'
-#' @param filter_nonSNP_PIP If TRUE, screening regions with total non-SNP PIP >= \code{min_nonSNP_PIP}.
+#' @param screen_L1 If TRUE, screens regions with L = 1.
 #'
 #' @param min_nonSNP_PIP Regions with non-SNP PIP >= \code{min_nonSNP_PIP}
 #' will be selected to run finemapping using all SNPs.
@@ -118,8 +116,7 @@ ctwas_sumstats <- function(
     init_group_prior = NULL,
     init_group_prior_var = NULL,
     group_prior_var_structure = c("shared_all", "shared_type", "shared_context", "shared_nonSNP", "independent"),
-    filter_L = TRUE,
-    filter_nonSNP_PIP = FALSE,
+    screen_L1 = TRUE,
     min_nonSNP_PIP = 0.5,
     min_p_single_effect = 0.8,
     maxSNP = Inf,
@@ -128,6 +125,9 @@ ctwas_sumstats <- function(
     min_group_size = 100,
     null_method = c("ctwas", "susie", "none"),
     null_weight = NULL,
+    include_enrichment_test = TRUE,
+    enrichment_test = c("G", "fisher"),
+    include_loglik = FALSE,
     coverage = 0.95,
     min_abs_corr = 0.1,
     LD_format = c("rds", "rdata", "mtx", "csv", "txt", "custom"),
@@ -149,13 +149,14 @@ ctwas_sumstats <- function(
     addHandler(writeToFile, file=logfile, level='DEBUG')
   }
 
-  loginfo("Running cTWAS analysis ...")
+  loginfo("Running cTWAS ...")
   loginfo("ctwas version: %s", packageVersion("ctwas"))
 
   # check inputs
   group_prior_var_structure <- match.arg(group_prior_var_structure)
   LD_format <- match.arg(LD_format)
   null_method <- match.arg(null_method)
+  enrichment_test <- match.arg(enrichment_test)
 
   if (anyNA(z_snp))
     stop("z_snp contains missing values!")
@@ -226,7 +227,7 @@ ctwas_sumstats <- function(
 
   # Estimate parameters
   #. get region_data for all the regions
-  #. run EM for two rounds with thinned SNPs using L = 1
+  #. run EM for two rounds using the SER model (L = 1)
   param <- est_param(region_data,
                      init_group_prior = init_group_prior,
                      init_group_prior_var = init_group_prior_var,
@@ -239,6 +240,9 @@ ctwas_sumstats <- function(
                      min_p_single_effect = min_p_single_effect,
                      null_method = null_method,
                      null_weight = null_weight,
+                     include_enrichment_test = include_enrichment_test,
+                     enrichment_test = enrichment_test,
+                     include_loglik = include_loglik,
                      ncore = ncore,
                      verbose = verbose,
                      ...)
@@ -249,30 +253,44 @@ ctwas_sumstats <- function(
   }
 
   # Screen regions
-  #. fine-map all regions with thinned SNPs
-  #. select regions with L > 0 or with high non-SNP PIP
-  screen_res <- screen_regions(region_data,
-                               LD_map = LD_map,
-                               weights = weights,
-                               group_prior = group_prior,
-                               group_prior_var = group_prior_var,
-                               L = L,
-                               min_var = min_var,
-                               min_gene = min_gene,
-                               filter_L = filter_L,
-                               filter_nonSNP_PIP = filter_nonSNP_PIP,
-                               min_nonSNP_PIP = min_nonSNP_PIP,
-                               min_abs_corr = min_abs_corr,
-                               null_method = null_method,
-                               null_weight = null_weight,
-                               LD_format = LD_format,
-                               LD_loader_fun = LD_loader_fun,
-                               snpinfo_loader_fun = snpinfo_loader_fun,
-                               ncore = ncore_LD,
-                               verbose = verbose,
-                               ...)
+  if (screen_L1 || L == 1){
+    #. fine-map all regions without LD (using SER model, L = 1)
+    #. select regions with strong non-SNP signals
+    screen_res <- screen_regions_noLD(region_data,
+                                      group_prior = group_prior,
+                                      group_prior_var = group_prior_var,
+                                      min_var = min_var,
+                                      min_gene = min_gene,
+                                      min_nonSNP_PIP = min_nonSNP_PIP,
+                                      null_method = null_method,
+                                      null_weight = null_weight,
+                                      ncore = ncore,
+                                      verbose = verbose)
+  } else{
+    #. fine-map all regions with LD
+    #. select regions with strong non-SNP signals
+    screen_res <- screen_regions(region_data,
+                                 LD_map = LD_map,
+                                 weights = weights,
+                                 group_prior = group_prior,
+                                 group_prior_var = group_prior_var,
+                                 L = L,
+                                 min_var = min_var,
+                                 min_gene = min_gene,
+                                 filter_L = FALSE,
+                                 filter_nonSNP_PIP = TRUE,
+                                 min_nonSNP_PIP = min_nonSNP_PIP,
+                                 min_abs_corr = min_abs_corr,
+                                 null_method = null_method,
+                                 null_weight = null_weight,
+                                 LD_format = LD_format,
+                                 LD_loader_fun = LD_loader_fun,
+                                 snpinfo_loader_fun = snpinfo_loader_fun,
+                                 ncore = ncore_LD,
+                                 verbose = verbose,
+                                 ...)
+  }
   screened_region_data <- screen_res$screened_region_data
-  screened_region_L <- screen_res$screened_region_L
 
   # expand selected regions with all SNPs
   if (thin < 1){
@@ -296,7 +314,7 @@ ctwas_sumstats <- function(
                            weights = weights,
                            group_prior = group_prior,
                            group_prior_var = group_prior_var,
-                           L = screened_region_L,
+                           L = L,
                            null_method = null_method,
                            null_weight = null_weight,
                            coverage = coverage,

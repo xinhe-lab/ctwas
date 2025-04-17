@@ -28,7 +28,7 @@
 #'
 #' @param include_enrichment_test If TRUE, includes enrichment test result.
 #'
-#' @param enrichment_test_method Method to test enrichment,
+#' @param enrichment_test Method to test enrichment,
 #' options: "G" (G-test), "fisher" (Fisher's exact test).
 #' Only used when \code{test_enrichment = TRUE}.
 #'
@@ -66,7 +66,7 @@ est_param <- function(
     null_method = c("ctwas", "susie", "none"),
     null_weight = NULL,
     include_enrichment_test = TRUE,
-    enrichment_test_method = c("G", "fisher", "none"),
+    enrichment_test = c("G", "fisher"),
     include_loglik = FALSE,
     min_var = 2,
     min_gene = 1,
@@ -84,7 +84,7 @@ est_param <- function(
 
   # check inputs
   group_prior_var_structure <- match.arg(group_prior_var_structure)
-  enrichment_test_method <- match.arg(enrichment_test_method)
+  enrichment_test <- match.arg(enrichment_test)
 
   if (!inherits(region_data,"list"))
     stop("'region_data' should be a list.")
@@ -236,7 +236,7 @@ est_param <- function(
                                              group_prior,
                                              group_prior_var,
                                              null_method = null_method,
-                                             enrichment_test_method = enrichment_test_method,
+                                             enrichment_test = enrichment_test,
                                              ncore = ncore)
 
     loginfo("Estimated enrichment (log scale) {%s}: {%s}",
@@ -268,7 +268,7 @@ est_param <- function(
 #'
 #' @param null_method Method to compute null model, options: "ctwas", "susie" or "none".
 #'
-#' @param enrichment_test_method Method to test enrichment,
+#' @param enrichment_test Method to test enrichment,
 #' options: "G" (G-test), "fisher" (Fisher's exact test).
 #'
 #' @param ncore The number of cores used to parallelize over regions
@@ -284,10 +284,10 @@ get_enrichment_se_test <- function(region_data,
                                    group_prior,
                                    group_prior_var,
                                    null_method = c("ctwas", "susie", "none"),
-                                   enrichment_test_method = c("G", "fisher"),
+                                   enrichment_test = c("G", "fisher"),
                                    ncore = 1){
 
-  enrichment_test_method <- match.arg(enrichment_test_method)
+  enrichment_test <- match.arg(enrichment_test)
 
   groups <- names(group_prior)
 
@@ -340,11 +340,11 @@ get_enrichment_se_test <- function(region_data,
     colnames(obs) <- c("r", "k")
     rownames(obs) <- c(group, "SNP")
 
-    if (enrichment_test_method == "G"){
+    if (enrichment_test == "G"){
       # evaluate statistical significance of enrichment using the G-test
       test_res <- g.test(obs)
       enrichment.pval[group] <- test_res$p.value
-    } else if (enrichment_test_method == "fisher"){
+    } else if (enrichment_test == "fisher"){
       # evaluate statistical significance of enrichment using the Fisher-test
       test_res <- fisher.test(round(obs))
       enrichment.pval[group] <- test_res$p.value

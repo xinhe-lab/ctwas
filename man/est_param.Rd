@@ -17,7 +17,7 @@ est_param(
   null_method = c("ctwas", "susie", "none"),
   null_weight = NULL,
   include_enrichment_test = TRUE,
-  enrichment_test_method = c("G", "fisher", "none"),
+  enrichment_test = c("G", "fisher"),
   include_loglik = FALSE,
   min_var = 2,
   min_gene = 1,
@@ -57,7 +57,7 @@ having at most one causal effect will be used selected for the complete paramete
 
 \item{include_enrichment_test}{If TRUE, includes enrichment test result.}
 
-\item{enrichment_test_method}{Method to test enrichment,
+\item{enrichment_test}{Method to test enrichment,
 options: "G" (G-test), "fisher" (Fisher's exact test).
 Only used when \code{test_enrichment = TRUE}.}
 

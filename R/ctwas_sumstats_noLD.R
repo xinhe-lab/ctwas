@@ -94,6 +94,9 @@ ctwas_sumstats_noLD <- function(
     min_p_single_effect = 0.8,
     null_method = c("ctwas", "susie", "none"),
     null_weight = NULL,
+    include_enrichment_test = TRUE,
+    enrichment_test = c("G", "fisher"),
+    include_loglik = FALSE,
     outputdir = NULL,
     outname = "ctwas_noLD",
     ncore = 1,
@@ -106,12 +109,13 @@ ctwas_sumstats_noLD <- function(
     addHandler(writeToFile, file=logfile, level='DEBUG')
   }
 
-  loginfo("Running cTWAS analysis without LD ...")
+  loginfo("Running cTWAS without LD ...")
   loginfo("ctwas version: %s", packageVersion("ctwas"))
 
   # check inputs
   group_prior_var_structure <- match.arg(group_prior_var_structure)
   null_method <- match.arg(null_method)
+  enrichment_test <- match.arg(enrichment_test)
 
   if (anyNA(z_snp))
     stop("z_snp contains missing values!")
@@ -188,6 +192,9 @@ ctwas_sumstats_noLD <- function(
                      min_p_single_effect = min_p_single_effect,
                      null_method = null_method,
                      null_weight = null_weight,
+                     include_enrichment_test = include_enrichment_test,
+                     enrichment_test = enrichment_test,
+                     include_loglik = include_loglik,
                      ncore = ncore,
                      verbose = verbose)
 
@@ -198,7 +205,7 @@ ctwas_sumstats_noLD <- function(
   }
 
   # Screen regions
-  #. fine-map all regions with thinned SNPs
+  #. fine-map all regions without LD
   #. select regions with strong non-SNP signals
   screen_res <- screen_regions_noLD(region_data,
                                     group_prior = group_prior,
@@ -209,8 +216,7 @@ ctwas_sumstats_noLD <- function(
                                     null_method = null_method,
                                     null_weight = null_weight,
                                     ncore = ncore,
-                                    verbose = verbose,
-                                    ...)
+                                    verbose = verbose)
   screened_region_data <- screen_res$screened_region_data
 
   # expand selected regions with all SNPs

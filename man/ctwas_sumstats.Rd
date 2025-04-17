@@ -19,8 +19,7 @@ ctwas_sumstats(
   init_group_prior_var = NULL,
   group_prior_var_structure = c("shared_all", "shared_type", "shared_context",
     "shared_nonSNP", "independent"),
-  filter_L = TRUE,
-  filter_nonSNP_PIP = FALSE,
+  screen_L1 = TRUE,
   min_nonSNP_PIP = 0.5,
   min_p_single_effect = 0.8,
   maxSNP = Inf,
@@ -29,6 +28,9 @@ ctwas_sumstats(
   min_group_size = 100,
   null_method = c("ctwas", "susie", "none"),
   null_weight = NULL,
+  include_enrichment_test = TRUE,
+  enrichment_test = c("G", "fisher"),
+  include_loglik = FALSE,
   coverage = 0.95,
   min_abs_corr = 0.1,
   LD_format = c("rds", "rdata", "mtx", "csv", "txt", "custom"),
@@ -80,9 +82,7 @@ giving the z scores for SNPs. "A1" is effect allele. "A2" is the other allele.}
 "shared_nonSNP" allows all non-SNP groups to share the same variance parameter.
 "independent" allows all groups to have their own separate variance parameters.}
 
-\item{filter_L}{If TRUE, screening regions with L > 0.}
-
-\item{filter_nonSNP_PIP}{If TRUE, screening regions with total non-SNP PIP >= \code{min_nonSNP_PIP}.}
+\item{screen_L1}{If TRUE, screens regions with L = 1.}
 
 \item{min_nonSNP_PIP}{Regions with non-SNP PIP >= \code{min_nonSNP_PIP}
 will be selected to run finemapping using all SNPs.}

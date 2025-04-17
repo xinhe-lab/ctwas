@@ -10,13 +10,10 @@ test_that("est_param works", {
                        niter = 30,
                        group_prior_var_structure = "shared_type",
                        null_method = "susie",
+                       include_enrichment_test = FALSE,
+                       include_loglik = FALSE,
                        ncore = 2)
   })
-  param$loglik_iters <- NULL
-  param$enrichment <- NULL
-  param$enrichment_se <- NULL
-  param$enrichment_pval <- NULL
-  param$enrichment_test_res <- NULL
-
   expect_equal(param, expected_param)
+
 })
