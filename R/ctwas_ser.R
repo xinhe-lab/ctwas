@@ -92,7 +92,7 @@ ctwas_ser_rss <- function(z,
               prior_variance = prior_variance))
 }
 
-# fit cTWAS version of single effect regression (SER) model with summary statistics
+# fit cTWAS version of single effect regression (SER) model with individual level data
 ctwas_ser <- function(X, Y,
                       scaled_prior_variance,
                       prior_weights = NULL,
@@ -230,122 +230,6 @@ anno_ser_res <- function(ser_res,
   return(ser_res_df)
 
 }
-
-# finemap a single region with L = 1 without LD, used in EM
-finemap_single_region_ser_rss <- function(region_data,
-                                          region_id,
-                                          pi_prior,
-                                          V_prior,
-                                          null_method = c("ctwas", "susie", "none"),
-                                          null_weight = NULL,
-                                          return_full_result = FALSE){
-
-
-  null_method <- match.arg(null_method)
-
-  # load region data
-  if (!inherits(region_data,"list")){
-    stop("'region_data' should be a list.")
-  }
-
-  regiondata <- region_data[[region_id]]
-  if (is.null(regiondata$z) || is.null(regiondata$gs_group)){
-    regiondata <- extract_region_data(region_data, region_id)
-  }
-
-  gids <- regiondata[["gid"]]
-  sids <- regiondata[["sid"]]
-  z <- regiondata[["z"]]
-  gs_group <- regiondata[["gs_group"]]
-  g_type <- regiondata[["g_type"]]
-  g_context <- regiondata[["g_context"]]
-  g_group <- regiondata[["g_group"]]
-  rm(regiondata)
-
-  if (length(z) < 2) {
-    stop(paste(length(z), "variables in the region", region_id, "\n",
-               "At least two variables in a region are needed to run SER model"))
-  }
-
-  # set priors, prior variances
-  res <- set_region_susie_priors(pi_prior, V_prior, gs_group, L = 1,
-                                 null_method = "none")
-  prior_weights <- res$prior
-  prior_variance <- res$V
-  rm(res)
-
-  # fit SER model
-  ser_res <- ctwas_ser_rss(z = z,
-                           prior_weights = prior_weights,
-                           prior_variance = prior_variance,
-                           null_method = null_method,
-                           null_weight = null_weight)
-
-  # annotate SER result
-  ser_res_df <- anno_ser_res(ser_res,
-                             gids,
-                             sids,
-                             g_type = g_type,
-                             g_context = g_context,
-                             g_group = g_group,
-                             region_id = region_id,
-                             z = z)
-
-  if (return_full_result){
-    return(list("ser_res" = ser_res,
-                "ser_res_df" = ser_res_df))
-  }else{
-    return(ser_res_df)
-  }
-
-}
-
-# fit a single region with L = 1 without LD, used in EM
-fit_single_region_ser_rss <- function(region_data,
-                                      region_id,
-                                      pi_prior,
-                                      V_prior,
-                                      null_method = c("ctwas", "susie", "none"),
-                                      null_weight = NULL){
-
-  null_method <- match.arg(null_method)
-
-  # load region data
-  if (!inherits(region_data,"list")){
-    stop("'region_data' should be a list.")
-  }
-
-  regiondata <- region_data[[region_id]]
-  if (is.null(regiondata$z) || is.null(regiondata$gs_group)){
-    regiondata <- extract_region_data(region_data, region_id)
-  }
-
-  z <- regiondata[["z"]]
-  gs_group <- regiondata[["gs_group"]]
-  rm(regiondata)
-
-  if (length(z) < 2) {
-    stop(paste(length(z), "variables in the region", region_id, "\n",
-               "At least two variables in a region are needed to run SER model"))
-  }
-
-  # set priors, prior variances
-  res <- set_region_susie_priors(pi_prior, V_prior, gs_group, L = 1,
-                                 null_method = "none")
-  prior_weights <- res$prior
-  prior_variance <- res$V
-  rm(res)
-
-  # fit SER model
-  ser_res <- ctwas_ser_rss(z = z,
-                           prior_weights = prior_weights,
-                           prior_variance = prior_variance,
-                           null_method = null_method,
-                           null_weight = null_weight)
-
-  return(ser_res)
-}
-
 
 #' @importFrom logging addHandler loginfo logwarn writeToFile
 #'
