@@ -93,7 +93,7 @@ ctwas_ser_rss <- function(z,
 }
 
 # fit cTWAS version of single effect regression (SER) model with individual level data
-ctwas_ser <- function(X, Y,
+ctwas_ser <- function(X, y,
                       scaled_prior_variance,
                       prior_weights = NULL,
                       residual_variance = 1,
@@ -114,7 +114,7 @@ ctwas_ser <- function(X, Y,
 
   # Center and scale input.
   X = set_X_attributes(X, center = TRUE, scale = TRUE)
-  Y = scale(Y, center = TRUE, scale = TRUE)
+  y = scale(y, center = TRUE, scale = TRUE)
 
   XtX = crossprod(X)
   Xty = drop(crossprod(X,y))
@@ -264,10 +264,10 @@ compute_loglik_ser <- function(
   region_ids <- names(region_data)
 
   EM_ser_res_list <- mclapply_check(region_ids, function(region_id){
-    finemap_single_region_ser_rss(region_data, region_id, pi_prior, V_prior,
-                                  null_method = null_method,
-                                  null_weight = null_weight,
-                                  return_full_result = TRUE)
+    fast_finemap_single_region_ser_rss(region_data, region_id, pi_prior, V_prior,
+                                       null_method = null_method,
+                                       null_weight = null_weight,
+                                       return_full_result = TRUE)
   }, mc.cores = ncore, stop_if_missing = TRUE)
 
   all_ser_res <- lapply(EM_ser_res_list, "[[", "ser_res")

@@ -26,6 +26,14 @@
 #' @param null_weight Prior probability of no effect (a number between
 #'   0 and 1, and cannot be exactly 1). Only used when \code{null_method = "susie"}.
 #'
+#' @param include_enrichment_test If TRUE, includes enrichment test result.
+#'
+#' @param enrichment_test_method Method to test enrichment,
+#' options: "G" (G-test), "fisher" (Fisher's exact test).
+#' Only used when \code{test_enrichment = TRUE}.
+#'
+#' @param include_loglik If TRUE, includes log-likelihood over the iterations.
+#'
 #' @param min_var minimum number of variables (SNPs and genes) in a region.
 #'
 #' @param min_gene minimum number of genes in a region.
@@ -57,7 +65,9 @@ est_param <- function(
     min_p_single_effect = 0.8,
     null_method = c("ctwas", "susie", "none"),
     null_weight = NULL,
-    enrichment_test = c("G", "fisher"),
+    include_enrichment_test = TRUE,
+    enrichment_test_method = c("G", "fisher", "none"),
+    include_loglik = FALSE,
     min_var = 2,
     min_gene = 1,
     min_group_size = 100,
@@ -74,7 +84,7 @@ est_param <- function(
 
   # check inputs
   group_prior_var_structure <- match.arg(group_prior_var_structure)
-  enrichment_test <- match.arg(enrichment_test)
+  enrichment_test_method <- match.arg(enrichment_test_method)
 
   if (!inherits(region_data,"list"))
     stop("'region_data' should be a list.")
@@ -107,8 +117,8 @@ est_param <- function(
   n_gids <- sapply(region_data, function(x){length(x$gid)})
   n_sids <- sapply(region_data, function(x){length(x$sid)})
   p_single_effect_df <- data.frame(region_id = region_ids,
-                                   n_gids = n_gids,
-                                   n_sids = n_sids,
+                                   # n_gids = n_gids,
+                                   # n_sids = n_sids,
                                    p_single_effect = NA)
 
   # skip regions with fewer than min_var variables
@@ -195,9 +205,6 @@ est_param <- function(
   group_prior_iters <- EM_res$group_prior_iters
   group_prior_var_iters <- EM_res$group_prior_var_iters
 
-  # log-likelihood from all iterations
-  loglik_iters <- EM_res$loglik_iters
-
   # adjust parameters to account for thin
   if (thin != 1){
     group_prior["SNP"] <- group_prior["SNP"] * thin
@@ -215,30 +222,37 @@ est_param <- function(
     stop("Estimated group_prior_var contains NAs!")
   }
 
-  # Enrichment, S.E. and G-test using estimated group_prior and group_prior_var
-  enrichment_res <- get_enrichment_se_test(selected_region_data,
-                                           group_prior,
-                                           group_prior_var,
-                                           null_method = null_method,
-                                           enrichment_test = enrichment_test,
-                                           ncore = ncore)
-
-  loginfo("Estimated enrichment (log scale) {%s}: {%s}",
-          names(enrichment_res$enrichment),
-          format(enrichment_res$enrichment, digits = 4))
-
   param <- list("group_prior" = group_prior,
                 "group_prior_var" = group_prior_var,
                 "group_prior_iters" = group_prior_iters,
                 "group_prior_var_iters" = group_prior_var_iters,
                 "group_prior_var_structure" = group_prior_var_structure,
                 "group_size" = group_size,
-                "p_single_effect" = p_single_effect_df,
-                "loglik_iters" = loglik_iters,
-                "enrichment" = enrichment_res$enrichment,
-                "enrichment_se" = enrichment_res$se,
-                "enrichment_pval" = enrichment_res$p.value,
-                "enrichment_test_res" = enrichment_res$test_res)
+                "p_single_effect" = p_single_effect_df)
+
+  if (include_enrichment_test){
+    # Enrichment, S.E. and G-test using estimated group_prior and group_prior_var
+    enrichment_res <- get_enrichment_se_test(selected_region_data,
+                                             group_prior,
+                                             group_prior_var,
+                                             null_method = null_method,
+                                             enrichment_test_method = enrichment_test_method,
+                                             ncore = ncore)
+
+    loginfo("Estimated enrichment (log scale) {%s}: {%s}",
+            names(enrichment_res$enrichment),
+            format(enrichment_res$enrichment, digits = 4))
+
+    param$enrichment = enrichment_res$enrichment
+    param$enrichment_se = enrichment_res$se
+    param$enrichment_pval = enrichment_res$p.value
+    param$enrichment_test_res = enrichment_res$test_res
+  }
+
+  if (include_loglik){
+    # get log-likelihood from all iterations
+    param$loglik_iters <- EM_res$loglik_iters
+  }
 
   return(param)
 }
@@ -254,6 +268,9 @@ est_param <- function(
 #'
 #' @param null_method Method to compute null model, options: "ctwas", "susie" or "none".
 #'
+#' @param enrichment_test_method Method to test enrichment,
+#' options: "G" (G-test), "fisher" (Fisher's exact test).
+#'
 #' @param ncore The number of cores used to parallelize over regions
 #'
 #' @return Estimated enrichment, S.E. and p-value.
@@ -267,10 +284,10 @@ get_enrichment_se_test <- function(region_data,
                                    group_prior,
                                    group_prior_var,
                                    null_method = c("ctwas", "susie", "none"),
-                                   enrichment_test = c("G", "fisher"),
+                                   enrichment_test_method = c("G", "fisher"),
                                    ncore = 1){
 
-  enrichment_test <- match.arg(enrichment_test)
+  enrichment_test_method <- match.arg(enrichment_test_method)
 
   groups <- names(group_prior)
 
@@ -283,9 +300,9 @@ get_enrichment_se_test <- function(region_data,
   # run finemapping with SER model to get PIPs
   region_ids <- names(region_data)
   all_ser_res_df_list <- mclapply_check(region_ids, function(region_id){
-    finemap_single_region_ser_rss(region_data, region_id, pi_prior, V_prior,
-                                  null_method = null_method,
-                                  return_full_result = FALSE)
+    fast_finemap_single_region_ser_rss(region_data, region_id, pi_prior, V_prior,
+                                       null_method = null_method,
+                                       return_full_result = FALSE)
   }, mc.cores = ncore, stop_if_missing = TRUE)
   ser_res_df <- do.call(rbind, all_ser_res_df_list)
 
@@ -323,11 +340,11 @@ get_enrichment_se_test <- function(region_data,
     colnames(obs) <- c("r", "k")
     rownames(obs) <- c(group, "SNP")
 
-    if (enrichment_test == "G"){
+    if (enrichment_test_method == "G"){
       # evaluate statistical significance of enrichment using the G-test
       test_res <- g.test(obs)
       enrichment.pval[group] <- test_res$p.value
-    } else if (enrichment_test == "fisher"){
+    } else if (enrichment_test_method == "fisher"){
       # evaluate statistical significance of enrichment using the Fisher-test
       test_res <- fisher.test(round(obs))
       enrichment.pval[group] <- test_res$p.value

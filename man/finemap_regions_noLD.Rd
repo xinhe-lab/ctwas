@@ -8,6 +8,8 @@ finemap_regions_noLD(
   region_data,
   group_prior = NULL,
   group_prior_var = NULL,
+  min_var = 2,
+  min_gene = 1,
   null_method = c("ctwas", "susie", "none"),
   null_weight = NULL,
   get_susie_alpha = TRUE,

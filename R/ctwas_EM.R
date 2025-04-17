@@ -93,10 +93,10 @@ fit_EM <- function(
     }
 
     all_ser_res_list <- mclapply_check(region_ids, function(region_id){
-      finemap_single_region_ser_rss(region_data, region_id, pi_prior, V_prior,
-                                    null_method = null_method,
-                                    null_weight = null_weight,
-                                    return_full_result = TRUE)
+      fast_finemap_single_region_ser_rss(region_data, region_id, pi_prior, V_prior,
+                                         null_method = null_method,
+                                         null_weight = null_weight,
+                                         return_full_result = TRUE)
     }, mc.cores = ncore, stop_if_missing = TRUE)
 
     EM_ser_res <- do.call(rbind, lapply(all_ser_res_list, "[[", "ser_res_df"))
