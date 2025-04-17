@@ -107,6 +107,8 @@ est_param <- function(
   n_gids <- sapply(region_data, function(x){length(x$gid)})
   n_sids <- sapply(region_data, function(x){length(x$sid)})
   p_single_effect_df <- data.frame(region_id = region_ids,
+                                   n_gids = n_gids,
+                                   n_sids = n_sids,
                                    p_single_effect = NA)
 
   # skip regions with fewer than min_var variables
@@ -326,6 +328,7 @@ get_enrichment_se_test <- function(region_data,
       test_res <- g.test(obs)
       enrichment.pval[group] <- test_res$p.value
     } else if (enrichment_test == "fisher"){
+      # evaluate statistical significance of enrichment using the Fisher-test
       test_res <- fisher.test(round(obs))
       enrichment.pval[group] <- test_res$p.value
     }
@@ -336,61 +339,4 @@ get_enrichment_se_test <- function(region_data,
               "se" = enrichment.se,
               "p.value" = enrichment.pval,
               "test_res" = test_res))
-}
-
-# Compute standard error and p-value for enrichment using
-# the likelihood ratio test from EM results
-get_enrichment_se_LRT <- function(region_data,
-                                  group_prior,
-                                  group_prior_var,
-                                  niter = 20,
-                                  null_method = c("ctwas", "susie", "none"),
-                                  ncore = 1,
-                                  log_enrichment = TRUE){
-
-  null_method <- match.arg(null_method)
-
-  # estimated enrichment
-  # compute loglik with estimated parameters
-  enrichment <- group_prior[names(group_prior) != "SNP"]/group_prior[names(group_prior) == "SNP"]
-
-  loglik <- compute_loglik_ser(group_prior = group_prior,
-                               group_prior_var = group_prior_var,
-                               region_data = region_data,
-                               null_method = null_method,
-                               ncore = ncore)
-
-  # null model (enrichment = 1)
-  # compute loglik under the null
-  EM_null_res <- fit_EM(region_data,
-                        niter = niter,
-                        init_group_prior = NULL,
-                        init_group_prior_var = group_prior_var,
-                        group_prior_var_structure = "fixed",
-                        shared_group_prior = TRUE,
-                        null_method = null_method,
-                        ncore = ncore)
-  group_prior_null <- EM_null_res$group_prior
-  group_prior_var_null <- EM_null_res$group_prior_var
-  loglik_null <- EM_null_res$loglik_iters[length(EM_null_res$loglik_iters)]
-
-  enrichment_null <- group_prior_null[names(group_prior_null) != "SNP"]/group_prior_null[names(group_prior_null) == "SNP"]
-  stopifnot(all(enrichment_null == 1))
-
-  if (log_enrichment){
-    enrichment <- log(enrichment)
-    enrichment_null <- 0
-  }
-
-  # compute S.E. using asymptotic test based on LRT
-  LR <- 2*(loglik - loglik_null)
-  enrichment.se <- sqrt(enrichment^2 / abs(LR))
-
-  # p-value of enrichment
-  enrichment.z <- (enrichment - enrichment_null) / enrichment.se
-  enrichment.pval <- 2*pnorm(abs(enrichment.z), lower.tail=FALSE)
-
-  return(list("enrichment" = enrichment,
-              "se" = enrichment.se,
-              "p.value" = enrichment.pval))
 }
