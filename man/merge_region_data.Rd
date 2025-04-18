@@ -13,7 +13,7 @@ merge_region_data(
   weights,
   z_snp,
   z_gene,
-  estimate_L = TRUE,
+  estimate_L = FALSE,
   null_method = c("ctwas", "susie", "none"),
   null_weight = NULL,
   expand = TRUE,

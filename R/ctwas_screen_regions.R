@@ -70,8 +70,8 @@ screen_regions <- function(region_data,
                            L = 5,
                            min_var = 2,
                            min_gene = 1,
-                           filter_L = TRUE,
-                           filter_nonSNP_PIP = FALSE,
+                           filter_L = FALSE,
+                           filter_nonSNP_PIP = TRUE,
                            min_L = 1,
                            min_nonSNP_PIP = 0.5,
                            min_abs_corr = 0.1,
@@ -115,10 +115,15 @@ screen_regions <- function(region_data,
   if (any(sapply(weights, is.null)))
     stop("'weights' contain NULL, remove empty weights!")
 
+  if (L < 1)
+    stop("L needs to be >= 1")
+
+  if (min_L < 1)
+    stop("min_L needs to be >= 1")
+
   # adjust group_prior to account for thin argument
-  if (!is.null(group_prior)){
+  if (!is.null(group_prior))
     group_prior["SNP"] <- group_prior["SNP"]/thin
-  }
 
   # create a data frame for screening summary
   region_ids <- names(region_data)
@@ -184,41 +189,42 @@ screen_regions <- function(region_data,
   # select regions with total non-SNP PIPs > 0.5
   if (filter_nonSNP_PIP) {
     loginfo("Computing non-SNP PIPs ...")
-    res <- finemap_regions(screened_region_data,
-                           LD_map = LD_map,
-                           weights = weights,
-                           L = L,
-                           group_prior = group_prior,
-                           group_prior_var = group_prior_var,
-                           include_cs = FALSE,
-                           get_susie_alpha = FALSE,
-                           null_method = null_method,
-                           null_weight = null_weight,
-                           LD_format = LD_format,
-                           LD_loader_fun = LD_loader_fun,
-                           snpinfo_loader_fun = snpinfo_loader_fun,
-                           ncore = ncore,
-                           verbose = verbose,
-                           ...)
-    finemap_screening_res <- res$finemap_res
-    rm(res)
+    if (L > 1){
+      finemap_screening_res <- finemap_regions(screened_region_data,
+                                               LD_map = LD_map,
+                                               weights = weights,
+                                               L = L,
+                                               group_prior = group_prior,
+                                               group_prior_var = group_prior_var,
+                                               include_cs = FALSE,
+                                               get_susie_alpha = FALSE,
+                                               null_method = null_method,
+                                               null_weight = null_weight,
+                                               LD_format = LD_format,
+                                               LD_loader_fun = LD_loader_fun,
+                                               snpinfo_loader_fun = snpinfo_loader_fun,
+                                               ncore = ncore,
+                                               verbose = verbose,
+                                               ...)$finemap_res
+    } else {
+      finemap_screening_res <- finemap_regions_ser(screened_region_data,
+                                                   group_prior = group_prior,
+                                                   group_prior_var = group_prior_var,
+                                                   null_method = null_method,
+                                                   null_weight = null_weight,
+                                                   ncore = ncore,
+                                                   verbose = verbose)
+    }
+
     # select regions based on total non-SNP PIPs
     all_nonSNP_PIPs <- compute_region_nonSNP_PIPs(finemap_screening_res, filter_cs = FALSE)
     screened_region_ids <- names(all_nonSNP_PIPs[all_nonSNP_PIPs >= min_nonSNP_PIP])
     screened_region_data <- region_data[screened_region_ids]
     loginfo("Selected %d regions with non-SNP PIP >= %s", length(screened_region_data), min_nonSNP_PIP)
-
-    if (length(screened_region_L) > 1) {
+    if (length(screened_region_L) > 1)
       screened_region_L <- screened_region_L[screened_region_ids]
-    }
-
     idx <- match(names(all_nonSNP_PIPs), screen_summary$region_id)
     screen_summary$nonSNP_PIP[idx] <- all_nonSNP_PIPs
-  }
-
-  # if min_L = 0, set regions with L = 0 to 1
-  if (min_L == 0) {
-    screened_region_L[screened_region_L == 0] <- 1
   }
 
   rownames(screen_summary) <- NULL

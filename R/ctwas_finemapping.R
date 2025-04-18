@@ -53,7 +53,7 @@
 #'
 #' @return a list with cTWAS finemapping results.
 #'
-#' @importFrom logging addHandler loginfo writeToFile
+#' @importFrom logging addHandler loginfo logwarn writeToFile
 #' @importFrom parallel mclapply
 #'
 #' @export
@@ -123,6 +123,11 @@ finemap_regions <- function(region_data,
       stop("The names of L do not match with region_data!")
   } else {
     stop("L needs to an integer or a vector of the same length as region_data!")
+  }
+
+  if (any(L < 1)) {
+    loginfo("L needs to be >= 1, set to 1 for %d regions", length(which(L < 1)))
+    L[L < 1] <- 1
   }
 
   # check if all groups have group_prior and group_prior_var
@@ -526,6 +531,9 @@ finemap_single_region <- function(region_data,
   if (any(sapply(weights, is.null)))
     stop("'weights' contain NULL, remove empty weights!")
 
+  if (L < 1)
+    stop("L needs to be >= 1")
+
   # load input data for the region
   regiondata <- extract_region_data(region_data, region_id,
                                     snps_only = snps_only)
@@ -905,67 +913,3 @@ fast_finemap_single_region_ser_rss <- function(region_data,
   }
 
 }
-
-
-# # finemap a single region with L = 1 without LD, used in EM
-# fast_finemap_single_region_L1_noLD <- function(region_data,
-#                                                region_id,
-#                                                pi_prior,
-#                                                V_prior,
-#                                                null_method = c("ctwas", "susie", "none"),
-#                                                null_weight = NULL,
-#                                                ...){
-#   # check inputs
-#   null_method <- match.arg(null_method)
-#
-#   # load region data
-#   regiondata <- extract_region_data(region_data, region_id)
-#   gids <- regiondata[["gid"]]
-#   sids <- regiondata[["sid"]]
-#   z <- regiondata[["z"]]
-#   gs_group <- regiondata[["gs_group"]]
-#   g_type <- regiondata[["g_type"]]
-#   g_context <- regiondata[["g_context"]]
-#   g_group <- regiondata[["g_group"]]
-#   rm(regiondata)
-#
-#   if (length(z) < 2) {
-#     stop(paste(length(z), "variables in the region", region_id, "\n",
-#                "At least two variables in a region are needed to run susie"))
-#   }
-#
-#   # update priors, prior variances and null_weight
-#   res <- set_region_susie_priors(pi_prior, V_prior, gs_group, L = 1,
-#                                  null_method = null_method, null_weight = null_weight)
-#   prior <- res$prior
-#   V <- res$V
-#   null_weight <- res$null_weight
-#   rm(res)
-#
-#   # Use an identity matrix as LD, R does not matter for susie when L = 1
-#   R <- diag(length(z))
-#
-#   # in susie, prior_variance is under standardized scale (if performed)
-#   susie_res <- ctwas_susie_rss(z = z,
-#                                R = R,
-#                                prior_weights = prior,
-#                                prior_variance = V,
-#                                L = 1,
-#                                null_weight = null_weight,
-#                                max_iter = 1,
-#                                warn_converge_fail = FALSE,
-#                                ...)
-#
-#   # annotate susie result
-#   susie_res_df <- anno_susie(susie_res,
-#                              gids = gids,
-#                              sids = sids,
-#                              g_type = g_type,
-#                              g_context = g_context,
-#                              g_group = g_group,
-#                              region_id = region_id,
-#                              include_cs = FALSE)
-#
-#   return(susie_res_df)
-# }
-

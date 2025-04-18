@@ -63,7 +63,7 @@ merge_region_data <- function(boundary_genes,
                               weights,
                               z_snp,
                               z_gene,
-                              estimate_L = TRUE,
+                              estimate_L = FALSE,
                               null_method = c("ctwas", "susie", "none"),
                               null_weight = NULL,
                               expand = TRUE,
@@ -146,6 +146,7 @@ merge_region_data <- function(boundary_genes,
                                          ncore = ncore,
                                          verbose = verbose,
                                          ...)
+    # set regions with estimated L = 0 to 1
     merged_region_L[merged_region_L == 0] <- 1
   } else {
     merged_region_L <- L
