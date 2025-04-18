@@ -256,7 +256,7 @@ compute_loglik_ser <- function(
             names(group_prior_var), format(group_prior_var, digits = 4))
   }
 
-  res <- initiate_group_priors(group_prior[groups], group_prior_var[groups], groups)
+  res <- initialize_group_priors(group_prior[groups], group_prior_var[groups], groups)
   pi_prior <- res$pi_prior
   V_prior <- res$V_prior
   rm(res)

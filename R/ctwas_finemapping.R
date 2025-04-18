@@ -568,7 +568,7 @@ finemap_single_region <- function(region_data,
     }
   }
 
-  res <- initiate_group_priors(group_prior[groups], group_prior_var[groups], groups)
+  res <- initialize_group_priors(group_prior[groups], group_prior_var[groups], groups)
   pi_prior <- res$pi_prior
   V_prior <- res$V_prior
   rm(res)
@@ -700,7 +700,7 @@ finemap_single_region_noLD <- function(region_data,
     }
   }
 
-  res <- initiate_group_priors(group_prior[groups], group_prior_var[groups], groups)
+  res <- initialize_group_priors(group_prior[groups], group_prior_var[groups], groups)
   pi_prior <- res$pi_prior
   V_prior <- res$V_prior
   rm(res)
@@ -811,7 +811,7 @@ finemap_single_region_ser <- function(region_data,
     }
   }
 
-  res <- initiate_group_priors(group_prior[groups], group_prior_var[groups], groups)
+  res <- initialize_group_priors(group_prior[groups], group_prior_var[groups], groups)
   pi_prior <- res$pi_prior
   V_prior <- res$V_prior
   rm(res)

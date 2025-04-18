@@ -103,7 +103,7 @@ simulate_groups <- function(group_size,
   if (effect_scale == "z")
     group_prior_var <- group_prior_var / n
 
-  res <- initiate_group_priors(group_prior[groups], group_prior_var[groups], groups)
+  res <- initialize_group_priors(group_prior[groups], group_prior_var[groups], groups)
   pi_prior <- res$pi_prior
   V_prior <- res$V_prior
   rm(res)
@@ -235,7 +235,7 @@ simulate_region_data <- function(group_size,
   if (effect_scale == "z")
     group_prior_var <- group_prior_var / n
 
-  res <- initiate_group_priors(group_prior[groups], group_prior_var[groups], groups)
+  res <- initialize_group_priors(group_prior[groups], group_prior_var[groups], groups)
   pi_prior <- res$pi_prior
   V_prior <- res$V_prior
   rm(res)

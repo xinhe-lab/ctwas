@@ -187,7 +187,7 @@ get_susie_alpha_res <- function(susie_res,
 }
 
 # set pi_prior and V_prior based on init_group_prior and init_group_prior_var
-initiate_group_priors <- function(group_prior = NULL, group_prior_var = NULL, groups) {
+initialize_group_priors <- function(group_prior = NULL, group_prior_var = NULL, groups) {
 
   if (is.null(group_prior)){
     group_prior <- structure(as.numeric(rep(NA,length(groups))), names=groups)

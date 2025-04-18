@@ -292,7 +292,7 @@ get_enrichment_se_test <- function(region_data,
   groups <- names(group_prior)
 
   # set pi_prior and V_prior based on group_prior and group_prior_var
-  res <- initiate_group_priors(group_prior[groups], group_prior_var[groups], groups)
+  res <- initialize_group_priors(group_prior[groups], group_prior_var[groups], groups)
   pi_prior <- res$pi_prior
   V_prior <- res$V_prior
   rm(res)
