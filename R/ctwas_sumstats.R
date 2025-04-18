@@ -32,7 +32,14 @@
 #' "shared_nonSNP" allows all non-SNP groups to share the same variance parameter.
 #' "independent" allows all groups to have their own separate variance parameters.
 #'
-#' @param screen_L1 If TRUE, screens regions with L = 1.
+#' @param screen_noLD If TRUE, screens regions with total non-SNP PIP >= \code{min_nonSNP_PIP}
+#' using L = 1 (no-LD).
+#'
+#' @param filter_L If TRUE, screening regions with L > 0.
+#' Only used when \code{screen_noLD = FALSE}.
+#'
+#' @param filter_nonSNP_PIP If TRUE, screening regions with total non-SNP PIP >= \code{min_nonSNP_PIP}.
+#' Only used when \code{screen_noLD = FALSE}.
 #'
 #' @param min_nonSNP_PIP Regions with non-SNP PIP >= \code{min_nonSNP_PIP}
 #' will be selected to run finemapping using all SNPs.
@@ -116,7 +123,9 @@ ctwas_sumstats <- function(
     init_group_prior = NULL,
     init_group_prior_var = NULL,
     group_prior_var_structure = c("shared_all", "shared_type", "shared_context", "shared_nonSNP", "independent"),
-    screen_L1 = TRUE,
+    filter_L = FALSE,
+    filter_nonSNP_PIP = TRUE,
+    screen_noLD = TRUE,
     min_nonSNP_PIP = 0.5,
     min_p_single_effect = 0.8,
     maxSNP = Inf,
@@ -253,7 +262,7 @@ ctwas_sumstats <- function(
   }
 
   # Screen regions
-  if (screen_L1 || L == 1){
+  if (screen_noLD || L == 1){
     #. fine-map all regions without LD (using SER model, L = 1)
     #. select regions with strong non-SNP signals
     screen_res <- screen_regions_noLD(region_data,
@@ -277,8 +286,8 @@ ctwas_sumstats <- function(
                                  L = L,
                                  min_var = min_var,
                                  min_gene = min_gene,
-                                 filter_L = FALSE,
-                                 filter_nonSNP_PIP = TRUE,
+                                 filter_L = filter_L,
+                                 filter_nonSNP_PIP = filter_nonSNP_PIP,
                                  min_nonSNP_PIP = min_nonSNP_PIP,
                                  min_abs_corr = min_abs_corr,
                                  null_method = null_method,

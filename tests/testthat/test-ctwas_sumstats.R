@@ -19,13 +19,13 @@ test_that("ctwas_sumstats works", {
                                 group_prior_var_structure = "shared_type",
                                 thin = 0.1,
                                 maxSNP = 20000,
-                                screen_L1 = FALSE,
+                                screen_noLD = FALSE,
                                 min_nonSNP_PIP = 0.5,
                                 min_abs_corr = 0.1,
                                 null_method = "susie",
                                 include_enrichment_test = FALSE,
-                                ncore = 1,
-                                ncore_LD = 1)
+                                ncore = 2,
+                                ncore_LD = 2)
   })
 
   # expect_equal(ctwas_res, expected_ctwas_res)

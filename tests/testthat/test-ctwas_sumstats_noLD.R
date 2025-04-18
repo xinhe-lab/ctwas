@@ -18,7 +18,7 @@ test_that("ctwas_sumstats_noLD works", {
                                      min_nonSNP_PIP = 0.5,
                                      null_method = "susie",
                                      include_enrichment_test = FALSE,
-                                     ncore = 1)
+                                     ncore = 2)
   })
 
   # expect_equal(ctwas_res, expected_ctwas_res)
