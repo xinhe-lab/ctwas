@@ -11,6 +11,7 @@ screen_regions_noLD(
   min_var = 2,
   min_gene = 1,
   min_nonSNP_PIP = 0.5,
+  min_pval = 5e-08,
   null_method = c("ctwas", "susie", "none"),
   null_weight = NULL,
   ncore = 1,
@@ -32,6 +33,8 @@ screen_regions_noLD(
 \item{min_nonSNP_PIP}{If screening by non-SNP PIPs,
 regions with total non-SNP PIP >= \code{min_nonSNP_PIP}
 will be selected to run finemapping using full SNPs.}
+
+\item{min_pval}{Keep regions with minimum p-values from z_snp and z_gene < \code{min_pval}.}
 
 \item{null_method}{Method to compute null model, options: "ctwas", "susie" or "none".}
 

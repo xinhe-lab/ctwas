@@ -165,3 +165,38 @@ compute_region_p_single_effect <- function(region_data, group_prior){
 }
 
 
+summarize_region_signals <- function(region_data){
+  region_ids <- names(region_data)
+  n_gids <- sapply(region_data, function(x){length(x$gid)})
+  n_sids <- sapply(region_data, function(x){length(x$sid)})
+
+  max_gene_absZ_regions <- sapply(region_data, function(x){
+    z = x$z_gene$z
+    if (length(z) > 0){
+      max(abs(z))
+    } else {
+      0
+    }
+  })
+
+  max_snp_absZ_regions <- sapply(region_data, function(x){
+    z = x$z_snp$z
+    if (length(z) > 0){
+      max(abs(z))
+    } else {
+      0
+    }
+  })
+
+  region_summary <- data.frame(region_id = region_ids,
+                               n_gids = n_gids,
+                               n_sids = n_sids,
+                               max_gene_absZ = max_gene_absZ_regions,
+                               max_snp_absZ = max_snp_absZ_regions,
+                               min_gene_p = z2p(max_gene_absZ_regions),
+                               min_snp_p = z2p(max_snp_absZ_regions),
+                               row.names = NULL)
+  return(region_summary)
+}
+
+

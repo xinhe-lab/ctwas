@@ -23,6 +23,7 @@ ctwas_sumstats(
   filter_nonSNP_PIP = TRUE,
   screen_noLD = TRUE,
   min_nonSNP_PIP = 0.5,
+  min_pval = 5e-08,
   min_p_single_effect = 0.8,
   maxSNP = Inf,
   min_var = 2,
@@ -95,6 +96,9 @@ using L = 1 (no-LD).}
 
 \item{min_nonSNP_PIP}{Regions with non-SNP PIP >= \code{min_nonSNP_PIP}
 will be selected to run finemapping using all SNPs.}
+
+\item{min_pval}{Keep regions with minimum p-values from z_snp and z_gene < \code{min_pval}.
+Only used when \code{screen_noLD = TRUE}.}
 
 \item{min_p_single_effect}{Regions with probability greater than \code{min_p_single_effect} of
 having 1 or fewer effects will be used for parameter estimation.}
