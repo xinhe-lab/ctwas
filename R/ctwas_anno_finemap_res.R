@@ -267,6 +267,7 @@ add_pos <- function(finemap_res,
   tmp_mapping_table$chrom <- parse_number(as.character(tmp_mapping_table$chrom))
   tmp_mapping_table$start <- as.numeric(tmp_mapping_table$start)
   tmp_mapping_table$end <- as.numeric(tmp_mapping_table$end)
+  finemap_gene_res$chrom <- tmp_mapping_table$chrom
   if (use_gene_pos == "mid"){
     finemap_gene_res$pos <- round((tmp_mapping_table$start+tmp_mapping_table$end)/2)
   } else if (use_gene_pos == "start") {
@@ -305,6 +306,8 @@ get_gene_annot_from_ens_db <- function(ens_db, gene_ids) {
   gene_ids <- unique(na.omit(gene_ids))
   if (any(grep("[.]", gene_ids))) {
     gene_ids_trimmed <- sapply(strsplit(gene_ids, split = "[.]"), "[[", 1)
+  } else {
+    gene_ids_trimmed <- gene_ids
   }
   gene_annot_gr <- genes(ens_db, filter = GeneIdFilter(gene_ids_trimmed))
   annot_idx <- match(gene_ids_trimmed, gene_annot_gr$gene_id)
