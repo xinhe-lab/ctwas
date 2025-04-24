@@ -121,13 +121,8 @@ screen_regions_noLD <- function(region_data,
   all_nonSNP_PIPs <- compute_region_nonSNP_PIPs(finemap_screening_res, filter_cs = FALSE)
   idx <- match(names(all_nonSNP_PIPs), screen_summary$region_id)
   screen_summary$nonSNP_PIP[idx] <- all_nonSNP_PIPs
-
-  screened_region_ids <- names(all_nonSNP_PIPs[all_nonSNP_PIPs >= min_nonSNP_PIP])
-  screened_region_ids2 <- screen_summary$region_id[which(screen_summary$nonSNP_PIP >= min_nonSNP_PIP)]
-
-  setequal(screened_region_ids, screened_region_ids2)
+  screened_region_ids <- screen_summary$region_id[which(screen_summary$nonSNP_PIP >= min_nonSNP_PIP)]
   loginfo("Selected %d regions with non-SNP PIP >= %s", length(screened_region_ids), min_nonSNP_PIP)
-
   screened_region_ids <- sort(unique(c(screened_region_ids, sigP_region_ids)))
   screened_region_data <- region_data[screened_region_ids]
   loginfo("Selected %d regions in total", length(screened_region_ids))
