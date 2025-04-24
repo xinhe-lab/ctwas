@@ -164,7 +164,7 @@ compute_region_p_single_effect <- function(region_data, group_prior){
   return(p_single_effect)
 }
 
-
+# get basic summary for screening regions
 summarize_region_signals <- function(region_data){
   region_ids <- names(region_data)
   n_gids <- sapply(region_data, function(x){length(x$gid)})
@@ -175,7 +175,7 @@ summarize_region_signals <- function(region_data){
     if (length(z) > 0){
       max(abs(z))
     } else {
-      0
+      NA
     }
   })
 
@@ -184,7 +184,7 @@ summarize_region_signals <- function(region_data){
     if (length(z) > 0){
       max(abs(z))
     } else {
-      0
+      NA
     }
   })
 
