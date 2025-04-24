@@ -334,13 +334,9 @@ create_predictdb_from_QTLs <- function(weight_table,
   # check and clean the QTL data
   weight_table <- as.data.frame(weight_table)
 
-  if (!select_by %in% colnames(weight_table)){
-    stop(paste0("Cannot find the column '", select_by, "' in weight_table!"))
-  }
-
   required_cols <- unique(c("gene", "rsid", "varID", "ref_allele", "eff_allele", "weight", select_by))
   if (!all(required_cols %in% colnames(weight_table))){
-    stop("weight_table needs to contain the following columns: ",
+    stop("Require the following columns in weight_table: ",
          paste(required_cols, collapse = " "))
   }
 
