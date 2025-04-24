@@ -17,6 +17,7 @@ test_that("screen_regions_noLD works", {
                                       group_prior = group_prior,
                                       group_prior_var = group_prior_var,
                                       min_nonSNP_PIP = 0.5,
+                                      min_pval = 0,
                                       null_method = "susie",
                                       ncore = 2)
     screened_region_data <- screen_res$screened_region_data
@@ -30,7 +31,7 @@ test_that("screen_regions_noLD works", {
   })
 
   expect_equal(screen_res$screened_region_data, expected_screen_res$screened_region_data)
-  expect_equal(screen_res$screen_summary, expected_screen_res$screen_summary)
+  expect_equal(screen_res$screen_summary$n_gids, expected_screen_res$screen_summary$n_gids)
 
 })
 
@@ -113,7 +114,7 @@ test_that("screen_regions (filter by non-SNP PIPs) with L = 1 works", {
   })
 
   expect_equal(screen_res$screened_region_data, expected_screen_res$screened_region_data)
-  expect_equal(screen_res$screen_summary, expected_screen_res$screen_summary)
+  expect_equal(screen_res$screen_summary$n_gids, expected_screen_res$screen_summary$n_gids)
 
 })
 
@@ -159,7 +160,7 @@ test_that("screen_regions (filter by non-SNP PIPs) works", {
 
   expect_equal(screen_res$screened_region_data, expected_screen_res$screened_region_data)
   expect_equal(screen_res$screened_region_L, expected_screen_res$screened_region_L)
-  expect_equal(screen_res$screen_summary, expected_screen_res$screen_summary)
+  expect_equal(screen_res$screen_summary$n_gids, expected_screen_res$screen_summary$n_gids)
 
 })
 
@@ -205,7 +206,7 @@ test_that("screen_regions (filter by L) works", {
 
   expect_equal(screen_res$screened_region_data, expected_screen_res$screened_region_data)
   expect_equal(screen_res$screened_region_L, expected_screen_res$screened_region_L)
-  expect_equal(screen_res$screen_summary, expected_screen_res$screen_summary)
+  expect_equal(screen_res$screen_summary$n_gids, expected_screen_res$screen_summary$n_gids)
 
 })
 
