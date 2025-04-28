@@ -90,11 +90,11 @@ We focus on examples from running cTWAS with LD here, but the steps below also m
 First, we make plots using the function `make_convergence_plots()` to see how estimated parameters converge during the execution of the program:
 
 ```{r convergence_plot, fig.width = 10, fig.height=5}
-make_convergence_plots(param, gwas_n)
+make_convergence_plots(param, gwas_n, log_enrichment = FALSE)
 ```
 
 
-These plots show the estimated prior inclusion probability, prior effect size variance, enrichment and proportion of variance explained (PVE) over the iterations of parameter estimation. The enrichment is defined as the ratio of the prior inclusion probability of molecular traits over the prior inclusion probability of variants. We generally expect molecular traits to have higher prior inclusion probability than variants. Enrichment values typically range from 20 - 100 for expression traits. 
+These plots show the estimated prior inclusion probability, prior effect size variance, enrichment and proportion of variance explained (PVE) over the iterations of parameter estimation. The enrichment is defined as the ratio of the prior inclusion probability of molecular traits over the prior inclusion probability of variants. We generally expect molecular traits to have higher prior inclusion probability than variants. Enrichment values typically range from 20 - 100 for expression traits. We could also plot enrichment at the log scale by setting `log_enrichment = TRUE`.
 
 Then, we use `summarize_param()` to obtain estimated parameters (from the last iteration) and to compute the PVE by variants and molecular traits. 
 
@@ -117,11 +117,18 @@ head(finemap_res)
 ```
 
 
-We can view the molecular traits above a certain PIP cutoff, e.g. PIP > 0.8. We also generally recommend limiting the results to molecular traits within credible sets. 
-
+We can view the molecular traits above a certain PIP cutoff, e.g. PIP > 0.8. 
 ```{r interpret_res}
+subset(finemap_res, group != "SNP" & susie_pip > 0.8)
+```
+
+
+We could further limit the results to molecular traits within credible sets. 
+
+```{r interpret_res_cs}
 subset(finemap_res, group != "SNP" & susie_pip > 0.8 & !is.na(cs))
 ```
+
 
 Below we describe how to aggregate the information from molecular traits targeting the same genes, to compute the evidence of a gene being causal (denoted as gene PIPs below). Additionally, we will show how to add annotations (e.g. gene names and positions) to the cTWAS results that may be needed in downstream analysis. 
 
@@ -137,18 +144,20 @@ We have several ways of combining PIPs:
 + "combine_cs" (default option): it first sums PIPs of molecular traits of a genes in each credible set, and then combine PIPs using the following formula: $1 - \prod_k (1 - \text{PIP}_k)$, where $\text{PIP}_k$ is the summed PIP of the $k$-th credible set of a gene. 
 + "sum": sum over PIPs of all molecular traits for the same gene. This summation is the expected number of causal molecular traits in this gene, and could be higher than 1. 
 
-For example, when using gene expression (eQTL) data from multiple tissues, we can use the function to compute combined PIPs across contexts, using the "combine_cs" method. By default, we limit the results to molecular traits within credible sets (`filter_cs = TRUE`). We also report the credible set information of each molecular trait in the output (`include_cs_id = TRUE`), which allows us to understand how gene PIPs are obtained.
+For example, when using gene expression (eQTL) data from multiple tissues, we can use the function to compute combined PIPs across contexts, using the "combine_cs" method. We also report the credible set information of each molecular trait in the output (`include_cs_id = TRUE`), which allows us to understand how gene PIPs are obtained.
 
 ```{r combine_pips_by_context}
 combined_pip_by_context <- combine_gene_pips(susie_alpha_res, 
                                              group_by = "molecular_id",
                                              by = "context",
                                              method = "combine_cs",
-                                             filter_cs = TRUE,
+                                             filter_cs = FALSE,
                                              include_cs_id = TRUE)
 subset(combined_pip_by_context, combined_pip > 0.8)
 ```
 
+
+You could set `filter_cs = TRUE`, if you want to limit the results to molecular traits within credible sets (default option is `filter_cs = FALSE`). 
 
 In this example, we have gene IDs in the "molecular_id" column, so we could use that column to group genes. If the gene IDs are not provided, we will need to map molecular traits to their target genes in order to compute gene PIPs, as described below.
 
@@ -240,7 +249,7 @@ combined_pip_by_type <- combine_gene_pips(susie_alpha_res,
                                           group_by = "gene_name",
                                           by = "type",
                                           method = "combine_cs",
-                                          filter_cs = TRUE,
+                                          filter_cs = FALSE,
                                           include_cs_id = TRUE)
 subset(combined_pip_by_type, combined_pip > 0.8)
 ```

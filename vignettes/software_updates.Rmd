@@ -1,5 +1,5 @@
 ---
-title: "Software updates"
+title: "Software updates in multi-group cTWAS"
 author: "Kaixuan Luo"
 date: "`r Sys.Date()`"
 output: rmarkdown::html_vignette
@@ -23,6 +23,7 @@ Below are major updates in the multi-group cTWAS:
 - Improved the computational efficiency of the software by more than 10-fold, allowing it to handle large numbers of molecular traits. 
 
 - Provide support to several formats of prediction models: including PredictDB, FUSION and top-QTL.  
+
 - Created new methods for estimating parameters, which allows sharing of the prior effect variance parameters among groups.
 
 - Updated functions for interpreting cTWAS results, including methods for combining evidence of all the molecular traits affecting a target gene across all types and contexts. 
@@ -35,9 +36,11 @@ Other changes include:
 
 - Created new functions for preprocessing and harmonizing input data (GWAS Z-scores, prediction models, reference data, etc.)
 
+- Created new functions to compute standard errors and p-values for the enrichment parameters.
+
 - Created new ways for screening regions with likely causal signals in molecular traits. 
 
-- Updated functions for running cTWAS version of fine-mapping. It uses estimated parameters and estimated numbers of causal signals. It also allows fine-mapping a single region or multiple regions, with or without LD. 
+- Updated functions for running cTWAS version of fine-mapping using estimated parameters. It also allows fine-mapping a single region or multiple regions, with or without LD. 
 
 - Updated functions for visualizing cTWAS results, allowing gene tracks to be plotted together with cTWAS result panels.
 

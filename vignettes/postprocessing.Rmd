@@ -105,18 +105,16 @@ Next, we use the function `merge_region_data()` to perform region merging.  It f
                                        weights = weights,
                                        z_snp = z_snp,
                                        z_gene = z_gene,
-                                       estimate_L = TRUE,
                                        maxSNP = 20000)
 merged_region_data <- merge_region_res$merged_region_data
 merged_region_info <- merge_region_res$merged_region_info
 merged_LD_map <- merge_region_res$merged_LD_map
 merged_snp_map <- merge_region_res$merged_snp_map
 merged_region_id_map <- merge_region_res$merged_region_id_map
-merged_region_L <- merge_region_res$merged_region_L
 ```
 
 
-When `estimate_L = TRUE`, we estimate the number of credible sets (`merged_region_L`) for the merged regions. This information will be used later in the fine-mapping step. We could set `maxSNP` to limit the number of SNPs in the region, if merged regions contain too many SNPs,  
+We could set `maxSNP` to limit the number of SNPs in the region, if merged regions contain too many SNPs,  
 
 Next, we run fine-mapping again for these merged regions, similar to the section "Fine-mapping screened regions" in the tutorial ["Running cTWAS analysis"][running_ctwas_analysis_tutorial].
 
@@ -126,7 +124,7 @@ finemap_merged_regions_res <- finemap_regions(merged_region_data,
                                               weights = weights,
                                               group_prior = group_prior,
                                               group_prior_var = group_prior_var,
-                                              L = merged_region_L,
+                                              L = 5,
                                               save_cor = TRUE,
                                               cor_dir = "./cor_matrix")
 ```
@@ -183,13 +181,11 @@ updated_data_res <- update_merged_region_data(region_data, merged_region_data,
                                               region_info, merged_region_info,
                                               LD_map, merged_LD_map,
                                               snp_map, merged_snp_map,
-                                              screened_region_L, merged_region_L,
                                               merged_region_id_map)
 updated_region_data <- updated_data_res$updated_region_data
 updated_region_info <- updated_data_res$updated_region_info
 updated_LD_map <- updated_data_res$updated_LD_map
 updated_snp_map <- updated_data_res$updated_snp_map
-updated_region_L <- updated_data_res$updated_region_L
 ```
 
 
@@ -227,7 +223,7 @@ res <- diagnose_LD_mismatch_susie(region_ids = selected_region_ids,
                                   z_snp = z_snp, 
                                   LD_map = LD_map, 
                                   gwas_n = gwas_n,
-                                  p_diff_thresh = 5e-8,
+                                  p_diff_thresh = 5e-6,
                                   ncore = 4)
 problematic_snps <- res$problematic_snps
 flipped_snps <- res$flipped_snps
@@ -235,9 +231,9 @@ condz_stats <- res$condz_stats
 ```
 
 
-This returns a list of problematic SNPs (diagnostic test `p-value < 5e-8`, by default), flipped SNPs, and the test statistics of `kriging_rss` function from [SuSiE-RSS][susierss_diagnostic]. 
+This returns a list of problematic SNPs (diagnostic test `p-value < 5e-6`, by default), flipped SNPs, and the test statistics of `kriging_rss` function from [SuSiE-RSS][susierss_diagnostic]. 
 
-Our basic strategy of dealing with LD mismatch is: we use the list of problematic SNPs to identify the molecular traits whose results may be affected by LD-mismatch. We would then run SuSiE fine-mapping with L = 1 in the regions containing these molecular traits, assuming a single causal signal in such a region. The fine-mapping results in this setting would be independent of LD. 
+Our basic strategy of dealing with LD mismatch is: we use the list of problematic SNPs to identify the molecular traits whose results may be affected by LD-mismatch. We would then run fine-mapping without LD (L = 1) in the regions containing these molecular traits, assuming a single causal signal in such a region. The fine-mapping results in this setting would be independent of LD. 
 
 We choose the genes with some plausibility of being risk genes (gene PIP > 0.5 by default) and problematic SNPs in their weights. We would then select regions containing these problematic genes.
 

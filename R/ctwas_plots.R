@@ -532,6 +532,8 @@ make_locusplot <- function(finemap_res,
 #'
 #' @param gwas_n the sample size of the GWAS summary statistics
 #'
+#' @param log_enrichment If TRUE, plot enrichment in log scale.
+#'
 #' @param title.size font size of the plot title
 #'
 #' @param legend.size font size of the plot legend title
@@ -541,8 +543,6 @@ make_locusplot <- function(finemap_res,
 #'   If fewer colors than "fits" are given, the colors are recycled.
 #'
 #' @param group_names groups to be included in the plots
-#'
-#' @param log_enrichment If TRUE, plot enrichment in log scale.
 #'
 #' @param ncol number of columns in the output plot
 #'
@@ -564,12 +564,12 @@ make_locusplot <- function(finemap_res,
 #' @export
 make_convergence_plots <- function(param,
                                    gwas_n,
+                                   log_enrichment = FALSE,
                                    title.size = 10,
                                    legend.size = 8,
                                    colors = c("#E69F00","#56B4E9","#009E73","#F0E442",
                                               "#0072B2","#D55E00","#CC79A7", "#999999"),
                                    group_names,
-                                   log_enrichment = FALSE,
                                    ncol = 2){
 
   # estimated group prior (all iterations)
@@ -658,7 +658,7 @@ make_convergence_plots <- function(param,
     geom_line() +
     geom_point(alpha = 0.5) +
     scale_color_manual(values = colors) +
-    xlab("Iteration") + ylab(bquote(pi[G]/pi[S])) +
+    xlab("Iteration") +
     theme_cowplot() +
     theme(plot.title=element_text(size=title.size)) +
     expand_limits(y=0) +
@@ -668,9 +668,9 @@ make_convergence_plots <- function(param,
           plot.margin = margin(b=10, l=10, t=10, r=10))
 
   if (log_enrichment){
-    p_enrich <- p_enrich + ggtitle("log(Enrichment)")
+    p_enrich <- p_enrich + ggtitle("log(Enrichment)") + ylab(bquote(log(pi[G]/pi[S])))
   } else {
-    p_enrich <- p_enrich + ggtitle("Enrichment")
+    p_enrich <- p_enrich + ggtitle("Enrichment") + ylab(bquote(pi[G]/pi[S]))
   }
 
   # PVE plot

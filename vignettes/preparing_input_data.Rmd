@@ -163,6 +163,7 @@ region_metatable$SNP_file <- file.path(LD_dir, paste0(LD_filestem, ".Rvar"))
 
 
 The `create_snp_LD_map()` function takes `region_metatable` as input, extracts the region definitions, ensures that it matches the format required by cTWAS (e.g. adding "region_id" column if not available), and returns updated `region_info`. It reads the variant information from the regions, and returns the result as `snp_map`. `snp_map` will be used when we need reference SNP information.  The function also checks the "LD_file" and "SNP_file" columns of `region_metatable` to make sure the files are available. It then returns `LD_map`, a data frame with the "region_id", "LD_file" and "SNP_file" columns of `region_metatable`. `LD_map` will be used when we need LD matrices, e.g. when computing correlations for fine-mapping. 
+
 ```{r create_snp_LD_map, eval=FALSE}
 res <- create_snp_LD_map(region_metatable)
 region_info <- res$region_info

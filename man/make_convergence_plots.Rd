@@ -7,12 +7,12 @@
 make_convergence_plots(
   param,
   gwas_n,
+  log_enrichment = FALSE,
   title.size = 10,
   legend.size = 8,
   colors = c("#E69F00", "#56B4E9", "#009E73", "#F0E442", "#0072B2", "#D55E00", "#CC79A7",
     "#999999"),
   group_names,
-  log_enrichment = FALSE,
   ncol = 2
 )
 }
@@ -20,6 +20,8 @@ make_convergence_plots(
 \item{param}{a list of cTWAS parameter estimation result from \code{est_param}}
 
 \item{gwas_n}{the sample size of the GWAS summary statistics}
+
+\item{log_enrichment}{If TRUE, plot enrichment in log scale.}
 
 \item{title.size}{font size of the plot title}
 
@@ -30,8 +32,6 @@ make_convergence_plots(
 If fewer colors than "fits" are given, the colors are recycled.}
 
 \item{group_names}{groups to be included in the plots}
-
-\item{log_enrichment}{If TRUE, plot enrichment in log scale.}
 
 \item{ncol}{number of columns in the output plot}
 }
