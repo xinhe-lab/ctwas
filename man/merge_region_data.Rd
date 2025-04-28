@@ -13,15 +13,8 @@ merge_region_data(
   weights,
   z_snp,
   z_gene,
-  estimate_L = FALSE,
-  null_method = c("ctwas", "susie", "none"),
-  null_weight = NULL,
   expand = TRUE,
-  L = 5,
   maxSNP = Inf,
-  LD_format = c("rds", "rdata", "mtx", "csv", "txt", "custom"),
-  LD_loader_fun = NULL,
-  snpinfo_loader_fun = NULL,
   ncore = 1,
   verbose = FALSE,
   logfile = NULL,
@@ -45,28 +38,11 @@ merge_region_data(
 
 \item{z_gene}{A data frame with columns: "id", "z", giving the z-scores for genes.}
 
-\item{estimate_L}{If TRUE, estimate L for merged regions.}
-
-\item{null_method}{Method to compute null model, options: "ctwas", "susie" or "none".}
-
-\item{null_weight}{Prior probability of no effect (a number between
-0 and 1, and cannot be exactly 1). Only used when \code{null_method = "susie"}.}
-
-\item{expand}{If TRUE, expand merged region_data with full SNPs}
-
-\item{L}{the number of effects for susie.}
+\item{expand}{If TRUE, expand merged region_data with full SNPs when "thin" < 1.}
 
 \item{maxSNP}{Inf or integer. Maximum number of SNPs in a region. Default is
 Inf, no limit. This can be useful if there are many SNPs in a region and you don't
 have enough memory to run the program.}
-
-\item{LD_format}{file format for LD matrix. If "custom", use a user defined
-\code{LD_loader_fun()} function to load LD matrix.}
-
-\item{LD_loader_fun}{a user defined function to load LD matrix when \code{LD_format = "custom"}.}
-
-\item{snpinfo_loader_fun}{a user defined function to load SNP information file,
-if SNP information files are not in standard cTWAS reference format.}
 
 \item{ncore}{The number of cores used to parallelize susie over regions}
 

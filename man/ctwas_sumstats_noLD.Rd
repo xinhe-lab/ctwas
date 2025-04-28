@@ -10,7 +10,7 @@ ctwas_sumstats_noLD(
   region_info,
   snp_map,
   z_gene = NULL,
-  thin = 0.1,
+  thin = 1,
   niter_prefit = 3,
   niter = 30,
   init_group_prior = NULL,
@@ -25,10 +25,8 @@ ctwas_sumstats_noLD(
   min_pval = 5e-08,
   min_p_single_effect = 0.8,
   null_method = c("ctwas", "susie", "none"),
-  null_weight = NULL,
-  include_enrichment_test = TRUE,
+  run_enrichment_test = TRUE,
   enrichment_test = c("G", "fisher"),
-  include_loglik = FALSE,
   outputdir = NULL,
   outname = "ctwas_noLD",
   ncore = 1,
@@ -90,8 +88,11 @@ having 1 or fewer effects will be used for parameter estimation.}
 
 \item{null_method}{Method to compute null model, options: "ctwas", "susie" or "none".}
 
-\item{null_weight}{Prior probability of no effect (a number between
-0 and 1, and cannot be exactly 1). Only used when \code{null_method = "susie"}.}
+\item{run_enrichment_test}{If TRUE, compute S.E. and p-value of enrichment.}
+
+\item{enrichment_test}{Method to test enrichment,
+options: "G" (G-test), "fisher" (Fisher's exact test).
+Only used when \code{run_enrichment_test = TRUE}.}
 
 \item{outputdir}{The directory to store output. If specified, save outputs to the directory.}
 

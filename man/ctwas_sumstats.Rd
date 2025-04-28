@@ -11,7 +11,7 @@ ctwas_sumstats(
   LD_map,
   snp_map,
   z_gene = NULL,
-  thin = 0.1,
+  thin = 1,
   niter_prefit = 3,
   niter = 30,
   L = 5,
@@ -19,8 +19,6 @@ ctwas_sumstats(
   init_group_prior_var = NULL,
   group_prior_var_structure = c("shared_all", "shared_type", "shared_context",
     "shared_nonSNP", "independent"),
-  filter_L = FALSE,
-  filter_nonSNP_PIP = TRUE,
   screen_noLD = TRUE,
   min_nonSNP_PIP = 0.5,
   min_pval = 5e-08,
@@ -30,10 +28,8 @@ ctwas_sumstats(
   min_gene = 1,
   min_group_size = 100,
   null_method = c("ctwas", "susie", "none"),
-  null_weight = NULL,
-  include_enrichment_test = TRUE,
+  run_enrichment_test = TRUE,
   enrichment_test = c("G", "fisher"),
-  include_loglik = FALSE,
   coverage = 0.95,
   min_abs_corr = 0.1,
   LD_format = c("rds", "rdata", "mtx", "csv", "txt", "custom"),
@@ -85,20 +81,10 @@ giving the z scores for SNPs. "A1" is effect allele. "A2" is the other allele.}
 "shared_nonSNP" allows all non-SNP groups to share the same variance parameter.
 "independent" allows all groups to have their own separate variance parameters.}
 
-\item{filter_L}{If TRUE, screening regions with L > 0.
-Only used when \code{screen_noLD = FALSE}.}
-
-\item{filter_nonSNP_PIP}{If TRUE, screening regions with total non-SNP PIP >= \code{min_nonSNP_PIP}.
-Only used when \code{screen_noLD = FALSE}.}
-
-\item{screen_noLD}{If TRUE, screens regions with total non-SNP PIP >= \code{min_nonSNP_PIP}
-using L = 1 (no-LD).}
-
 \item{min_nonSNP_PIP}{Regions with non-SNP PIP >= \code{min_nonSNP_PIP}
 will be selected to run finemapping using all SNPs.}
 
-\item{min_pval}{Keep regions with minimum p-values from z_snp and z_gene < \code{min_pval}.
-Only used when \code{screen_noLD = TRUE}.}
+\item{min_pval}{Keep regions with minimum p-values from z_snp and z_gene < \code{min_pval}.}
 
 \item{min_p_single_effect}{Regions with probability greater than \code{min_p_single_effect} of
 having 1 or fewer effects will be used for parameter estimation.}
@@ -118,8 +104,11 @@ Groups with number of genes < \code{min_group_size} will be removed for the anal
 
 \item{null_method}{Method to compute null model, options: "ctwas", "susie" or "none".}
 
-\item{null_weight}{Prior probability of no effect (a number between
-0 and 1, and cannot be exactly 1). Only used when \code{null_method = "susie"}.}
+\item{run_enrichment_test}{If TRUE, compute S.E. and p-value of enrichment.}
+
+\item{enrichment_test}{Method to test enrichment,
+options: "G" (G-test), "fisher" (Fisher's exact test).
+Only used when \code{run_enrichment_test = TRUE}.}
 
 \item{coverage}{A number between 0 and 1 specifying the \dQuote{coverage} of
 the estimated confidence sets.}

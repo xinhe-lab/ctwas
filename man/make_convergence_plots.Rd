@@ -11,6 +11,8 @@ make_convergence_plots(
   legend.size = 8,
   colors = c("#E69F00", "#56B4E9", "#009E73", "#F0E442", "#0072B2", "#D55E00", "#CC79A7",
     "#999999"),
+  group_names,
+  log_enrichment = FALSE,
   ncol = 2
 )
 }
@@ -26,6 +28,10 @@ make_convergence_plots(
 \item{colors}{colors for different groups, passed as the
 \code{values} input to \code{\link[ggplot2]{scale_color_manual}}.
 If fewer colors than "fits" are given, the colors are recycled.}
+
+\item{group_names}{groups to be included in the plots}
+
+\item{log_enrichment}{If TRUE, plot enrichment in log scale.}
 
 \item{ncol}{number of columns in the output plot}
 }

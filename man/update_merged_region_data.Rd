@@ -13,8 +13,6 @@ update_merged_region_data(
   merged_LD_map,
   snp_map,
   merged_snp_map,
-  screened_region_L,
-  merged_region_L,
   merged_region_id_map
 )
 }
@@ -35,14 +33,10 @@ update_merged_region_data(
 
 \item{merged_snp_map}{a list of merged SNP info.}
 
-\item{screened_region_L}{a vector of L for original screened regions.}
-
-\item{merged_region_L}{a vector of L for merged regions.}
-
 \item{merged_region_id_map}{a data frame of new region IDs and original regions IDs.}
 }
 \value{
-a list with updated region_data, region_info, LD_map, snp_map, and L.
+a list with updated region_data, region_info, LD_map, snp_map.
 }
 \description{
 Updates cTWAS input data with merged region data

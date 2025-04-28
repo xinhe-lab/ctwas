@@ -51,8 +51,11 @@
 #'
 #' @param null_method Method to compute null model, options: "ctwas", "susie" or "none".
 #'
-#' @param null_weight Prior probability of no effect (a number between
-#'   0 and 1, and cannot be exactly 1). Only used when \code{null_method = "susie"}.
+#' @param run_enrichment_test If TRUE, compute S.E. and p-value of enrichment.
+#'
+#' @param enrichment_test Method to test enrichment,
+#' options: "G" (G-test), "fisher" (Fisher's exact test).
+#' Only used when \code{run_enrichment_test = TRUE}.
 #'
 #' @param outputdir The directory to store output. If specified, save outputs to the directory.
 #'
@@ -82,7 +85,7 @@ ctwas_sumstats_noLD <- function(
     region_info,
     snp_map,
     z_gene = NULL,
-    thin = 0.1,
+    thin = 1,
     niter_prefit = 3,
     niter = 30,
     init_group_prior = NULL,
@@ -96,10 +99,8 @@ ctwas_sumstats_noLD <- function(
     min_pval = 5e-8,
     min_p_single_effect = 0.8,
     null_method = c("ctwas", "susie", "none"),
-    null_weight = NULL,
-    include_enrichment_test = TRUE,
+    run_enrichment_test = TRUE,
     enrichment_test = c("G", "fisher"),
-    include_loglik = FALSE,
     outputdir = NULL,
     outname = "ctwas_noLD",
     ncore = 1,
@@ -194,10 +195,8 @@ ctwas_sumstats_noLD <- function(
                      min_group_size = min_group_size,
                      min_p_single_effect = min_p_single_effect,
                      null_method = null_method,
-                     null_weight = null_weight,
-                     include_enrichment_test = include_enrichment_test,
+                     run_enrichment_test = run_enrichment_test,
                      enrichment_test = enrichment_test,
-                     include_loglik = include_loglik,
                      ncore = ncore,
                      verbose = verbose)
 
@@ -208,19 +207,18 @@ ctwas_sumstats_noLD <- function(
   }
 
   # Screen regions
-  #. fine-map all regions without LD
+  #. fine-map all regions without LD (using SER model, L = 1)
   #. select regions with strong non-SNP signals
-  screen_res <- screen_regions_noLD(region_data,
-                                    group_prior = group_prior,
-                                    group_prior_var = group_prior_var,
-                                    min_var = min_var,
-                                    min_gene = min_gene,
-                                    min_nonSNP_PIP = min_nonSNP_PIP,
-                                    min_pval = min_pval,
-                                    null_method = null_method,
-                                    null_weight = null_weight,
-                                    ncore = ncore,
-                                    verbose = verbose)
+  screen_res <- screen_regions(region_data,
+                               group_prior = group_prior,
+                               group_prior_var = group_prior_var,
+                               min_var = min_var,
+                               min_gene = min_gene,
+                               min_nonSNP_PIP = min_nonSNP_PIP,
+                               min_pval = min_pval,
+                               null_method = null_method,
+                               ncore = ncore,
+                               verbose = verbose)
   screened_region_data <- screen_res$screened_region_data
 
   # expand selected regions with all SNPs
@@ -243,7 +241,6 @@ ctwas_sumstats_noLD <- function(
                                 group_prior = group_prior,
                                 group_prior_var = group_prior_var,
                                 null_method = null_method,
-                                null_weight = null_weight,
                                 ncore = ncore,
                                 verbose = verbose,
                                 ...)

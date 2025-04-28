@@ -18,6 +18,12 @@
 #'
 #' @param niter the number of iterations of the E-M algorithm to perform during the complete parameter estimation step.
 #'
+#' @param min_var minimum number of variables (SNPs and genes) in a region.
+#'
+#' @param min_gene minimum number of genes in a region.
+#'
+#' @param min_group_size Minimum number of variables in a group.
+#'
 #' @param min_p_single_effect Regions with probability greater than \code{min_p_single_effect} of
 #' having at most one causal effect will be used selected for the complete parameter estimation step.
 #'
@@ -26,19 +32,13 @@
 #' @param null_weight Prior probability of no effect (a number between
 #'   0 and 1, and cannot be exactly 1). Only used when \code{null_method = "susie"}.
 #'
-#' @param include_enrichment_test If TRUE, includes enrichment test result.
+#' @param run_enrichment_test If TRUE, compute S.E. and p-value of enrichment.
 #'
 #' @param enrichment_test Method to test enrichment,
 #' options: "G" (G-test), "fisher" (Fisher's exact test).
-#' Only used when \code{test_enrichment = TRUE}.
+#' Only used when \code{run_enrichment_test = TRUE}.
 #'
 #' @param include_loglik If TRUE, includes log-likelihood over the iterations.
-#'
-#' @param min_var minimum number of variables (SNPs and genes) in a region.
-#'
-#' @param min_gene minimum number of genes in a region.
-#'
-#' @param min_group_size Minimum number of variables in a group.
 #'
 #' @param ncore The number of cores used to parallelize computation over regions.
 #'
@@ -62,15 +62,15 @@ est_param <- function(
     shared_group_prior = FALSE,
     niter_prefit = 3,
     niter = 30,
-    min_p_single_effect = 0.8,
-    null_method = c("ctwas", "susie", "none"),
-    null_weight = NULL,
-    include_enrichment_test = TRUE,
-    enrichment_test = c("G", "fisher"),
-    include_loglik = FALSE,
     min_var = 2,
     min_gene = 1,
     min_group_size = 100,
+    min_p_single_effect = 0.8,
+    null_method = c("ctwas", "susie", "none"),
+    null_weight = NULL,
+    run_enrichment_test = TRUE,
+    enrichment_test = c("G", "fisher"),
+    include_loglik = FALSE,
     ncore = 1,
     logfile = NULL,
     verbose = FALSE,
@@ -84,6 +84,7 @@ est_param <- function(
 
   # check inputs
   group_prior_var_structure <- match.arg(group_prior_var_structure)
+  null_method <- match.arg(null_method)
   enrichment_test <- match.arg(enrichment_test)
 
   if (!inherits(region_data,"list"))
@@ -230,14 +231,14 @@ est_param <- function(
                 "group_size" = group_size,
                 "p_single_effect" = p_single_effect_df)
 
-  if (include_enrichment_test){
+  if (run_enrichment_test){
     # Enrichment, S.E. and G-test using estimated group_prior and group_prior_var
-    enrichment_res <- get_enrichment_se_test(selected_region_data,
-                                             group_prior,
-                                             group_prior_var,
-                                             null_method = null_method,
-                                             enrichment_test = enrichment_test,
-                                             ncore = ncore)
+    enrichment_res <- compute_enrichment_test(selected_region_data,
+                                              group_prior,
+                                              group_prior_var,
+                                              null_method = null_method,
+                                              enrichment_test = enrichment_test,
+                                              ncore = ncore)
 
     loginfo("Estimated enrichment (log scale) {%s}: {%s}",
             names(enrichment_res$enrichment),
@@ -258,7 +259,7 @@ est_param <- function(
 }
 
 
-#' Compute standard error and p-value for enrichment using the G test
+#' Compute standard error and p-value for enrichment
 #'
 #' @param region_data a list of assembled region data.
 #'
@@ -269,24 +270,25 @@ est_param <- function(
 #' @param null_method Method to compute null model, options: "ctwas", "susie" or "none".
 #'
 #' @param enrichment_test Method to test enrichment,
-#' options: "G" (G-test), "fisher" (Fisher's exact test).
+#'"G": G-test, "fisher": Fisher's exact test.
 #'
 #' @param ncore The number of cores used to parallelize over regions
 #'
-#' @return Estimated enrichment, S.E. and p-value.
+#' @return Estimated enrichment, S.E. and p-value from G-test or Fisher's exact test.
 #'
 #' @export
 #'
 #' @importFrom parallel mclapply
 #' @importFrom AMR g.test
 #'
-get_enrichment_se_test <- function(region_data,
-                                   group_prior,
-                                   group_prior_var,
-                                   null_method = c("ctwas", "susie", "none"),
-                                   enrichment_test = c("G", "fisher"),
-                                   ncore = 1){
+compute_enrichment_test <- function(region_data,
+                                    group_prior,
+                                    group_prior_var,
+                                    null_method = c("ctwas", "susie", "none"),
+                                    enrichment_test = c("G", "fisher"),
+                                    ncore = 1){
 
+  null_method <- match.arg(null_method)
   enrichment_test <- match.arg(enrichment_test)
 
   groups <- names(group_prior)
@@ -323,7 +325,7 @@ get_enrichment_se_test <- function(region_data,
   enrichment.pval <- rep(NA, length(gene_groups))
   names(enrichment.pval) <- gene_groups
 
-  for(group in gene_groups){
+  for (group in gene_groups) {
     k0 <- group_size["SNP"]
     k1 <- group_size[group]
 
@@ -341,15 +343,14 @@ get_enrichment_se_test <- function(region_data,
     rownames(obs) <- c(group, "SNP")
 
     if (enrichment_test == "G"){
-      # evaluate statistical significance of enrichment using the G-test
+      # evaluate statistical significance of enrichment using G-test
       test_res <- g.test(obs)
       enrichment.pval[group] <- test_res$p.value
     } else if (enrichment_test == "fisher"){
-      # evaluate statistical significance of enrichment using the Fisher-test
+      # evaluate statistical significance of enrichment using Fisher's exact test
       test_res <- fisher.test(round(obs))
       enrichment.pval[group] <- test_res$p.value
     }
-
   }
 
   return(list("enrichment" = enrichment,

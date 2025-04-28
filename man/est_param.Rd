@@ -13,15 +13,15 @@ est_param(
   shared_group_prior = FALSE,
   niter_prefit = 3,
   niter = 30,
-  min_p_single_effect = 0.8,
-  null_method = c("ctwas", "susie", "none"),
-  null_weight = NULL,
-  include_enrichment_test = TRUE,
-  enrichment_test = c("G", "fisher"),
-  include_loglik = FALSE,
   min_var = 2,
   min_gene = 1,
   min_group_size = 100,
+  min_p_single_effect = 0.8,
+  null_method = c("ctwas", "susie", "none"),
+  null_weight = NULL,
+  run_enrichment_test = TRUE,
+  enrichment_test = c("G", "fisher"),
+  include_loglik = FALSE,
   ncore = 1,
   logfile = NULL,
   verbose = FALSE,
@@ -47,6 +47,12 @@ est_param(
 
 \item{niter}{the number of iterations of the E-M algorithm to perform during the complete parameter estimation step.}
 
+\item{min_var}{minimum number of variables (SNPs and genes) in a region.}
+
+\item{min_gene}{minimum number of genes in a region.}
+
+\item{min_group_size}{Minimum number of variables in a group.}
+
 \item{min_p_single_effect}{Regions with probability greater than \code{min_p_single_effect} of
 having at most one causal effect will be used selected for the complete parameter estimation step.}
 
@@ -55,19 +61,13 @@ having at most one causal effect will be used selected for the complete paramete
 \item{null_weight}{Prior probability of no effect (a number between
 0 and 1, and cannot be exactly 1). Only used when \code{null_method = "susie"}.}
 
-\item{include_enrichment_test}{If TRUE, includes enrichment test result.}
+\item{run_enrichment_test}{If TRUE, compute S.E. and p-value of enrichment.}
 
 \item{enrichment_test}{Method to test enrichment,
 options: "G" (G-test), "fisher" (Fisher's exact test).
-Only used when \code{test_enrichment = TRUE}.}
+Only used when \code{run_enrichment_test = TRUE}.}
 
 \item{include_loglik}{If TRUE, includes log-likelihood over the iterations.}
-
-\item{min_var}{minimum number of variables (SNPs and genes) in a region.}
-
-\item{min_gene}{minimum number of genes in a region.}
-
-\item{min_group_size}{Minimum number of variables in a group.}
 
 \item{ncore}{The number of cores used to parallelize computation over regions.}
 

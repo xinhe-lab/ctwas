@@ -32,20 +32,10 @@
 #' "shared_nonSNP" allows all non-SNP groups to share the same variance parameter.
 #' "independent" allows all groups to have their own separate variance parameters.
 #'
-#' @param screen_noLD If TRUE, screens regions with total non-SNP PIP >= \code{min_nonSNP_PIP}
-#' using L = 1 (no-LD).
-#'
-#' @param filter_L If TRUE, screening regions with L > 0.
-#' Only used when \code{screen_noLD = FALSE}.
-#'
-#' @param filter_nonSNP_PIP If TRUE, screening regions with total non-SNP PIP >= \code{min_nonSNP_PIP}.
-#' Only used when \code{screen_noLD = FALSE}.
-#'
 #' @param min_nonSNP_PIP Regions with non-SNP PIP >= \code{min_nonSNP_PIP}
 #' will be selected to run finemapping using all SNPs.
 #'
 #' @param min_pval Keep regions with minimum p-values from z_snp and z_gene < \code{min_pval}.
-#' Only used when \code{screen_noLD = TRUE}.
 #'
 #' @param min_p_single_effect Regions with probability greater than \code{min_p_single_effect} of
 #' having 1 or fewer effects will be used for parameter estimation.
@@ -65,8 +55,11 @@
 #'
 #' @param null_method Method to compute null model, options: "ctwas", "susie" or "none".
 #'
-#' @param null_weight Prior probability of no effect (a number between
-#'   0 and 1, and cannot be exactly 1). Only used when \code{null_method = "susie"}.
+#' @param run_enrichment_test If TRUE, compute S.E. and p-value of enrichment.
+#'
+#' @param enrichment_test Method to test enrichment,
+#' options: "G" (G-test), "fisher" (Fisher's exact test).
+#' Only used when \code{run_enrichment_test = TRUE}.
 #'
 #' @param coverage A number between 0 and 1 specifying the \dQuote{coverage} of
 #' the estimated confidence sets.
@@ -119,15 +112,13 @@ ctwas_sumstats <- function(
     LD_map,
     snp_map,
     z_gene = NULL,
-    thin = 0.1,
+    thin = 1,
     niter_prefit = 3,
     niter = 30,
     L = 5,
     init_group_prior = NULL,
     init_group_prior_var = NULL,
     group_prior_var_structure = c("shared_all", "shared_type", "shared_context", "shared_nonSNP", "independent"),
-    filter_L = FALSE,
-    filter_nonSNP_PIP = TRUE,
     screen_noLD = TRUE,
     min_nonSNP_PIP = 0.5,
     min_pval = 5e-8,
@@ -137,10 +128,8 @@ ctwas_sumstats <- function(
     min_gene = 1,
     min_group_size = 100,
     null_method = c("ctwas", "susie", "none"),
-    null_weight = NULL,
-    include_enrichment_test = TRUE,
+    run_enrichment_test = TRUE,
     enrichment_test = c("G", "fisher"),
-    include_loglik = FALSE,
     coverage = 0.95,
     min_abs_corr = 0.1,
     LD_format = c("rds", "rdata", "mtx", "csv", "txt", "custom"),
@@ -252,10 +241,8 @@ ctwas_sumstats <- function(
                      min_group_size = min_group_size,
                      min_p_single_effect = min_p_single_effect,
                      null_method = null_method,
-                     null_weight = null_weight,
-                     include_enrichment_test = include_enrichment_test,
+                     run_enrichment_test = run_enrichment_test,
                      enrichment_test = enrichment_test,
-                     include_loglik = include_loglik,
                      ncore = ncore,
                      verbose = verbose,
                      ...)
@@ -266,43 +253,18 @@ ctwas_sumstats <- function(
   }
 
   # Screen regions
-  if (screen_noLD || L == 1){
-    #. fine-map all regions without LD (using SER model, L = 1)
-    #. select regions with strong non-SNP signals
-    screen_res <- screen_regions_noLD(region_data,
-                                      group_prior = group_prior,
-                                      group_prior_var = group_prior_var,
-                                      min_var = min_var,
-                                      min_gene = min_gene,
-                                      min_nonSNP_PIP = min_nonSNP_PIP,
-                                      null_method = null_method,
-                                      null_weight = null_weight,
-                                      ncore = ncore,
-                                      verbose = verbose)
-  } else{
-    #. fine-map all regions with LD
-    #. select regions with strong non-SNP signals
-    screen_res <- screen_regions(region_data,
-                                 LD_map = LD_map,
-                                 weights = weights,
-                                 group_prior = group_prior,
-                                 group_prior_var = group_prior_var,
-                                 L = L,
-                                 min_var = min_var,
-                                 min_gene = min_gene,
-                                 filter_L = filter_L,
-                                 filter_nonSNP_PIP = filter_nonSNP_PIP,
-                                 min_nonSNP_PIP = min_nonSNP_PIP,
-                                 min_abs_corr = min_abs_corr,
-                                 null_method = null_method,
-                                 null_weight = null_weight,
-                                 LD_format = LD_format,
-                                 LD_loader_fun = LD_loader_fun,
-                                 snpinfo_loader_fun = snpinfo_loader_fun,
-                                 ncore = ncore_LD,
-                                 verbose = verbose,
-                                 ...)
-  }
+  #. fine-map all regions without LD (using SER model, L = 1)
+  #. select regions with strong non-SNP signals
+  screen_res <- screen_regions(region_data,
+                               group_prior = group_prior,
+                               group_prior_var = group_prior_var,
+                               min_var = min_var,
+                               min_gene = min_gene,
+                               min_nonSNP_PIP = min_nonSNP_PIP,
+                               min_pval = min_pval,
+                               null_method = null_method,
+                               ncore = ncore,
+                               verbose = verbose)
   screened_region_data <- screen_res$screened_region_data
 
   # expand selected regions with all SNPs
@@ -329,7 +291,6 @@ ctwas_sumstats <- function(
                            group_prior_var = group_prior_var,
                            L = L,
                            null_method = null_method,
-                           null_weight = null_weight,
                            coverage = coverage,
                            min_abs_corr = min_abs_corr,
                            force_compute_cor = force_compute_cor,

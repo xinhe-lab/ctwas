@@ -32,9 +32,9 @@ If NULL, do not create covariance files (.txg.gz), unless \code{use_top_QTL=TRUE
 \item{use_top_QTL}{If TRUE, only keep the top QTL per gene (molecular trait), and
 create a simple cov_table with covariance set to 1.}
 
-\item{select_by}{Select the top QTL by the column:
-"pval": choose the top QTL with the smallest pval per gene (molecular trait).
-"weight": choose the top QTL with the largest abs(weight) per gene (molecular trait).
+\item{select_by}{Select the top SNP by the column:
+"weight": choose the top SNP with the largest abs(weight) per gene (molecular trait),
+"pval": choose the top SNP with the smallest p-value per gene (molecular trait).
 Only used when \code{use_top_QTL=TRUE}.}
 
 \item{outputdir}{output directory}

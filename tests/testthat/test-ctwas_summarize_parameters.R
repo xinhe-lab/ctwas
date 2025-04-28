@@ -10,6 +10,8 @@ test_that("summarize_param works", {
   ctwas_parameters$enrichment_se <- NULL
   ctwas_parameters$enrichment_pval <- NULL
 
+  expected_ctwas_parameters$enrichment <- log(expected_ctwas_parameters$enrichment)
+
   expect_equal(ctwas_parameters, expected_ctwas_parameters)
 
 })
