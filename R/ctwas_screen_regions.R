@@ -82,7 +82,6 @@ screen_regions <- function(region_data,
   screen_summary <- summarize_region_signals(region_data)
   n_gids <- screen_summary$n_gids
   n_sids <- screen_summary$n_sids
-  screen_summary$L <- 1
   screen_summary$nonSNP_PIP <- NA
 
   # skip regions with fewer than min_var variables
