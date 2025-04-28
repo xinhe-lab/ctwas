@@ -7,7 +7,7 @@ test_that("get_region_cor correctly computes correlation matrices", {
   region_info <- readRDS(system.file("extdata/sample_data", "LDL_example.region_info.RDS", package = "ctwas"))
   snp_map <- readRDS(system.file("extdata/sample_data", "LDL_example.snp_map.RDS", package = "ctwas"))
   weights <- readRDS(system.file("extdata/sample_data", "LDL_example.preprocessed.weights.RDS", package = "ctwas"))
-  ctwas_res <- readRDS(system.file("extdata/sample_data", "LDL_example.ctwas_sumstats_res.RDS", package = "ctwas"))
+  ctwas_res <- readRDS(system.file("extdata/sample_data", "LDL_example.ctwas_sumstats_v0.5_res.RDS", package = "ctwas"))
 
   screened_region_data <- ctwas_res$screen_res$screened_region_data
 

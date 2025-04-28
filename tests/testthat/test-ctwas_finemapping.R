@@ -1,7 +1,7 @@
 test_that("finemap_regions_noLD works", {
 
   # finemap a single region with no-LD version
-  ctwas_res <- readRDS(system.file("extdata/sample_data", "LDL_example.ctwas_sumstats_noLD_res.RDS", package = "ctwas"))
+  ctwas_res <- readRDS(system.file("extdata/sample_data", "LDL_example.ctwas_sumstats_noLD_v0.5_res.RDS", package = "ctwas"))
   expected_finemap_res <- ctwas_res$finemap_res
   expected_susie_alpha_res <- ctwas_res$susie_alpha_res
 
@@ -22,7 +22,7 @@ test_that("finemap_regions_noLD works", {
     res <- finemap_regions_noLD(region_data = screened_region_data[region_id],
                                 group_prior = group_prior,
                                 group_prior_var = group_prior_var,
-                                null_method = "susie")
+                                null_method = "ctwas")
     finemap_res <- res$finemap_res
     susie_alpha_res <- res$susie_alpha_res
   })
@@ -40,11 +40,10 @@ test_that("finemap_regions works", {
 
   weights <- readRDS(system.file("extdata/sample_data", "LDL_example.preprocessed.weights.RDS", package = "ctwas"))
 
-  ctwas_res <- readRDS(system.file("extdata/sample_data", "LDL_example.ctwas_sumstats_res.RDS", package = "ctwas"))
+  ctwas_res <- readRDS(system.file("extdata/sample_data", "LDL_example.ctwas_sumstats_v0.5_res.RDS", package = "ctwas"))
   expected_finemap_res <- ctwas_res$finemap_res
   expected_susie_alpha_res <- ctwas_res$susie_alpha_res
   screened_region_data <- ctwas_res$screen_res$screened_region_data
-  screened_region_L <- ctwas_res$screen_res$screened_region_L
   param <- ctwas_res$param
   group_prior <- param$group_prior
   group_prior_var <- param$group_prior_var
@@ -63,8 +62,8 @@ test_that("finemap_regions works", {
                            weights = weights,
                            group_prior = group_prior,
                            group_prior_var = group_prior_var,
-                           null_method = "susie",
-                           L = screened_region_L[region_id])
+                           null_method = "ctwas",
+                           L = 5)
     finemap_res <- res$finemap_res
     susie_alpha_res <- res$susie_alpha_res
   })
@@ -78,7 +77,7 @@ test_that("finemap_regions works", {
 test_that("finemap_regions_ser works", {
 
   # finemap a single region with no-LD version
-  ctwas_res <- readRDS(system.file("extdata/sample_data", "LDL_example.ctwas_sumstats_noLD_res.RDS", package = "ctwas"))
+  ctwas_res <- readRDS(system.file("extdata/sample_data", "LDL_example.ctwas_sumstats_noLD_v0.5_res.RDS", package = "ctwas"))
   expected_finemap_res <- ctwas_res$finemap_res
   expected_susie_alpha_res <- ctwas_res$susie_alpha_res
 
@@ -99,7 +98,7 @@ test_that("finemap_regions_ser works", {
     ser_res <- finemap_regions_ser(region_data = screened_region_data[region_id],
                                    group_prior = group_prior,
                                    group_prior_var = group_prior_var,
-                                   null_method = "susie")
+                                   null_method = "ctwas")
   })
   expect_equal(ser_res$susie_pip, expected_finemap_res$susie_pip)
   expect_equal(ser_res$mu2, expected_finemap_res$mu2)

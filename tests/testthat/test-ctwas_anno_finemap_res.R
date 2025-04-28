@@ -1,7 +1,7 @@
 test_that("anno_finemap_res works", {
 
   snp_map <- readRDS(system.file("extdata/sample_data", "LDL_example.snp_map.RDS", package = "ctwas"))
-  ctwas_res <- readRDS(system.file("extdata/sample_data", "LDL_example.ctwas_sumstats_res.RDS", package = "ctwas"))
+  ctwas_res <- readRDS(system.file("extdata/sample_data", "LDL_example.ctwas_sumstats_v0.5_res.RDS", package = "ctwas"))
   finemap_res <- ctwas_res$finemap_res
   gene_annot <- readRDS(system.file("extdata/sample_data", "LDL_example.gene_annot.RDS", package = "ctwas"))
   colnames(gene_annot)[colnames(gene_annot) == "gene_id"] <- "molecular_id"
@@ -20,9 +20,37 @@ test_that("anno_finemap_res works", {
                                               use_gene_pos = "mid")
   })
 
+  # saveRDS(annotated_finemap_res, "LDL_example.annotated_finemap_res.RDS")
+
   expect_equal(annotated_finemap_res$gene_name, expected_annotated_finemap_res$gene_name)
   expect_equal(annotated_finemap_res$gene_type, expected_annotated_finemap_res$gene_type)
   expect_equal(annotated_finemap_res$pos, expected_annotated_finemap_res$pos)
 
 })
+
+test_that("anno_susie_alpha_res works", {
+
+  snp_map <- readRDS(system.file("extdata/sample_data", "LDL_example.snp_map.RDS", package = "ctwas"))
+  ctwas_res <- readRDS(system.file("extdata/sample_data", "LDL_example.ctwas_sumstats_v0.5_res.RDS", package = "ctwas"))
+  finemap_res <- ctwas_res$finemap_res
+  susie_alpha_res <- ctwas_res$susie_alpha_res
+  gene_annot <- readRDS(system.file("extdata/sample_data", "LDL_example.gene_annot.RDS", package = "ctwas"))
+  colnames(gene_annot)[colnames(gene_annot) == "gene_id"] <- "molecular_id"
+
+  expected_annotated_susie_alpha_res <- readRDS("LDL_example.annotated_susie_alpha_res.RDS")
+
+  capture.output({
+    susie_alpha_res$molecular_id <- get_molecular_ids(susie_alpha_res)
+    annotated_susie_alpha_res <- anno_susie_alpha_res(susie_alpha_res,
+                                                      mapping_table = gene_annot,
+                                                      map_by = "molecular_id",
+                                                      drop_unmapped = TRUE)
+  })
+  # saveRDS(annotated_susie_alpha_res, "LDL_example.annotated_susie_alpha_res.RDS")
+
+  expect_equal(annotated_susie_alpha_res$id, expected_annotated_susie_alpha_res$id)
+  expect_equal(annotated_susie_alpha_res$gene_name, expected_annotated_susie_alpha_res$gene_name)
+
+})
+
 
