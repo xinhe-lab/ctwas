@@ -10,8 +10,9 @@
 #'
 #' @param gwas_n integer, GWAS sample size.
 #'
-#' @param p_diff_thresh numeric, p-value threshold for identifying problematic SNPs
-#' with significant difference between observed z-scores and estimated values
+#' @param p_diff_thresh numeric, p-value cutoff for identifying problematic SNPs
+#' with significant difference between observed z-scores and estimated values.
+#' Default is 5e-6.
 #'
 #' @param LD_format file format for LD matrix. If "custom", use a user defined
 #' \code{LD_loader_fun()} function to load LD matrix.
@@ -38,7 +39,7 @@ diagnose_LD_mismatch_susie <- function(region_ids,
                                        z_snp,
                                        LD_map,
                                        gwas_n,
-                                       p_diff_thresh = 5e-8,
+                                       p_diff_thresh = 5e-6,
                                        LD_format = c("rds", "rdata", "mtx", "csv", "txt", "custom"),
                                        LD_loader_fun = NULL,
                                        snpinfo_loader_fun = NULL,
