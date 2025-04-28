@@ -142,6 +142,8 @@ est_param <- function(
 
   # Run EM for a few (niter_prefit) iterations, getting rough estimates
   loginfo("Run EM (prefit) for %d iterations, getting rough estimates ...", niter_prefit)
+  loginfo("group_prior_var_structure = '%s'", group_prior_var_structure)
+
   loginfo("Using data in %d regions", length(region_data))
   if (length(region_data) == 0){
     stop("No regions selected!")
@@ -247,7 +249,6 @@ est_param <- function(
     param$enrichment = enrichment_res$enrichment
     param$enrichment_se = enrichment_res$se
     param$enrichment_pval = enrichment_res$p.value
-    param$enrichment_test_res = enrichment_res$test_res
   }
 
   if (include_loglik){
@@ -355,6 +356,5 @@ compute_enrichment_test <- function(region_data,
 
   return(list("enrichment" = enrichment,
               "se" = enrichment.se,
-              "p.value" = enrichment.pval,
-              "test_res" = test_res))
+              "p.value" = enrichment.pval))
 }
