@@ -10,7 +10,7 @@ assemble_region_data(
   z_gene,
   weights,
   snp_map,
-  thin = 0.1,
+  thin = 1,
   maxSNP = Inf,
   min_group_size = 100,
   trim_by = c("random", "z"),
