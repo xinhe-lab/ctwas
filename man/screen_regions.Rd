@@ -2,93 +2,55 @@
 % Please edit documentation in R/ctwas_screen_regions.R
 \name{screen_regions}
 \alias{screen_regions}
-\title{Screens regions with strong signals using LD.}
+\title{Screens regions with strong signals}
 \usage{
 screen_regions(
   region_data,
-  LD_map,
-  weights,
   group_prior = NULL,
   group_prior_var = NULL,
-  L = 5,
   min_var = 2,
   min_gene = 1,
-  filter_L = FALSE,
-  filter_nonSNP_PIP = TRUE,
-  min_L = 1,
   min_nonSNP_PIP = 0.5,
-  min_abs_corr = 0.1,
+  min_pval = 5e-08,
   null_method = c("ctwas", "susie", "none"),
   null_weight = NULL,
-  LD_format = c("rds", "rdata", "mtx", "csv", "txt", "custom"),
-  LD_loader_fun = NULL,
-  snpinfo_loader_fun = NULL,
   ncore = 1,
   logfile = NULL,
-  verbose = FALSE,
-  ...
+  verbose = FALSE
 )
 }
 \arguments{
 \item{region_data}{a list object indexing regions, variants and genes.}
 
-\item{LD_map}{a data frame with filenames of LD matrices and SNP information for each of the regions.}
-
-\item{weights}{a list of preprocessed weights.}
-
 \item{group_prior}{a vector of two prior inclusion probabilities for SNPs and genes.}
 
 \item{group_prior_var}{a vector of two prior variances for SNPs and gene effects.}
-
-\item{L}{the number of effects for susie.}
 
 \item{min_var}{minimum number of variables (SNPs and genes) in a region.}
 
 \item{min_gene}{minimum number of genes in a region.}
 
-\item{filter_L}{If TRUE, screening regions with estimated credible sets
-(L) = \code{min_L}.}
-
-\item{filter_nonSNP_PIP}{If TRUE, screening regions with
-total non-SNP PIP >= \code{min_nonSNP_PIP}.}
-
-\item{min_L}{If screening by nubmer of credible sets (L),
-regions with L >= \code{min_L}
-will be selected to run finemapping using full SNPs.}
-
 \item{min_nonSNP_PIP}{If screening by non-SNP PIPs,
 regions with total non-SNP PIP >= \code{min_nonSNP_PIP}
 will be selected to run finemapping using full SNPs.}
 
-\item{min_abs_corr}{Minimum absolute correlation allowed in a credible set.}
+\item{min_pval}{Keep regions with minimum p-values from z_snp and z_gene < \code{min_pval}.}
 
 \item{null_method}{Method to compute null model, options: "ctwas", "susie" or "none".}
 
 \item{null_weight}{Prior probability of no effect (a number between
 0 and 1, and cannot be exactly 1). Only used when \code{null_method = "susie"}.}
 
-\item{LD_format}{file format for LD matrix. If "custom", use a user defined
-\code{LD_loader_fun()} function to load LD matrix.}
-
-\item{LD_loader_fun}{a user defined function to load LD matrix
-when \code{LD_format = "custom"}.}
-
-\item{snpinfo_loader_fun}{a user defined function to load SNP information file,
-if SNP information files are not in standard cTWAS reference format.}
-
 \item{ncore}{The number of cores used to parallelize susie over regions.}
 
-\item{logfile}{The log filename. If NULL, will print log info on screen.}
+\item{logfile}{The log filename. If NULL, print log info on screen.}
 
 \item{verbose}{If TRUE, print detail messages.}
-
-\item{...}{Additional arguments of \code{susie_rss}.}
 }
 \value{
 a list, containing a data frame of selected region data,
-estimated L for selected regions,
 and a data frame of screening summary for all regions.
 }
 \description{
-Screens regions with strong signals using LD.
+Screens regions with strong signals
 }
