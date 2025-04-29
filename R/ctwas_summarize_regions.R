@@ -115,7 +115,7 @@ get_L <- function(finemap_res){
 #' @return a vector of non-SNP PIPs for all regions
 #'
 #' @export
-compute_region_nonSNP_PIPs <- function(finemap_res, filter_cs = TRUE){
+compute_region_nonSNP_PIPs <- function(finemap_res, filter_cs = FALSE){
 
   region_ids <- unique(finemap_res$region_id)
   if (length(region_ids) == 0) {

@@ -198,13 +198,13 @@ group_prior_var <- param$group_prior_var
 
 After parameter estimation, we use the `screen_regions()` function to perform a screening process to select regions with likely causal signals in molecular traits. cTWAS first selects regions with minimum p-values (`min_pval`) < 5e-8 or any SNPs or all molecular traits (from `region_data`). Then, cTWAS will perform an initial fine-mapping without LD (L= 1) and compute the non-SNP PIP, i.e. total PIP of all molecular traits, for each region (using estimated priors). It then selects regions by applying a  `min_nonSNP_PIP` cutoff (0.5, by default). Only these selected regions would be subject to full fine-mapping analysis in the final step. Thus screening regions can save computational time. 
 
-```{r screen_regions_nonSNP_PIP, eval=FALSE}
-screen_res <- screen_regions_noLD(region_data,
-                                  group_prior = group_prior,
-                                  group_prior_var = group_prior_var,
-                                  min_nonSNP_PIP = 0.5,
-                                  min_pval = 5e-8,
-                                  ncore = 6)
+```{r screen_regions, eval=FALSE}
+screen_res <- screen_regions(region_data,
+                             group_prior = group_prior,
+                             group_prior_var = group_prior_var,
+                             min_nonSNP_PIP = 0.5,
+                             min_pval = 5e-8,
+                             ncore = 6)
 screened_region_data <- screen_res$screened_region_data
 screen_summary <- screen_res$screen_summary
 ```

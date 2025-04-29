@@ -441,10 +441,10 @@ expand_region_data <- function(region_data,
     stop("z_snp contains missing values!")
 
   # update SNP IDs for each region
-  thin <- sapply(region_data, "[[", "thin")
+  thin_regions <- unlist(lapply(region_data, "[[", "thin"))
 
-  if (length(which(thin < 1)) > 0) {
-    loginfo("Expand %d regions with all SNPs", length(which(thin < 1)))
+  if (length(which(thin_regions < 1)) > 0) {
+    loginfo("Expand %d regions with all SNPs", length(which(thin_regions < 1)))
     region_ids <- names(region_data)
     region_data <- mclapply_check(region_ids, function(region_id){
       # add z-scores and types of the region to the region_data

@@ -85,29 +85,31 @@ screen_regions <- function(region_data,
   screen_summary$nonSNP_PIP <- NA
 
   # skip regions with fewer than min_var variables
+  skipped_region_ids <- NULL
   if (min_var > 0) {
-    skip_region_ids <- region_ids[(n_sids + n_gids) < min_var]
-    if (length(skip_region_ids) > 0){
-      loginfo("Skip %d regions with number of variables < %d.", length(skip_region_ids), min_var)
-      region_data <- region_data[!names(region_data) %in% skip_region_ids]
+    min_var_region_ids <- region_ids[(n_sids + n_gids) < min_var]
+    if (length(min_var_region_ids) > 0){
+      loginfo("Skip %d regions with number of variables < %d.", length(min_var_region_ids), min_var)
+      skipped_region_ids <- c(skipped_region_ids, min_var_region_ids)
     }
   }
 
   # skip regions with fewer than min_gene genes
   if (min_gene > 0) {
-    skip_region_ids <- region_ids[n_gids < min_gene]
-    if (length(skip_region_ids) > 0){
-      loginfo("Skip %d regions with number of genes < %d.", length(skip_region_ids), min_gene)
-      region_data <- region_data[!names(region_data) %in% skip_region_ids]
+    min_gene_region_ids <- region_ids[n_gids < min_gene]
+    if (length(min_gene_region_ids) > 0){
+      loginfo("Skip %d regions with number of genes < %d.", length(min_gene_region_ids), min_gene)
+      skipped_region_ids <- c(skipped_region_ids, min_gene_region_ids)
     }
   }
 
   sigP_region_ids <- screen_summary$region_id[which(screen_summary$min_gene_p < min_pval | screen_summary$min_snp_p < min_pval)]
+  sigP_region_ids <- setdiff(sigP_region_ids, skipped_region_ids)
   loginfo("Selected %d regions with minimum p-value < %s.", length(sigP_region_ids), min_pval)
 
   # run finemapping for all regions without LD (L=1) using the SER model
   # select regions with total non-SNP PIPs > 0.5
-  region_ids_to_screen <- setdiff(names(region_data), sigP_region_ids)
+  region_ids_to_screen <- setdiff(region_ids, c(skipped_region_ids, sigP_region_ids))
   loginfo("Screening %d regions by non-SNP PIPs", length(region_ids_to_screen))
   finemap_screening_res <- finemap_regions_ser(region_data[region_ids_to_screen],
                                                group_prior = group_prior,
@@ -122,9 +124,9 @@ screen_regions <- function(region_data,
   screen_summary$nonSNP_PIP[idx] <- all_nonSNP_PIPs
   screened_region_ids <- screen_summary$region_id[which(screen_summary$nonSNP_PIP >= min_nonSNP_PIP)]
   loginfo("Selected %d regions with non-SNP PIP >= %s", length(screened_region_ids), min_nonSNP_PIP)
-  screened_region_ids <- sort(unique(c(screened_region_ids, sigP_region_ids)))
-  screened_region_data <- region_data[screened_region_ids]
-  loginfo("Selected %d regions in total", length(screened_region_ids))
+  all_selected_region_ids <- sort(unique(c(screened_region_ids, sigP_region_ids)))
+  screened_region_data <- region_data[all_selected_region_ids]
+  loginfo("Selected %d regions in total", length(screened_region_data))
 
   return(list("screened_region_data" = screened_region_data,
               "screen_summary" = screen_summary))
