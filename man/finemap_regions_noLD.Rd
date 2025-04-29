@@ -32,6 +32,10 @@ If NULL, it will use uniform prior inclusion probabilities.}
 \item{group_prior_var}{a vector of two prior variances for SNPs and gene effects.
 If NULL, it will set prior variance = 50 as the default in \code{susie_rss}.}
 
+\item{min_var}{minimum number of variables (SNPs and genes) in a region.}
+
+\item{min_gene}{minimum number of genes in a region.}
+
 \item{null_method}{Method to compute null model, options: "ctwas", "susie" or "none".}
 
 \item{null_weight}{Prior probability of no effect (a number between

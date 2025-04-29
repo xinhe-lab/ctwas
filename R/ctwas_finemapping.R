@@ -14,6 +14,10 @@
 #' @param group_prior_var a vector of two prior variances for SNPs and gene effects.
 #' If NULL, it will set prior variance = 50 as the default in \code{susie_rss}.
 #'
+#' @param min_var minimum number of variables (SNPs and genes) in a region.
+#'
+#' @param min_gene minimum number of genes in a region.
+#'
 #' @param null_method Method to compute null model, options: "ctwas", "susie" or "none".
 #'
 #' @param null_weight Prior probability of no effect (a number between
@@ -234,6 +238,10 @@ finemap_regions <- function(region_data,
 #'
 #' @param group_prior_var a vector of two prior variances for SNPs and gene effects.
 #' If NULL, it will set prior variance = 50 as the default in \code{susie_rss}.
+#'
+#' @param min_var minimum number of variables (SNPs and genes) in a region.
+#'
+#' @param min_gene minimum number of genes in a region.
 #'
 #' @param null_method Method to compute null model, options: "ctwas", "susie" or "none".
 #'

@@ -59,7 +59,6 @@ est_param <- function(
     init_group_prior = NULL,
     init_group_prior_var = NULL,
     group_prior_var_structure = c("shared_all", "shared_type", "shared_context", "shared_nonSNP", "independent", "fixed"),
-    shared_group_prior = FALSE,
     niter_prefit = 3,
     niter = 30,
     min_var = 2,
@@ -154,7 +153,6 @@ est_param <- function(
                           init_group_prior = init_group_prior,
                           init_group_prior_var = init_group_prior_var,
                           group_prior_var_structure = group_prior_var_structure,
-                          shared_group_prior = shared_group_prior,
                           null_method = null_method,
                           null_weight = null_weight,
                           ncore = ncore,
@@ -195,7 +193,6 @@ est_param <- function(
                    init_group_prior = EM_prefit_res$group_prior,
                    init_group_prior_var = EM_prefit_res$group_prior_var,
                    group_prior_var_structure = group_prior_var_structure,
-                   shared_group_prior = shared_group_prior,
                    null_method = null_method,
                    null_weight = null_weight,
                    ncore = ncore,
@@ -281,6 +278,7 @@ est_param <- function(
 #'
 #' @importFrom parallel mclapply
 #' @importFrom AMR g.test
+#' @importFrom stats fisher.test
 #'
 compute_enrichment_test <- function(region_data,
                                     group_prior,

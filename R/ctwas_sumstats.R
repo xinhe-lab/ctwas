@@ -119,7 +119,6 @@ ctwas_sumstats <- function(
     init_group_prior = NULL,
     init_group_prior_var = NULL,
     group_prior_var_structure = c("shared_all", "shared_type", "shared_context", "shared_nonSNP", "independent"),
-    screen_noLD = TRUE,
     min_nonSNP_PIP = 0.5,
     min_pval = 5e-8,
     min_p_single_effect = 0.8,

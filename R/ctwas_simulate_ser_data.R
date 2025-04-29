@@ -322,6 +322,7 @@ simulate_region_data <- function(group_size,
 }
 
 # simulate causal configuration
+#' @importFrom stats fisher.test rbinom
 simulate_config_single_group <- function(p, prior_weights, simulate_null_model) {
 
   # simulate beta
@@ -339,6 +340,7 @@ simulate_config_single_group <- function(p, prior_weights, simulate_null_model) 
 
 
 # simulate causal configuration
+#' @importFrom stats fisher.test rbinom
 simulate_config_groups <- function(group_size, pi_prior, simulate_null_model) {
   gene_groups = setdiff(names(group_size), "SNP")
   group_size = group_size[c(gene_groups, "SNP")]
@@ -371,40 +373,5 @@ simulate_config_groups <- function(group_size, pi_prior, simulate_null_model) {
               "gid" = gid,
               "sid" = sid,
               "gs_group" = gs_group))
-}
-
-# compute prior variance from PVE
-compute_group_prior_var_from_pve <- function(group_prior, group_pve, group_size, n,
-                                             effect_scale = c("z", "beta")) {
-  effect_scale <- match.arg(effect_scale)
-  groups <- names(group_size)
-  group_prior <- group_prior[groups]
-  group_size <- group_size[groups]
-  group_pve <- group_pve[groups]
-
-  if (effect_scale == "z") {
-    group_prior_var <- group_pve * n / (group_prior*group_size)
-  } else if (effect_scale == "beta") {
-    group_prior_var <- group_pve / (group_prior*group_size)
-  }
-  return(group_prior_var)
-}
-
-# compute group PVE
-compute_group_pve <- function(group_prior, group_prior_var, group_size, n,
-                              effect_scale = c("z", "beta")) {
-  effect_scale <- match.arg(effect_scale)
-
-  groups <- names(group_size)
-  group_prior <- group_prior[groups]
-  group_prior_var <- group_prior_var[groups]
-
-  # group PVE
-  if (effect_scale == "z") {
-    group_pve <- group_prior_var*group_prior*group_size/n
-  } else if (effect_scale == "beta") {
-    group_pve <- group_prior_var*group_prior*group_size
-  }
-  return(group_pve)
 }
 
