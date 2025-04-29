@@ -51,7 +51,7 @@ LD_map <- readRDS(system.file("extdata/sample_data", "LDL_example.LD_map.RDS", p
 We then load the cTWAS result for the sample data (chr16) using parameters estimated from the entire genome. 
 
 ```{r load_ctwas_res}
-ctwas_res <- readRDS(system.file("extdata/sample_data", "LDL_example.ctwas_sumstats_res_param_allchrs.RDS", package = "ctwas"))
+ctwas_res <- readRDS(system.file("extdata/sample_data", "LDL_example.ctwas_sumstats_res_param_allchrs_thin1_v0.5.RDS", package = "ctwas"))
 z_gene <- ctwas_res$z_gene
 param <- ctwas_res$param
 finemap_res <- ctwas_res$finemap_res
