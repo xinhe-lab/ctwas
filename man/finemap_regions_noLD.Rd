@@ -12,7 +12,10 @@ finemap_regions_noLD(
   min_gene = 1,
   null_method = c("ctwas", "susie", "none"),
   null_weight = NULL,
-  get_susie_alpha = TRUE,
+  coverage = 0.95,
+  include_cs = TRUE,
+  include_prior = FALSE,
+  include_susie_alpha = TRUE,
   snps_only = FALSE,
   ncore = 1,
   verbose = FALSE,
@@ -34,7 +37,13 @@ If NULL, it will set prior variance = 50 as the default in \code{susie_rss}.}
 \item{null_weight}{Prior probability of no effect (a number between
 0 and 1, and cannot be exactly 1). Only used when \code{null_method = "susie"}.}
 
-\item{get_susie_alpha}{If TRUE, get susie alpha matrix from finemapping results.}
+\item{coverage}{A number between 0 and 1 specifying the \dQuote{coverage} of the estimated confidence sets}
+
+\item{include_cs}{If TRUE, include credible sets (CS) to finemapping results.}
+
+\item{include_prior}{If TRUE, include priors in finemapping results.}
+
+\item{include_susie_alpha}{If TRUE, include susie alpha matrix in the result.}
 
 \item{snps_only}{If TRUE, use only SNPs in the region data.}
 

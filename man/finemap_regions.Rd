@@ -18,7 +18,8 @@ finemap_regions(
   coverage = 0.95,
   min_abs_corr = 0.1,
   include_cs = TRUE,
-  get_susie_alpha = TRUE,
+  include_prior = FALSE,
+  include_susie_alpha = TRUE,
   snps_only = FALSE,
   force_compute_cor = FALSE,
   save_cor = FALSE,
@@ -58,7 +59,9 @@ If NULL, it will set prior variance = 50 as the default in \code{susie_rss}.}
 
 \item{include_cs}{If TRUE, add credible sets (CS) to finemapping results.}
 
-\item{get_susie_alpha}{If TRUE, get susie alpha matrix from finemapping results.}
+\item{include_prior}{If TRUE, include priors in finemapping results.}
+
+\item{include_susie_alpha}{If TRUE, get susie alpha matrix from finemapping results.}
 
 \item{snps_only}{If TRUE, use only SNPs in the region data.}
 

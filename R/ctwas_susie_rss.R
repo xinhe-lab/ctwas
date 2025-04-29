@@ -53,6 +53,8 @@ anno_susie <- function(susie_res,
                        g_group = "gene",
                        region_id = NULL,
                        z = NULL,
+                       prior = NULL,
+                       prior_var = NULL,
                        include_cs = TRUE,
                        get_alpha = TRUE) {
 
@@ -72,6 +74,14 @@ anno_susie <- function(susie_res,
 
   if (!is.null(z)) {
     susie_res_df$z <- z
+  }
+
+  if (!is.null(prior)) {
+    susie_res_df$prior <- prior
+  }
+
+  if (!is.null(prior_var)) {
+    susie_res_df$prior_var <- prior_var
   }
 
   susie_res_df$susie_pip <- susie_res$pip
