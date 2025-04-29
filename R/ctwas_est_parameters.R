@@ -176,8 +176,8 @@ est_param <- function(
 
   # Select regions with single effect
   p_single_effect <- compute_region_p_single_effect(region_data, EM_prefit_res$group_prior)
-  selected_region_ids <- names(p_single_effect)[p_single_effect >= min_p_single_effect]
-  loginfo("Selected %d regions with p(single effect) >= %s", length(selected_region_ids), min_p_single_effect)
+  selected_region_ids <- names(p_single_effect)[p_single_effect > min_p_single_effect]
+  loginfo("Selected %d regions with p(single effect) > %s", length(selected_region_ids), min_p_single_effect)
   selected_region_data <- region_data[selected_region_ids]
   idx <- match(names(p_single_effect), p_single_effect_df$region_id)
   p_single_effect_df$p_single_effect[idx] <- p_single_effect
