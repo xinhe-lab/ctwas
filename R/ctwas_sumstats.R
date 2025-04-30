@@ -61,6 +61,11 @@
 #' options: "G" (G-test), "fisher" (Fisher's exact test).
 #' Only used when \code{run_enrichment_test = TRUE}.
 #'
+#' @param EM_tol A small, non-negative number specifying the convergence
+#'   tolerance of log-likelihood for the EM iterations.
+#'
+#' @param force_run_niter If TRUE, run all the \code{niter} EM iterations.
+#'
 #' @param coverage A number between 0 and 1 specifying the \dQuote{coverage} of
 #' the estimated confidence sets.
 #'
@@ -127,6 +132,8 @@ ctwas_sumstats <- function(
     min_gene = 1,
     min_group_size = 100,
     null_method = c("ctwas", "susie", "none"),
+    EM_tol = 1e-4,
+    force_run_niter = FALSE,
     run_enrichment_test = TRUE,
     enrichment_test = c("G", "fisher"),
     coverage = 0.95,
@@ -240,6 +247,8 @@ ctwas_sumstats <- function(
                      min_group_size = min_group_size,
                      min_p_single_effect = min_p_single_effect,
                      null_method = null_method,
+                     EM_tol = EM_tol,
+                     force_run_niter = force_run_niter,
                      run_enrichment_test = run_enrichment_test,
                      enrichment_test = enrichment_test,
                      ncore = ncore,

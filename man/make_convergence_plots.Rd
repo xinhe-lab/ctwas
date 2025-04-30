@@ -7,6 +7,7 @@
 make_convergence_plots(
   param,
   gwas_n,
+  plot_loglik = FALSE,
   log_enrichment = FALSE,
   title.size = 10,
   legend.size = 8,
@@ -20,6 +21,8 @@ make_convergence_plots(
 \item{param}{a list of cTWAS parameter estimation result from \code{est_param}}
 
 \item{gwas_n}{the sample size of the GWAS summary statistics}
+
+\item{plot_loglik}{If TRUE, plot log-likelihood.}
 
 \item{log_enrichment}{If TRUE, plot enrichment in log scale.}
 

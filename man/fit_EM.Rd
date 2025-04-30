@@ -9,13 +9,16 @@ fit_EM(
   groups,
   types,
   contexts,
-  niter = 20,
+  niter = 30,
   init_group_prior = NULL,
   init_group_prior_var = NULL,
   group_prior_var_structure = c("shared_all", "shared_type", "shared_context",
     "shared_nonSNP", "independent", "fixed"),
   null_method = c("ctwas", "susie", "none"),
   null_weight = NULL,
+  EM_tol = 1e-04,
+  force_run_niter = FALSE,
+  warn_converge_fail = TRUE,
   ncore = 1,
   verbose = FALSE
 )
@@ -29,7 +32,7 @@ fit_EM(
 
 \item{contexts}{a vector of the contexts to estimate parameters}
 
-\item{niter}{the number of iterations of the E-M algorithm to perform}
+\item{niter}{the maximum number of iterations of the EM algorithm to perform}
 
 \item{init_group_prior}{a vector of initial prior inclusion probabilities for SNPs and genes.}
 
@@ -46,6 +49,14 @@ fit_EM(
 
 \item{null_weight}{Prior probability of no effect (a number between
 0 and 1, and cannot be exactly 1). Only used when \code{null_method = "susie"}.}
+
+\item{EM_tol}{A small, non-negative number specifying the convergence
+tolerance of log-likelihood for the EM iterations.}
+
+\item{force_run_niter}{If TRUE, run all the \code{niter} iterations.}
+
+\item{warn_converge_fail}{If \code{warn_converge_fail = TRUE},
+prints a warning message when EM algorithm does not converge.}
 
 \item{ncore}{The number of cores used to parallelize over regions}
 

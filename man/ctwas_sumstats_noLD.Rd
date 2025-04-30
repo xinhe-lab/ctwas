@@ -25,6 +25,8 @@ ctwas_sumstats_noLD(
   min_pval = 5e-08,
   min_p_single_effect = 0.8,
   null_method = c("ctwas", "susie", "none"),
+  EM_tol = 1e-04,
+  force_run_niter = FALSE,
   run_enrichment_test = TRUE,
   enrichment_test = c("G", "fisher"),
   outputdir = NULL,
@@ -87,6 +89,11 @@ will be selected to run finemapping using full SNPs.}
 having 1 or fewer effects will be used for parameter estimation.}
 
 \item{null_method}{Method to compute null model, options: "ctwas", "susie" or "none".}
+
+\item{EM_tol}{A small, non-negative number specifying the convergence
+tolerance of log-likelihood for the EM iterations.}
+
+\item{force_run_niter}{If TRUE, run all the \code{niter} EM iterations.}
 
 \item{run_enrichment_test}{If TRUE, compute S.E. and p-value of enrichment.}
 

@@ -1,6 +1,6 @@
 test_that("est_param works", {
 
-  ctwas_res <- readRDS(system.file("extdata/sample_data", "LDL_example.ctwas_sumstats_noLD_v0.5_res.RDS", package = "ctwas"))
+  ctwas_res <- readRDS(system.file("extdata/sample_data", "LDL_example.ctwas_sumstats_noLD_res.RDS", package = "ctwas"))
   region_data <- ctwas_res$region_data
   expected_param <- ctwas_res$param
 
@@ -12,7 +12,7 @@ test_that("est_param works", {
                          group_prior_var_structure = "shared_all",
                          null_method = "ctwas",
                          run_enrichment_test = TRUE,
-                         include_loglik = FALSE,
+                         force_run_niter = TRUE,
                          ncore = 2)
     })
   })

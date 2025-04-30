@@ -532,6 +532,8 @@ make_locusplot <- function(finemap_res,
 #'
 #' @param gwas_n the sample size of the GWAS summary statistics
 #'
+#' @param plot_loglik If TRUE, plot log-likelihood.
+#'
 #' @param log_enrichment If TRUE, plot enrichment in log scale.
 #'
 #' @param title.size font size of the plot title
@@ -564,6 +566,7 @@ make_locusplot <- function(finemap_res,
 #' @export
 make_convergence_plots <- function(param,
                                    gwas_n,
+                                   plot_loglik = FALSE,
                                    log_enrichment = FALSE,
                                    title.size = 10,
                                    legend.size = 8,
@@ -694,6 +697,33 @@ make_convergence_plots <- function(param,
           legend.text = element_text(size=legend.size),
           plot.margin = margin(b=10, l=10, t=10, r=10))
 
-  cowplot::plot_grid(p_pi, p_sigma2, p_enrich, p_pve,
-                     ncol = ncol)
+  # log-likelihood plot
+  p_loglik <- NULL
+  if (plot_loglik) {
+    if (!is.null(param$loglik_iters)){
+      loglik_iters <- param$loglik_iters
+      df <- data.frame(niter = 1:length(loglik_iters),
+                       value = loglik_iters)
+      p_loglik <- ggplot(df, aes(x=.data$niter, y=.data$value)) +
+        geom_line() +
+        geom_point() +
+        xlab("Iteration") + ylab("loglik") +
+        ggtitle("log-likelihood") +
+        theme_cowplot() +
+        theme(plot.title=element_text(size=title.size)) +
+        guides(color = guide_legend(title = "")) +
+        theme(legend.title = element_text(size=legend.size, face="bold"),
+              legend.text = element_text(size=legend.size),
+              plot.margin = margin(b=10, l=10, t=10, r=10))
+
+    }
+  }
+
+  if (!is.null(p_loglik)){
+    plot_grid(p_pi, p_sigma2, p_enrich, p_pve, p_loglik, ncol = ncol)
+  } else{
+    plot_grid(p_pi, p_sigma2, p_enrich, p_pve, ncol = ncol)
+  }
+
 }
+

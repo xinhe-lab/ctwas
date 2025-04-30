@@ -14,9 +14,9 @@
 #' "independent" allows all groups to have their own separate variance parameters.
 #' "fixed" fixes variance parameters to values in \code{init_group_prior_var}.
 #'
-#' @param niter_prefit the number of iterations of the E-M algorithm to perform during the initial parameter estimation step.
+#' @param niter_prefit the maximum number of iterations of the E-M algorithm to perform during the initial parameter estimation step.
 #'
-#' @param niter the number of iterations of the E-M algorithm to perform during the complete parameter estimation step.
+#' @param niter the maximum number of iterations of the E-M algorithm to perform during the complete parameter estimation step.
 #'
 #' @param min_var minimum number of variables (SNPs and genes) in a region.
 #'
@@ -32,13 +32,16 @@
 #' @param null_weight Prior probability of no effect (a number between
 #'   0 and 1, and cannot be exactly 1). Only used when \code{null_method = "susie"}.
 #'
+#' @param EM_tol A small, non-negative number specifying the convergence
+#'   tolerance of log-likelihood for the EM iterations.
+#'
+#' @param force_run_niter If TRUE, run all the \code{niter} EM iterations.
+#'
 #' @param run_enrichment_test If TRUE, compute S.E. and p-value of enrichment.
 #'
 #' @param enrichment_test Method to test enrichment,
 #' options: "G" (G-test), "fisher" (Fisher's exact test).
 #' Only used when \code{run_enrichment_test = TRUE}.
-#'
-#' @param include_loglik If TRUE, includes log-likelihood over the iterations.
 #'
 #' @param ncore The number of cores used to parallelize computation over regions.
 #'
@@ -69,7 +72,8 @@ est_param <- function(
     null_weight = NULL,
     run_enrichment_test = TRUE,
     enrichment_test = c("G", "fisher"),
-    include_loglik = FALSE,
+    EM_tol = 1e-4,
+    force_run_niter = FALSE,
     ncore = 1,
     logfile = NULL,
     verbose = FALSE,
@@ -140,7 +144,7 @@ est_param <- function(
   }
 
   # Run EM for a few (niter_prefit) iterations, getting rough estimates
-  loginfo("Run EM (prefit) for %d iterations, getting rough estimates ...", niter_prefit)
+  loginfo("Run EM (prefit) iterations, getting rough estimates ...")
   loginfo("group_prior_var_structure = '%s'", group_prior_var_structure)
 
   loginfo("Using data in %d regions", length(region_data))
@@ -155,6 +159,9 @@ est_param <- function(
                           group_prior_var_structure = group_prior_var_structure,
                           null_method = null_method,
                           null_weight = null_weight,
+                          EM_tol = EM_tol,
+                          force_run_niter = force_run_niter,
+                          warn_converge_fail = FALSE,
                           ncore = ncore,
                           verbose = verbose)
   adjusted_EM_prefit_group_prior <- EM_prefit_res$group_prior
@@ -182,7 +189,7 @@ est_param <- function(
   rownames(p_single_effect_df) <- NULL
 
   # Run EM for more (niter) iterations, getting rough estimates
-  loginfo("Run EM for %d iterations, getting accurate estimates ...", niter)
+  loginfo("Run EM iterations, getting accurate estimates ...")
   loginfo("Using data in %d regions", length(selected_region_data))
   if (length(selected_region_data) == 0){
     stop("No regions selected!")
@@ -195,6 +202,9 @@ est_param <- function(
                    group_prior_var_structure = group_prior_var_structure,
                    null_method = null_method,
                    null_weight = null_weight,
+                   EM_tol = EM_tol,
+                   force_run_niter = force_run_niter,
+                   warn_converge_fail = TRUE,
                    ncore = ncore,
                    verbose = verbose)
   group_prior <- EM_res$group_prior
@@ -248,10 +258,10 @@ est_param <- function(
     param$enrichment_pval = enrichment_res$p.value
   }
 
-  if (include_loglik){
-    # get log-likelihood from all iterations
-    param$loglik_iters <- EM_res$loglik_iters
-  }
+  # get log-likelihood from all iterations
+  param$loglik_iters <- EM_res$loglik_iters
+  param$converged <- EM_res$converged
+  param$niter <- EM_res$niter
 
   return(param)
 }

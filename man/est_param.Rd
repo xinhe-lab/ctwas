@@ -20,7 +20,8 @@ est_param(
   null_weight = NULL,
   run_enrichment_test = TRUE,
   enrichment_test = c("G", "fisher"),
-  include_loglik = FALSE,
+  EM_tol = 1e-04,
+  force_run_niter = FALSE,
   ncore = 1,
   logfile = NULL,
   verbose = FALSE,
@@ -42,9 +43,9 @@ est_param(
 "independent" allows all groups to have their own separate variance parameters.
 "fixed" fixes variance parameters to values in \code{init_group_prior_var}.}
 
-\item{niter_prefit}{the number of iterations of the E-M algorithm to perform during the initial parameter estimation step.}
+\item{niter_prefit}{the maximum number of iterations of the E-M algorithm to perform during the initial parameter estimation step.}
 
-\item{niter}{the number of iterations of the E-M algorithm to perform during the complete parameter estimation step.}
+\item{niter}{the maximum number of iterations of the E-M algorithm to perform during the complete parameter estimation step.}
 
 \item{min_var}{minimum number of variables (SNPs and genes) in a region.}
 
@@ -66,7 +67,10 @@ having at most one causal effect will be used selected for the complete paramete
 options: "G" (G-test), "fisher" (Fisher's exact test).
 Only used when \code{run_enrichment_test = TRUE}.}
 
-\item{include_loglik}{If TRUE, includes log-likelihood over the iterations.}
+\item{EM_tol}{A small, non-negative number specifying the convergence
+tolerance of log-likelihood for the EM iterations.}
+
+\item{force_run_niter}{If TRUE, run all the \code{niter} EM iterations.}
 
 \item{ncore}{The number of cores used to parallelize computation over regions.}
 

@@ -8,7 +8,7 @@
 #'
 #' @param contexts a vector of the contexts to estimate parameters
 #'
-#' @param niter the number of iterations of the E-M algorithm to perform
+#' @param niter the maximum number of iterations of the EM algorithm to perform
 #'
 #' @param init_group_prior a vector of initial prior inclusion probabilities for SNPs and genes.
 #'
@@ -25,6 +25,14 @@
 #'
 #' @param null_weight Prior probability of no effect (a number between
 #'   0 and 1, and cannot be exactly 1). Only used when \code{null_method = "susie"}.
+#'
+#' @param EM_tol A small, non-negative number specifying the convergence
+#'   tolerance of log-likelihood for the EM iterations.
+#'
+#' @param force_run_niter If TRUE, run all the \code{niter} iterations.
+#'
+#' @param warn_converge_fail If \code{warn_converge_fail = TRUE},
+#'   prints a warning message when EM algorithm does not converge.
 #'
 #' @param ncore The number of cores used to parallelize over regions
 #'
@@ -43,12 +51,15 @@ fit_EM <- function(
     groups,
     types,
     contexts,
-    niter = 20,
+    niter = 30,
     init_group_prior = NULL,
     init_group_prior_var = NULL,
     group_prior_var_structure = c("shared_all", "shared_type", "shared_context", "shared_nonSNP", "independent", "fixed"),
     null_method = c("ctwas", "susie", "none"),
     null_weight = NULL,
+    EM_tol = 1e-4,
+    force_run_niter = FALSE,
+    warn_converge_fail = TRUE,
     ncore = 1,
     verbose = FALSE){
 
@@ -83,7 +94,10 @@ fit_EM <- function(
   rownames(group_prior_var_iters) <- groups
   colnames(group_prior_var_iters) <- paste0("iter", 1:ncol(group_prior_var_iters))
 
-  loglik_iters <- rep(NA, length = niter)
+  # Initialize loglik to NA.
+  loglik_iters <- rep(as.numeric(NA), length = niter + 1)
+  loglik_iters[1] <- -Inf
+  converged <- FALSE
 
   region_ids <- names(region_data)
   for (iter in 1:niter) {
@@ -99,10 +113,6 @@ fit_EM <- function(
     }, mc.cores = ncore, stop_if_missing = TRUE)
 
     EM_ser_res <- do.call(rbind, lapply(all_ser_res_list, "[[", "ser_res_df"))
-
-    loglik_iters[iter] <- sum(sapply(lapply(all_ser_res_list, "[[", "ser_res"), "[[", "loglik"))
-
-    rm(all_ser_res_list)
 
     # update estimated group_prior from the current iteration
     pi_prior <- sapply(names(pi_prior), function(x){mean(EM_ser_res$susie_pip[EM_ser_res$group==x])})
@@ -172,12 +182,36 @@ fit_EM <- function(
     if (verbose){
       loginfo("Iteration %d, group_prior_var {%s}: {%s}", iter, names(V_prior), format(V_prior, digits = 4))
     }
+
+    loglik_iters[iter+1] <- sum(sapply(lapply(all_ser_res_list, "[[", "ser_res"), "[[", "loglik"))
+
+    # check EM convergence
+    if (abs(loglik_iters[iter+1] - loglik_iters[iter]) < EM_tol) {
+      converged <- TRUE
+      # stop EM if converged
+      if (!force_run_niter) {
+        loginfo("Converged, stop EM.")
+        break
+      }
+    }
   }
+
+  niter = iter
+  loginfo("%d iterations done.", niter)
 
   group_size <- table(EM_ser_res$group)
   group_size <- group_size[groups]
   group_size <- as.numeric(group_size)
   names(group_size) <- groups
+
+  loglik_iters = loglik_iters[2:(niter+1)] # Remove first (-Inf) entry, and trailing NAs.
+  names(loglik_iters) <- paste0("iter", 1:length(loglik_iters))
+
+  if (!converged) {
+    if (warn_converge_fail) {
+      warning(paste("EM did not converge in",niter,"iterations! Please increase niter."))
+    }
+  }
 
   return(list("group_prior"= pi_prior,
               "group_prior_var" = V_prior,
@@ -185,6 +219,8 @@ fit_EM <- function(
               "group_prior_var_iters" = group_prior_var_iters,
               "group_prior_var_structure" = group_prior_var_structure,
               "group_size" = group_size,
-              "loglik_iters" = loglik_iters))
+              "loglik_iters" = loglik_iters,
+              "converged" = converged,
+              "niter" = niter))
 }
 

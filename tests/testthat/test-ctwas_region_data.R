@@ -6,7 +6,7 @@ test_that("assemble_region_data works", {
   z_snp <- readRDS(system.file("extdata/sample_data", "LDL_example.preprocessed.z_snp.RDS", package = "ctwas"))
   z_gene <- readRDS(system.file("extdata/sample_data", "LDL_example.z_gene.RDS", package = "ctwas"))
 
-  ctwas_res <- readRDS(system.file("extdata/sample_data", "LDL_example.ctwas_sumstats_noLD_v0.5_res.RDS", package = "ctwas"))
+  ctwas_res <- readRDS(system.file("extdata/sample_data", "LDL_example.ctwas_sumstats_noLD_res.RDS", package = "ctwas"))
   expected_region_data <- ctwas_res$region_data
   expected_boundary_genes <- ctwas_res$boundary_genes
 
@@ -36,7 +36,7 @@ test_that("expand_region_data works", {
   z_snp <- readRDS(system.file("extdata/sample_data", "LDL_example.preprocessed.z_snp.RDS", package = "ctwas"))
   z_gene <- readRDS(system.file("extdata/sample_data", "LDL_example.z_gene.RDS", package = "ctwas"))
 
-  ctwas_res <- readRDS(system.file("extdata/sample_data", "LDL_example.ctwas_sumstats_noLD_v0.5_res.RDS", package = "ctwas"))
+  ctwas_res <- readRDS(system.file("extdata/sample_data", "LDL_example.ctwas_sumstats_noLD_res.RDS", package = "ctwas"))
   region_data <- ctwas_res$region_data
   expected_screened_region_data <- ctwas_res$screen_res$screened_region_data
   screened_region_data <- region_data[names(expected_screened_region_data)]

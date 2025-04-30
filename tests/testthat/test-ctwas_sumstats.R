@@ -8,7 +8,7 @@ test_that("ctwas_sumstats works", {
   z_snp <- readRDS(system.file("extdata/sample_data", "LDL_example.preprocessed.z_snp.RDS", package = "ctwas"))
   weights <- readRDS(system.file("extdata/sample_data", "LDL_example.preprocessed.weights.RDS", package = "ctwas"))
 
-  expected_ctwas_res <- readRDS(system.file("extdata/sample_data", "LDL_example.ctwas_sumstats_v0.5_res.RDS", package = "ctwas"))
+  expected_ctwas_res <- readRDS(system.file("extdata/sample_data", "LDL_example.ctwas_sumstats_res.RDS", package = "ctwas"))
 
   capture.output({
     suppressWarnings({
@@ -24,12 +24,13 @@ test_that("ctwas_sumstats works", {
                                   min_abs_corr = 0.1,
                                   null_method = "ctwas",
                                   run_enrichment_test = TRUE,
+                                  force_run_niter = TRUE,
                                   ncore = 2,
                                   ncore_LD = 2)
     })
   })
 
-  # saveRDS(ctwas_res, "inst/extdata/sample_data/LDL_example.ctwas_sumstats_v0.5_res.RDS")
+  # saveRDS(ctwas_res, "inst/extdata/sample_data/LDL_example.ctwas_sumstats_res.RDS")
 
   # expect_equal(ctwas_res, expected_ctwas_res)
   expect_equal(ctwas_res$z_gene, expected_ctwas_res$z_gene)

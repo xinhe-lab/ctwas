@@ -1,7 +1,7 @@
 test_that("anno_finemap_res works", {
 
   snp_map <- readRDS(system.file("extdata/sample_data", "LDL_example.snp_map.RDS", package = "ctwas"))
-  ctwas_res <- readRDS(system.file("extdata/sample_data", "LDL_example.ctwas_sumstats_v0.5_res.RDS", package = "ctwas"))
+  ctwas_res <- readRDS(system.file("extdata/sample_data", "LDL_example.ctwas_sumstats_res.RDS", package = "ctwas"))
   finemap_res <- ctwas_res$finemap_res
   gene_annot <- readRDS(system.file("extdata/sample_data", "LDL_example.gene_annot.RDS", package = "ctwas"))
   colnames(gene_annot)[colnames(gene_annot) == "gene_id"] <- "molecular_id"
@@ -31,7 +31,7 @@ test_that("anno_finemap_res works", {
 test_that("anno_susie_alpha_res works", {
 
   snp_map <- readRDS(system.file("extdata/sample_data", "LDL_example.snp_map.RDS", package = "ctwas"))
-  ctwas_res <- readRDS(system.file("extdata/sample_data", "LDL_example.ctwas_sumstats_v0.5_res.RDS", package = "ctwas"))
+  ctwas_res <- readRDS(system.file("extdata/sample_data", "LDL_example.ctwas_sumstats_res.RDS", package = "ctwas"))
   finemap_res <- ctwas_res$finemap_res
   susie_alpha_res <- ctwas_res$susie_alpha_res
   gene_annot <- readRDS(system.file("extdata/sample_data", "LDL_example.gene_annot.RDS", package = "ctwas"))

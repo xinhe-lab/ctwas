@@ -51,6 +51,11 @@
 #'
 #' @param null_method Method to compute null model, options: "ctwas", "susie" or "none".
 #'
+#' @param EM_tol A small, non-negative number specifying the convergence
+#'   tolerance of log-likelihood for the EM iterations.
+#'
+#' @param force_run_niter If TRUE, run all the \code{niter} EM iterations.
+#'
 #' @param run_enrichment_test If TRUE, compute S.E. and p-value of enrichment.
 #'
 #' @param enrichment_test Method to test enrichment,
@@ -99,6 +104,8 @@ ctwas_sumstats_noLD <- function(
     min_pval = 5e-8,
     min_p_single_effect = 0.8,
     null_method = c("ctwas", "susie", "none"),
+    EM_tol = 1e-4,
+    force_run_niter = FALSE,
     run_enrichment_test = TRUE,
     enrichment_test = c("G", "fisher"),
     outputdir = NULL,
@@ -195,6 +202,8 @@ ctwas_sumstats_noLD <- function(
                      min_group_size = min_group_size,
                      min_p_single_effect = min_p_single_effect,
                      null_method = null_method,
+                     EM_tol = EM_tol,
+                     force_run_niter = force_run_niter,
                      run_enrichment_test = run_enrichment_test,
                      enrichment_test = enrichment_test,
                      ncore = ncore,

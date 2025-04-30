@@ -6,7 +6,7 @@ test_that("diagnose_LD_mismatch_susie works", {
   gwas_n <- 343621
   snp_map <- readRDS(system.file("extdata/sample_data", "LDL_example.snp_map.RDS", package = "ctwas"))
   z_snp <- readRDS(system.file("extdata/sample_data", "LDL_example.preprocessed.z_snp.RDS", package = "ctwas"))
-  ctwas_res <- readRDS(system.file("extdata/sample_data", "LDL_example.ctwas_sumstats_v0.5_res.RDS", package = "ctwas"))
+  ctwas_res <- readRDS(system.file("extdata/sample_data", "LDL_example.ctwas_sumstats_res.RDS", package = "ctwas"))
   finemap_res <- ctwas_res$finemap_res
 
   expected_LD_diagnosis_res <- readRDS("LDL_example.LD_diagnosis_res.RDS")
