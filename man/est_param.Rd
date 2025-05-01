@@ -18,6 +18,7 @@ est_param(
   min_p_single_effect = 0.8,
   null_method = c("ctwas", "susie", "none"),
   enrichment_test = c("G", "fisher"),
+  include_test_result = FALSE,
   EM_tol = 1e-04,
   force_run_niter = FALSE,
   ncore = 1,
@@ -59,6 +60,8 @@ having at most one causal effect will be used selected for the complete paramete
 \item{enrichment_test}{Method to test enrichment,
 options: "G" (G-test), "fisher" (Fisher's exact test).
 Only used when \code{run_enrichment_test = TRUE}.}
+
+\item{include_test_result}{If TRUE, return the original enrichment test result.}
 
 \item{EM_tol}{A small, non-negative number specifying the convergence
 tolerance of log-likelihood for the EM iterations.}

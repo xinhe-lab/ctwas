@@ -7,7 +7,8 @@
 compute_enrichment_test(
   group_prior,
   group_size,
-  enrichment_test = c("G", "fisher")
+  enrichment_test = c("G", "fisher"),
+  include_test_result = FALSE
 )
 }
 \arguments{
@@ -17,6 +18,8 @@ compute_enrichment_test(
 
 \item{enrichment_test}{Method to test enrichment,
 "G": G-test, "fisher": Fisher's exact test.}
+
+\item{include_test_result}{If TRUE, return the original test result.}
 }
 \value{
 Estimated enrichment, S.E. and p-value from G-test or Fisher's exact test.

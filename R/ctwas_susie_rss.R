@@ -114,10 +114,14 @@ anno_susie <- function(susie_res,
 
 }
 
-# Extracts the alpha matrix from susie result
-# adapted from susie's susie_get_pip() function
+#' extract the alpha matrix from susie result
+#' adapted from susie's susie_get_pip() function
+#'
 #' @param prune_by_cs Whether or not to ignore single effects not in
 #'   a reported CS when calculating PIP.
+#'
+#' @keywords internal
+#'
 extract_susie_alpha = function(susie_res, prune_by_cs = FALSE){
 
   if (inherits(susie_res,"susie")) {

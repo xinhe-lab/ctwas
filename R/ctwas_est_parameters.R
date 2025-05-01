@@ -38,6 +38,8 @@
 #' options: "G" (G-test), "fisher" (Fisher's exact test).
 #' Only used when \code{run_enrichment_test = TRUE}.
 #'
+#' @param include_test_result If TRUE, return the original enrichment test result.
+#'
 #' @param ncore The number of cores used to parallelize computation over regions.
 #'
 #' @param logfile The log filename. If NULL, print log info on screen.
@@ -65,6 +67,7 @@ est_param <- function(
     min_p_single_effect = 0.8,
     null_method = c("ctwas", "susie", "none"),
     enrichment_test = c("G", "fisher"),
+    include_test_result = FALSE,
     EM_tol = 1e-4,
     force_run_niter = FALSE,
     ncore = 1,
@@ -236,7 +239,8 @@ est_param <- function(
   # compute enrichment, s.e. and p-values
   enrichment_res <- compute_enrichment_test(group_prior = group_prior,
                                             group_size = group_size,
-                                            enrichment_test = enrichment_test)
+                                            enrichment_test = enrichment_test,
+                                            include_test_result = include_test_result)
 
   loginfo("Estimated enrichment (log scale) {%s}: {%s}",
           names(enrichment_res$enrichment),
@@ -245,6 +249,10 @@ est_param <- function(
   param$enrichment = enrichment_res$enrichment
   param$enrichment_se = enrichment_res$se
   param$enrichment_pval = enrichment_res$p.value
+
+  if (include_test_result) {
+    param$test_res <- enrichment_res$test_res
+  }
 
   # include log-likelihood from all iterations
   param$loglik_iters <- EM_res$loglik_iters
@@ -264,6 +272,8 @@ est_param <- function(
 #' @param enrichment_test Method to test enrichment,
 #'"G": G-test, "fisher": Fisher's exact test.
 #'
+#' @param include_test_result If TRUE, return the original test result.
+#'
 #' @return Estimated enrichment, S.E. and p-value from G-test or Fisher's exact test.
 #'
 #' @importFrom AMR g.test
@@ -273,7 +283,8 @@ est_param <- function(
 #'
 compute_enrichment_test <- function(group_prior,
                                     group_size,
-                                    enrichment_test = c("G", "fisher")){
+                                    enrichment_test = c("G", "fisher"),
+                                    include_test_result = FALSE){
 
   enrichment_test <- match.arg(enrichment_test)
 
@@ -292,6 +303,7 @@ compute_enrichment_test <- function(group_prior,
   enrichment.pval <- rep(NA, length(gene_groups))
   names(enrichment.pval) <- gene_groups
 
+  test_res_list <- list()
   for (group in gene_groups) {
     k0 <- group_size["SNP"]
     k1 <- group_size[group]
@@ -318,9 +330,17 @@ compute_enrichment_test <- function(group_prior,
       test_res <- fisher.test(round(obs))
       enrichment.pval[group] <- test_res$p.value
     }
+
+    test_res_list[[group]] <- test_res
   }
 
-  return(list("enrichment" = enrichment,
+  res <- list("enrichment" = enrichment,
               "se" = enrichment.se,
-              "p.value" = enrichment.pval))
+              "p.value" = enrichment.pval)
+
+  if (include_test_result){
+    res$test_res <- test_res_list
+  }
+
+  return(res)
 }
