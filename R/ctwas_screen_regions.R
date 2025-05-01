@@ -53,24 +53,19 @@ screen_regions <- function(region_data,
   }
 
   loginfo("Screening regions ...")
+
   null_method <- match.arg(null_method)
-
-  # extract thin value from region_data
-  thin <- unique(sapply(region_data, "[[", "thin"))
-  if (length(thin) > 1) {
-    thin <- min(thin)
-    loginfo("thin has more than one value in region_data, use the minimum thin value.")
-  }
-  loginfo("thin = %s", thin)
-
-  if (thin <= 0 || thin > 1)
-    stop("thin value needs to be in (0,1]")
 
   if (!inherits(region_data,"list"))
     stop("'region_data' should be a list.")
 
   if (anyDuplicated(names(region_data)))
     logwarn("Duplicated names of region_data found! Please use unique names for region_data!")
+
+  # use all SNPs (thin = 1) for screening
+  thin <- min(sapply(region_data, "[[", "thin"))
+  if (thin != 1)
+    stop("thin != 1, please run expand_region_data() first to include all SNPs!")
 
   # adjust group_prior to account for thin argument
   if (!is.null(group_prior)){
@@ -110,7 +105,7 @@ screen_regions <- function(region_data,
   # run finemapping for all regions without LD (L=1) using the SER model
   # select regions with total non-SNP PIPs > 0.5
   region_ids_to_screen <- setdiff(region_ids, c(skipped_region_ids, sigP_region_ids))
-  loginfo("Screening %d regions by non-SNP PIPs", length(region_ids_to_screen))
+  loginfo("Screening %d regions ...", length(region_ids_to_screen))
   finemap_screening_res <- finemap_regions_ser(region_data[region_ids_to_screen],
                                                group_prior = group_prior,
                                                group_prior_var = group_prior_var,

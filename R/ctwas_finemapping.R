@@ -107,6 +107,11 @@ finemap_regions <- function(region_data,
   if (anyDuplicated(names(region_data)))
     logwarn("Duplicated names of region_data found! Please use unique names for region_data!")
 
+  # use all SNPs (thin = 1) for finemapping
+  thin <- min(sapply(region_data, "[[", "thin"))
+  if (thin != 1)
+    stop("thin != 1, please run expand_region_data() first to include all SNPs!")
+
   if (missing(LD_map))
     stop("'LD_map' is required when running with LD!")
 
@@ -305,6 +310,11 @@ finemap_regions_noLD <- function(region_data,
   if (anyDuplicated(names(region_data)))
     logwarn("Duplicated names of region_data found! Please use unique names for region_data!")
 
+  # use all SNPs (thin = 1) for finemapping
+  thin <- min(sapply(region_data, "[[", "thin"))
+  if (thin != 1)
+    stop("thin != 1, please run expand_region_data() first to include all SNPs!")
+
   # check if all groups have group_prior and group_prior_var
   groups <- unique(unlist(lapply(region_data, "[[", "groups")))
   if (!is.null(group_prior)) {
@@ -385,38 +395,9 @@ finemap_regions_noLD <- function(region_data,
               "susie_alpha_res" = susie_alpha_res))
 }
 
-#' @title Finemap regions with cTWAS SER model
-#'
-#' @param region_data a list object with the susie input data for each region.
-#'
-#' @param group_prior a vector of prior inclusion probabilities for SNPs and genes.
-#'
-#' @param group_prior_var a vector of prior variances for SNPs and gene effects.
-#'
-#' @param min_var minimum number of variables (SNPs and genes) in a region.
-#'
-#' @param min_gene minimum number of genes in a region.
-#'
-#' @param null_method Method to compute null model, options: "ctwas", "susie" or "none".
-#'
-#' @param null_weight Prior probability of no effect (a number between
-#'   0 and 1, and cannot be exactly 1). Only used when \code{null_method = "susie"}.
-#'
-#' @param snps_only If TRUE, use only SNPs in the region data.
-#'
-#' @param ncore The number of cores used to parallelize computation over regions
-#'
-#' @param verbose If TRUE, print detail messages
-#'
-#' @param logfile the log file, if NULL will print log info on screen
-#'
-#' @return a data frame of SER result for finemapped regions
-#'
+# Finemap regions with cTWAS SER model, used in screening regions
 #' @importFrom logging addHandler loginfo logwarn writeToFile
 #' @importFrom parallel mclapply
-#'
-#' @export
-#'
 finemap_regions_ser <- function(region_data,
                                 group_prior = NULL,
                                 group_prior_var = NULL,
@@ -432,8 +413,6 @@ finemap_regions_ser <- function(region_data,
   if (!is.null(logfile)){
     addHandler(writeToFile, file=logfile, level='DEBUG')
   }
-
-  loginfo("Fine-mapping %d regions with SER model ...", length(region_data))
 
   # check inputs
   null_method <- match.arg(null_method)
@@ -487,6 +466,7 @@ finemap_regions_ser <- function(region_data,
   }
 
   if (verbose) {
+    loginfo("Fine-mapping %d regions with SER model ...", length(region_data))
     if (is.null(group_prior)) {
       loginfo("Use uniform prior")
     }
@@ -512,6 +492,7 @@ finemap_regions_ser <- function(region_data,
 }
 
 # Runs cTWAS finemapping for a single region
+#' @importFrom logging loginfo
 finemap_single_region <- function(region_data,
                                   region_id,
                                   LD_map,
@@ -683,6 +664,7 @@ finemap_single_region <- function(region_data,
 
 
 # Runs cTWAS finemapping for a single region without LD
+#' @importFrom logging loginfo
 finemap_single_region_noLD <- function(region_data,
                                        region_id,
                                        group_prior = NULL,
@@ -814,6 +796,7 @@ finemap_single_region_noLD <- function(region_data,
 }
 
 # Runs cTWAS finemapping for a single region using cTWAS SER model
+#' @importFrom logging loginfo
 finemap_single_region_ser <- function(region_data,
                                       region_id,
                                       group_prior = NULL,
@@ -900,7 +883,6 @@ finemap_single_region_ser <- function(region_data,
 }
 
 # finemap a single region with cTWAS SER model, used in EM
-# this replaces the earlier function `fast_finemap_single_region_L1_noLD()`
 fast_finemap_single_region_ser_rss <- function(region_data,
                                                region_id,
                                                pi_prior,

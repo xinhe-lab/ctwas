@@ -56,8 +56,6 @@
 #'
 #' @param force_run_niter If TRUE, run all the \code{niter} EM iterations.
 #'
-#' @param run_enrichment_test If TRUE, compute S.E. and p-value of enrichment.
-#'
 #' @param enrichment_test Method to test enrichment,
 #' options: "G" (G-test), "fisher" (Fisher's exact test).
 #' Only used when \code{run_enrichment_test = TRUE}.
@@ -106,7 +104,6 @@ ctwas_sumstats_noLD <- function(
     null_method = c("ctwas", "susie", "none"),
     EM_tol = 1e-4,
     force_run_niter = FALSE,
-    run_enrichment_test = TRUE,
     enrichment_test = c("G", "fisher"),
     outputdir = NULL,
     outname = "ctwas_noLD",
@@ -204,7 +201,6 @@ ctwas_sumstats_noLD <- function(
                      null_method = null_method,
                      EM_tol = EM_tol,
                      force_run_niter = force_run_niter,
-                     run_enrichment_test = run_enrichment_test,
                      enrichment_test = enrichment_test,
                      ncore = ncore,
                      verbose = verbose)
@@ -215,10 +211,21 @@ ctwas_sumstats_noLD <- function(
     saveRDS(param, file.path(outputdir, paste0(outname, ".param.RDS")))
   }
 
+  # expand regions with all SNPs before screening and fine-mapping
+  if (thin < 1){
+    all_region_data <- expand_region_data(region_data,
+                                          snp_map,
+                                          z_snp,
+                                          maxSNP = maxSNP,
+                                          ncore = ncore)
+  } else {
+    all_region_data <- region_data
+  }
+
   # Screen regions
   #. fine-map all regions without LD (using SER model, L = 1)
   #. select regions with strong non-SNP signals
-  screen_res <- screen_regions(region_data,
+  screen_res <- screen_regions(all_region_data,
                                group_prior = group_prior,
                                group_prior_var = group_prior_var,
                                min_var = min_var,
@@ -229,22 +236,11 @@ ctwas_sumstats_noLD <- function(
                                ncore = ncore,
                                verbose = verbose)
   screened_region_data <- screen_res$screened_region_data
-
-  # expand selected regions with all SNPs
-  if (thin < 1){
-    screened_region_data <- expand_region_data(screened_region_data,
-                                               snp_map,
-                                               z_snp,
-                                               maxSNP = maxSNP,
-                                               ncore = ncore)
-    screen_res$screened_region_data <- screened_region_data
-  }
-
   if (!is.null(outputdir)) {
     saveRDS(screen_res, file.path(outputdir, paste0(outname, ".screen_res.RDS")))
   }
 
-  # Run fine-mapping for regions with strong gene signals using full SNPs
+  # Run fine-mapping for regions with strong gene signals using all SNPs
   if (length(screened_region_data) > 0){
     res <- finemap_regions_noLD(screened_region_data,
                                 group_prior = group_prior,
@@ -255,7 +251,6 @@ ctwas_sumstats_noLD <- function(
                                 ...)
     finemap_res <- res$finemap_res
     susie_alpha_res <- res$susie_alpha_res
-
     if (!is.null(outputdir)) {
       saveRDS(finemap_res, file.path(outputdir, paste0(outname, ".finemap_res.RDS")))
       saveRDS(susie_alpha_res, file.path(outputdir, paste0(outname, ".susie_alpha_res.RDS")))
