@@ -37,8 +37,6 @@
 #'
 #' @param force_run_niter If TRUE, run all the \code{niter} EM iterations.
 #'
-#' @param run_enrichment_test If TRUE, compute S.E. and p-value of enrichment.
-#'
 #' @param enrichment_test Method to test enrichment,
 #' options: "G" (G-test), "fisher" (Fisher's exact test).
 #' Only used when \code{run_enrichment_test = TRUE}.
@@ -70,7 +68,6 @@ est_param <- function(
     min_p_single_effect = 0.8,
     null_method = c("ctwas", "susie", "none"),
     null_weight = NULL,
-    run_enrichment_test = TRUE,
     enrichment_test = c("G", "fisher"),
     EM_tol = 1e-4,
     force_run_niter = FALSE,
@@ -165,14 +162,11 @@ est_param <- function(
                           ncore = ncore,
                           verbose = verbose)
   adjusted_EM_prefit_group_prior <- EM_prefit_res$group_prior
-  group_size <- EM_prefit_res$group_size
+
   # adjust thin
   if (thin != 1){
     adjusted_EM_prefit_group_prior["SNP"] <- EM_prefit_res$group_prior["SNP"] * thin
-    group_size["SNP"] <- group_size["SNP"]/thin
   }
-  group_size <- group_size[names(EM_prefit_res$group_prior)]
-  loginfo("group_size {%s}: {%s}", names(group_size), group_size)
 
   loginfo("Roughly estimated group_prior {%s}: {%s}",
           names(EM_prefit_res$group_prior), format(adjusted_EM_prefit_group_prior, digits = 4))
@@ -215,15 +209,6 @@ est_param <- function(
   group_prior_iters <- EM_res$group_prior_iters
   group_prior_var_iters <- EM_res$group_prior_var_iters
 
-  # adjust parameters to account for thin
-  if (thin != 1){
-    group_prior["SNP"] <- group_prior["SNP"] * thin
-    group_prior_iters["SNP",] <- group_prior_iters["SNP",] * thin
-  }
-
-  loginfo("Estimated group_prior {%s}: {%s}", names(group_prior), format(group_prior, digits = 4))
-  loginfo("Estimated group_prior_var {%s}: {%s}", names(group_prior_var), format(group_prior_var, digits = 4))
-
   if (anyNA(group_prior)) {
     stop("Estimated group_prior contains NAs!")
   }
@@ -231,6 +216,20 @@ est_param <- function(
   if (anyNA(group_prior_var)) {
     stop("Estimated group_prior_var contains NAs!")
   }
+
+  group_size <- get_group_size_from_region_data(region_data)
+  group_size <- group_size[names(group_prior)]
+
+  # adjust parameters to account for thin
+  if (thin != 1){
+    group_prior["SNP"] <- group_prior["SNP"] * thin
+    group_prior_iters["SNP",] <- group_prior_iters["SNP",] * thin
+    group_size["SNP"] <- group_size["SNP"]/thin
+  }
+
+  loginfo("Estimated group_prior {%s}: {%s}", names(group_prior), format(group_prior, digits = 4))
+  loginfo("Estimated group_prior_var {%s}: {%s}", names(group_prior_var), format(group_prior_var, digits = 4))
+  loginfo("group_size {%s}: {%s}", names(group_size), group_size)
 
   param <- list("group_prior" = group_prior,
                 "group_prior_var" = group_prior_var,
@@ -240,25 +239,20 @@ est_param <- function(
                 "group_size" = group_size,
                 "p_single_effect" = p_single_effect_df)
 
-  if (run_enrichment_test){
-    # Enrichment, S.E. and G-test using estimated group_prior and group_prior_var
-    enrichment_res <- compute_enrichment_test(selected_region_data,
-                                              group_prior,
-                                              group_prior_var,
-                                              null_method = null_method,
-                                              enrichment_test = enrichment_test,
-                                              ncore = ncore)
+  # compute enrichment, s.e. and p-values
+  enrichment_res <- compute_enrichment_test(group_prior = group_prior,
+                                            group_size = group_size,
+                                            enrichment_test = enrichment_test)
 
-    loginfo("Estimated enrichment (log scale) {%s}: {%s}",
-            names(enrichment_res$enrichment),
-            format(enrichment_res$enrichment, digits = 4))
+  loginfo("Estimated enrichment (log scale) {%s}: {%s}",
+          names(enrichment_res$enrichment),
+          format(enrichment_res$enrichment, digits = 4))
 
-    param$enrichment = enrichment_res$enrichment
-    param$enrichment_se = enrichment_res$se
-    param$enrichment_pval = enrichment_res$p.value
-  }
+  param$enrichment = enrichment_res$enrichment
+  param$enrichment_se = enrichment_res$se
+  param$enrichment_pval = enrichment_res$p.value
 
-  # get log-likelihood from all iterations
+  # include log-likelihood from all iterations
   param$loglik_iters <- EM_res$loglik_iters
   param$converged <- EM_res$converged
   param$niter <- EM_res$niter
@@ -267,63 +261,33 @@ est_param <- function(
 }
 
 
-#' Compute standard error and p-value for enrichment
-#'
-#' @param region_data a list of assembled region data.
+#' @title Computes standard error and p-value for enrichment
 #'
 #' @param group_prior a vector of prior inclusion probabilities for different groups.
 #'
-#' @param group_prior_var a vector of prior variances for different groups.
-#'
-#' @param null_method Method to compute null model, options: "ctwas", "susie" or "none".
+#' @param group_size a vector of number of variables in different groups.
 #'
 #' @param enrichment_test Method to test enrichment,
 #'"G": G-test, "fisher": Fisher's exact test.
-#'
-#' @param ncore The number of cores used to parallelize over regions
 #'
 #' @return Estimated enrichment, S.E. and p-value from G-test or Fisher's exact test.
 #'
 #' @export
 #'
-#' @importFrom parallel mclapply
 #' @importFrom AMR g.test
 #' @importFrom stats fisher.test
 #'
-compute_enrichment_test <- function(region_data,
-                                    group_prior,
-                                    group_prior_var,
-                                    null_method = c("ctwas", "susie", "none"),
-                                    enrichment_test = c("G", "fisher"),
-                                    ncore = 1){
+compute_enrichment_test <- function(group_prior,
+                                    group_size,
+                                    enrichment_test = c("G", "fisher")){
 
-  null_method <- match.arg(null_method)
   enrichment_test <- match.arg(enrichment_test)
 
+  # compute sum of PIPs for each group
   groups <- names(group_prior)
-
-  # set pi_prior and V_prior based on group_prior and group_prior_var
-  res <- initialize_group_priors(group_prior[groups], group_prior_var[groups], groups)
-  pi_prior <- res$pi_prior
-  V_prior <- res$V_prior
-  rm(res)
-
-  # run finemapping with SER model to get PIPs
-  region_ids <- names(region_data)
-  all_ser_res_df_list <- mclapply_check(region_ids, function(region_id){
-    fast_finemap_single_region_ser_rss(region_data, region_id, pi_prior, V_prior,
-                                       null_method = null_method,
-                                       return_full_result = FALSE)
-  }, mc.cores = ncore, stop_if_missing = TRUE)
-  ser_res_df <- do.call(rbind, all_ser_res_df_list)
-
-  group_pip <- sapply(groups, function(x){sum(ser_res_df$susie_pip[ser_res_df$group==x])})
-  names(group_pip) <- groups
-
-  group_size <- table(ser_res_df$group)
   group_size <- group_size[groups]
-  group_size <- as.numeric(group_size)
-  names(group_size) <- groups
+  group_pip <- group_prior * group_size
+  names(group_pip) <- groups
 
   gene_groups <- setdiff(groups, "SNP")
 

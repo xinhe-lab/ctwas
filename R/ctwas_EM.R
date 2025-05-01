@@ -190,14 +190,13 @@ fit_EM <- function(
       converged <- TRUE
       # stop EM if converged
       if (!force_run_niter) {
-        loginfo("Converged, stop EM.")
+        loginfo("EM converged after %d iterations.", iter)
         break
       }
     }
   }
 
   niter = iter
-  loginfo("%d iterations done.", niter)
 
   group_size <- table(EM_ser_res$group)
   group_size <- group_size[groups]
