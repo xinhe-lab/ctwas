@@ -20,9 +20,6 @@
 #'
 #' @param null_method Method to compute null model, options: "ctwas", "susie" or "none".
 #'
-#' @param null_weight Prior probability of no effect (a number between
-#'   0 and 1, and cannot be exactly 1). Only used when \code{null_method = "susie"}.
-#'
 #' @param coverage A number between 0 and 1 specifying the \dQuote{coverage} of the estimated confidence sets
 #'
 #' @param min_abs_corr Minimum absolute correlation allowed in a credible set.

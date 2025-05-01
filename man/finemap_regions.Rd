@@ -86,9 +86,6 @@ if SNP information files are not in standard cTWAS reference format.}
 \item{logfile}{the log file, if NULL will print log info on screen}
 
 \item{...}{Additional arguments of \code{susie_rss}.}
-
-\item{null_weight}{Prior probability of no effect (a number between
-0 and 1, and cannot be exactly 1). Only used when \code{null_method = "susie"}.}
 }
 \value{
 a list with cTWAS finemapping results.
