@@ -17,18 +17,15 @@
 #'
 #' @param maxSNP Inf or integer. Maximum number of SNPs in a region. Default is
 #' Inf, no limit. This can be useful if there are many SNPs in a region and you don't
-#' have enough memory to run the program. This applies to the last rerun step
-#' (using full SNPs and rerun susie for regions with strong gene signals) only.
+#' have enough memory to run the program.
 #'
 #' @param min_group_size Minimum number of genes for a group to be included.
 #'
-#' @param trim_by remove SNPs if the total number of SNPs exceeds limit,
-#' options: "random", or "z" (trim SNPs with lower |z|).
-#' See parameter `maxSNP` for more information.
+#' @param trim_by remove SNPs if the total number of SNPs exceeds \code{maxSNP},
+#' options: "z" (trim SNPs with lower |z|), "random".
 #'
 #' @param thin_by options for thinning SNPs,
-#' "reference": thin reference SNPs,
-#' "gwas": thin GWAS SNPs.
+#' "reference": thin reference SNPs, "gwas": thin GWAS SNPs.
 #'
 #' @param adjust_boundary_genes If TRUE, identify cross-boundary genes, and
 #' adjust region_data.
@@ -54,7 +51,7 @@ assemble_region_data <- function(region_info,
                                  thin = 1,
                                  maxSNP = Inf,
                                  min_group_size = 100,
-                                 trim_by = c("random", "z"),
+                                 trim_by = c("z", "random"),
                                  thin_by = c("ref", "gwas"),
                                  adjust_boundary_genes = TRUE,
                                  ncore = 1,
@@ -241,7 +238,7 @@ assign_region_data <- function(region_info,
 #' @importFrom logging loginfo
 trim_region_data <- function(region_data,
                              z_snp,
-                             trim_by = c("random", "z"),
+                             trim_by = c("z", "random"),
                              maxSNP = Inf,
                              seed = 99){
 
