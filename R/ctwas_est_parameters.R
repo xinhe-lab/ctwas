@@ -12,7 +12,7 @@
 #' "shared_context" allows all groups in one context (tissue, cell type, condition) to share the same variance parameter.
 #' "shared_nonSNP" allows all non-SNP groups to share the same variance parameter.
 #' "independent" allows all groups to have their own separate variance parameters.
-#' "fixed" fixes variance parameters to values in \code{init_group_prior_var}.
+#' "fixed" sets prior variance parameters to values in \code{init_group_prior_var}.
 #'
 #' @param niter_prefit the maximum number of iterations of the E-M algorithm to perform during the initial parameter estimation step.
 #'
@@ -61,7 +61,7 @@ est_param <- function(
     init_group_prior_var = NULL,
     group_prior_var_structure = c("shared_all", "shared_type", "shared_context", "shared_nonSNP", "independent", "fixed"),
     niter_prefit = 3,
-    niter = 30,
+    niter = 50,
     min_var = 2,
     min_gene = 1,
     min_group_size = 100,

@@ -15,7 +15,7 @@
 #'
 #' @param niter_prefit the number of iterations of the E-M algorithm to perform during the initial parameter estimation step.
 #'
-#' @param niter the number of iterations of the E-M algorithm to perform during the complete parameter estimation step.
+#' @param niter the maximum number of iterations of the E-M algorithm to perform during the complete parameter estimation step.
 #'
 #' @param thin The proportion of SNPs to be used for estimating parameters and screening regions.
 #'
@@ -31,6 +31,7 @@
 #' "shared_context" allows all groups in one context (tissue, cell type, condition) to share the same variance parameter.
 #' "shared_nonSNP" allows all non-SNP groups to share the same variance parameter.
 #' "independent" allows all groups to have their own separate variance parameters.
+#' "fixed" sets prior variance parameters to values in \code{init_group_prior_var}.
 #'
 #' @param min_nonSNP_PIP Regions with non-SNP PIP >= \code{min_nonSNP_PIP}
 #' will be selected to run finemapping using all SNPs.
@@ -117,7 +118,7 @@ ctwas_sumstats <- function(
     z_gene = NULL,
     thin = 1,
     niter_prefit = 3,
-    niter = 30,
+    niter = 50,
     L = 5,
     init_group_prior = NULL,
     init_group_prior_var = NULL,
