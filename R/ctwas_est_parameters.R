@@ -2,9 +2,9 @@
 #'
 #' @param region_data a list object indexing regions, variants and genes.
 #'
-#' @param init_group_prior a vector of initial values of prior inclusion probabilities for SNPs and genes.
+#' @param init_group_prior a vector of initial values of prior inclusion probabilities for different groups.
 #'
-#' @param init_group_prior_var a vector of initial values of prior variances for SNPs and gene effects.
+#' @param init_group_prior_var a vector of initial values of prior variances for different groups.
 #'
 #' @param group_prior_var_structure a string indicating the structure to put on the prior variance parameters.
 #' "shared_all" allows all groups to share the same variance parameter.
@@ -28,9 +28,6 @@
 #' having at most one causal effect will be used selected for the complete parameter estimation step.
 #'
 #' @param null_method Method to compute null model, options: "ctwas", "susie" or "none".
-#'
-#' @param null_weight Prior probability of no effect (a number between
-#'   0 and 1, and cannot be exactly 1). Only used when \code{null_method = "susie"}.
 #'
 #' @param EM_tol A small, non-negative number specifying the convergence
 #'   tolerance of log-likelihood for the EM iterations.
@@ -67,7 +64,6 @@ est_param <- function(
     min_group_size = 100,
     min_p_single_effect = 0.8,
     null_method = c("ctwas", "susie", "none"),
-    null_weight = NULL,
     enrichment_test = c("G", "fisher"),
     EM_tol = 1e-4,
     force_run_niter = FALSE,
@@ -155,7 +151,6 @@ est_param <- function(
                           init_group_prior_var = init_group_prior_var,
                           group_prior_var_structure = group_prior_var_structure,
                           null_method = null_method,
-                          null_weight = null_weight,
                           EM_tol = EM_tol,
                           force_run_niter = force_run_niter,
                           warn_converge_fail = FALSE,
@@ -195,7 +190,6 @@ est_param <- function(
                    init_group_prior_var = EM_prefit_res$group_prior_var,
                    group_prior_var_structure = group_prior_var_structure,
                    null_method = null_method,
-                   null_weight = null_weight,
                    EM_tol = EM_tol,
                    force_run_niter = force_run_niter,
                    warn_converge_fail = TRUE,
@@ -261,7 +255,7 @@ est_param <- function(
 }
 
 
-#' @title Computes standard error and p-value for enrichment
+#' @title Computes enrichment (log-scale), standard error and p-value
 #'
 #' @param group_prior a vector of prior inclusion probabilities for different groups.
 #'
@@ -272,10 +266,10 @@ est_param <- function(
 #'
 #' @return Estimated enrichment, S.E. and p-value from G-test or Fisher's exact test.
 #'
-#' @export
-#'
 #' @importFrom AMR g.test
 #' @importFrom stats fisher.test
+#'
+#' @export
 #'
 compute_enrichment_test <- function(group_prior,
                                     group_size,

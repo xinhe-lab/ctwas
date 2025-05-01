@@ -3,9 +3,9 @@
 #'
 #' @param region_data a list object indexing regions, variants and genes.
 #'
-#' @param group_prior a vector of two prior inclusion probabilities for SNPs and genes.
+#' @param group_prior a vector of prior inclusion probabilities for different groups.
 #'
-#' @param group_prior_var a vector of two prior variances for SNPs and gene effects.
+#' @param group_prior_var a vector of prior variances for different groups.
 #'
 #' @param min_var minimum number of variables (SNPs and genes) in a region.
 #'
@@ -18,9 +18,6 @@
 #' @param min_pval Keep regions with minimum p-values from z_snp and z_gene < \code{min_pval}.
 #'
 #' @param null_method Method to compute null model, options: "ctwas", "susie" or "none".
-#'
-#' @param null_weight Prior probability of no effect (a number between
-#'   0 and 1, and cannot be exactly 1). Only used when \code{null_method = "susie"}.
 #'
 #' @param ncore The number of cores used to parallelize susie over regions.
 #'
@@ -43,7 +40,6 @@ screen_regions <- function(region_data,
                            min_nonSNP_PIP = 0.5,
                            min_pval = 5e-8,
                            null_method = c("ctwas", "susie", "none"),
-                           null_weight = NULL,
                            ncore = 1,
                            logfile = NULL,
                            verbose = FALSE){
@@ -64,12 +60,12 @@ screen_regions <- function(region_data,
 
   # use all SNPs (thin = 1) for screening
   thin <- min(sapply(region_data, "[[", "thin"))
-  if (thin != 1)
-    stop("thin != 1, please run expand_region_data() first to include all SNPs!")
-
-  # adjust group_prior to account for thin argument
-  if (!is.null(group_prior)){
-    group_prior["SNP"] <- group_prior["SNP"]/thin
+  if (thin != 1){
+    stop("thin != 1, run expand_region_data() first to include all SNPs!")
+    # adjust group_prior to account for thin argument
+    # if (!is.null(group_prior)){
+    #   group_prior["SNP"] <- group_prior["SNP"]/thin
+    # }
   }
 
   # create a data frame for screening summary
@@ -110,7 +106,6 @@ screen_regions <- function(region_data,
                                                group_prior = group_prior,
                                                group_prior_var = group_prior_var,
                                                null_method = null_method,
-                                               null_weight = null_weight,
                                                ncore = ncore,
                                                verbose = verbose)
   # select regions based on total non-SNP PIPs

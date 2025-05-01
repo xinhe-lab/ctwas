@@ -15,7 +15,6 @@ fit_EM(
   group_prior_var_structure = c("shared_all", "shared_type", "shared_context",
     "shared_nonSNP", "independent", "fixed"),
   null_method = c("ctwas", "susie", "none"),
-  null_weight = NULL,
   EM_tol = 1e-04,
   force_run_niter = FALSE,
   warn_converge_fail = TRUE,
@@ -46,9 +45,6 @@ fit_EM(
 "independent" allows all groups to have their own separate variance parameters.}
 
 \item{null_method}{Method to compute null weight, options: "ctwas", "susie" or "none".}
-
-\item{null_weight}{Prior probability of no effect (a number between
-0 and 1, and cannot be exactly 1). Only used when \code{null_method = "susie"}.}
 
 \item{EM_tol}{A small, non-negative number specifying the convergence
 tolerance of log-likelihood for the EM iterations.}

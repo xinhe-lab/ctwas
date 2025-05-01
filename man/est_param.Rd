@@ -17,7 +17,6 @@ est_param(
   min_group_size = 100,
   min_p_single_effect = 0.8,
   null_method = c("ctwas", "susie", "none"),
-  null_weight = NULL,
   enrichment_test = c("G", "fisher"),
   EM_tol = 1e-04,
   force_run_niter = FALSE,
@@ -30,9 +29,9 @@ est_param(
 \arguments{
 \item{region_data}{a list object indexing regions, variants and genes.}
 
-\item{init_group_prior}{a vector of initial values of prior inclusion probabilities for SNPs and genes.}
+\item{init_group_prior}{a vector of initial values of prior inclusion probabilities for different groups.}
 
-\item{init_group_prior_var}{a vector of initial values of prior variances for SNPs and gene effects.}
+\item{init_group_prior_var}{a vector of initial values of prior variances for different groups.}
 
 \item{group_prior_var_structure}{a string indicating the structure to put on the prior variance parameters.
 "shared_all" allows all groups to share the same variance parameter.
@@ -56,9 +55,6 @@ est_param(
 having at most one causal effect will be used selected for the complete parameter estimation step.}
 
 \item{null_method}{Method to compute null model, options: "ctwas", "susie" or "none".}
-
-\item{null_weight}{Prior probability of no effect (a number between
-0 and 1, and cannot be exactly 1). Only used when \code{null_method = "susie"}.}
 
 \item{enrichment_test}{Method to test enrichment,
 options: "G" (G-test), "fisher" (Fisher's exact test).

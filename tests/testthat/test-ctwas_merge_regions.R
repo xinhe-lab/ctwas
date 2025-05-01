@@ -19,7 +19,6 @@ test_that("merge_region_data_noLD works", {
                                                snp_map = snp_map,
                                                z_snp = z_snp,
                                                z_gene = z_gene,
-                                               expand = TRUE,
                                                maxSNP = 20000,
                                                ncore = 2)
   })
@@ -62,7 +61,6 @@ test_that("merge_region_data works", {
                                           weights = weights,
                                           z_snp = z_snp,
                                           z_gene = z_gene,
-                                          expand = TRUE,
                                           maxSNP = 20000,
                                           ncore = 2)
   })

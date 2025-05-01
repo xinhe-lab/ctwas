@@ -13,7 +13,6 @@ screen_regions(
   min_nonSNP_PIP = 0.5,
   min_pval = 5e-08,
   null_method = c("ctwas", "susie", "none"),
-  null_weight = NULL,
   ncore = 1,
   logfile = NULL,
   verbose = FALSE
@@ -22,9 +21,9 @@ screen_regions(
 \arguments{
 \item{region_data}{a list object indexing regions, variants and genes.}
 
-\item{group_prior}{a vector of two prior inclusion probabilities for SNPs and genes.}
+\item{group_prior}{a vector of prior inclusion probabilities for different groups.}
 
-\item{group_prior_var}{a vector of two prior variances for SNPs and gene effects.}
+\item{group_prior_var}{a vector of prior variances for different groups.}
 
 \item{min_var}{minimum number of variables (SNPs and genes) in a region.}
 
@@ -37,9 +36,6 @@ will be selected to run finemapping using full SNPs.}
 \item{min_pval}{Keep regions with minimum p-values from z_snp and z_gene < \code{min_pval}.}
 
 \item{null_method}{Method to compute null model, options: "ctwas", "susie" or "none".}
-
-\item{null_weight}{Prior probability of no effect (a number between
-0 and 1, and cannot be exactly 1). Only used when \code{null_method = "susie"}.}
 
 \item{ncore}{The number of cores used to parallelize susie over regions.}
 

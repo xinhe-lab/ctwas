@@ -8,10 +8,10 @@
 #'
 #' @param L the number of effects or a vector of number of effects for each region.
 #'
-#' @param group_prior a vector of two prior inclusion probabilities for SNPs and genes.
+#' @param group_prior a vector of prior inclusion probabilities for different groups.
 #' If NULL, it will use uniform prior inclusion probabilities.
 #'
-#' @param group_prior_var a vector of two prior variances for SNPs and gene effects.
+#' @param group_prior_var a vector of prior variances for different groups.
 #' If NULL, it will set prior variance = 50 as the default in \code{susie_rss}.
 #'
 #' @param min_var minimum number of variables (SNPs and genes) in a region.
@@ -73,7 +73,6 @@ finemap_regions <- function(region_data,
                             min_var = 2,
                             min_gene = 1,
                             null_method = c("ctwas", "susie", "none"),
-                            null_weight = NULL,
                             coverage = 0.95,
                             min_abs_corr = 0.1,
                             include_cs = TRUE,
@@ -110,7 +109,7 @@ finemap_regions <- function(region_data,
   # use all SNPs (thin = 1) for finemapping
   thin <- min(sapply(region_data, "[[", "thin"))
   if (thin != 1)
-    stop("thin != 1, please run expand_region_data() first to include all SNPs!")
+    stop("thin != 1, run expand_region_data() first to include all SNPs!")
 
   if (missing(LD_map))
     stop("'LD_map' is required when running with LD!")
@@ -203,7 +202,6 @@ finemap_regions <- function(region_data,
                           group_prior = group_prior,
                           group_prior_var = group_prior_var,
                           null_method = null_method,
-                          null_weight = null_weight,
                           coverage = coverage,
                           min_abs_corr = min_abs_corr,
                           include_cs = include_cs,
@@ -238,10 +236,10 @@ finemap_regions <- function(region_data,
 #'
 #' @param region_data region_data to be finemapped
 #'
-#' @param group_prior a vector of two prior inclusion probabilities for SNPs and genes.
+#' @param group_prior a vector of prior inclusion probabilities for different groups.
 #' If NULL, it will use uniform prior inclusion probabilities.
 #'
-#' @param group_prior_var a vector of two prior variances for SNPs and gene effects.
+#' @param group_prior_var a vector of prior variances for different groups.
 #' If NULL, it will set prior variance = 50 as the default in \code{susie_rss}.
 #'
 #' @param min_var minimum number of variables (SNPs and genes) in a region.
@@ -249,9 +247,6 @@ finemap_regions <- function(region_data,
 #' @param min_gene minimum number of genes in a region.
 #'
 #' @param null_method Method to compute null model, options: "ctwas", "susie" or "none".
-#'
-#' @param null_weight Prior probability of no effect (a number between
-#'   0 and 1, and cannot be exactly 1). Only used when \code{null_method = "susie"}.
 #'
 #' @param coverage A number between 0 and 1 specifying the \dQuote{coverage} of the estimated confidence sets
 #'
@@ -284,7 +279,6 @@ finemap_regions_noLD <- function(region_data,
                                  min_var = 2,
                                  min_gene = 1,
                                  null_method = c("ctwas", "susie", "none"),
-                                 null_weight = NULL,
                                  coverage = 0.95,
                                  include_cs = TRUE,
                                  include_prior = FALSE,
@@ -313,7 +307,7 @@ finemap_regions_noLD <- function(region_data,
   # use all SNPs (thin = 1) for finemapping
   thin <- min(sapply(region_data, "[[", "thin"))
   if (thin != 1)
-    stop("thin != 1, please run expand_region_data() first to include all SNPs!")
+    stop("thin != 1, run expand_region_data() first to include all SNPs!")
 
   # check if all groups have group_prior and group_prior_var
   groups <- unique(unlist(lapply(region_data, "[[", "groups")))
@@ -371,7 +365,6 @@ finemap_regions_noLD <- function(region_data,
                                group_prior = group_prior,
                                group_prior_var = group_prior_var,
                                null_method = null_method,
-                               null_weight = null_weight,
                                coverage = coverage,
                                include_cs = include_cs,
                                include_prior = include_prior,
@@ -404,7 +397,6 @@ finemap_regions_ser <- function(region_data,
                                 min_var = 2,
                                 min_gene = 1,
                                 null_method = c("ctwas", "susie", "none"),
-                                null_weight = NULL,
                                 snps_only = FALSE,
                                 ncore = 1,
                                 verbose = FALSE,
@@ -480,7 +472,6 @@ finemap_regions_ser <- function(region_data,
                               group_prior = group_prior,
                               group_prior_var = group_prior_var,
                               null_method = null_method,
-                              null_weight = null_weight,
                               snps_only = snps_only,
                               verbose = verbose)
   }, mc.cores = ncore, stop_if_missing = TRUE)
@@ -581,7 +572,8 @@ finemap_single_region <- function(region_data,
 
   # set prior and prior variance values for the region
   res <- set_region_susie_priors(pi_prior, V_prior, gs_group, L = L,
-                                 null_method = null_method, null_weight = null_weight)
+                                 null_method = null_method,
+                                 null_weight = null_weight)
   prior <- res$prior
   V <- res$V
   null_weight <- res$null_weight

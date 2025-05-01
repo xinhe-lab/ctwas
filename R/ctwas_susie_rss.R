@@ -44,7 +44,7 @@ ctwas_susie_rss <- function(z,
 }
 
 
-# annotate susie results with SNP and gene information
+# Annotates susie results with SNP and gene information
 anno_susie <- function(susie_res,
                        gids,
                        sids,
@@ -114,15 +114,11 @@ anno_susie <- function(susie_res,
 
 }
 
-#' extract the alpha matrix from susie result
-#' adapted from susie's susie_get_pip() function
-#'
+# Extracts the alpha matrix from susie result
+# adapted from susie's susie_get_pip() function
 #' @param prune_by_cs Whether or not to ignore single effects not in
 #'   a reported CS when calculating PIP.
-#'
-#' @keywords internal
-#'
-extract_susie_alpha = function (susie_res, prune_by_cs = FALSE) {
+extract_susie_alpha = function(susie_res, prune_by_cs = FALSE){
 
   if (inherits(susie_res,"susie")) {
 
@@ -151,7 +147,7 @@ extract_susie_alpha = function (susie_res, prune_by_cs = FALSE) {
   return(susie_alpha)
 }
 
-# extract the alpha matrix from susie result,
+# Extracts the alpha matrix from susie result,
 # and combine with annotated susie result data frame
 #' @importFrom tidyr pivot_longer
 get_susie_alpha_res <- function(susie_res,

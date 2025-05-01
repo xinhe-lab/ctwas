@@ -21,9 +21,9 @@
 #'
 #' @param L the number of effects for susie during the fine mapping steps.
 #'
-#' @param init_group_prior a vector of initial values of prior inclusion probabilities for SNPs and genes.
+#' @param init_group_prior a vector of initial values of prior inclusion probabilities for different groups.
 #'
-#' @param init_group_prior_var a vector of initial values of prior variances for SNPs and gene effects.
+#' @param init_group_prior_var a vector of initial values of prior variances for different groups.
 #'
 #' @param group_prior_var_structure a string indicating the structure to put on the prior variance parameters.
 #' "shared_all" allows all groups to share the same variance parameter.

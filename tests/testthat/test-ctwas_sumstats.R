@@ -21,10 +21,7 @@ test_that("ctwas_sumstats works", {
                                   thin = 0.1,
                                   maxSNP = 20000,
                                   min_nonSNP_PIP = 0.5,
-                                  min_abs_corr = 0.1,
                                   null_method = "ctwas",
-                                  run_enrichment_test = TRUE,
-                                  force_run_niter = TRUE,
                                   ncore = 2,
                                   ncore_LD = 2)
     })

@@ -18,8 +18,6 @@ test_that("ctwas_sumstats_noLD works", {
                                        maxSNP = 20000,
                                        min_nonSNP_PIP = 0.5,
                                        null_method = "ctwas",
-                                       run_enrichment_test = TRUE,
-                                       force_run_niter = TRUE,
                                        ncore = 2)
     })
   })

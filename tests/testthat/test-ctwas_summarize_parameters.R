@@ -8,6 +8,8 @@ test_that("summarize_param works", {
 
   ctwas_parameters <- summarize_param(param, gwas_n)
 
+  # saveRDS(ctwas_parameters, "inst/extdata/sample_data/LDL_example.ctwas_parameters.RDS")
+
   expect_equal(ctwas_parameters, expected_ctwas_parameters)
 
 })

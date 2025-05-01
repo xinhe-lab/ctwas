@@ -55,9 +55,9 @@ giving the z scores for SNPs. "A1" is effect allele. "A2" is the other allele.}
 
 \item{niter}{the maximum number of iterations of the E-M algorithm to perform during the complete parameter estimation step.}
 
-\item{init_group_prior}{a vector of initial values of prior inclusion probabilities for SNPs and genes.}
+\item{init_group_prior}{a vector of initial values of prior inclusion probabilities for different groups.}
 
-\item{init_group_prior_var}{a vector of initial values of prior variances for SNPs and gene effects.}
+\item{init_group_prior_var}{a vector of initial values of prior variances for different groups.}
 
 \item{group_prior_var_structure}{a string indicating the structure to put on the prior variance parameters.
 "shared_all" allows all groups to share the same variance parameter.

@@ -2,7 +2,7 @@
 % Please edit documentation in R/ctwas_est_parameters.R
 \name{compute_enrichment_test}
 \alias{compute_enrichment_test}
-\title{Computes standard error and p-value for enrichment}
+\title{Computes enrichment (log-scale), standard error and p-value}
 \usage{
 compute_enrichment_test(
   group_prior,
@@ -22,5 +22,5 @@ compute_enrichment_test(
 Estimated enrichment, S.E. and p-value from G-test or Fisher's exact test.
 }
 \description{
-Computes standard error and p-value for enrichment
+Computes enrichment (log-scale), standard error and p-value
 }

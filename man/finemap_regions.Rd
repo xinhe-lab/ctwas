@@ -14,7 +14,6 @@ finemap_regions(
   min_var = 2,
   min_gene = 1,
   null_method = c("ctwas", "susie", "none"),
-  null_weight = NULL,
   coverage = 0.95,
   min_abs_corr = 0.1,
   include_cs = TRUE,
@@ -42,10 +41,10 @@ finemap_regions(
 
 \item{L}{the number of effects or a vector of number of effects for each region.}
 
-\item{group_prior}{a vector of two prior inclusion probabilities for SNPs and genes.
+\item{group_prior}{a vector of prior inclusion probabilities for different groups.
 If NULL, it will use uniform prior inclusion probabilities.}
 
-\item{group_prior_var}{a vector of two prior variances for SNPs and gene effects.
+\item{group_prior_var}{a vector of prior variances for different groups.
 If NULL, it will set prior variance = 50 as the default in \code{susie_rss}.}
 
 \item{min_var}{minimum number of variables (SNPs and genes) in a region.}
@@ -53,9 +52,6 @@ If NULL, it will set prior variance = 50 as the default in \code{susie_rss}.}
 \item{min_gene}{minimum number of genes in a region.}
 
 \item{null_method}{Method to compute null model, options: "ctwas", "susie" or "none".}
-
-\item{null_weight}{Prior probability of no effect (a number between
-0 and 1, and cannot be exactly 1). Only used when \code{null_method = "susie"}.}
 
 \item{coverage}{A number between 0 and 1 specifying the \dQuote{coverage} of the estimated confidence sets}
 
@@ -90,6 +86,9 @@ if SNP information files are not in standard cTWAS reference format.}
 \item{logfile}{the log file, if NULL will print log info on screen}
 
 \item{...}{Additional arguments of \code{susie_rss}.}
+
+\item{null_weight}{Prior probability of no effect (a number between
+0 and 1, and cannot be exactly 1). Only used when \code{null_method = "susie"}.}
 }
 \value{
 a list with cTWAS finemapping results.

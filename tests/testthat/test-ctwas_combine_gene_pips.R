@@ -28,11 +28,11 @@ test_that("combine_gene_pips works", {
                                                include_cs_id = FALSE,
                                                include_set_id = FALSE)
 
-    # saveRDS(list("by_context" = combined_pip_by_context,
-    #              "by_type" = combined_pip_by_type,
-    #              "by_group" = combined_pip_by_group), "LDL_example.combined_pip_res.RDS")
-
   })
+
+  # saveRDS(list("by_context" = combined_pip_by_context,
+  #              "by_type" = combined_pip_by_type,
+  #              "by_group" = combined_pip_by_group), "LDL_example.combined_pip_res.RDS")
 
   expect_equal(combined_pip_by_context, expected_combined_pip_res$by_context)
   expect_equal(combined_pip_by_type, expected_combined_pip_res$by_type)

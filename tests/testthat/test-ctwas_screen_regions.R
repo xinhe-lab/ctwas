@@ -13,21 +13,24 @@ test_that("screen_regions works", {
   rm(ctwas_res)
 
   capture.output({
+    thin <- min(sapply(region_data, "[[", "thin"))
+    if (thin < 1){
+      region_data <- expand_region_data(region_data,
+                                            snp_map,
+                                            z_snp,
+                                            maxSNP = 20000,
+                                            ncore = 2)
+    } else {
+      region_data <- region_data
+    }
+
     screen_res <- screen_regions(region_data,
                                  group_prior = group_prior,
                                  group_prior_var = group_prior_var,
                                  min_nonSNP_PIP = 0.5,
                                  min_pval = 5e-8,
                                  null_method = "ctwas",
-                                 ncore = 1)
-    screened_region_data <- screen_res$screened_region_data
-
-    # expand selected regions with all SNPs
-    screened_region_data <- expand_region_data(screened_region_data,
-                                               snp_map,
-                                               z_snp,
-                                               maxSNP = 20000)
-    screen_res$screened_region_data <- screened_region_data
+                                 ncore = 2)
   })
 
   expect_equal(screen_res$screened_region_data, expected_screen_res$screened_region_data)
