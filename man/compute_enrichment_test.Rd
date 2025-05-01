@@ -2,34 +2,25 @@
 % Please edit documentation in R/ctwas_est_parameters.R
 \name{compute_enrichment_test}
 \alias{compute_enrichment_test}
-\title{Compute standard error and p-value for enrichment}
+\title{Computes standard error and p-value for enrichment}
 \usage{
 compute_enrichment_test(
-  region_data,
   group_prior,
-  group_prior_var,
-  null_method = c("ctwas", "susie", "none"),
-  enrichment_test = c("G", "fisher"),
-  ncore = 1
+  group_size,
+  enrichment_test = c("G", "fisher")
 )
 }
 \arguments{
-\item{region_data}{a list of assembled region data.}
-
 \item{group_prior}{a vector of prior inclusion probabilities for different groups.}
 
-\item{group_prior_var}{a vector of prior variances for different groups.}
-
-\item{null_method}{Method to compute null model, options: "ctwas", "susie" or "none".}
+\item{group_size}{a vector of number of variables in different groups.}
 
 \item{enrichment_test}{Method to test enrichment,
 "G": G-test, "fisher": Fisher's exact test.}
-
-\item{ncore}{The number of cores used to parallelize over regions}
 }
 \value{
 Estimated enrichment, S.E. and p-value from G-test or Fisher's exact test.
 }
 \description{
-Compute standard error and p-value for enrichment
+Computes standard error and p-value for enrichment
 }

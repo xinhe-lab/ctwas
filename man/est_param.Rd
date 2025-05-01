@@ -11,14 +11,13 @@ est_param(
   group_prior_var_structure = c("shared_all", "shared_type", "shared_context",
     "shared_nonSNP", "independent", "fixed"),
   niter_prefit = 3,
-  niter = 30,
+  niter = 50,
   min_var = 2,
   min_gene = 1,
   min_group_size = 100,
   min_p_single_effect = 0.8,
   null_method = c("ctwas", "susie", "none"),
   null_weight = NULL,
-  run_enrichment_test = TRUE,
   enrichment_test = c("G", "fisher"),
   EM_tol = 1e-04,
   force_run_niter = FALSE,
@@ -41,7 +40,7 @@ est_param(
 "shared_context" allows all groups in one context (tissue, cell type, condition) to share the same variance parameter.
 "shared_nonSNP" allows all non-SNP groups to share the same variance parameter.
 "independent" allows all groups to have their own separate variance parameters.
-"fixed" fixes variance parameters to values in \code{init_group_prior_var}.}
+"fixed" sets prior variance parameters to values in \code{init_group_prior_var}.}
 
 \item{niter_prefit}{the maximum number of iterations of the E-M algorithm to perform during the initial parameter estimation step.}
 
@@ -60,8 +59,6 @@ having at most one causal effect will be used selected for the complete paramete
 
 \item{null_weight}{Prior probability of no effect (a number between
 0 and 1, and cannot be exactly 1). Only used when \code{null_method = "susie"}.}
-
-\item{run_enrichment_test}{If TRUE, compute S.E. and p-value of enrichment.}
 
 \item{enrichment_test}{Method to test enrichment,
 options: "G" (G-test), "fisher" (Fisher's exact test).

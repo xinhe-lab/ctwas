@@ -13,7 +13,7 @@ ctwas_sumstats(
   z_gene = NULL,
   thin = 1,
   niter_prefit = 3,
-  niter = 30,
+  niter = 50,
   L = 5,
   init_group_prior = NULL,
   init_group_prior_var = NULL,
@@ -29,7 +29,6 @@ ctwas_sumstats(
   null_method = c("ctwas", "susie", "none"),
   EM_tol = 1e-04,
   force_run_niter = FALSE,
-  run_enrichment_test = TRUE,
   enrichment_test = c("G", "fisher"),
   coverage = 0.95,
   min_abs_corr = 0.1,
@@ -67,7 +66,7 @@ giving the z scores for SNPs. "A1" is effect allele. "A2" is the other allele.}
 
 \item{niter_prefit}{the number of iterations of the E-M algorithm to perform during the initial parameter estimation step.}
 
-\item{niter}{the number of iterations of the E-M algorithm to perform during the complete parameter estimation step.}
+\item{niter}{the maximum number of iterations of the E-M algorithm to perform during the complete parameter estimation step.}
 
 \item{L}{the number of effects for susie during the fine mapping steps.}
 
@@ -80,7 +79,8 @@ giving the z scores for SNPs. "A1" is effect allele. "A2" is the other allele.}
 "shared_type" allows all groups in one molecular QTL type to share the same variance parameter.
 "shared_context" allows all groups in one context (tissue, cell type, condition) to share the same variance parameter.
 "shared_nonSNP" allows all non-SNP groups to share the same variance parameter.
-"independent" allows all groups to have their own separate variance parameters.}
+"independent" allows all groups to have their own separate variance parameters.
+"fixed" sets prior variance parameters to values in \code{init_group_prior_var}.}
 
 \item{min_nonSNP_PIP}{Regions with non-SNP PIP >= \code{min_nonSNP_PIP}
 will be selected to run finemapping using all SNPs.}
@@ -109,8 +109,6 @@ Groups with number of genes < \code{min_group_size} will be removed for the anal
 tolerance of log-likelihood for the EM iterations.}
 
 \item{force_run_niter}{If TRUE, run all the \code{niter} EM iterations.}
-
-\item{run_enrichment_test}{If TRUE, compute S.E. and p-value of enrichment.}
 
 \item{enrichment_test}{Method to test enrichment,
 options: "G" (G-test), "fisher" (Fisher's exact test).

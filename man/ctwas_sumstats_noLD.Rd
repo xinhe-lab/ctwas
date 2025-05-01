@@ -12,7 +12,7 @@ ctwas_sumstats_noLD(
   z_gene = NULL,
   thin = 1,
   niter_prefit = 3,
-  niter = 30,
+  niter = 50,
   init_group_prior = NULL,
   init_group_prior_var = NULL,
   group_prior_var_structure = c("shared_all", "shared_type", "shared_context",
@@ -27,7 +27,6 @@ ctwas_sumstats_noLD(
   null_method = c("ctwas", "susie", "none"),
   EM_tol = 1e-04,
   force_run_niter = FALSE,
-  run_enrichment_test = TRUE,
   enrichment_test = c("G", "fisher"),
   outputdir = NULL,
   outname = "ctwas_noLD",
@@ -54,7 +53,7 @@ giving the z scores for SNPs. "A1" is effect allele. "A2" is the other allele.}
 
 \item{niter_prefit}{the number of iterations of the E-M algorithm to perform during the initial parameter estimation step.}
 
-\item{niter}{the number of iterations of the E-M algorithm to perform during the complete parameter estimation step.}
+\item{niter}{the maximum number of iterations of the E-M algorithm to perform during the complete parameter estimation step.}
 
 \item{init_group_prior}{a vector of initial values of prior inclusion probabilities for SNPs and genes.}
 
@@ -65,7 +64,8 @@ giving the z scores for SNPs. "A1" is effect allele. "A2" is the other allele.}
 "shared_type" allows all groups in one molecular QTL type to share the same variance parameter.
 "shared_context" allows all groups in one context (tissue, cell type, condition) to share the same variance parameter.
 "shared_nonSNP" allows all non-SNP groups to share the same variance parameter.
-"independent" allows all groups to have their own separate variance parameters.}
+"independent" allows all groups to have their own separate variance parameters.
+"fixed" sets prior variance parameters to values in \code{init_group_prior_var}.}
 
 \item{maxSNP}{Inf or integer. Maximum number of SNPs in a region. Default is
 Inf, no limit. This can be useful if there are many SNPs in a region and you don't
@@ -94,8 +94,6 @@ having 1 or fewer effects will be used for parameter estimation.}
 tolerance of log-likelihood for the EM iterations.}
 
 \item{force_run_niter}{If TRUE, run all the \code{niter} EM iterations.}
-
-\item{run_enrichment_test}{If TRUE, compute S.E. and p-value of enrichment.}
 
 \item{enrichment_test}{Method to test enrichment,
 options: "G" (G-test), "fisher" (Fisher's exact test).
