@@ -170,17 +170,16 @@ As described in the Introduction, cTWAS can analyze multiple groups of molecular
 - "shared_nonSNP" allows all non-SNP groups (i.e. all molecular traits) to share the same variance parameter.
 - "independent" allows all groups to have their own separate variance parameters.
 
-This step will run the EM algorithm to estimate parameters and return the estimated parameters (`group_prior`, `group_prior_var`, etc.). For technical reasons (see Methods of the cTWAS paper), it will run two rounds of EM algorithm. In the first round, it uses fewer iterations (`niter_prefit=3` by default) to get rough parameter estimates, and using these values, select regions for the analysis in the second run of EM. We use more iterations in the second round (`niter=30` by default) to get accurate parameter estimates. `min_group_size` sets the minimum number of variables in a group, as parameters cannot be reliably estimated for groups with too few variables. 
+This step will run the EM algorithm to estimate parameters and return the estimated parameters (`group_prior`, `group_prior_var`, etc.). For technical reasons (see Methods of the cTWAS paper), it will run two rounds of EM algorithm. In the first round, it uses fewer iterations (`niter_prefit=3` by default) to get rough parameter estimates, and using these values, select regions for the analysis in the second run of EM. We use more iterations in the second round (maximum `niter=50` by default) to get accurate parameter estimates. `min_group_size` sets the minimum number of variables in a group, as parameters cannot be reliably estimated for groups with too few variables. 
 
-We could compute standard errors and p-values of enrichment (`run_enrichment_test = TRUE`). We provided two options to assess the significance of enrichment: "G-test" (`enrichment_test = "G"`, default option), or Fisher's exact test (`enrichment_test = "fisher"`).
+It also computes enrichment (log scale), and its standard error. We provided two options to assess the statistical significance of enrichment: "G-test" (`enrichment_test = "G"`, default option), or Fisher's exact test (`enrichment_test = "fisher"`).
 
 ```{r est_param, eval=FALSE}
 param <- est_param(region_data, 
                    group_prior_var_structure = "shared_all", 
                    niter_prefit = 3,
-                   niter = 30, 
+                   niter = 50, 
                    min_group_size = 100,
-                   run_enrichment_test = TRUE,
                    enrichment_test = "G",
                    ncore = 6)
 group_prior <- param$group_prior
@@ -207,9 +206,9 @@ if (thin < 1){
 ```
 
 
-#### Screening regions with LD
+#### Screening regions
 
-After parameter estimation, we use the `screen_regions()` function to perform a screening process to select regions with likely causal signals in molecular traits. cTWAS first selects regions with minimum p-values (`min_pval`) < 5e-8 or any SNPs or all molecular traits (from `region_data`). Then, cTWAS will perform an initial fine-mapping without LD (L= 1) and compute the non-SNP PIP, i.e. total PIP of all molecular traits, for each region (using estimated priors). It then selects regions by applying a  `min_nonSNP_PIP` cutoff (0.5, by default). Only these selected regions would be subject to full fine-mapping analysis in the final step. Thus screening regions can save computational time. 
+We use the `screen_regions()` function to perform a screening process to select regions with likely causal signals in molecular traits. cTWAS first selects regions with minimum p-values (`min_pval`) < 5e-8 or any SNPs or all molecular traits (from `region_data`). Then, cTWAS will perform an initial fine-mapping without LD (L= 1) and compute the non-SNP PIP, i.e. total PIP of all molecular traits, for each region (using estimated priors). It then selects regions by applying a  `min_nonSNP_PIP` cutoff (0.5, by default). Only these selected regions would be subject to full fine-mapping analysis in the final step. Thus screening regions can save computational time. 
 
 ```{r screen_regions, eval=FALSE}
 screen_res <- screen_regions(region_data,
@@ -229,9 +228,7 @@ screen_summary <- screen_res$screen_summary
 
 We now perform the fine-mapping step for each of the selected regions from screening with the estimated parameters.
 
-The `finemap_regions()` function performs fine-mapping for the regions in the `screened_region_data`.
-
-It first computes correlation matrices among all variables included in fine-mapping (SNPs, and molecular traits), then runs fine-mapping with estimated parameters (`group_prior` and `group_prior_var`) with `L = 5` (default option), and returns fine-mapping results for the regions. 
+The `finemap_regions()` function performs fine-mapping for the regions in the `screened_region_data`. It first computes correlation matrices among all variables included in fine-mapping (SNPs, and molecular traits), then runs fine-mapping with estimated parameters (`group_prior` and `group_prior_var`) with `L = 5` (default option), and returns fine-mapping results for the regions. 
 
 ```{r finemap_regions, eval=FALSE}
 res <- finemap_regions(screened_region_data,
