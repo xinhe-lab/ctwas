@@ -21,7 +21,23 @@ summarize_param <- function(param, gwas_n){
   group_size <- group_size[names(group_prior)]
 
   # estimated enrichment
-  enrichment <- group_prior[names(group_prior) != "SNP"]/group_prior[names(group_prior) == "SNP"]
+  if (!is.null(param$enrichment)){
+    enrichment <- param$enrichment
+  } else {
+    enrichment <- log(group_prior[names(group_prior) != "SNP"]/group_prior[names(group_prior) == "SNP"])
+  }
+
+  if (!is.null(param$enrichment_se)){
+    enrichment_se <- param$enrichment_se
+  } else {
+    enrichment_se <- NULL
+  }
+
+  if (!is.null(param$enrichment_pval)){
+    enrichment_pval <- param$enrichment_pval
+  } else {
+    enrichment_pval <- NULL
+  }
 
   # estimated group PVE
   group_pve <- group_prior_var*group_prior*group_size/gwas_n
@@ -36,6 +52,8 @@ summarize_param <- function(param, gwas_n){
               group_prior = group_prior,
               group_prior_var = group_prior_var,
               enrichment = enrichment,
+              enrichment_se = enrichment_se,
+              enrichment_pval = enrichment_pval,
               group_pve = group_pve,
               total_pve = total_pve,
               prop_heritability = prop_heritability)

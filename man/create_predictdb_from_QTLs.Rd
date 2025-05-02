@@ -9,6 +9,7 @@ create_predictdb_from_QTLs(
   gene_table = NULL,
   cov_table = NULL,
   use_top_QTL = TRUE,
+  select_by = c("weight", "pval"),
   outputdir = getwd(),
   outname
 )
@@ -28,9 +29,13 @@ If NULL, create a simple gene_table based on the weight_table}
 "GENE","RSID1","RSID2", "VALUE".
 If NULL, do not create covariance files (.txg.gz), unless \code{use_top_QTL=TRUE}.}
 
-\item{use_top_QTL}{If TRUE, only keep the top QTL with
-the largest abs(weight) for each gene (molecular trait), and
+\item{use_top_QTL}{If TRUE, only keep the top QTL per gene (molecular trait), and
 create a simple cov_table with covariance set to 1.}
+
+\item{select_by}{Select the top SNP by the column:
+"weight": choose the top SNP with the largest abs(weight) per gene (molecular trait),
+"pval": choose the top SNP with the smallest p-value per gene (molecular trait).
+Only used when \code{use_top_QTL=TRUE}.}
 
 \item{outputdir}{output directory}
 

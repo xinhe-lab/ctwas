@@ -14,7 +14,7 @@ update_region_z(
 )
 }
 \arguments{
-\item{region_data}{a list of region gene IDs and SNP IDs and associated file names}
+\item{region_data}{a list of assembled region data.}
 
 \item{z_snp}{A data frame with columns: "id", "z", giving the z-scores for SNPs.}
 

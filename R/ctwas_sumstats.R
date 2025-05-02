@@ -15,29 +15,28 @@
 #'
 #' @param niter_prefit the number of iterations of the E-M algorithm to perform during the initial parameter estimation step.
 #'
-#' @param niter the number of iterations of the E-M algorithm to perform during the complete parameter estimation step.
+#' @param niter the maximum number of iterations of the E-M algorithm to perform during the complete parameter estimation step.
 #'
 #' @param thin The proportion of SNPs to be used for estimating parameters and screening regions.
 #'
 #' @param L the number of effects for susie during the fine mapping steps.
 #'
-#' @param init_group_prior a vector of initial values of prior inclusion probabilities for SNPs and genes.
+#' @param init_group_prior a vector of initial values of prior inclusion probabilities for different groups.
 #'
-#' @param init_group_prior_var a vector of initial values of prior variances for SNPs and gene effects.
+#' @param init_group_prior_var a vector of initial values of prior variances for different groups.
 #'
 #' @param group_prior_var_structure a string indicating the structure to put on the prior variance parameters.
+#' "shared_all" allows all groups to share the same variance parameter.
 #' "shared_type" allows all groups in one molecular QTL type to share the same variance parameter.
 #' "shared_context" allows all groups in one context (tissue, cell type, condition) to share the same variance parameter.
 #' "shared_nonSNP" allows all non-SNP groups to share the same variance parameter.
-#' "shared_all" allows all groups to share the same variance parameter.
 #' "independent" allows all groups to have their own separate variance parameters.
-#'
-#' @param filter_L If TRUE, screening regions with L > 0.
-#'
-#' @param filter_nonSNP_PIP If TRUE, screening regions with total non-SNP PIP >= \code{min_nonSNP_PIP}.
+#' "fixed" sets prior variance parameters to values in \code{init_group_prior_var}.
 #'
 #' @param min_nonSNP_PIP Regions with non-SNP PIP >= \code{min_nonSNP_PIP}
 #' will be selected to run finemapping using all SNPs.
+#'
+#' @param min_pval Keep regions with minimum p-values from z_snp and z_gene < \code{min_pval}.
 #'
 #' @param min_p_single_effect Regions with probability greater than \code{min_p_single_effect} of
 #' having 1 or fewer effects will be used for parameter estimation.
@@ -55,7 +54,16 @@
 #' @param min_group_size Minimum number of genes in a group.
 #' Groups with number of genes < \code{min_group_size} will be removed for the analysis.
 #'
-#' @param use_null_weight If TRUE, allow for a probability of no effect in susie.
+#' @param null_method Method to compute null model, options: "ctwas", "susie" or "none".
+#'
+#' @param enrichment_test Method to test enrichment,
+#' options: "G" (G-test), "fisher" (Fisher's exact test).
+#' Only used when \code{run_enrichment_test = TRUE}.
+#'
+#' @param EM_tol A small, non-negative number specifying the convergence
+#'   tolerance of log-likelihood for the EM iterations.
+#'
+#' @param force_run_niter If TRUE, run all the \code{niter} EM iterations.
 #'
 #' @param coverage A number between 0 and 1 specifying the \dQuote{coverage} of
 #' the estimated confidence sets.
@@ -108,22 +116,24 @@ ctwas_sumstats <- function(
     LD_map,
     snp_map,
     z_gene = NULL,
-    thin = 0.1,
+    thin = 1,
     niter_prefit = 3,
-    niter = 30,
+    niter = 50,
     L = 5,
     init_group_prior = NULL,
     init_group_prior_var = NULL,
-    group_prior_var_structure = c("shared_type", "shared_context", "shared_nonSNP", "shared_all", "independent"),
-    filter_L = TRUE,
-    filter_nonSNP_PIP = FALSE,
+    group_prior_var_structure = c("shared_all", "shared_type", "shared_context", "shared_nonSNP", "independent"),
     min_nonSNP_PIP = 0.5,
+    min_pval = 5e-8,
     min_p_single_effect = 0.8,
     maxSNP = Inf,
     min_var = 2,
     min_gene = 1,
     min_group_size = 100,
-    use_null_weight = TRUE,
+    null_method = c("ctwas", "susie", "none"),
+    EM_tol = 1e-4,
+    force_run_niter = FALSE,
+    enrichment_test = c("G", "fisher"),
     coverage = 0.95,
     min_abs_corr = 0.1,
     LD_format = c("rds", "rdata", "mtx", "csv", "txt", "custom"),
@@ -145,12 +155,14 @@ ctwas_sumstats <- function(
     addHandler(writeToFile, file=logfile, level='DEBUG')
   }
 
-  loginfo("Running cTWAS analysis ...")
+  loginfo("Running cTWAS ...")
   loginfo("ctwas version: %s", packageVersion("ctwas"))
 
   # check inputs
   group_prior_var_structure <- match.arg(group_prior_var_structure)
   LD_format <- match.arg(LD_format)
+  null_method <- match.arg(null_method)
+  enrichment_test <- match.arg(enrichment_test)
 
   if (anyNA(z_snp))
     stop("z_snp contains missing values!")
@@ -214,6 +226,7 @@ ctwas_sumstats <- function(
                                           seed = seed)
   region_data <- region_data_res$region_data
   boundary_genes <- region_data_res$boundary_genes
+  rm(region_data_res)
   if (!is.null(outputdir)) {
     saveRDS(region_data, file.path(outputdir, paste0(outname, ".region_data.thin", thin, ".RDS")))
     saveRDS(boundary_genes, file.path(outputdir, paste0(outname, ".boundary_genes.RDS")))
@@ -221,7 +234,7 @@ ctwas_sumstats <- function(
 
   # Estimate parameters
   #. get region_data for all the regions
-  #. run EM for two rounds with thinned SNPs using L = 1
+  #. run EM for two rounds using the SER model (L = 1)
   param <- est_param(region_data,
                      init_group_prior = init_group_prior,
                      init_group_prior_var = init_group_prior_var,
@@ -232,6 +245,10 @@ ctwas_sumstats <- function(
                      min_gene = min_gene,
                      min_group_size = min_group_size,
                      min_p_single_effect = min_p_single_effect,
+                     null_method = null_method,
+                     EM_tol = EM_tol,
+                     force_run_niter = force_run_niter,
+                     enrichment_test = enrichment_test,
                      ncore = ncore,
                      verbose = verbose,
                      ...)
@@ -241,45 +258,36 @@ ctwas_sumstats <- function(
     saveRDS(param, file.path(outputdir, paste0(outname, ".param.RDS")))
   }
 
-  # Screen regions
-  #. fine-map all regions with thinned SNPs
-  #. select regions with L > 0 or with high non-SNP PIP
-  screen_res <- screen_regions(region_data,
-                               LD_map = LD_map,
-                               weights = weights,
-                               group_prior = group_prior,
-                               group_prior_var = group_prior_var,
-                               L = L,
-                               min_var = min_var,
-                               min_gene = min_gene,
-                               filter_L = filter_L,
-                               filter_nonSNP_PIP = filter_nonSNP_PIP,
-                               min_nonSNP_PIP = min_nonSNP_PIP,
-                               min_abs_corr = min_abs_corr,
-                               LD_format = LD_format,
-                               LD_loader_fun = LD_loader_fun,
-                               snpinfo_loader_fun = snpinfo_loader_fun,
-                               ncore = ncore_LD,
-                               verbose = verbose,
-                               ...)
-  screened_region_data <- screen_res$screened_region_data
-  screened_region_L <- screen_res$screened_region_L
-
-  # expand selected regions with all SNPs
-  if (thin < 1){
-    screened_region_data <- expand_region_data(screened_region_data,
-                                               snp_map,
-                                               z_snp,
-                                               maxSNP = maxSNP,
-                                               ncore = ncore)
-    screen_res$screened_region_data <- screened_region_data
+  # expand regions with all SNPs before screening and fine-mapping
+  if (thin < 1) {
+    all_region_data <- expand_region_data(region_data,
+                                          snp_map,
+                                          z_snp,
+                                          maxSNP = maxSNP,
+                                          ncore = ncore)
+  } else {
+    all_region_data <- region_data
   }
 
+  # Screen regions
+  #. fine-map all regions without LD (using SER model, L = 1)
+  #. select regions with strong non-SNP signals
+  screen_res <- screen_regions(all_region_data,
+                               group_prior = group_prior,
+                               group_prior_var = group_prior_var,
+                               min_var = min_var,
+                               min_gene = min_gene,
+                               min_nonSNP_PIP = min_nonSNP_PIP,
+                               min_pval = min_pval,
+                               null_method = null_method,
+                               ncore = ncore,
+                               verbose = verbose)
+  screened_region_data <- screen_res$screened_region_data
   if (!is.null(outputdir)) {
     saveRDS(screen_res, file.path(outputdir, paste0(outname, ".screen_res.RDS")))
   }
 
-  # Run fine-mapping for regions with strong gene signals using full SNPs
+  # Run fine-mapping for regions with strong gene signals using all SNPs
   #. save correlation matrices if save_cor is TRUE
   if (length(screened_region_data) > 0){
     res <- finemap_regions(screened_region_data,
@@ -287,8 +295,8 @@ ctwas_sumstats <- function(
                            weights = weights,
                            group_prior = group_prior,
                            group_prior_var = group_prior_var,
-                           L = screened_region_L,
-                           use_null_weight = use_null_weight,
+                           L = L,
+                           null_method = null_method,
                            coverage = coverage,
                            min_abs_corr = min_abs_corr,
                            force_compute_cor = force_compute_cor,
@@ -302,7 +310,6 @@ ctwas_sumstats <- function(
                            ...)
     finemap_res <- res$finemap_res
     susie_alpha_res <- res$susie_alpha_res
-
     if (!is.null(outputdir)) {
       saveRDS(finemap_res, file.path(outputdir, paste0(outname, ".finemap_res.RDS")))
       saveRDS(susie_alpha_res, file.path(outputdir, paste0(outname, ".susie_alpha_res.RDS")))

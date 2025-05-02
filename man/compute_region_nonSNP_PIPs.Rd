@@ -4,7 +4,7 @@
 \alias{compute_region_nonSNP_PIPs}
 \title{Computes non-SNP PIPs for all regions from finemapping result}
 \usage{
-compute_region_nonSNP_PIPs(finemap_res, filter_cs = TRUE)
+compute_region_nonSNP_PIPs(finemap_res, filter_cs = FALSE)
 }
 \arguments{
 \item{finemap_res}{a data frame of finemapping result}

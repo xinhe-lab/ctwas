@@ -17,18 +17,15 @@
 #'
 #' @param maxSNP Inf or integer. Maximum number of SNPs in a region. Default is
 #' Inf, no limit. This can be useful if there are many SNPs in a region and you don't
-#' have enough memory to run the program. This applies to the last rerun step
-#' (using full SNPs and rerun susie for regions with strong gene signals) only.
+#' have enough memory to run the program.
 #'
 #' @param min_group_size Minimum number of genes for a group to be included.
 #'
-#' @param trim_by remove SNPs if the total number of SNPs exceeds limit,
-#' options: "random", or "z" (trim SNPs with lower |z|).
-#' See parameter `maxSNP` for more information.
+#' @param trim_by remove SNPs if the total number of SNPs exceeds \code{maxSNP},
+#' options: "z" (trim SNPs with lower |z|), "random".
 #'
 #' @param thin_by options for thinning SNPs,
-#' "reference": thin reference SNPs,
-#' "gwas": thin GWAS SNPs.
+#' "reference": thin reference SNPs, "gwas": thin GWAS SNPs.
 #'
 #' @param adjust_boundary_genes If TRUE, identify cross-boundary genes, and
 #' adjust region_data.
@@ -51,10 +48,10 @@ assemble_region_data <- function(region_info,
                                  z_gene,
                                  weights,
                                  snp_map,
-                                 thin = 0.1,
+                                 thin = 1,
                                  maxSNP = Inf,
                                  min_group_size = 100,
-                                 trim_by = c("random", "z"),
+                                 trim_by = c("z", "random"),
                                  thin_by = c("ref", "gwas"),
                                  adjust_boundary_genes = TRUE,
                                  ncore = 1,
@@ -170,7 +167,7 @@ assemble_region_data <- function(region_info,
 assign_region_data <- function(region_info,
                                snp_info,
                                gene_info,
-                               thin = 0.1,
+                               thin = 1,
                                thin_by = c("ref", "gwas"),
                                seed = 99,
                                ncore = 1) {
@@ -241,7 +238,7 @@ assign_region_data <- function(region_info,
 #' @importFrom logging loginfo
 trim_region_data <- function(region_data,
                              z_snp,
-                             trim_by = c("random", "z"),
+                             trim_by = c("z", "random"),
                              maxSNP = Inf,
                              seed = 99){
 
@@ -283,7 +280,7 @@ trim_region_data <- function(region_data,
 #' @title Adds or updates z-scores in region_data based on z_snp and z_gene.
 #' this will also update sid and gid based on z_snp and z_gene.
 #
-#' @param region_data a list of region gene IDs and SNP IDs and associated file names
+#' @param region_data a list of assembled region data.
 #'
 #' @param z_snp A data frame with columns: "id", "z", giving the z-scores for SNPs.
 #'
@@ -405,7 +402,7 @@ adjust_boundary_genes <- function(boundary_genes,
 
 #' @title Expands region_data with all SNPs
 #'
-#' @param region_data a list of region gene IDs and SNP IDs and associated file names
+#' @param region_data a list of assembled region data.
 #'
 #' @param snp_map a list of data frames with SNP-to-region map for the reference.
 #'
@@ -441,10 +438,10 @@ expand_region_data <- function(region_data,
     stop("z_snp contains missing values!")
 
   # update SNP IDs for each region
-  thin <- sapply(region_data, "[[", "thin")
+  thin_regions <- unlist(lapply(region_data, "[[", "thin"))
 
-  if (length(which(thin < 1)) > 0) {
-    loginfo("Expand %d regions with all SNPs", length(which(thin < 1)))
+  if (length(which(thin_regions < 1)) > 0) {
+    loginfo("Expand %d regions with all SNPs", length(which(thin_regions < 1)))
     region_ids <- names(region_data)
     region_data <- mclapply_check(region_ids, function(region_id){
       # add z-scores and types of the region to the region_data

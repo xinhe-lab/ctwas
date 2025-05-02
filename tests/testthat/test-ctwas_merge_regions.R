@@ -19,10 +19,11 @@ test_that("merge_region_data_noLD works", {
                                                snp_map = snp_map,
                                                z_snp = z_snp,
                                                z_gene = z_gene,
-                                               expand = TRUE,
                                                maxSNP = 20000,
                                                ncore = 2)
   })
+
+  # saveRDS(merge_region_res, "LDL_example.merge_region_noLD_res.RDS")
 
   # expect_equal(merge_region_res, expected_merge_region_res)
   expect_equal(merge_region_res$merged_region_data, expected_merge_region_res$merged_region_data)
@@ -60,10 +61,11 @@ test_that("merge_region_data works", {
                                           weights = weights,
                                           z_snp = z_snp,
                                           z_gene = z_gene,
-                                          expand = TRUE,
                                           maxSNP = 20000,
                                           ncore = 2)
   })
+
+  # saveRDS(merge_region_res, "LDL_example.merge_region_res.RDS")
 
   # expect_equal(merge_region_res, expected_merge_region_res)
   expect_equal(merge_region_res$merged_region_data, expected_merge_region_res$merged_region_data)

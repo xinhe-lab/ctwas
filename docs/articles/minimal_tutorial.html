@@ -33,7 +33,7 @@
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">ctwas</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">0.4.21</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">0.5.16</span>
       </span>
     </div>
 
@@ -108,7 +108,7 @@
       <h1 data-toc-skip>A minimal tutorial of running cTWAS without LD</h1>
                         <h4 data-toc-skip class="author">Kaixuan Luo, Sheng Qian</h4>
             
-            <h4 data-toc-skip class="date">2024-12-18</h4>
+            <h4 data-toc-skip class="date">2025-05-01</h4>
       
       <small class="dont-index">Source: <a href="https://github.com/xinhe-lab/ctwas/blob/multigroup/vignettes/minimal_tutorial.Rmd" class="external-link"><code>vignettes/minimal_tutorial.Rmd</code></a></small>
       <div class="hidden name"><code>minimal_tutorial.Rmd</code></div>
@@ -193,7 +193,7 @@
 <span></span>
 <span><span class="va">ref_snp_info_file</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/system.file.html" class="external-link">system.file</a></span><span class="op">(</span><span class="st">"extdata/sample_data"</span>, <span class="st">"ukb_b38_0.1_chr16_var_info.Rvar.gz"</span>, package <span class="op">=</span> <span class="st">"ctwas"</span><span class="op">)</span></span>
 <span></span>
-<span><span class="va">ref_snp_info</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/data.table/man/fread.html" class="external-link">fread</a></span><span class="op">(</span><span class="va">ref_snp_info_file</span>, sep <span class="op">=</span> <span class="st">"\t"</span><span class="op">)</span></span>
+<span><span class="va">ref_snp_info</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdatatable.gitlab.io/data.table/reference/fread.html" class="external-link">fread</a></span><span class="op">(</span><span class="va">ref_snp_info_file</span>, sep <span class="op">=</span> <span class="st">"\t"</span><span class="op">)</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/class.html" class="external-link">class</a></span><span class="op">(</span><span class="va">ref_snp_info</span><span class="op">)</span> <span class="op">&lt;-</span> <span class="st">"data.frame"</span></span>
 <span><span class="va">region_info</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/subset.html" class="external-link">subset</a></span><span class="op">(</span><span class="va">region_info</span>, <span class="va">chrom</span> <span class="op">==</span> <span class="va">example_chrom</span><span class="op">)</span></span>
 <span></span>
@@ -246,13 +246,12 @@
 <div class="section level2">
 <h2 id="running-the-ctwas-analysis">Running the cTWAS analysis<a class="anchor" aria-label="anchor" href="#running-the-ctwas-analysis"></a>
 </h2>
-<p>We use the function <code><a href="../reference/ctwas_sumstats_noLD.html">ctwas_sumstats_noLD()</a></code> to run cTWAS analysis without LD. It takes as input preprocessed GWAS z-scores (<code>z_snp</code>), <code>weights</code>, <code>region_info</code>, <code>snp_map</code>, and will perform the main steps: (i) computing Z-scores of molecular traits - effectively performing TWAS; (i) estimating model parameters; (iii) screening regions potentially containing causal molecular traits, and (iv) fine-mapping those regions. Note that cTWAS uses a strategy to speed up computation. It initially estimates parameters in step (ii), using a fraction of SNPs (by default, we use <code>thin = 0.1</code>, i.e. 10% of the SNPs) , and then in step (iii) select regions likely containing signals. After that, it includes all SNPs in the selected regions to do full fine-mapping analysis in step (iv).</p>
+<p>We use the function <code><a href="../reference/ctwas_sumstats_noLD.html">ctwas_sumstats_noLD()</a></code> to run cTWAS analysis without LD. It takes as input preprocessed GWAS z-scores (<code>z_snp</code>), <code>weights</code>, <code>region_info</code>, <code>snp_map</code>, and will perform the main steps: (i) computing Z-scores of molecular traits - effectively performing TWAS; (i) estimating model parameters; (iii) screening regions potentially containing causal molecular traits, and (iv) fine-mapping those regions. Note that cTWAS uses a strategy to speed up computation. It initially estimates parameters in step (ii), and then in step (iii) select regions likely containing signals. After that, it includes all SNPs in the selected regions to do full fine-mapping analysis in step (iv).</p>
 <div class="sourceCode" id="cb13"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">ctwas_res</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/ctwas_sumstats_noLD.html">ctwas_sumstats_noLD</a></span><span class="op">(</span><span class="va">z_snp</span>,</span>
 <span>                                 <span class="va">weights</span>,</span>
 <span>                                 <span class="va">region_info</span>,</span>
 <span>                                 <span class="va">snp_map</span>,</span>
-<span>                                 thin <span class="op">=</span> <span class="fl">0.1</span>, </span>
 <span>                                 ncore <span class="op">=</span> <span class="fl">6</span><span class="op">)</span></span></code></pre></div>
 <div class="sourceCode" id="cb14"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">z_gene</span> <span class="op">&lt;-</span> <span class="va">ctwas_res</span><span class="op">$</span><span class="va">z_gene</span></span>

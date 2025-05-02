@@ -8,13 +8,17 @@
 #'
 #' @param L the number of effects or a vector of number of effects for each region.
 #'
-#' @param group_prior a vector of two prior inclusion probabilities for SNPs and genes.
+#' @param group_prior a vector of prior inclusion probabilities for different groups.
 #' If NULL, it will use uniform prior inclusion probabilities.
 #'
-#' @param group_prior_var a vector of two prior variances for SNPs and gene effects.
+#' @param group_prior_var a vector of prior variances for different groups.
 #' If NULL, it will set prior variance = 50 as the default in \code{susie_rss}.
 #'
-#' @param use_null_weight If TRUE, allow for a probability of no effect in susie
+#' @param min_var minimum number of variables (SNPs and genes) in a region.
+#'
+#' @param min_gene minimum number of genes in a region.
+#'
+#' @param null_method Method to compute null model, options: "ctwas", "susie" or "none".
 #'
 #' @param coverage A number between 0 and 1 specifying the \dQuote{coverage} of the estimated confidence sets
 #'
@@ -22,7 +26,9 @@
 #'
 #' @param include_cs If TRUE, add credible sets (CS) to finemapping results.
 #'
-#' @param get_susie_alpha If TRUE, get susie alpha matrix from finemapping results.
+#' @param include_prior If TRUE, include priors in finemapping results.
+#'
+#' @param include_susie_alpha If TRUE, get susie alpha matrix from finemapping results.
 #'
 #' @param snps_only If TRUE, use only SNPs in the region data.
 #'
@@ -50,7 +56,7 @@
 #'
 #' @return a list with cTWAS finemapping results.
 #'
-#' @importFrom logging addHandler loginfo writeToFile
+#' @importFrom logging addHandler loginfo logwarn writeToFile
 #' @importFrom parallel mclapply
 #'
 #' @export
@@ -61,11 +67,14 @@ finemap_regions <- function(region_data,
                             L = 5,
                             group_prior = NULL,
                             group_prior_var = NULL,
-                            use_null_weight = TRUE,
+                            min_var = 2,
+                            min_gene = 1,
+                            null_method = c("ctwas", "susie", "none"),
                             coverage = 0.95,
                             min_abs_corr = 0.1,
                             include_cs = TRUE,
-                            get_susie_alpha = TRUE,
+                            include_prior = FALSE,
+                            include_susie_alpha = TRUE,
                             snps_only = FALSE,
                             force_compute_cor = FALSE,
                             save_cor = FALSE,
@@ -86,12 +95,18 @@ finemap_regions <- function(region_data,
 
   # check inputs
   LD_format <- match.arg(LD_format)
+  null_method <- match.arg(null_method)
 
   if (!inherits(region_data,"list"))
     stop("'region_data' should be a list.")
 
   if (anyDuplicated(names(region_data)))
     logwarn("Duplicated names of region_data found! Please use unique names for region_data!")
+
+  # use all SNPs (thin = 1) for finemapping
+  thin <- min(sapply(region_data, "[[", "thin"))
+  if (thin != 1)
+    stop("thin != 1, run expand_region_data() first to include all SNPs!")
 
   if (missing(LD_map))
     stop("'LD_map' is required when running with LD!")
@@ -118,6 +133,11 @@ finemap_regions <- function(region_data,
     stop("L needs to an integer or a vector of the same length as region_data!")
   }
 
+  if (any(L < 1)) {
+    loginfo("L needs to be >= 1, set to 1 for %d regions", length(which(L < 1)))
+    L[L < 1] <- 1
+  }
+
   # check if all groups have group_prior and group_prior_var
   groups <- unique(unlist(lapply(region_data, "[[", "groups")))
   if (!is.null(group_prior)) {
@@ -134,10 +154,37 @@ finemap_regions <- function(region_data,
     }
   }
 
+  # skip regions with fewer than min_var variables
+  if (min_var > 0) {
+    region_ids <- names(region_data)
+    n_gids <- sapply(region_data, function(x){length(x$gid)})
+    n_sids <- sapply(region_data, function(x){length(x$sid)})
+
+    skip_region_ids <- region_ids[(n_sids + n_gids) < min_var]
+    if (length(skip_region_ids) > 0){
+      loginfo("Skip %d regions with number of variables < %d", length(skip_region_ids), min_var)
+      region_data[skip_region_ids] <- NULL
+    }
+
+    # skip regions with fewer than min_gene genes
+    if (min_gene > 0) {
+      skip_region_ids <- region_ids[n_gids < min_gene]
+      if (length(skip_region_ids) > 0){
+        loginfo("Skip %d regions with number of genes < %d", length(skip_region_ids), min_gene)
+        region_data[skip_region_ids] <- NULL
+      }
+    }
+  }
+
+  if (length(region_data) == 0){
+    stop("No region data for Fine-mapping.")
+  }
+
   if (verbose) {
     if (is.null(group_prior)) {
       loginfo("Use uniform prior")
     }
+    loginfo("null weight method = %s", null_method)
     loginfo("coverage = %s", coverage)
     loginfo("min_abs_corr = %s", min_abs_corr)
   }
@@ -151,11 +198,12 @@ finemap_regions <- function(region_data,
                           L = L[region_id],
                           group_prior = group_prior,
                           group_prior_var = group_prior_var,
-                          use_null_weight = use_null_weight,
+                          null_method = null_method,
                           coverage = coverage,
                           min_abs_corr = min_abs_corr,
                           include_cs = include_cs,
-                          get_susie_alpha = get_susie_alpha,
+                          include_prior = include_prior,
+                          include_susie_alpha = include_susie_alpha,
                           snps_only = snps_only,
                           force_compute_cor = force_compute_cor,
                           save_cor = save_cor,
@@ -170,7 +218,7 @@ finemap_regions <- function(region_data,
   finemap_res <- do.call(rbind, lapply(res, "[[", 1))
   rownames(finemap_res) <- NULL
 
-  if (get_susie_alpha) {
+  if (include_susie_alpha) {
     susie_alpha_res <- do.call(rbind, lapply(res, "[[", 2))
     rownames(susie_alpha_res) <- NULL
   } else {
@@ -185,15 +233,25 @@ finemap_regions <- function(region_data,
 #'
 #' @param region_data region_data to be finemapped
 #'
-#' @param group_prior a vector of two prior inclusion probabilities for SNPs and genes.
+#' @param group_prior a vector of prior inclusion probabilities for different groups.
 #' If NULL, it will use uniform prior inclusion probabilities.
 #'
-#' @param group_prior_var a vector of two prior variances for SNPs and gene effects.
+#' @param group_prior_var a vector of prior variances for different groups.
 #' If NULL, it will set prior variance = 50 as the default in \code{susie_rss}.
 #'
-#' @param use_null_weight If TRUE, allow for a probability of no effect in susie
+#' @param min_var minimum number of variables (SNPs and genes) in a region.
 #'
-#' @param get_susie_alpha If TRUE, get susie alpha matrix from finemapping results.
+#' @param min_gene minimum number of genes in a region.
+#'
+#' @param null_method Method to compute null model, options: "ctwas", "susie" or "none".
+#'
+#' @param coverage A number between 0 and 1 specifying the \dQuote{coverage} of the estimated confidence sets
+#'
+#' @param include_cs If TRUE, include credible sets (CS) to finemapping results.
+#'
+#' @param include_prior If TRUE, include priors in finemapping results.
+#'
+#' @param include_susie_alpha If TRUE, include susie alpha matrix in the result.
 #'
 #' @param snps_only If TRUE, use only SNPs in the region data.
 #'
@@ -215,8 +273,13 @@ finemap_regions <- function(region_data,
 finemap_regions_noLD <- function(region_data,
                                  group_prior = NULL,
                                  group_prior_var = NULL,
-                                 use_null_weight = TRUE,
-                                 get_susie_alpha = TRUE,
+                                 min_var = 2,
+                                 min_gene = 1,
+                                 null_method = c("ctwas", "susie", "none"),
+                                 coverage = 0.95,
+                                 include_cs = TRUE,
+                                 include_prior = FALSE,
+                                 include_susie_alpha = TRUE,
                                  snps_only = FALSE,
                                  ncore = 1,
                                  verbose = FALSE,
@@ -228,6 +291,120 @@ finemap_regions_noLD <- function(region_data,
   }
 
   loginfo("Fine-mapping %d regions without LD ...", length(region_data))
+
+  # check inputs
+  null_method <- match.arg(null_method)
+
+  if (!inherits(region_data,"list"))
+    stop("'region_data' should be a list!")
+
+  if (anyDuplicated(names(region_data)))
+    logwarn("Duplicated names of region_data found! Please use unique names for region_data!")
+
+  # use all SNPs (thin = 1) for finemapping
+  thin <- min(sapply(region_data, "[[", "thin"))
+  if (thin != 1)
+    stop("thin != 1, run expand_region_data() first to include all SNPs!")
+
+  # check if all groups have group_prior and group_prior_var
+  groups <- unique(unlist(lapply(region_data, "[[", "groups")))
+  if (!is.null(group_prior)) {
+    groups_without_prior <- setdiff(groups, names(group_prior))
+    if (length(groups_without_prior) > 0) {
+      stop(paste("Missing group_prior for group:", groups_without_prior, "!"))
+    }
+  }
+
+  if (!is.null(group_prior_var)) {
+    groups_without_prior_var <- setdiff(groups, names(group_prior))
+    if (length(groups_without_prior_var) > 0) {
+      stop(paste("Missing group_prior_var for group:", groups_without_prior_var, "!"))
+    }
+  }
+
+  # skip regions with fewer than min_var variables
+  if (min_var > 0) {
+    region_ids <- names(region_data)
+    n_gids <- sapply(region_data, function(x){length(x$gid)})
+    n_sids <- sapply(region_data, function(x){length(x$sid)})
+
+    skip_region_ids <- region_ids[(n_sids + n_gids) < min_var]
+    if (length(skip_region_ids) > 0){
+      loginfo("Skip %d regions with number of variables < %d", length(skip_region_ids), min_var)
+      region_data[skip_region_ids] <- NULL
+    }
+
+    # skip regions with fewer than min_gene genes
+    if (min_gene > 0) {
+      skip_region_ids <- region_ids[n_gids < min_gene]
+      if (length(skip_region_ids) > 0){
+        loginfo("Skip %d regions with number of genes < %d", length(skip_region_ids), min_gene)
+        region_data[skip_region_ids] <- NULL
+      }
+    }
+  }
+
+  if (length(region_data) == 0){
+    stop("No region data for Fine-mapping.")
+  }
+
+  if (verbose) {
+    if (is.null(group_prior)) {
+      loginfo("Use uniform prior")
+    }
+    loginfo("null weight method = %s", null_method)
+  }
+
+  region_ids <- names(region_data)
+  res <- mclapply_check(region_ids, function(region_id){
+    finemap_single_region_noLD(region_data = region_data,
+                               region_id = region_id,
+                               group_prior = group_prior,
+                               group_prior_var = group_prior_var,
+                               null_method = null_method,
+                               coverage = coverage,
+                               include_cs = include_cs,
+                               include_prior = include_prior,
+                               include_susie_alpha = include_susie_alpha,
+                               snps_only = snps_only,
+                               verbose = verbose,
+                               ...)
+  }, mc.cores = ncore, stop_if_missing = TRUE)
+
+  finemap_res <- do.call(rbind, lapply(res, "[[", 1))
+  rownames(finemap_res) <- NULL
+
+  if (include_susie_alpha) {
+    susie_alpha_res <- do.call(rbind, lapply(res, "[[", 2))
+    rownames(susie_alpha_res) <- NULL
+  } else {
+    susie_alpha_res <- NULL
+  }
+
+  return(list("finemap_res" = finemap_res,
+              "susie_alpha_res" = susie_alpha_res))
+}
+
+# Finemap regions with cTWAS SER model, used in screening regions
+#' @importFrom logging addHandler loginfo logwarn writeToFile
+#' @importFrom parallel mclapply
+finemap_regions_ser <- function(region_data,
+                                group_prior = NULL,
+                                group_prior_var = NULL,
+                                min_var = 2,
+                                min_gene = 1,
+                                null_method = c("ctwas", "susie", "none"),
+                                snps_only = FALSE,
+                                ncore = 1,
+                                verbose = FALSE,
+                                logfile = NULL){
+
+  if (!is.null(logfile)){
+    addHandler(writeToFile, file=logfile, level='DEBUG')
+  }
+
+  # check inputs
+  null_method <- match.arg(null_method)
 
   if (!inherits(region_data,"list"))
     stop("'region_data' should be a list!")
@@ -251,40 +428,59 @@ finemap_regions_noLD <- function(region_data,
     }
   }
 
+  # skip regions with fewer than min_var variables
+  if (min_var > 0) {
+    region_ids <- names(region_data)
+    n_gids <- sapply(region_data, function(x){length(x$gid)})
+    n_sids <- sapply(region_data, function(x){length(x$sid)})
+
+    skip_region_ids <- region_ids[(n_sids + n_gids) < min_var]
+    if (length(skip_region_ids) > 0){
+      loginfo("Skip %d regions with number of variables < %d", length(skip_region_ids), min_var)
+      region_data[skip_region_ids] <- NULL
+    }
+
+    # skip regions with fewer than min_gene genes
+    if (min_gene > 0) {
+      skip_region_ids <- region_ids[n_gids < min_gene]
+      if (length(skip_region_ids) > 0){
+        loginfo("Skip %d regions with number of genes < %d", length(skip_region_ids), min_gene)
+        region_data[skip_region_ids] <- NULL
+      }
+    }
+  }
+
+  if (length(region_data) == 0){
+    stop("No region data for Fine-mapping.")
+  }
+
   if (verbose) {
+    loginfo("Fine-mapping %d regions with SER model ...", length(region_data))
     if (is.null(group_prior)) {
       loginfo("Use uniform prior")
     }
+    loginfo("Use %s null weight method", null_method)
   }
 
   region_ids <- names(region_data)
   res <- mclapply_check(region_ids, function(region_id){
-    finemap_single_region_noLD(region_data = region_data,
-                               region_id = region_id,
-                               group_prior = group_prior,
-                               group_prior_var = group_prior_var,
-                               use_null_weight = use_null_weight,
-                               get_susie_alpha = get_susie_alpha,
-                               snps_only = snps_only,
-                               verbose = verbose,
-                               ...)
+    finemap_single_region_ser(region_data = region_data,
+                              region_id = region_id,
+                              group_prior = group_prior,
+                              group_prior_var = group_prior_var,
+                              null_method = null_method,
+                              snps_only = snps_only,
+                              verbose = verbose)
   }, mc.cores = ncore, stop_if_missing = TRUE)
 
-  finemap_res <- do.call(rbind, lapply(res, "[[", 1))
+  finemap_res <- do.call(rbind, res)
   rownames(finemap_res) <- NULL
 
-  if (get_susie_alpha) {
-    susie_alpha_res <- do.call(rbind, lapply(res, "[[", 2))
-    rownames(susie_alpha_res) <- NULL
-  } else {
-    susie_alpha_res <- NULL
-  }
-
-  return(list("finemap_res" = finemap_res,
-              "susie_alpha_res" = susie_alpha_res))
+  return(finemap_res)
 }
 
 # Runs cTWAS finemapping for a single region
+#' @importFrom logging loginfo
 finemap_single_region <- function(region_data,
                                   region_id,
                                   LD_map,
@@ -292,11 +488,13 @@ finemap_single_region <- function(region_data,
                                   L = 5,
                                   group_prior = NULL,
                                   group_prior_var = NULL,
-                                  use_null_weight = TRUE,
+                                  null_method = c("ctwas", "susie", "none"),
+                                  null_weight = NULL,
                                   coverage = 0.95,
                                   min_abs_corr = 0.1,
                                   include_cs = TRUE,
-                                  get_susie_alpha = TRUE,
+                                  include_prior = FALSE,
+                                  include_susie_alpha = TRUE,
                                   snps_only = FALSE,
                                   force_compute_cor = FALSE,
                                   save_cor = FALSE,
@@ -313,6 +511,7 @@ finemap_single_region <- function(region_data,
 
   # check inputs
   LD_format <- match.arg(LD_format)
+  null_method <- match.arg(null_method)
 
   if (!inherits(region_data,"list"))
     stop("'region_data' should be a list.")
@@ -325,6 +524,9 @@ finemap_single_region <- function(region_data,
 
   if (any(sapply(weights, is.null)))
     stop("'weights' contain NULL, remove empty weights!")
+
+  if (L < 1)
+    stop("L needs to be >= 1")
 
   # load input data for the region
   regiondata <- extract_region_data(region_data, region_id,
@@ -360,13 +562,15 @@ finemap_single_region <- function(region_data,
     }
   }
 
-  res <- initiate_group_priors(group_prior[groups], group_prior_var[groups], groups)
+  res <- initialize_group_priors(group_prior[groups], group_prior_var[groups], groups)
   pi_prior <- res$pi_prior
   V_prior <- res$V_prior
   rm(res)
 
   # set prior and prior variance values for the region
-  res <- set_region_susie_priors(pi_prior, V_prior, gs_group, L = L, use_null_weight = use_null_weight)
+  res <- set_region_susie_priors(pi_prior, V_prior, gs_group, L = L,
+                                 null_method = null_method,
+                                 null_weight = null_weight)
   prior <- res$prior
   V <- res$V
   null_weight <- res$null_weight
@@ -382,7 +586,8 @@ finemap_single_region <- function(region_data,
                             cor_dir = cor_dir,
                             LD_format = LD_format,
                             LD_loader_fun = LD_loader_fun,
-                            snpinfo_loader_fun = snpinfo_loader_fun)
+                            snpinfo_loader_fun = snpinfo_loader_fun,
+                            verbose = verbose)
 
   # gene first then SNPs
   R <- rbind(cbind(cor_res$R_gene, t(cor_res$R_snp_gene)),
@@ -410,17 +615,31 @@ finemap_single_region <- function(region_data,
                                min_abs_corr = min_abs_corr,
                                ...)
 
-  susie_res_df <- anno_susie(susie_res,
-                             gids = gids,
-                             sids = sids,
-                             g_type = g_type,
-                             g_context = g_context,
-                             g_group = g_group,
-                             region_id = region_id,
-                             z = z,
-                             include_cs = include_cs)
+  if (include_prior) {
+    susie_res_df <- anno_susie(susie_res,
+                               gids = gids,
+                               sids = sids,
+                               g_type = g_type,
+                               g_context = g_context,
+                               g_group = g_group,
+                               region_id = region_id,
+                               z = z,
+                               include_cs = include_cs,
+                               prior = prior,
+                               prior_var = drop(V[1,]))
+  } else {
+    susie_res_df <- anno_susie(susie_res,
+                               gids = gids,
+                               sids = sids,
+                               g_type = g_type,
+                               g_context = g_context,
+                               g_group = g_group,
+                               region_id = region_id,
+                               z = z,
+                               include_cs = include_cs)
+  }
 
-  if (get_susie_alpha) {
+  if (include_susie_alpha) {
     # extract alpha matrix from susie result
     susie_alpha_df <- get_susie_alpha_res(susie_res, susie_res_df, keep_genes_only = TRUE)
   } else {
@@ -434,14 +653,17 @@ finemap_single_region <- function(region_data,
 
 
 # Runs cTWAS finemapping for a single region without LD
+#' @importFrom logging loginfo
 finemap_single_region_noLD <- function(region_data,
                                        region_id,
                                        group_prior = NULL,
                                        group_prior_var = NULL,
-                                       use_null_weight = TRUE,
+                                       null_method = c("ctwas", "susie", "none"),
+                                       null_weight = NULL,
                                        coverage = 0.95,
                                        include_cs = TRUE,
-                                       get_susie_alpha = TRUE,
+                                       include_prior = FALSE,
+                                       include_susie_alpha = TRUE,
                                        snps_only = FALSE,
                                        verbose = FALSE,
                                        ...){
@@ -449,6 +671,9 @@ finemap_single_region_noLD <- function(region_data,
   if (verbose){
     loginfo("Fine-mapping region %s without LD", region_id)
   }
+
+  # check inputs
+  null_method <- match.arg(null_method)
 
   if (!inherits(region_data,"list"))
     stop("'region_data' should be a list.")
@@ -486,13 +711,15 @@ finemap_single_region_noLD <- function(region_data,
     }
   }
 
-  res <- initiate_group_priors(group_prior[groups], group_prior_var[groups], groups)
+  res <- initialize_group_priors(group_prior[groups], group_prior_var[groups], groups)
   pi_prior <- res$pi_prior
   V_prior <- res$V_prior
   rm(res)
 
   # set prior and prior variance values for the region
-  res <- set_region_susie_priors(pi_prior, V_prior, gs_group, L = 1, use_null_weight = use_null_weight)
+  res <- set_region_susie_priors(pi_prior, V_prior, gs_group, L = 1,
+                                 null_method = null_method,
+                                 null_weight = null_weight)
   prior <- res$prior
   V <- res$V
   null_weight <- res$null_weight
@@ -522,17 +749,31 @@ finemap_single_region_noLD <- function(region_data,
                                min_abs_corr = 0,
                                ...)
 
-  susie_res_df <- anno_susie(susie_res,
-                             gids = gids,
-                             sids = sids,
-                             g_type = g_type,
-                             g_context = g_context,
-                             g_group = g_group,
-                             region_id = region_id,
-                             z = z,
-                             include_cs = include_cs)
+  if (include_prior) {
+    susie_res_df <- anno_susie(susie_res,
+                               gids = gids,
+                               sids = sids,
+                               g_type = g_type,
+                               g_context = g_context,
+                               g_group = g_group,
+                               region_id = region_id,
+                               z = z,
+                               include_cs = include_cs,
+                               prior = prior,
+                               prior_var = drop(V[1,]))
+  } else {
+    susie_res_df <- anno_susie(susie_res,
+                               gids = gids,
+                               sids = sids,
+                               g_type = g_type,
+                               g_context = g_context,
+                               g_group = g_group,
+                               region_id = region_id,
+                               z = z,
+                               include_cs = include_cs)
+  }
 
-  if (get_susie_alpha) {
+  if (include_susie_alpha) {
     # extract alpha matrix from susie result
     susie_alpha_df <- get_susie_alpha_res(susie_res, susie_res_df, keep_genes_only = TRUE)
   } else {
@@ -543,15 +784,115 @@ finemap_single_region_noLD <- function(region_data,
               "susie_alpha_df" = susie_alpha_df))
 }
 
-# finemap a single region with L = 1 without LD, used in EM
-fast_finemap_single_region_L1_noLD <- function(region_data,
+# Runs cTWAS finemapping for a single region using cTWAS SER model
+#' @importFrom logging loginfo
+finemap_single_region_ser <- function(region_data,
+                                      region_id,
+                                      group_prior = NULL,
+                                      group_prior_var = NULL,
+                                      null_method = c("ctwas", "susie", "none"),
+                                      null_weight = NULL,
+                                      snps_only = FALSE,
+                                      verbose = FALSE){
+
+  if (verbose){
+    loginfo("Fine-mapping region %s with SER model", region_id)
+  }
+
+  # check inputs
+  null_method <- match.arg(null_method)
+
+  if (!inherits(region_data,"list"))
+    stop("'region_data' should be a list.")
+
+  regiondata <- extract_region_data(region_data, region_id,
+                                    snps_only = snps_only)
+  gids <- regiondata[["gid"]]
+  sids <- regiondata[["sid"]]
+  z <- regiondata[["z"]]
+  gs_group <- regiondata[["gs_group"]]
+  g_type <- regiondata[["g_type"]]
+  g_context <- regiondata[["g_context"]]
+  g_group <- regiondata[["g_group"]]
+  groups <- regiondata$groups
+  rm(regiondata)
+
+  if (verbose){
+    loginfo("%d genes, %d SNPs in the region", length(gids), length(sids))
+  }
+
+  if (length(z) < 2) {
+    stop(paste(length(z), "variables in the region. At least two variables in a region are needed to run susie"))
+  }
+
+  if (!is.null(group_prior)) {
+    groups_without_prior <- setdiff(groups, names(group_prior))
+    if (length(groups_without_prior) > 0) {
+      stop(paste("Missing group_prior for group:", groups_without_prior, "!"))
+    }
+  }
+  if (!is.null(group_prior_var)) {
+    groups_without_prior_var <- setdiff(groups, names(group_prior))
+    if (length(groups_without_prior_var) > 0) {
+      stop(paste("Missing group_prior_var for group:", groups_without_prior_var, "!"))
+    }
+  }
+
+  res <- initialize_group_priors(group_prior[groups], group_prior_var[groups], groups)
+  pi_prior <- res$pi_prior
+  V_prior <- res$V_prior
+  rm(res)
+
+  # set priors, prior variances
+  res <- set_region_susie_priors(pi_prior, V_prior, gs_group, L = 1,
+                                 null_method = "none")
+  prior_weights <- res$prior
+  prior_variance <- res$V
+  rm(res)
+
+  # fit SER model
+  ser_res <- ctwas_ser_rss(z = z,
+                           prior_weights = prior_weights,
+                           prior_variance = prior_variance,
+                           null_method = null_method,
+                           null_weight = null_weight)
+
+  # annotate SER result
+  ser_res_df <- anno_ser_res(ser_res,
+                             gids,
+                             sids,
+                             g_type = g_type,
+                             g_context = g_context,
+                             g_group = g_group,
+                             region_id = region_id,
+                             z = z)
+
+  return(ser_res_df)
+
+}
+
+# finemap a single region with cTWAS SER model, used in EM
+fast_finemap_single_region_ser_rss <- function(region_data,
                                                region_id,
                                                pi_prior,
                                                V_prior,
-                                               use_null_weight = TRUE,
-                                               ...){
+                                               null_method = c("ctwas", "susie", "none"),
+                                               null_weight = NULL,
+                                               return_full_result = FALSE){
+
+
+  null_method <- match.arg(null_method)
+
   # load region data
-  regiondata <- extract_region_data(region_data, region_id)
+  if (!inherits(region_data,"list")){
+    stop("'region_data' should be a list.")
+  }
+
+  regiondata <- region_data[[region_id]]
+  if (is.null(regiondata$z) || is.null(regiondata$gs_group)){
+    regiondata <- extract_region_data(region_data, region_id)
+  }
+
   gids <- regiondata[["gid"]]
   sids <- regiondata[["sid"]]
   z <- regiondata[["z"]]
@@ -563,39 +904,38 @@ fast_finemap_single_region_L1_noLD <- function(region_data,
 
   if (length(z) < 2) {
     stop(paste(length(z), "variables in the region", region_id, "\n",
-               "At least two variables in a region are needed to run susie"))
+               "At least two variables in a region are needed to run SER model"))
   }
 
-  # update priors, prior variances and null_weight
-  res <- set_region_susie_priors(pi_prior, V_prior, gs_group, L = 1, use_null_weight = use_null_weight)
-  prior <- res$prior
-  V <- res$V
-  null_weight <- res$null_weight
+  # set priors, prior variances
+  res <- set_region_susie_priors(pi_prior, V_prior, gs_group, L = 1,
+                                 null_method = "none")
+  prior_weights <- res$prior
+  prior_variance <- res$V
   rm(res)
 
-  # Use an identity matrix as LD, R does not matter for susie when L = 1
-  R <- diag(length(z))
+  # fit SER model
+  ser_res <- ctwas_ser_rss(z = z,
+                           prior_weights = prior_weights,
+                           prior_variance = prior_variance,
+                           null_method = null_method,
+                           null_weight = null_weight)
 
-  # in susie, prior_variance is under standardized scale (if performed)
-  susie_res <- ctwas_susie_rss(z = z,
-                               R = R,
-                               prior_weights = prior,
-                               prior_variance = V,
-                               L = 1,
-                               null_weight = null_weight,
-                               max_iter = 1,
-                               warn_converge_fail = FALSE,
-                               ...)
-
-  # annotate susie result
-  susie_res_df <- anno_susie(susie_res,
-                             gids = gids,
-                             sids = sids,
+  # annotate SER result
+  ser_res_df <- anno_ser_res(ser_res,
+                             gids,
+                             sids,
                              g_type = g_type,
                              g_context = g_context,
                              g_group = g_group,
                              region_id = region_id,
-                             include_cs = FALSE)
+                             z = z)
 
-  return(susie_res_df)
+  if (return_full_result){
+    return(list("ser_res" = ser_res,
+                "ser_res_df" = ser_res_df))
+  }else{
+    return(ser_res_df)
+  }
+
 }

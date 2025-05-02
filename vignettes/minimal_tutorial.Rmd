@@ -107,6 +107,7 @@ region_info <- res$region_info
 snp_map <- res$snp_map
 ```
 
+
 We set `ncore` to parallelize the computation. 
 
 ### Harmonizing GWAS summary statistics 
@@ -161,14 +162,13 @@ Note, FUSION weights do not contain LD information, so LD is required when using
 
 ## Running the cTWAS analysis 
 
-We use the function `ctwas_sumstats_noLD()` to run cTWAS analysis without LD. It takes as input preprocessed GWAS z-scores (`z_snp`), `weights`, `region_info`, `snp_map`, and will perform the main steps: (i) computing Z-scores of molecular traits - effectively performing TWAS; (i) estimating model parameters; (iii) screening regions potentially containing causal molecular traits, and (iv) fine-mapping those regions. Note that cTWAS uses a strategy to speed up computation. It initially estimates parameters in step (ii), using a fraction of SNPs (by default, we use `thin = 0.1`, i.e. 10% of the SNPs) , and then in step (iii) select regions likely containing signals. After that, it includes all SNPs in the selected regions to do full fine-mapping analysis in step (iv). 
+We use the function `ctwas_sumstats_noLD()` to run cTWAS analysis without LD. It takes as input preprocessed GWAS z-scores (`z_snp`), `weights`, `region_info`, `snp_map`, and will perform the main steps: (i) computing Z-scores of molecular traits - effectively performing TWAS; (i) estimating model parameters; (iii) screening regions potentially containing causal molecular traits, and (iv) fine-mapping those regions. Note that cTWAS uses a strategy to speed up computation. It initially estimates parameters in step (ii), and then in step (iii) select regions likely containing signals. After that, it includes all SNPs in the selected regions to do full fine-mapping analysis in step (iv). 
 
 ```{r ctwas_sumstats_noLD, eval=FALSE}
 ctwas_res <- ctwas_sumstats_noLD(z_snp,
                                  weights,
                                  region_info,
                                  snp_map,
-                                 thin = 0.1, 
                                  ncore = 6)
 ```
 
@@ -210,7 +210,7 @@ One potential issue of cTWAS is the “cross-region” genes. These are genes wh
 
 ## Sample report of the cTWAS results
 
-We present a [sample cTWAS report][sample_report_tutorial] based on real data analysis.
+We present a [sample cTWAS report][sample_report_tutorial] based on real data analysis. 
 
 
 [minimal_tutorial]: https://xinhe-lab.github.io/multigroup_ctwas/articles/minimal_tutorial.html

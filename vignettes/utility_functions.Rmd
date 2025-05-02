@@ -119,6 +119,7 @@ We could convert top QTLs into PredictDB format weights using the function `crea
 create_predictdb_from_QTLs(weight_table, 
                            gene_table, 
                            use_top_QTL = TRUE,
+                           select_by = "weight",
                            outputdir, 
                            outname)
 ```
@@ -154,7 +155,7 @@ cg26295774  AADACL2 protein_coding
 ```
 
 
-When `use_top_QTL=TRUE`, it is limited to only one top QTL per molecular trait. If `weight_table` has more than one SNP per molecular trait, it will select the top SNP with the largest `abs(weight)`. It will also create a simple covariance table with covariance set to 1, as each molecular trait only has one top QTL.
+When `use_top_QTL=TRUE`, it is limited to only one top QTL per molecular trait. If `weight_table` has more than one SNP per molecular trait, it has two options to select the top SNP. If `select_by = "weight"`, it will select the top SNP with the largest `abs(weight)`. If `select_by = "pval"`, it will select the top SNP with the smallest QTL p-value (in this case, the `weight_table` needs to contain an additional column named "pval"). It will also create a simple covariance table with covariance set to 1, as each molecular trait only has one top QTL.
 
 If you want to use multiple QTLs per molecular trait, you can set `use_top_QTL=FALSE`. In that case, we assume the weights of the QTLs are learned from multiple regression (instead of marginal effect sizes). 
 

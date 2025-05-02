@@ -44,7 +44,7 @@ ctwas_susie_rss <- function(z,
 }
 
 
-# annotate susie results with SNP and gene information
+# Annotates susie results with SNP and gene information
 anno_susie <- function(susie_res,
                        gids,
                        sids,
@@ -53,6 +53,8 @@ anno_susie <- function(susie_res,
                        g_group = "gene",
                        region_id = NULL,
                        z = NULL,
+                       prior = NULL,
+                       prior_var = NULL,
                        include_cs = TRUE,
                        get_alpha = TRUE) {
 
@@ -72,6 +74,14 @@ anno_susie <- function(susie_res,
 
   if (!is.null(z)) {
     susie_res_df$z <- z
+  }
+
+  if (!is.null(prior)) {
+    susie_res_df$prior <- prior
+  }
+
+  if (!is.null(prior_var)) {
+    susie_res_df$prior_var <- prior_var
   }
 
   susie_res_df$susie_pip <- susie_res$pip
@@ -112,7 +122,7 @@ anno_susie <- function(susie_res,
 #'
 #' @keywords internal
 #'
-extract_susie_alpha = function (susie_res, prune_by_cs = FALSE) {
+extract_susie_alpha = function(susie_res, prune_by_cs = FALSE){
 
   if (inherits(susie_res,"susie")) {
 
@@ -141,7 +151,7 @@ extract_susie_alpha = function (susie_res, prune_by_cs = FALSE) {
   return(susie_alpha)
 }
 
-# extract the alpha matrix from susie result,
+# Extracts the alpha matrix from susie result,
 # and combine with annotated susie result data frame
 #' @importFrom tidyr pivot_longer
 get_susie_alpha_res <- function(susie_res,
@@ -187,7 +197,7 @@ get_susie_alpha_res <- function(susie_res,
 }
 
 # set pi_prior and V_prior based on init_group_prior and init_group_prior_var
-initiate_group_priors <- function(group_prior = NULL, group_prior_var = NULL, groups) {
+initialize_group_priors <- function(group_prior = NULL, group_prior_var = NULL, groups) {
 
   if (is.null(group_prior)){
     group_prior <- structure(as.numeric(rep(NA,length(groups))), names=groups)
@@ -217,7 +227,10 @@ initiate_group_priors <- function(group_prior = NULL, group_prior_var = NULL, gr
 
 # set prior and prior variance values for the region
 set_region_susie_priors <- function(pi_prior, V_prior, gs_group, L,
-                                    use_null_weight = TRUE){
+                                    null_method = c("ctwas", "susie", "none"),
+                                    null_weight = NULL){
+
+  null_method <- match.arg(null_method)
 
   if (length(gs_group) < 2) {
     stop(paste(length(gs_group), "variables in the region. At least two variables in a region are needed to run susie"))
@@ -239,10 +252,20 @@ set_region_susie_priors <- function(pi_prior, V_prior, gs_group, L,
     V <- matrix(rep(V, each = L), nrow=L)
   }
 
-  if (use_null_weight){
-    null_weight <- max(0, 1 - sum(prior))
+  if (null_method == "susie"){
+    if (!is.null(null_weight)){
+      if (!is.numeric(null_weight))
+        stop("Null weight must be numeric")
+      if (null_weight < 0 || null_weight >= 1)
+        stop("Null weight must be between 0 and 1")
+    }else{
+      null_weight <- max(0, 1 - sum(prior))
+    }
     prior <- prior/(1-null_weight)
-  } else {
+  } else if (null_method == "ctwas"){
+    null_weight <- 0.5
+    prior <- prior/(1-prior)
+  } else if (null_method == "none"){
     null_weight <- NULL
   }
 

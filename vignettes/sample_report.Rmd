@@ -172,22 +172,22 @@ We use the ctwas main function `ctwas_sumstats()` to run the cTWAS analysis with
 For more details on this function, refer to the tutorial ["Running cTWAS analysis"][running_ctwas_analysis_tutorial].
 
 We use the following settings:
-
-- `group_prior_var_structure = "shared_type"` (default option): Allows all groups within a molecular QTL type to share the same variance parameter.
-- `filter_L = TRUE` (default option): Estimates the number of causal signals (L) for each region.
+- `thin = 1` (default option): uses all SNPs to estimate parameters and screen regions.
+- `group_prior_var_structure = "shared_all"` (default option): Allows all groups to share the same variance parameter.
 
 ```{r echo=TRUE, eval=FALSE}
-thin <- 0.1
-maxSNP <- 20000
 ctwas_res <- ctwas_sumstats(z_snp, 
                             weights, 
                             region_info, 
                             LD_map, 
                             snp_map, 
-                            thin = thin,
-                            maxSNP = maxSNP,
-                            group_prior_var_structure = "shared_type", 
-                            filter_L = TRUE,
+                            thin = 1,
+                            maxSNP = 20000,
+                            group_prior_var_structure = "shared_all", 
+                            L = 5,
+                            min_group_size = 100, 
+                            min_nonSNP_PIP = 0.5,
+                            min_abs_corr = 0.1, 
                             ncore = ncore, 
                             save_cor = TRUE, 
                             cor_dir = file.path(outputdir, "cor_matrix"))
@@ -196,7 +196,7 @@ ctwas_res <- ctwas_sumstats(z_snp,
 
 `ctwas_res` is the object containing the outputs of cTWAS.
 ```{r echo=FALSE, eval=TRUE}
-results_dir <- file.path("/project/xinhe/xsun/multi_group_ctwas/examples/results_predictdb_1010/", trait)
+results_dir <- file.path("/project/xinhe/xsun/multi_group_ctwas/examples/results_predictdb_430/", trait)
 
 ctwas_res <- readRDS(file.path(results_dir, paste0(trait,".ctwas.res.RDS")))
 ```
@@ -309,7 +309,7 @@ combined_pip_by_type <- combine_gene_pips(susie_alpha_res,
                                           group_by = "gene_name",
                                           by = "type",
                                           method = "combine_cs",
-                                          filter_cs = TRUE,
+                                          filter_cs = FALSE,
                                           include_cs_id = TRUE)
 
 combined_pip_by_type$sQTL_pip_partition <- sapply(combined_pip_by_type$gene_name, function(gene) {

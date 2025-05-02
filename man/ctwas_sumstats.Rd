@@ -11,23 +11,25 @@ ctwas_sumstats(
   LD_map,
   snp_map,
   z_gene = NULL,
-  thin = 0.1,
+  thin = 1,
   niter_prefit = 3,
-  niter = 30,
+  niter = 50,
   L = 5,
   init_group_prior = NULL,
   init_group_prior_var = NULL,
-  group_prior_var_structure = c("shared_type", "shared_context", "shared_nonSNP",
-    "shared_all", "independent"),
-  filter_L = TRUE,
-  filter_nonSNP_PIP = FALSE,
+  group_prior_var_structure = c("shared_all", "shared_type", "shared_context",
+    "shared_nonSNP", "independent"),
   min_nonSNP_PIP = 0.5,
+  min_pval = 5e-08,
   min_p_single_effect = 0.8,
   maxSNP = Inf,
   min_var = 2,
   min_gene = 1,
   min_group_size = 100,
-  use_null_weight = TRUE,
+  null_method = c("ctwas", "susie", "none"),
+  EM_tol = 1e-04,
+  force_run_niter = FALSE,
+  enrichment_test = c("G", "fisher"),
   coverage = 0.95,
   min_abs_corr = 0.1,
   LD_format = c("rds", "rdata", "mtx", "csv", "txt", "custom"),
@@ -64,27 +66,26 @@ giving the z scores for SNPs. "A1" is effect allele. "A2" is the other allele.}
 
 \item{niter_prefit}{the number of iterations of the E-M algorithm to perform during the initial parameter estimation step.}
 
-\item{niter}{the number of iterations of the E-M algorithm to perform during the complete parameter estimation step.}
+\item{niter}{the maximum number of iterations of the E-M algorithm to perform during the complete parameter estimation step.}
 
 \item{L}{the number of effects for susie during the fine mapping steps.}
 
-\item{init_group_prior}{a vector of initial values of prior inclusion probabilities for SNPs and genes.}
+\item{init_group_prior}{a vector of initial values of prior inclusion probabilities for different groups.}
 
-\item{init_group_prior_var}{a vector of initial values of prior variances for SNPs and gene effects.}
+\item{init_group_prior_var}{a vector of initial values of prior variances for different groups.}
 
 \item{group_prior_var_structure}{a string indicating the structure to put on the prior variance parameters.
+"shared_all" allows all groups to share the same variance parameter.
 "shared_type" allows all groups in one molecular QTL type to share the same variance parameter.
 "shared_context" allows all groups in one context (tissue, cell type, condition) to share the same variance parameter.
 "shared_nonSNP" allows all non-SNP groups to share the same variance parameter.
-"shared_all" allows all groups to share the same variance parameter.
-"independent" allows all groups to have their own separate variance parameters.}
-
-\item{filter_L}{If TRUE, screening regions with L > 0.}
-
-\item{filter_nonSNP_PIP}{If TRUE, screening regions with total non-SNP PIP >= \code{min_nonSNP_PIP}.}
+"independent" allows all groups to have their own separate variance parameters.
+"fixed" sets prior variance parameters to values in \code{init_group_prior_var}.}
 
 \item{min_nonSNP_PIP}{Regions with non-SNP PIP >= \code{min_nonSNP_PIP}
 will be selected to run finemapping using all SNPs.}
+
+\item{min_pval}{Keep regions with minimum p-values from z_snp and z_gene < \code{min_pval}.}
 
 \item{min_p_single_effect}{Regions with probability greater than \code{min_p_single_effect} of
 having 1 or fewer effects will be used for parameter estimation.}
@@ -102,7 +103,16 @@ when estimating paramters and screening regions.}
 \item{min_group_size}{Minimum number of genes in a group.
 Groups with number of genes < \code{min_group_size} will be removed for the analysis.}
 
-\item{use_null_weight}{If TRUE, allow for a probability of no effect in susie.}
+\item{null_method}{Method to compute null model, options: "ctwas", "susie" or "none".}
+
+\item{EM_tol}{A small, non-negative number specifying the convergence
+tolerance of log-likelihood for the EM iterations.}
+
+\item{force_run_niter}{If TRUE, run all the \code{niter} EM iterations.}
+
+\item{enrichment_test}{Method to test enrichment,
+options: "G" (G-test), "fisher" (Fisher's exact test).
+Only used when \code{run_enrichment_test = TRUE}.}
 
 \item{coverage}{A number between 0 and 1 specifying the \dQuote{coverage} of
 the estimated confidence sets.}

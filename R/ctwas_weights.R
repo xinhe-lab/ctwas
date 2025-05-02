@@ -301,9 +301,13 @@ load_fusion_wgt_data <- function(wgt_rdata_file,
 #' "GENE","RSID1","RSID2", "VALUE".
 #' If NULL, do not create covariance files (.txg.gz), unless \code{use_top_QTL=TRUE}.
 #'
-#' @param use_top_QTL If TRUE, only keep the top QTL with
-#' the largest abs(weight) for each gene (molecular trait), and
+#' @param use_top_QTL If TRUE, only keep the top QTL per gene (molecular trait), and
 #' create a simple cov_table with covariance set to 1.
+#'
+#' @param select_by Select the top SNP by the column:
+#' "weight": choose the top SNP with the largest abs(weight) per gene (molecular trait),
+#' "pval": choose the top SNP with the smallest p-value per gene (molecular trait).
+#' Only used when \code{use_top_QTL=TRUE}.
 #'
 #' @param outputdir output directory
 #'
@@ -320,26 +324,32 @@ create_predictdb_from_QTLs <- function(weight_table,
                                        gene_table = NULL,
                                        cov_table = NULL,
                                        use_top_QTL = TRUE,
+                                       select_by = c("weight", "pval"),
                                        outputdir = getwd(),
                                        outname){
 
-  if (!dir.exists(outputdir))
-    dir.create(outputdir, showWarnings = FALSE, recursive = TRUE)
-
   loginfo("Makes PredictDB weights from QTL data")
+  column_top_QTL <- match.arg(column_top_QTL)
 
   # check and clean the QTL data
   weight_table <- as.data.frame(weight_table)
-  required_cols <- c("gene", "rsid", "varID", "ref_allele", "eff_allele", "weight")
+
+  required_cols <- unique(c("gene", "rsid", "varID", "ref_allele", "eff_allele", "weight", select_by))
   if (!all(required_cols %in% colnames(weight_table))){
-    stop("QTL_data needs to contain the following columns: ",
+    stop("Require the following columns in weight_table: ",
          paste(required_cols, collapse = " "))
   }
 
-  # if use_top_QTL, select the top SNP with the max abs(weight) for each gene
   if (use_top_QTL) {
-    loginfo("select the top SNP with the max abs(weight) for each gene")
-    weight_table <- weight_table[with(weight_table, order(gene, -abs(weight))),]
+    # if use_top_QTL by pval, select the top SNP with the smallest pvalue for each gene
+    if (select_by == "pval"){
+      loginfo("Choose the top QTL with the smallest pval for each gene")
+      weight_table <- weight_table[with(weight_table, order(gene, pval)),]
+    } else {
+    # if use_top_QTL by weight, select the top SNP with the largest abs(weight) for each gene
+      loginfo("Choose the top QTL with the largest abs(weight) for each gene")
+      weight_table <- weight_table[with(weight_table, order(gene, -abs(weight))),]
+    }
     weight_table <- weight_table[!duplicated(weight_table$gene), ]
   }
 
@@ -372,6 +382,9 @@ create_predictdb_from_QTLs <- function(weight_table,
   }
 
   # write PredictDB '.db' file
+  if (!dir.exists(outputdir))
+    dir.create(outputdir, showWarnings = FALSE, recursive = TRUE)
+
   write_predictdb(weight_table, gene_table, cov_table, outputdir, outname)
 
 }

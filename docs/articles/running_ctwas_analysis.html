@@ -33,7 +33,7 @@
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">ctwas</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">0.4.21</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">0.5.16</span>
       </span>
     </div>
 
@@ -108,7 +108,7 @@
       <h1 data-toc-skip>Running cTWAS analysis</h1>
                         <h4 data-toc-skip class="author">Kaixuan Luo, Sheng Qian</h4>
             
-            <h4 data-toc-skip class="date">2024-12-18</h4>
+            <h4 data-toc-skip class="date">2025-05-01</h4>
       
       <small class="dont-index">Source: <a href="https://github.com/xinhe-lab/ctwas/blob/multigroup/vignettes/running_ctwas_analysis.Rmd" class="external-link"><code>vignettes/running_ctwas_analysis.Rmd</code></a></small>
       <div class="hidden name"><code>running_ctwas_analysis.Rmd</code></div>
@@ -118,7 +118,7 @@
     
     
 <p>Running cTWAS analysis involves several major steps: preparing input data, computing associations of molecular traits with the phenotype, estimating parameters, screening for candidate genomic regions, and fine-mapping these regions.</p>
-<p>In this version of cTWAS, we allow the joint analysis of multiple groups of molecular traits. This could be: eQTL of multiple tissues; or eQTLs, splicing QTLs and other types of QTLs in a single tissue. In a more complex setting, multiple types of QTL data from multiple tissues/cell types. Each group is defined by its “type” (kind of molecular traits), and “context” (tissue, cell type, condition, etc.).</p>
+<p>In this version of cTWAS, we allow the joint analysis of multiple groups of molecular traits. This could be: eQTL of multiple tissues; or eQTLs, splicing QTLs and other types of QTLs in a single tissue. In a more complex setting, multiple types of QTL data from multiple tissues/cell types. Each group is defined by its “type” (kind of molecular traits), and “context” (tissue, cell type, condition, etc.). If you have multiple datasets from the same type and context, and you prefer to treat them as separate groups, then you can give them different context names, e.g. “context” = “GTEx_brain” and “CMC_brain”.</p>
 <p>We require first running the data preprocessing and harmonization steps. Please follow the <a href="https://xinhe-lab.github.io/multigroup_ctwas/articles/preparing_input_data.html" class="external-link">“Preparing cTWAS input data”</a> tutorial.</p>
 <p>Load the packages</p>
 <div class="sourceCode" id="cb1"><pre class="downlit sourceCode r">
@@ -148,12 +148,10 @@
 <span>                            <span class="va">region_info</span>, </span>
 <span>                            <span class="va">LD_map</span>, </span>
 <span>                            <span class="va">snp_map</span>, </span>
-<span>                            thin <span class="op">=</span> <span class="fl">0.1</span>,</span>
+<span>                            thin <span class="op">=</span> <span class="fl">1</span>,</span>
 <span>                            maxSNP <span class="op">=</span> <span class="fl">20000</span>,</span>
 <span>                            min_group_size <span class="op">=</span> <span class="fl">100</span>, </span>
-<span>                            group_prior_var_structure <span class="op">=</span> <span class="st">"shared_type"</span>, </span>
-<span>                            filter_L <span class="op">=</span> <span class="cn">TRUE</span>,</span>
-<span>                            filter_nonSNP_PIP <span class="op">=</span> <span class="cn">FALSE</span>,</span>
+<span>                            group_prior_var_structure <span class="op">=</span> <span class="st">"shared_all"</span>, </span>
 <span>                            min_nonSNP_PIP <span class="op">=</span> <span class="fl">0.5</span>,</span>
 <span>                            min_abs_corr <span class="op">=</span> <span class="fl">0.1</span>, </span>
 <span>                            ncore <span class="op">=</span> <span class="fl">6</span>, </span>
@@ -164,10 +162,10 @@
 <p>Important arguments that control how this function is executed:</p>
 <ul>
 <li><p><code>z_gene</code>: computed Z-scores of the molecular traits. If not provided, it will compute those using <code>z_snp</code> and <code>weights</code>.</p></li>
-<li><p><code>thin</code>: the fraction of SNPs used to estimate parameters and screen regions likely containing signals. By sampling a fraction of SNPs, this speeds up computation. By default, we use <code>thin = 0.1</code>, i.e. 10% of the SNPs. To use all SNPs in parameter estimation and screening regions, one could change the <code>thin</code> parameter to 1.</p></li>
+<li><p><code>thin</code>: the fraction of SNPs used to estimate parameters and screen regions likely containing signals. By sampling a fraction of SNPs, this speeds up computation. By default, we use <code>thin = 1</code>, i.e. all SNPs. You can speed up computation by sampling a fraction of SNPs, e.g. <code>thin=0.1</code> will use 10% of SNPs.</p></li>
 <li><p><code>maxSNP</code>: maximum number of SNPs in a region (e.g. 20000). Default is Inf, no limit. This can be useful if there are too many SNPs in a region and you don’t have enough memory to run the program.</p></li>
 <li><p><code>min_group_size</code>: minimum number of variables in a region (default is 100). Groups with fewer variables will be removed from cTWAS analysis, because parameters cannot be reliably estimated for groups with too few variables.</p></li>
-<li><p><code>group_prior_var_stucture</code>: options to control how the effect size variance parameters are shared among groups. For example, “shared_type” (default option) allows all groups in one molecular QTL type to share the same variance parameter. “independent” allows all groups to have their own separate variance parameters. More options can be found in the “Estimating parameters” section below.</p></li>
+<li><p><code>group_prior_var_stucture</code>: options to control how the effect size variance parameters are shared among groups. For example, “shared_all” (default option) allows all groups to share the same variance parameter. “independent” allows all groups to have their own separate variance parameters. More options can be found in the “Estimating parameters” section below.</p></li>
 <li><p><code>filter_L</code>: if <code>filter_L = TRUE</code> (the default option), cTWAS will first estimate the number of causal signals (<code>L</code>) for each region. This step is done using uniform prior, treating all variants and genes equally. From the results, we obtain the number of credible sets (<code>L</code>). We then select regions with at least one credible set, L &gt; 0.</p></li>
 <li><p><code>filter_nonSNP_PIP</code> and <code>min_nonSNP_PIP</code>: if <code>filter_nonSNP_PIP = TRUE</code>, it will compute the non-SNP PIP, i.e. the total PIP of all molecular traits, for each region (using the estimated parameters) and select regions with non-SNP PIP &gt; <code>min_nonSNP_PIP</code> (0.5 by default).</p></li>
 <li><p><code>min_abs_corr</code>: Minimum absolute correlation allowed in a credible set. cTWAS jointly fine-maps both SNPs and molecular traits, the correlations between SNPs and molecular traits could be lower than standard fine-mapping with SNPs. We use a lower cutoff (0.1 by default).</p></li>
@@ -204,13 +202,13 @@
 <span>                            <span class="va">z_gene</span>, </span>
 <span>                            <span class="va">weights</span>, </span>
 <span>                            <span class="va">snp_map</span>,</span>
-<span>                            thin <span class="op">=</span> <span class="fl">0.1</span>, </span>
+<span>                            thin <span class="op">=</span> <span class="fl">1</span>, </span>
 <span>                            maxSNP <span class="op">=</span> <span class="fl">20000</span>,</span>
 <span>                            min_group_size <span class="op">=</span> <span class="fl">100</span>, </span>
 <span>                            ncore <span class="op">=</span> <span class="fl">6</span><span class="op">)</span></span>
 <span><span class="va">region_data</span> <span class="op">&lt;-</span> <span class="va">res</span><span class="op">$</span><span class="va">region_data</span></span>
 <span><span class="va">boundary_genes</span> <span class="op">&lt;-</span> <span class="va">res</span><span class="op">$</span><span class="va">boundary_genes</span></span></code></pre></div>
-<p>The function has a few arguments to control its behavior. The <code>thin</code> argument randomly selects a subset of variants (10% when thin = 0.1) to use during parameter estimation and screening for candidate regions. This helps reduce computation. If <code>thin = 1</code>, it will use all the SNPs. <code>maxSNP</code> sets a maximum on the number of variants that can be in a single region to prevent memory issues during fine-mapping. If the number of SNPs in a region is more than <code>maxSNP</code>, It will choose <code>maxSNP</code> SNPs (randomly, by default) in the region. <code>min_group_size</code> sets the minimum number of variables in a group. Groups with fewer variables will be removed from the analysis, because cTWAS cannot reliably estimate parameters for groups with too few variables. <code>ncore</code> specifies the number of cores to use when parallelizing over regions.</p>
+<p>The function has a few arguments to control its behavior. The <code>thin</code> argument randomly selects a subset of variants (10% when thin = 0.1) to use during parameter estimation for candidate regions. This helps reduce computation. When <code>thin = 1</code> (default option), it will use all the SNPs. <code>maxSNP</code> sets a maximum on the number of variants that can be in a single region to prevent memory issues during fine-mapping. If the number of SNPs in a region is more than <code>maxSNP</code>, it will, by default, choose the top <code>maxSNP</code> SNPs with the highest Z-scores. <code>min_group_size</code> sets the minimum number of variables in a group. Groups with fewer variables will be removed from the analysis, because cTWAS cannot reliably estimate parameters for groups with too few variables. <code>ncore</code> specifies the number of cores to use when parallelizing over regions.</p>
 <p>This function returns <code>region_data</code>, a list object containing input data (IDs of molecular traits and variants, their Z-scores, genomic boundaries, etc.) for each of the regions. It also returns a data frame <code>boundary_genes</code>, containing the information of molecular traits whose weights cross region boundaries. The information would be used in later analysis and post-processing.</p>
 </div>
 <div class="section level3">
@@ -219,19 +217,22 @@
 <p>We use the <code><a href="../reference/est_param.html">est_param()</a></code> function to estimate two sets of parameters: the prior inclusion probabilities and the prior effect size variance for molecular traits and variants, separately.</p>
 <p>As described in the Introduction, cTWAS can analyze multiple groups of molecular traits. This step will estimate the prior parameters for each group. But we allow sharing of the prior effect variance parameters among groups. This may improve the accuracy of parameter estimation.There are several options to control how parameters are shared among groups. This can be done by specifying the <code>group_prior_var_stucture</code>:</p>
 <ul>
-<li>“shared_type” (default option) allows all groups in one molecular QTL type to share the same variance parameter.</li>
+<li>“shared_all” (default option) allows all groups, including SNPs, to share the same variance parameter.</li>
+<li>“shared_type” allows all groups in one molecular QTL type to share the same variance parameter.</li>
 <li>“shared_context” allows all groups in one context (tissue, cell type, condition) to share the same variance parameter.</li>
 <li>“shared_nonSNP” allows all non-SNP groups (i.e. all molecular traits) to share the same variance parameter.</li>
-<li>“shared_all” allows all groups, including SNPs, to share the same variance parameter.</li>
 <li>“independent” allows all groups to have their own separate variance parameters.</li>
 </ul>
 <p>This step will run the EM algorithm to estimate parameters and return the estimated parameters (<code>group_prior</code>, <code>group_prior_var</code>, etc.). For technical reasons (see Methods of the cTWAS paper), it will run two rounds of EM algorithm. In the first round, it uses fewer iterations (<code>niter_prefit=3</code> by default) to get rough parameter estimates, and using these values, select regions for the analysis in the second run of EM. We use more iterations in the second round (<code>niter=30</code> by default) to get accurate parameter estimates. <code>min_group_size</code> sets the minimum number of variables in a group, as parameters cannot be reliably estimated for groups with too few variables.</p>
+<p>We could compute standard errors and p-values of enrichment (<code>run_enrichment_test = TRUE</code>). We provided two options to assess the significance of enrichment: “G-test” (<code>enrichment_test = "G"</code>, default option), or Fisher’s exact test (<code>enrichment_test = "fisher"</code>).</p>
 <div class="sourceCode" id="cb7"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">param</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/est_param.html">est_param</a></span><span class="op">(</span><span class="va">region_data</span>, </span>
-<span>                   group_prior_var_structure <span class="op">=</span> <span class="st">"shared_type"</span>, </span>
+<span>                   group_prior_var_structure <span class="op">=</span> <span class="st">"shared_all"</span>, </span>
 <span>                   niter_prefit <span class="op">=</span> <span class="fl">3</span>,</span>
 <span>                   niter <span class="op">=</span> <span class="fl">30</span>, </span>
 <span>                   min_group_size <span class="op">=</span> <span class="fl">100</span>,</span>
+<span>                   run_enrichment_test <span class="op">=</span> <span class="cn">TRUE</span>,</span>
+<span>                   enrichment_test <span class="op">=</span> <span class="st">"G"</span>,</span>
 <span>                   ncore <span class="op">=</span> <span class="fl">6</span><span class="op">)</span></span>
 <span><span class="va">group_prior</span> <span class="op">&lt;-</span> <span class="va">param</span><span class="op">$</span><span class="va">group_prior</span></span>
 <span><span class="va">group_prior_var</span> <span class="op">&lt;-</span> <span class="va">param</span><span class="op">$</span><span class="va">group_prior_var</span></span></code></pre></div>
@@ -241,67 +242,31 @@
 <h3 id="screening-regions">Screening regions<a class="anchor" aria-label="anchor" href="#screening-regions"></a>
 </h3>
 <div class="section level4">
+<h4 id="expanding-regions-with-all-snps">Expanding regions with all SNPs<a class="anchor" aria-label="anchor" href="#expanding-regions-with-all-snps"></a>
+</h4>
+<p>If you had <code>thin</code> &lt; 1 when preparing <code>region_data</code>, you need to expand the regions with all SNPs for screening regions and fine-mapping. If the number of SNPs in a region is more than <code>maxSNP</code>, it will choose the top <code>maxSNP</code> SNPs with the highest Z-scores. This is not needed when <code>thin = 1</code>.</p>
+<div class="sourceCode" id="cb8"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="kw">if</span> <span class="op">(</span><span class="va">thin</span> <span class="op">&lt;</span> <span class="fl">1</span><span class="op">)</span><span class="op">{</span></span>
+<span>    <span class="va">region_data</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/expand_region_data.html">expand_region_data</a></span><span class="op">(</span><span class="va">region_data</span>,</span>
+<span>                                      <span class="va">snp_map</span>,</span>
+<span>                                      <span class="va">z_snp</span>,</span>
+<span>                                      maxSNP <span class="op">=</span> <span class="fl">20000</span>,</span>
+<span>                                      ncore <span class="op">=</span> <span class="fl">6</span><span class="op">)</span></span>
+<span><span class="op">}</span></span></code></pre></div>
+</div>
+<div class="section level4">
 <h4 id="screening-regions-with-ld">Screening regions with LD<a class="anchor" aria-label="anchor" href="#screening-regions-with-ld"></a>
 </h4>
-<p>After parameter estimation, we use the <code><a href="../reference/screen_regions.html">screen_regions()</a></code> function to perform a screening process to select regions with likely causal signals in molecular traits. To find these regions, we perform an initial fine-mapping with thinned SNPs (a subset of all variants, see the Section “Assemble input data”). Only these regions would be subject to full fine-mapping analysis, using all variants, in the final step. Thus screening regions can save computational time.</p>
-<p>cTWAS have two options to screen regions: 1) screening by the number of causal signals, 2) screening by non-SNP PIPs.</p>
-<p>Option 1: screening by the number of causal signals. If <code>filter_L = TRUE</code> and <code>filter_nonSNP_PIP = FALSE</code> (the default option), cTWAS will estimate the number of causal signals (<code>L</code>) for each region. This step is done by running fine-mapping using uniform prior, treating all variants and molecular traits equally. To use uniform prior, we set <code>group_prior = NULL</code> (uniform prior inclusion probabilities) and <code>group_prior_var = NULL</code> (prior variance = 50 as the default in <code>susie_rss</code>). From the results, we obtain the number of credible sets (<code>L</code>). We then select regions with at least one credible set, L &gt; 0.</p>
-<div class="sourceCode" id="cb8"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">screen_res</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/screen_regions.html">screen_regions</a></span><span class="op">(</span><span class="va">region_data</span>,</span>
-<span>                             LD_map <span class="op">=</span> <span class="va">LD_map</span>,</span>
-<span>                             weights <span class="op">=</span> <span class="va">weights</span>, </span>
-<span>                             filter_L <span class="op">=</span> <span class="cn">TRUE</span>,</span>
-<span>                             filter_nonSNP_PIP <span class="op">=</span> <span class="cn">FALSE</span>,</span>
-<span>                             min_abs_corr <span class="op">=</span> <span class="fl">0.1</span>, </span>
-<span>                             group_prior <span class="op">=</span> <span class="cn">NULL</span>,</span>
-<span>                             group_prior_var <span class="op">=</span> <span class="cn">NULL</span>, </span>
-<span>                             ncore <span class="op">=</span> <span class="fl">4</span><span class="op">)</span></span>
-<span><span class="va">screened_region_data</span> <span class="op">&lt;-</span> <span class="va">screen_res</span><span class="op">$</span><span class="va">screened_region_data</span></span>
-<span><span class="va">screened_region_L</span> <span class="op">&lt;-</span> <span class="va">screen_res</span><span class="op">$</span><span class="va">screened_region_L</span></span>
-<span><span class="va">screen_summary</span> <span class="op">&lt;-</span> <span class="va">screen_res</span><span class="op">$</span><span class="va">screen_summary</span></span></code></pre></div>
-<p>It returns <code>screened_region_data</code> which contains a subset of region data for selected regions. It also returns the estimated L (number of credible sets) for the selected regions, which could be used in the fine-mapping step to set L for each region. In addition, it returns a data frame <code>screen_summary</code>, which includes the estimated L and non-SNP PIPs for all the regions.</p>
-<p>Note: cTWAS jointly fine-maps both SNPs and molecular traits, the correlations between SNPs and molecular traits could be lower than standard fine-mapping with SNPs. Thus, we set a lower purity cutoff (default option: <code>min_abs_corr = 0.1</code>) for obtaining credible sets to avoid missing causal genes.</p>
-<p>Option 2: screening by non-SNP PIPs. If <code>filter_nonSNP_PIP = TRUE</code> and <code>filter_L = FALSE</code>, cTWAS will compute the non-SNP PIP, i.e. total PIP of all molecular traits, for each region (using estimated priors). It then selects regions by applying a <code>min_nonSNP_PIP</code> cutoff (0.5, by default).</p>
+<p>After parameter estimation, we use the <code><a href="../reference/screen_regions.html">screen_regions()</a></code> function to perform a screening process to select regions with likely causal signals in molecular traits. cTWAS first selects regions with minimum p-values (<code>min_pval</code>) &lt; 5e-8 or any SNPs or all molecular traits (from <code>region_data</code>). Then, cTWAS will perform an initial fine-mapping without LD (L= 1) and compute the non-SNP PIP, i.e. total PIP of all molecular traits, for each region (using estimated priors). It then selects regions by applying a <code>min_nonSNP_PIP</code> cutoff (0.5, by default). Only these selected regions would be subject to full fine-mapping analysis in the final step. Thus screening regions can save computational time.</p>
 <div class="sourceCode" id="cb9"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">screen_res</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/screen_regions.html">screen_regions</a></span><span class="op">(</span><span class="va">region_data</span>,</span>
-<span>                             LD_map <span class="op">=</span> <span class="va">LD_map</span>,</span>
-<span>                             weights <span class="op">=</span> <span class="va">weights</span>, </span>
-<span>                             filter_L <span class="op">=</span> <span class="cn">FALSE</span>,</span>
-<span>                             filter_nonSNP_PIP <span class="op">=</span> <span class="cn">TRUE</span>,</span>
 <span>                             group_prior <span class="op">=</span> <span class="va">group_prior</span>,</span>
 <span>                             group_prior_var <span class="op">=</span> <span class="va">group_prior_var</span>,</span>
-<span>                             ncore <span class="op">=</span> <span class="fl">4</span><span class="op">)</span></span>
-<span><span class="va">screened_region_data</span> <span class="op">&lt;-</span> <span class="va">screen_res</span><span class="op">$</span><span class="va">screened_region_data</span></span>
-<span><span class="va">screened_region_L</span> <span class="op">&lt;-</span> <span class="va">screen_res</span><span class="op">$</span><span class="va">screened_region_L</span></span>
-<span><span class="va">screen_summary</span> <span class="op">&lt;-</span> <span class="va">screen_res</span><span class="op">$</span><span class="va">screen_summary</span></span></code></pre></div>
-<p>In general, we recommend screening by the number of causal signals, i.e. setting <code>filter_L = TRUE</code> and <code>filter_nonSNP_PIP = FALSE</code>.</p>
-</div>
-<div class="section level4">
-<h4 id="screening-regions-without-ld">Screening regions without LD<a class="anchor" aria-label="anchor" href="#screening-regions-without-ld"></a>
-</h4>
-<p>When running without LD, we could use the <code><a href="../reference/screen_regions_noLD.html">screen_regions_noLD()</a></code> function; it would only perform screening regions by non-SNP PIPs.</p>
-<div class="sourceCode" id="cb10"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">screen_res</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/screen_regions_noLD.html">screen_regions_noLD</a></span><span class="op">(</span><span class="va">region_data</span>,</span>
-<span>                                  group_prior <span class="op">=</span> <span class="va">group_prior</span>,</span>
-<span>                                  group_prior_var <span class="op">=</span> <span class="va">group_prior_var</span>,</span>
-<span>                                  min_nonSNP_PIP <span class="op">=</span> <span class="fl">0.5</span>,</span>
-<span>                                  ncore <span class="op">=</span> <span class="fl">6</span><span class="op">)</span></span>
+<span>                             min_nonSNP_PIP <span class="op">=</span> <span class="fl">0.5</span>,</span>
+<span>                             min_pval <span class="op">=</span> <span class="fl">5e-8</span>,</span>
+<span>                             ncore <span class="op">=</span> <span class="fl">6</span><span class="op">)</span></span>
 <span><span class="va">screened_region_data</span> <span class="op">&lt;-</span> <span class="va">screen_res</span><span class="op">$</span><span class="va">screened_region_data</span></span>
 <span><span class="va">screen_summary</span> <span class="op">&lt;-</span> <span class="va">screen_res</span><span class="op">$</span><span class="va">screen_summary</span></span></code></pre></div>
-</div>
-<div class="section level4">
-<h4 id="expanding-selected-regions-with-all-snps">Expanding selected regions with all SNPs<a class="anchor" aria-label="anchor" href="#expanding-selected-regions-with-all-snps"></a>
-</h4>
-<p>After screening regions, we expand the selected regions with all SNPs for final fine-mapping. (This is not needed when <code>thin = 1</code>.)</p>
-<div class="sourceCode" id="cb11"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">screened_region_data</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/expand_region_data.html">expand_region_data</a></span><span class="op">(</span><span class="va">screened_region_data</span>,</span>
-<span>                                           <span class="va">snp_map</span>,</span>
-<span>                                           <span class="va">z_snp</span>,</span>
-<span>                                           maxSNP <span class="op">=</span> <span class="fl">20000</span>,</span>
-<span>                                           ncore <span class="op">=</span> <span class="fl">6</span><span class="op">)</span></span>
-<span></span>
-<span><span class="va">screen_res</span><span class="op">$</span><span class="va">screened_region_data</span> <span class="op">&lt;-</span> <span class="va">screened_region_data</span></span></code></pre></div>
-<p>If the number of SNPs in a region is more than <code>maxSNP</code>, it will choose the top <code>maxSNP</code> SNPs with the highest Z-scores.</p>
 </div>
 </div>
 <div class="section level3">
@@ -312,29 +277,28 @@
 </h4>
 <p>We now perform the fine-mapping step for each of the selected regions from screening with the estimated parameters.</p>
 <p>The <code><a href="../reference/finemap_regions.html">finemap_regions()</a></code> function performs fine-mapping for the regions in the <code>screened_region_data</code>.</p>
-<p>It first computes correlation matrices among all variables included in fine-mapping (SNPs, and molecular traits), then runs fine-mapping with estimated parameters (<code>group_prior</code> and <code>group_prior_var</code>) and estimated number of causal signals (<code>screened_region_L</code>), and returns a data frame with fine-mapping results for the regions.</p>
-<div class="sourceCode" id="cb12"><pre class="downlit sourceCode r">
+<p>It first computes correlation matrices among all variables included in fine-mapping (SNPs, and molecular traits), then runs fine-mapping with estimated parameters (<code>group_prior</code> and <code>group_prior_var</code>) with <code>L = 5</code> (default option), and returns fine-mapping results for the regions.</p>
+<div class="sourceCode" id="cb10"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">res</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/finemap_regions.html">finemap_regions</a></span><span class="op">(</span><span class="va">screened_region_data</span>,</span>
 <span>                       LD_map <span class="op">=</span> <span class="va">LD_map</span>,</span>
 <span>                       weights <span class="op">=</span> <span class="va">weights</span>,</span>
 <span>                       group_prior <span class="op">=</span> <span class="va">group_prior</span>,</span>
 <span>                       group_prior_var <span class="op">=</span> <span class="va">group_prior_var</span>,</span>
-<span>                       L <span class="op">=</span> <span class="va">screened_region_L</span>,</span>
-<span>                       min_abs_corr <span class="op">=</span> <span class="fl">0.1</span>, </span>
+<span>                       L <span class="op">=</span> <span class="fl">5</span>,</span>
 <span>                       save_cor <span class="op">=</span> <span class="cn">TRUE</span>,</span>
 <span>                       cor_dir <span class="op">=</span> <span class="st">"./cor_matrix"</span>,</span>
 <span>                       ncore <span class="op">=</span> <span class="fl">4</span><span class="op">)</span></span>
 <span><span class="va">finemap_res</span> <span class="op">&lt;-</span> <span class="va">res</span><span class="op">$</span><span class="va">finemap_res</span></span>
 <span><span class="va">susie_alpha_res</span> <span class="op">&lt;-</span> <span class="va">res</span><span class="op">$</span><span class="va">susie_alpha_res</span></span></code></pre></div>
 <p>cTWAS will automatically check <code>cor_dir</code>. If precomputed correlation matrices are available in <code>cor_dir</code>, cTWAS will simply load and reuse those. Otherwise, it will compute the correlation matrices and save to the <code>cor_dir</code> directory if <code>save_cor = TRUE</code>. You can set <code>force_compute_cor = TRUE</code> so that it always computes the correlation matrices. The correlation matrices are large datasets, so they are not saved by default.</p>
-<p><em>Note</em>: when screening regions and fine-mapping with LD, we need larger memory to load LD matrices and compute correlation matrices. So we recommend increasing memory or reducing the number of <code>ncore</code> for these steps.</p>
+<p><em>Note</em>: when fine-mapping with LD, we need larger memory to load LD matrices and compute correlation matrices. So we recommend increasing memory or reducing the number of <code>ncore</code> for these steps.</p>
 <p>It is possible to run fine-mapping using uniform prior, treating all variants and molecular traits equally. To do this, we set <code>group_prior = NULL</code> (uniform prior inclusion probabilities) and <code>group_prior_var = NULL</code> (prior variance = 50 as the default in <code>susie_rss</code>).</p>
 </div>
 <div class="section level4">
 <h4 id="fine-mapping-regions-without-ld">Fine-mapping regions without LD<a class="anchor" aria-label="anchor" href="#fine-mapping-regions-without-ld"></a>
 </h4>
 <p><em>Note</em>: we could use the <code><a href="../reference/finemap_regions_noLD.html">finemap_regions_noLD()</a></code> function to run fine-mapping without LD.</p>
-<div class="sourceCode" id="cb13"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb11"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">res</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/finemap_regions_noLD.html">finemap_regions_noLD</a></span><span class="op">(</span><span class="va">screened_region_data</span>,</span>
 <span>                            group_prior <span class="op">=</span> <span class="va">group_prior</span>,</span>
 <span>                            group_prior_var <span class="op">=</span> <span class="va">group_prior_var</span>,</span>
@@ -348,25 +312,24 @@
 </h3>
 <p>We could also run fine-mapping for a single region (or several regions of interest) with precomputed parameters. This is particularly useful to perform a deep analysis on molecular traits for regions of interest.</p>
 <p>Here we show an example for fine-mapping a single region “16_71020125_72901251”.</p>
-<p>We first select the data for the region of interest from <code>screened_region_data</code>. We also need the number of causal signals (<code>L</code>) for this region. These are obtained from the output of the earlier <code><a href="../reference/screen_regions.html">screen_regions()</a></code> function.</p>
-<div class="sourceCode" id="cb14"><pre class="downlit sourceCode r">
+<p>We select the data for the region of interest from <code>screened_region_data</code>, obtained from the output of the earlier <code><a href="../reference/screen_regions.html">screen_regions()</a></code> function.</p>
+<div class="sourceCode" id="cb12"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">region_id</span> <span class="op">&lt;-</span> <span class="st">"16_71020125_72901251"</span></span>
-<span><span class="va">selected_region_data</span> <span class="op">&lt;-</span> <span class="va">screened_region_data</span><span class="op">[</span><span class="va">region_id</span><span class="op">]</span></span>
-<span><span class="va">selected_region_L</span> <span class="op">&lt;-</span> <span class="va">screened_region_L</span><span class="op">[</span><span class="va">region_id</span><span class="op">]</span></span></code></pre></div>
+<span><span class="va">selected_region_data</span> <span class="op">&lt;-</span> <span class="va">screened_region_data</span><span class="op">[</span><span class="va">region_id</span><span class="op">]</span></span></code></pre></div>
 <p>We could then perform fine-mapping for this region of interest:</p>
-<div class="sourceCode" id="cb15"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb13"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">res</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/finemap_regions.html">finemap_regions</a></span><span class="op">(</span><span class="va">selected_region_data</span>,</span>
 <span>                       LD_map <span class="op">=</span> <span class="va">LD_map</span>,</span>
 <span>                       weights <span class="op">=</span> <span class="va">weights</span>,</span>
 <span>                       group_prior <span class="op">=</span> <span class="va">group_prior</span>,</span>
 <span>                       group_prior_var <span class="op">=</span> <span class="va">group_prior_var</span>,</span>
-<span>                       L <span class="op">=</span> <span class="va">selected_region_L</span>,</span>
+<span>                       L <span class="op">=</span> <span class="fl">5</span>,</span>
 <span>                       save_cor <span class="op">=</span> <span class="cn">TRUE</span>,</span>
 <span>                       cor_dir <span class="op">=</span> <span class="st">"./cor_matrix"</span><span class="op">)</span></span>
 <span><span class="va">finemap_res</span> <span class="op">&lt;-</span> <span class="va">res</span><span class="op">$</span><span class="va">finemap_res</span></span>
 <span><span class="va">susie_alpha_res</span> <span class="op">&lt;-</span> <span class="va">res</span><span class="op">$</span><span class="va">susie_alpha_res</span></span></code></pre></div>
 <p>We could also perform fine-mapping without LD:</p>
-<div class="sourceCode" id="cb16"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb14"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">res</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/finemap_regions_noLD.html">finemap_regions_noLD</a></span><span class="op">(</span><span class="va">selected_region_data</span>,</span>
 <span>                            group_prior <span class="op">=</span> <span class="va">group_prior</span>,</span>
 <span>                            group_prior_var <span class="op">=</span> <span class="va">group_prior_var</span><span class="op">)</span></span>

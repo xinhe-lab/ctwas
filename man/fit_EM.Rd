@@ -2,22 +2,24 @@
 % Please edit documentation in R/ctwas_EM.R
 \name{fit_EM}
 \alias{fit_EM}
-\title{Runs EM to estimate parameters.}
+\title{Runs EM to estimate parameters using cTWAS SER model}
 \usage{
 fit_EM(
   region_data,
   groups,
   types,
   contexts,
-  niter = 20,
+  niter = 30,
   init_group_prior = NULL,
   init_group_prior_var = NULL,
-  group_prior_var_structure = c("shared_type", "shared_context", "shared_nonSNP",
-    "shared_all", "independent"),
-  use_null_weight = TRUE,
+  group_prior_var_structure = c("shared_all", "shared_type", "shared_context",
+    "shared_nonSNP", "independent", "fixed"),
+  null_method = c("ctwas", "susie", "none"),
+  EM_tol = 1e-04,
+  force_run_niter = FALSE,
+  warn_converge_fail = TRUE,
   ncore = 1,
-  verbose = FALSE,
-  ...
+  verbose = FALSE
 )
 }
 \arguments{
@@ -29,22 +31,30 @@ fit_EM(
 
 \item{contexts}{a vector of the contexts to estimate parameters}
 
-\item{niter}{the number of iterations of the E-M algorithm to perform}
+\item{niter}{the maximum number of iterations of the EM algorithm to perform}
 
 \item{init_group_prior}{a vector of initial prior inclusion probabilities for SNPs and genes.}
 
 \item{init_group_prior_var}{a vector of initial prior variances for SNPs and gene effects.}
 
 \item{group_prior_var_structure}{a string indicating the structure to put on the prior variance parameters.
+"shared_all" allows all groups to share the same variance parameter.
 "shared_type" allows all groups in one molecular QTL type to share the same variance parameter.
 "shared_context" allows all groups in one context (tissue, cell type, condition) to share the same variance parameter.
 "shared_nonSNP" allows all non-SNP groups to share the same variance parameter.
-"shared_all" allows all groups to share the same variance parameter.
 "independent" allows all groups to have their own separate variance parameters.}
 
-\item{use_null_weight}{If TRUE, allow for a probability of no effect in susie}
+\item{null_method}{Method to compute null weight, options: "ctwas", "susie" or "none".}
 
-\item{ncore}{The number of cores used to parallelize susie over regions}
+\item{EM_tol}{A small, non-negative number specifying the convergence
+tolerance of log-likelihood for the EM iterations.}
+
+\item{force_run_niter}{If TRUE, run all the \code{niter} iterations.}
+
+\item{warn_converge_fail}{If \code{warn_converge_fail = TRUE},
+prints a warning message when EM algorithm does not converge.}
+
+\item{ncore}{The number of cores used to parallelize over regions}
 
 \item{verbose}{If TRUE, print detail messages}
 }
@@ -52,6 +62,6 @@ fit_EM(
 a list of estimated parameters
 }
 \description{
-Runs EM to estimate parameters.
+Runs EM to estimate parameters using cTWAS SER model
 }
 \keyword{internal}

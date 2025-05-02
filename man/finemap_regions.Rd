@@ -11,11 +11,14 @@ finemap_regions(
   L = 5,
   group_prior = NULL,
   group_prior_var = NULL,
-  use_null_weight = TRUE,
+  min_var = 2,
+  min_gene = 1,
+  null_method = c("ctwas", "susie", "none"),
   coverage = 0.95,
   min_abs_corr = 0.1,
   include_cs = TRUE,
-  get_susie_alpha = TRUE,
+  include_prior = FALSE,
+  include_susie_alpha = TRUE,
   snps_only = FALSE,
   force_compute_cor = FALSE,
   save_cor = FALSE,
@@ -38,13 +41,17 @@ finemap_regions(
 
 \item{L}{the number of effects or a vector of number of effects for each region.}
 
-\item{group_prior}{a vector of two prior inclusion probabilities for SNPs and genes.
+\item{group_prior}{a vector of prior inclusion probabilities for different groups.
 If NULL, it will use uniform prior inclusion probabilities.}
 
-\item{group_prior_var}{a vector of two prior variances for SNPs and gene effects.
+\item{group_prior_var}{a vector of prior variances for different groups.
 If NULL, it will set prior variance = 50 as the default in \code{susie_rss}.}
 
-\item{use_null_weight}{If TRUE, allow for a probability of no effect in susie}
+\item{min_var}{minimum number of variables (SNPs and genes) in a region.}
+
+\item{min_gene}{minimum number of genes in a region.}
+
+\item{null_method}{Method to compute null model, options: "ctwas", "susie" or "none".}
 
 \item{coverage}{A number between 0 and 1 specifying the \dQuote{coverage} of the estimated confidence sets}
 
@@ -52,7 +59,9 @@ If NULL, it will set prior variance = 50 as the default in \code{susie_rss}.}
 
 \item{include_cs}{If TRUE, add credible sets (CS) to finemapping results.}
 
-\item{get_susie_alpha}{If TRUE, get susie alpha matrix from finemapping results.}
+\item{include_prior}{If TRUE, include priors in finemapping results.}
+
+\item{include_susie_alpha}{If TRUE, get susie alpha matrix from finemapping results.}
 
 \item{snps_only}{If TRUE, use only SNPs in the region data.}
 

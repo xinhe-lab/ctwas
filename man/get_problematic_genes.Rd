@@ -9,7 +9,7 @@ get_problematic_genes(
   weights,
   finemap_res,
   pip_thresh = 0.5,
-  z_thresh = 3
+  z_thresh = NULL
 )
 }
 \arguments{

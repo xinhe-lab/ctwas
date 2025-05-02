@@ -17,7 +17,7 @@
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">ctwas</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">0.4.21</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">0.5.16</span>
       </span>
     </div>
 
@@ -94,10 +94,10 @@
 <span>  <span class="va">z_gene</span>,</span>
 <span>  <span class="va">weights</span>,</span>
 <span>  <span class="va">snp_map</span>,</span>
-<span>  thin <span class="op">=</span> <span class="fl">0.1</span>,</span>
+<span>  thin <span class="op">=</span> <span class="fl">1</span>,</span>
 <span>  maxSNP <span class="op">=</span> <span class="cn">Inf</span>,</span>
 <span>  min_group_size <span class="op">=</span> <span class="fl">100</span>,</span>
-<span>  trim_by <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"random"</span>, <span class="st">"z"</span><span class="op">)</span>,</span>
+<span>  trim_by <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"z"</span>, <span class="st">"random"</span><span class="op">)</span>,</span>
 <span>  thin_by <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"ref"</span>, <span class="st">"gwas"</span><span class="op">)</span>,</span>
 <span>  adjust_boundary_genes <span class="op">=</span> <span class="cn">TRUE</span>,</span>
 <span>  ncore <span class="op">=</span> <span class="fl">1</span>,</span>
@@ -138,8 +138,7 @@ The fine mapping step is rerun using full SNPs for regions with strong gene sign
 <dt>maxSNP</dt>
 <dd><p>Inf or integer. Maximum number of SNPs in a region. Default is
 Inf, no limit. This can be useful if there are many SNPs in a region and you don't
-have enough memory to run the program. This applies to the last rerun step
-(using full SNPs and rerun susie for regions with strong gene signals) only.</p></dd>
+have enough memory to run the program.</p></dd>
 
 
 <dt>min_group_size</dt>
@@ -147,15 +146,13 @@ have enough memory to run the program. This applies to the last rerun step
 
 
 <dt>trim_by</dt>
-<dd><p>remove SNPs if the total number of SNPs exceeds limit,
-options: "random", or "z" (trim SNPs with lower |z|).
-See parameter `maxSNP` for more information.</p></dd>
+<dd><p>remove SNPs if the total number of SNPs exceeds <code>maxSNP</code>,
+options: "z" (trim SNPs with lower |z|), "random".</p></dd>
 
 
 <dt>thin_by</dt>
 <dd><p>options for thinning SNPs,
-"reference": thin reference SNPs,
-"gwas": thin GWAS SNPs.</p></dd>
+"reference": thin reference SNPs, "gwas": thin GWAS SNPs.</p></dd>
 
 
 <dt>adjust_boundary_genes</dt>

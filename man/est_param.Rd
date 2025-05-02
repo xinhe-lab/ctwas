@@ -2,21 +2,25 @@
 % Please edit documentation in R/ctwas_est_parameters.R
 \name{est_param}
 \alias{est_param}
-\title{Estimates cTWAS parameters using EM}
+\title{Estimates cTWAS parameters using EM with cTWAS SER model}
 \usage{
 est_param(
   region_data,
   init_group_prior = NULL,
   init_group_prior_var = NULL,
-  group_prior_var_structure = c("shared_type", "shared_context", "shared_nonSNP",
-    "shared_all", "independent"),
+  group_prior_var_structure = c("shared_all", "shared_type", "shared_context",
+    "shared_nonSNP", "independent", "fixed"),
   niter_prefit = 3,
-  niter = 30,
-  min_p_single_effect = 0.8,
-  use_null_weight = TRUE,
+  niter = 50,
   min_var = 2,
   min_gene = 1,
   min_group_size = 100,
+  min_p_single_effect = 0.8,
+  null_method = c("ctwas", "susie", "none"),
+  enrichment_test = c("G", "fisher"),
+  include_test_result = FALSE,
+  EM_tol = 1e-04,
+  force_run_niter = FALSE,
   ncore = 1,
   logfile = NULL,
   verbose = FALSE,
@@ -26,31 +30,43 @@ est_param(
 \arguments{
 \item{region_data}{a list object indexing regions, variants and genes.}
 
-\item{init_group_prior}{a vector of initial values of prior inclusion probabilities for SNPs and genes.}
+\item{init_group_prior}{a vector of initial values of prior inclusion probabilities for different groups.}
 
-\item{init_group_prior_var}{a vector of initial values of prior variances for SNPs and gene effects.}
+\item{init_group_prior_var}{a vector of initial values of prior variances for different groups.}
 
 \item{group_prior_var_structure}{a string indicating the structure to put on the prior variance parameters.
+"shared_all" allows all groups to share the same variance parameter.
 "shared_type" allows all groups in one molecular QTL type to share the same variance parameter.
 "shared_context" allows all groups in one context (tissue, cell type, condition) to share the same variance parameter.
 "shared_nonSNP" allows all non-SNP groups to share the same variance parameter.
-"shared_all" allows all groups to share the same variance parameter.
-"independent" allows all groups to have their own separate variance parameters.}
+"independent" allows all groups to have their own separate variance parameters.
+"fixed" sets prior variance parameters to values in \code{init_group_prior_var}.}
 
-\item{niter_prefit}{the number of iterations of the E-M algorithm to perform during the initial parameter estimation step.}
+\item{niter_prefit}{the maximum number of iterations of the E-M algorithm to perform during the initial parameter estimation step.}
 
-\item{niter}{the number of iterations of the E-M algorithm to perform during the complete parameter estimation step.}
-
-\item{min_p_single_effect}{Regions with probability greater than \code{min_p_single_effect} of
-having at most one causal effect will be used selected for the complete parameter estimation step.}
-
-\item{use_null_weight}{If TRUE, allow for a probability of no effect in susie.}
+\item{niter}{the maximum number of iterations of the E-M algorithm to perform during the complete parameter estimation step.}
 
 \item{min_var}{minimum number of variables (SNPs and genes) in a region.}
 
 \item{min_gene}{minimum number of genes in a region.}
 
 \item{min_group_size}{Minimum number of variables in a group.}
+
+\item{min_p_single_effect}{Regions with probability greater than \code{min_p_single_effect} of
+having at most one causal effect will be used selected for the complete parameter estimation step.}
+
+\item{null_method}{Method to compute null model, options: "ctwas", "susie" or "none".}
+
+\item{enrichment_test}{Method to test enrichment,
+options: "G" (G-test), "fisher" (Fisher's exact test).
+Only used when \code{run_enrichment_test = TRUE}.}
+
+\item{include_test_result}{If TRUE, return the original enrichment test result.}
+
+\item{EM_tol}{A small, non-negative number specifying the convergence
+tolerance of log-likelihood for the EM iterations.}
+
+\item{force_run_niter}{If TRUE, run all the \code{niter} EM iterations.}
 
 \item{ncore}{The number of cores used to parallelize computation over regions.}
 
@@ -64,5 +80,5 @@ having at most one causal effect will be used selected for the complete paramete
 a list with estimated parameters
 }
 \description{
-Estimates cTWAS parameters using EM
+Estimates cTWAS parameters using EM with cTWAS SER model
 }

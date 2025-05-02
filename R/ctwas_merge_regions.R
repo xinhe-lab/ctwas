@@ -17,23 +17,11 @@
 #'
 #' @param z_gene A data frame with columns: "id", "z", giving the z-scores for genes.
 #'
-#' @param estimate_L If TRUE, estimate L for merged regions.
-#'
-#' @param expand If TRUE, expand merged region_data with full SNPs
-#'
-#' @param L the number of effects for susie.
+#' @param expand If TRUE, expand merged region_data with full SNPs when "thin" < 1.
 #'
 #' @param maxSNP Inf or integer. Maximum number of SNPs in a region. Default is
 #' Inf, no limit. This can be useful if there are many SNPs in a region and you don't
 #' have enough memory to run the program.
-#'
-#' @param LD_format file format for LD matrix. If "custom", use a user defined
-#' \code{LD_loader_fun()} function to load LD matrix.
-#'
-#' @param LD_loader_fun a user defined function to load LD matrix when \code{LD_format = "custom"}.
-#'
-#' @param snpinfo_loader_fun a user defined function to load SNP information file,
-#' if SNP information files are not in standard cTWAS reference format.
 #'
 #' @param ncore The number of cores used to parallelize susie over regions
 #'
@@ -58,13 +46,8 @@ merge_region_data <- function(boundary_genes,
                               weights,
                               z_snp,
                               z_gene,
-                              estimate_L = TRUE,
                               expand = TRUE,
-                              L = 5,
                               maxSNP = Inf,
-                              LD_format = c("rds", "rdata", "mtx", "csv", "txt", "custom"),
-                              LD_loader_fun = NULL,
-                              snpinfo_loader_fun = NULL,
                               ncore = 1,
                               verbose = FALSE,
                               logfile = NULL,
@@ -122,23 +105,6 @@ merge_region_data <- function(boundary_genes,
 
   loginfo("%d regions in merged_region_data", length(merged_region_data))
 
-  if (estimate_L) {
-    loginfo("Estimating L ...")
-    merged_region_L <- estimate_region_L(region_data = merged_region_data,
-                                         LD_map = merged_LD_map,
-                                         weights = weights,
-                                         init_L = L,
-                                         LD_format = LD_format,
-                                         LD_loader_fun = LD_loader_fun,
-                                         snpinfo_loader_fun = snpinfo_loader_fun,
-                                         ncore = ncore,
-                                         verbose = verbose,
-                                         ...)
-    merged_region_L[merged_region_L == 0] <- 1
-  } else {
-    merged_region_L <- L
-  }
-
   if (expand) {
     merged_region_data <- expand_region_data(merged_region_data,
                                              merged_snp_map,
@@ -151,8 +117,7 @@ merge_region_data <- function(boundary_genes,
               "merged_region_info" = merged_region_info,
               "merged_LD_map" = merged_LD_map,
               "merged_snp_map" = merged_snp_map,
-              "merged_region_id_map" = merged_region_id_map,
-              "merged_region_L" = merged_region_L))
+              "merged_region_id_map" = merged_region_id_map))
 }
 
 #' @title Merges region data for cross-boundary genes without using LD
@@ -460,11 +425,9 @@ update_merged_region_finemap_res <- function(finemap_res,
 #' @param merged_LD_map a data frame of merged LD map.
 #' @param snp_map a list of original SNP info.
 #' @param merged_snp_map a list of merged SNP info.
-#' @param screened_region_L a vector of L for original screened regions.
-#' @param merged_region_L a vector of L for merged regions.
 #' @param merged_region_id_map a data frame of new region IDs and original regions IDs.
 #'
-#' @return a list with updated region_data, region_info, LD_map, snp_map, and L.
+#' @return a list with updated region_data, region_info, LD_map, snp_map.
 #'
 #' @export
 #'
@@ -472,7 +435,6 @@ update_merged_region_data <- function(region_data, merged_region_data,
                                       region_info, merged_region_info,
                                       LD_map, merged_LD_map,
                                       snp_map, merged_snp_map,
-                                      screened_region_L, merged_region_L,
                                       merged_region_id_map){
 
   new_region_ids <- merged_region_id_map$region_id
@@ -492,15 +454,10 @@ update_merged_region_data <- function(region_data, merged_region_data,
   region_data <- c(region_data, merged_region_data)
   region_data <- region_data[region_info$region_id]
 
-  kept_screened_region_L <- screened_region_L[!names(screened_region_L) %in% old_region_ids]
-  new_region_L <- merged_region_L[new_region_ids]
-  screened_region_L <- c(kept_screened_region_L, new_region_L)
-
   return(list("updated_region_data" = region_data,
               "updated_region_info" = region_info,
               "updated_LD_map" = LD_map,
-              "updated_snp_map" = snp_map,
-              "updated_region_L" = screened_region_L))
+              "updated_snp_map" = snp_map))
 }
 
 #' Updates cTWAS input data without LD with merged region data

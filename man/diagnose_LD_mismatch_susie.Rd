@@ -9,7 +9,8 @@ diagnose_LD_mismatch_susie(
   z_snp,
   LD_map,
   gwas_n,
-  p_diff_thresh = 5e-08,
+  p_diff_thresh = 5e-06,
+  plot = TRUE,
   LD_format = c("rds", "rdata", "mtx", "csv", "txt", "custom"),
   LD_loader_fun = NULL,
   snpinfo_loader_fun = NULL,
@@ -27,8 +28,11 @@ snps. "A1" is effect allele. "A2" is the other allele.}
 
 \item{gwas_n}{integer, GWAS sample size.}
 
-\item{p_diff_thresh}{numeric, p-value threshold for identifying problematic SNPs
-with significant difference between observed z-scores and estimated values}
+\item{p_diff_thresh}{numeric, p-value cutoff for identifying problematic SNPs
+with significant difference between observed z-scores and estimated values.
+Default is 5e-6.}
+
+\item{plot}{If TRUE, plot observed z score vs the expected value.}
 
 \item{LD_format}{file format for LD matrix. If "custom", use a user defined
 \code{LD_loader_fun()} function to load LD matrix.}

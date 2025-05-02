@@ -11,6 +11,11 @@
 #'
 #' @param min_abs_corr Minimum absolute correlation allowed in a credible set.
 #'
+#' @param null_method Method to compute null model, options: "ctwas", "susie" or "none".
+#'
+#' @param null_weight Prior probability of no effect (a number between
+#'   0 and 1, and cannot be exactly 1). Only used when \code{null_method = "susie"}.
+#'
 #' @param snps_only If TRUE, use only SNPs in the region data.
 #'
 #' @param LD_format file format for LD matrix. If "custom", use a user defined
@@ -38,6 +43,8 @@ estimate_region_L <- function(region_data,
                               weights,
                               init_L = 5,
                               min_abs_corr = 0.1,
+                              null_method = c("ctwas", "susie", "none"),
+                              null_weight = NULL,
                               snps_only = FALSE,
                               LD_format = c("rds", "rdata", "mtx", "csv", "txt", "custom"),
                               LD_loader_fun = NULL,
@@ -48,6 +55,7 @@ estimate_region_L <- function(region_data,
 
   # check inputs
   LD_format <- match.arg(LD_format)
+  null_method <- match.arg(null_method)
 
   if (snps_only)
     loginfo("Use SNPs only when estimating L")
@@ -60,6 +68,8 @@ estimate_region_L <- function(region_data,
                          min_abs_corr = min_abs_corr,
                          include_cs = TRUE,
                          get_susie_alpha = FALSE,
+                         null_method = null_method,
+                         null_weight = null_weight,
                          snps_only = snps_only,
                          LD_format = LD_format,
                          LD_loader_fun = LD_loader_fun,
@@ -105,7 +115,7 @@ get_L <- function(finemap_res){
 #' @return a vector of non-SNP PIPs for all regions
 #'
 #' @export
-compute_region_nonSNP_PIPs <- function(finemap_res, filter_cs = TRUE){
+compute_region_nonSNP_PIPs <- function(finemap_res, filter_cs = FALSE){
 
   region_ids <- unique(finemap_res$region_id)
   if (length(region_ids) == 0) {
@@ -152,6 +162,41 @@ compute_region_p_single_effect <- function(region_data, group_prior){
   names(p_single_effect) <- region_ids
 
   return(p_single_effect)
+}
+
+# get basic summary for screening regions
+summarize_region_signals <- function(region_data){
+  region_ids <- names(region_data)
+  n_gids <- sapply(region_data, function(x){length(x$gid)})
+  n_sids <- sapply(region_data, function(x){length(x$sid)})
+
+  max_gene_absZ_regions <- sapply(region_data, function(x){
+    z = x$z_gene$z
+    if (length(z) > 0){
+      max(abs(z))
+    } else {
+      NA
+    }
+  })
+
+  max_snp_absZ_regions <- sapply(region_data, function(x){
+    z = x$z_snp$z
+    if (length(z) > 0){
+      max(abs(z))
+    } else {
+      NA
+    }
+  })
+
+  region_summary <- data.frame(region_id = region_ids,
+                               n_gids = n_gids,
+                               n_sids = n_sids,
+                               max_gene_absZ = max_gene_absZ_regions,
+                               max_snp_absZ = max_snp_absZ_regions,
+                               min_gene_p = z2p(max_gene_absZ_regions),
+                               min_snp_p = z2p(max_snp_absZ_regions),
+                               row.names = NULL)
+  return(region_summary)
 }
 
 

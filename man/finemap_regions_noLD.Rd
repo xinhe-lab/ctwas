@@ -8,8 +8,13 @@ finemap_regions_noLD(
   region_data,
   group_prior = NULL,
   group_prior_var = NULL,
-  use_null_weight = TRUE,
-  get_susie_alpha = TRUE,
+  min_var = 2,
+  min_gene = 1,
+  null_method = c("ctwas", "susie", "none"),
+  coverage = 0.95,
+  include_cs = TRUE,
+  include_prior = FALSE,
+  include_susie_alpha = TRUE,
   snps_only = FALSE,
   ncore = 1,
   verbose = FALSE,
@@ -20,15 +25,25 @@ finemap_regions_noLD(
 \arguments{
 \item{region_data}{region_data to be finemapped}
 
-\item{group_prior}{a vector of two prior inclusion probabilities for SNPs and genes.
+\item{group_prior}{a vector of prior inclusion probabilities for different groups.
 If NULL, it will use uniform prior inclusion probabilities.}
 
-\item{group_prior_var}{a vector of two prior variances for SNPs and gene effects.
+\item{group_prior_var}{a vector of prior variances for different groups.
 If NULL, it will set prior variance = 50 as the default in \code{susie_rss}.}
 
-\item{use_null_weight}{If TRUE, allow for a probability of no effect in susie}
+\item{min_var}{minimum number of variables (SNPs and genes) in a region.}
 
-\item{get_susie_alpha}{If TRUE, get susie alpha matrix from finemapping results.}
+\item{min_gene}{minimum number of genes in a region.}
+
+\item{null_method}{Method to compute null model, options: "ctwas", "susie" or "none".}
+
+\item{coverage}{A number between 0 and 1 specifying the \dQuote{coverage} of the estimated confidence sets}
+
+\item{include_cs}{If TRUE, include credible sets (CS) to finemapping results.}
+
+\item{include_prior}{If TRUE, include priors in finemapping results.}
+
+\item{include_susie_alpha}{If TRUE, include susie alpha matrix in the result.}
 
 \item{snps_only}{If TRUE, use only SNPs in the region data.}
 

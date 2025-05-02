@@ -17,7 +17,7 @@
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">ctwas</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">0.4.21</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">0.5.16</span>
       </span>
     </div>
 
@@ -95,23 +95,25 @@
 <span>  <span class="va">LD_map</span>,</span>
 <span>  <span class="va">snp_map</span>,</span>
 <span>  z_gene <span class="op">=</span> <span class="cn">NULL</span>,</span>
-<span>  thin <span class="op">=</span> <span class="fl">0.1</span>,</span>
+<span>  thin <span class="op">=</span> <span class="fl">1</span>,</span>
 <span>  niter_prefit <span class="op">=</span> <span class="fl">3</span>,</span>
-<span>  niter <span class="op">=</span> <span class="fl">30</span>,</span>
+<span>  niter <span class="op">=</span> <span class="fl">50</span>,</span>
 <span>  L <span class="op">=</span> <span class="fl">5</span>,</span>
 <span>  init_group_prior <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  init_group_prior_var <span class="op">=</span> <span class="cn">NULL</span>,</span>
-<span>  group_prior_var_structure <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"shared_type"</span>, <span class="st">"shared_context"</span>, <span class="st">"shared_nonSNP"</span>,</span>
-<span>    <span class="st">"shared_all"</span>, <span class="st">"independent"</span><span class="op">)</span>,</span>
-<span>  filter_L <span class="op">=</span> <span class="cn">TRUE</span>,</span>
-<span>  filter_nonSNP_PIP <span class="op">=</span> <span class="cn">FALSE</span>,</span>
+<span>  group_prior_var_structure <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"shared_all"</span>, <span class="st">"shared_type"</span>, <span class="st">"shared_context"</span>,</span>
+<span>    <span class="st">"shared_nonSNP"</span>, <span class="st">"independent"</span><span class="op">)</span>,</span>
 <span>  min_nonSNP_PIP <span class="op">=</span> <span class="fl">0.5</span>,</span>
+<span>  min_pval <span class="op">=</span> <span class="fl">5e-08</span>,</span>
 <span>  min_p_single_effect <span class="op">=</span> <span class="fl">0.8</span>,</span>
 <span>  maxSNP <span class="op">=</span> <span class="cn">Inf</span>,</span>
 <span>  min_var <span class="op">=</span> <span class="fl">2</span>,</span>
 <span>  min_gene <span class="op">=</span> <span class="fl">1</span>,</span>
 <span>  min_group_size <span class="op">=</span> <span class="fl">100</span>,</span>
-<span>  use_null_weight <span class="op">=</span> <span class="cn">TRUE</span>,</span>
+<span>  null_method <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"ctwas"</span>, <span class="st">"susie"</span>, <span class="st">"none"</span><span class="op">)</span>,</span>
+<span>  EM_tol <span class="op">=</span> <span class="fl">1e-04</span>,</span>
+<span>  force_run_niter <span class="op">=</span> <span class="cn">FALSE</span>,</span>
+<span>  enrichment_test <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"G"</span>, <span class="st">"fisher"</span><span class="op">)</span>,</span>
 <span>  coverage <span class="op">=</span> <span class="fl">0.95</span>,</span>
 <span>  min_abs_corr <span class="op">=</span> <span class="fl">0.1</span>,</span>
 <span>  LD_format <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"rds"</span>, <span class="st">"rdata"</span>, <span class="st">"mtx"</span>, <span class="st">"csv"</span>, <span class="st">"txt"</span>, <span class="st">"custom"</span><span class="op">)</span>,</span>
@@ -167,7 +169,7 @@ giving the z scores for SNPs. "A1" is effect allele. "A2" is the other allele.</
 
 
 <dt>niter</dt>
-<dd><p>the number of iterations of the E-M algorithm to perform during the complete parameter estimation step.</p></dd>
+<dd><p>the maximum number of iterations of the E-M algorithm to perform during the complete parameter estimation step.</p></dd>
 
 
 <dt>L</dt>
@@ -175,33 +177,30 @@ giving the z scores for SNPs. "A1" is effect allele. "A2" is the other allele.</
 
 
 <dt>init_group_prior</dt>
-<dd><p>a vector of initial values of prior inclusion probabilities for SNPs and genes.</p></dd>
+<dd><p>a vector of initial values of prior inclusion probabilities for different groups.</p></dd>
 
 
 <dt>init_group_prior_var</dt>
-<dd><p>a vector of initial values of prior variances for SNPs and gene effects.</p></dd>
+<dd><p>a vector of initial values of prior variances for different groups.</p></dd>
 
 
 <dt>group_prior_var_structure</dt>
 <dd><p>a string indicating the structure to put on the prior variance parameters.
+"shared_all" allows all groups to share the same variance parameter.
 "shared_type" allows all groups in one molecular QTL type to share the same variance parameter.
 "shared_context" allows all groups in one context (tissue, cell type, condition) to share the same variance parameter.
 "shared_nonSNP" allows all non-SNP groups to share the same variance parameter.
-"shared_all" allows all groups to share the same variance parameter.
-"independent" allows all groups to have their own separate variance parameters.</p></dd>
-
-
-<dt>filter_L</dt>
-<dd><p>If TRUE, screening regions with L &gt; 0.</p></dd>
-
-
-<dt>filter_nonSNP_PIP</dt>
-<dd><p>If TRUE, screening regions with total non-SNP PIP &gt;= <code>min_nonSNP_PIP</code>.</p></dd>
+"independent" allows all groups to have their own separate variance parameters.
+"fixed" sets prior variance parameters to values in <code>init_group_prior_var</code>.</p></dd>
 
 
 <dt>min_nonSNP_PIP</dt>
 <dd><p>Regions with non-SNP PIP &gt;= <code>min_nonSNP_PIP</code>
 will be selected to run finemapping using all SNPs.</p></dd>
+
+
+<dt>min_pval</dt>
+<dd><p>Keep regions with minimum p-values from z_snp and z_gene &lt; <code>min_pval</code>.</p></dd>
 
 
 <dt>min_p_single_effect</dt>
@@ -230,8 +229,23 @@ when estimating paramters and screening regions.</p></dd>
 Groups with number of genes &lt; <code>min_group_size</code> will be removed for the analysis.</p></dd>
 
 
-<dt>use_null_weight</dt>
-<dd><p>If TRUE, allow for a probability of no effect in susie.</p></dd>
+<dt>null_method</dt>
+<dd><p>Method to compute null model, options: "ctwas", "susie" or "none".</p></dd>
+
+
+<dt>EM_tol</dt>
+<dd><p>A small, non-negative number specifying the convergence
+tolerance of log-likelihood for the EM iterations.</p></dd>
+
+
+<dt>force_run_niter</dt>
+<dd><p>If TRUE, run all the <code>niter</code> EM iterations.</p></dd>
+
+
+<dt>enrichment_test</dt>
+<dd><p>Method to test enrichment,
+options: "G" (G-test), "fisher" (Fisher's exact test).
+Only used when <code>run_enrichment_test = TRUE</code>.</p></dd>
 
 
 <dt>coverage</dt>

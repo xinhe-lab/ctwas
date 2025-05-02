@@ -10,6 +10,8 @@ estimate_region_L(
   weights,
   init_L = 5,
   min_abs_corr = 0.1,
+  null_method = c("ctwas", "susie", "none"),
+  null_weight = NULL,
   snps_only = FALSE,
   LD_format = c("rds", "rdata", "mtx", "csv", "txt", "custom"),
   LD_loader_fun = NULL,
@@ -29,6 +31,11 @@ estimate_region_L(
 \item{init_L}{upper bound of the number of causal signals}
 
 \item{min_abs_corr}{Minimum absolute correlation allowed in a credible set.}
+
+\item{null_method}{Method to compute null model, options: "ctwas", "susie" or "none".}
+
+\item{null_weight}{Prior probability of no effect (a number between
+0 and 1, and cannot be exactly 1). Only used when \code{null_method = "susie"}.}
 
 \item{snps_only}{If TRUE, use only SNPs in the region data.}
 

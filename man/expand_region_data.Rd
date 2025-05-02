@@ -7,7 +7,7 @@
 expand_region_data(region_data, snp_map, z_snp, maxSNP = Inf, ncore = 1)
 }
 \arguments{
-\item{region_data}{a list of region gene IDs and SNP IDs and associated file names}
+\item{region_data}{a list of assembled region data.}
 
 \item{snp_map}{a list of data frames with SNP-to-region map for the reference.}
 

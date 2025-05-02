@@ -532,6 +532,10 @@ make_locusplot <- function(finemap_res,
 #'
 #' @param gwas_n the sample size of the GWAS summary statistics
 #'
+#' @param plot_loglik If TRUE, plot log-likelihood.
+#'
+#' @param log_enrichment If TRUE, plot enrichment in log scale.
+#'
 #' @param title.size font size of the plot title
 #'
 #' @param legend.size font size of the plot legend title
@@ -539,6 +543,8 @@ make_locusplot <- function(finemap_res,
 #' @param colors colors for different groups, passed as the
 #'   \code{values} input to \code{\link[ggplot2]{scale_color_manual}}.
 #'   If fewer colors than "fits" are given, the colors are recycled.
+#'
+#' @param group_names groups to be included in the plots
 #'
 #' @param ncol number of columns in the output plot
 #'
@@ -560,10 +566,13 @@ make_locusplot <- function(finemap_res,
 #' @export
 make_convergence_plots <- function(param,
                                    gwas_n,
+                                   plot_loglik = FALSE,
+                                   log_enrichment = FALSE,
                                    title.size = 10,
                                    legend.size = 8,
                                    colors = c("#E69F00","#56B4E9","#009E73","#F0E442",
                                               "#0072B2","#D55E00","#CC79A7", "#999999"),
+                                   group_names,
                                    ncol = 2){
 
   # estimated group prior (all iterations)
@@ -583,15 +592,28 @@ make_convergence_plots <- function(param,
   enrichment_iters <- t(sapply(rownames(group_prior_iters)[rownames(group_prior_iters)!="SNP"], function(x){
     group_prior_iters[rownames(group_prior_iters)==x,]/group_prior_iters[rownames(group_prior_iters)=="SNP"]}))
 
+  if (log_enrichment){
+    enrichment_iters <- log(enrichment_iters)
+  }
+
   # make convergence plots
 
   # prior inclusion probability plot
   df <- data.frame(niter = rep(1:ncol(group_prior_iters), nrow(group_prior_iters)),
                    value = unlist(lapply(1:nrow(group_prior_iters), function(x){group_prior_iters[x,]})),
                    group = rep(rownames(group_prior_iters), each=ncol(group_prior_iters)))
-  factor_levels <- c(setdiff(rownames(group_prior_iters), "SNP"), "SNP")
-  df$group <- factor(df$group, levels = factor_levels)
-  df <- na.omit(df)
+
+  if (missing(group_names)){
+    group_names <- c(setdiff(rownames(group_prior_iters), "SNP"), "SNP")
+  }
+
+  df <- df[df$group %in% group_names, ]
+  df$group <- factor(df$group, levels = group_names)
+  df <- df[complete.cases(df), ,drop = FALSE]
+
+  if(length(colors) < length(levels(df$group))){
+    stop(paste("Insufficient colors! ", length(levels(df$group)), "needed but only", length(colors), "provided in colors."))
+  }
 
   p_pi <- ggplot(df, aes(x=.data$niter, y=.data$value, group=.data$group, color=.data$group)) +
     geom_line() +
@@ -611,7 +633,7 @@ make_convergence_plots <- function(param,
   df <- data.frame(niter = rep(1:ncol(group_prior_var_iters), nrow(group_prior_var_iters)),
                    value = unlist(lapply(1:nrow(group_prior_var_iters), function(x){group_prior_var_iters[x,]})),
                    group = rep(rownames(group_prior_var_iters), each=ncol(group_prior_var_iters)))
-  df$group <- factor(df$group, levels = factor_levels)
+  df$group <- factor(df$group, levels = group_names)
   df <- na.omit(df)
 
   p_sigma2 <- ggplot(df, aes(x=.data$niter, y=.data$value, group=.data$group, color=.data$group)) +
@@ -632,15 +654,14 @@ make_convergence_plots <- function(param,
   df <- data.frame(niter = rep(1:ncol(enrichment_iters), nrow(enrichment_iters)),
                    value = unlist(lapply(1:nrow(enrichment_iters), function(x){enrichment_iters[x,]})),
                    group = rep(rownames(enrichment_iters), each=ncol(enrichment_iters)))
-  df$group <- factor(df$group, levels = factor_levels[factor_levels!="SNP"])
+  df$group <- factor(df$group, levels = group_names[group_names!="SNP"])
   df <- na.omit(df)
 
   p_enrich <- ggplot(df, aes(x=.data$niter, y=.data$value, group=.data$group, color=.data$group)) +
     geom_line() +
     geom_point(alpha = 0.5) +
     scale_color_manual(values = colors) +
-    xlab("Iteration") + ylab(bquote(pi[G]/pi[S])) +
-    ggtitle("Enrichment") +
+    xlab("Iteration") +
     theme_cowplot() +
     theme(plot.title=element_text(size=title.size)) +
     expand_limits(y=0) +
@@ -649,11 +670,17 @@ make_convergence_plots <- function(param,
           legend.text = element_text(size=legend.size),
           plot.margin = margin(b=10, l=10, t=10, r=10))
 
+  if (log_enrichment){
+    p_enrich <- p_enrich + ggtitle("log(Enrichment)") + ylab(bquote(log(pi[G]/pi[S])))
+  } else {
+    p_enrich <- p_enrich + ggtitle("Enrichment") + ylab(bquote(pi[G]/pi[S]))
+  }
+
   # PVE plot
   df <- data.frame(niter = rep(1:ncol(group_pve_iters), nrow(group_pve_iters)),
                    value = unlist(lapply(1:nrow(group_pve_iters), function(x){group_pve_iters[x,]})),
                    group = rep(rownames(group_pve_iters), each=ncol(group_pve_iters)))
-  df$group <- factor(df$group, levels = factor_levels)
+  df$group <- factor(df$group, levels = group_names)
   df <- na.omit(df)
 
   p_pve <- ggplot(df, aes(x=.data$niter, y=.data$value, group=.data$group, color=.data$group)) +
@@ -670,6 +697,33 @@ make_convergence_plots <- function(param,
           legend.text = element_text(size=legend.size),
           plot.margin = margin(b=10, l=10, t=10, r=10))
 
-  cowplot::plot_grid(p_pi, p_sigma2, p_enrich, p_pve,
-                     ncol = ncol)
+  # log-likelihood plot
+  p_loglik <- NULL
+  if (plot_loglik) {
+    if (!is.null(param$loglik_iters)){
+      loglik_iters <- param$loglik_iters
+      df <- data.frame(niter = 1:length(loglik_iters),
+                       value = loglik_iters)
+      p_loglik <- ggplot(df, aes(x=.data$niter, y=.data$value)) +
+        geom_line() +
+        geom_point() +
+        xlab("Iteration") + ylab("loglik") +
+        ggtitle("log-likelihood") +
+        theme_cowplot() +
+        theme(plot.title=element_text(size=title.size)) +
+        guides(color = guide_legend(title = "")) +
+        theme(legend.title = element_text(size=legend.size, face="bold"),
+              legend.text = element_text(size=legend.size),
+              plot.margin = margin(b=10, l=10, t=10, r=10))
+
+    }
+  }
+
+  if (!is.null(p_loglik)){
+    plot_grid(p_pi, p_sigma2, p_enrich, p_pve, p_loglik, ncol = ncol)
+  } else{
+    plot_grid(p_pi, p_sigma2, p_enrich, p_pve, ncol = ncol)
+  }
+
 }
+
