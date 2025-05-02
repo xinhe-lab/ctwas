@@ -58,6 +58,9 @@
     <loc>/reference/combine_gene_pips.html</loc>
   </url>
   <url>
+    <loc>/reference/compute_enrichment_test.html</loc>
+  </url>
+  <url>
     <loc>/reference/compute_gene_z.html</loc>
   </url>
   <url>
@@ -119,6 +122,9 @@
   </url>
   <url>
     <loc>/reference/finemap_regions_noLD.html</loc>
+  </url>
+  <url>
+    <loc>/reference/finemap_regions_ser.html</loc>
   </url>
   <url>
     <loc>/reference/finemap_single_region.html</loc>
@@ -197,6 +203,9 @@
   </url>
   <url>
     <loc>/reference/preprocess_z_snp.html</loc>
+  </url>
+  <url>
+    <loc>/reference/read_exprvar.html</loc>
   </url>
   <url>
     <loc>/reference/read_gwas.html</loc>

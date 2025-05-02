@@ -17,7 +17,7 @@
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">ctwas</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">0.4.21</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">0.5.16</span>
       </span>
     </div>
 
@@ -94,6 +94,8 @@
 <span>  <span class="va">weights</span>,</span>
 <span>  init_L <span class="op">=</span> <span class="fl">5</span>,</span>
 <span>  min_abs_corr <span class="op">=</span> <span class="fl">0.1</span>,</span>
+<span>  null_method <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"ctwas"</span>, <span class="st">"susie"</span>, <span class="st">"none"</span><span class="op">)</span>,</span>
+<span>  null_weight <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  snps_only <span class="op">=</span> <span class="cn">FALSE</span>,</span>
 <span>  LD_format <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"rds"</span>, <span class="st">"rdata"</span>, <span class="st">"mtx"</span>, <span class="st">"csv"</span>, <span class="st">"txt"</span>, <span class="st">"custom"</span><span class="op">)</span>,</span>
 <span>  LD_loader_fun <span class="op">=</span> <span class="cn">NULL</span>,</span>
@@ -124,6 +126,15 @@
 
 <dt>min_abs_corr</dt>
 <dd><p>Minimum absolute correlation allowed in a credible set.</p></dd>
+
+
+<dt>null_method</dt>
+<dd><p>Method to compute null model, options: "ctwas", "susie" or "none".</p></dd>
+
+
+<dt>null_weight</dt>
+<dd><p>Prior probability of no effect (a number between
+0 and 1, and cannot be exactly 1). Only used when <code>null_method = "susie"</code>.</p></dd>
 
 
 <dt>snps_only</dt>

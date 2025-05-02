@@ -17,7 +17,7 @@
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">ctwas</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">0.4.21</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">0.5.16</span>
       </span>
     </div>
 
@@ -91,10 +91,13 @@
     <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="fu">make_convergence_plots</span><span class="op">(</span></span>
 <span>  <span class="va">param</span>,</span>
 <span>  <span class="va">gwas_n</span>,</span>
+<span>  plot_loglik <span class="op">=</span> <span class="cn">FALSE</span>,</span>
+<span>  log_enrichment <span class="op">=</span> <span class="cn">FALSE</span>,</span>
 <span>  title.size <span class="op">=</span> <span class="fl">10</span>,</span>
 <span>  legend.size <span class="op">=</span> <span class="fl">8</span>,</span>
 <span>  colors <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"#E69F00"</span>, <span class="st">"#56B4E9"</span>, <span class="st">"#009E73"</span>, <span class="st">"#F0E442"</span>, <span class="st">"#0072B2"</span>, <span class="st">"#D55E00"</span>, <span class="st">"#CC79A7"</span>,</span>
 <span>    <span class="st">"#999999"</span><span class="op">)</span>,</span>
+<span>  <span class="va">group_names</span>,</span>
 <span>  ncol <span class="op">=</span> <span class="fl">2</span></span>
 <span><span class="op">)</span></span></code></pre></div>
     </div>
@@ -109,6 +112,14 @@
 <dd><p>the sample size of the GWAS summary statistics</p></dd>
 
 
+<dt>plot_loglik</dt>
+<dd><p>If TRUE, plot log-likelihood.</p></dd>
+
+
+<dt>log_enrichment</dt>
+<dd><p>If TRUE, plot enrichment in log scale.</p></dd>
+
+
 <dt>title.size</dt>
 <dd><p>font size of the plot title</p></dd>
 
@@ -121,6 +132,10 @@
 <dd><p>colors for different groups, passed as the
 <code>values</code> input to <code><a href="https://ggplot2.tidyverse.org/reference/scale_manual.html" class="external-link">scale_color_manual</a></code>.
 If fewer colors than "fits" are given, the colors are recycled.</p></dd>
+
+
+<dt>group_names</dt>
+<dd><p>groups to be included in the plots</p></dd>
 
 
 <dt>ncol</dt>

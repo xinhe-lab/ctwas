@@ -33,7 +33,7 @@
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">ctwas</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">0.4.21</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">0.5.16</span>
       </span>
     </div>
 
@@ -108,7 +108,7 @@
       <h1 data-toc-skip>FAQ</h1>
                         <h4 data-toc-skip class="author">Kaixuan Luo</h4>
             
-            <h4 data-toc-skip class="date">2024-12-18</h4>
+            <h4 data-toc-skip class="date">2025-05-01</h4>
       
       <small class="dont-index">Source: <a href="https://github.com/xinhe-lab/ctwas/blob/multigroup/vignettes/FAQ.Rmd" class="external-link"><code>vignettes/FAQ.Rmd</code></a></small>
       <div class="hidden name"><code>FAQ.Rmd</code></div>
@@ -125,6 +125,11 @@
 </h3>
 <p>It is critical that the genome build (e.g. hg38) of the LD reference matches the genome build used to train the prediction models. You can use the function <code><a href="../reference/get_predictdb_genome_build.html">get_predictdb_genome_build()</a></code> to check the genome build of PredictDB weight file.</p>
 <p>The genome build of the GWAS summary statistics does not matter because variant positions are determined by the LD reference.</p>
+</div>
+<div class="section level3">
+<h3 id="how-to-run-ctwas-with-multiple-datasets-with-the-same-type-and-context">How to run cTWAS with multiple datasets with the same type and context?<a class="anchor" aria-label="anchor" href="#how-to-run-ctwas-with-multiple-datasets-with-the-same-type-and-context"></a>
+</h3>
+<p>You may have multiple datasets with the same type and context, e.g. GTEx brain and CMC brain eQTLs. In this case, if we set <code>context = "brain"</code> and <code>type = "expression"</code> for both datasets, the molecular traits would be merged into a single group. If you prefer to treat them as separate groups, you can give them different context names, e.g. <code>context = “GTEx_brain”</code> and <code>“CMC_brain”</code>.</p>
 </div>
 <div class="section level3">
 <h3 id="can-i-use-my-own-ld-matrices-as-reference">Can I use my own LD matrices as reference?<a class="anchor" aria-label="anchor" href="#can-i-use-my-own-ld-matrices-as-reference"></a>
@@ -178,7 +183,7 @@
 <p>We included several default shapes to represent different types of molecular traits. If you have more types of molecular traits or if you want to change the shapes, you can set the <code>point.shapes</code>argument in the function <code><a href="../reference/make_locusplot.html">make_locusplot()</a></code>.</p>
 </div>
 <div class="section level3">
-<h3 id="error-message-null-found-in-mclapply-output--results-may-be-incomplete">Error message: " ‘NULL’ found in mclapply output. Results may be incomplete!"**<a class="anchor" aria-label="anchor" href="#error-message-null-found-in-mclapply-output--results-may-be-incomplete"></a>
+<h3 id="error-message-null-found-in-mclapply-output--results-may-be-incomplete">Error message: " ‘NULL’ found in mclapply output. Results may be incomplete!"<a class="anchor" aria-label="anchor" href="#error-message-null-found-in-mclapply-output--results-may-be-incomplete"></a>
 </h3>
 <p>This message is often caused by insufficient memory when running cTWAS with multiple cores in parallel. You could use a larger memory, or set a lower <code>ncore</code>. If you still get this error message, try <code>ncore=1</code> to run without parallelization.</p>
 </div>

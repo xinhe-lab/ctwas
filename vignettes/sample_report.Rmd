@@ -196,7 +196,7 @@ ctwas_res <- ctwas_sumstats(z_snp,
 
 `ctwas_res` is the object containing the outputs of cTWAS.
 ```{r echo=FALSE, eval=TRUE}
-results_dir <- file.path("/project/xinhe/xsun/multi_group_ctwas/examples/results_predictdb_4301010/", trait)
+results_dir <- file.path("/project/xinhe/xsun/multi_group_ctwas/examples/results_predictdb_430/", trait)
 
 ctwas_res <- readRDS(file.path(results_dir, paste0(trait,".ctwas.res.RDS")))
 ```

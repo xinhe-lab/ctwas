@@ -17,7 +17,7 @@
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">ctwas</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">0.4.21</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">0.5.16</span>
       </span>
     </div>
 
@@ -92,8 +92,13 @@
 <span>  <span class="va">region_data</span>,</span>
 <span>  group_prior <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  group_prior_var <span class="op">=</span> <span class="cn">NULL</span>,</span>
-<span>  use_null_weight <span class="op">=</span> <span class="cn">TRUE</span>,</span>
-<span>  get_susie_alpha <span class="op">=</span> <span class="cn">TRUE</span>,</span>
+<span>  min_var <span class="op">=</span> <span class="fl">2</span>,</span>
+<span>  min_gene <span class="op">=</span> <span class="fl">1</span>,</span>
+<span>  null_method <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"ctwas"</span>, <span class="st">"susie"</span>, <span class="st">"none"</span><span class="op">)</span>,</span>
+<span>  coverage <span class="op">=</span> <span class="fl">0.95</span>,</span>
+<span>  include_cs <span class="op">=</span> <span class="cn">TRUE</span>,</span>
+<span>  include_prior <span class="op">=</span> <span class="cn">FALSE</span>,</span>
+<span>  include_susie_alpha <span class="op">=</span> <span class="cn">TRUE</span>,</span>
 <span>  snps_only <span class="op">=</span> <span class="cn">FALSE</span>,</span>
 <span>  ncore <span class="op">=</span> <span class="fl">1</span>,</span>
 <span>  verbose <span class="op">=</span> <span class="cn">FALSE</span>,</span>
@@ -109,21 +114,41 @@
 
 
 <dt>group_prior</dt>
-<dd><p>a vector of two prior inclusion probabilities for SNPs and genes.
+<dd><p>a vector of prior inclusion probabilities for different groups.
 If NULL, it will use uniform prior inclusion probabilities.</p></dd>
 
 
 <dt>group_prior_var</dt>
-<dd><p>a vector of two prior variances for SNPs and gene effects.
+<dd><p>a vector of prior variances for different groups.
 If NULL, it will set prior variance = 50 as the default in <code>susie_rss</code>.</p></dd>
 
 
-<dt>use_null_weight</dt>
-<dd><p>If TRUE, allow for a probability of no effect in susie</p></dd>
+<dt>min_var</dt>
+<dd><p>minimum number of variables (SNPs and genes) in a region.</p></dd>
 
 
-<dt>get_susie_alpha</dt>
-<dd><p>If TRUE, get susie alpha matrix from finemapping results.</p></dd>
+<dt>min_gene</dt>
+<dd><p>minimum number of genes in a region.</p></dd>
+
+
+<dt>null_method</dt>
+<dd><p>Method to compute null model, options: "ctwas", "susie" or "none".</p></dd>
+
+
+<dt>coverage</dt>
+<dd><p>A number between 0 and 1 specifying the “coverage” of the estimated confidence sets</p></dd>
+
+
+<dt>include_cs</dt>
+<dd><p>If TRUE, include credible sets (CS) to finemapping results.</p></dd>
+
+
+<dt>include_prior</dt>
+<dd><p>If TRUE, include priors in finemapping results.</p></dd>
+
+
+<dt>include_susie_alpha</dt>
+<dd><p>If TRUE, include susie alpha matrix in the result.</p></dd>
 
 
 <dt>snps_only</dt>
