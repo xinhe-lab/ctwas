@@ -208,7 +208,7 @@ if (thin < 1){
 
 #### Screening regions
 
-We use the `screen_regions()` function to perform a screening process to select regions with likely causal signals in molecular traits. cTWAS first selects regions with minimum p-values (`min_pval`) < 5e-8 or any SNPs or all molecular traits (from `region_data`). Then, cTWAS will perform an initial fine-mapping without LD (L= 1) and compute the non-SNP PIP, i.e. total PIP of all molecular traits, for each region (using estimated priors). It then selects regions by applying a  `min_nonSNP_PIP` cutoff (0.5, by default). Only these selected regions would be subject to full fine-mapping analysis in the final step. Thus screening regions can save computational time. 
+We use the `screen_regions()` function to perform a screening process to select regions with likely causal signals in molecular traits. cTWAS first selects regions with minimum p-values (`min_pval`) < 5e-8 for any SNPs or molecular traits (from `region_data`). Then, it will perform an initial fine-mapping without LD (L= 1) and compute the non-SNP PIP, i.e. total PIP of all molecular traits, for each region (using estimated priors). It then selects regions by applying a  `min_nonSNP_PIP` cutoff (0.5, by default). Only these selected regions would be subject to full fine-mapping analysis in the final step. Thus screening regions can save computational time. 
 
 ```{r screen_regions, eval=FALSE}
 screen_res <- screen_regions(region_data,
