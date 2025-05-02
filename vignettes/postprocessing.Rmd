@@ -223,15 +223,17 @@ res <- diagnose_LD_mismatch_susie(region_ids = selected_region_ids,
                                   z_snp = z_snp, 
                                   LD_map = LD_map, 
                                   gwas_n = gwas_n,
+                                  plot = TRUE,
                                   p_diff_thresh = 5e-6,
                                   ncore = 4)
 problematic_snps <- res$problematic_snps
 flipped_snps <- res$flipped_snps
 condz_stats <- res$condz_stats
+plots <- res$plots
 ```
 
 
-This returns a list of problematic SNPs (diagnostic test `p-value < 5e-6`, by default), flipped SNPs, and the test statistics of `kriging_rss` function from [SuSiE-RSS][susierss_diagnostic]. 
+This returns a list of problematic SNPs (diagnostic test `p-value < 5e-6`, by default), flipped SNPs, and the test statistics of `kriging_rss` function from [SuSiE-RSS][susierss_diagnostic]. When `plot = TRUE`, it returns the plots with expected vs. observed z-scores for diagnosis. 
 
 Our basic strategy of dealing with LD mismatch is: we use the list of problematic SNPs to identify the molecular traits whose results may be affected by LD-mismatch. We would then run fine-mapping without LD (L = 1) in the regions containing these molecular traits, assuming a single causal signal in such a region. The fine-mapping results in this setting would be independent of LD. 
 

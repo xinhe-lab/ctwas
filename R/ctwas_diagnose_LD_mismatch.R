@@ -14,6 +14,8 @@
 #' with significant difference between observed z-scores and estimated values.
 #' Default is 5e-6.
 #'
+#' @param plot If TRUE, plot observed z score vs the expected value.
+#'
 #' @param LD_format file format for LD matrix. If "custom", use a user defined
 #' \code{LD_loader_fun()} function to load LD matrix.
 #'
@@ -40,6 +42,7 @@ diagnose_LD_mismatch_susie <- function(region_ids,
                                        LD_map,
                                        gwas_n,
                                        p_diff_thresh = 5e-6,
+                                       plot = TRUE,
                                        LD_format = c("rds", "rdata", "mtx", "csv", "txt", "custom"),
                                        LD_loader_fun = NULL,
                                        snpinfo_loader_fun = NULL,
@@ -58,14 +61,16 @@ diagnose_LD_mismatch_susie <- function(region_ids,
 
   LD_format <- match.arg(LD_format)
 
-  condz_list <- mclapply_check(region_ids, function(region_id){
+  condz_res <- mclapply_check(region_ids, function(region_id){
     compute_region_condz(region_id, z_snp, LD_map, gwas_n,
+                         plot = plot,
                          LD_format = LD_format,
                          LD_loader_fun = LD_loader_fun,
                          snpinfo_loader_fun = snpinfo_loader_fun)
   }, mc.cores = ncore, stop_if_missing = TRUE)
+  names(condz_res) <- region_ids
 
-  names(condz_list) <- region_ids
+  condz_list <- lapply(condz_res, "[[", "condz_stats")
   condz_stats <- rbindlist(condz_list, idcol = "region_id")
   rownames(condz_stats) <- NULL
 
@@ -73,9 +78,17 @@ diagnose_LD_mismatch_susie <- function(region_ids,
   problematic_snps <- condz_stats$id[which(condz_stats$p_diff < p_diff_thresh)]
   flipped_snps <- condz_stats$id[which(condz_stats$logLR > 2 & abs(condz_stats$z) > 2)]
 
+  if (plot) {
+    plots <- lapply(condz_res, "[[", "condz_plot")
+    names(plots) <- region_ids
+  } else {
+    plots <- NULL
+  }
+
   return(list("condz_stats" = condz_stats,
               "problematic_snps" = problematic_snps,
-              "flipped_snps" = flipped_snps))
+              "flipped_snps" = flipped_snps,
+              "plots" = plots))
 }
 
 # Compute expected z-scores based on conditional distribution of
@@ -83,10 +96,12 @@ diagnose_LD_mismatch_susie <- function(region_ids,
 #
 #' @importFrom stats pchisq
 #' @importFrom Matrix bdiag
+#' @importFrom ggplot2 ggtitle theme element_text
 compute_region_condz <- function(region_id,
                                  z_snp,
                                  LD_map,
                                  gwas_n,
+                                 plot = TRUE,
                                  LD_format = c("rds", "rdata", "mtx", "csv", "txt", "custom"),
                                  LD_loader_fun = NULL,
                                  snpinfo_loader_fun = NULL){
@@ -116,13 +131,23 @@ compute_region_condz <- function(region_id,
   region_R <- R_snp[sidx, sidx]
 
   # Compute expected z-scores based on conditional distribution of z-scores
-  condz_stats <- kriging_rss(z = region_z, R = region_R, n = gwas_n)$conditional_dist
+  kriging_rss_res <- kriging_rss(z = region_z, R = region_R, n = gwas_n, plot = plot)
+  condz_stats <- kriging_rss_res$conditional_dist
   condz_stats <- cbind(region_z_snp[,c("id", "A1", "A2")], condz_stats)
 
   # compute p-values for the significance of z-score difference between observed and estimated values
   condz_stats$p_diff <- pchisq(condz_stats$z_std_diff^2, df = 1, lower.tail=FALSE)
 
-  return(condz_stats)
+  # diagnosis plot from kriging_rss
+  if (plot) {
+    condz_plot <- kriging_rss_res$plot +
+      ggtitle(paste("region:", region_id)) +
+      theme(plot.title = element_text(hjust = 0.5))
+  } else {
+    condz_plot <- NULL
+  }
+
+  return(list(condz_stats = condz_stats, condz_plot = condz_plot))
 }
 
 #' @title Gets problematic genes from problematic SNPs

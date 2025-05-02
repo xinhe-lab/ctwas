@@ -71,8 +71,6 @@ ctwas_res <- ctwas_sumstats(z_snp,
                             maxSNP = 20000,
                             min_group_size = 100, 
                             group_prior_var_structure = "shared_all", 
-                            filter_L = TRUE,
-                            filter_nonSNP_PIP = FALSE,
                             min_nonSNP_PIP = 0.5,
                             min_abs_corr = 0.1, 
                             ncore = 6, 
@@ -154,7 +152,7 @@ boundary_genes <- res$boundary_genes
 ```
 
 
-The function has a few arguments to control its behavior. The `thin` argument randomly selects a subset of variants (10% when thin = 0.1) to use during parameter estimation and screening for candidate regions. This helps reduce computation. When `thin = 1` (default option), it will use all the SNPs. `maxSNP` sets a maximum on the number of variants that can be in a single region to prevent memory issues during fine-mapping. If the number of SNPs in a region is more than `maxSNP`, It will choose `maxSNP` SNPs (randomly, by default) in the region. `min_group_size` sets the minimum number of variables in a group. Groups with fewer variables will be removed from the analysis, because cTWAS cannot reliably estimate parameters for groups with too few variables.  `ncore` specifies the number of cores to use when parallelizing over regions.
+The function has a few arguments to control its behavior. The `thin` argument randomly selects a subset of variants (10% when thin = 0.1) to use during parameter estimation for candidate regions. This helps reduce computation. When `thin = 1` (default option), it will use all the SNPs. `maxSNP` sets a maximum on the number of variants that can be in a single region to prevent memory issues during fine-mapping. If the number of SNPs in a region is more than `maxSNP`, it will, by default, choose the top `maxSNP` SNPs with the highest Z-scores. `min_group_size` sets the minimum number of variables in a group. Groups with fewer variables will be removed from the analysis, because cTWAS cannot reliably estimate parameters for groups with too few variables.  `ncore` specifies the number of cores to use when parallelizing over regions.
 
 This function returns `region_data`, a list object containing input data (IDs of molecular traits and variants, their Z-scores, genomic boundaries, etc.) for each of the regions. It also returns 
 a data frame `boundary_genes`, containing the information of molecular traits whose weights cross region boundaries. The information would be used in later analysis and post-processing. 
@@ -194,6 +192,21 @@ group_prior_var <- param$group_prior_var
 
 ### Screening regions
 
+#### Expanding regions with all SNPs
+
+If you had `thin` < 1 when preparing `region_data`, you need to expand the regions with all SNPs for screening regions and fine-mapping. If the number of SNPs in a region is more than `maxSNP`, it will choose the top `maxSNP` SNPs with the highest Z-scores. This is not needed when `thin = 1`. 
+
+```{r expand_region_data, eval=FALSE}
+if (thin < 1){
+    region_data <- expand_region_data(region_data,
+                                      snp_map,
+                                      z_snp,
+                                      maxSNP = 20000,
+                                      ncore = 6)
+}
+```
+
+
 #### Screening regions with LD
 
 After parameter estimation, we use the `screen_regions()` function to perform a screening process to select regions with likely causal signals in molecular traits. cTWAS first selects regions with minimum p-values (`min_pval`) < 5e-8 or any SNPs or all molecular traits (from `region_data`). Then, cTWAS will perform an initial fine-mapping without LD (L= 1) and compute the non-SNP PIP, i.e. total PIP of all molecular traits, for each region (using estimated priors). It then selects regions by applying a  `min_nonSNP_PIP` cutoff (0.5, by default). Only these selected regions would be subject to full fine-mapping analysis in the final step. Thus screening regions can save computational time. 
@@ -210,25 +223,6 @@ screen_summary <- screen_res$screen_summary
 ```
 
 
-
-
-#### Expanding selected regions with all SNPs
-
-If you had `thin` < 1 when preparing `region_data`, after screening regions, you need to expand the selected regions with all SNPs for final fine-mapping. This is not needed when `thin = 1`.
-
-```{r expand_region_data, eval=FALSE}
-screened_region_data <- expand_region_data(screened_region_data,
-                                           snp_map,
-                                           z_snp,
-                                           maxSNP = 20000,
-                                           ncore = 6)
-
-screen_res$screened_region_data <- screened_region_data
-```
-
-
-If the number of SNPs in a region is more than `maxSNP`, it will choose the top `maxSNP` SNPs with the highest Z-scores.
-
 ### Fine-mapping regions
 
 #### Fine-mapping regions with LD
@@ -237,7 +231,7 @@ We now perform the fine-mapping step for each of the selected regions from scree
 
 The `finemap_regions()` function performs fine-mapping for the regions in the `screened_region_data`.
 
-It first computes correlation matrices among all variables included in fine-mapping (SNPs, and molecular traits), then runs fine-mapping with estimated parameters (`group_prior` and `group_prior_var`) with `L = 5` (default option), and returns a data frame with fine-mapping results for the regions. 
+It first computes correlation matrices among all variables included in fine-mapping (SNPs, and molecular traits), then runs fine-mapping with estimated parameters (`group_prior` and `group_prior_var`) with `L = 5` (default option), and returns fine-mapping results for the regions. 
 
 ```{r finemap_regions, eval=FALSE}
 res <- finemap_regions(screened_region_data,
@@ -280,12 +274,11 @@ We could also run fine-mapping for a single region (or several regions of intere
 
 Here we show an example for fine-mapping a single region "16_71020125_72901251".
 
-We first select the data for the region of interest from `screened_region_data`. We also need the number of causal signals (`L`) for this region. These are obtained from the output of the earlier `screen_regions()` function.
+We select the data for the region of interest from `screened_region_data`, obtained from the output of the earlier `screen_regions()` function.
 
 ```{r example_region, eval=FALSE}
 region_id <- "16_71020125_72901251"
 selected_region_data <- screened_region_data[region_id]
-selected_region_L <- screened_region_L[region_id]
 ```
 
 
@@ -297,7 +290,7 @@ res <- finemap_regions(selected_region_data,
                        weights = weights,
                        group_prior = group_prior,
                        group_prior_var = group_prior_var,
-                       L = selected_region_L,
+                       L = 5,
                        save_cor = TRUE,
                        cor_dir = "./cor_matrix")
 finemap_res <- res$finemap_res

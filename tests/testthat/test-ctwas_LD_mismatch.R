@@ -21,6 +21,7 @@ test_that("diagnose_LD_mismatch_susie works", {
                                                    LD_map,
                                                    gwas_n,
                                                    p_diff_thresh = 5e-6,
+                                                   plot = FALSE,
                                                    ncore = 2)
 
     problematic_snps <- LD_diagnosis_res$problematic_snps
