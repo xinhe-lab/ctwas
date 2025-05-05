@@ -92,6 +92,9 @@ est_param <- function(
   if (anyDuplicated(names(region_data)))
     logwarn("Duplicated names of region_data found! Please use unique names for region_data!")
 
+  if (length(region_data) == 0)
+    stop("'region_data' is empty!")
+
   # extract thin value from region_data
   thin <- unique(sapply(region_data, "[[", "thin"))
   if (length(thin) > 1) {

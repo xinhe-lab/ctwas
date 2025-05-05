@@ -58,14 +58,13 @@ screen_regions <- function(region_data,
   if (anyDuplicated(names(region_data)))
     logwarn("Duplicated names of region_data found! Please use unique names for region_data!")
 
+  if (length(region_data) == 0)
+    stop("'region_data' is empty!")
+
   # use all SNPs (thin = 1) for screening
   thin <- min(sapply(region_data, "[[", "thin"))
   if (thin != 1){
     stop("thin != 1, run expand_region_data() first to include all SNPs!")
-    # adjust group_prior to account for thin argument
-    # if (!is.null(group_prior)){
-    #   group_prior["SNP"] <- group_prior["SNP"]/thin
-    # }
   }
 
   # create a data frame for screening summary
@@ -101,22 +100,34 @@ screen_regions <- function(region_data,
   # run finemapping for all regions without LD (L=1) using the SER model
   # select regions with total non-SNP PIPs > 0.5
   region_ids_to_screen <- setdiff(region_ids, c(skipped_region_ids, sigP_region_ids))
-  loginfo("Screening %d regions ...", length(region_ids_to_screen))
-  finemap_screening_res <- finemap_regions_ser(region_data[region_ids_to_screen],
-                                               group_prior = group_prior,
-                                               group_prior_var = group_prior_var,
-                                               null_method = null_method,
-                                               ncore = ncore,
-                                               verbose = verbose)
-  # select regions based on total non-SNP PIPs
-  all_nonSNP_PIPs <- compute_region_nonSNP_PIPs(finemap_screening_res, filter_cs = FALSE)
-  idx <- match(names(all_nonSNP_PIPs), screen_summary$region_id)
-  screen_summary$nonSNP_PIP[idx] <- all_nonSNP_PIPs
-  screened_region_ids <- screen_summary$region_id[which(screen_summary$nonSNP_PIP > min_nonSNP_PIP)]
-  loginfo("Selected %d regions with non-SNP PIP > %s", length(screened_region_ids), min_nonSNP_PIP)
+
+  if (length(region_ids_to_screen) > 0) {
+    loginfo("Screening %d regions ...", length(region_ids_to_screen))
+    finemap_screening_res <- finemap_regions_ser(region_data[region_ids_to_screen],
+                                                 group_prior = group_prior,
+                                                 group_prior_var = group_prior_var,
+                                                 null_method = null_method,
+                                                 ncore = ncore,
+                                                 verbose = verbose)
+    # select regions based on total non-SNP PIPs
+    all_nonSNP_PIPs <- compute_region_nonSNP_PIPs(finemap_screening_res, filter_cs = FALSE)
+    idx <- match(names(all_nonSNP_PIPs), screen_summary$region_id)
+    screen_summary$nonSNP_PIP[idx] <- all_nonSNP_PIPs
+    screened_region_ids <- screen_summary$region_id[which(screen_summary$nonSNP_PIP > min_nonSNP_PIP)]
+    loginfo("Selected %d regions with non-SNP PIP > %s", length(screened_region_ids), min_nonSNP_PIP)
+  } else {
+    screened_region_ids <- NULL
+  }
+
   all_selected_region_ids <- sort(unique(c(screened_region_ids, sigP_region_ids)))
-  screened_region_data <- region_data[all_selected_region_ids]
-  loginfo("Selected %d regions in total", length(screened_region_data))
+
+  if (length(all_selected_region_ids) > 0) {
+    screened_region_data <- region_data[all_selected_region_ids]
+    loginfo("Selected %d regions in total.", length(screened_region_data))
+  } else {
+    screened_region_data <- NULL
+    loginfo("No regions selected after screening.")
+  }
 
   return(list("screened_region_data" = screened_region_data,
               "screen_summary" = screen_summary))

@@ -103,6 +103,9 @@ finemap_regions <- function(region_data,
   if (anyDuplicated(names(region_data)))
     logwarn("Duplicated names of region_data found! Please use unique names for region_data!")
 
+  if (length(region_data) == 0)
+    stop("'region_data' is empty!")
+
   # use all SNPs (thin = 1) for finemapping
   thin <- min(sapply(region_data, "[[", "thin"))
   if (thin != 1)
@@ -301,6 +304,9 @@ finemap_regions_noLD <- function(region_data,
   if (anyDuplicated(names(region_data)))
     logwarn("Duplicated names of region_data found! Please use unique names for region_data!")
 
+  if (length(region_data) == 0)
+    stop("'region_data' is empty!")
+
   # use all SNPs (thin = 1) for finemapping
   thin <- min(sapply(region_data, "[[", "thin"))
   if (thin != 1)
@@ -411,6 +417,9 @@ finemap_regions_ser <- function(region_data,
 
   if (anyDuplicated(names(region_data)))
     logwarn("Duplicated names of region_data found! Please use unique names for region_data!")
+
+  if (length(region_data) == 0)
+    stop("'region_data' is empty!")
 
   # check if all groups have group_prior and group_prior_var
   groups <- unique(unlist(lapply(region_data, "[[", "groups")))
