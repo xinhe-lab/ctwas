@@ -91,7 +91,7 @@ finemap_regions <- function(region_data,
     addHandler(writeToFile, file=logfile, level='DEBUG')
   }
 
-  loginfo("Fine-mapping %d regions ...", length(region_data))
+  loginfo("Fine-mapping regions ...")
 
   # check inputs
   LD_format <- match.arg(LD_format)
@@ -157,31 +157,36 @@ finemap_regions <- function(region_data,
     }
   }
 
+  # filter regions
+  region_ids <- names(region_data)
+  n_gids <- sapply(region_data, function(x){length(x$gid)})
+  n_sids <- sapply(region_data, function(x){length(x$sid)})
+
   # skip regions with fewer than min_var variables
+  skipped_region_ids <- NULL
   if (min_var > 0) {
-    region_ids <- names(region_data)
-    n_gids <- sapply(region_data, function(x){length(x$gid)})
-    n_sids <- sapply(region_data, function(x){length(x$sid)})
-
-    skip_region_ids <- region_ids[(n_sids + n_gids) < min_var]
-    if (length(skip_region_ids) > 0){
-      loginfo("Skip %d regions with number of variables < %d", length(skip_region_ids), min_var)
-      region_data[skip_region_ids] <- NULL
-    }
-
-    # skip regions with fewer than min_gene genes
-    if (min_gene > 0) {
-      skip_region_ids <- region_ids[n_gids < min_gene]
-      if (length(skip_region_ids) > 0){
-        loginfo("Skip %d regions with number of genes < %d", length(skip_region_ids), min_gene)
-        region_data[skip_region_ids] <- NULL
-      }
+    min_var_region_ids <- region_ids[(n_sids + n_gids) < min_var]
+    if (length(min_var_region_ids) > 0){
+      loginfo("Skip %d regions with number of variables < %d.", length(min_var_region_ids), min_var)
+      skipped_region_ids <- c(skipped_region_ids, min_var_region_ids)
     }
   }
 
+  # skip regions with fewer than min_gene genes
+  if (min_gene > 0) {
+    min_gene_region_ids <- region_ids[n_gids < min_gene]
+    if (length(min_gene_region_ids) > 0){
+      loginfo("Skip %d regions with number of genes < %d.", length(min_gene_region_ids), min_gene)
+      skipped_region_ids <- c(skipped_region_ids, min_gene_region_ids)
+    }
+  }
+
+  selected_region_ids <- setdiff(names(region_data), skipped_region_ids)
+  region_data <- region_data[selected_region_ids]
   if (length(region_data) == 0){
     stop("No region data for Fine-mapping.")
   }
+  loginfo("%d regions included in finemapping ...", length(region_data))
 
   if (verbose) {
     if (is.null(group_prior)) {
@@ -293,7 +298,7 @@ finemap_regions_noLD <- function(region_data,
     addHandler(writeToFile, file=logfile, level='DEBUG')
   }
 
-  loginfo("Fine-mapping %d regions without LD ...", length(region_data))
+  loginfo("Fine-mapping regions without LD ...")
 
   # check inputs
   null_method <- match.arg(null_method)
@@ -328,31 +333,36 @@ finemap_regions_noLD <- function(region_data,
     }
   }
 
+  # filter regions
+  region_ids <- names(region_data)
+  n_gids <- sapply(region_data, function(x){length(x$gid)})
+  n_sids <- sapply(region_data, function(x){length(x$sid)})
+
   # skip regions with fewer than min_var variables
+  skipped_region_ids <- NULL
   if (min_var > 0) {
-    region_ids <- names(region_data)
-    n_gids <- sapply(region_data, function(x){length(x$gid)})
-    n_sids <- sapply(region_data, function(x){length(x$sid)})
-
-    skip_region_ids <- region_ids[(n_sids + n_gids) < min_var]
-    if (length(skip_region_ids) > 0){
-      loginfo("Skip %d regions with number of variables < %d", length(skip_region_ids), min_var)
-      region_data[skip_region_ids] <- NULL
-    }
-
-    # skip regions with fewer than min_gene genes
-    if (min_gene > 0) {
-      skip_region_ids <- region_ids[n_gids < min_gene]
-      if (length(skip_region_ids) > 0){
-        loginfo("Skip %d regions with number of genes < %d", length(skip_region_ids), min_gene)
-        region_data[skip_region_ids] <- NULL
-      }
+    min_var_region_ids <- region_ids[(n_sids + n_gids) < min_var]
+    if (length(min_var_region_ids) > 0){
+      loginfo("Skip %d regions with number of variables < %d.", length(min_var_region_ids), min_var)
+      skipped_region_ids <- c(skipped_region_ids, min_var_region_ids)
     }
   }
 
+  # skip regions with fewer than min_gene genes
+  if (min_gene > 0) {
+    min_gene_region_ids <- region_ids[n_gids < min_gene]
+    if (length(min_gene_region_ids) > 0){
+      loginfo("Skip %d regions with number of genes < %d.", length(min_gene_region_ids), min_gene)
+      skipped_region_ids <- c(skipped_region_ids, min_gene_region_ids)
+    }
+  }
+
+  selected_region_ids <- setdiff(names(region_data), skipped_region_ids)
+  region_data <- region_data[selected_region_ids]
   if (length(region_data) == 0){
     stop("No region data for Fine-mapping.")
   }
+  loginfo("%d regions included in finemapping ...", length(region_data))
 
   if (verbose) {
     if (is.null(group_prior)) {
@@ -437,28 +447,32 @@ finemap_regions_ser <- function(region_data,
     }
   }
 
+  # filter regions
+  region_ids <- names(region_data)
+  n_gids <- sapply(region_data, function(x){length(x$gid)})
+  n_sids <- sapply(region_data, function(x){length(x$sid)})
+
   # skip regions with fewer than min_var variables
+  skipped_region_ids <- NULL
   if (min_var > 0) {
-    region_ids <- names(region_data)
-    n_gids <- sapply(region_data, function(x){length(x$gid)})
-    n_sids <- sapply(region_data, function(x){length(x$sid)})
-
-    skip_region_ids <- region_ids[(n_sids + n_gids) < min_var]
-    if (length(skip_region_ids) > 0){
-      loginfo("Skip %d regions with number of variables < %d", length(skip_region_ids), min_var)
-      region_data[skip_region_ids] <- NULL
-    }
-
-    # skip regions with fewer than min_gene genes
-    if (min_gene > 0) {
-      skip_region_ids <- region_ids[n_gids < min_gene]
-      if (length(skip_region_ids) > 0){
-        loginfo("Skip %d regions with number of genes < %d", length(skip_region_ids), min_gene)
-        region_data[skip_region_ids] <- NULL
-      }
+    min_var_region_ids <- region_ids[(n_sids + n_gids) < min_var]
+    if (length(min_var_region_ids) > 0){
+      loginfo("Skip %d regions with number of variables < %d.", length(min_var_region_ids), min_var)
+      skipped_region_ids <- c(skipped_region_ids, min_var_region_ids)
     }
   }
 
+  # skip regions with fewer than min_gene genes
+  if (min_gene > 0) {
+    min_gene_region_ids <- region_ids[n_gids < min_gene]
+    if (length(min_gene_region_ids) > 0){
+      loginfo("Skip %d regions with number of genes < %d.", length(min_gene_region_ids), min_gene)
+      skipped_region_ids <- c(skipped_region_ids, min_gene_region_ids)
+    }
+  }
+
+  selected_region_ids <- setdiff(names(region_data), skipped_region_ids)
+  region_data <- region_data[selected_region_ids]
   if (length(region_data) == 0){
     stop("No region data for Fine-mapping.")
   }

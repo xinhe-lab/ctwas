@@ -164,7 +164,14 @@ compute_region_p_single_effect <- function(region_data, group_prior){
   return(p_single_effect)
 }
 
-# get basic summary for screening regions
+#' Gets a basic summary of region signals
+#'
+#' @param region_data a list object indexing regions, variants and genes.
+#'
+#' @return a data frame of basic summary of region signals
+#'
+#' @export
+#'
 summarize_region_signals <- function(region_data){
   region_ids <- names(region_data)
   n_gids <- sapply(region_data, function(x){length(x$gid)})

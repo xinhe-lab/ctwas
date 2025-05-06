@@ -109,10 +109,10 @@ est_param <- function(
   }
 
   # filter groups with number of variables < min_group_size
-  group_size_thinned <- get_group_size_from_region_data(region_data)
-  if (any(group_size_thinned < min_group_size)){
-    group_size_drop <- group_size_thinned[group_size_thinned < min_group_size]
-    logwarn("Groups with group size < %d:\n {%s}: {%s}", min_group_size, names(group_size_drop), group_size_drop)
+  group_size <- get_group_size_from_region_data(region_data)
+  if (any(group_size < min_group_size)){
+    dropped_group_size <- group_size[group_size < min_group_size]
+    logwarn("Groups with group size < %d:\n {%s}: {%s}", min_group_size, names(dropped_group_size), dropped_group_size)
     stop("Parameters may not be reliable for groups with too few variables! Remove those groups from z_gene!")
   }
 
@@ -125,33 +125,37 @@ est_param <- function(
                                    p_single_effect = NA)
 
   # skip regions with fewer than min_var variables
+  skipped_region_ids <- NULL
   if (min_var > 0) {
-    skip_region_ids <- region_ids[(n_sids + n_gids) < min_var]
-    if (length(skip_region_ids) > 0){
-      loginfo("Skip %d regions with number of variables < %d", length(skip_region_ids), min_var)
-      region_data <- region_data[!names(region_data) %in% skip_region_ids]
+    min_var_region_ids <- region_ids[(n_sids + n_gids) < min_var]
+    if (length(min_var_region_ids) > 0){
+      loginfo("Skip %d regions with number of variables < %d.", length(min_var_region_ids), min_var)
+      skipped_region_ids <- c(skipped_region_ids, min_var_region_ids)
     }
   }
 
   # skip regions with fewer than min_gene genes
   if (min_gene > 0) {
-    skip_region_ids <- region_ids[n_gids < min_gene]
-    if (length(skip_region_ids) > 0){
-      loginfo("Skip %d regions with number of genes < %d", length(skip_region_ids), min_gene)
-      region_data <- region_data[!names(region_data) %in% skip_region_ids]
+    min_gene_region_ids <- region_ids[n_gids < min_gene]
+    if (length(min_gene_region_ids) > 0){
+      loginfo("Skip %d regions with number of genes < %d.", length(min_gene_region_ids), min_gene)
+      skipped_region_ids <- c(skipped_region_ids, min_gene_region_ids)
     }
   }
 
+  # selected regions to run EM prefit
+  prefit_region_ids <- setdiff(names(region_data), skipped_region_ids)
+
   # Run EM for a few (niter_prefit) iterations, getting rough estimates
-  loginfo("Run EM (prefit) iterations, getting rough estimates ...")
+  loginfo("Run EM prefit iterations, getting rough estimates ...")
   loginfo("group_prior_var_structure = '%s'", group_prior_var_structure)
 
-  loginfo("Using data in %d regions", length(region_data))
-  if (length(region_data) == 0){
+  loginfo("Using data in %d regions", length(prefit_region_ids))
+  if (length(prefit_region_ids) == 0){
     stop("No regions selected!")
   }
 
-  EM_prefit_res <- fit_EM(region_data,
+  EM_prefit_res <- fit_EM(region_data[prefit_region_ids],
                           niter = niter_prefit,
                           init_group_prior = init_group_prior,
                           init_group_prior_var = init_group_prior_var,
@@ -175,22 +179,21 @@ est_param <- function(
           names(EM_prefit_res$group_prior_var), format(EM_prefit_res$group_prior_var, digits = 4))
 
   # Select regions with single effect
-  p_single_effect <- compute_region_p_single_effect(region_data, EM_prefit_res$group_prior)
-  selected_region_ids <- names(p_single_effect)[p_single_effect > min_p_single_effect]
-  loginfo("Selected %d regions with p(single effect) > %s", length(selected_region_ids), min_p_single_effect)
-  selected_region_data <- region_data[selected_region_ids]
+  p_single_effect <- compute_region_p_single_effect(region_data[prefit_region_ids], EM_prefit_res$group_prior)
+  EM_region_ids <- names(p_single_effect)[p_single_effect > min_p_single_effect]
+  loginfo("Selected %d regions with p(single effect) > %s to run EM", length(EM_region_ids), min_p_single_effect)
   idx <- match(names(p_single_effect), p_single_effect_df$region_id)
   p_single_effect_df$p_single_effect[idx] <- p_single_effect
   rownames(p_single_effect_df) <- NULL
 
   # Run EM for more (niter) iterations, getting rough estimates
   loginfo("Run EM iterations, getting accurate estimates ...")
-  loginfo("Using data in %d regions", length(selected_region_data))
-  if (length(selected_region_data) == 0){
+  loginfo("Using data in %d regions", length(EM_region_ids))
+  if (length(EM_region_ids) == 0){
     stop("No regions selected!")
   }
 
-  EM_res <- fit_EM(selected_region_data,
+  EM_res <- fit_EM(region_data[EM_region_ids],
                    niter = niter,
                    init_group_prior = EM_prefit_res$group_prior,
                    init_group_prior_var = EM_prefit_res$group_prior_var,
@@ -217,27 +220,23 @@ est_param <- function(
     stop("Estimated group_prior_var contains NAs!")
   }
 
-  group_size <- get_group_size_from_region_data(region_data)
   group_size <- group_size[names(group_prior)]
+
+  # group size of selected regions used in EM
+  EM_group_size <- get_group_size_from_region_data(region_data[EM_region_ids])
+  EM_group_size <- EM_group_size[names(group_prior)]
 
   # adjust parameters to account for thin
   if (thin != 1){
     group_prior["SNP"] <- group_prior["SNP"] * thin
     group_prior_iters["SNP",] <- group_prior_iters["SNP",] * thin
-    group_size["SNP"] <- group_size["SNP"]/thin
+    group_size["SNP"] <- group_size["SNP"] / thin
+    EM_group_size["SNP"] <- EM_group_size["SNP"] / thin
   }
 
   loginfo("Estimated group_prior {%s}: {%s}", names(group_prior), format(group_prior, digits = 4))
   loginfo("Estimated group_prior_var {%s}: {%s}", names(group_prior_var), format(group_prior_var, digits = 4))
   loginfo("group_size {%s}: {%s}", names(group_size), group_size)
-
-  param <- list("group_prior" = group_prior,
-                "group_prior_var" = group_prior_var,
-                "group_prior_iters" = group_prior_iters,
-                "group_prior_var_iters" = group_prior_var_iters,
-                "group_prior_var_structure" = group_prior_var_structure,
-                "group_size" = group_size,
-                "p_single_effect" = p_single_effect_df)
 
   # compute enrichment, s.e. and p-values
   enrichment_res <- compute_enrichment_test(group_prior = group_prior,
@@ -249,20 +248,21 @@ est_param <- function(
           names(enrichment_res$enrichment),
           format(enrichment_res$enrichment, digits = 4))
 
-  param$enrichment = enrichment_res$enrichment
-  param$enrichment_se = enrichment_res$se
-  param$enrichment_pval = enrichment_res$p.value
-
-  if (include_test_result) {
-    param$test_res <- enrichment_res$test_res
-  }
-
-  # include log-likelihood from all iterations
-  param$loglik_iters <- EM_res$loglik_iters
-  param$converged <- EM_res$converged
-  param$niter <- EM_res$niter
-
-  return(param)
+  return(list("group_prior" = group_prior,
+              "group_prior_var" = group_prior_var,
+              "group_prior_iters" = group_prior_iters,
+              "group_prior_var_iters" = group_prior_var_iters,
+              "group_prior_var_structure" = group_prior_var_structure,
+              "group_size" = group_size,
+              "EM_group_size" = EM_group_size,
+              "EM_region_ids" = EM_region_ids,
+              "p_single_effect" = p_single_effect_df,
+              "loglik_iters" = EM_res$loglik_iters,
+              "converged" = EM_res$converged,
+              "enrichment" = enrichment_res$enrichment,
+              "enrichment_se" = enrichment_res$se,
+              "enrichment_pval" = enrichment_res$p.value,
+              "enrichment_test_res" = enrichment_res$test_res))
 }
 
 
@@ -294,8 +294,8 @@ compute_enrichment_test <- function(group_prior,
   # compute sum of PIPs for each group
   groups <- names(group_prior)
   group_size <- group_size[groups]
-  group_pip <- group_prior * group_size
-  names(group_pip) <- groups
+  group_sum_pip <- group_prior * group_size
+  names(group_sum_pip) <- groups
 
   gene_groups <- setdiff(groups, "SNP")
 
@@ -311,8 +311,8 @@ compute_enrichment_test <- function(group_prior,
     k0 <- group_size["SNP"]
     k1 <- group_size[group]
 
-    r0 <- group_pip["SNP"]
-    r1 <- group_pip[group]
+    r0 <- group_sum_pip["SNP"]
+    r1 <- group_sum_pip[group]
 
     # enrichment: relative risk estimate in a 2 × 2 contingency table
     enrichment[group] <- log((r1/k1) / (r0/k0))
@@ -334,16 +334,16 @@ compute_enrichment_test <- function(group_prior,
       enrichment.pval[group] <- test_res$p.value
     }
 
+    # save test result
     test_res_list[[group]] <- test_res
   }
 
-  res <- list("enrichment" = enrichment,
-              "se" = enrichment.se,
-              "p.value" = enrichment.pval)
-
-  if (include_test_result){
-    res$test_res <- test_res_list
+  if (!include_test_result) {
+    test_res_list <- NULL
   }
 
-  return(res)
+  return(list("enrichment" = enrichment,
+              "se" = enrichment.se,
+              "p.value" = enrichment.pval,
+              "test_res" = test_res_list))
 }
