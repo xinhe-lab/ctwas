@@ -27,7 +27,6 @@ ctwas_sumstats_noLD(
   null_method = c("ctwas", "susie", "none"),
   EM_tol = 1e-04,
   force_run_niter = FALSE,
-  enrichment_test = c("G", "fisher"),
   outputdir = NULL,
   outname = "ctwas_noLD",
   ncore = 1,
