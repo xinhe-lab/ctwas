@@ -56,10 +56,6 @@
 #'
 #' @param null_method Method to compute null model, options: "ctwas", "susie" or "none".
 #'
-#' @param enrichment_test Method to test enrichment,
-#' options: "G" (G-test), "fisher" (Fisher's exact test).
-#' Only used when \code{run_enrichment_test = TRUE}.
-#'
 #' @param EM_tol A small, non-negative number specifying the convergence
 #'   tolerance of log-likelihood for the EM iterations.
 #'
@@ -133,7 +129,6 @@ ctwas_sumstats <- function(
     null_method = c("ctwas", "susie", "none"),
     EM_tol = 1e-4,
     force_run_niter = FALSE,
-    enrichment_test = c("G", "fisher"),
     coverage = 0.95,
     min_abs_corr = 0.1,
     LD_format = c("rds", "rdata", "mtx", "csv", "txt", "custom"),
@@ -162,7 +157,6 @@ ctwas_sumstats <- function(
   group_prior_var_structure <- match.arg(group_prior_var_structure)
   LD_format <- match.arg(LD_format)
   null_method <- match.arg(null_method)
-  enrichment_test <- match.arg(enrichment_test)
 
   if (anyNA(z_snp))
     stop("z_snp contains missing values!")
@@ -248,10 +242,8 @@ ctwas_sumstats <- function(
                      null_method = null_method,
                      EM_tol = EM_tol,
                      force_run_niter = force_run_niter,
-                     enrichment_test = enrichment_test,
                      ncore = ncore,
-                     verbose = verbose,
-                     ...)
+                     verbose = verbose)
   group_prior <- param$group_prior
   group_prior_var <- param$group_prior_var
   if (!is.null(outputdir)) {

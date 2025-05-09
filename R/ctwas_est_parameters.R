@@ -34,19 +34,11 @@
 #'
 #' @param force_run_niter If TRUE, run all the \code{niter} EM iterations.
 #'
-#' @param enrichment_test Method to test enrichment,
-#' options: "G" (G-test), "fisher" (Fisher's exact test).
-#' Only used when \code{run_enrichment_test = TRUE}.
-#'
-#' @param include_test_result If TRUE, return the original enrichment test result.
-#'
 #' @param ncore The number of cores used to parallelize computation over regions.
 #'
 #' @param logfile The log filename. If NULL, print log info on screen.
 #'
 #' @param verbose If TRUE, print detail messages.
-#'
-#' @param ... Additional arguments of \code{susie_rss}.
 #'
 #' @importFrom logging addHandler loginfo logwarn writeToFile
 #'
@@ -66,14 +58,11 @@ est_param <- function(
     min_group_size = 100,
     min_p_single_effect = 0.8,
     null_method = c("ctwas", "susie", "none"),
-    enrichment_test = c("G", "fisher"),
-    include_test_result = FALSE,
     EM_tol = 1e-4,
     force_run_niter = FALSE,
     ncore = 1,
     logfile = NULL,
-    verbose = FALSE,
-    ...){
+    verbose = FALSE){
 
   if (!is.null(logfile)){
     addHandler(writeToFile, file=logfile, level='DEBUG')
@@ -84,7 +73,6 @@ est_param <- function(
   # check inputs
   group_prior_var_structure <- match.arg(group_prior_var_structure)
   null_method <- match.arg(null_method)
-  enrichment_test <- match.arg(enrichment_test)
 
   if (!inherits(region_data,"list"))
     stop("'region_data' should be a list.")
@@ -238,16 +226,6 @@ est_param <- function(
   loginfo("Estimated group_prior_var {%s}: {%s}", names(group_prior_var), format(group_prior_var, digits = 4))
   loginfo("group_size {%s}: {%s}", names(group_size), group_size)
 
-  # compute enrichment, s.e. and p-values
-  enrichment_res <- compute_enrichment_test(group_prior = group_prior,
-                                            group_size = group_size,
-                                            enrichment_test = enrichment_test,
-                                            include_test_result = include_test_result)
-
-  loginfo("Estimated enrichment (log scale) {%s}: {%s}",
-          names(enrichment_res$enrichment),
-          format(enrichment_res$enrichment, digits = 4))
-
   return(list("group_prior" = group_prior,
               "group_prior_var" = group_prior_var,
               "group_prior_iters" = group_prior_iters,
@@ -255,95 +233,7 @@ est_param <- function(
               "group_prior_var_structure" = group_prior_var_structure,
               "group_size" = group_size,
               "EM_group_size" = EM_group_size,
-              "EM_region_ids" = EM_region_ids,
               "p_single_effect" = p_single_effect_df,
               "loglik_iters" = EM_res$loglik_iters,
-              "converged" = EM_res$converged,
-              "enrichment" = enrichment_res$enrichment,
-              "enrichment_se" = enrichment_res$se,
-              "enrichment_pval" = enrichment_res$p.value,
-              "enrichment_test_res" = enrichment_res$test_res))
-}
-
-
-#' @title Computes enrichment (log-scale), standard error and p-value
-#'
-#' @param group_prior a vector of prior inclusion probabilities for different groups.
-#'
-#' @param group_size a vector of number of variables in different groups.
-#'
-#' @param enrichment_test Method to test enrichment,
-#'"G": G-test, "fisher": Fisher's exact test.
-#'
-#' @param include_test_result If TRUE, return the original test result.
-#'
-#' @return Estimated enrichment, S.E. and p-value from G-test or Fisher's exact test.
-#'
-#' @importFrom AMR g.test
-#' @importFrom stats fisher.test
-#'
-#' @export
-#'
-compute_enrichment_test <- function(group_prior,
-                                    group_size,
-                                    enrichment_test = c("G", "fisher"),
-                                    include_test_result = FALSE){
-
-  enrichment_test <- match.arg(enrichment_test)
-
-  # compute sum of PIPs for each group
-  groups <- names(group_prior)
-  group_size <- group_size[groups]
-  group_sum_pip <- group_prior * group_size
-  names(group_sum_pip) <- groups
-
-  gene_groups <- setdiff(groups, "SNP")
-
-  enrichment <- rep(NA, length(gene_groups))
-  names(enrichment) <- gene_groups
-  enrichment.se <- rep(NA, length(gene_groups))
-  names(enrichment.se) <- gene_groups
-  enrichment.pval <- rep(NA, length(gene_groups))
-  names(enrichment.pval) <- gene_groups
-
-  test_res_list <- list()
-  for (group in gene_groups) {
-    k0 <- group_size["SNP"]
-    k1 <- group_size[group]
-
-    r0 <- group_sum_pip["SNP"]
-    r1 <- group_sum_pip[group]
-
-    # enrichment: relative risk estimate in a 2 × 2 contingency table
-    enrichment[group] <- log((r1/k1) / (r0/k0))
-
-    # standard error: standard error of a relative risk
-    enrichment.se[group] <- sqrt(1/r1 + 1/r0 - 1/k1 - 1/k0)
-
-    obs <- rbind(c(r1, k1), c(r0, k0))
-    colnames(obs) <- c("r", "k")
-    rownames(obs) <- c(group, "SNP")
-
-    if (enrichment_test == "G"){
-      # evaluate statistical significance of enrichment using G-test
-      test_res <- g.test(obs)
-      enrichment.pval[group] <- test_res$p.value
-    } else if (enrichment_test == "fisher"){
-      # evaluate statistical significance of enrichment using Fisher's exact test
-      test_res <- fisher.test(round(obs))
-      enrichment.pval[group] <- test_res$p.value
-    }
-
-    # save test result
-    test_res_list[[group]] <- test_res
-  }
-
-  if (!include_test_result) {
-    test_res_list <- NULL
-  }
-
-  return(list("enrichment" = enrichment,
-              "se" = enrichment.se,
-              "p.value" = enrichment.pval,
-              "test_res" = test_res_list))
+              "converged" = EM_res$converged))
 }

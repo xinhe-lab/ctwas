@@ -57,10 +57,6 @@
 #'
 #' @param force_run_niter If TRUE, run all the \code{niter} EM iterations.
 #'
-#' @param enrichment_test Method to test enrichment,
-#' options: "G" (G-test), "fisher" (Fisher's exact test).
-#' Only used when \code{run_enrichment_test = TRUE}.
-#'
 #' @param outputdir The directory to store output. If specified, save outputs to the directory.
 #'
 #' @param outname The output name.
@@ -124,7 +120,6 @@ ctwas_sumstats_noLD <- function(
   # check inputs
   group_prior_var_structure <- match.arg(group_prior_var_structure)
   null_method <- match.arg(null_method)
-  enrichment_test <- match.arg(enrichment_test)
 
   if (anyNA(z_snp))
     stop("z_snp contains missing values!")
@@ -188,7 +183,7 @@ ctwas_sumstats_noLD <- function(
 
   # Estimate parameters
   #. get region_data for all the regions
-  #. run EM for two rounds with thinned SNPs using L = 1
+  #. run EM for two rounds using the SER model (L = 1)
   param <- est_param(region_data,
                      init_group_prior = init_group_prior,
                      init_group_prior_var = init_group_prior_var,
@@ -202,10 +197,8 @@ ctwas_sumstats_noLD <- function(
                      null_method = null_method,
                      EM_tol = EM_tol,
                      force_run_niter = force_run_niter,
-                     enrichment_test = enrichment_test,
                      ncore = ncore,
                      verbose = verbose)
-
   group_prior <- param$group_prior
   group_prior_var <- param$group_prior_var
   if (!is.null(outputdir)) {
