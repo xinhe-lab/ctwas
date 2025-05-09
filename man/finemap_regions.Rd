@@ -19,6 +19,7 @@ finemap_regions(
   include_cs = TRUE,
   include_prior = FALSE,
   include_susie_alpha = TRUE,
+  include_susie_result = FALSE,
   snps_only = FALSE,
   force_compute_cor = FALSE,
   save_cor = FALSE,

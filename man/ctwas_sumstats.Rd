@@ -29,7 +29,6 @@ ctwas_sumstats(
   null_method = c("ctwas", "susie", "none"),
   EM_tol = 1e-04,
   force_run_niter = FALSE,
-  enrichment_test = c("G", "fisher"),
   coverage = 0.95,
   min_abs_corr = 0.1,
   LD_format = c("rds", "rdata", "mtx", "csv", "txt", "custom"),
@@ -109,10 +108,6 @@ Groups with number of genes < \code{min_group_size} will be removed for the anal
 tolerance of log-likelihood for the EM iterations.}
 
 \item{force_run_niter}{If TRUE, run all the \code{niter} EM iterations.}
-
-\item{enrichment_test}{Method to test enrichment,
-options: "G" (G-test), "fisher" (Fisher's exact test).
-Only used when \code{run_enrichment_test = TRUE}.}
 
 \item{coverage}{A number between 0 and 1 specifying the \dQuote{coverage} of
 the estimated confidence sets.}

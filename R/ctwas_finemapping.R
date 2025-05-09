@@ -75,6 +75,7 @@ finemap_regions <- function(region_data,
                             include_cs = TRUE,
                             include_prior = FALSE,
                             include_susie_alpha = TRUE,
+                            include_susie_result = FALSE,
                             snps_only = FALSE,
                             force_compute_cor = FALSE,
                             save_cor = FALSE,
@@ -212,6 +213,7 @@ finemap_regions <- function(region_data,
                           include_cs = include_cs,
                           include_prior = include_prior,
                           include_susie_alpha = include_susie_alpha,
+                          include_susie_result = include_susie_result,
                           snps_only = snps_only,
                           force_compute_cor = force_compute_cor,
                           save_cor = save_cor,
@@ -223,18 +225,26 @@ finemap_regions <- function(region_data,
                           ...)
   }, mc.cores = ncore, stop_if_missing = TRUE)
 
-  finemap_res <- do.call(rbind, lapply(res, "[[", 1))
+  finemap_res <- do.call(rbind, lapply(res, "[[", "susie_res_df"))
   rownames(finemap_res) <- NULL
 
   if (include_susie_alpha) {
-    susie_alpha_res <- do.call(rbind, lapply(res, "[[", 2))
+    susie_alpha_res <- do.call(rbind, lapply(res, "[[", "susie_alpha_df"))
     rownames(susie_alpha_res) <- NULL
   } else {
     susie_alpha_res <- NULL
   }
 
+  if (include_susie_result) {
+    susie_res <- lapply(res, "[[", "susie_res")
+    names(susie_res) <- region_ids
+  } else {
+    susie_res <- NULL
+  }
+
   return(list("finemap_res" = finemap_res,
-              "susie_alpha_res" = susie_alpha_res))
+              "susie_alpha_res" = susie_alpha_res,
+              "susie_res" = susie_res))
 }
 
 #' @title Runs cTWAS fine-mapping for regions without LD (L = 1)
@@ -288,6 +298,7 @@ finemap_regions_noLD <- function(region_data,
                                  include_cs = TRUE,
                                  include_prior = FALSE,
                                  include_susie_alpha = TRUE,
+                                 include_susie_result = FALSE,
                                  snps_only = FALSE,
                                  ncore = 1,
                                  verbose = FALSE,
@@ -382,23 +393,32 @@ finemap_regions_noLD <- function(region_data,
                                include_cs = include_cs,
                                include_prior = include_prior,
                                include_susie_alpha = include_susie_alpha,
+                               include_susie_result = include_susie_result,
                                snps_only = snps_only,
                                verbose = verbose,
                                ...)
   }, mc.cores = ncore, stop_if_missing = TRUE)
 
-  finemap_res <- do.call(rbind, lapply(res, "[[", 1))
+  finemap_res <- do.call(rbind, lapply(res, "[[", "susie_res_df"))
   rownames(finemap_res) <- NULL
 
   if (include_susie_alpha) {
-    susie_alpha_res <- do.call(rbind, lapply(res, "[[", 2))
+    susie_alpha_res <- do.call(rbind, lapply(res, "[[", "susie_alpha_df"))
     rownames(susie_alpha_res) <- NULL
   } else {
     susie_alpha_res <- NULL
   }
 
+  if (include_susie_result) {
+    susie_res <- lapply(res, "[[", "susie_res")
+    names(susie_res) <- region_ids
+  } else {
+    susie_res <- NULL
+  }
+
   return(list("finemap_res" = finemap_res,
-              "susie_alpha_res" = susie_alpha_res))
+              "susie_alpha_res" = susie_alpha_res,
+              "susie_res" = susie_res))
 }
 
 # Finemap regions with cTWAS SER model, used in screening regions
@@ -518,6 +538,7 @@ finemap_single_region <- function(region_data,
                                   include_cs = TRUE,
                                   include_prior = FALSE,
                                   include_susie_alpha = TRUE,
+                                  include_susie_result = FALSE,
                                   snps_only = FALSE,
                                   force_compute_cor = FALSE,
                                   save_cor = FALSE,
@@ -669,8 +690,13 @@ finemap_single_region <- function(region_data,
     susie_alpha_df <- NULL
   }
 
+  if (!include_susie_result) {
+    susie_res <- NULL
+  }
+
   return(list("susie_res_df" = susie_res_df,
-              "susie_alpha_df" = susie_alpha_df))
+              "susie_alpha_df" = susie_alpha_df,
+              "susie_res" = susie_res))
 
 }
 
@@ -687,6 +713,7 @@ finemap_single_region_noLD <- function(region_data,
                                        include_cs = TRUE,
                                        include_prior = FALSE,
                                        include_susie_alpha = TRUE,
+                                       include_susie_result = FALSE,
                                        snps_only = FALSE,
                                        verbose = FALSE,
                                        ...){
@@ -803,8 +830,13 @@ finemap_single_region_noLD <- function(region_data,
     susie_alpha_df <- NULL
   }
 
+  if (!include_susie_result) {
+    susie_res <- NULL
+  }
+
   return(list("susie_res_df" = susie_res_df,
-              "susie_alpha_df" = susie_alpha_df))
+              "susie_alpha_df" = susie_alpha_df,
+              "susie_res" = susie_res))
 }
 
 # Runs cTWAS finemapping for a single region using cTWAS SER model
@@ -900,9 +932,7 @@ fast_finemap_single_region_ser_rss <- function(region_data,
                                                pi_prior,
                                                V_prior,
                                                null_method = c("ctwas", "susie", "none"),
-                                               null_weight = NULL,
-                                               return_full_result = FALSE){
-
+                                               null_weight = NULL){
 
   null_method <- match.arg(null_method)
 
@@ -954,11 +984,6 @@ fast_finemap_single_region_ser_rss <- function(region_data,
                              region_id = region_id,
                              z = z)
 
-  if (return_full_result){
-    return(list("ser_res" = ser_res,
-                "ser_res_df" = ser_res_df))
-  }else{
-    return(ser_res_df)
-  }
-
+  return(list("ser_res" = ser_res,
+              "ser_res_df" = ser_res_df))
 }

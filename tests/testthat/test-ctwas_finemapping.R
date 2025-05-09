@@ -22,9 +22,11 @@ test_that("finemap_regions_noLD works", {
     res <- finemap_regions_noLD(region_data = screened_region_data[region_id],
                                 group_prior = group_prior,
                                 group_prior_var = group_prior_var,
+                                include_susie_result = TRUE,
                                 null_method = "ctwas")
     finemap_res <- res$finemap_res
     susie_alpha_res <- res$susie_alpha_res
+    susie_res <- res$susie_res
   })
 
   expect_equal(finemap_res$susie_pip, expected_finemap_res$susie_pip)
@@ -62,10 +64,12 @@ test_that("finemap_regions works", {
                            weights = weights,
                            group_prior = group_prior,
                            group_prior_var = group_prior_var,
+                           include_susie_result = TRUE,
                            null_method = "ctwas",
                            L = 5)
     finemap_res <- res$finemap_res
     susie_alpha_res <- res$susie_alpha_res
+    susie_res <- res$susie_res
   })
 
   expect_equal(finemap_res$susie_pip, expected_finemap_res$susie_pip)

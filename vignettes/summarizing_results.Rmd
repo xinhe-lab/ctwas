@@ -96,15 +96,17 @@ make_convergence_plots(param, gwas_n, log_enrichment = FALSE)
 
 These plots show the estimated prior inclusion probability, prior effect size variance, enrichment and proportion of variance explained (PVE) over the iterations of parameter estimation. The enrichment is defined as the ratio of the prior inclusion probability of molecular traits over the prior inclusion probability of variants. We generally expect molecular traits to have higher prior inclusion probability than variants. Enrichment values typically range from 20 - 100 for expression traits. We could also plot enrichment at the log scale by setting `log_enrichment = TRUE`.
 
-Then, we use `summarize_param()` to obtain estimated parameters (from the last iteration) and to compute the PVE by variants and molecular traits. 
+Then, we use `summarize_param()` to obtain estimated parameters, test enrichment, and to compute the PVE by variants and molecular traits. 
 
 ```{r summarize_param}
-ctwas_parameters <- summarize_param(param, gwas_n)
+ctwas_parameters <- summarize_param(param, gwas_n, enrichment_test = "fisher")
 ctwas_parameters
 ```
 
 
-This function returns several output: `group_prior` are the estimated prior inclusion probabilities for molecular traits and variants; `group_prior_var` are estimated prior effect size variance for molecular traits and variants; `enrichment` are estimated enrichment of molecular traits over variants, defined as ratios of prior inclusion probabilities. Other output parameters are related to the proportion of variance explained (PVE) by molecular traits or variants: `group_pve` are PVE of molecular traits and variants; `total_pve` is the total PVE from all molecular traits and variants (sum of `group_pve`) - basically heritability from all included variables (effectively all common variants); `prop_heritability` are the proportion of heritability mediated by molecular traits and variants.  
+This function returns several output: `group_prior` are the estimated prior inclusion probabilities for molecular traits and variants; `group_prior_var` are estimated prior effect size variance for molecular traits and variants; `enrichment` are estimated enrichment (at the log scale) of molecular traits over variants, defined as log ratios of prior inclusion probabilities. `enrichment_se` are standard errors of the log enrichment. `enrichment_pval` are the p-values from the enrichment test. By default, the p-values are computed using Fisher's exact test (`enrichment_test = "fisher"`). Alternatively, we could compute p-values using G-test (`enrichment_test = "G"`), or get p-values converted from the z-scores of enrichment (`enrichment_test = "z"`). 
+
+Other output parameters are related to the proportion of variance explained (PVE) by molecular traits or variants: `group_pve` are PVE of molecular traits and variants; `total_pve` is the total PVE from all molecular traits and variants (sum of `group_pve`) - basically heritability from all included variables (effectively all common variants); `prop_heritability` are the proportion of heritability mediated by molecular traits and variants.  
 
 These PVE values allow us to compute how heritability of the phenotype is partitioned among variants and groups of molecular traits. From our experience, in single-tissue gene expression analysis, genes typically explain around 5-15% of the total heritability of the trait. In multi-group analysis, the heritability of genes could become lower. 
 

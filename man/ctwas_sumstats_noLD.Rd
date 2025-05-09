@@ -95,10 +95,6 @@ tolerance of log-likelihood for the EM iterations.}
 
 \item{force_run_niter}{If TRUE, run all the \code{niter} EM iterations.}
 
-\item{enrichment_test}{Method to test enrichment,
-options: "G" (G-test), "fisher" (Fisher's exact test).
-Only used when \code{run_enrichment_test = TRUE}.}
-
 \item{outputdir}{The directory to store output. If specified, save outputs to the directory.}
 
 \item{outname}{The output name.}

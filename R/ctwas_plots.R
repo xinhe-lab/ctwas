@@ -575,7 +575,6 @@ make_convergence_plots <- function(param,
                                    group_names,
                                    ncol = 2){
 
-  browser()
   # estimated group prior (all iterations)
   group_prior_iters <- param$group_prior_iters
   # estimated group prior variance (all iterations)
