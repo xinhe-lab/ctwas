@@ -14,7 +14,7 @@ get_molecular_ids <- function(finemap_res){
   return(molecular_ids)
 }
 
-#' convert z-scores to pvalues
+#' convert z-scores to p-values (two-sided test)
 #'
 #' @param z a vector of z-scores
 #'

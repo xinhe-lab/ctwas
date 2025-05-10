@@ -55,11 +55,12 @@
 #' @param EM_tol A small, non-negative number specifying the convergence
 #'   tolerance of log-likelihood for the EM iterations.
 #'
-#' @param force_run_niter If TRUE, run all the \code{niter} EM iterations.
+#' @param coverage A number between 0 and 1 specifying the \dQuote{coverage} of
+#' the estimated confidence sets.
 #'
-#' @param enrichment_test Method to test enrichment,
-#' options: "G" (G-test), "fisher" (Fisher's exact test).
-#' Only used when \code{run_enrichment_test = TRUE}.
+#' @param include_prior If TRUE, include priors in finemapping results.
+#'
+#' @param include_susie_result If TRUE, include the "susie" result object in finemapping results.
 #'
 #' @param outputdir The directory to store output. If specified, save outputs to the directory.
 #'
@@ -104,8 +105,9 @@ ctwas_sumstats_noLD <- function(
     min_p_single_effect = 0.8,
     null_method = c("ctwas", "susie", "none"),
     EM_tol = 1e-4,
-    force_run_niter = FALSE,
-    enrichment_test = c("G", "fisher"),
+    coverage = 0.95,
+    include_prior = FALSE,
+    include_susie_result = FALSE,
     outputdir = NULL,
     outname = "ctwas_noLD",
     ncore = 1,
@@ -124,7 +126,6 @@ ctwas_sumstats_noLD <- function(
   # check inputs
   group_prior_var_structure <- match.arg(group_prior_var_structure)
   null_method <- match.arg(null_method)
-  enrichment_test <- match.arg(enrichment_test)
 
   if (anyNA(z_snp))
     stop("z_snp contains missing values!")
@@ -146,6 +147,17 @@ ctwas_sumstats_noLD <- function(
   }
 
   loginfo("ncore = %d", ncore)
+
+  # check the number of SNPs in z_snp and weights
+  count_snp_res <- count_z_snp_weights(z_snp, weights)
+  loginfo("%d SNPs in z_snp", count_snp_res$n_snps_z)
+  loginfo("%d SNPs in weights", count_snp_res$n_snps_weights)
+
+  if (count_snp_res$n_snps_weights == 0)
+    stop("Please check z_snp! No SNPs in z_snp outside weights! ")
+
+  if (count_snp_res$N_snps_not_in_weights < count_snp_res$n_snps_weights)
+    logwarn("SNPs outside weights are less than SNPs in weights!")
 
   # Compute gene z-scores
   if (is.null(z_gene)) {
@@ -188,7 +200,7 @@ ctwas_sumstats_noLD <- function(
 
   # Estimate parameters
   #. get region_data for all the regions
-  #. run EM for two rounds with thinned SNPs using L = 1
+  #. run EM for two rounds using the SER model (L = 1)
   param <- est_param(region_data,
                      init_group_prior = init_group_prior,
                      init_group_prior_var = init_group_prior_var,
@@ -201,11 +213,8 @@ ctwas_sumstats_noLD <- function(
                      min_p_single_effect = min_p_single_effect,
                      null_method = null_method,
                      EM_tol = EM_tol,
-                     force_run_niter = force_run_niter,
-                     enrichment_test = enrichment_test,
                      ncore = ncore,
                      verbose = verbose)
-
   group_prior <- param$group_prior
   group_prior_var <- param$group_prior_var
   if (!is.null(outputdir)) {
@@ -247,25 +256,35 @@ ctwas_sumstats_noLD <- function(
                                 group_prior = group_prior,
                                 group_prior_var = group_prior_var,
                                 null_method = null_method,
+                                coverage = coverage,
+                                include_prior = include_prior,
+                                include_susie_result = include_susie_result,
                                 ncore = ncore,
                                 verbose = verbose,
                                 ...)
     finemap_res <- res$finemap_res
     susie_alpha_res <- res$susie_alpha_res
+    susie_res <- res$susie_res
+
     if (!is.null(outputdir)) {
       saveRDS(finemap_res, file.path(outputdir, paste0(outname, ".finemap_res.RDS")))
-      saveRDS(susie_alpha_res, file.path(outputdir, paste0(outname, ".susie_alpha_res.RDS")))
+      if (!is.null(susie_alpha_res))
+        saveRDS(susie_alpha_res, file.path(outputdir, paste0(outname, ".susie_alpha_res.RDS")))
+      if (!is.null(susie_res))
+        saveRDS(susie_res, file.path(outputdir, paste0(outname, ".susie_res.RDS")))
     }
   } else {
     loginfo("No regions selected for fine-mapping.")
     finemap_res <- NULL
     susie_alpha_res <- NULL
+    susie_res <- NULL
   }
 
   return(list("z_gene" = z_gene,
               "param" = param,
               "finemap_res" = finemap_res,
               "susie_alpha_res" = susie_alpha_res,
+              "susie_res" = susie_res,
               "region_data" = region_data,
               "boundary_genes" = boundary_genes,
               "screen_res" = screen_res))

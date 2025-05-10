@@ -26,8 +26,9 @@ ctwas_sumstats_noLD(
   min_p_single_effect = 0.8,
   null_method = c("ctwas", "susie", "none"),
   EM_tol = 1e-04,
-  force_run_niter = FALSE,
-  enrichment_test = c("G", "fisher"),
+  coverage = 0.95,
+  include_prior = FALSE,
+  include_susie_result = FALSE,
   outputdir = NULL,
   outname = "ctwas_noLD",
   ncore = 1,
@@ -93,11 +94,12 @@ having 1 or fewer effects will be used for parameter estimation.}
 \item{EM_tol}{A small, non-negative number specifying the convergence
 tolerance of log-likelihood for the EM iterations.}
 
-\item{force_run_niter}{If TRUE, run all the \code{niter} EM iterations.}
+\item{coverage}{A number between 0 and 1 specifying the \dQuote{coverage} of
+the estimated confidence sets.}
 
-\item{enrichment_test}{Method to test enrichment,
-options: "G" (G-test), "fisher" (Fisher's exact test).
-Only used when \code{run_enrichment_test = TRUE}.}
+\item{include_prior}{If TRUE, include priors in finemapping results.}
+
+\item{include_susie_result}{If TRUE, include the "susie" result object in finemapping results.}
 
 \item{outputdir}{The directory to store output. If specified, save outputs to the directory.}
 

@@ -20,8 +20,5 @@ test_that("est_param works", {
   expect_equal(param$group_prior_var, expected_param$group_prior_var)
   expect_equal(param$group_size, expected_param$group_size)
   expect_equal(param$loglik_iters, expected_param$loglik_iters)
-  expect_equal(param$enrichment, expected_param$enrichment)
-  expect_equal(param$enrichment_se, expected_param$enrichment_se)
-  expect_equal(param$enrichment_pval, expected_param$enrichment_pval)
 
 })

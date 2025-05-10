@@ -172,15 +172,12 @@ As described in the Introduction, cTWAS can analyze multiple groups of molecular
 
 This step will run the EM algorithm to estimate parameters and return the estimated parameters (`group_prior`, `group_prior_var`, etc.). For technical reasons (see Methods of the cTWAS paper), it will run two rounds of EM algorithm. In the first round, it uses fewer iterations (`niter_prefit=3` by default) to get rough parameter estimates, and using these values, select regions for the analysis in the second run of EM. We use more iterations in the second round (maximum `niter=50` by default) to get accurate parameter estimates. `min_group_size` sets the minimum number of variables in a group, as parameters cannot be reliably estimated for groups with too few variables. 
 
-It also computes enrichment (log scale), and its standard error. We provided two options to assess the statistical significance of enrichment: "G-test" (`enrichment_test = "G"`, default option), or Fisher's exact test (`enrichment_test = "fisher"`).
-
 ```{r est_param, eval=FALSE}
 param <- est_param(region_data, 
                    group_prior_var_structure = "shared_all", 
                    niter_prefit = 3,
                    niter = 50, 
                    min_group_size = 100,
-                   enrichment_test = "G",
                    ncore = 6)
 group_prior <- param$group_prior
 group_prior_var <- param$group_prior_var
@@ -245,6 +242,8 @@ susie_alpha_res <- res$susie_alpha_res
 ```
 
 
+If you want to check some details of SuSiE result, you can set `include_susie_result = TRUE`, and it will return the "susie" objects for the regions in `res$susie_res`. 
+ 
 cTWAS will automatically check `cor_dir`. If precomputed correlation matrices are available in `cor_dir`, cTWAS will simply load and reuse those. Otherwise, it will compute the correlation matrices and save to the `cor_dir` directory if `save_cor = TRUE`.  You can set `force_compute_cor = TRUE` so that it always computes the correlation matrices. The correlation matrices are large datasets, so they are not saved by default. 
 
 *Note*: when fine-mapping with LD, we need larger memory to load LD matrices and compute correlation matrices. So we recommend increasing memory or reducing the number of `ncore` for these steps.

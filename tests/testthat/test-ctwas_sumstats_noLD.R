@@ -8,18 +8,16 @@ test_that("ctwas_sumstats_noLD works", {
   expected_ctwas_res <- readRDS(system.file("extdata/sample_data", "LDL_example.ctwas_sumstats_noLD_res.RDS", package = "ctwas"))
 
   capture.output({
-    suppressWarnings({
-      ctwas_res <- ctwas_sumstats_noLD(z_snp,
-                                       weights,
-                                       region_info,
-                                       snp_map,
-                                       group_prior_var_structure = "shared_all",
-                                       thin = 0.1,
-                                       maxSNP = 20000,
-                                       min_nonSNP_PIP = 0.5,
-                                       null_method = "ctwas",
-                                       ncore = 2)
-    })
+    ctwas_res <- ctwas_sumstats_noLD(z_snp,
+                                     weights,
+                                     region_info,
+                                     snp_map,
+                                     group_prior_var_structure = "shared_all",
+                                     thin = 0.1,
+                                     maxSNP = 20000,
+                                     min_nonSNP_PIP = 0.5,
+                                     null_method = "ctwas",
+                                     ncore = 2)
   })
 
   # saveRDS(ctwas_res, "inst/extdata/sample_data/LDL_example.ctwas_sumstats_noLD_res.RDS")

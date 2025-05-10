@@ -82,6 +82,9 @@
     <loc>/reference/convert_to_ukb_varIDs.html</loc>
   </url>
   <url>
+    <loc>/reference/count_z_snp_weights.html</loc>
+  </url>
+  <url>
     <loc>/reference/create_predictdb_from_QTLs.html</loc>
   </url>
   <url>
@@ -227,6 +230,9 @@
   </url>
   <url>
     <loc>/reference/summarize_param.html</loc>
+  </url>
+  <url>
+    <loc>/reference/summarize_region_signals.html</loc>
   </url>
   <url>
     <loc>/reference/susie.html</loc>

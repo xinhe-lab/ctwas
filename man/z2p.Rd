@@ -2,7 +2,7 @@
 % Please edit documentation in R/ctwas_anno_finemap_res.R
 \name{z2p}
 \alias{z2p}
-\title{convert z-scores to pvalues}
+\title{convert z-scores to p-values (two-sided test)}
 \usage{
 z2p(z, neg_log10_p = FALSE)
 }
@@ -15,5 +15,5 @@ z2p(z, neg_log10_p = FALSE)
 a vector of p-values, or -log10(p-values) if neg_log10_p is TRUE.
 }
 \description{
-convert z-scores to pvalues
+convert z-scores to p-values (two-sided test)
 }

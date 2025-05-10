@@ -28,10 +28,10 @@ ctwas_sumstats(
   min_group_size = 100,
   null_method = c("ctwas", "susie", "none"),
   EM_tol = 1e-04,
-  force_run_niter = FALSE,
-  enrichment_test = c("G", "fisher"),
   coverage = 0.95,
   min_abs_corr = 0.1,
+  include_prior = FALSE,
+  include_susie_result = FALSE,
   LD_format = c("rds", "rdata", "mtx", "csv", "txt", "custom"),
   LD_loader_fun = NULL,
   snpinfo_loader_fun = NULL,
@@ -108,16 +108,14 @@ Groups with number of genes < \code{min_group_size} will be removed for the anal
 \item{EM_tol}{A small, non-negative number specifying the convergence
 tolerance of log-likelihood for the EM iterations.}
 
-\item{force_run_niter}{If TRUE, run all the \code{niter} EM iterations.}
-
-\item{enrichment_test}{Method to test enrichment,
-options: "G" (G-test), "fisher" (Fisher's exact test).
-Only used when \code{run_enrichment_test = TRUE}.}
-
 \item{coverage}{A number between 0 and 1 specifying the \dQuote{coverage} of
 the estimated confidence sets.}
 
 \item{min_abs_corr}{Minimum absolute correlation allowed in a credible set.}
+
+\item{include_prior}{If TRUE, include priors in finemapping results.}
+
+\item{include_susie_result}{If TRUE, include the "susie" result object in finemapping results.}
 
 \item{LD_format}{file format for LD matrix. If "custom", use a user defined
 \code{LD_loader_fun()} function to load LD matrix.}

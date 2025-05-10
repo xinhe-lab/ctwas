@@ -17,7 +17,7 @@
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">ctwas</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">0.5.16</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">0.5.19</span>
       </span>
     </div>
 
@@ -98,7 +98,9 @@
 <span>  coverage <span class="op">=</span> <span class="fl">0.95</span>,</span>
 <span>  include_cs <span class="op">=</span> <span class="cn">TRUE</span>,</span>
 <span>  include_prior <span class="op">=</span> <span class="cn">FALSE</span>,</span>
+<span>  include_mu2 <span class="op">=</span> <span class="cn">FALSE</span>,</span>
 <span>  include_susie_alpha <span class="op">=</span> <span class="cn">TRUE</span>,</span>
+<span>  include_susie_result <span class="op">=</span> <span class="cn">FALSE</span>,</span>
 <span>  snps_only <span class="op">=</span> <span class="cn">FALSE</span>,</span>
 <span>  ncore <span class="op">=</span> <span class="fl">1</span>,</span>
 <span>  verbose <span class="op">=</span> <span class="cn">FALSE</span>,</span>
@@ -147,8 +149,16 @@ If NULL, it will set prior variance = 50 as the default in <code>susie_rss</code
 <dd><p>If TRUE, include priors in finemapping results.</p></dd>
 
 
+<dt>include_mu2</dt>
+<dd><p>If TRUE, include estimated effect size variance (mu2) in finemapping results.</p></dd>
+
+
 <dt>include_susie_alpha</dt>
-<dd><p>If TRUE, include susie alpha matrix in the result.</p></dd>
+<dd><p>If TRUE, include susie alpha matrix from finemapping results.</p></dd>
+
+
+<dt>include_susie_result</dt>
+<dd><p>If TRUE, include the "susie" result object in finemapping results.</p></dd>
 
 
 <dt>snps_only</dt>

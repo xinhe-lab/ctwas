@@ -17,7 +17,7 @@
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">ctwas</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">0.5.16</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">0.5.19</span>
       </span>
     </div>
 
@@ -138,6 +138,10 @@ saves LD matrices as .RDS files and SNP info as .Rvar files</p></td>
           <p><code><a href="convert_to_ukb_varIDs.html">convert_to_ukb_varIDs()</a></code> </p>
         </td>
         <td><p>Convert variant IDs from Open GWAS format or PredictDB weight format</p></td>
+      </tr><tr><td>
+          <p><code><a href="count_z_snp_weights.html">count_z_snp_weights()</a></code> </p>
+        </td>
+        <td><p>Counts the number of SNPs in z_snp and weights</p></td>
       </tr><tr><td>
           <p><code><a href="create_predictdb_from_QTLs.html">create_predictdb_from_QTLs()</a></code> </p>
         </td>
@@ -283,6 +287,10 @@ saves LD matrices as .RDS files and SNP info as .Rvar files</p></td>
         </td>
         <td><p>Summarizes estimated parameters</p></td>
       </tr><tr><td>
+          <p><code><a href="summarize_region_signals.html">summarize_region_signals()</a></code> </p>
+        </td>
+        <td><p>Gets a basic summary of region signals</p></td>
+      </tr><tr><td>
           <p><code><a href="update_finemap_res.html">update_finemap_res()</a></code> </p>
         </td>
         <td><p>Updates cTWAS finemapping result for selected regions</p></td>
@@ -306,7 +314,7 @@ this will also update sid and gid based on z_snp and z_gene.</p></td>
       </tr><tr><td>
           <p><code><a href="z2p.html">z2p()</a></code> </p>
         </td>
-        <td><p>convert z-scores to pvalues</p></td>
+        <td><p>convert z-scores to p-values (two-sided test)</p></td>
       </tr></tbody></table></div>
 
   <div class="col-md-3 hidden-xs hidden-sm" id="pkgdown-sidebar">

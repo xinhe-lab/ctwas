@@ -4,12 +4,28 @@
 \alias{summarize_param}
 \title{Summarizes estimated parameters}
 \usage{
-summarize_param(param, gwas_n)
+summarize_param(
+  param,
+  gwas_n,
+  enrichment_test = c("fisher", "G", "z"),
+  alternative = c("greater", "two.sided", "less"),
+  include_test_result = FALSE
+)
 }
 \arguments{
 \item{param}{a list of parameter estimation result from \code{est_param}}
 
-\item{gwas_n}{the sample size of the GWAS summary statistics}
+\item{gwas_n}{the sample size of the GWAS summary statistics.}
+
+\item{enrichment_test}{Method to test enrichment,
+"G": G-test, "fisher": Fisher's exact test,
+"z": p-value computed from z-score of enrichment.}
+
+\item{alternative}{indicates the alternative hypothesis and
+must be one of "greater", "two.sided", or "less".
+Only used when \code{enrichment_test} is "fisher" or "z".}
+
+\item{include_test_result}{If TRUE, return the original test result.}
 }
 \value{
 a list of summarized parameters

@@ -56,7 +56,8 @@ anno_susie <- function(susie_res,
                        prior = NULL,
                        prior_var = NULL,
                        include_cs = TRUE,
-                       get_alpha = TRUE) {
+                       include_prior = FALSE,
+                       include_mu2 = FALSE) {
 
   gene_df <- data.frame(id = gids,
                         molecular_id = sapply(strsplit(gids, split = "[|]"), "[[", 1),
@@ -76,18 +77,20 @@ anno_susie <- function(susie_res,
     susie_res_df$z <- z
   }
 
-  if (!is.null(prior)) {
-    susie_res_df$prior <- prior
-  }
+  if (include_prior) {
+    if (!is.null(prior))
+      susie_res_df$prior <- prior
 
-  if (!is.null(prior_var)) {
-    susie_res_df$prior_var <- prior_var
+    if (!is.null(prior_var))
+      susie_res_df$prior_var <- prior_var
   }
 
   susie_res_df$susie_pip <- susie_res$pip
 
-  p <- length(gids) + length(sids)
-  susie_res_df$mu2 <- colSums(susie_res$mu2[, seq(1, p)[1:p!=susie_res$null_index], drop = FALSE]) # WARN: not sure for L>1
+  if (include_mu2) {
+    p <- length(gids) + length(sids)
+    susie_res_df$mu2 <- colSums(susie_res$mu2[, seq(1, p)[1:p!=susie_res$null_index], drop = FALSE]) # WARN: not sure for L>1
+  }
 
   if (include_cs) {
     susie_res_df$cs <- NA
