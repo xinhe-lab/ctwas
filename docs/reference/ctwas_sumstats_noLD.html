@@ -17,7 +17,7 @@
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">ctwas</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">0.5.18</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">0.5.19</span>
       </span>
     </div>
 
@@ -110,7 +110,9 @@
 <span>  min_p_single_effect <span class="op">=</span> <span class="fl">0.8</span>,</span>
 <span>  null_method <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"ctwas"</span>, <span class="st">"susie"</span>, <span class="st">"none"</span><span class="op">)</span>,</span>
 <span>  EM_tol <span class="op">=</span> <span class="fl">1e-04</span>,</span>
-<span>  force_run_niter <span class="op">=</span> <span class="cn">FALSE</span>,</span>
+<span>  coverage <span class="op">=</span> <span class="fl">0.95</span>,</span>
+<span>  include_prior <span class="op">=</span> <span class="cn">FALSE</span>,</span>
+<span>  include_susie_result <span class="op">=</span> <span class="cn">FALSE</span>,</span>
 <span>  outputdir <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  outname <span class="op">=</span> <span class="st">"ctwas_noLD"</span>,</span>
 <span>  ncore <span class="op">=</span> <span class="fl">1</span>,</span>
@@ -218,8 +220,17 @@ having 1 or fewer effects will be used for parameter estimation.</p></dd>
 tolerance of log-likelihood for the EM iterations.</p></dd>
 
 
-<dt>force_run_niter</dt>
-<dd><p>If TRUE, run all the <code>niter</code> EM iterations.</p></dd>
+<dt>coverage</dt>
+<dd><p>A number between 0 and 1 specifying the “coverage” of
+the estimated confidence sets.</p></dd>
+
+
+<dt>include_prior</dt>
+<dd><p>If TRUE, include priors in finemapping results.</p></dd>
+
+
+<dt>include_susie_result</dt>
+<dd><p>If TRUE, include the "susie" result object in finemapping results.</p></dd>
 
 
 <dt>outputdir</dt>
