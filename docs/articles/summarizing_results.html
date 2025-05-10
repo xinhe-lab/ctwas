@@ -33,7 +33,7 @@
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">ctwas</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">0.5.16</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">0.5.18</span>
       </span>
     </div>
 
@@ -108,7 +108,7 @@
       <h1 data-toc-skip>Summarizing and visualizing cTWAS results</h1>
                         <h4 data-toc-skip class="author">Kaixuan Luo, Sheng Qian</h4>
             
-            <h4 data-toc-skip class="date">2025-05-01</h4>
+            <h4 data-toc-skip class="date">2025-05-09</h4>
       
       <small class="dont-index">Source: <a href="https://github.com/xinhe-lab/ctwas/blob/multigroup/vignettes/summarizing_results.Rmd" class="external-link"><code>vignettes/summarizing_results.Rmd</code></a></small>
       <div class="hidden name"><code>summarizing_results.Rmd</code></div>
@@ -171,9 +171,9 @@
 </p>
 </div>
 <p>These plots show the estimated prior inclusion probability, prior effect size variance, enrichment and proportion of variance explained (PVE) over the iterations of parameter estimation. The enrichment is defined as the ratio of the prior inclusion probability of molecular traits over the prior inclusion probability of variants. We generally expect molecular traits to have higher prior inclusion probability than variants. Enrichment values typically range from 20 - 100 for expression traits. We could also plot enrichment at the log scale by setting <code>log_enrichment = TRUE</code>.</p>
-<p>Then, we use <code><a href="../reference/summarize_param.html">summarize_param()</a></code> to obtain estimated parameters (from the last iteration) and to compute the PVE by variants and molecular traits.</p>
+<p>Then, we use <code><a href="../reference/summarize_param.html">summarize_param()</a></code> to obtain estimated parameters, test enrichment, and to compute the PVE by variants and molecular traits.</p>
 <div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">ctwas_parameters</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/summarize_param.html">summarize_param</a></span><span class="op">(</span><span class="va">param</span>, <span class="va">gwas_n</span><span class="op">)</span></span>
+<code class="sourceCode R"><span><span class="va">ctwas_parameters</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/summarize_param.html">summarize_param</a></span><span class="op">(</span><span class="va">param</span>, <span class="va">gwas_n</span>, enrichment_test <span class="op">=</span> <span class="st">"fisher"</span><span class="op">)</span></span>
 <span><span class="va">ctwas_parameters</span></span></code></pre></div>
 <pre><code><span><span class="co">## $group_size</span></span>
 <span><span class="co">##   liver|expression adipose|expression                SNP </span></span>
@@ -187,17 +187,20 @@
 <span><span class="co">##   liver|expression adipose|expression                SNP </span></span>
 <span><span class="co">##           82.35015           82.35015           82.35015 </span></span>
 <span><span class="co">## </span></span>
-<span><span class="co">## $enrichment</span></span>
+<span><span class="co">## $log_enrichment</span></span>
 <span><span class="co">##   liver|expression adipose|expression </span></span>
 <span><span class="co">##           5.105972           3.882310 </span></span>
 <span><span class="co">## </span></span>
-<span><span class="co">## $enrichment_se</span></span>
+<span><span class="co">## $log_enrichment_se</span></span>
 <span><span class="co">##   liver|expression adipose|expression </span></span>
 <span><span class="co">##          0.1284031          0.2034980 </span></span>
 <span><span class="co">## </span></span>
 <span><span class="co">## $enrichment_pval</span></span>
 <span><span class="co">##   liver|expression adipose|expression </span></span>
-<span><span class="co">##      4.049075e-130       3.140911e-34 </span></span>
+<span><span class="co">##      5.337213e-131       3.423029e-34 </span></span>
+<span><span class="co">## </span></span>
+<span><span class="co">## $enrichment_test_res</span></span>
+<span><span class="co">## NULL</span></span>
 <span><span class="co">## </span></span>
 <span><span class="co">## $group_pve</span></span>
 <span><span class="co">##   liver|expression adipose|expression                SNP </span></span>
@@ -209,7 +212,8 @@
 <span><span class="co">## $prop_heritability</span></span>
 <span><span class="co">##   liver|expression adipose|expression                SNP </span></span>
 <span><span class="co">##         0.16978808         0.05997749         0.77023443</span></span></code></pre>
-<p>This function returns several output: <code>group_prior</code> are the estimated prior inclusion probabilities for molecular traits and variants; <code>group_prior_var</code> are estimated prior effect size variance for molecular traits and variants; <code>enrichment</code> are estimated enrichment of molecular traits over variants, defined as ratios of prior inclusion probabilities. Other output parameters are related to the proportion of variance explained (PVE) by molecular traits or variants: <code>group_pve</code> are PVE of molecular traits and variants; <code>total_pve</code> is the total PVE from all molecular traits and variants (sum of <code>group_pve</code>) - basically heritability from all included variables (effectively all common variants); <code>prop_heritability</code> are the proportion of heritability mediated by molecular traits and variants.</p>
+<p>This function returns several output: <code>group_prior</code> are the estimated prior inclusion probabilities for molecular traits and variants; <code>group_prior_var</code> are estimated prior effect size variance for molecular traits and variants; <code>enrichment</code> are estimated enrichment (at the log scale) of molecular traits over variants, defined as log ratios of prior inclusion probabilities. <code>enrichment_se</code> are standard errors of the log enrichment. <code>enrichment_pval</code> are the p-values from the enrichment test. By default, the p-values are computed using Fisher’s exact test (<code>enrichment_test = "fisher"</code>). Alternatively, we could compute p-values using G-test (<code>enrichment_test = "G"</code>).</p>
+<p>Other output parameters are related to the proportion of variance explained (PVE) by molecular traits or variants: <code>group_pve</code> are PVE of molecular traits and variants; <code>total_pve</code> is the total PVE from all molecular traits and variants (sum of <code>group_pve</code>) - basically heritability from all included variables (effectively all common variants); <code>prop_heritability</code> are the proportion of heritability mediated by molecular traits and variants.</p>
 <p>These PVE values allow us to compute how heritability of the phenotype is partitioned among variants and groups of molecular traits. From our experience, in single-tissue gene expression analysis, genes typically explain around 5-15% of the total heritability of the trait. In multi-group analysis, the heritability of genes could become lower.</p>
 </div>
 <div class="section level2">
@@ -323,10 +327,10 @@
 <span>                                drop_unmapped <span class="op">=</span> <span class="cn">TRUE</span>,</span>
 <span>                                add_position <span class="op">=</span> <span class="cn">TRUE</span>,</span>
 <span>                                use_gene_pos <span class="op">=</span> <span class="st">"mid"</span><span class="op">)</span></span></code></pre></div>
-<pre><code><span><span class="co">## 2025-05-01 20:54:46 INFO::Annotating fine-mapping result ...</span></span>
-<span><span class="co">## 2025-05-01 20:54:46 INFO::Map molecular traits to genes</span></span>
-<span><span class="co">## 2025-05-01 20:54:46 INFO::Add gene positions</span></span>
-<span><span class="co">## 2025-05-01 20:54:46 INFO::Add SNP positions</span></span></code></pre>
+<pre><code><span><span class="co">## 2025-05-09 19:41:04 INFO::Annotating fine-mapping result ...</span></span>
+<span><span class="co">## 2025-05-09 19:41:04 INFO::Map molecular traits to genes</span></span>
+<span><span class="co">## 2025-05-09 19:41:04 INFO::Add gene positions</span></span>
+<span><span class="co">## 2025-05-09 19:41:04 INFO::Add SNP positions</span></span></code></pre>
 <p>If <code>add_gene_annot = TRUE</code>, it joins the fine-mapping result table (<code>finemap_res</code>) with the <code>gene_annot</code> table, by the “molecular ids” column (set in <code>map_by</code>), and adds additional columns of gene annotations to the fine-mapping results By default, we drop the genes not found in <code>gene_annot</code> (<code>drop_unmapped = TRUE</code>). If <code>add_position = TRUE</code>, it adds positional information to the fine-mapping results. The positional information of variants can be found in the data structure of reference SNPs: <code>snp_map</code>. The users need to provide positional information of molecular traits, through <code>mapping_table</code>. In our example, we use <code>gene_annot</code>, which has gene positions. By default, we will use the midpoint positions for genes. You could also use “start” or “end” positions by setting the <code>use_gene_pos</code> argument.</p>
 <p>With the added gene information, we could limit results to protein coding genes, and view the prioritized genes with additional information:</p>
 <div class="sourceCode" id="cb19"><pre class="downlit sourceCode r">
@@ -381,8 +385,8 @@
 <span>                                        mapping_table <span class="op">=</span> <span class="va">gene_annot</span>,</span>
 <span>                                        map_by <span class="op">=</span> <span class="st">"molecular_id"</span>,</span>
 <span>                                        drop_unmapped <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span></code></pre></div>
-<pre><code><span><span class="co">## 2025-05-01 20:54:49 INFO::Annotating susie alpha result ...</span></span>
-<span><span class="co">## 2025-05-01 20:54:49 INFO::Map molecular traits to genes</span></span></code></pre>
+<pre><code><span><span class="co">## 2025-05-09 19:41:08 INFO::Annotating susie alpha result ...</span></span>
+<span><span class="co">## 2025-05-09 19:41:08 INFO::Map molecular traits to genes</span></span></code></pre>
 <p>We could use the <code><a href="../reference/combine_gene_pips.html">combine_gene_pips()</a></code> function to compute gene PIPs across different types of molecular traits. Here we use <code>group_by = "gene_name"</code>, because molecular traits are mapped to their corresponding genes by the “gene_name” column.</p>
 <div class="sourceCode" id="cb26"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">combined_pip_by_type</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/combine_gene_pips.html">combine_gene_pips</a></span><span class="op">(</span><span class="va">susie_alpha_res</span>,</span>
@@ -416,12 +420,12 @@
 <span>               filter_cs <span class="op">=</span> <span class="cn">TRUE</span>,</span>
 <span>               color_pval_by <span class="op">=</span> <span class="st">"cs"</span>,</span>
 <span>               color_pip_by <span class="op">=</span> <span class="st">"cs"</span><span class="op">)</span></span></code></pre></div>
-<pre><code><span><span class="co">## 2025-05-01 20:54:50 INFO::Limit to protein coding genes</span></span>
-<span><span class="co">## 2025-05-01 20:54:50 INFO::focal id: ENSG00000261701.6|liver_expression</span></span>
-<span><span class="co">## 2025-05-01 20:54:50 INFO::focal molecular trait: HPR liver expression</span></span>
-<span><span class="co">## 2025-05-01 20:54:50 INFO::Range of locus: chr16:71020348-72900542</span></span>
-<span><span class="co">## 2025-05-01 20:54:51 INFO::focal molecular trait QTL positions: 72063820,72063928</span></span>
-<span><span class="co">## 2025-05-01 20:54:51 INFO::Limit PIPs to credible sets</span></span></code></pre>
+<pre><code><span><span class="co">## 2025-05-09 19:41:09 INFO::Limit to protein coding genes</span></span>
+<span><span class="co">## 2025-05-09 19:41:09 INFO::focal id: ENSG00000261701.6|liver_expression</span></span>
+<span><span class="co">## 2025-05-09 19:41:09 INFO::focal molecular trait: HPR liver expression</span></span>
+<span><span class="co">## 2025-05-09 19:41:09 INFO::Range of locus: chr16:71020348-72900542</span></span>
+<span><span class="co">## 2025-05-09 19:41:10 INFO::focal molecular trait QTL positions: 72063820,72063928</span></span>
+<span><span class="co">## 2025-05-09 19:41:10 INFO::Limit PIPs to credible sets</span></span></code></pre>
 <div class="figure" style="text-align: center">
 <img src="summarizing_results_files/figure-html/locus_plot_1-1.png" alt="&amp;nbsp;" width="1200"><p class="caption">
  
@@ -458,13 +462,13 @@
 <span>               filter_cs <span class="op">=</span> <span class="cn">TRUE</span>,</span>
 <span>               color_pval_by <span class="op">=</span> <span class="st">"LD"</span>,</span>
 <span>               color_pip_by <span class="op">=</span> <span class="st">"cs"</span><span class="op">)</span></span></code></pre></div>
-<pre><code><span><span class="co">## 2025-05-01 20:54:56 INFO::Limit to protein coding genes</span></span>
-<span><span class="co">## 2025-05-01 20:54:56 INFO::focal id: ENSG00000261701.6|liver_expression</span></span>
-<span><span class="co">## 2025-05-01 20:54:56 INFO::focal molecular trait: HPR liver expression</span></span>
-<span><span class="co">## 2025-05-01 20:54:56 INFO::Range of locus: chr16:71600000-72400000</span></span>
-<span><span class="co">## 2025-05-01 20:54:56 INFO::focal molecular trait QTL positions: 72063820,72063928</span></span>
-<span><span class="co">## 2025-05-01 20:54:56 INFO::Limit PIPs to credible sets</span></span>
-<span><span class="co">## 2025-05-01 20:54:56 INFO::highlight positions: 72070235</span></span></code></pre>
+<pre><code><span><span class="co">## 2025-05-09 19:41:17 INFO::Limit to protein coding genes</span></span>
+<span><span class="co">## 2025-05-09 19:41:17 INFO::focal id: ENSG00000261701.6|liver_expression</span></span>
+<span><span class="co">## 2025-05-09 19:41:17 INFO::focal molecular trait: HPR liver expression</span></span>
+<span><span class="co">## 2025-05-09 19:41:17 INFO::Range of locus: chr16:71600000-72400000</span></span>
+<span><span class="co">## 2025-05-09 19:41:17 INFO::focal molecular trait QTL positions: 72063820,72063928</span></span>
+<span><span class="co">## 2025-05-09 19:41:17 INFO::Limit PIPs to credible sets</span></span>
+<span><span class="co">## 2025-05-09 19:41:17 INFO::highlight positions: 72070235</span></span></code></pre>
 <div class="figure" style="text-align: center">
 <img src="summarizing_results_files/figure-html/locus_plot_2-1.png" alt="&amp;nbsp;" width="1200"><p class="caption">
  

@@ -33,7 +33,7 @@
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">ctwas</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">0.5.16</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">0.5.18</span>
       </span>
     </div>
 
@@ -108,7 +108,7 @@
       <h1 data-toc-skip>Running cTWAS analysis</h1>
                         <h4 data-toc-skip class="author">Kaixuan Luo, Sheng Qian</h4>
             
-            <h4 data-toc-skip class="date">2025-05-02</h4>
+            <h4 data-toc-skip class="date">2025-05-09</h4>
       
       <small class="dont-index">Source: <a href="https://github.com/xinhe-lab/ctwas/blob/multigroup/vignettes/running_ctwas_analysis.Rmd" class="external-link"><code>vignettes/running_ctwas_analysis.Rmd</code></a></small>
       <div class="hidden name"><code>running_ctwas_analysis.Rmd</code></div>
@@ -224,14 +224,12 @@
 <li>“independent” allows all groups to have their own separate variance parameters.</li>
 </ul>
 <p>This step will run the EM algorithm to estimate parameters and return the estimated parameters (<code>group_prior</code>, <code>group_prior_var</code>, etc.). For technical reasons (see Methods of the cTWAS paper), it will run two rounds of EM algorithm. In the first round, it uses fewer iterations (<code>niter_prefit=3</code> by default) to get rough parameter estimates, and using these values, select regions for the analysis in the second run of EM. We use more iterations in the second round (maximum <code>niter=50</code> by default) to get accurate parameter estimates. <code>min_group_size</code> sets the minimum number of variables in a group, as parameters cannot be reliably estimated for groups with too few variables.</p>
-<p>It also computes enrichment (log scale), and its standard error. We provided two options to assess the statistical significance of enrichment: “G-test” (<code>enrichment_test = "G"</code>, default option), or Fisher’s exact test (<code>enrichment_test = "fisher"</code>).</p>
 <div class="sourceCode" id="cb7"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">param</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/est_param.html">est_param</a></span><span class="op">(</span><span class="va">region_data</span>, </span>
 <span>                   group_prior_var_structure <span class="op">=</span> <span class="st">"shared_all"</span>, </span>
 <span>                   niter_prefit <span class="op">=</span> <span class="fl">3</span>,</span>
 <span>                   niter <span class="op">=</span> <span class="fl">50</span>, </span>
 <span>                   min_group_size <span class="op">=</span> <span class="fl">100</span>,</span>
-<span>                   enrichment_test <span class="op">=</span> <span class="st">"G"</span>,</span>
 <span>                   ncore <span class="op">=</span> <span class="fl">6</span><span class="op">)</span></span>
 <span><span class="va">group_prior</span> <span class="op">&lt;-</span> <span class="va">param</span><span class="op">$</span><span class="va">group_prior</span></span>
 <span><span class="va">group_prior_var</span> <span class="op">&lt;-</span> <span class="va">param</span><span class="op">$</span><span class="va">group_prior_var</span></span></code></pre></div>
@@ -288,6 +286,7 @@
 <span>                       ncore <span class="op">=</span> <span class="fl">4</span><span class="op">)</span></span>
 <span><span class="va">finemap_res</span> <span class="op">&lt;-</span> <span class="va">res</span><span class="op">$</span><span class="va">finemap_res</span></span>
 <span><span class="va">susie_alpha_res</span> <span class="op">&lt;-</span> <span class="va">res</span><span class="op">$</span><span class="va">susie_alpha_res</span></span></code></pre></div>
+<p>If you want to check some details of SuSiE result, you can set <code>include_susie_result = TRUE</code>, and it will return the “susie” objects for the regions in <code>res$susie_res</code>.</p>
 <p>cTWAS will automatically check <code>cor_dir</code>. If precomputed correlation matrices are available in <code>cor_dir</code>, cTWAS will simply load and reuse those. Otherwise, it will compute the correlation matrices and save to the <code>cor_dir</code> directory if <code>save_cor = TRUE</code>. You can set <code>force_compute_cor = TRUE</code> so that it always computes the correlation matrices. The correlation matrices are large datasets, so they are not saved by default.</p>
 <p><em>Note</em>: when fine-mapping with LD, we need larger memory to load LD matrices and compute correlation matrices. So we recommend increasing memory or reducing the number of <code>ncore</code> for these steps.</p>
 <p>It is possible to run fine-mapping using uniform prior, treating all variants and molecular traits equally. To do this, we set <code>group_prior = NULL</code> (uniform prior inclusion probabilities) and <code>group_prior_var = NULL</code> (prior variance = 50 as the default in <code>susie_rss</code>).</p>

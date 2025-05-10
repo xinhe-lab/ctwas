@@ -17,7 +17,7 @@
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">ctwas</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">0.5.16</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">0.5.18</span>
       </span>
     </div>
 
@@ -79,7 +79,7 @@
   <div class="col-md-9 contents">
     <div class="page-header">
     <h1>Computes enrichment (log-scale), standard error and p-value</h1>
-    <small class="dont-index">Source: <a href="https://github.com/xinhe-lab/ctwas/blob/multigroup/R/ctwas_est_parameters.R" class="external-link"><code>R/ctwas_est_parameters.R</code></a></small>
+    <small class="dont-index">Source: <a href="https://github.com/xinhe-lab/ctwas/blob/multigroup/R/ctwas_summarize_parameters.R" class="external-link"><code>R/ctwas_summarize_parameters.R</code></a></small>
     <div class="hidden name"><code>compute_enrichment_test.Rd</code></div>
     </div>
 
@@ -91,7 +91,8 @@
     <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="fu">compute_enrichment_test</span><span class="op">(</span></span>
 <span>  <span class="va">group_prior</span>,</span>
 <span>  <span class="va">group_size</span>,</span>
-<span>  enrichment_test <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"G"</span>, <span class="st">"fisher"</span><span class="op">)</span>,</span>
+<span>  enrichment_test <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"fisher"</span>, <span class="st">"G"</span>, <span class="st">"z"</span><span class="op">)</span>,</span>
+<span>  alternative <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"greater"</span>, <span class="st">"two.sided"</span>, <span class="st">"less"</span><span class="op">)</span>,</span>
 <span>  include_test_result <span class="op">=</span> <span class="cn">FALSE</span></span>
 <span><span class="op">)</span></span></code></pre></div>
     </div>
@@ -108,7 +109,14 @@
 
 <dt>enrichment_test</dt>
 <dd><p>Method to test enrichment,
-"G": G-test, "fisher": Fisher's exact test.</p></dd>
+"G": G-test, "fisher": Fisher's exact test,
+"z": p-value computed from z-score of enrichment.</p></dd>
+
+
+<dt>alternative</dt>
+<dd><p>indicates the alternative hypothesis and
+must be one of "greater", "two.sided", or "less".
+Only used when <code>enrichment_test</code> is "fisher" or "z".</p></dd>
 
 
 <dt>include_test_result</dt>
