@@ -43,8 +43,8 @@ summarize_param <- function(param,
                                             enrichment_test = enrichment_test,
                                             alternative = alternative,
                                             include_test_result = include_test_result)
-  enrichment <- enrichment_res$enrichment
-  enrichment_se <- enrichment_res$se
+  log_enrichment <- enrichment_res$log_enrichment
+  log_enrichment_se <- enrichment_res$se
   enrichment_pval <- enrichment_res$p.value
   enrichment_test_res <- enrichment_res$test_res
 
@@ -60,8 +60,8 @@ summarize_param <- function(param,
   return(list("group_size" = group_size,
               "group_prior" = group_prior,
               "group_prior_var" = group_prior_var,
-              "enrichment" = enrichment,
-              "enrichment_se" = enrichment_se,
+              "log_enrichment" = log_enrichment,
+              "log_enrichment_se" = log_enrichment_se,
               "enrichment_pval" = enrichment_pval,
               "enrichment_test_res" = enrichment_test_res,
               "group_pve" = group_pve,
@@ -110,12 +110,12 @@ compute_enrichment_test <- function(group_prior,
 
   gene_groups <- setdiff(groups, "SNP")
 
-  enrichment <- rep(NA, length(gene_groups))
-  names(enrichment) <- gene_groups
-  enrichment.se <- rep(NA, length(gene_groups))
-  names(enrichment.se) <- gene_groups
-  enrichment.pval <- rep(NA, length(gene_groups))
-  names(enrichment.pval) <- gene_groups
+  log_enrichment <- rep(NA, length(gene_groups))
+  names(log_enrichment) <- gene_groups
+  log_enrichment_se <- rep(NA, length(gene_groups))
+  names(log_enrichment_se) <- gene_groups
+  enrichment_pval <- rep(NA, length(gene_groups))
+  names(enrichment_pval) <- gene_groups
 
   test_res_list <- list()
   for (group in gene_groups) {
@@ -126,10 +126,10 @@ compute_enrichment_test <- function(group_prior,
     r1 <- group_sum_pip[group]
 
     # enrichment: relative risk estimate in a 2 × 2 contingency table
-    enrichment[group] <- log((r1/k1) / (r0/k0))
+    log_enrichment[group] <- log((r1/k1) / (r0/k0))
 
     # standard error: standard error of a relative risk
-    enrichment.se[group] <- sqrt(1/r1 + 1/r0 - 1/k1 - 1/k0)
+    log_enrichment_se[group] <- sqrt(1/r1 + 1/r0 - 1/k1 - 1/k0)
 
     obs <- rbind(c(r1, k1), c(r0, k0))
     colnames(obs) <- c("r", "k")
@@ -138,15 +138,15 @@ compute_enrichment_test <- function(group_prior,
     if (enrichment_test == "G"){
       # evaluate statistical significance of enrichment using G-test
       test_res <- g.test(obs)
-      enrichment.pval[group] <- test_res$p.value
+      enrichment_pval[group] <- test_res$p.value
     } else if (enrichment_test == "fisher"){
       # evaluate statistical significance of enrichment using Fisher's exact test
       test_res <- fisher.test(round(obs), alternative = alternative)
-      enrichment.pval[group] <- test_res$p.value
+      enrichment_pval[group] <- test_res$p.value
     } else if (enrichment_test == "z"){
-      enrichment <- as.numeric(enrichment[group])
-      se <- as.numeric(enrichment.se[group])
-      z <- enrichment/se
+      estimate <- as.numeric(log_enrichment[group])
+      se <- as.numeric(log_enrichment_se[group])
+      z <- estimate/se
       if (alternative == "two.sided"){
         p <- 2*pnorm(abs(z), lower.tail=FALSE)
       } else if (alternative == "greater") {
@@ -154,8 +154,11 @@ compute_enrichment_test <- function(group_prior,
       } else if (alternative == "less") {
         p <- pnorm(-abs(z), lower.tail=TRUE)
       }
-      enrichment.pval[group] <- p
-      test_res <- list("enrichment" = enrichment, "se" = se, "z" = z, "p" = p)
+      enrichment_pval[group] <- p
+      test_res <- list("estimate" = estimate,
+                       "se" = se,
+                       "z" = z,
+                       "p" = p)
     }
 
     # save test result
@@ -166,8 +169,8 @@ compute_enrichment_test <- function(group_prior,
     test_res_list <- NULL
   }
 
-  return(list("enrichment" = enrichment,
-              "se" = enrichment.se,
-              "p.value" = enrichment.pval,
+  return(list("log_enrichment" = log_enrichment,
+              "se" = log_enrichment_se,
+              "p.value" = enrichment_pval,
               "test_res" = test_res_list))
 }
