@@ -18,6 +18,7 @@ finemap_regions(
   min_abs_corr = 0.1,
   include_cs = TRUE,
   include_prior = FALSE,
+  include_mu2 = FALSE,
   include_susie_alpha = TRUE,
   include_susie_result = FALSE,
   snps_only = FALSE,
@@ -62,7 +63,11 @@ If NULL, it will set prior variance = 50 as the default in \code{susie_rss}.}
 
 \item{include_prior}{If TRUE, include priors in finemapping results.}
 
-\item{include_susie_alpha}{If TRUE, get susie alpha matrix from finemapping results.}
+\item{include_mu2}{If TRUE, include estimated effect size variance (mu2) in finemapping results.}
+
+\item{include_susie_alpha}{If TRUE, include susie alpha matrix from finemapping results.}
+
+\item{include_susie_result}{If TRUE, include the "susie" result object in finemapping results.}
 
 \item{snps_only}{If TRUE, use only SNPs in the region data.}
 

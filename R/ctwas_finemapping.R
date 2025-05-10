@@ -28,7 +28,11 @@
 #'
 #' @param include_prior If TRUE, include priors in finemapping results.
 #'
-#' @param include_susie_alpha If TRUE, get susie alpha matrix from finemapping results.
+#' @param include_mu2 If TRUE, include estimated effect size variance (mu2) in finemapping results.
+#'
+#' @param include_susie_alpha If TRUE, include susie alpha matrix from finemapping results.
+#'
+#' @param include_susie_result If TRUE, include the "susie" result object in finemapping results.
 #'
 #' @param snps_only If TRUE, use only SNPs in the region data.
 #'
@@ -74,6 +78,7 @@ finemap_regions <- function(region_data,
                             min_abs_corr = 0.1,
                             include_cs = TRUE,
                             include_prior = FALSE,
+                            include_mu2 = FALSE,
                             include_susie_alpha = TRUE,
                             include_susie_result = FALSE,
                             snps_only = FALSE,
@@ -212,6 +217,7 @@ finemap_regions <- function(region_data,
                           min_abs_corr = min_abs_corr,
                           include_cs = include_cs,
                           include_prior = include_prior,
+                          include_mu2 = include_mu2,
                           include_susie_alpha = include_susie_alpha,
                           include_susie_result = include_susie_result,
                           snps_only = snps_only,
@@ -269,7 +275,11 @@ finemap_regions <- function(region_data,
 #'
 #' @param include_prior If TRUE, include priors in finemapping results.
 #'
-#' @param include_susie_alpha If TRUE, include susie alpha matrix in the result.
+#' @param include_mu2 If TRUE, include estimated effect size variance (mu2) in finemapping results.
+#'
+#' @param include_susie_alpha If TRUE, include susie alpha matrix from finemapping results.
+#'
+#' @param include_susie_result If TRUE, include the "susie" result object in finemapping results.
 #'
 #' @param snps_only If TRUE, use only SNPs in the region data.
 #'
@@ -297,6 +307,7 @@ finemap_regions_noLD <- function(region_data,
                                  coverage = 0.95,
                                  include_cs = TRUE,
                                  include_prior = FALSE,
+                                 include_mu2 = FALSE,
                                  include_susie_alpha = TRUE,
                                  include_susie_result = FALSE,
                                  snps_only = FALSE,
@@ -392,6 +403,7 @@ finemap_regions_noLD <- function(region_data,
                                coverage = coverage,
                                include_cs = include_cs,
                                include_prior = include_prior,
+                               include_mu2 = include_mu2,
                                include_susie_alpha = include_susie_alpha,
                                include_susie_result = include_susie_result,
                                snps_only = snps_only,
@@ -537,6 +549,7 @@ finemap_single_region <- function(region_data,
                                   min_abs_corr = 0.1,
                                   include_cs = TRUE,
                                   include_prior = FALSE,
+                                  include_mu2 = FALSE,
                                   include_susie_alpha = TRUE,
                                   include_susie_result = FALSE,
                                   snps_only = FALSE,
@@ -659,29 +672,19 @@ finemap_single_region <- function(region_data,
                                min_abs_corr = min_abs_corr,
                                ...)
 
-  if (include_prior) {
-    susie_res_df <- anno_susie(susie_res,
-                               gids = gids,
-                               sids = sids,
-                               g_type = g_type,
-                               g_context = g_context,
-                               g_group = g_group,
-                               region_id = region_id,
-                               z = z,
-                               include_cs = include_cs,
-                               prior = prior,
-                               prior_var = drop(V[1,]))
-  } else {
-    susie_res_df <- anno_susie(susie_res,
-                               gids = gids,
-                               sids = sids,
-                               g_type = g_type,
-                               g_context = g_context,
-                               g_group = g_group,
-                               region_id = region_id,
-                               z = z,
-                               include_cs = include_cs)
-  }
+  susie_res_df <- anno_susie(susie_res,
+                             gids = gids,
+                             sids = sids,
+                             g_type = g_type,
+                             g_context = g_context,
+                             g_group = g_group,
+                             region_id = region_id,
+                             z = z,
+                             include_cs = include_cs,
+                             include_prior = include_prior,
+                             include_mu2 = include_mu2,
+                             prior = prior,
+                             prior_var = drop(V[1,]))
 
   if (include_susie_alpha) {
     # extract alpha matrix from susie result
@@ -712,6 +715,7 @@ finemap_single_region_noLD <- function(region_data,
                                        coverage = 0.95,
                                        include_cs = TRUE,
                                        include_prior = FALSE,
+                                       include_mu2 = FALSE,
                                        include_susie_alpha = TRUE,
                                        include_susie_result = FALSE,
                                        snps_only = FALSE,
@@ -799,29 +803,19 @@ finemap_single_region_noLD <- function(region_data,
                                min_abs_corr = 0,
                                ...)
 
-  if (include_prior) {
-    susie_res_df <- anno_susie(susie_res,
-                               gids = gids,
-                               sids = sids,
-                               g_type = g_type,
-                               g_context = g_context,
-                               g_group = g_group,
-                               region_id = region_id,
-                               z = z,
-                               include_cs = include_cs,
-                               prior = prior,
-                               prior_var = drop(V[1,]))
-  } else {
-    susie_res_df <- anno_susie(susie_res,
-                               gids = gids,
-                               sids = sids,
-                               g_type = g_type,
-                               g_context = g_context,
-                               g_group = g_group,
-                               region_id = region_id,
-                               z = z,
-                               include_cs = include_cs)
-  }
+  susie_res_df <- anno_susie(susie_res,
+                             gids = gids,
+                             sids = sids,
+                             g_type = g_type,
+                             g_context = g_context,
+                             g_group = g_group,
+                             region_id = region_id,
+                             z = z,
+                             include_cs = include_cs,
+                             include_prior = include_prior,
+                             include_mu2 = include_mu2,
+                             prior = prior,
+                             prior_var = drop(V[1,]))
 
   if (include_susie_alpha) {
     # extract alpha matrix from susie result

@@ -68,7 +68,7 @@ screen_res <- ctwas_res$screen_res
 
 + `param`: the estimated parameters,
  
-+ `finemap_res`: fine-mapping results, a data frame of molecular traits and variants, including their cTWAS IDs ("id"), molecular ID ("molecular_ id"), the regions they belong to ("region_id"), Z-scores ("z"), PIPs ("susie_pip"), credible set indices ("cs_index"), and estimated effect size variance ("mu2"). 
++ `finemap_res`: fine-mapping results, a data frame of molecular traits and variants, including their cTWAS IDs ("id"), molecular ID ("molecular_ id"), the regions they belong to ("region_id"), Z-scores ("z"), PIPs ("susie_pip"), credible set indices ("cs_index"). 
 
 The IDs of molecular traits ("id") used in cTWAS is in the format of 
 <molecular_ id|weight_name>. "molecular_id" are the IDs originally used in the PredictDB or FUSION weights for genes or other molecular traits, such as Ensembl gene IDs. `weight_name` is the user defined weight name when preprocessing weights, see the tutorial ["Preparing cTWAS input data"][preparing_input_data_tutorial]). 
@@ -331,7 +331,6 @@ For the "no-LD" version, we could still make the locus plot. The difference is t
 ## Sample report of the cTWAS results
 
 We present a [sample cTWAS report][sample_report_tutorial] based on real data analysis. The analyzed trait is LDL cholesterol, the prediction models are liver gene expression and splicing models trained on GTEx v8 in the PredictDB format.
-
 
 
 
