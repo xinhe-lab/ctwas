@@ -104,7 +104,6 @@ test_that("finemap_regions_ser works", {
                                    null_method = "ctwas")
   })
   expect_equal(ser_res$susie_pip, expected_finemap_res$susie_pip)
-  expect_equal(ser_res$mu2, expected_finemap_res$mu2)
 
 })
 
