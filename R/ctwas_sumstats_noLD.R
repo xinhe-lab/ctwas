@@ -249,6 +249,7 @@ ctwas_sumstats_noLD <- function(
   if (!is.null(outputdir)) {
     saveRDS(screen_res, file.path(outputdir, paste0(outname, ".screen_res.RDS")))
   }
+  rm(all_region_data)
 
   # Run fine-mapping for regions with strong gene signals using all SNPs
   if (length(screened_region_data) > 0){

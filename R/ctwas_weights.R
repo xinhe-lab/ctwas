@@ -329,7 +329,6 @@ create_predictdb_from_QTLs <- function(weight_table,
                                        outname){
 
   loginfo("Makes PredictDB weights from QTL data")
-  column_top_QTL <- match.arg(column_top_QTL)
 
   # check and clean the QTL data
   weight_table <- as.data.frame(weight_table)
