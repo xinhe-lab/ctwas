@@ -291,6 +291,7 @@ ctwas_sumstats <- function(
   if (!is.null(outputdir)) {
     saveRDS(screen_res, file.path(outputdir, paste0(outname, ".screen_res.RDS")))
   }
+  rm(all_region_data)
 
   # Run fine-mapping for regions with strong gene signals using all SNPs
   #. save correlation matrices if save_cor is TRUE
