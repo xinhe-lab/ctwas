@@ -305,8 +305,8 @@ load_fusion_wgt_data <- function(wgt_rdata_file,
 #' create a simple cov_table with covariance set to 1.
 #'
 #' @param select_by Select the top SNP by the column:
-#' "weight": choose the top SNP with the largest abs(weight) per gene (molecular trait),
 #' "pval": choose the top SNP with the smallest p-value per gene (molecular trait).
+#' "weight": choose the top SNP with the largest abs(weight) per gene (molecular trait),
 #' Only used when \code{use_top_QTL=TRUE}.
 #'
 #' @param outputdir output directory
@@ -324,9 +324,11 @@ create_predictdb_from_QTLs <- function(weight_table,
                                        gene_table = NULL,
                                        cov_table = NULL,
                                        use_top_QTL = TRUE,
-                                       select_by = c("weight", "pval"),
+                                       select_by = c("pval", "weight"),
                                        outputdir = getwd(),
                                        outname){
+
+  select_by <- match.arg(select_by)
 
   loginfo("Makes PredictDB weights from QTL data")
 
