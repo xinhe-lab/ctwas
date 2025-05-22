@@ -66,7 +66,7 @@ We also have a FAQ page for some common questions:
 
 - [FAQ](https://xinhe-lab.github.io/multigroup_ctwas/articles/FAQ.html)
 
-<img style="display:block;margin:auto" width="700" height="300" src="man/figures/workflow.png">
+<img style="display:block;margin:auto" width="700" height="300" src="man/figures/multi_cTWAS_workflow.png">
 
 ## Citing this work
 
