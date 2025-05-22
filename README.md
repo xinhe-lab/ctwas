@@ -9,13 +9,7 @@ You can follow the new [tutorials](https://xinhe-lab.github.io/multigroup_ctwas/
 
 You can browse [source code for the new version](https://github.com/xinhe-lab/ctwas/tree/multigroup) and report a bug [here](https://github.com/xinhe-lab/ctwas/issues). You can also join our [Google Group](https://groups.google.com/g/ctwas_users) to receive notifications of software updates. 
 
-## Citing this work
+## Reference
 
-If you find the `ctwas` package or any of the source code in this
-repository useful for your work, please cite:
-
-> Zhao S, Crouse W, Qian S, Luo K, Stephens M, He X. 
-> Adjusting for genetic confounders in transcriptome-wide association 
-> studies improves discovery of risk genes of complex traits. 
-> Nat Genet (2024). https://doi.org/10.1038/s41588-023-01648-9
+  - Zhao S, Crouse W, Qian S, Luo K, Stephens M, He X. Adjusting for genetic confounders in transcriptome-wide association studies improves discovery of risk genes of complex traits. Nat Genet (2024). https://doi.org/10.1038/s41588-023-01648-9
 
