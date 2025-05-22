@@ -7,7 +7,7 @@ Expression Quantitative Trait Loci (eQTLs) have often been used to nominate cand
 We have updated the `ctwas` package. The new version, multi-group cTWAS (or multi-cTWAS), can analyze GWAS and molecular QTL data from multiple modalities and contexts. 
 You can follow the new [tutorials](https://xinhe-lab.github.io/multigroup_ctwas/). (Tutorial for the old version can be found [here](https://xinhe-lab.github.io/ctwas/articles/ctwas_summary_statistics.html)).
 
-You can browse [source code for the new version](https://github.com/xinhe-lab/multigroup_ctwas) and report a bug [here](https://github.com/xinhe-lab/ctwas/issues). You can also join our [Google Group](https://groups.google.com/g/ctwas_users) to receive notifications of software updates. 
+You can browse [source code for the new version](https://github.com/xinhe-lab/ctwas/tree/multigroup) and report a bug [here](https://github.com/xinhe-lab/ctwas/issues). You can also join our [Google Group](https://groups.google.com/g/ctwas_users) to receive notifications of software updates. 
 
 ## Citing this work
 
