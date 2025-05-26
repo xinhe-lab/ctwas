@@ -87,9 +87,11 @@ anno_susie <- function(susie_res,
 
   susie_res_df$susie_pip <- susie_res$pip
 
+  p <- length(gids) + length(sids)
+  susie_res_df$mu <- colSums(susie_res$mu[, seq(1, p)[1:p!=susie_res$null_index], drop = FALSE])
+
   if (include_mu2) {
-    p <- length(gids) + length(sids)
-    susie_res_df$mu2 <- colSums(susie_res$mu2[, seq(1, p)[1:p!=susie_res$null_index], drop = FALSE]) # WARN: not sure for L>1
+    susie_res_df$mu2 <- colSums(susie_res$mu2[, seq(1, p)[1:p!=susie_res$null_index], drop = FALSE])
   }
 
   if (include_cs) {
