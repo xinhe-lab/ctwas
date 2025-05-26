@@ -15,7 +15,7 @@
 #' regions with total non-SNP PIP >= \code{min_nonSNP_PIP}
 #' will be selected to run finemapping using full SNPs.
 #'
-#' @param min_pval Keep regions with minimum p-values from z_snp and z_gene < \code{min_pval}.
+#' @param min_pval Select regions with minimum z_snp p-values < \code{min_pval}.
 #'
 #' @param null_method Method to compute null model, options: "ctwas", "susie" or "none".
 #'
@@ -93,9 +93,12 @@ screen_regions <- function(region_data,
     }
   }
 
-  sigP_region_ids <- screen_summary$region_id[which(screen_summary$min_gene_p < min_pval | screen_summary$min_snp_p < min_pval)]
+  n_gids <- sapply(region_data, function(x){length(x$gid)})
+
+  min_adjusted_pval <- 0.05/sum(n_gids)
+  sigP_region_ids <- screen_summary$region_id[which(screen_summary$min_snp_p < min_pval | screen_summary$min_gene_p < min_adjusted_pval)]
   sigP_region_ids <- setdiff(sigP_region_ids, skipped_region_ids)
-  loginfo("Selected %d regions with minimum p-value < %s.", length(sigP_region_ids), min_pval)
+  loginfo("Selected %d regions with significant GWAS or TWAS signals.", length(sigP_region_ids))
 
   # run finemapping for all regions without LD (L=1) using the SER model
   # select regions with total non-SNP PIPs > 0.5
