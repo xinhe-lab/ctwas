@@ -36,7 +36,10 @@
 #' @param min_nonSNP_PIP Regions with non-SNP PIP >= \code{min_nonSNP_PIP}
 #' will be selected to run finemapping using all SNPs.
 #'
-#' @param min_pval Keep regions with minimum p-values from z_snp and z_gene < \code{min_pval}.
+#' @param min_snp_pval Select regions with minimum SNP p-values < \code{min_snp_pval}.
+#'
+#' @param min_gene_pval Select regions with minimum gene p-values < \code{min_gene_pval}.
+#' By default, it is set to the same value as \code{min_snp_pval}.
 #'
 #' @param min_p_single_effect Regions with probability greater than \code{min_p_single_effect} of
 #' having 1 or fewer effects will be used for parameter estimation.
@@ -122,7 +125,8 @@ ctwas_sumstats <- function(
     init_group_prior_var = NULL,
     group_prior_var_structure = c("shared_all", "shared_type", "shared_context", "shared_nonSNP", "independent"),
     min_nonSNP_PIP = 0.5,
-    min_pval = 5e-8,
+    min_snp_pval = 5e-8,
+    min_gene_pval = min_snp_pval,
     min_p_single_effect = 0.8,
     maxSNP = Inf,
     min_var = 2,
@@ -283,7 +287,8 @@ ctwas_sumstats <- function(
                                min_var = min_var,
                                min_gene = min_gene,
                                min_nonSNP_PIP = min_nonSNP_PIP,
-                               min_pval = min_pval,
+                               min_snp_pval = min_snp_pval,
+                               min_gene_pval = min_gene_pval,
                                null_method = null_method,
                                ncore = ncore,
                                verbose = verbose)

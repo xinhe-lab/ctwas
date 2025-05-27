@@ -28,7 +28,6 @@ test_that("screen_regions works", {
                                  group_prior = group_prior,
                                  group_prior_var = group_prior_var,
                                  min_nonSNP_PIP = 0.5,
-                                 min_pval = 5e-8,
                                  null_method = "ctwas",
                                  ncore = 2)
   })

@@ -11,7 +11,9 @@ screen_regions(
   min_var = 2,
   min_gene = 1,
   min_nonSNP_PIP = 0.5,
-  min_pval = 5e-08,
+  min_snp_pval = 5e-08,
+  min_gene_pval = min_snp_pval,
+  use_twas_min_pval = FALSE,
   null_method = c("ctwas", "susie", "none"),
   ncore = 1,
   logfile = NULL,
@@ -33,7 +35,10 @@ screen_regions(
 regions with total non-SNP PIP >= \code{min_nonSNP_PIP}
 will be selected to run finemapping using full SNPs.}
 
-\item{min_pval}{Select regions with minimum z_snp p-values < \code{min_pval}.}
+\item{min_snp_pval}{Select regions with minimum SNP p-values < \code{min_snp_pval}.}
+
+\item{min_gene_pval}{Select regions with minimum gene p-values < \code{min_gene_pval}.
+By default, it is set to the same value as \code{min_snp_pval}.}
 
 \item{null_method}{Method to compute null model, options: "ctwas", "susie" or "none".}
 

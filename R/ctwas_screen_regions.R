@@ -15,7 +15,10 @@
 #' regions with total non-SNP PIP >= \code{min_nonSNP_PIP}
 #' will be selected to run finemapping using full SNPs.
 #'
-#' @param min_pval Select regions with minimum z_snp p-values < \code{min_pval}.
+#' @param min_snp_pval Select regions with minimum SNP p-values < \code{min_snp_pval}.
+#'
+#' @param min_gene_pval Select regions with minimum gene p-values < \code{min_gene_pval}.
+#' By default, it is set to the same value as \code{min_snp_pval}.
 #'
 #' @param null_method Method to compute null model, options: "ctwas", "susie" or "none".
 #'
@@ -38,7 +41,9 @@ screen_regions <- function(region_data,
                            min_var = 2,
                            min_gene = 1,
                            min_nonSNP_PIP = 0.5,
-                           min_pval = 5e-8,
+                           min_snp_pval = 5e-8,
+                           min_gene_pval = min_snp_pval,
+                           use_twas_min_pval = FALSE,
                            null_method = c("ctwas", "susie", "none"),
                            ncore = 1,
                            logfile = NULL,
@@ -93,10 +98,9 @@ screen_regions <- function(region_data,
     }
   }
 
-  n_gids <- sapply(region_data, function(x){length(x$gid)})
-
-  min_adjusted_pval <- 0.05/sum(n_gids) # Bonferroni adjusted p-value cutoff for TWAS
-  sigP_region_ids <- screen_summary$region_id[which(screen_summary$min_snp_p < min_pval | screen_summary$min_gene_p < min_adjusted_pval)]
+  loginfo("min_snp_pval = %s.", min_snp_pval)
+  loginfo("min_gene_pval = %s.", min_gene_pval)
+  sigP_region_ids <- screen_summary$region_id[which(screen_summary$min_snp_p < min_snp_pval | screen_summary$min_gene_p < min_gene_pval)]
   sigP_region_ids <- setdiff(sigP_region_ids, skipped_region_ids)
   loginfo("Selected %d regions with significant GWAS or TWAS signals.", length(sigP_region_ids))
 
