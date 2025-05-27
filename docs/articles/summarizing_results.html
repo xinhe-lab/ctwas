@@ -33,7 +33,7 @@
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">ctwas</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">0.5.21</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">0.5.22</span>
       </span>
     </div>
 
@@ -327,10 +327,10 @@
 <span>                                drop_unmapped <span class="op">=</span> <span class="cn">TRUE</span>,</span>
 <span>                                add_position <span class="op">=</span> <span class="cn">TRUE</span>,</span>
 <span>                                use_gene_pos <span class="op">=</span> <span class="st">"mid"</span><span class="op">)</span></span></code></pre></div>
-<pre><code><span><span class="co">## 2025-05-27 12:11:23 INFO::Annotating fine-mapping result...</span></span>
-<span><span class="co">## 2025-05-27 12:11:23 INFO::Map molecular traits to genes</span></span>
-<span><span class="co">## 2025-05-27 12:11:23 INFO::Add gene positions</span></span>
-<span><span class="co">## 2025-05-27 12:11:23 INFO::Add SNP positions</span></span></code></pre>
+<pre><code><span><span class="co">## 2025-05-27 18:16:09 INFO::Annotating fine-mapping result...</span></span>
+<span><span class="co">## 2025-05-27 18:16:09 INFO::Map molecular traits to genes</span></span>
+<span><span class="co">## 2025-05-27 18:16:09 INFO::Add gene positions</span></span>
+<span><span class="co">## 2025-05-27 18:16:10 INFO::Add SNP positions</span></span></code></pre>
 <p>If <code>add_gene_annot = TRUE</code>, it joins the fine-mapping result table (<code>finemap_res</code>) with the <code>gene_annot</code> table, by the “molecular ids” column (set in <code>map_by</code>), and adds additional columns of gene annotations to the fine-mapping results By default, we drop the genes not found in <code>gene_annot</code> (<code>drop_unmapped = TRUE</code>). If <code>add_position = TRUE</code>, it adds positional information to the fine-mapping results. The positional information of variants can be found in the data structure of reference SNPs: <code>snp_map</code>. The users need to provide positional information of molecular traits, through <code>mapping_table</code>. In our example, we use <code>gene_annot</code>, which has gene positions. By default, we will use the midpoint positions for genes. You could also use “start” or “end” positions by setting the <code>use_gene_pos</code> argument.</p>
 <p>With the added gene information, we could limit results to protein coding genes, and view the prioritized genes with additional information:</p>
 <div class="sourceCode" id="cb19"><pre class="downlit sourceCode r">
@@ -385,8 +385,8 @@
 <span>                                        mapping_table <span class="op">=</span> <span class="va">gene_annot</span>,</span>
 <span>                                        map_by <span class="op">=</span> <span class="st">"molecular_id"</span>,</span>
 <span>                                        drop_unmapped <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span></code></pre></div>
-<pre><code><span><span class="co">## 2025-05-27 12:11:28 INFO::Annotating susie alpha result...</span></span>
-<span><span class="co">## 2025-05-27 12:11:28 INFO::Map molecular traits to genes</span></span></code></pre>
+<pre><code><span><span class="co">## 2025-05-27 18:16:14 INFO::Annotating susie alpha result...</span></span>
+<span><span class="co">## 2025-05-27 18:16:14 INFO::Map molecular traits to genes</span></span></code></pre>
 <p>We could use the <code><a href="../reference/combine_gene_pips.html">combine_gene_pips()</a></code> function to compute gene PIPs across different types of molecular traits. Here we use <code>group_by = "gene_name"</code>, because molecular traits are mapped to their corresponding genes by the “gene_name” column.</p>
 <div class="sourceCode" id="cb26"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">combined_pip_by_type</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/combine_gene_pips.html">combine_gene_pips</a></span><span class="op">(</span><span class="va">susie_alpha_res</span>,</span>
@@ -420,12 +420,12 @@
 <span>               filter_cs <span class="op">=</span> <span class="cn">TRUE</span>,</span>
 <span>               color_pval_by <span class="op">=</span> <span class="st">"cs"</span>,</span>
 <span>               color_pip_by <span class="op">=</span> <span class="st">"cs"</span><span class="op">)</span></span></code></pre></div>
-<pre><code><span><span class="co">## 2025-05-27 12:11:28 INFO::Limit to protein coding genes</span></span>
-<span><span class="co">## 2025-05-27 12:11:28 INFO::focal id: ENSG00000261701.6|liver_expression</span></span>
-<span><span class="co">## 2025-05-27 12:11:28 INFO::focal molecular trait: HPR liver expression</span></span>
-<span><span class="co">## 2025-05-27 12:11:28 INFO::Range of locus: chr16:71020348-72900542</span></span>
-<span><span class="co">## 2025-05-27 12:11:28 INFO::focal molecular trait QTL positions: 72063820,72063928</span></span>
-<span><span class="co">## 2025-05-27 12:11:28 INFO::Limit PIPs to credible sets</span></span></code></pre>
+<pre><code><span><span class="co">## 2025-05-27 18:16:14 INFO::Limit to protein coding genes</span></span>
+<span><span class="co">## 2025-05-27 18:16:14 INFO::focal id: ENSG00000261701.6|liver_expression</span></span>
+<span><span class="co">## 2025-05-27 18:16:14 INFO::focal molecular trait: HPR liver expression</span></span>
+<span><span class="co">## 2025-05-27 18:16:14 INFO::Range of locus: chr16:71020348-72900542</span></span>
+<span><span class="co">## 2025-05-27 18:16:14 INFO::focal molecular trait QTL positions: 72063820,72063928</span></span>
+<span><span class="co">## 2025-05-27 18:16:14 INFO::Limit PIPs to credible sets</span></span></code></pre>
 <div class="figure" style="text-align: center">
 <img src="summarizing_results_files/figure-html/locus_plot_1-1.png" alt="&amp;nbsp;" width="1200"><p class="caption">
  
@@ -462,13 +462,13 @@
 <span>               filter_cs <span class="op">=</span> <span class="cn">TRUE</span>,</span>
 <span>               color_pval_by <span class="op">=</span> <span class="st">"LD"</span>,</span>
 <span>               color_pip_by <span class="op">=</span> <span class="st">"cs"</span><span class="op">)</span></span></code></pre></div>
-<pre><code><span><span class="co">## 2025-05-27 12:11:33 INFO::Limit to protein coding genes</span></span>
-<span><span class="co">## 2025-05-27 12:11:33 INFO::focal id: ENSG00000261701.6|liver_expression</span></span>
-<span><span class="co">## 2025-05-27 12:11:33 INFO::focal molecular trait: HPR liver expression</span></span>
-<span><span class="co">## 2025-05-27 12:11:33 INFO::Range of locus: chr16:71600000-72400000</span></span>
-<span><span class="co">## 2025-05-27 12:11:34 INFO::focal molecular trait QTL positions: 72063820,72063928</span></span>
-<span><span class="co">## 2025-05-27 12:11:34 INFO::Limit PIPs to credible sets</span></span>
-<span><span class="co">## 2025-05-27 12:11:34 INFO::highlight positions: 72070235</span></span></code></pre>
+<pre><code><span><span class="co">## 2025-05-27 18:16:19 INFO::Limit to protein coding genes</span></span>
+<span><span class="co">## 2025-05-27 18:16:19 INFO::focal id: ENSG00000261701.6|liver_expression</span></span>
+<span><span class="co">## 2025-05-27 18:16:19 INFO::focal molecular trait: HPR liver expression</span></span>
+<span><span class="co">## 2025-05-27 18:16:19 INFO::Range of locus: chr16:71600000-72400000</span></span>
+<span><span class="co">## 2025-05-27 18:16:20 INFO::focal molecular trait QTL positions: 72063820,72063928</span></span>
+<span><span class="co">## 2025-05-27 18:16:20 INFO::Limit PIPs to credible sets</span></span>
+<span><span class="co">## 2025-05-27 18:16:20 INFO::highlight positions: 72070235</span></span></code></pre>
 <div class="figure" style="text-align: center">
 <img src="summarizing_results_files/figure-html/locus_plot_2-1.png" alt="&amp;nbsp;" width="1200"><p class="caption">
  

@@ -17,7 +17,7 @@
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">ctwas</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">0.5.21</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">0.5.22</span>
       </span>
     </div>
 
@@ -95,7 +95,9 @@
 <span>  min_var <span class="op">=</span> <span class="fl">2</span>,</span>
 <span>  min_gene <span class="op">=</span> <span class="fl">1</span>,</span>
 <span>  min_nonSNP_PIP <span class="op">=</span> <span class="fl">0.5</span>,</span>
-<span>  min_pval <span class="op">=</span> <span class="fl">5e-08</span>,</span>
+<span>  min_snp_pval <span class="op">=</span> <span class="fl">5e-08</span>,</span>
+<span>  min_gene_pval <span class="op">=</span> <span class="va">min_snp_pval</span>,</span>
+<span>  use_twas_min_pval <span class="op">=</span> <span class="cn">FALSE</span>,</span>
 <span>  null_method <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"ctwas"</span>, <span class="st">"susie"</span>, <span class="st">"none"</span><span class="op">)</span>,</span>
 <span>  ncore <span class="op">=</span> <span class="fl">1</span>,</span>
 <span>  logfile <span class="op">=</span> <span class="cn">NULL</span>,</span>
@@ -131,8 +133,13 @@ regions with total non-SNP PIP &gt;= <code>min_nonSNP_PIP</code>
 will be selected to run finemapping using full SNPs.</p></dd>
 
 
-<dt>min_pval</dt>
-<dd><p>Select regions with minimum z_snp p-values &lt; <code>min_pval</code>.</p></dd>
+<dt>min_snp_pval</dt>
+<dd><p>Select regions with minimum SNP p-values &lt; <code>min_snp_pval</code>.</p></dd>
+
+
+<dt>min_gene_pval</dt>
+<dd><p>Select regions with minimum gene p-values &lt; <code>min_gene_pval</code>.
+By default, it is set to the same value as <code>min_snp_pval</code>.</p></dd>
 
 
 <dt>null_method</dt>

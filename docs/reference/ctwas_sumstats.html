@@ -17,7 +17,7 @@
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">ctwas</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">0.5.21</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">0.5.22</span>
       </span>
     </div>
 
@@ -104,7 +104,8 @@
 <span>  group_prior_var_structure <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"shared_all"</span>, <span class="st">"shared_type"</span>, <span class="st">"shared_context"</span>,</span>
 <span>    <span class="st">"shared_nonSNP"</span>, <span class="st">"independent"</span><span class="op">)</span>,</span>
 <span>  min_nonSNP_PIP <span class="op">=</span> <span class="fl">0.5</span>,</span>
-<span>  min_pval <span class="op">=</span> <span class="fl">5e-08</span>,</span>
+<span>  min_snp_pval <span class="op">=</span> <span class="fl">5e-08</span>,</span>
+<span>  min_gene_pval <span class="op">=</span> <span class="va">min_snp_pval</span>,</span>
 <span>  min_p_single_effect <span class="op">=</span> <span class="fl">0.8</span>,</span>
 <span>  maxSNP <span class="op">=</span> <span class="cn">Inf</span>,</span>
 <span>  min_var <span class="op">=</span> <span class="fl">2</span>,</span>
@@ -199,8 +200,13 @@ giving the z scores for SNPs. "A1" is effect allele. "A2" is the other allele.</
 will be selected to run finemapping using all SNPs.</p></dd>
 
 
-<dt>min_pval</dt>
-<dd><p>Keep regions with minimum p-values from z_snp and z_gene &lt; <code>min_pval</code>.</p></dd>
+<dt>min_snp_pval</dt>
+<dd><p>Select regions with minimum SNP p-values &lt; <code>min_snp_pval</code>.</p></dd>
+
+
+<dt>min_gene_pval</dt>
+<dd><p>Select regions with minimum gene p-values &lt; <code>min_gene_pval</code>.
+By default, it is set to the same value as <code>min_snp_pval</code>.</p></dd>
 
 
 <dt>min_p_single_effect</dt>
