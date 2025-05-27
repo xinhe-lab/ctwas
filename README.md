@@ -68,7 +68,7 @@ We also have a FAQ page for some common questions:
 
 <img style="display:block;margin:auto" width="700" height="300" src="man/figures/multi_cTWAS_workflow.png">
 
-## Citing this work
+## Reference
 
 If you find the `ctwas` package or any of the source code in this
 repository useful for your work, please cite:
@@ -84,20 +84,20 @@ repository useful for your work, please cite:
 
 We have pre-computed reference LD matrices and variant information of European samples from UK Biobank. They can be downloaded [here](https://uchicago.box.com/s/jqocacd2fulskmhoqnasrknbt59x3xkn).  
 
-cTWAS requires the expression prediction models, or weights, of genes. 
+cTWAS requires the prediction models, or weights, of molecular traits. 
 The pre-computed weights of GTEx expression and splicing traits can be downloaded from [PredictDB](https://predictdb.org/post/2021/07/21/gtex-v8-models-on-eqtl-and-sqtl/). 
 
 ## Acknowledgments
 
-We thank the authors of `susieR` package for using their codes.
+We thank the authors of `susieR` package for borrowing their code.
 
-Original `susieR` code obtained by:
+The `susieR` code used in `ctwas` package was based on the commit `c7934c0`:
+
 ```
 git clone git@github.com:stephenslab/susieR.git
 git checkout c7934c0
 ```
 
-
-Minor edits to make it accept different prior variances for each variable.
+Minor edits were made to allow for different prior variances.
 
 

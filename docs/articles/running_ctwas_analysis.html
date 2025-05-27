@@ -33,7 +33,7 @@
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">ctwas</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">0.5.20</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">0.5.21</span>
       </span>
     </div>
 
@@ -108,7 +108,7 @@
       <h1 data-toc-skip>Running cTWAS analysis</h1>
                         <h4 data-toc-skip class="author">Kaixuan Luo, Sheng Qian</h4>
             
-            <h4 data-toc-skip class="date">2025-05-12</h4>
+            <h4 data-toc-skip class="date">2025-05-27</h4>
       
       <small class="dont-index">Source: <a href="https://github.com/xinhe-lab/ctwas/blob/multigroup/vignettes/running_ctwas_analysis.Rmd" class="external-link"><code>vignettes/running_ctwas_analysis.Rmd</code></a></small>
       <div class="hidden name"><code>running_ctwas_analysis.Rmd</code></div>
@@ -254,13 +254,12 @@
 <div class="section level4">
 <h4 id="screening-regions-1">Screening regions<a class="anchor" aria-label="anchor" href="#screening-regions-1"></a>
 </h4>
-<p>We use the <code><a href="../reference/screen_regions.html">screen_regions()</a></code> function to perform a screening process to select regions with likely causal signals in molecular traits. cTWAS first selects regions with minimum p-values (<code>min_pval</code>) &lt; 5e-8 for any SNPs or molecular traits (from <code>region_data</code>). Then, it will perform an initial fine-mapping without LD (L= 1) and compute the non-SNP PIP, i.e. total PIP of all molecular traits, for each region (using estimated priors). It then selects regions by applying a <code>min_nonSNP_PIP</code> cutoff (0.5, by default). Only these selected regions would be subject to full fine-mapping analysis in the final step. Thus screening regions can save computational time.</p>
+<p>We use the <code><a href="../reference/screen_regions.html">screen_regions()</a></code> function to perform a screening process to select regions with likely causal signals in molecular traits. cTWAS first selects regions with significant GWAS or TWAS signals. Then, it will perform an initial fine-mapping without LD (L= 1) and compute the non-SNP PIP, i.e. total PIP of all molecular traits, for each region (using estimated priors). It then selects regions by applying a <code>min_nonSNP_PIP</code> cutoff (0.5, by default). Only these selected regions would be subject to full fine-mapping analysis in the final step. Thus screening regions can save computational time.</p>
 <div class="sourceCode" id="cb9"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">screen_res</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/screen_regions.html">screen_regions</a></span><span class="op">(</span><span class="va">region_data</span>,</span>
 <span>                             group_prior <span class="op">=</span> <span class="va">group_prior</span>,</span>
 <span>                             group_prior_var <span class="op">=</span> <span class="va">group_prior_var</span>,</span>
 <span>                             min_nonSNP_PIP <span class="op">=</span> <span class="fl">0.5</span>,</span>
-<span>                             min_pval <span class="op">=</span> <span class="fl">5e-8</span>,</span>
 <span>                             ncore <span class="op">=</span> <span class="fl">6</span><span class="op">)</span></span>
 <span><span class="va">screened_region_data</span> <span class="op">&lt;-</span> <span class="va">screen_res</span><span class="op">$</span><span class="va">screened_region_data</span></span>
 <span><span class="va">screen_summary</span> <span class="op">&lt;-</span> <span class="va">screen_res</span><span class="op">$</span><span class="va">screen_summary</span></span></code></pre></div>

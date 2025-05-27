@@ -41,7 +41,7 @@
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="index.html">ctwas</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">0.5.20</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">0.5.21</span>
       </span>
     </div>
 
@@ -160,7 +160,7 @@
 <p><img style="display:block;margin:auto" width="700" height="300" src="reference/figures/multi_cTWAS_workflow.png"></p>
 </div>
 <div class="section level2">
-<h2 id="citing-this-work">Citing this work<a class="anchor" aria-label="anchor" href="#citing-this-work"></a>
+<h2 id="reference">Reference<a class="anchor" aria-label="anchor" href="#reference"></a>
 </h2>
 <p>If you find the <code>ctwas</code> package or any of the source code in this repository useful for your work, please cite:</p>
 <blockquote><p>Zhao S, Crouse W, Qian S, Luo K, Stephens M, He X. Adjusting for genetic confounders in transcriptome-wide association studies improves discovery of risk genes of complex traits. Nature Genetics 56, 336–347 (2024). <a href="https://doi.org/10.1038/s41588-023-01648-9" class="external-link uri">https://doi.org/10.1038/s41588-023-01648-9</a></p></blockquote>
@@ -169,16 +169,16 @@
 <h2 id="useful-resources">Useful resources<a class="anchor" aria-label="anchor" href="#useful-resources"></a>
 </h2>
 <p>We have pre-computed reference LD matrices and variant information of European samples from UK Biobank. They can be downloaded <a href="https://uchicago.box.com/s/jqocacd2fulskmhoqnasrknbt59x3xkn" class="external-link">here</a>.</p>
-<p>cTWAS requires the expression prediction models, or weights, of genes. The pre-computed weights of GTEx expression and splicing traits can be downloaded from <a href="https://predictdb.org/post/2021/07/21/gtex-v8-models-on-eqtl-and-sqtl/" class="external-link">PredictDB</a>.</p>
+<p>cTWAS requires the prediction models, or weights, of molecular traits. The pre-computed weights of GTEx expression and splicing traits can be downloaded from <a href="https://predictdb.org/post/2021/07/21/gtex-v8-models-on-eqtl-and-sqtl/" class="external-link">PredictDB</a>.</p>
 </div>
 <div class="section level2">
 <h2 id="acknowledgments">Acknowledgments<a class="anchor" aria-label="anchor" href="#acknowledgments"></a>
 </h2>
-<p>We thank the authors of <code>susieR</code> package for using their codes.</p>
-<p>Original <code>susieR</code> code obtained by:</p>
+<p>We thank the authors of <code>susieR</code> package for borrowing their code.</p>
+<p>The <code>susieR</code> code used in <code>ctwas</code> package was based on the commit <code>c7934c0</code>:</p>
 <pre><code>git clone git@github.com:stephenslab/susieR.git
 git checkout c7934c0</code></pre>
-<p>Minor edits to make it accept different prior variances for each variable.</p>
+<p>Minor edits were made to allow for different prior variances.</p>
 </div>
 </div>
   </div>
