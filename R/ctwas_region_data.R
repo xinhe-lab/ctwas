@@ -88,7 +88,7 @@ assemble_region_data <- function(region_info,
 
   # begin assembling region_data
   region_ids <- region_info$region_id
-  loginfo("Assembling region_data ...")
+  loginfo("Assembling region_data...")
   loginfo("Number of regions in total: %d", length(region_ids))
   loginfo("thin = %s", thin)
 
@@ -156,7 +156,7 @@ assemble_region_data <- function(region_info,
                                   maxSNP = maxSNP, seed = seed)
 
   # add z-scores to region_data
-  loginfo("Adding region z-scores ...")
+  loginfo("Adding region z-scores...")
   region_data <- update_region_z(region_data, z_snp, z_gene, ncore = ncore)
 
   return(list("region_data" = region_data,
@@ -468,7 +468,7 @@ expand_region_data <- function(region_data,
     region_data <- trim_region_data(region_data, z_snp, trim_by = "z", maxSNP = maxSNP)
 
     # add z-scores to region_data
-    loginfo("Updating region z-scores ...")
+    loginfo("Updating region z-scores...")
     region_data <- update_region_z(region_data, z_snp, update = "snps", ncore = ncore)
   }
 

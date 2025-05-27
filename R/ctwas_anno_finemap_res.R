@@ -70,7 +70,7 @@ anno_finemap_res <- function(finemap_res,
                              use_gene_pos = c("mid", "start", "end"),
                              drop_unmapped = TRUE){
 
-  loginfo("Annotating fine-mapping result ...")
+  loginfo("Annotating fine-mapping result...")
 
   use_gene_pos <- match.arg(use_gene_pos)
 
@@ -169,7 +169,7 @@ anno_susie_alpha_res <- function(susie_alpha_res,
                                  map_by = "molecular_id",
                                  drop_unmapped = TRUE){
 
-  loginfo("Annotating susie alpha result ...")
+  loginfo("Annotating susie alpha result...")
 
   # map molecular traits to genes
   # there could be n-to-1 and 1-to-n mapping

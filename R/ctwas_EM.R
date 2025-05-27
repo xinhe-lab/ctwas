@@ -98,7 +98,7 @@ fit_EM <- function(
   region_ids <- names(region_data)
   for (iter in 1:niter) {
     if (verbose){
-      loginfo("Start EM iteration %d ...", iter)
+      loginfo("Start EM iteration %d.", iter)
     }
 
     all_ser_res_list <- mclapply_check(region_ids, function(region_id){

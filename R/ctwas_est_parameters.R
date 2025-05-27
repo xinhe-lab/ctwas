@@ -68,7 +68,7 @@ est_param <- function(
     addHandler(writeToFile, file=logfile, level='DEBUG')
   }
 
-  loginfo('Estimating parameters ... ')
+  loginfo('Estimating parameters... ')
 
   # check inputs
   group_prior_var_structure <- match.arg(group_prior_var_structure)
@@ -135,7 +135,7 @@ est_param <- function(
   prefit_region_ids <- setdiff(names(region_data), skipped_region_ids)
 
   # Run EM for a few (niter_prefit) iterations, getting rough estimates
-  loginfo("Run EM prefit iterations, getting rough estimates ...")
+  loginfo("Run EM prefit iterations, getting rough estimates...")
   loginfo("group_prior_var_structure = '%s'", group_prior_var_structure)
 
   loginfo("Using data in %d regions", length(prefit_region_ids))
@@ -175,7 +175,7 @@ est_param <- function(
   rownames(p_single_effect_df) <- NULL
 
   # Run EM for more (niter) iterations, getting rough estimates
-  loginfo("Run EM iterations, getting accurate estimates ...")
+  loginfo("Run EM iterations, getting accurate estimates...")
   loginfo("Using data in %d regions", length(EM_region_ids))
   if (length(EM_region_ids) == 0){
     stop("No regions selected!")

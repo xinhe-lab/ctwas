@@ -205,9 +205,9 @@ preprocess_weights <- function(weight_file,
   # subset to genes in weight table
   cov_table <- cov_table[cov_table$GENE %in% weight_table$gene, ]
 
-  loginfo("Harmonizing and processing weights ...")
+  loginfo("Harmonizing and processing weights...")
   if (load_predictdb_LD && include_weight_LD) {
-    loginfo("Compute LD for variants in weights (R_wgt) using PredictDB LD ...")
+    loginfo("Compute LD for variants in weights (R_wgt) using PredictDB LD...")
   }
   weights <- mclapply_check(weight_molecular_ids, function(molecular_id){
     process_weight(molecular_id,
@@ -232,7 +232,7 @@ preprocess_weights <- function(weight_file,
   }
 
   if (!load_predictdb_LD && include_weight_LD) {
-    loginfo("Computing LD for variants in weights (R_wgt) using reference LD ...")
+    loginfo("Computing LD for variants in weights (R_wgt) using reference LD...")
     weights <- compute_weight_LD_from_ref(weights,
                                           region_info = region_info,
                                           LD_map = LD_map,
@@ -278,7 +278,7 @@ process_weight <- function(molecular_id,
   }
 
   if (verbose)
-    loginfo("Processing weight for %s ...", molecular_id)
+    loginfo("Processing weight for %s...", molecular_id)
 
   g.weight_table <- weight_table[weight_table$gene==molecular_id,]
   wgt.matrix <- as.matrix(g.weight_table[, "weight", drop = FALSE])

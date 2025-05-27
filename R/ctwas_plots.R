@@ -335,7 +335,7 @@ make_locusplot <- function(finemap_res,
 
   # p-value panel
   if (verbose) {
-    loginfo("Making p-value panel ...")
+    loginfo("Making p-value panel...")
   }
   pval_plot_data <- loc$data
   p_pval <- ggplot(pval_plot_data, aes(x=.data$pos/1e6, y=.data$pval, shape=.data$type,
@@ -388,7 +388,7 @@ make_locusplot <- function(finemap_res,
 
   # PIP panel
   if (verbose) {
-    loginfo("Making PIP panel ...")
+    loginfo("Making PIP panel...")
   }
   pip_plot_data <- loc$data
   # limit to credible sets (if cs is available)
@@ -445,7 +445,7 @@ make_locusplot <- function(finemap_res,
   # QTL panel
   if (!is.null(weights)){
     if (verbose) {
-      loginfo("Making QTL panel ...")
+      loginfo("Making QTL panel...")
     }
     p_qtl <- ggplot(finemap_qtl_res, aes(x=.data$pos/1e6)) +
       geom_rect(aes(xmin=loc$xrange[1]/1e6, xmax=loc$xrange[2]/1e6, ymin=0, ymax=1),
@@ -477,7 +477,7 @@ make_locusplot <- function(finemap_res,
 
   # gene track panel
   if (verbose) {
-    loginfo("Making gene track panel ...")
+    loginfo("Making gene track panel...")
   }
   p_genes <- gg_genetracks(loc,
                            filter_gene_biotype = filter_gene_biotype,
@@ -510,7 +510,7 @@ make_locusplot <- function(finemap_res,
   }
 
   if (verbose) {
-    loginfo("Plot panels ...")
+    loginfo("Plot panels...")
   }
 
   if (is.null(p_qtl)){

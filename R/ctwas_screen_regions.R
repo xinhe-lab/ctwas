@@ -48,7 +48,7 @@ screen_regions <- function(region_data,
     addHandler(writeToFile, file=logfile, level='DEBUG')
   }
 
-  loginfo("Screening regions ...")
+  loginfo("Screening regions...")
 
   null_method <- match.arg(null_method)
 
@@ -95,7 +95,7 @@ screen_regions <- function(region_data,
 
   n_gids <- sapply(region_data, function(x){length(x$gid)})
 
-  min_adjusted_pval <- 0.05/sum(n_gids)
+  min_adjusted_pval <- 0.05/sum(n_gids) # Bonferroni adjusted p-value cutoff for TWAS
   sigP_region_ids <- screen_summary$region_id[which(screen_summary$min_snp_p < min_pval | screen_summary$min_gene_p < min_adjusted_pval)]
   sigP_region_ids <- setdiff(sigP_region_ids, skipped_region_ids)
   loginfo("Selected %d regions with significant GWAS or TWAS signals.", length(sigP_region_ids))
@@ -105,7 +105,7 @@ screen_regions <- function(region_data,
   region_ids_to_screen <- setdiff(region_ids, c(skipped_region_ids, sigP_region_ids))
 
   if (length(region_ids_to_screen) > 0) {
-    loginfo("Screening %d regions ...", length(region_ids_to_screen))
+    loginfo("Screening %d regions...", length(region_ids_to_screen))
     finemap_screening_res <- finemap_regions_ser(region_data[region_ids_to_screen],
                                                  group_prior = group_prior,
                                                  group_prior_var = group_prior_var,
@@ -117,7 +117,7 @@ screen_regions <- function(region_data,
     idx <- match(names(all_nonSNP_PIPs), screen_summary$region_id)
     screen_summary$nonSNP_PIP[idx] <- all_nonSNP_PIPs
     screened_region_ids <- screen_summary$region_id[which(screen_summary$nonSNP_PIP > min_nonSNP_PIP)]
-    loginfo("Selected %d regions with non-SNP PIP > %s", length(screened_region_ids), min_nonSNP_PIP)
+    loginfo("Selected %d regions with non-SNP PIP > %s.", length(screened_region_ids), min_nonSNP_PIP)
   } else {
     screened_region_ids <- NULL
   }

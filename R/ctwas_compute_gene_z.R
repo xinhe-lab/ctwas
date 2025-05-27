@@ -36,7 +36,7 @@ compute_gene_z <- function (z_snp,
     stop("z_snp contains missing values!")
   }
 
-  loginfo("Computing gene z-scores ...")
+  loginfo("Computing gene z-scores...")
   weight_snp_ids <- unique(unlist(lapply(weights, function(x){rownames(x[["wgt"]])})))
 
   if (any(!weight_snp_ids %in% z_snp$id)){

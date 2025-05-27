@@ -120,7 +120,7 @@ ctwas_sumstats_noLD <- function(
     addHandler(writeToFile, file=logfile, level='DEBUG')
   }
 
-  loginfo("Running cTWAS without LD ...")
+  loginfo("Running cTWAS without LD...")
   loginfo("ctwas version: %s", packageVersion("ctwas"))
 
   # check inputs

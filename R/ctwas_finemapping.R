@@ -97,7 +97,7 @@ finemap_regions <- function(region_data,
     addHandler(writeToFile, file=logfile, level='DEBUG')
   }
 
-  loginfo("Fine-mapping regions ...")
+  loginfo("Fine-mapping regions...")
 
   # check inputs
   LD_format <- match.arg(LD_format)
@@ -192,7 +192,7 @@ finemap_regions <- function(region_data,
   if (length(region_data) == 0){
     stop("No region data for Fine-mapping.")
   }
-  loginfo("%d regions included in finemapping ...", length(region_data))
+  loginfo("%d regions included in finemapping.", length(region_data))
 
   if (verbose) {
     if (is.null(group_prior)) {
@@ -320,7 +320,7 @@ finemap_regions_noLD <- function(region_data,
     addHandler(writeToFile, file=logfile, level='DEBUG')
   }
 
-  loginfo("Fine-mapping regions without LD ...")
+  loginfo("Fine-mapping regions without LD...")
 
   # check inputs
   null_method <- match.arg(null_method)
@@ -384,7 +384,7 @@ finemap_regions_noLD <- function(region_data,
   if (length(region_data) == 0){
     stop("No region data for Fine-mapping.")
   }
-  loginfo("%d regions included in finemapping ...", length(region_data))
+  loginfo("%d regions included in finemapping.", length(region_data))
 
   if (verbose) {
     if (is.null(group_prior)) {
@@ -510,7 +510,7 @@ finemap_regions_ser <- function(region_data,
   }
 
   if (verbose) {
-    loginfo("Fine-mapping %d regions with SER model ...", length(region_data))
+    loginfo("Fine-mapping %d regions with SER model...", length(region_data))
     if (is.null(group_prior)) {
       loginfo("Use uniform prior")
     }
@@ -845,7 +845,7 @@ finemap_single_region_ser <- function(region_data,
                                       verbose = FALSE){
 
   if (verbose){
-    loginfo("Fine-mapping region %s with SER model", region_id)
+    loginfo("Fine-mapping region %s with SER model...", region_id)
   }
 
   # check inputs
