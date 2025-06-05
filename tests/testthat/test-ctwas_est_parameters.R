@@ -6,14 +6,12 @@ test_that("est_param works", {
   rm(ctwas_res)
 
   capture.output({
-    suppressWarnings({
-      param <- est_param(region_data,
-                         niter_prefit = 3,
-                         niter = 50,
-                         group_prior_var_structure = "shared_all",
-                         null_method = "ctwas",
-                         ncore = 2)
-    })
+    param <- est_param(region_data,
+                       niter_prefit = 3,
+                       niter = 50,
+                       group_prior_var_structure = "shared_all",
+                       null_method = "ctwas",
+                       ncore = 2)
   })
 
   expect_equal(param$group_prior, expected_param$group_prior)
