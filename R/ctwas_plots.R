@@ -596,16 +596,18 @@ make_convergence_plots <- function(param,
     enrichment_iters <- log(enrichment_iters)
   }
 
+  group_prior_var_structure <- param$group_prior_var_structure
+
   # make convergence plots
+  if (missing(group_names)){
+    group_names <- c(setdiff(rownames(group_prior_iters), "SNP"), "SNP")
+  }
+  nonSNP_group_names <- setdiff(group_names, "SNP")
 
   # prior inclusion probability plot
   df <- data.frame(niter = rep(1:ncol(group_prior_iters), nrow(group_prior_iters)),
                    value = unlist(lapply(1:nrow(group_prior_iters), function(x){group_prior_iters[x,]})),
                    group = rep(rownames(group_prior_iters), each=ncol(group_prior_iters)))
-
-  if (missing(group_names)){
-    group_names <- c(setdiff(rownames(group_prior_iters), "SNP"), "SNP")
-  }
 
   df <- df[df$group %in% group_names, ]
   df$group <- factor(df$group, levels = group_names)
@@ -633,8 +635,31 @@ make_convergence_plots <- function(param,
   df <- data.frame(niter = rep(1:ncol(group_prior_var_iters), nrow(group_prior_var_iters)),
                    value = unlist(lapply(1:nrow(group_prior_var_iters), function(x){group_prior_var_iters[x,]})),
                    group = rep(rownames(group_prior_var_iters), each=ncol(group_prior_var_iters)))
-  df$group <- factor(df$group, levels = group_names)
-  df <- na.omit(df)
+
+  df <- df[df$group %in% group_names, ]
+  nonSNP_rows <- which(df$group != "SNP")
+  df$context <- df$group
+  df$context[nonSNP_rows] <- sapply(strsplit(df$group[nonSNP_rows], "[|]"), "[[", 1)
+  df$type <- df$group
+  df$type[nonSNP_rows] <- sapply(strsplit(df$group[nonSNP_rows], "[|]"), "[[", 2)
+
+  context_names <- c(unique(sapply(strsplit(nonSNP_group_names, "[|]"), "[[", 1)), "SNP")
+  type_names <- c(unique(sapply(strsplit(nonSNP_group_names, "[|]"), "[[", 2)), "SNP")
+
+  if (group_prior_var_structure == "shared_all"){
+    df$group <- "shared"
+  } else if (group_prior_var_structure == "shared_type"){
+    df$group <- factor(df$type, levels = type_names)
+  } else if (group_prior_var_structure == "shared_context"){
+    df$group <- factor(df$context, levels = context_names)
+  } else if (group_prior_var_structure == "shared_nonSNP"){
+    df$group[df$group != "SNP"] <- "non-SNP"
+    df$group <- factor(df$group, levels = c("non-SNP", "SNP"))
+  } else if (group_prior_var_structure == "independent"){
+    df$group <- factor(df$group, levels = group_names)
+  }
+
+  df <- df[complete.cases(df), ,drop = FALSE]
 
   p_sigma2 <- ggplot(df, aes(x=.data$niter, y=.data$value, group=.data$group, color=.data$group)) +
     geom_line() +
@@ -654,8 +679,11 @@ make_convergence_plots <- function(param,
   df <- data.frame(niter = rep(1:ncol(enrichment_iters), nrow(enrichment_iters)),
                    value = unlist(lapply(1:nrow(enrichment_iters), function(x){enrichment_iters[x,]})),
                    group = rep(rownames(enrichment_iters), each=ncol(enrichment_iters)))
-  df$group <- factor(df$group, levels = group_names[group_names!="SNP"])
-  df <- na.omit(df)
+
+  df <- df[df$group %in% group_names, ]
+
+  df$group <- factor(df$group, levels = nonSNP_group_names)
+  df <- df[complete.cases(df), ,drop = FALSE]
 
   p_enrich <- ggplot(df, aes(x=.data$niter, y=.data$value, group=.data$group, color=.data$group)) +
     geom_line() +
@@ -681,7 +709,7 @@ make_convergence_plots <- function(param,
                    value = unlist(lapply(1:nrow(group_pve_iters), function(x){group_pve_iters[x,]})),
                    group = rep(rownames(group_pve_iters), each=ncol(group_pve_iters)))
   df$group <- factor(df$group, levels = group_names)
-  df <- na.omit(df)
+  df <- df[complete.cases(df), ,drop = FALSE]
 
   p_pve <- ggplot(df, aes(x=.data$niter, y=.data$value, group=.data$group, color=.data$group)) +
     geom_line() +
@@ -715,7 +743,6 @@ make_convergence_plots <- function(param,
         theme(legend.title = element_text(size=legend.size, face="bold"),
               legend.text = element_text(size=legend.size),
               plot.margin = margin(b=10, l=10, t=10, r=10))
-
     }
   }
 
@@ -726,4 +753,3 @@ make_convergence_plots <- function(param,
   }
 
 }
-
