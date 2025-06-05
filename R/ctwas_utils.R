@@ -337,7 +337,7 @@ check_n_snps <- function(snp_map, z_snp, weights){
     stop("Error: all SNPs (from z_snp) are in weights! ")
 
   if (frac_snps_in_weights > 0.5)
-    logwarn("More than 50% SNPs (from z_snp) are in weights!")
+    logwarn("%.2f%% SNPs (from z_snp) are in weights!", frac_snps_in_weights*100)
 
 }
 
