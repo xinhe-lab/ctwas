@@ -693,22 +693,3 @@ get_predictdb_genome_build <- function(weight_file){
 
   return(varID_genomebuild)
 }
-
-#' @title Counts the number of SNPs in z_snp and weights
-#'
-#' @param z_snp A data frame with columns: "id", "z", giving the z-scores for SNPs.
-#'
-#' @param weights a list of preprocessed weights.
-#'
-#' @return number of SNPs in z_snp and weights
-#'
-#' @export
-count_z_snp_weights <- function(z_snp, weights){
-  z_snp_ids <- unique(z_snp$id)
-  weight_snp_ids <- unique(unlist(lapply(weights, function(x){rownames(x[["wgt"]])})))
-  snps_not_in_weights <- setdiff(z_snp_ids, weight_snp_ids)
-
-  return(list("n_snps_z" = length(z_snp_ids),
-              "n_snps_weights" = length(weight_snp_ids),
-              "N_snps_not_in_weights" = length(snps_not_in_weights)))
-}

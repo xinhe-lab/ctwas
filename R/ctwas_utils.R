@@ -255,27 +255,6 @@ read_var_info <- function(var_info_file){
 }
 
 
-# run mclapply and check to see if NULL was found in mclapply output.
-#' @importFrom parallel mclapply
-#' @importFrom logging logwarn
-mclapply_check <- function(X, FUN, mc.cores = 1, stop_if_missing = FALSE){
-  if (length(X) <= 1 || mc.cores == 1) {
-    res <- lapply(X, FUN)
-  } else {
-    res <- mclapply(X, FUN, mc.cores = mc.cores)
-    if (any(sapply(res, is.null))) {
-      msg <- paste("'NULL' found in mclapply output. Results may be incomplete!",
-                   "Try more memory or ncore = 1.")
-      if (stop_if_missing) {
-        stop(msg)
-      } else {
-        logwarn(msg)
-      }
-    }
-  }
-  return(res)
-}
-
 #' @title Convert variant IDs from Open GWAS format or PredictDB weight format
 # to UKB reference variant format.
 #'
@@ -300,3 +279,86 @@ convert_to_ukb_varIDs <- function(varIDs){
   return(new_varIDs)
 }
 
+
+#' @title Check the numbers of SNPs in snp_map, z_snp and weights
+#'
+#' @param snp_map a list of data frames with SNP-to-region map for the reference.
+#'
+#' @param z_snp A data frame with columns: "id", "z", giving the z-scores for SNPs.
+#'
+#' @param weights a list of pre-processed prediction weights.
+#'
+#' @export
+check_n_snps <- function(snp_map, z_snp, weights){
+
+  if (!inherits(snp_map,"list"))
+    stop("'snp_map' should be a list.")
+
+  if (anyNA(z_snp))
+    stop("z_snp contains missing values!")
+
+  if (!inherits(weights,"list"))
+    stop("'weights' should be a list object.")
+
+  if (any(sapply(weights, is.null)))
+    stop("weights contain NULL, remove empty weights!")
+
+  # count the number of SNPs in snp_map
+  # combine snp_map into a data frame of snp_info
+  snp_info <- as.data.frame(rbindlist(snp_map, idcol = "region_id"))
+  n_snps_snp_map <- length(unique(snp_info$id))
+  loginfo("Number of SNPs in snp_map = %d.", n_snps_snp_map)
+
+  # count the number of SNPs in z_snp
+  n_snps_z_snp <- length(unique(z_snp$id))
+  loginfo("Number of SNPs in z_snp = %d.", n_snps_z_snp)
+
+  # count the number of SNPs in weights
+
+  # get gene info from weights
+  gene_info <- get_gene_info(weights)
+
+  n_wgt <- sapply(weights, "[[", "n_wgt")
+  loginfo("Average number of SNPs in weights per gene = %.1f", mean(n_wgt))
+
+  # count by chromosome, avoid memory issues when there are too many SNPs in weights
+  n_snps_weights <- 0
+  for(chrom in unique(gene_info$chrom)){
+    tmp_gids <- gene_info[gene_info$chrom == chrom, "id"]
+    tmp_weights <- weights[tmp_gids]
+    n_snps_tmp_weights <- length(unique(unlist(lapply(tmp_weights, function(x){rownames(x[["wgt"]])}))))
+    n_snps_weights <- n_snps_weights + n_snps_tmp_weights
+  }
+  loginfo("Total number of SNPs in weights = %d.", n_snps_weights)
+
+  frac_snps_in_weights <- n_snps_weights/n_snps_z_snp
+
+  if (frac_snps_in_weights == 1)
+    stop("Error: all SNPs (from z_snp) are in weights! ")
+
+  if (frac_snps_in_weights > 0.5)
+    logwarn("More than 50% SNPs (from z_snp) are in weights!")
+
+}
+
+
+# run mclapply and check to see if NULL was found in mclapply output.
+#' @importFrom parallel mclapply
+#' @importFrom logging logwarn
+mclapply_check <- function(X, FUN, mc.cores = 1, stop_if_missing = FALSE){
+  if (length(X) <= 1 || mc.cores == 1) {
+    res <- lapply(X, FUN)
+  } else {
+    res <- mclapply(X, FUN, mc.cores = mc.cores)
+    if (any(sapply(res, is.null))) {
+      msg <- paste("'NULL' found in mclapply output. Results may be incomplete!",
+                   "Try more memory or ncore = 1.")
+      if (stop_if_missing) {
+        stop(msg)
+      } else {
+        logwarn(msg)
+      }
+    }
+  }
+  return(res)
+}

@@ -84,8 +84,6 @@ assemble_region_data <- function(region_info,
   if (!inherits(snp_map,"list"))
     stop("'snp_map' should be a list object.")
 
-  snp_info <- as.data.frame(rbindlist(snp_map, idcol = "region_id"))
-
   # begin assembling region_data
   region_ids <- region_info$region_id
   loginfo("Assembling region_data...")
@@ -93,6 +91,12 @@ assemble_region_data <- function(region_info,
   loginfo("thin = %s", thin)
 
   region_info <- region_info[order(region_info$chrom, region_info$start),]
+
+  # check the number of SNPs in snp_map, z_snp and weights
+  check_n_snps(snp_map, z_snp, weights)
+
+  # combine snp_map into a data frame of snp_info
+  snp_info <- as.data.frame(rbindlist(snp_map, idcol = "region_id"))
 
   # get gene info from weights
   gene_info <- get_gene_info(weights)
@@ -155,8 +159,8 @@ assemble_region_data <- function(region_info,
   region_data <- trim_region_data(region_data, z_snp, trim_by = trim_by,
                                   maxSNP = maxSNP, seed = seed)
 
-  # add z-scores to region_data
-  loginfo("Adding region z-scores...")
+  # fill in z-scores to region_data
+  loginfo("Updating region z-scores...")
   region_data <- update_region_z(region_data, z_snp, z_gene, ncore = ncore)
 
   return(list("region_data" = region_data,
@@ -332,7 +336,6 @@ update_region_z <- function(region_data,
       gid <- intersect(gid, region_z_df$id)
       regiondata[["gid"]] <- gid
       region_z_gene <- region_z_df[match(gid, region_z_df$id), ]
-      region_z_gene <- region_z_gene[complete.cases(region_z_gene),]
       regiondata[["z_gene"]] <- region_z_gene
       rownames(regiondata[["z_gene"]]) <- NULL
     }
@@ -342,7 +345,6 @@ update_region_z <- function(region_data,
       sid <- intersect(sid, region_z_df$id)
       regiondata[["sid"]] <- sid
       region_z_snp <- region_z_df[match(sid, region_z_df$id), ]
-      region_z_snp <- region_z_snp[complete.cases(region_z_snp),]
       regiondata[["z_snp"]] <- region_z_snp
       rownames(regiondata[["z_snp"]]) <- NULL
     }

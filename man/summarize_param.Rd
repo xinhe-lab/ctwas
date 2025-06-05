@@ -8,8 +8,7 @@ summarize_param(
   param,
   gwas_n,
   enrichment_test = c("fisher", "G", "z"),
-  alternative = c("greater", "two.sided", "less"),
-  include_test_result = FALSE
+  alternative = c("greater", "two.sided", "less")
 )
 }
 \arguments{
@@ -24,8 +23,6 @@ summarize_param(
 \item{alternative}{indicates the alternative hypothesis and
 must be one of "greater", "two.sided", or "less".
 Only used when \code{enrichment_test} is "fisher" or "z".}
-
-\item{include_test_result}{If TRUE, return the original test result.}
 }
 \value{
 a list of summarized parameters

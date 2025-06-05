@@ -152,17 +152,6 @@ ctwas_sumstats_noLD <- function(
 
   loginfo("ncore = %d", ncore)
 
-  # check the number of SNPs in z_snp and weights
-  count_snp_res <- count_z_snp_weights(z_snp, weights)
-  loginfo("%d SNPs in z_snp", count_snp_res$n_snps_z)
-  loginfo("%d SNPs in weights", count_snp_res$n_snps_weights)
-
-  if (count_snp_res$n_snps_weights == 0)
-    stop("Please check z_snp! No SNPs in z_snp outside weights! ")
-
-  if (count_snp_res$N_snps_not_in_weights < count_snp_res$n_snps_weights)
-    logwarn("SNPs outside weights are less than SNPs in weights!")
-
   # Compute gene z-scores
   if (is.null(z_gene)) {
     z_gene <- compute_gene_z(z_snp, weights, ncore = ncore)
