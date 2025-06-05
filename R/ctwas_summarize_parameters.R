@@ -12,8 +12,6 @@
 #' must be one of "greater", "two.sided", or "less".
 #' Only used when \code{enrichment_test} is "fisher" or "z".
 #'
-#' @param include_test_result If TRUE, return the original test result.
-#'
 #' @return a list of summarized parameters
 #'
 #' @export
@@ -21,8 +19,7 @@
 summarize_param <- function(param,
                             gwas_n,
                             enrichment_test = c("fisher","G", "z"),
-                            alternative = c("greater","two.sided","less"),
-                            include_test_result = FALSE){
+                            alternative = c("greater","two.sided","less")){
 
   enrichment_test <- match.arg(enrichment_test)
   alternative <- match.arg(alternative)
@@ -41,12 +38,10 @@ summarize_param <- function(param,
   enrichment_res <- compute_enrichment_test(group_prior = group_prior,
                                             group_size = group_size,
                                             enrichment_test = enrichment_test,
-                                            alternative = alternative,
-                                            include_test_result = include_test_result)
+                                            alternative = alternative)
   log_enrichment <- enrichment_res$log_enrichment
   log_enrichment_se <- enrichment_res$se
   enrichment_pval <- enrichment_res$p.value
-  enrichment_test_res <- enrichment_res$test_res
 
   # estimated group PVE
   group_pve <- group_prior_var*group_prior*group_size/gwas_n
@@ -63,7 +58,6 @@ summarize_param <- function(param,
               "log_enrichment" = log_enrichment,
               "log_enrichment_se" = log_enrichment_se,
               "enrichment_pval" = enrichment_pval,
-              "enrichment_test_res" = enrichment_test_res,
               "group_pve" = group_pve,
               "total_pve" = total_pve,
               "prop_heritability" = prop_heritability))

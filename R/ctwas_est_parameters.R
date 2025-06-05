@@ -117,7 +117,7 @@ est_param <- function(
   if (min_var > 0) {
     min_var_region_ids <- region_ids[(n_sids + n_gids) < min_var]
     if (length(min_var_region_ids) > 0){
-      loginfo("Skip %d regions with number of variables < %d.", length(min_var_region_ids), min_var)
+      loginfo("Skip %d regions with < %d variables.", length(min_var_region_ids), min_var)
       skipped_region_ids <- c(skipped_region_ids, min_var_region_ids)
     }
   }
@@ -126,7 +126,7 @@ est_param <- function(
   if (min_gene > 0) {
     min_gene_region_ids <- region_ids[n_gids < min_gene]
     if (length(min_gene_region_ids) > 0){
-      loginfo("Skip %d regions with number of genes < %d.", length(min_gene_region_ids), min_gene)
+      loginfo("Skip %d regions with < %d genes.", length(min_gene_region_ids), min_gene)
       skipped_region_ids <- c(skipped_region_ids, min_gene_region_ids)
     }
   }
@@ -226,14 +226,12 @@ est_param <- function(
   loginfo("Estimated group_prior_var {%s}: {%s}", names(group_prior_var), format(group_prior_var, digits = 4))
   loginfo("group_size {%s}: {%s}", names(group_size), group_size)
 
-  return(list("group_prior" = group_prior,
+  return(list("group_size" = group_size,
+              "group_prior" = group_prior,
               "group_prior_var" = group_prior_var,
               "group_prior_iters" = group_prior_iters,
               "group_prior_var_iters" = group_prior_var_iters,
-              "group_prior_var_structure" = group_prior_var_structure,
-              "group_size" = group_size,
-              "EM_group_size" = EM_group_size,
-              "p_single_effect" = p_single_effect_df,
               "loglik_iters" = EM_res$loglik_iters,
+              "group_prior_var_structure" = group_prior_var_structure,
               "converged" = EM_res$converged))
 }
