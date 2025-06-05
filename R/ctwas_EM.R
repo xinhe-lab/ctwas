@@ -197,8 +197,11 @@ fit_EM <- function(
   group_size <- as.numeric(group_size)
   names(group_size) <- groups
 
-  loglik_iters = loglik_iters[2:(niter+1)] # Remove first (-Inf) entry, and trailing NAs.
+  loglik_iters <- loglik_iters[2:(niter+1)] # Remove first (-Inf) entry, and trailing NAs.
   names(loglik_iters) <- paste0("iter", 1:length(loglik_iters))
+
+  group_prior_iters <- group_prior_iters[, 1:niter] # Remove trailing NAs.
+  group_prior_var_iters <- group_prior_var_iters[, 1:niter] # Remove trailing NAs.
 
   if (!converged) {
     if (warn_converge_fail) {
