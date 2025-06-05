@@ -84,7 +84,7 @@ screen_regions <- function(region_data,
   if (min_var > 0) {
     min_var_region_ids <- region_ids[(n_sids + n_gids) < min_var]
     if (length(min_var_region_ids) > 0){
-      loginfo("Skip %d regions with number of variables < %d.", length(min_var_region_ids), min_var)
+      loginfo("Skip %d regions with < %d variables.", length(min_var_region_ids), min_var)
       skipped_region_ids <- c(skipped_region_ids, min_var_region_ids)
     }
   }
@@ -93,7 +93,7 @@ screen_regions <- function(region_data,
   if (min_gene > 0) {
     min_gene_region_ids <- region_ids[n_gids < min_gene]
     if (length(min_gene_region_ids) > 0){
-      loginfo("Skip %d regions with number of genes < %d.", length(min_gene_region_ids), min_gene)
+      loginfo("Skip %d regions with < %d genes.", length(min_gene_region_ids), min_gene)
       skipped_region_ids <- c(skipped_region_ids, min_gene_region_ids)
     }
   }
