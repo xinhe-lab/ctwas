@@ -17,7 +17,6 @@ test_that("assemble_region_data works", {
                                 weights,
                                 snp_map,
                                 thin = 0.1,
-                                thin_by = "ref",
                                 maxSNP = 20000,
                                 min_group_size = 100)
   })

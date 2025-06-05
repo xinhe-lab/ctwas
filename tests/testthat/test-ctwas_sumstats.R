@@ -27,7 +27,6 @@ test_that("ctwas_sumstats works", {
 
   # saveRDS(ctwas_res, "inst/extdata/sample_data/LDL_example.ctwas_sumstats_res.RDS")
 
-  # expect_equal(ctwas_res, expected_ctwas_res)
   expect_equal(ctwas_res$z_gene, expected_ctwas_res$z_gene)
   expect_equal(ctwas_res$region_data, expected_ctwas_res$region_data)
   expect_equal(ctwas_res$boundary_genes, expected_ctwas_res$boundary_genes)
