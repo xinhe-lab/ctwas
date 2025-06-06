@@ -93,7 +93,7 @@ assemble_region_data <- function(region_info,
   region_info <- region_info[order(region_info$chrom, region_info$start),]
 
   # check the number of SNPs in snp_map, z_snp and weights
-  check_n_snps(snp_map, z_snp, weights)
+  count_n_snp_res <- count_n_snps(snp_map, z_snp, weights)
 
   # combine snp_map into a data frame of snp_info
   snp_info <- as.data.frame(rbindlist(snp_map, idcol = "region_id"))
@@ -189,8 +189,7 @@ assign_region_data <- function(region_info,
       thin_idx <- which(snp_info$keep == 1)
     }
     snp_info$thin_tag <- 0
-    nkept <- round(length(thin_idx) * thin)
-    snp_info$thin_tag[sample(thin_idx, nkept)] <- 1
+    snp_info$thin_tag[sample(thin_idx, round(length(thin_idx) * thin))] <- 1
   } else {
     snp_info$thin_tag <- 1
   }

@@ -280,7 +280,7 @@ convert_to_ukb_varIDs <- function(varIDs){
 }
 
 
-#' @title Check the numbers of SNPs in snp_map, z_snp and weights
+#' @title Count the numbers of SNPs in snp_map, z_snp and weights
 #'
 #' @param snp_map a list of data frames with SNP-to-region map for the reference.
 #'
@@ -288,8 +288,10 @@ convert_to_ukb_varIDs <- function(varIDs){
 #'
 #' @param weights a list of pre-processed prediction weights.
 #'
+#' @return a list of numbers of SNPs in snp_map, z_snp and weights
+#'
 #' @export
-check_n_snps <- function(snp_map, z_snp, weights){
+count_n_snps <- function(snp_map, z_snp, weights){
 
   if (!inherits(snp_map,"list"))
     stop("'snp_map' should be a list.")
@@ -314,20 +316,16 @@ check_n_snps <- function(snp_map, z_snp, weights){
   loginfo("Number of SNPs in z_snp = %d.", n_snps_z_snp)
 
   # count the number of SNPs in weights
-
-  # get gene info from weights
-  gene_info <- get_gene_info(weights)
-
   n_wgt <- sapply(weights, "[[", "n_wgt")
   loginfo("Average number of SNPs in weights per gene = %.1f", mean(n_wgt))
 
   # count by chromosome, avoid memory issues when there are too many SNPs in weights
+  wgt_chrs <- sapply(weights, "[[", "chrom")
   n_snps_weights <- 0
-  for(chrom in unique(gene_info$chrom)){
-    tmp_gids <- gene_info[gene_info$chrom == chrom, "id"]
-    tmp_weights <- weights[tmp_gids]
-    n_snps_tmp_weights <- length(unique(unlist(lapply(tmp_weights, function(x){rownames(x[["wgt"]])}))))
-    n_snps_weights <- n_snps_weights + n_snps_tmp_weights
+  for(chr in unique(wgt_chrs)){
+    weights_chr <- weights[which(wgt_chrs == chr)]
+    n_snps_weights_chr <- length(unique(unlist(lapply(weights_chr, function(x){rownames(x[["wgt"]])}))))
+    n_snps_weights <- n_snps_weights + n_snps_weights_chr
   }
   loginfo("Total number of SNPs in weights = %d.", n_snps_weights)
 
@@ -336,9 +334,15 @@ check_n_snps <- function(snp_map, z_snp, weights){
   if (frac_snps_in_weights == 1)
     stop("Error: all SNPs (from z_snp) are in weights! ")
 
-  if (frac_snps_in_weights > 0.5)
+  if (frac_snps_in_weights > 0.5){
     logwarn("%.2f%% SNPs (from z_snp) are in weights!", frac_snps_in_weights*100)
+  } else {
+    loginfo("%.2f%% SNPs (from z_snp) are in weights.", frac_snps_in_weights*100)
+  }
 
+  return(list("n_snps_snp_map" = n_snps_snp_map,
+              "n_snps_z_snp" = n_snps_z_snp,
+              "n_snps_weights" = n_snps_weights))
 }
 
 
