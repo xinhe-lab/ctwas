@@ -45,8 +45,8 @@
 #'
 #' @param fusion_genome_version a string, specifying the genome version of FUSION models
 #'
-#' @param top_n_snps a number, specifying the top n SNPs included in weight models.
-#' By default, use all SNPs in weights.
+#' @param top_n_snps a number, only keeping the top n SNPs included in weight models.
+#' By default, keep all SNPs in weights.
 #'
 #' @param LD_format file format for LD matrix. If "custom", use a user defined
 #' \code{LD_loader_fun()} function to load LD matrix.
@@ -210,18 +210,18 @@ preprocess_weights <- function(weight_file,
     loginfo("Compute LD for variants in weights (R_wgt) using PredictDB LD...")
   }
   weights <- mclapply_check(weight_molecular_ids, function(molecular_id){
-    process_weight(molecular_id,
-                   type = type,
-                   context = context,
-                   weight_name = weight_name,
-                   weight_table = weight_table,
-                   cov_table = cov_table,
-                   snp_info = snp_info,
-                   weight_format = weight_format,
-                   top_n_snps = top_n_snps,
-                   drop_strand_ambig = drop_strand_ambig,
-                   scale_predictdb_weights = scale_predictdb_weights,
-                   verbose = verbose)
+    process_weights(molecular_id,
+                    type = type,
+                    context = context,
+                    weight_name = weight_name,
+                    weight_table = weight_table,
+                    cov_table = cov_table,
+                    snp_info = snp_info,
+                    weight_format = weight_format,
+                    top_n_snps = top_n_snps,
+                    drop_strand_ambig = drop_strand_ambig,
+                    scale_predictdb_weights = scale_predictdb_weights,
+                    verbose = verbose)
   }, mc.cores = ncore)
   names(weights) <- paste0(weight_molecular_ids, "|", weight_name)
 
@@ -253,18 +253,18 @@ preprocess_weights <- function(weight_file,
 #' @importFrom stats complete.cases
 #' @importFrom utils head
 #' @importFrom logging loginfo logwarn
-process_weight <- function(molecular_id,
-                           type,
-                           context,
-                           weight_name,
-                           weight_table,
-                           cov_table,
-                           snp_info,
-                           weight_format = c("PredictDB", "FUSION"),
-                           top_n_snps = NULL,
-                           drop_strand_ambig = TRUE,
-                           scale_predictdb_weights = TRUE,
-                           verbose = FALSE) {
+process_weights <- function(molecular_id,
+                            type,
+                            context,
+                            weight_name,
+                            weight_table,
+                            cov_table,
+                            snp_info,
+                            weight_format = c("PredictDB", "FUSION"),
+                            top_n_snps = NULL,
+                            drop_strand_ambig = TRUE,
+                            scale_predictdb_weights = TRUE,
+                            verbose = FALSE) {
 
   if (weight_format == "FUSION") {
     scale_predictdb_weights <- FALSE
@@ -347,8 +347,8 @@ process_weight <- function(molecular_id,
       }
       g.cov_table <- cov_table[cov_table$GENE == molecular_id,]
       R_wgt <- get_weight_LD_from_predictdb(g.cov_table,
-                                        g.weight_table,
-                                        convert_cov_to_cor = TRUE)
+                                            g.weight_table,
+                                            convert_cov_to_cor = TRUE)
       R_wgt <- R_wgt[wgt.snp_ids, wgt.snp_ids, drop=FALSE]
     } else{
       R_wgt <- NULL
