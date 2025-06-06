@@ -693,3 +693,124 @@ get_predictdb_genome_build <- function(weight_file){
 
   return(varID_genomebuild)
 }
+
+
+#' Trim weights by keeping top number of SNPs and/or filtering by minimum absolute weights.
+#'
+#' @param weights a list of pre-processed prediction weights.
+#'
+#' @param snp_map a list of data frames with SNP-to-region map for the reference.
+#'
+#' @param top_n_snps an integer, only keeping the top n SNPs included in weight models.
+#' By default, keep all SNPs in weights.
+#'
+#' @param min_abs_weight a numeric value, only keeping the SNPs with abs(weight) > code{min_abs_weight}.
+#' By default, keep all SNPs with abs(weight) > 0.
+#'
+#' @param ncore The number of cores used to parallelize computation.
+#'
+#' @return Trimmed weights
+#'
+#' @export
+trim_weights <- function(weights,
+                          snp_map,
+                          top_n_snps = NULL,
+                          min_abs_weight = 0,
+                          ncore = 1){
+
+  if (!inherits(snp_map,"list"))
+    stop("'snp_map' should be a list.")
+
+  if (!inherits(weights,"list"))
+    stop("'weights' should be a list.")
+
+  if (any(sapply(weights, is.null)))
+    stop("weights contain NULL, remove empty weights!")
+
+  n_wgt_all <- sapply(weights, "[[", "n_wgt")
+  min_abs_weight_all <- sapply(weights, function(x){min(abs(x$wgt[,"weight"]))})
+
+  trim_idx <- NULL
+  # select weights needed to be trimed by top_n_snps
+  if (!is.null(top_n_snps)){
+    trim_idx <- which(n_wgt_all > top_n_snps)
+    if (length(trim_idx) > 0){
+      loginfo("%d genes with more than %d SNPs in weights.", length(trim_idx), top_n_snps)
+    }
+  }
+
+  # select weights needed to be trimed by min_abs_weight
+  if (!is.null(min_abs_weight)){
+    trim2_idx <- which(min_abs_weight_all <= min_abs_weight)
+    if (length(trim2_idx) > 0){
+      loginfo("%d genes with abs(weight) less or equal to %s.", length(trim2_idx), min_abs_weight)
+    }
+    trim_idx <- union(trim_idx, trim2_idx)
+  }
+
+  if (length(trim_idx) == 0){
+    loginfo("No need to trim weights.")
+  } else {
+
+    # browser()
+    loginfo("%d weights in total.", length(weights))
+    loginfo("Trimming %d weights...", length(trim_idx))
+    trim_weight_names <- names(weights)[trim_idx]
+
+    snp_info <- as.data.frame(rbindlist(snp_map, idcol = "region_id"))
+
+    trimmed_weights <- mclapply_check(trim_weight_names, function(x){
+      tmp_weights <- weights[[x]]
+      wgt <- tmp_weights$wgt
+      R_wgt <- tmp_weights$R_wgt
+      wgt.snp_ids <- rownames(wgt)
+      wgt.snpinfo <- snp_info[snp_info$id %in% wgt.snp_ids, , drop=FALSE]
+
+      keep.idx <- 1:length(wgt.snp_ids)
+
+      # keep top n SNPs
+      if (!is.null(top_n_snps)){
+        keep.idx <- head(order(-abs(wgt[,"weight"])), top_n_snps)
+      }
+
+      # keep SNPs with abs(weight) > min_abs_weight
+      if (!is.null(min_abs_weight)){
+        keep2.idx <- which(abs(wgt[,"weight"]) > min_abs_weight)
+        keep.idx <- intersect(keep.idx, keep2.idx)
+      }
+
+      if (length(keep.idx) == 0){
+        tmp_weights$p0 <- NA
+        tmp_weights$p1 <- NA
+        tmp_weights$wgt <- NULL
+        tmp_weights$R_wgt <- NULL
+        tmp_weights$n_wgt <- 0
+      } else if (length(keep.idx) < length(wgt.snp_ids)){
+        keep.wgt.snp_ids <- wgt.snp_ids[keep.idx]
+        tmp_weights$wgt <- wgt[keep.wgt.snp_ids, , drop=FALSE]
+        tmp_weights$n_wgt <- length(keep.wgt.snp_ids)
+        keep.wgt.snp_pos <- as.integer(wgt.snpinfo$pos[match(keep.wgt.snp_ids, wgt.snpinfo$id)])
+        tmp_weights$p0 <- min(keep.wgt.snp_pos, na.rm = TRUE)
+        tmp_weights$p1 <- max(keep.wgt.snp_pos, na.rm = TRUE)
+        if (!is.null(R_wgt)) {
+          tmp_weights$R_wgt <- R_wgt[keep.wgt.snp_ids, keep.wgt.snp_ids]
+        }
+      }
+      tmp_weights
+    }, mc.cores = ncore)
+
+    weights[trim_weight_names] <- trimmed_weights
+    n_wgt_all <- sapply(weights, "[[", "n_wgt")
+
+    empty_wgt_idx <- which(n_wgt_all == 0)
+    if (length(empty_wgt_idx) > 0) {
+      loginfo("Remove %d empty weights.", length(empty_wgt_idx))
+      weights[empty_wgt_idx] <- NULL
+    }
+
+    loginfo("%d weights left after trimming.", length(weights))
+
+  }
+
+  return(weights)
+}
