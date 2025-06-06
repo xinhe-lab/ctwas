@@ -76,8 +76,8 @@ when using precomputed gene Z-scores.}
 
 \item{fusion_genome_version}{a string, specifying the genome version of FUSION models}
 
-\item{top_n_snps}{a number, specifying the top n SNPs included in weight models.
-By default, use all SNPs in weights.}
+\item{top_n_snps}{a number, only keeping the top n SNPs included in weight models.
+By default, keep all SNPs in weights.}
 
 \item{LD_format}{file format for LD matrix. If "custom", use a user defined
 \code{LD_loader_fun()} function to load LD matrix.}
