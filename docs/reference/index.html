@@ -17,7 +17,7 @@
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">ctwas</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">0.5.22</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">0.5.25</span>
       </span>
     </div>
 
@@ -139,9 +139,9 @@ saves LD matrices as .RDS files and SNP info as .Rvar files</p></td>
         </td>
         <td><p>Convert variant IDs from Open GWAS format or PredictDB weight format</p></td>
       </tr><tr><td>
-          <p><code><a href="count_z_snp_weights.html">count_z_snp_weights()</a></code> </p>
+          <p><code><a href="count_n_snps.html">count_n_snps()</a></code> </p>
         </td>
-        <td><p>Counts the number of SNPs in z_snp and weights</p></td>
+        <td><p>Count the numbers of SNPs in snp_map, z_snp and weights</p></td>
       </tr><tr><td>
           <p><code><a href="create_predictdb_from_QTLs.html">create_predictdb_from_QTLs()</a></code> </p>
         </td>
@@ -290,6 +290,10 @@ saves LD matrices as .RDS files and SNP info as .Rvar files</p></td>
           <p><code><a href="summarize_region_signals.html">summarize_region_signals()</a></code> </p>
         </td>
         <td><p>Gets a basic summary of region signals</p></td>
+      </tr><tr><td>
+          <p><code><a href="trim_weights.html">trim_weights()</a></code> </p>
+        </td>
+        <td><p>Trim weights by keeping top number of SNPs and/or filtering by minimum absolute weights.</p></td>
       </tr><tr><td>
           <p><code><a href="update_finemap_res.html">update_finemap_res()</a></code> </p>
         </td>

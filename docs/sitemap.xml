@@ -82,6 +82,9 @@
     <loc>/reference/convert_to_ukb_varIDs.html</loc>
   </url>
   <url>
+    <loc>/reference/count_n_snps.html</loc>
+  </url>
+  <url>
     <loc>/reference/count_z_snp_weights.html</loc>
   </url>
   <url>
@@ -242,6 +245,9 @@
   </url>
   <url>
     <loc>/reference/susie_rss.html</loc>
+  </url>
+  <url>
+    <loc>/reference/trim_weights.html</loc>
   </url>
   <url>
     <loc>/reference/update_finemap_res.html</loc>

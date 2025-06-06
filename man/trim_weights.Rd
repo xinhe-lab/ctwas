@@ -20,7 +20,7 @@ trim_weights(
 \item{top_n_snps}{an integer, only keeping the top n SNPs included in weight models.
 By default, keep all SNPs in weights.}
 
-\item{min_abs_weight}{a numeric value, only keeping the SNPs with abs(weight) > code{min_abs_weight}.
+\item{min_abs_weight}{a numeric value, only keeping the SNPs with abs(weight) > \code{min_abs_weight}.
 By default, keep all SNPs with abs(weight) > 0.}
 
 \item{ncore}{The number of cores used to parallelize computation.}
