@@ -4,16 +4,12 @@
 \alias{subset_weights}
 \title{Get a subset of weights, by group, context or type.}
 \usage{
-subset_weights(
-  weights,
-  selected_names,
-  select_by = c("group", "context", "type")
-)
+subset_weights(weights, names, select_by = c("group", "context", "type"))
 }
 \arguments{
 \item{weights}{a list of pre-processed prediction weights.}
 
-\item{selected_names}{names of groups, contexts, or types to be selected.}
+\item{names}{names of groups, contexts, or types to be selected.}
 
 \item{select_by}{select weights by group, context, or type.}
 }
