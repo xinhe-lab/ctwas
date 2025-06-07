@@ -59,7 +59,7 @@ adjust region_data.}
 \item{logfile}{path to the log file, if NULL will print log info on screen.}
 }
 \value{
-a list with region_data, updated weights, and cross-bounary genes
+a list with region_data and cross-boundary genes
 }
 \description{
 Assembles data for all the regions

@@ -188,6 +188,10 @@ fit_EM <- function(
         break
       }
     }
+
+    if (iter %% 10 == 0){
+      loginfo("%d iterations done.", iter)
+    }
   }
 
   niter = iter
