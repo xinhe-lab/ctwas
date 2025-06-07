@@ -811,3 +811,42 @@ trim_weights <- function(weights,
 
   return(weights)
 }
+
+
+#' @title Get a subset of weights, by group, context or type.
+#'
+#' @param weights a list of pre-processed prediction weights.
+#'
+#' @param selected_names names of groups, contexts, or types to be selected.
+#'
+#' @param select_by select weights by group, context, or type.
+#'
+#' @return a list of selected weights.
+#'
+#' @export
+subset_weights <- function(weights,
+                           selected_names,
+                           select_by = c("group", "context", "type")){
+
+  select_by <- match.arg(select_by)
+
+  weights_contexts <- sapply(weights, "[[", "context")
+  weights_types <- sapply(weights, "[[", "type")
+  weights_groups <- paste0(weights_contexts,"|",weights_types)
+
+  if (select_by == "group"){
+    selected_idx <- which(weights_groups %in% selected_names)
+  } else if (select_by == "context"){
+    selected_idx <- which(weights_contexts %in% selected_names)
+  } else if (select_by == "type"){
+    selected_idx <- which(weights_types %in% selected_names)
+  }
+
+  if (length(selected_idx) == 0){
+    warning("No weights selected!")
+  }
+
+  weights_subset <- weights[selected_idx]
+
+  return(weights_subset)
+}
