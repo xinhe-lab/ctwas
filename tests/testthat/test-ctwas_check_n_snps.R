@@ -1,4 +1,4 @@
-test_that("count_n_snps works", {
+test_that("check_n_snps works", {
 
   snp_map <- readRDS(system.file("extdata/sample_data", "LDL_example.snp_map.RDS", package = "ctwas"))
   z_snp <- readRDS(system.file("extdata/sample_data", "LDL_example.preprocessed.z_snp.RDS", package = "ctwas"))
@@ -7,10 +7,10 @@ test_that("count_n_snps works", {
   expected_count_n_snp_res <- readRDS("LDL_example.count_n_snp_res.RDS")
 
   capture.output({
-    count_n_snp_res <- count_n_snps(snp_map, z_snp, weights)
+    check_n_snps_res <- check_n_snps(snp_map, z_snp, weights)
   })
 
-  saveRDS(count_n_snp_res, "LDL_example.count_n_snp_res.RDS")
+  # saveRDS(check_n_snps_res, "LDL_example.check_n_snps_res.RDS")
 
-  expect_equal(count_n_snp_res, expected_count_n_snp_res)
+  expect_equal(check_n_snps_res, expected_count_n_snp_res)
 })
