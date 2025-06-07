@@ -36,7 +36,7 @@
 #'
 #' @param logfile path to the log file, if NULL will print log info on screen.
 #'
-#' @return a list with region_data, updated weights, and cross-bounary genes
+#' @return a list with region_data and cross-boundary genes
 #'
 #' @importFrom logging addHandler loginfo logwarn writeToFile
 #' @importFrom data.table rbindlist
@@ -84,6 +84,10 @@ assemble_region_data <- function(region_info,
   if (!inherits(snp_map,"list"))
     stop("'snp_map' should be a list object.")
 
+  if (any(abs(z_gene$z) == Inf)) {
+    stop("z_gene has Inf z-scores!")
+  }
+
   # begin assembling region_data
   region_ids <- region_info$region_id
   loginfo("Assembling region_data...")
@@ -93,7 +97,7 @@ assemble_region_data <- function(region_info,
   region_info <- region_info[order(region_info$chrom, region_info$start),]
 
   # check the number of SNPs in snp_map, z_snp and weights
-  count_n_snp_res <- count_n_snps(snp_map, z_snp, weights)
+  check_n_snps_res <- check_n_snps(snp_map, z_snp, weights)
 
   # combine snp_map into a data frame of snp_info
   snp_info <- as.data.frame(rbindlist(snp_map, idcol = "region_id"))

@@ -280,7 +280,7 @@ convert_to_ukb_varIDs <- function(varIDs){
 }
 
 
-#' @title Count the numbers of SNPs in snp_map, z_snp and weights
+#' @title Check the numbers of SNPs in snp_map, z_snp and weights
 #'
 #' @param snp_map a list of data frames with SNP-to-region map for the reference.
 #'
@@ -291,7 +291,7 @@ convert_to_ukb_varIDs <- function(varIDs){
 #' @return a list of numbers of SNPs in snp_map, z_snp and weights
 #'
 #' @export
-count_n_snps <- function(snp_map, z_snp, weights){
+check_n_snps <- function(snp_map, z_snp, weights){
 
   if (!inherits(snp_map,"list"))
     stop("'snp_map' should be a list.")
@@ -308,26 +308,35 @@ count_n_snps <- function(snp_map, z_snp, weights){
   # count the number of SNPs in snp_map
   # combine snp_map into a data frame of snp_info
   snp_info <- as.data.frame(rbindlist(snp_map, idcol = "region_id"))
-  n_snps_snp_map <- length(unique(snp_info$id))
-  loginfo("Number of SNPs in snp_map = %d.", n_snps_snp_map)
+  n_snps_snp_map <- nrow(snp_info)
+  # n_snps_snp_map <- length(unique(snp_info$id))
+  loginfo("Number of SNPs in snp_map: %d.", n_snps_snp_map)
 
   # count the number of SNPs in z_snp
   n_snps_z_snp <- length(unique(z_snp$id))
-  loginfo("Number of SNPs in z_snp = %d.", n_snps_z_snp)
+  loginfo("Number of SNPs in z_snp: %d.", n_snps_z_snp)
+
+  if (any(!z_snp$id %in% snp_info$id)){
+    stop("Not all SNPs in z_snps are in snp_map!")
+  }
 
   # count the number of SNPs in weights
   n_wgt <- sapply(weights, "[[", "n_wgt")
-  loginfo("Average number of SNPs in weights per gene = %.1f", mean(n_wgt))
+  loginfo("Average number of SNPs in weights per molecular trait: %d", round(mean(n_wgt)))
 
   # count by chromosome, avoid memory issues when there are too many SNPs in weights
   wgt_chrs <- sapply(weights, "[[", "chrom")
   n_snps_weights <- 0
   for(chr in unique(wgt_chrs)){
     weights_chr <- weights[which(wgt_chrs == chr)]
-    n_snps_weights_chr <- length(unique(unlist(lapply(weights_chr, function(x){rownames(x[["wgt"]])}))))
+    snps_in_weights_chr <- unique(unlist(lapply(weights_chr, function(x){rownames(x[["wgt"]])})))
+    if (any(!snps_in_weights_chr %in% z_snp$id)){
+      stop("Not all SNPs in weights are in z_snp!")
+    }
+    n_snps_weights_chr <- length(snps_in_weights_chr)
     n_snps_weights <- n_snps_weights + n_snps_weights_chr
   }
-  loginfo("Total number of SNPs in weights = %d.", n_snps_weights)
+  loginfo("Total number of SNPs in weights: %d.", n_snps_weights)
 
   frac_snps_in_weights <- n_snps_weights/n_snps_z_snp
 

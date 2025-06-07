@@ -63,6 +63,10 @@ compute_gene_z <- function (z_snp,
   z_gene <- do.call("rbind", z_gene)
   rownames(z_gene) <- NULL
 
+  if (any(abs(z_gene$z) == Inf)) {
+    logwarn("z_gene has Inf z-scores! Please check z_snp and weights.")
+  }
+
   return(z_gene)
 }
 
