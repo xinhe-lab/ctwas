@@ -6,7 +6,7 @@ test_that("trim_weights works", {
   expected_trimmed_weights <- readRDS("LDL_example.preprocessed.trimmed.liver.weights.RDS")
 
   capture.output({
-      trimmed_weights <- trim_weights(weights, snp_map, top_n_snps = 2)
+    trimmed_weights <- trim_weights(weights, snp_map, top_n_snps = 2)
   })
 
   # saveRDS(trimmed_weights, "LDL_example.preprocessed.trimmed.liver.weights.RDS")
