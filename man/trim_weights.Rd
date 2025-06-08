@@ -2,11 +2,12 @@
 % Please edit documentation in R/ctwas_weights.R
 \name{trim_weights}
 \alias{trim_weights}
-\title{Trim weights by keeping top number of SNPs and/or filtering by minimum absolute weights.}
+\title{Trim weights and filter SNPs by LD reference and GWAS SNPs.}
 \usage{
 trim_weights(
   weights,
   snp_map,
+  gwas_snp_ids,
   top_n_snps = NULL,
   min_abs_weight = 0,
   ncore = 1
@@ -16,6 +17,8 @@ trim_weights(
 \item{weights}{a list of pre-processed prediction weights.}
 
 \item{snp_map}{a list of data frames with SNP-to-region map for the reference.}
+
+\item{gwas_snp_ids}{a vector of SNP IDs in GWAS summary statistics (z_snp$id).}
 
 \item{top_n_snps}{an integer, only keeping the top n SNPs included in weight models.
 By default, keep all SNPs in weights.}
@@ -29,5 +32,5 @@ By default, keep SNPs with abs(weight) > 0.}
 a list of trimmed weights.
 }
 \description{
-Trim weights by keeping top number of SNPs and/or filtering by minimum absolute weights.
+Trim weights and filter SNPs by LD reference and GWAS SNPs.
 }

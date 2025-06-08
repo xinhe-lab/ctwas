@@ -4,15 +4,17 @@
 \alias{convert_to_ukb_varIDs}
 \title{Convert variant IDs from Open GWAS format or PredictDB weight format}
 \usage{
-convert_to_ukb_varIDs(varIDs)
+convert_to_ukb_varIDs(varIDs, ref_format = "\%s:\%s_\%s_\%s")
 }
 \arguments{
 \item{varIDs}{a vector of variant IDs from Open GWAS format
 ("chr_pos_ref_alt") or PredictDB weight format
 (“chr_pos_ref_alt_build” or “chr:pos_ref_alt_build”)}
+
+\item{ref_format}{variant ID format in the LD reference.}
 }
 \value{
-a vector of variant IDs in the format of "chr:pos_ref_alt"
+a vector of variant IDs in the format of the LD reference.
 }
 \description{
 Convert variant IDs from Open GWAS format or PredictDB weight format
