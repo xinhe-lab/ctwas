@@ -1,4 +1,50 @@
 
+#' @title Read GWAS summary statistics
+#'
+#' @param gwas A data frame of GWAS summary statistics.
+#'
+#' @param id Column name of the variant IDs.
+#'
+#' @param A1 Column name of the alternative alleles.
+#'
+#' @param A2 Column name of the reference alleles.
+#'
+#' @param z Column name of z-scores.
+#'
+#' @param beta Column name of effect sizes.
+#'
+#' @param se Column name of the standard errors.
+#'
+#' @return A data frame of processed GWAS summary statistics.
+#'
+#' @export
+read_gwas <- function(gwas,
+                      id = 'rsid',
+                      A1 = 'ALT',
+                      A2 = 'REF',
+                      z = 'Z',
+                      beta = 'ES',
+                      se = 'SE'){
+
+  # Extract relevant columns
+  z_snp <- data.frame(id = gwas[,id], A1 = gwas[, A1], A2 = gwas[,A2])
+
+  # Convert alleles to upper case
+  z_snp$A1 <- toupper(z_snp$A1)
+  z_snp$A2 <- toupper(z_snp$A2)
+
+  if (z %in% colnames(gwas)){
+    z_snp$z <- gwas[,z]
+  } else {
+    z_snp$z <- gwas[,beta]/gwas[,se]
+    z_snp <- z_snp[!is.na(z_snp$z),]
+  }
+
+  z_snp <- z_snp[,c("id", "A1", "A2", "z")]
+
+  return(z_snp)
+}
+
 #' @title Read a single SNP info file as a data frame
 #'
 #' @param file SNP info file name.
@@ -262,15 +308,18 @@ read_var_info <- function(var_info_file){
 #' ("chr_pos_ref_alt") or PredictDB weight format
 #' (“chr_pos_ref_alt_build” or “chr:pos_ref_alt_build”)
 #'
-#' @return a vector of variant IDs in the format of "chr:pos_ref_alt"
+#' @param ref_format variant ID format in the LD reference.
+#'
+#' @return a vector of variant IDs in the format of the LD reference.
+#'
 #' @export
 #'
-convert_to_ukb_varIDs <- function(varIDs){
+convert_to_ukb_varIDs <- function(varIDs, ref_format = "%s:%s_%s_%s"){
 
   varID_list <- strsplit(varIDs, split = "_|:")
   new_varIDs <- unlist(lapply(varID_list, function(x){
     if (length(x) >= 4) {
-      sprintf("%s:%s_%s_%s", x[1], x[2], x[3], x[4])
+      sprintf(ref_format, x[1], x[2], x[3], x[4])
     } else {
       x
     }
@@ -289,6 +338,9 @@ convert_to_ukb_varIDs <- function(varIDs){
 #' @param weights a list of pre-processed prediction weights.
 #'
 #' @return a list of numbers of SNPs in snp_map, z_snp and weights
+#'
+#' @importFrom logging addHandler loginfo logwarn writeToFile
+#' @importFrom data.table rbindlist
 #'
 #' @export
 check_n_snps <- function(snp_map, z_snp, weights){
@@ -317,7 +369,7 @@ check_n_snps <- function(snp_map, z_snp, weights){
   loginfo("Number of SNPs in z_snp: %d.", n_snps_z_snp)
 
   if (any(!z_snp$id %in% snp_info$id)){
-    stop("Not all SNPs in z_snps are in snp_map!")
+    logwarn("Not all SNPs in z_snps are in snp_map!")
   }
 
   # count the number of SNPs in weights
@@ -325,10 +377,10 @@ check_n_snps <- function(snp_map, z_snp, weights){
   loginfo("Average number of SNPs in weights per molecular trait: %d", round(mean(n_wgt)))
 
   # count by chromosome, avoid memory issues when there are too many SNPs in weights
-  wgt_chrs <- sapply(weights, "[[", "chrom")
+  weights_chrs <- sapply(weights, "[[", "chrom")
   n_snps_weights <- 0
-  for(chr in unique(wgt_chrs)){
-    weights_chr <- weights[which(wgt_chrs == chr)]
+  for(chr in unique(weights_chrs)){
+    weights_chr <- weights[which(weights_chrs == chr)]
     snps_in_weights_chr <- unique(unlist(lapply(weights_chr, function(x){rownames(x[["wgt"]])})))
     if (any(!snps_in_weights_chr %in% z_snp$id)){
       stop("Not all SNPs in weights are in z_snp!")
