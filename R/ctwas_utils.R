@@ -361,15 +361,14 @@ check_n_snps <- function(snp_map, z_snp, weights){
   # combine snp_map into a data frame of snp_info
   snp_info <- as.data.frame(rbindlist(snp_map, idcol = "region_id"))
   n_snps_snp_map <- nrow(snp_info)
-  # n_snps_snp_map <- length(unique(snp_info$id))
-  loginfo("Number of SNPs in snp_map: %d.", n_snps_snp_map)
+  loginfo("Number of SNPs in snp_map: %d", n_snps_snp_map)
 
   # count the number of SNPs in z_snp
-  n_snps_z_snp <- length(unique(z_snp$id))
-  loginfo("Number of SNPs in z_snp: %d.", n_snps_z_snp)
+  n_snps_gwas <- length(unique(z_snp$id))
+  loginfo("Number of SNPs in GWAS (z_snp$id): %d", n_snps_gwas)
 
   if (any(!z_snp$id %in% snp_info$id)){
-    logwarn("Not all SNPs in z_snps are in snp_map!")
+    logwarn("Not all SNPs in GWAS (z_snp$id) are in snp_map!")
   }
 
   # count the number of SNPs in weights
@@ -388,21 +387,21 @@ check_n_snps <- function(snp_map, z_snp, weights){
     n_snps_weights_chr <- length(snps_in_weights_chr)
     n_snps_weights <- n_snps_weights + n_snps_weights_chr
   }
-  loginfo("Total number of SNPs in weights: %d.", n_snps_weights)
+  loginfo("Total number of SNPs in weights: %d", n_snps_weights)
 
-  frac_snps_in_weights <- n_snps_weights/n_snps_z_snp
+  frac_snps_in_weights <- n_snps_weights/n_snps_gwas
 
   if (frac_snps_in_weights == 1)
-    stop("Error: all SNPs (from z_snp) are in weights! ")
+    stop("Error: all GWAS SNPs (z_snp$id) are in weights! ")
 
   if (frac_snps_in_weights > 0.5){
-    logwarn("%.2f%% SNPs (from z_snp) are in weights!", frac_snps_in_weights*100)
+    logwarn("%.2f%% GWAS SNPs (z_snp$id) are in weights!", frac_snps_in_weights*100)
   } else {
-    loginfo("%.2f%% SNPs (from z_snp) are in weights.", frac_snps_in_weights*100)
+    loginfo("%.2f%% GWAS SNPs (z_snp$id) are in weights.", frac_snps_in_weights*100)
   }
 
   return(list("n_snps_snp_map" = n_snps_snp_map,
-              "n_snps_z_snp" = n_snps_z_snp,
+              "n_snps_gwas" = n_snps_gwas,
               "n_snps_weights" = n_snps_weights))
 }
 
