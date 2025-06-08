@@ -695,11 +695,13 @@ get_predictdb_genome_build <- function(weight_file){
 }
 
 
-#' @title Trim weights by keeping top number of SNPs and/or filtering by minimum absolute weights.
+#' @title Trim weights and filter SNPs by LD reference and GWAS SNPs.
 #'
 #' @param weights a list of pre-processed prediction weights.
 #'
 #' @param snp_map a list of data frames with SNP-to-region map for the reference.
+#'
+#' @param gwas_snp_ids a vector of SNP IDs in GWAS summary statistics (z_snp$id).
 #'
 #' @param top_n_snps an integer, only keeping the top n SNPs included in weight models.
 #' By default, keep all SNPs in weights.
@@ -711,9 +713,14 @@ get_predictdb_genome_build <- function(weight_file){
 #'
 #' @return a list of trimmed weights.
 #'
+#' @importFrom logging addHandler loginfo logwarn writeToFile
+#' @importFrom data.table rbindlist
+#' @importFrom parallel mclapply
+#'
 #' @export
 trim_weights <- function(weights,
                          snp_map,
+                         gwas_snp_ids,
                          top_n_snps = NULL,
                          min_abs_weight = 0,
                          ncore = 1){
@@ -727,67 +734,93 @@ trim_weights <- function(weights,
   if (any(sapply(weights, is.null)))
     stop("weights contain NULL, remove empty weights!")
 
+  if (!inherits(gwas_snp_ids,"character")){
+    stop("'gwas_snp_ids' should be a character object.")
+  }
+
+  loginfo("%d weights in total.", length(weights))
+  loginfo("Identifying weights to be trimmed...")
+
+  snp_info <- as.data.frame(rbindlist(snp_map, idcol = "region_id"))
+
+  # keep GWAS SNPs in LD reference
+  if (any(!gwas_snp_ids %in% snp_info$id)){
+    gwas_snp_ids <- intersect(gwas_snp_ids, snp_info$id)
+  }
+
   n_wgt_all <- sapply(weights, "[[", "n_wgt")
   min_abs_weight_all <- sapply(weights, function(x){min(abs(x$wgt[,"weight"]))})
 
   trim_idx <- NULL
-  # select weights needed to be trimed by top_n_snps
+  trim_idx <- mclapply_check(1:length(weights), function(x){
+    wgt.snp_ids <- rownames(weights[[x]]$wgt)
+    if (any(!wgt.snp_ids %in% gwas_snp_ids)){
+      x
+    }
+  }, mc.cores = ncore)
+  trim_idx <- unlist(trim_idx)
+
+  # select weights needed to be trimmed by top_n_snps
   if (!is.null(top_n_snps)){
-    trim_idx <- which(n_wgt_all > top_n_snps)
+    trim_idx <- union(trim_idx, which(n_wgt_all > top_n_snps))
   }
 
-  # select weights needed to be trimed by min_abs_weight
+  # select weights needed to be trimmed by min_abs_weight
   if (!is.null(min_abs_weight)){
-    trim2_idx <- which(min_abs_weight_all <= min_abs_weight)
-    trim_idx <- union(trim_idx, trim2_idx)
+    trim_idx <- union(trim_idx, which(min_abs_weight_all <= min_abs_weight))
   }
 
   if (length(trim_idx) == 0){
-    loginfo("No need to trim weights.")
+    loginfo("No weights needed to trim.")
   } else {
-    loginfo("%d weights in total.", length(weights))
     loginfo("Trimming %d weights...", length(trim_idx))
-
-    snp_info <- as.data.frame(rbindlist(snp_map, idcol = "region_id"))
 
     trimmed_weights <- mclapply_check(trim_idx, function(x){
       tmp_weights <- weights[[x]]
       wgt <- tmp_weights$wgt
+      n_wgt <- tmp_weights$n_wgt
       wgt.snp_ids <- rownames(wgt)
       wgt.snpinfo <- snp_info[snp_info$id %in% wgt.snp_ids, , drop=FALSE]
 
-      keep.idx <- 1:length(wgt.snp_ids)
+      # Find SNPs to keep
+      # keep SNPs in GWAS
+      kept.wgt.snp_ids <- intersect(wgt.snp_ids, gwas_snp_ids)
 
-      # keep top n SNPs
-      if (!is.null(top_n_snps)){
-        keep.idx <- head(order(-abs(wgt[,"weight"])), top_n_snps)
+      if (length(kept.wgt.snp_ids) > 0){
+        tmp.wgt <- wgt[kept.wgt.snp_ids, ,drop=FALSE]
+        # keep top n SNPs
+        if (!is.null(top_n_snps)){
+          kept.idx <- head(order(-abs(tmp.wgt[,"weight"])), top_n_snps)
+          kept.wgt.snp_ids <- intersect(kept.wgt.snp_ids, rownames(tmp.wgt)[kept.idx])
+        }
+        # keep SNPs with abs(weight) > min_abs_weight
+        if (!is.null(min_abs_weight)){
+          kept.idx <- which(abs(tmp.wgt[,"weight"]) > min_abs_weight)
+          kept.wgt.snp_ids <- intersect(kept.wgt.snp_ids, rownames(tmp.wgt)[kept.idx])
+        }
+        rm(tmp.wgt)
       }
 
-      # keep SNPs with abs(weight) > min_abs_weight
-      if (!is.null(min_abs_weight)){
-        keep2.idx <- which(abs(wgt[,"weight"]) > min_abs_weight)
-        keep.idx <- intersect(keep.idx, keep2.idx)
-      }
-
-      if (length(keep.idx) == 0){
+      if (length(kept.wgt.snp_ids) == 0){
+        # no SNPs to keep, empty weights
         tmp_weights$p0 <- NA
         tmp_weights$p1 <- NA
         tmp_weights$wgt <- NULL
         tmp_weights$R_wgt <- NULL
         tmp_weights$n_wgt <- 0
-      } else if (length(keep.idx) < length(wgt.snp_ids)){
-        keep.wgt.snp_ids <- wgt.snp_ids[keep.idx]
-        tmp_weights$wgt <- wgt[keep.wgt.snp_ids, , drop=FALSE]
-        tmp_weights$n_wgt <- length(keep.wgt.snp_ids)
-        keep.wgt.snp_pos <- as.integer(wgt.snpinfo$pos[match(keep.wgt.snp_ids, wgt.snpinfo$id)])
-        tmp_weights$p0 <- min(keep.wgt.snp_pos, na.rm = TRUE)
-        tmp_weights$p1 <- max(keep.wgt.snp_pos, na.rm = TRUE)
+      } else if (length(kept.wgt.snp_ids) < n_wgt){
+        # trim weights
+        tmp_weights$wgt <- wgt[kept.wgt.snp_ids, , drop=FALSE]
+        tmp_weights$n_wgt <- length(kept.wgt.snp_ids)
+        kept.wgt.snp_pos <- as.integer(wgt.snpinfo$pos[match(kept.wgt.snp_ids, wgt.snpinfo$id)])
+        tmp_weights$p0 <- min(kept.wgt.snp_pos, na.rm = TRUE)
+        tmp_weights$p1 <- max(kept.wgt.snp_pos, na.rm = TRUE)
         if (!is.null(tmp_weights$R_wgt)) {
-          tmp_weights$R_wgt <- tmp_weights$R_wgt[keep.wgt.snp_ids, keep.wgt.snp_ids, drop=FALSE]
+          tmp_weights$R_wgt <- tmp_weights$R_wgt[kept.wgt.snp_ids, kept.wgt.snp_ids, drop=FALSE]
         } else {
-          if (length(keep.wgt.snp_ids) == 1){
+          if (length(kept.wgt.snp_ids) == 1){
             tmp_weights$R_wgt <- diag(1)
-            rownames(tmp_weights$R_wgt) <- colnames(tmp_weights$R_wgt) <- keep.wgt.snp_ids
+            rownames(tmp_weights$R_wgt) <- colnames(tmp_weights$R_wgt) <- kept.wgt.snp_ids
           } else{
             tmp_weights$R_wgt <- NULL
           }
@@ -804,14 +837,11 @@ trim_weights <- function(weights,
       loginfo("Remove %d empty weights.", length(empty_wgt_idx))
       weights[empty_wgt_idx] <- NULL
     }
-
     loginfo("%d weights left after trimming.", length(weights))
-
   }
 
   return(weights)
 }
-
 
 #' @title Get a subset of weights, by group, context or type.
 #'
@@ -829,6 +859,12 @@ subset_weights <- function(weights,
                            select_by = c("group", "context", "type")){
 
   select_by <- match.arg(select_by)
+
+  if (!inherits(weights,"list"))
+    stop("'weights' should be a list.")
+
+  if (any(sapply(weights, is.null)))
+    stop("weights contain NULL, remove empty weights!")
 
   weights_contexts <- sapply(weights, "[[", "context")
   weights_types <- sapply(weights, "[[", "type")
