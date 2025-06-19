@@ -55,7 +55,7 @@ compute_gene_z <- function (z_snp,
     group <- paste0(context,"|",type)
     z.idx <- match(wgt_snp_ids, z_snp$id)
     z.s <- as.matrix(z_snp$z[z.idx])
-    z.g <- as.matrix(crossprod(wgt, z.s)/sqrt(t(wgt)%*%R.s%*% wgt))
+    z.g <- as.matrix(crossprod(wgt, z.s)/sqrt(t(wgt)%*%R.s%*%wgt))
     dimnames(z.g) <- NULL
     data.frame(id = id, z = z.g, type = type, context = context, group = group)
   }, mc.cores = ncore)
@@ -64,7 +64,10 @@ compute_gene_z <- function (z_snp,
   rownames(z_gene) <- NULL
 
   if (any(abs(z_gene$z) == Inf)) {
-    logwarn("z_gene has Inf z-scores! Please check z_snp and weights.")
+    logwarn("z_gene has Inf z-scores!")
+    drop_idx <- which(abs(z_gene$z) == Inf)
+    loginfo("Remove %d genes with Inf z-scores.", length(drop_idx))
+    z_gene <- z_gene[-drop_idx, ]
   }
 
   return(z_gene)
