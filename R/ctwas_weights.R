@@ -309,9 +309,9 @@ load_fusion_wgt_data <- function(wgt_rdata_file,
 #' "weight": choose the top SNP with the largest abs(weight) per gene (molecular trait),
 #' Only used when \code{use_top_QTL=TRUE}.
 #'
-#' @param outputdir output directory
+#' @param outputdir output directory.
 #'
-#' @param outname name of the output weight file
+#' @param outname name of the output weight file.
 #'
 #' @importFrom stats complete.cases
 #' @importFrom magrittr %>%
@@ -885,4 +885,58 @@ subset_weights <- function(weights,
   weights_subset <- weights[selected_idx]
 
   return(weights_subset)
+}
+
+#' @title Convert rsIDs and varIDs in predictDB weights to the reference variant format.
+#'
+#' @param weight_file filename of the PredictDB weights '.db' file.
+#'
+#' @param load_predictdb_LD If TRUE, load pre-computed LD among weight SNPs.
+#'
+#' @param varID_converter_fun a user defined function to convert
+#' varIDs in weights to the reference variant format. If NULL, do not convert varIDs.
+#'
+#' @param rsID_converter_fun a user defined function to convert
+#' rsIDs in weights to the reference variant format. If NULL, do not convert rsIDs.
+#'
+#' @param outputdir output directory.
+#'
+#' @param outname name of the output weight file.
+#'
+#' @importFrom logging loginfo
+#'
+#' @export
+convert_predictdb_weights_varIDs <- function(weight_file,
+                                             load_predictdb_LD = TRUE,
+                                             varID_converter_fun = NULL,
+                                             rsID_converter_fun = NULL,
+                                             outputdir = getwd(),
+                                             outname){
+
+  loaded_weights <- load_predictdb_weights(weight_file,
+                                           filter_protein_coding_genes = FALSE,
+                                           load_predictdb_LD = load_predictdb_LD)
+  weight_table <- loaded_weights$weight_table
+  extra_table <- loaded_weights$extra_table
+  cov_table <- loaded_weights$cov_table
+
+  # convert varIDs in weights to reference varID format
+  if (!is.null(varID_converter_fun)) {
+    loginfo("Convert varIDs in weights to reference format.")
+    weight_table$varID <- varID_converter_fun(weight_table$varID)
+    if (!is.null(cov_table)) {
+      cov_table$RSID1 <- varID_converter_fun(cov_table$RSID1)
+      cov_table$RSID2 <- varID_converter_fun(cov_table$RSID2)
+    }
+  }
+
+  # convert rsid in weights to reference SNP id format
+  if (!is.null(rsID_converter_fun)) {
+    loginfo("Convert rsid in weights to reference format.")
+    weight_table$rsid <- rsID_converter_fun(weight_table$rsid)
+  }
+
+  # write PredictDB weights
+  write_predictdb(weight_table, extra_table, cov_table, outputdir, outname)
+
 }
