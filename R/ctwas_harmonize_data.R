@@ -27,7 +27,7 @@ harmonize_z <- function(z_snp, snp_info, drop_strand_ambig = TRUE){
   }
 
   snpnames <- intersect(z_snp$id, snp_info$id)
-  loginfo("Harmonize %s variants between GWAS and the reference", length(snpnames))
+  loginfo("Harmonizing %s variants between GWAS and the reference...", length(snpnames))
 
   if (length(snpnames) != 0) {
     z.idx <- match(snpnames, z_snp$id)

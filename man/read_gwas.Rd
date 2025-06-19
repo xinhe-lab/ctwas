@@ -25,7 +25,8 @@ read_gwas(
 
 \item{z}{Column name of z-scores.}
 
-\item{beta}{Column name of effect sizes.}
+\item{beta}{Column name of effect sizes.
+If z is not available, compute z from beta and se.}
 
 \item{se}{Column name of the standard errors.}
 }

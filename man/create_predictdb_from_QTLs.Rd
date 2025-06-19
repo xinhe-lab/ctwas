@@ -37,9 +37,9 @@ create a simple cov_table with covariance set to 1.}
 "weight": choose the top SNP with the largest abs(weight) per gene (molecular trait),
 Only used when \code{use_top_QTL=TRUE}.}
 
-\item{outputdir}{output directory}
+\item{outputdir}{output directory.}
 
-\item{outname}{name of the output weight file}
+\item{outname}{name of the output weight file.}
 }
 \description{
 Creates weight files in PredictDB format from QTL data

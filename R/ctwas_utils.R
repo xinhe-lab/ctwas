@@ -12,6 +12,7 @@
 #' @param z Column name of z-scores.
 #'
 #' @param beta Column name of effect sizes.
+#' If z is not available, compute z from beta and se.
 #'
 #' @param se Column name of the standard errors.
 #'
@@ -27,6 +28,7 @@ read_gwas <- function(gwas,
                       se = 'SE'){
 
   # Extract relevant columns
+  gwas <- as.data.frame(gwas)
   z_snp <- data.frame(id = gwas[,id], A1 = gwas[, A1], A2 = gwas[,A2])
 
   # Convert alleles to upper case
@@ -373,7 +375,7 @@ check_n_snps <- function(snp_map, z_snp, weights){
 
   # count the number of SNPs in weights
   n_wgt <- sapply(weights, "[[", "n_wgt")
-  loginfo("Average number of SNPs in weights per molecular trait: %d", round(mean(n_wgt)))
+  loginfo("Average number of SNPs in weights per molecular trait: %.2f", mean(n_wgt))
 
   # count by chromosome, avoid memory issues when there are too many SNPs in weights
   weights_chrs <- sapply(weights, "[[", "chrom")
