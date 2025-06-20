@@ -96,10 +96,11 @@ anno_finemap_res <- function(finemap_res,
         finemap_gene_res$molecular_id <- sapply(strsplit(finemap_gene_res$id, split = "[|]"), "[[", 1)
       }
 
-      # Map molecular traits to genes by joining finemap_gene_res with mapping_table
+      # Map molecular traits to genes, allow for many-to-many matching, return all matches
+      # a gene could have molecular traits, and a molecular trait could be linked to multiple genes
       loginfo("Map molecular traits to genes")
       finemap_gene_res <- finemap_gene_res %>%
-        left_join(mapping_table, by = map_by, multiple = "all")
+        left_join(mapping_table, by = map_by, multiple = "all", relationship = "many-to-many")
 
       unmapped_finemap_res <- NULL
       if (drop_unmapped) {
@@ -192,10 +193,11 @@ anno_susie_alpha_res <- function(susie_alpha_res,
       susie_alpha_res$molecular_id <- sapply(strsplit(susie_alpha_res$id, split = "[|]"), "[[", 1)
     }
 
-    # Map molecular traits to genes by joining finemap_gene_res with mapping_table
+    # Map molecular traits to genes, allow for many-to-many matching, return all matches
+    # a gene could have molecular traits, and a molecular trait could be linked to multiple genes
     loginfo("Map molecular traits to genes")
     susie_alpha_res <- susie_alpha_res %>%
-      left_join(mapping_table, by = map_by, multiple = "all")
+      left_join(mapping_table, by = map_by, multiple = "all", relationship = "many-to-many")
 
     if (drop_unmapped) {
       unmapped_idx <- which(is.na(susie_alpha_res$gene_name))
