@@ -41,7 +41,7 @@ compute_gene_z <- function (z_snp,
 
   if (any(!weight_snp_ids %in% z_snp$id)){
     stop(paste("Some SNPs in weights not found in z_snp!\n",
-         "Please run preprocess_z_snp() before running preprocess_weights() with 'gwas_snp_ids = z_snp$id'!"))
+               "Please run preprocess_z_snp() before running preprocess_weights() with 'gwas_snp_ids = z_snp$id'!"))
   }
 
   z_snp <- z_snp[z_snp$id %in% weight_snp_ids, c("id", "z")]
@@ -73,61 +73,180 @@ compute_gene_z <- function (z_snp,
   return(z_gene)
 }
 
-#' @title Get gene info from weights
+#' @title Get gene info from weights.
 #'
-#' @param weights a list of preprocessed weights
+#' @param weights a list of preprocessed weights.
 #'
-#' @return a data frame of gene info
+#' @param ncore The number of cores used to parallelize over genes.
+#'
+#' @return a data frame of gene info.
 #'
 #' @export
-get_gene_info <- function(weights){
+get_gene_info <- function(weights, ncore = 1){
 
   if (!inherits(weights,"list")){
     stop("'weights' should be a list.")
   }
-  gene_info <- lapply(names(weights), function(x){
-    as.data.frame(weights[[x]][c("chrom", "p0","p1", "molecular_id", "weight_name")])
-  })
+  gene_info <- mclapply_check(names(weights), function(x){
+    as.data.frame(weights[[x]][c("chrom", "p0", "p1", "molecular_id", "weight_name")])
+  }, mc.cores = ncore)
   gene_info <- do.call(rbind, gene_info)
   gene_info$id <- names(weights)
-  gene_info <- gene_info[, c("chrom", "id", "p0", "p1", "molecular_id", "weight_name")]
+  gene_info <- gene_info[, c("chrom", "p0", "p1", "id", "molecular_id", "weight_name")]
   gene_info[, c("chrom", "p0", "p1")] <- sapply(gene_info[, c("chrom", "p0", "p1")], as.integer)
   rownames(gene_info) <- NULL
 
   return(gene_info)
 }
 
-#' @title Get regions for each gene
+#' @title Get regions for each gene.
 #'
-#' @param gene_info a data frame of gene info
+#' @param gene_info a data frame of gene info.
 #'
-#' @param region_info a data frame of region definitions
+#' @param region_info a data frame of region definitions.
+#'
+#' @param ncore The number of cores used to parallelize over genes.
 #'
 #' @return a data frame of gene info with regions overlapping each gene
 #'
+#' @importFrom logging loginfo logwarn
+#'
 #' @export
-get_gene_regions <- function(gene_info, region_info){
+get_gene_regions <- function(gene_info,
+                             region_info,
+                             ncore = 1){
 
   gene_info <- gene_info[gene_info$chrom %in% unique(region_info$chrom), , drop=FALSE]
-  for (i in 1:nrow(gene_info)) {
-    chrom <- gene_info[i, "chrom"]
-    p0 <- gene_info[i, "p0"]
-    p1 <- gene_info[i, "p1"]
-    region.idx <- which(region_info$chrom == chrom & region_info$start <= p1 & region_info$stop > p0)
-    if (length(region.idx) > 0) {
-      gene_info[i, "region_start"] <- min(region_info[region.idx,"start"])
-      gene_info[i, "region_stop"] <- max(region_info[region.idx,"stop"])
-      gene_info[i, "region_id"] <- paste(sort(region_info[region.idx, "region_id"]), collapse = ",")
-      gene_info[i, "n_regions"] <- length(region.idx)
-    } else {
-      warning(paste("No regions overlapping with", gene_info[i, "id"]))
-      gene_info[i, "region_start"] <- NA
-      gene_info[i, "region_stop"] <- NA
-      gene_info[i, "region_id"] <- NA
-      gene_info[i, "n_regions"] <- length(region.idx)
-    }
+
+  if (!all(c("chrom", "p0", "p1") %in% colnames(gene_info))){
+    stop("Columns chrom, p0, p1 are required in gene_info!")
   }
-  return(gene_info)
+
+  gene_region_info_list <- mclapply_check(1:nrow(gene_info), function(i){
+    tmp_gene_region_info <- gene_info[i, , drop=FALSE]
+    chrom <- tmp_gene_region_info$chrom
+    p0 <- tmp_gene_region_info$p0
+    p1 <- tmp_gene_region_info$p1
+    # find all the regions that overlap with the QTL range of the gene
+    gene_regions.idx <- which(region_info$chrom == chrom & region_info$start <= p1 & region_info$stop > p0)
+    if (length(gene_regions.idx) > 0) {
+      tmp_gene_region_info$region_start <- min(region_info[gene_regions.idx,"start"])
+      tmp_gene_region_info$region_stop <- max(region_info[gene_regions.idx,"stop"])
+      tmp_gene_region_info$region_id <- paste(sort(region_info[gene_regions.idx, "region_id"]), collapse = ",")
+      tmp_gene_region_info$n_regions <- length(gene_regions.idx)
+    } else {
+      logwarn("No regions overlapping with %s!", tmp_gene_region_info$id)
+      tmp_gene_region_info$region_start <- NA
+      tmp_gene_region_info$region_stop <- NA
+      tmp_gene_region_info$region_id <- NA
+      tmp_gene_region_info$n_regions <- length(gene_regions.idx)
+    }
+    tmp_gene_region_info
+  }, mc.cores = ncore)
+
+  gene_region_info <- do.call(rbind, gene_region_info_list)
+
+  return(gene_region_info)
+}
+
+#' @title Get cross-boundary genes.
+#'
+#' @param region_info a data frame of region definitions.
+#'
+#' @param weights a list of preprocessed weights.
+#'
+#' @param gene_ids a vector of gene IDs (z_gene$id). If available, limits to these genes.
+#'
+#' @param mapping_table a data frame of mapping between molecular traits and genes,
+#' with required columns: "molecular_id", "gene_name".
+#'
+#' @param map_by column name to be mapped by (default: "molecular_id").
+#'
+#' @param ncore The number of cores used to parallelize over genes.
+#'
+#' @return a data frame of cross-boundary genes.
+#'
+#' @importFrom logging loginfo
+#' @importFrom magrittr %>%
+#' @importFrom dplyr left_join select summarise group_by ungroup rename
+#' @importFrom rlang .data
+#'
+#' @export
+get_boundary_genes <- function(region_info,
+                               weights,
+                               gene_ids = NULL,
+                               mapping_table = NULL,
+                               map_by = "molecular_id",
+                               ncore = 1){
+
+  loginfo("Get boundary genes...")
+
+  # get gene info from weights
+  gene_info <- get_gene_info(weights, ncore=ncore)
+
+  # limit genes to gene_ids
+  if (!is.null(gene_ids)) {
+    gene_info <- gene_info[gene_info$id %in% gene_ids, , drop=FALSE]
+  }
+
+  gene_info_columns <- c("chrom", "p0", "p1", "id", "molecular_id", "weight_name")
+
+  gene_info <- gene_info[, gene_info_columns]
+
+  if (!is.null(mapping_table)) {
+    # get combined gene_info
+    # map molecular traits to genes, allow for many-to-many matching, return all matches
+    # a gene could have molecular traits, and a molecular trait could be linked to multiple genes
+    loginfo("Map molecular traits to genes")
+
+    mapped_gene_info <- gene_info %>%
+      left_join(mapping_table[,c(map_by, "gene_name")],
+                by = map_by, multiple = "all", relationship = "many-to-many")
+
+    gene_info_columns <- c(gene_info_columns, "gene_name")
+
+    # get molecular trait level positions
+    molecular_trait_level_info <- mapped_gene_info %>%
+      group_by(.data$id) %>%
+      summarise(chrom = .data$chrom[1],
+                p0 = min(.data$p0),
+                p1 = max(.data$p1),
+                gene_name = paste(unique(.data$gene_name), collapse = ","),
+                molecular_id = paste(unique(.data$molecular_id), collapse = ","),
+                weight_name = paste(unique(.data$weight_name), collapse = ",")) %>%
+      ungroup() %>%
+      select(all_of(gene_info_columns)) %>%
+      as.data.frame()
+
+    # get gene level positions
+    gene_level_info <- mapped_gene_info %>%
+      group_by(.data$gene_name) %>%
+      summarise(chrom = .data$chrom[1],
+                id = paste(unique(.data$id), collapse = ","),
+                p0 = min(.data$p0),
+                p1 = max(.data$p1),
+                molecular_id = paste(unique(.data$molecular_id), collapse = ","),
+                weight_name = paste(unique(.data$weight_name), collapse = ",")) %>%
+      ungroup() %>%
+      select(all_of(gene_info_columns)) %>%
+      as.data.frame()
+
+    # combine gene_info from both molecular trait level and gene level
+    gene_info <- rbind(molecular_trait_level_info, gene_level_info)
+    gene_info <- unique(gene_info)
+  }
+
+  # get regions for each molecular trait or gene
+  gene_region_info <- get_gene_regions(gene_info,
+                                       region_info,
+                                       ncore = ncore)
+
+  # get boundary genes (n_regions > 1)
+  boundary_genes <- gene_region_info[gene_region_info$n_regions > 1, ]
+  boundary_genes <- boundary_genes[with(boundary_genes, order(chrom, p0, p1)), ]
+  rownames(boundary_genes) <- NULL
+
+  return(boundary_genes)
 }
 
 # Combines SNP and gene z-scores
