@@ -251,7 +251,7 @@ label_overlapping_regions <- function(boundary_genes) {
       # Loop through the rows starting from the second row
       for (i in 2:nrow(df)) {
         # Check if the current row overlaps with the previous row
-        if (df$region_start[i] <= df$region_stop[i-1]) {
+        if (df$region_start[i] < df$region_stop[i-1]) {
           # merge with previous region
           df$merge_label[i] <- paste0(b, ":", merge_idx)
         } else {
@@ -289,13 +289,13 @@ create_merged_snp_LD_map <- function(boundary_genes,
   merged_region_id_map <- data.frame()
 
   for(merge_label in merge_labels){
-    df <- boundary_genes[boundary_genes$merge_label == merge_label,,drop=F]
+    df <- boundary_genes[boundary_genes$merge_label == merge_label,,drop=FALSE]
     new_region_chrom <- df$chrom[1]
     new_region_start <- min(df$region_start)
     new_region_stop <- max(df$region_stop)
     new_region_id <- paste0(new_region_chrom, "_", new_region_start, "_", new_region_stop)
 
-    old_region_ids <- unique(unlist(strsplit(df[df$merge_label == merge_label, "region_id"], split = ",")))
+    old_region_ids <- unique(unlist(strsplit(df$region_id, split = ",")))
 
     merged_region_info <- rbind(merged_region_info,
                                 data.frame(chrom = new_region_chrom,
@@ -341,13 +341,15 @@ create_merged_snp_map <- function(boundary_genes,
   merged_snp_map <- list()
   merged_region_id_map <- data.frame()
   for(merge_label in merge_labels){
-    df <- boundary_genes[boundary_genes$merge_label == merge_label,,drop=F]
+    # pool together all the regions for each merge_label,
+    # and get the new region start and stop positions
+    df <- boundary_genes[boundary_genes$merge_label == merge_label,,drop=FALSE]
     new_region_chrom <- df$chrom[1]
     new_region_start <- min(df$region_start)
     new_region_stop <- max(df$region_stop)
     new_region_id <- paste0(new_region_chrom, "_", new_region_start, "_", new_region_stop)
 
-    old_region_ids <- unique(unlist(strsplit(df[df$merge_label == merge_label, "region_id"], split = ",")))
+    old_region_ids <- unique(unlist(strsplit(df$region_id, split = ",")))
 
     merged_region_info <- rbind(merged_region_info,
                                 data.frame(chrom = new_region_chrom,
@@ -360,7 +362,6 @@ create_merged_snp_map <- function(boundary_genes,
     merged_region_id_map <- rbind(merged_region_id_map,
                                   data.frame(region_id = new_region_id,
                                              old_region_ids = paste(old_region_ids, collapse = ",")))
-
   }
 
   loginfo("Merge %d boundary genes into %d regions", nrow(boundary_genes), nrow(merged_region_info))
