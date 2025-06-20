@@ -103,7 +103,7 @@ assemble_region_data <- function(region_info,
   snp_info <- as.data.frame(rbindlist(snp_map, idcol = "region_id"))
 
   # get gene info from weights
-  gene_info <- get_gene_info(weights, ncore = ncore)
+  gene_info <- get_gene_info(weights)
 
   # filter groups with too few genes
   z_gene <- filter_z_gene_by_group_size(z_gene, min_group_size)

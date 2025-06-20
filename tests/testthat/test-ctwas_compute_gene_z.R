@@ -12,6 +12,20 @@ test_that("compute_gene_z works", {
 
 })
 
+test_that("get_gene_info works", {
+
+  weights <- readRDS(system.file("extdata/sample_data", "LDL_example.preprocessed.weights.RDS", package = "ctwas"))
+  expected_gene_info <- readRDS("LDL_example.gene_info.RDS")
+
+  capture.output({
+    gene_info <- get_gene_info(weights)
+  })
+
+  # saveRDS(gene_info, "LDL_example.gene_info.RDS")
+  expect_equal(gene_info, expected_gene_info)
+
+})
+
 test_that("get_boundary_genes works", {
 
   region_info <- readRDS(system.file("extdata/sample_data", "LDL_example.region_info.RDS", package = "ctwas"))

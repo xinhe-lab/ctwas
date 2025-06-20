@@ -77,23 +77,21 @@ compute_gene_z <- function (z_snp,
 #'
 #' @param weights a list of preprocessed weights.
 #'
-#' @param ncore The number of cores used to parallelize over genes.
-#'
 #' @return a data frame of gene info.
 #'
 #' @export
-get_gene_info <- function(weights, ncore = 1){
+get_gene_info <- function(weights){
 
   if (!inherits(weights,"list")){
     stop("'weights' should be a list.")
   }
-  gene_info <- mclapply_check(names(weights), function(x){
-    as.data.frame(weights[[x]][c("chrom", "p0", "p1", "molecular_id", "weight_name")])
-  }, mc.cores = ncore)
-  gene_info <- do.call(rbind, gene_info)
-  gene_info$id <- names(weights)
-  gene_info <- gene_info[, c("chrom", "p0", "p1", "id", "molecular_id", "weight_name")]
-  gene_info[, c("chrom", "p0", "p1")] <- sapply(gene_info[, c("chrom", "p0", "p1")], as.integer)
+
+  gene_info <- data.frame(chrom = as.integer(sapply(weights, "[[", "chrom")),
+                          p0 = as.integer(sapply(weights, "[[", "p0")),
+                          p1 = as.integer(sapply(weights, "[[", "p1")),
+                          id = names(weights),
+                          molecular_id = sapply(weights, "[[", "molecular_id"),
+                          weight_name = sapply(weights, "[[", "weight_name"))
   rownames(gene_info) <- NULL
 
   return(gene_info)
@@ -182,7 +180,7 @@ get_boundary_genes <- function(region_info,
   loginfo("Get boundary genes...")
 
   # get gene info from weights
-  gene_info <- get_gene_info(weights, ncore=ncore)
+  gene_info <- get_gene_info(weights)
 
   # limit genes to gene_ids
   if (!is.null(gene_ids)) {
