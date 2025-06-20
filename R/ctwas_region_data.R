@@ -103,7 +103,7 @@ assemble_region_data <- function(region_info,
   snp_info <- as.data.frame(rbindlist(snp_map, idcol = "region_id"))
 
   # get gene info from weights
-  gene_info <- get_gene_info(weights)
+  gene_info <- get_gene_info(weights, ncore = ncore)
 
   # filter groups with too few genes
   z_gene <- filter_z_gene_by_group_size(z_gene, min_group_size)
@@ -147,13 +147,17 @@ assemble_region_data <- function(region_info,
 
   # adjust region_data for boundary genes
   if (adjust_boundary_genes && nrow(region_info) > 1){
-    gene_info <- get_gene_regions(gene_info, region_info)
-    boundary_genes <- gene_info[gene_info$n_regions > 1, ]
-    boundary_genes <- boundary_genes[with(boundary_genes, order(chrom, p0)), ]
+    # get regions for each molecular trait or gene
+    gene_region_info <- get_gene_regions(gene_info,
+                                         region_info,
+                                         ncore = ncore)
+    # get boundary genes (n_regions > 1)
+    boundary_genes <- gene_region_info[gene_region_info$n_regions > 1, ]
+    boundary_genes <- boundary_genes[with(boundary_genes, order(chrom, p0, p1)), ]
     rownames(boundary_genes) <- NULL
     loginfo("Number of boundary genes: %d", nrow(boundary_genes))
     if (nrow(boundary_genes) > 0) {
-      region_data <- adjust_boundary_genes(boundary_genes, weights, region_data, snp_map)
+      region_data <- adjust_boundary_gene_region_assignment(boundary_genes, weights, region_data, snp_map)
     }
   } else {
     boundary_genes <- NULL
@@ -363,13 +367,13 @@ update_region_z <- function(region_data,
   return(region_data2)
 }
 
-# Adjust region_data for boundary genes
+# Adjust gene assignment in region_data,
+# assign boundary genes to the regions with the largest abs(weights).
 #' @importFrom logging loginfo
-#' @importFrom data.table rbindlist
-adjust_boundary_genes <- function(boundary_genes,
-                                  weights,
-                                  region_data,
-                                  snp_map){
+adjust_boundary_gene_region_assignment <- function(boundary_genes,
+                                                   weights,
+                                                   region_data,
+                                                   snp_map){
   loginfo("Adjust region assignment for boundary genes")
 
   if (!inherits(weights,"list")){
@@ -384,7 +388,7 @@ adjust_boundary_genes <- function(boundary_genes,
     stop("'snp_map' should be a list.")
   }
 
-  # assign boundary gene to the region with max weights
+  # assign boundary gene to the region with the largest abs(weights)
   for (i in 1:nrow(boundary_genes)){
     gname <- boundary_genes[i, "id"]
     region_ids <- unlist(strsplit(boundary_genes[i, "region_id"], split = ","))
