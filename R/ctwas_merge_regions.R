@@ -233,7 +233,6 @@ merge_region_data_noLD <- function(boundary_genes,
 # Identify overlapping regions
 label_overlapping_regions <- function(boundary_genes) {
 
-  boundary_genes <- boundary_genes[,c("id", "chrom", "region_start", "region_stop", "region_id", "n_regions")]
   boundary_genes <- boundary_genes[boundary_genes$n_regions > 1, ]
 
   boundary_genes_list <- list()
