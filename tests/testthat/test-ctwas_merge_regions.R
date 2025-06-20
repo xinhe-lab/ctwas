@@ -74,3 +74,75 @@ test_that("merge_region_data works", {
   expect_equal(merge_region_res$merged_region_id_map, expected_merge_region_res$merged_region_id_map)
 
 })
+
+test_that("create_merged_snp_map works", {
+
+  region_info <- readRDS(system.file("extdata/sample_data", "LDL_example.region_info.RDS", package = "ctwas"))
+  snp_map <- readRDS(system.file("extdata/sample_data", "LDL_example.snp_map.RDS", package = "ctwas"))
+  ctwas_res <- readRDS(system.file("extdata/sample_data", "LDL_example.ctwas_sumstats_noLD_res.RDS", package = "ctwas"))
+  boundary_genes <- ctwas_res$boundary_genes
+
+  expected_merge_region_res <- readRDS("LDL_example.merge_region_noLD_res.RDS")
+
+  capture.output({
+    res <- create_merged_snp_map(boundary_genes, region_info, snp_map)
+    merged_region_info <- res$merged_region_info
+    merged_snp_map <- res$merged_snp_map
+    merged_region_id_map <- res$merged_region_id_map
+  })
+
+  expect_equal(merged_region_info, expected_merge_region_res$merged_region_info)
+  expect_equal(merged_snp_map, expected_merge_region_res$merged_snp_map)
+  expect_equal(merged_region_id_map, expected_merge_region_res$merged_region_id_map)
+
+})
+
+test_that("create_merged_snp_LD_map works", {
+
+  LD_map <- readRDS(system.file("extdata/sample_data", "LDL_example.LD_map.RDS", package = "ctwas"))
+  skip_if_no_LD_file(LD_map$LD_file)
+
+  region_info <- readRDS(system.file("extdata/sample_data", "LDL_example.region_info.RDS", package = "ctwas"))
+  snp_map <- readRDS(system.file("extdata/sample_data", "LDL_example.snp_map.RDS", package = "ctwas"))
+  ctwas_res <- readRDS(system.file("extdata/sample_data", "LDL_example.ctwas_sumstats_noLD_res.RDS", package = "ctwas"))
+  boundary_genes <- ctwas_res$boundary_genes
+
+  expected_merge_region_res <- readRDS("LDL_example.merge_region_res.RDS")
+
+  capture.output({
+    res <- create_merged_snp_LD_map(boundary_genes, region_info, snp_map, LD_map)
+    merged_region_info <- res$merged_region_info
+    merged_LD_map <- res$merged_LD_map
+    merged_snp_map <- res$merged_snp_map
+    merged_region_id_map <- res$merged_region_id_map
+  })
+
+  expect_equal(merged_region_info, expected_merge_region_res$merged_region_info)
+  expect_equal(merged_LD_map, expected_merge_region_res$merged_LD_map)
+  expect_equal(merged_snp_map, expected_merge_region_res$merged_snp_map)
+  expect_equal(merged_region_id_map, expected_merge_region_res$merged_region_id_map)
+
+})
+
+
+test_that("label_overlapping_regions works", {
+
+  region_info <- readRDS(system.file("extdata/sample_data", "LDL_example.region_info.RDS", package = "ctwas"))
+  weights <- readRDS(system.file("extdata/sample_data", "LDL_example.preprocessed.weights.RDS", package = "ctwas"))
+  z_gene <- readRDS(system.file("extdata/sample_data", "LDL_example.z_gene.RDS", package = "ctwas"))
+  snp_map <- readRDS(system.file("extdata/sample_data", "LDL_example.snp_map.RDS", package = "ctwas"))
+  mapping_table <- readRDS(system.file("extdata/sample_data", "mapping_real_data.RDS", package = "ctwas"))
+
+  ctwas_res <- readRDS(system.file("extdata/sample_data", "LDL_example.ctwas_sumstats_noLD_res.RDS", package = "ctwas"))
+  boundary_genes <- ctwas_res$boundary_genes
+
+  expected_labeled_boundary_genes <- readRDS("LDL_example.labeled_boundary_genes.RDS")
+
+  capture.output({
+    labeled_boundary_genes <- label_overlapping_regions(boundary_genes)
+  })
+  # saveRDS(labeled_boundary_genes, "LDL_example.labeled_boundary_genes.RDS")
+
+  expect_equal(labeled_boundary_genes, expected_labeled_boundary_genes)
+
+})
