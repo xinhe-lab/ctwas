@@ -2,16 +2,18 @@
 % Please edit documentation in R/ctwas_compute_gene_z.R
 \name{get_gene_info}
 \alias{get_gene_info}
-\title{Get gene info from weights}
+\title{Get gene info from weights.}
 \usage{
-get_gene_info(weights)
+get_gene_info(weights, ncore = 1)
 }
 \arguments{
-\item{weights}{a list of preprocessed weights}
+\item{weights}{a list of preprocessed weights.}
+
+\item{ncore}{The number of cores used to parallelize over genes.}
 }
 \value{
-a data frame of gene info
+a data frame of gene info.
 }
 \description{
-Get gene info from weights
+Get gene info from weights.
 }

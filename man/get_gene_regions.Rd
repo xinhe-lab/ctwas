@@ -2,18 +2,20 @@
 % Please edit documentation in R/ctwas_compute_gene_z.R
 \name{get_gene_regions}
 \alias{get_gene_regions}
-\title{Get regions for each gene}
+\title{Get regions for each gene.}
 \usage{
-get_gene_regions(gene_info, region_info)
+get_gene_regions(gene_info, region_info, ncore = 1)
 }
 \arguments{
-\item{gene_info}{a data frame of gene info}
+\item{gene_info}{a data frame of gene info.}
 
-\item{region_info}{a data frame of region definitions}
+\item{region_info}{a data frame of region definitions.}
+
+\item{ncore}{The number of cores used to parallelize over genes.}
 }
 \value{
 a data frame of gene info with regions overlapping each gene
 }
 \description{
-Get regions for each gene
+Get regions for each gene.
 }
