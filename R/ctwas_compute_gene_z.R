@@ -132,7 +132,7 @@ get_gene_regions <- function(gene_info,
     if (length(gene_regions.idx) > 0) {
       tmp_gene_region_info$region_start <- min(region_info[gene_regions.idx,"start"])
       tmp_gene_region_info$region_stop <- max(region_info[gene_regions.idx,"stop"])
-      tmp_gene_region_info$region_id <- paste(sort(region_info[gene_regions.idx, "region_id"]), collapse = ",")
+      tmp_gene_region_info$region_id <- paste(region_info[gene_regions.idx, "region_id"], collapse = ",")
       tmp_gene_region_info$n_regions <- length(gene_regions.idx)
     } else {
       logwarn("No regions overlapping with %s!", tmp_gene_region_info$id)
