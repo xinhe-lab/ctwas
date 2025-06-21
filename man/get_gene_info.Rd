@@ -4,12 +4,10 @@
 \alias{get_gene_info}
 \title{Get gene info from weights.}
 \usage{
-get_gene_info(weights, ncore = 1)
+get_gene_info(weights)
 }
 \arguments{
 \item{weights}{a list of preprocessed weights.}
-
-\item{ncore}{The number of cores used to parallelize over genes.}
 }
 \value{
 a data frame of gene info.

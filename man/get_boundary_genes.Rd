@@ -9,7 +9,7 @@ get_boundary_genes(
   weights,
   gene_ids = NULL,
   mapping_table = NULL,
-  map_by = "molecular_id",
+  show_mapping = FALSE,
   ncore = 1
 )
 }
@@ -23,7 +23,8 @@ get_boundary_genes(
 \item{mapping_table}{a data frame of mapping between molecular traits and genes,
 with required columns: "molecular_id", "gene_name".}
 
-\item{map_by}{column name to be mapped by (default: "molecular_id").}
+\item{show_mapping}{If TRUE, include the mapping between molecular traits and genes
+in the result.}
 
 \item{ncore}{The number of cores used to parallelize over genes.}
 }

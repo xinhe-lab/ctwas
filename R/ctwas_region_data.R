@@ -147,10 +147,8 @@ assemble_region_data <- function(region_info,
 
   # adjust region_data for boundary genes
   if (adjust_boundary_genes && nrow(region_info) > 1){
-    # get regions for each molecular trait or gene
-    gene_region_info <- get_gene_regions(gene_info,
-                                         region_info,
-                                         ncore = ncore)
+    # map regions for each molecular trait or gene
+    gene_region_info <- map_gene_regions(gene_info, region_info, ncore = ncore)
     # get boundary genes (n_regions > 1)
     boundary_genes <- gene_region_info[gene_region_info$n_regions > 1, ]
     boundary_genes <- boundary_genes[with(boundary_genes, order(chrom, p0, p1)), ]
@@ -390,8 +388,8 @@ adjust_boundary_gene_region_assignment <- function(boundary_genes,
 
   # assign boundary gene to the region with the largest abs(weights)
   for (i in 1:nrow(boundary_genes)){
-    gname <- boundary_genes[i, "id"]
-    region_ids <- unlist(strsplit(boundary_genes[i, "region_id"], split = ","))
+    gname <- boundary_genes$id[i]
+    region_ids <- unlist(strsplit(boundary_genes$region_id[i], split = ","))
     wgt <- weights[[gname]][["wgt"]]
 
     region_sum_wgt <- sapply(region_ids, function(region_id){

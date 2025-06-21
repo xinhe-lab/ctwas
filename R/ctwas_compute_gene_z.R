@@ -82,22 +82,20 @@ compute_gene_z <- function (z_snp,
 #' @export
 get_gene_info <- function(weights){
 
-  if (!inherits(weights,"list")){
+  if (!inherits(weights,"list"))
     stop("'weights' should be a list.")
-  }
 
   gene_info <- data.frame(chrom = as.integer(sapply(weights, "[[", "chrom")),
                           p0 = as.integer(sapply(weights, "[[", "p0")),
                           p1 = as.integer(sapply(weights, "[[", "p1")),
                           id = names(weights),
-                          molecular_id = sapply(weights, "[[", "molecular_id"),
-                          weight_name = sapply(weights, "[[", "weight_name"))
+                          molecular_id = sapply(weights, "[[", "molecular_id"))
   rownames(gene_info) <- NULL
 
   return(gene_info)
 }
 
-#' @title Get regions for each gene.
+#' @title Map regions for each gene.
 #'
 #' @param gene_info a data frame of gene info.
 #'
@@ -110,7 +108,7 @@ get_gene_info <- function(weights){
 #' @importFrom logging loginfo logwarn
 #'
 #' @export
-get_gene_regions <- function(gene_info,
+map_gene_regions <- function(gene_info,
                              region_info,
                              ncore = 1){
 
@@ -119,6 +117,8 @@ get_gene_regions <- function(gene_info,
   if (!all(c("chrom", "p0", "p1") %in% colnames(gene_info))){
     stop("Columns chrom, p0, p1 are required in gene_info!")
   }
+
+  loginfo("Map gene regions...")
 
   gene_region_info_list <- mclapply_check(1:nrow(gene_info), function(i){
     tmp_gene_region_info <- gene_info[i, , drop=FALSE]
@@ -158,7 +158,8 @@ get_gene_regions <- function(gene_info,
 #' @param mapping_table a data frame of mapping between molecular traits and genes,
 #' with required columns: "molecular_id", "gene_name".
 #'
-#' @param map_by column name to be mapped by (default: "molecular_id").
+#' @param show_mapping If TRUE, include the mapping between molecular traits and genes
+#' in the result.
 #'
 #' @param ncore The number of cores used to parallelize over genes.
 #'
@@ -166,7 +167,7 @@ get_gene_regions <- function(gene_info,
 #'
 #' @importFrom logging loginfo
 #' @importFrom magrittr %>%
-#' @importFrom dplyr left_join select summarise group_by ungroup rename
+#' @importFrom dplyr left_join select summarise group_by ungroup
 #' @importFrom rlang .data
 #'
 #' @export
@@ -174,10 +175,8 @@ get_boundary_genes <- function(region_info,
                                weights,
                                gene_ids = NULL,
                                mapping_table = NULL,
-                               map_by = "molecular_id",
+                               show_mapping = FALSE,
                                ncore = 1){
-
-  loginfo("Get boundary genes...")
 
   # get gene info from weights
   gene_info <- get_gene_info(weights)
@@ -187,21 +186,20 @@ get_boundary_genes <- function(region_info,
     gene_info <- gene_info[gene_info$id %in% gene_ids, , drop=FALSE]
   }
 
-  gene_info_columns <- c("chrom", "p0", "p1", "id", "molecular_id", "weight_name")
-
-  gene_info <- gene_info[, gene_info_columns]
+  gene_info <- gene_info[, c("chrom", "p0", "p1", "id", "molecular_id")]
 
   if (!is.null(mapping_table)) {
     # get combined gene_info
     # map molecular traits to genes, allow for many-to-many matching, return all matches
     # a gene could have molecular traits, and a molecular trait could be linked to multiple genes
-    loginfo("Map molecular traits to genes")
+    loginfo("Map molecular traits to genes...")
 
     mapped_gene_info <- gene_info %>%
-      left_join(mapping_table[,c(map_by, "gene_name")],
-                by = map_by, multiple = "all", relationship = "many-to-many")
+      left_join(mapping_table[,c("molecular_id", "gene_name")],
+                by = "molecular_id",
+                multiple = "all", relationship = "many-to-many")
 
-    gene_info_columns <- c(gene_info_columns, "gene_name")
+    selected_columns <- c(colnames(gene_info), "gene_name")
 
     # get molecular trait level positions
     molecular_trait_level_info <- mapped_gene_info %>%
@@ -209,12 +207,14 @@ get_boundary_genes <- function(region_info,
       summarise(chrom = .data$chrom[1],
                 p0 = min(.data$p0),
                 p1 = max(.data$p1),
-                gene_name = paste(unique(.data$gene_name), collapse = ","),
                 molecular_id = paste(unique(.data$molecular_id), collapse = ","),
-                weight_name = paste(unique(.data$weight_name), collapse = ",")) %>%
+                gene_name = paste(unique(.data$gene_name), collapse = ",")) %>%
       ungroup() %>%
-      select(all_of(gene_info_columns)) %>%
-      as.data.frame()
+      select(all_of(selected_columns))
+
+    if (!show_mapping) {
+      molecular_trait_level_info$gene_name <- ""
+    }
 
     # get gene level positions
     gene_level_info <- mapped_gene_info %>%
@@ -223,11 +223,14 @@ get_boundary_genes <- function(region_info,
                 id = paste(unique(.data$id), collapse = ","),
                 p0 = min(.data$p0),
                 p1 = max(.data$p1),
-                molecular_id = paste(unique(.data$molecular_id), collapse = ","),
-                weight_name = paste(unique(.data$weight_name), collapse = ",")) %>%
+                molecular_id = paste(unique(.data$molecular_id), collapse = ",")) %>%
       ungroup() %>%
-      select(all_of(gene_info_columns)) %>%
-      as.data.frame()
+      select(all_of(selected_columns))
+
+    if (!show_mapping) {
+      gene_level_info$id <- ""
+      gene_level_info$molecular_id <- ""
+    }
 
     # combine gene_info from both molecular trait level and gene level
     gene_info <- rbind(molecular_trait_level_info, gene_level_info)
@@ -235,14 +238,16 @@ get_boundary_genes <- function(region_info,
   }
 
   # get regions for each molecular trait or gene
-  gene_region_info <- get_gene_regions(gene_info,
+  gene_region_info <- map_gene_regions(gene_info,
                                        region_info,
                                        ncore = ncore)
 
   # get boundary genes (n_regions > 1)
+  loginfo("Get boundary genes...")
   boundary_genes <- gene_region_info[gene_region_info$n_regions > 1, ]
   boundary_genes <- boundary_genes[with(boundary_genes, order(chrom, p0, p1)), ]
   rownames(boundary_genes) <- NULL
+  boundary_genes <- as.data.frame(boundary_genes)
 
   return(boundary_genes)
 }

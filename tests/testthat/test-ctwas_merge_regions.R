@@ -25,11 +25,7 @@ test_that("merge_region_data_noLD works", {
 
   # saveRDS(merge_region_res, "LDL_example.merge_region_noLD_res.RDS")
 
-  # expect_equal(merge_region_res, expected_merge_region_res)
-  expect_equal(merge_region_res$merged_region_data, expected_merge_region_res$merged_region_data)
-  expect_equal(merge_region_res$merged_region_info, expected_merge_region_res$merged_region_info)
-  expect_equal(merge_region_res$merged_snp_map, expected_merge_region_res$merged_snp_map)
-  expect_equal(merge_region_res$merged_region_id_map, expected_merge_region_res$merged_region_id_map)
+  expect_equal(merge_region_res, expected_merge_region_res)
 
 })
 
@@ -67,11 +63,7 @@ test_that("merge_region_data works", {
 
   # saveRDS(merge_region_res, "LDL_example.merge_region_res.RDS")
 
-  # expect_equal(merge_region_res, expected_merge_region_res)
-  expect_equal(merge_region_res$merged_region_data, expected_merge_region_res$merged_region_data)
-  expect_equal(merge_region_res$merged_region_info, expected_merge_region_res$merged_region_info)
-  expect_equal(merge_region_res$merged_snp_map, expected_merge_region_res$merged_snp_map)
-  expect_equal(merge_region_res$merged_region_id_map, expected_merge_region_res$merged_region_id_map)
+  expect_equal(merge_region_res, expected_merge_region_res)
 
 })
 
@@ -125,24 +117,58 @@ test_that("create_merged_snp_LD_map works", {
 })
 
 
-test_that("label_overlapping_regions works", {
+test_that("create_merged_snp_map with combined boundary genes works", {
 
   region_info <- readRDS(system.file("extdata/sample_data", "LDL_example.region_info.RDS", package = "ctwas"))
   weights <- readRDS(system.file("extdata/sample_data", "LDL_example.preprocessed.weights.RDS", package = "ctwas"))
   z_gene <- readRDS(system.file("extdata/sample_data", "LDL_example.z_gene.RDS", package = "ctwas"))
   snp_map <- readRDS(system.file("extdata/sample_data", "LDL_example.snp_map.RDS", package = "ctwas"))
-  mapping_table <- readRDS(system.file("extdata/sample_data", "mapping_real_data.RDS", package = "ctwas"))
+  mapping_table <- readRDS(system.file("extdata/sample_data", "mapping_table.RDS", package = "ctwas"))
 
-  ctwas_res <- readRDS(system.file("extdata/sample_data", "LDL_example.ctwas_sumstats_noLD_res.RDS", package = "ctwas"))
-  boundary_genes <- ctwas_res$boundary_genes
+  capture.output({
+    boundary_genes1 <- get_boundary_genes(region_info,
+                                         weights,
+                                         gene_ids = z_gene$id,
+                                         mapping_table = mapping_table,
+                                         show_mapping = TRUE,
+                                         ncore = 2)
+
+    res1 <- create_merged_snp_map(boundary_genes1, region_info, snp_map)
+
+    boundary_genes2 <- get_boundary_genes(region_info,
+                                         weights,
+                                         gene_ids = z_gene$id,
+                                         mapping_table = mapping_table,
+                                         show_mapping = FALSE,
+                                         ncore = 2)
+
+    res2 <- create_merged_snp_map(boundary_genes2, region_info, snp_map)
+
+  })
+
+  expect_equal(res1, res2)
+
+})
+
+
+test_that("label_overlapping_regions works", {
+
+  region_info <- readRDS(system.file("extdata/sample_data", "LDL_example.region_info.RDS", package = "ctwas"))
+  weights <- readRDS(system.file("extdata/sample_data", "LDL_example.preprocessed.weights.RDS", package = "ctwas"))
+  z_gene <- readRDS(system.file("extdata/sample_data", "LDL_example.z_gene.RDS", package = "ctwas"))
+
+  boundary_genes <- readRDS(system.file("extdata/sample_data", "LDL_example.boundary_genes.RDS", package = "ctwas"))
 
   expected_labeled_boundary_genes <- readRDS("LDL_example.labeled_boundary_genes.RDS")
 
   capture.output({
+    boundary_genes <- get_boundary_genes(region_info,
+                                         weights,
+                                         gene_ids = z_gene$id,
+                                         ncore = 2)
     labeled_boundary_genes <- label_overlapping_regions(boundary_genes)
   })
   # saveRDS(labeled_boundary_genes, "LDL_example.labeled_boundary_genes.RDS")
-
   expect_equal(labeled_boundary_genes, expected_labeled_boundary_genes)
 
 })

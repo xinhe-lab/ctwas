@@ -18,13 +18,14 @@ test_that("assemble_region_data works", {
                                 snp_map,
                                 thin = 0.1,
                                 maxSNP = 20000,
-                                min_group_size = 100)
+                                min_group_size = 100,
+                                ncore = 2)
   })
   region_data <- res$region_data
   boundary_genes <- res$boundary_genes
 
   expect_equal(region_data, expected_region_data)
-  expect_equal(boundary_genes$id, expected_boundary_genes$id)
+  expect_equal(boundary_genes, expected_boundary_genes)
 
 })
 
