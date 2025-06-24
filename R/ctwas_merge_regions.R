@@ -11,8 +11,6 @@
 #'
 #' @param snp_map a list of data frames with SNP-to-region map for the reference.
 #'
-#' @param weights a list of preprocessed weights.
-#'
 #' @param z_snp A data frame with columns: "id", "z", giving the z-scores for SNPs.
 #'
 #' @param z_gene A data frame with columns: "id", "z", giving the z-scores for genes.
@@ -29,8 +27,6 @@
 #'
 #' @param logfile The log filename. If NULL, will print log info on screen.
 #'
-#' @param ... Additional arguments of \code{susie_rss}.
-#'
 #' @return a list of merged region data, merged region info, LD_map, snp_map,
 #' and merged region IDs.
 #'
@@ -43,15 +39,13 @@ merge_region_data <- function(boundary_genes,
                               region_info,
                               LD_map,
                               snp_map,
-                              weights,
                               z_snp,
                               z_gene,
                               expand = TRUE,
                               maxSNP = Inf,
                               ncore = 1,
                               verbose = FALSE,
-                              logfile = NULL,
-                              ...) {
+                              logfile = NULL) {
 
   if (!is.null(logfile)){
     addHandler(writeToFile, file= logfile, level='DEBUG')
@@ -146,8 +140,6 @@ merge_region_data <- function(boundary_genes,
 #'
 #' @param logfile The log filename. If NULL, will print log info on screen.
 #'
-#' @param ... Additional arguments of \code{susie_rss}.
-#'
 #' @return a list of merged region data, merged region info, snp_map,
 #' and merged region IDs.
 #'
@@ -165,8 +157,7 @@ merge_region_data_noLD <- function(boundary_genes,
                                    maxSNP = Inf,
                                    ncore = 1,
                                    verbose = FALSE,
-                                   logfile = NULL,
-                                   ...) {
+                                   logfile = NULL) {
 
   if (!is.null(logfile)){
     addHandler(writeToFile, file= logfile, level='DEBUG')

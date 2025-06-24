@@ -29,8 +29,7 @@ snps. "A1" is effect allele. "A2" is the other allele.}
 \item{gwas_n}{integer, GWAS sample size.}
 
 \item{p_diff_thresh}{numeric, p-value cutoff for identifying problematic SNPs
-with significant difference between observed z-scores and estimated values.
-Default is 5e-6.}
+with significant difference between observed z-scores and estimated values.}
 
 \item{plot}{If TRUE, plot observed z score vs the expected value.}
 

@@ -12,7 +12,6 @@
 #'
 #' @param p_diff_thresh numeric, p-value cutoff for identifying problematic SNPs
 #' with significant difference between observed z-scores and estimated values.
-#' Default is 5e-6.
 #'
 #' @param plot If TRUE, plot observed z score vs the expected value.
 #'
@@ -53,7 +52,7 @@ diagnose_LD_mismatch_susie <- function(region_ids,
     addHandler(writeToFile, file= logfile, level='DEBUG')
   }
 
-  loginfo("Performing LD mismatch diagnosis for %d regions", length(region_ids))
+  loginfo("Performing LD mismatch diagnosis for %d regions...", length(region_ids))
 
   if (!all(region_ids %in% LD_map$region_id)){
      stop("region_ids do not match with LD_map$region_id!")
@@ -175,7 +174,7 @@ get_problematic_genes <- function(problematic_snps,
                                   z_thresh = NULL){
 
   if (length(problematic_snps) == 0) {
-    loginfo('No problematic SNPs')
+    loginfo('No problematic SNPs.')
     problematic_genes <- NULL
   }else{
     loginfo('Number of problematic SNPs: %d', length(problematic_snps))

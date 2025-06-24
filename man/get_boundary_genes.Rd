@@ -18,7 +18,8 @@ get_boundary_genes(
 
 \item{weights}{a list of preprocessed weights.}
 
-\item{gene_ids}{a vector of gene IDs (z_gene$id). If available, limits to these genes.}
+\item{gene_ids}{a vector of selected gene IDs (z_gene$id).
+If specified, limits to these genes. Default: use all genes in weights.}
 
 \item{mapping_table}{a data frame of mapping between molecular traits and genes,
 with required columns: "molecular_id", "gene_name".}
