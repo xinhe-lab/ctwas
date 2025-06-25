@@ -74,7 +74,7 @@ postprocess_merge_regions <- function(region_info,
                                       group_prior_var = NULL,
                                       combined_pip_res = NULL,
                                       mapping_table = NULL,
-                                      show_mapping = FALSE,
+                                      show_mapping = TRUE,
                                       min_PIP = 0.5,
                                       filter_cs = FALSE,
                                       maxSNP = Inf,
@@ -96,6 +96,7 @@ postprocess_merge_regions <- function(region_info,
                                        weights,
                                        gene_ids = z_gene$id,
                                        mapping_table = mapping_table,
+                                       show_mapping = show_mapping,
                                        ncore = ncore)
 
   loginfo("%d boundary genes (molecular traits).", nrow(boundary_genes))
@@ -111,8 +112,7 @@ postprocess_merge_regions <- function(region_info,
 
   high_PIP_ids <- unique(high_PIP_finemap_gene_res$id)
   selected_boundary_genes <- boundary_genes[which(boundary_genes$id %in% high_PIP_ids), , drop=FALSE]
-  if (verbose)
-    loginfo("%d boundary molecular traits selected.", nrow(selected_boundary_genes))
+  loginfo("Selected %d boundary molecular traits with PIP > %s.", nrow(selected_boundary_genes), min_PIP)
 
   if (!is.null(combined_pip_res)) {
     if (is.null(boundary_genes$gene_name))
@@ -120,14 +120,14 @@ postprocess_merge_regions <- function(region_info,
     high_PIP_combined_pip_res <- combined_pip_res[combined_pip_res$combined_pip > min_PIP,,drop=FALSE]
     high_PIP_gene_names <- unique(high_PIP_combined_pip_res$gene_name)
     selected_boundary_genes2 <- boundary_genes[which(boundary_genes$gene_name %in% high_PIP_gene_names), , drop=FALSE]
-    if (verbose)
-      loginfo("%d boundary genes selected.", nrow(selected_boundary_genes2))
+    loginfo("Selected %d boundary genes with PIP > %s.", nrow(selected_boundary_genes2), min_PIP)
     selected_boundary_genes <- unique(rbind(selected_boundary_genes, selected_boundary_genes2))
   }
-  loginfo("%d boundary genes (molecular traits) selected in total.", nrow(selected_boundary_genes))
+  loginfo("Selected %d boundary genes (molecular traits) for merging regions.", nrow(selected_boundary_genes))
 
   if (nrow(selected_boundary_genes) > 0) {
     # merge region data for selected boundary genes
+    loginfo("Merge region data for selected boundary genes...")
     res <- merge_region_data(selected_boundary_genes,
                              region_data = region_data,
                              region_info = region_info,
@@ -144,6 +144,7 @@ postprocess_merge_regions <- function(region_info,
     merged_region_id_map <- res$merged_region_id_map
 
     # rerun fine-mapping for the merged regions
+    loginfo("Rerun fine-mapping for the merged regions...")
     res <- finemap_regions(merged_region_data,
                            LD_map = merged_LD_map,
                            weights = weights,
@@ -159,6 +160,7 @@ postprocess_merge_regions <- function(region_info,
     merged_region_susie_alpha_res <- res$susie_alpha_res
 
     # update fine-mapping results after region merging
+    loginfo("Update fine-mapping results...")
     res <- update_merged_region_finemap_res(finemap_res,
                                             susie_alpha_res,
                                             merged_region_finemap_res,
@@ -168,6 +170,7 @@ postprocess_merge_regions <- function(region_info,
     updated_susie_alpha_res <- res$susie_alpha_res
 
     # update region data after region merging
+    loginfo("Update region data...")
     res <- update_merged_region_data(region_data, merged_region_data,
                                      region_info, merged_region_info,
                                      LD_map, merged_LD_map,
@@ -196,7 +199,7 @@ postprocess_merge_regions <- function(region_info,
                 "updated_finemap_res" = updated_finemap_res,
                 "updated_susie_alpha_res" = updated_susie_alpha_res))
   } else {
-    loginfo("No boundary genes selected. Skip merging regions.")
+    loginfo("No boundary genes selected. Skipped merging regions.")
 
     return(list("boundary_genes" = boundary_genes,
                 "selected_boundary_genes" = selected_boundary_genes,
@@ -331,10 +334,11 @@ postprocess_merge_regions_noLD <- function(region_info,
       loginfo("%d boundary genes selected.", nrow(selected_boundary_genes2))
     selected_boundary_genes <- unique(rbind(selected_boundary_genes, selected_boundary_genes2))
   }
-  loginfo("%d boundary genes (molecular traits) selected in total.", nrow(selected_boundary_genes))
+  loginfo("Selected %d boundary genes (molecular traits) for merging regions.", nrow(selected_boundary_genes))
 
   if (nrow(selected_boundary_genes) > 0) {
     # merge region data for selected boundary genes
+    loginfo("Merge region data for selected boundary genes...")
     res <- merge_region_data_noLD(selected_boundary_genes,
                                   region_data = region_data,
                                   region_info = region_info,
@@ -349,6 +353,7 @@ postprocess_merge_regions_noLD <- function(region_info,
     merged_region_id_map <- res$merged_region_id_map
 
     # rerun fine-mapping for the merged regions
+    loginfo("Rerun fine-mapping for the merged regions...")
     res <- finemap_regions_noLD(merged_region_data,
                                 group_prior = group_prior,
                                 group_prior_var = group_prior_var,
@@ -359,6 +364,7 @@ postprocess_merge_regions_noLD <- function(region_info,
     merged_region_susie_alpha_res <- res$susie_alpha_res
 
     # update fine-mapping results after region merging
+    loginfo("Update fine-mapping results...")
     res <- update_merged_region_finemap_res(finemap_res,
                                             susie_alpha_res,
                                             merged_region_finemap_res,
@@ -368,6 +374,7 @@ postprocess_merge_regions_noLD <- function(region_info,
     updated_susie_alpha_res <- res$susie_alpha_res
 
     # update region data after region merging
+    loginfo("Update region data...")
     res <- update_merged_region_data_noLD(region_data, merged_region_data,
                                           region_info, merged_region_info,
                                           snp_map, merged_snp_map,
@@ -392,7 +399,7 @@ postprocess_merge_regions_noLD <- function(region_info,
                 "updated_finemap_res" = updated_finemap_res,
                 "updated_susie_alpha_res" = updated_susie_alpha_res))
   } else {
-    loginfo("No boundary genes selected. Skip merging regions.")
+    loginfo("No boundary genes selected. Skipped merging regions.")
 
     return(list("boundary_genes" = boundary_genes,
                 "selected_boundary_genes" = selected_boundary_genes,
