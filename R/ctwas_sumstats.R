@@ -157,7 +157,7 @@ ctwas_sumstats <- function(
     addHandler(writeToFile, file=logfile, level='DEBUG')
   }
 
-  loginfo("Running cTWAS.")
+  loginfo("Running cTWAS...")
   loginfo("ctwas version: %s", packageVersion("ctwas"))
 
   # check inputs

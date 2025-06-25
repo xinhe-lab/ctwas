@@ -24,15 +24,15 @@
 #'
 #' @param min_abs_corr Minimum absolute correlation allowed in a credible set.
 #'
-#' @param include_cs If TRUE, add credible sets (CS) to finemapping results.
+#' @param include_cs If TRUE, add credible sets (CS) to fine-mapping results.
 #'
-#' @param include_prior If TRUE, include priors in finemapping results.
+#' @param include_prior If TRUE, include priors in fine-mapping results.
 #'
-#' @param include_mu2 If TRUE, include estimated effect size variance (mu2) in finemapping results.
+#' @param include_mu2 If TRUE, include estimated effect size variance (mu2) in fine-mapping results.
 #'
-#' @param include_susie_alpha If TRUE, include susie alpha matrix from finemapping results.
+#' @param include_susie_alpha If TRUE, include susie alpha matrix from fine-mapping results.
 #'
-#' @param include_susie_result If TRUE, include the "susie" result object in finemapping results.
+#' @param include_susie_result If TRUE, include the "susie" result object in fine-mapping results.
 #'
 #' @param snps_only If TRUE, use only SNPs in the region data.
 #'
@@ -58,7 +58,7 @@
 #'
 #' @param ... Additional arguments of \code{susie_rss}.
 #'
-#' @return a list with cTWAS finemapping results.
+#' @return a list with cTWAS fine-mapping results.
 #'
 #' @importFrom logging addHandler loginfo logwarn writeToFile
 #' @importFrom parallel mclapply
@@ -112,7 +112,7 @@ finemap_regions <- function(region_data,
   if (length(region_data) == 0)
     stop("'region_data' is empty!")
 
-  # use all SNPs (thin = 1) for finemapping
+  # use all SNPs (thin = 1) for fine-mapping
   thin <- min(sapply(region_data, "[[", "thin"))
   if (thin != 1)
     stop("thin != 1, run expand_region_data() first to include all SNPs!")
@@ -192,13 +192,13 @@ finemap_regions <- function(region_data,
   if (length(region_data) == 0){
     stop("No region data for Fine-mapping.")
   }
-  loginfo("%d regions included in finemapping.", length(region_data))
+  loginfo("%d regions included in fine-mapping.", length(region_data))
 
   if (verbose) {
     if (is.null(group_prior)) {
       loginfo("Use uniform prior")
     }
-    loginfo("null weight method = %s", null_method)
+    loginfo("null weight method = '%s'", null_method)
     loginfo("coverage = %s", coverage)
     loginfo("min_abs_corr = %s", min_abs_corr)
   }
@@ -271,15 +271,15 @@ finemap_regions <- function(region_data,
 #'
 #' @param coverage A number between 0 and 1 specifying the \dQuote{coverage} of the estimated confidence sets
 #'
-#' @param include_cs If TRUE, include credible sets (CS) to finemapping results.
+#' @param include_cs If TRUE, include credible sets (CS) to fine-mapping results.
 #'
-#' @param include_prior If TRUE, include priors in finemapping results.
+#' @param include_prior If TRUE, include priors in fine-mapping results.
 #'
-#' @param include_mu2 If TRUE, include estimated effect size variance (mu2) in finemapping results.
+#' @param include_mu2 If TRUE, include estimated effect size variance (mu2) in fine-mapping results.
 #'
-#' @param include_susie_alpha If TRUE, include susie alpha matrix from finemapping results.
+#' @param include_susie_alpha If TRUE, include susie alpha matrix from fine-mapping results.
 #'
-#' @param include_susie_result If TRUE, include the "susie" result object in finemapping results.
+#' @param include_susie_result If TRUE, include the "susie" result object in fine-mapping results.
 #'
 #' @param snps_only If TRUE, use only SNPs in the region data.
 #'
@@ -291,7 +291,7 @@ finemap_regions <- function(region_data,
 #'
 #' @param ... Additional arguments of \code{susie_rss}.
 #'
-#' @return a list with cTWAS finemapping results.
+#' @return a list with cTWAS fine-mapping results.
 #'
 #' @importFrom logging addHandler loginfo logwarn writeToFile
 #' @importFrom parallel mclapply
@@ -334,7 +334,7 @@ finemap_regions_noLD <- function(region_data,
   if (length(region_data) == 0)
     stop("'region_data' is empty!")
 
-  # use all SNPs (thin = 1) for finemapping
+  # use all SNPs (thin = 1) for fine-mapping
   thin <- min(sapply(region_data, "[[", "thin"))
   if (thin != 1)
     stop("thin != 1, run expand_region_data() first to include all SNPs!")
@@ -384,13 +384,13 @@ finemap_regions_noLD <- function(region_data,
   if (length(region_data) == 0){
     stop("No region data for Fine-mapping.")
   }
-  loginfo("%d regions included in finemapping.", length(region_data))
+  loginfo("%d regions included in fine-mapping.", length(region_data))
 
   if (verbose) {
     if (is.null(group_prior)) {
       loginfo("Use uniform prior")
     }
-    loginfo("null weight method = %s", null_method)
+    loginfo("null weight method = '%s'", null_method)
   }
 
   region_ids <- names(region_data)
@@ -514,7 +514,7 @@ finemap_regions_ser <- function(region_data,
     if (is.null(group_prior)) {
       loginfo("Use uniform prior")
     }
-    loginfo("Use %s null weight method", null_method)
+    loginfo("null weight method = '%s'", null_method)
   }
 
   region_ids <- names(region_data)
@@ -534,7 +534,7 @@ finemap_regions_ser <- function(region_data,
   return(finemap_res)
 }
 
-# Runs cTWAS finemapping for a single region
+# Runs cTWAS fine-mapping for a single region
 #' @importFrom logging loginfo
 finemap_single_region <- function(region_data,
                                   region_id,
@@ -704,7 +704,7 @@ finemap_single_region <- function(region_data,
 }
 
 
-# Runs cTWAS finemapping for a single region without LD
+# Runs cTWAS fine-mapping for a single region without LD
 #' @importFrom logging loginfo
 finemap_single_region_noLD <- function(region_data,
                                        region_id,
@@ -833,7 +833,7 @@ finemap_single_region_noLD <- function(region_data,
               "susie_res" = susie_res))
 }
 
-# Runs cTWAS finemapping for a single region using cTWAS SER model
+# Runs cTWAS fine-mapping for a single region using cTWAS SER model
 #' @importFrom logging loginfo
 finemap_single_region_ser <- function(region_data,
                                       region_id,

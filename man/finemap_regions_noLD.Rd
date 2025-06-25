@@ -41,15 +41,15 @@ If NULL, it will set prior variance = 50 as the default in \code{susie_rss}.}
 
 \item{coverage}{A number between 0 and 1 specifying the \dQuote{coverage} of the estimated confidence sets}
 
-\item{include_cs}{If TRUE, include credible sets (CS) to finemapping results.}
+\item{include_cs}{If TRUE, include credible sets (CS) to fine-mapping results.}
 
-\item{include_prior}{If TRUE, include priors in finemapping results.}
+\item{include_prior}{If TRUE, include priors in fine-mapping results.}
 
-\item{include_mu2}{If TRUE, include estimated effect size variance (mu2) in finemapping results.}
+\item{include_mu2}{If TRUE, include estimated effect size variance (mu2) in fine-mapping results.}
 
-\item{include_susie_alpha}{If TRUE, include susie alpha matrix from finemapping results.}
+\item{include_susie_alpha}{If TRUE, include susie alpha matrix from fine-mapping results.}
 
-\item{include_susie_result}{If TRUE, include the "susie" result object in finemapping results.}
+\item{include_susie_result}{If TRUE, include the "susie" result object in fine-mapping results.}
 
 \item{snps_only}{If TRUE, use only SNPs in the region data.}
 
@@ -62,7 +62,7 @@ If NULL, it will set prior variance = 50 as the default in \code{susie_rss}.}
 \item{...}{Additional arguments of \code{susie_rss}.}
 }
 \value{
-a list with cTWAS finemapping results.
+a list with cTWAS fine-mapping results.
 }
 \description{
 Runs cTWAS fine-mapping for regions without LD (L = 1)

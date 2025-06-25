@@ -9,7 +9,7 @@ get_boundary_genes(
   weights,
   gene_ids = NULL,
   mapping_table = NULL,
-  show_mapping = FALSE,
+  show_mapping = TRUE,
   ncore = 1
 )
 }
