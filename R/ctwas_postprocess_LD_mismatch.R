@@ -115,13 +115,14 @@ postprocess_LD_mismatch <- function(region_data,
                                                pip_thresh = pip_thresh,
                                                z_thresh = z_thresh)
   } else {
-    loginfo('No problematic SNPs. No need to update fine-mapping results.')
+    loginfo('No problematic SNPs. Skipped updating fine-mapping results.')
     problematic_genes <- NULL
   }
 
   # rerun the fine-mapping without LD for the regions with problematic genes
   if (length(problematic_genes) > 0) {
     problematic_region_ids <- unique(finemap_res$region_id[finemap_res$id %in% problematic_genes])
+    loginfo('Number of problematic regions: %d', length(problematic_region_ids))
     rerun_region_data <- region_data[problematic_region_ids]
     thin <- min(sapply(rerun_region_data, "[[", "thin"))
     # expand regions with all SNPs before fine-mapping
@@ -154,6 +155,7 @@ postprocess_LD_mismatch <- function(region_data,
     updated_susie_alpha_res <- res$susie_alpha_res
     rm(res)
   } else {
+    loginfo('No problematic genes. Skipped updating fine-mapping results.')
     problematic_region_ids <- NULL
     rerun_finemap_res <- NULL
     rerun_susie_alpha_res <- NULL
