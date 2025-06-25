@@ -17,7 +17,7 @@ postprocess_merge_regions_noLD(
   group_prior_var = NULL,
   combined_pip_res = NULL,
   mapping_table = NULL,
-  show_mapping = FALSE,
+  show_mapping = TRUE,
   min_PIP = 0.5,
   filter_cs = FALSE,
   maxSNP = Inf,
