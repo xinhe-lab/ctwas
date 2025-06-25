@@ -176,7 +176,7 @@ get_boundary_genes <- function(region_info,
                                weights,
                                gene_ids = NULL,
                                mapping_table = NULL,
-                               show_mapping = FALSE,
+                               show_mapping = TRUE,
                                ncore = 1){
 
   # limit to the selected genes
@@ -201,54 +201,34 @@ get_boundary_genes <- function(region_info,
 
     selected_columns <- c(colnames(gene_info), "gene_name")
 
-    if (show_mapping) {
-      # show all the ids mapped between molecular traits and genes
-      # paste (concatenate) together all the combined molecular traits or genes
-      # get molecular trait level positions
-      molecular_trait_level_info <- mapped_gene_info %>%
-        group_by(.data$id) %>%
-        summarise(chrom = .data$chrom[1],
-                  p0 = min(.data$p0),
-                  p1 = max(.data$p1),
-                  molecular_id = .data$molecular_id[1],
-                  gene_name = paste(unique(.data$gene_name), collapse = ",")) %>%
-        ungroup() %>%
-        select(all_of(selected_columns))
+    # get molecular trait level positions
+    molecular_trait_level_info <- mapped_gene_info %>%
+      group_by(.data$id) %>%
+      summarise(chrom = .data$chrom[1],
+                p0 = min(.data$p0),
+                p1 = max(.data$p1),
+                molecular_id = .data$molecular_id[1],
+                gene_name = paste(unique(.data$gene_name), collapse = ",")) %>%
+      ungroup() %>%
+      select(all_of(selected_columns))
 
-      # get gene level positions
-      gene_level_info <- mapped_gene_info %>%
-        group_by(.data$gene_name) %>%
-        summarise(chrom = .data$chrom[1],
-                  p0 = min(.data$p0),
-                  p1 = max(.data$p1),
-                  id = paste(unique(.data$id), collapse = ","),
-                  molecular_id = paste(unique(.data$molecular_id), collapse = ",")) %>%
-        ungroup() %>%
-        select(all_of(selected_columns))
+    # get gene level positions
+    gene_level_info <- mapped_gene_info %>%
+      group_by(.data$gene_name) %>%
+      summarise(chrom = .data$chrom[1],
+                p0 = min(.data$p0),
+                p1 = max(.data$p1),
+                id = paste(unique(.data$id), collapse = ","),
+                molecular_id = paste(unique(.data$molecular_id), collapse = ",")) %>%
+      ungroup() %>%
+      select(all_of(selected_columns))
 
-    } else {
+    if (!show_mapping) {
       # only show the combined molecular traits or genes
       # get molecular trait level positions
-      molecular_trait_level_info <- mapped_gene_info %>%
-        group_by(.data$id) %>%
-        summarise(chrom = .data$chrom[1],
-                  p0 = min(.data$p0),
-                  p1 = max(.data$p1),
-                  molecular_id = .data$molecular_id[1],
-                  gene_name = "") %>%
-        ungroup() %>%
-        select(all_of(selected_columns))
-
-      # get gene level positions
-      gene_level_info <- mapped_gene_info %>%
-        group_by(.data$gene_name) %>%
-        summarise(chrom = .data$chrom[1],
-                  p0 = min(.data$p0),
-                  p1 = max(.data$p1),
-                  id = "",
-                  molecular_id = "") %>%
-        ungroup() %>%
-        select(all_of(selected_columns))
+      molecular_trait_level_info$gene_name <- ""
+      gene_level_info$id <- ""
+      gene_level_info$molecular_id <- ""
     }
 
     # combine gene_info from both molecular trait level and gene level
