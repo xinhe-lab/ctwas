@@ -27,8 +27,8 @@
 #' @param thin_by options for thinning SNPs,
 #' "reference": thin reference SNPs, "gwas": thin GWAS SNPs.
 #'
-#' @param adjust_boundary_genes If TRUE, identify cross-boundary genes, and
-#' adjust region_data.
+#' @param adjust_boundary_genes If TRUE, identify boundary genes, and
+#' adjust region_data for boundary genes.
 #'
 #' @param ncore The number of cores used to parallelize susie over regions
 #'
@@ -36,7 +36,7 @@
 #'
 #' @param logfile path to the log file, if NULL will print log info on screen.
 #'
-#' @return a list with region_data and cross-boundary genes
+#' @return a list of region_data
 #'
 #' @importFrom logging addHandler loginfo logwarn writeToFile
 #' @importFrom data.table rbindlist
@@ -169,8 +169,7 @@ assemble_region_data <- function(region_info,
   loginfo("Updating region z-scores...")
   region_data <- update_region_z(region_data, z_snp, z_gene, ncore = ncore)
 
-  return(list("region_data" = region_data,
-              "boundary_genes" = boundary_genes))
+  return(region_data)
 }
 
 # Assign genes and SNPs in regions

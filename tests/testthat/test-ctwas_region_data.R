@@ -8,24 +8,20 @@ test_that("assemble_region_data works", {
 
   ctwas_res <- readRDS(system.file("extdata/sample_data", "LDL_example.ctwas_sumstats_noLD_res.RDS", package = "ctwas"))
   expected_region_data <- ctwas_res$region_data
-  expected_boundary_genes <- ctwas_res$boundary_genes
 
   capture.output({
-    res <- assemble_region_data(region_info,
-                                z_snp,
-                                z_gene,
-                                weights,
-                                snp_map,
-                                thin = 0.1,
-                                maxSNP = 20000,
-                                min_group_size = 100,
-                                ncore = 2)
+    region_data <- assemble_region_data(region_info,
+                                        z_snp,
+                                        z_gene,
+                                        weights,
+                                        snp_map,
+                                        thin = 0.1,
+                                        maxSNP = 20000,
+                                        min_group_size = 100,
+                                        ncore = 2)
   })
-  region_data <- res$region_data
-  boundary_genes <- res$boundary_genes
 
   expect_equal(region_data, expected_region_data)
-  expect_equal(boundary_genes, expected_boundary_genes)
 
 })
 

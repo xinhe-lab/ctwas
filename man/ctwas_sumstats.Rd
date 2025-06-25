@@ -154,7 +154,7 @@ in screening regions and fine-mapping steps with LD.}
 }
 \value{
 a list, including z_gene, estimated parameters, region_data,
-cross-boundary genes, screening region results, and fine-mapping results.
+screening region results, and fine-mapping results.
 }
 \description{
 cTWAS analysis using summary statistics

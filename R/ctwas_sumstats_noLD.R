@@ -83,7 +83,7 @@
 #' @importFrom utils packageVersion
 #'
 #' @return a list, including z_gene, estimated parameters, region_data,
-#' cross-boundary genes, screening region results, and fine-mapping results.
+#' screening region results, and fine-mapping results.
 #'
 #' @export
 #'
@@ -171,8 +171,8 @@ ctwas_sumstats_noLD <- function(
   # Get region_data, which contains SNPs and genes assigned to each region
   #. downsample SNPs if thin < 1
   #. assign SNP and gene IDs, and z-scores to each region
-  #. find boundary genes and adjust region_data for boundary genes
-  region_data_res <- assemble_region_data(region_info,
+  #. adjust region_data for boundary genes
+  region_data <- assemble_region_data(region_info,
                                           z_snp,
                                           z_gene,
                                           weights,
@@ -180,15 +180,10 @@ ctwas_sumstats_noLD <- function(
                                           thin = thin,
                                           maxSNP = maxSNP,
                                           min_group_size = min_group_size,
-                                          trim_by = "random",
-                                          adjust_boundary_genes = TRUE,
                                           ncore = ncore,
                                           seed = seed)
-  region_data <- region_data_res$region_data
-  boundary_genes <- region_data_res$boundary_genes
   if (!is.null(outputdir)) {
     saveRDS(region_data, file.path(outputdir, paste0(outname, ".region_data.thin", thin, ".RDS")))
-    saveRDS(boundary_genes, file.path(outputdir, paste0(outname, ".boundary_genes.RDS")))
   }
 
   # Estimate parameters
@@ -277,11 +272,11 @@ ctwas_sumstats_noLD <- function(
 
   return(list("z_gene" = z_gene,
               "param" = param,
+              "region_data" = region_data,
+              "screen_res" = screen_res,
               "finemap_res" = finemap_res,
               "susie_alpha_res" = susie_alpha_res,
-              "susie_res" = susie_res,
-              "region_data" = region_data,
-              "boundary_genes" = boundary_genes,
-              "screen_res" = screen_res))
+              "susie_res" = susie_res))
+
 }
 

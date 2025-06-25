@@ -3,11 +3,11 @@ test_that("merge_region_data_noLD works", {
   z_snp <- readRDS(system.file("extdata/sample_data", "LDL_example.preprocessed.z_snp.RDS", package = "ctwas"))
   region_info <- readRDS(system.file("extdata/sample_data", "LDL_example.region_info.RDS", package = "ctwas"))
   snp_map <- readRDS(system.file("extdata/sample_data", "LDL_example.snp_map.RDS", package = "ctwas"))
+  boundary_genes <- readRDS(system.file("extdata/sample_data", "LDL_example.boundary_genes.RDS", package = "ctwas"))
+
   ctwas_res <- readRDS(system.file("extdata/sample_data", "LDL_example.ctwas_sumstats_noLD_res.RDS", package = "ctwas"))
   z_gene <- ctwas_res$z_gene
-  boundary_genes <- ctwas_res$boundary_genes
   region_data <- ctwas_res$region_data
-  rm(ctwas_res)
 
   expected_merge_region_res <- readRDS("LDL_example.merge_region_noLD_res.RDS")
 
@@ -36,13 +36,12 @@ test_that("merge_region_data works", {
   z_snp <- readRDS(system.file("extdata/sample_data", "LDL_example.preprocessed.z_snp.RDS", package = "ctwas"))
   region_info <- readRDS(system.file("extdata/sample_data", "LDL_example.region_info.RDS", package = "ctwas"))
   snp_map <- readRDS(system.file("extdata/sample_data", "LDL_example.snp_map.RDS", package = "ctwas"))
+  boundary_genes <- readRDS(system.file("extdata/sample_data", "LDL_example.boundary_genes.RDS", package = "ctwas"))
   ctwas_res <- readRDS(system.file("extdata/sample_data", "LDL_example.ctwas_sumstats_res.RDS", package = "ctwas"))
   z_gene <- ctwas_res$z_gene
-  boundary_genes <- ctwas_res$boundary_genes
   region_data <- ctwas_res$region_data
   group_prior <- ctwas_res$param$group_prior
   group_prior_var <- ctwas_res$param$group_prior_var
-  rm(ctwas_res)
 
   expected_merge_region_res <- readRDS("LDL_example.merge_region_res.RDS")
 
@@ -68,9 +67,7 @@ test_that("create_merged_snp_map works", {
 
   region_info <- readRDS(system.file("extdata/sample_data", "LDL_example.region_info.RDS", package = "ctwas"))
   snp_map <- readRDS(system.file("extdata/sample_data", "LDL_example.snp_map.RDS", package = "ctwas"))
-  ctwas_res <- readRDS(system.file("extdata/sample_data", "LDL_example.ctwas_sumstats_noLD_res.RDS", package = "ctwas"))
-  boundary_genes <- ctwas_res$boundary_genes
-
+  boundary_genes <- readRDS(system.file("extdata/sample_data", "LDL_example.boundary_genes.RDS", package = "ctwas"))
   expected_merge_region_res <- readRDS("LDL_example.merge_region_noLD_res.RDS")
 
   capture.output({
@@ -93,8 +90,7 @@ test_that("create_merged_snp_LD_map works", {
 
   region_info <- readRDS(system.file("extdata/sample_data", "LDL_example.region_info.RDS", package = "ctwas"))
   snp_map <- readRDS(system.file("extdata/sample_data", "LDL_example.snp_map.RDS", package = "ctwas"))
-  ctwas_res <- readRDS(system.file("extdata/sample_data", "LDL_example.ctwas_sumstats_noLD_res.RDS", package = "ctwas"))
-  boundary_genes <- ctwas_res$boundary_genes
+  boundary_genes <- readRDS(system.file("extdata/sample_data", "LDL_example.boundary_genes.RDS", package = "ctwas"))
 
   expected_merge_region_res <- readRDS("LDL_example.merge_region_res.RDS")
 
@@ -153,7 +149,6 @@ test_that("label_overlapping_regions works", {
   region_info <- readRDS(system.file("extdata/sample_data", "LDL_example.region_info.RDS", package = "ctwas"))
   weights <- readRDS(system.file("extdata/sample_data", "LDL_example.preprocessed.weights.RDS", package = "ctwas"))
   z_gene <- readRDS(system.file("extdata/sample_data", "LDL_example.z_gene.RDS", package = "ctwas"))
-
   boundary_genes <- readRDS(system.file("extdata/sample_data", "LDL_example.boundary_genes.RDS", package = "ctwas"))
 
   expected_labeled_boundary_genes <- readRDS("LDL_example.labeled_boundary_genes.RDS")
@@ -180,14 +175,15 @@ test_that("postprocess_merge_regions works", {
   weights <- readRDS(system.file("extdata/sample_data", "LDL_example.preprocessed.weights.RDS", package = "ctwas"))
   region_info <- readRDS(system.file("extdata/sample_data", "LDL_example.region_info.RDS", package = "ctwas"))
   snp_map <- readRDS(system.file("extdata/sample_data", "LDL_example.snp_map.RDS", package = "ctwas"))
+
   ctwas_res <- readRDS(system.file("extdata/sample_data", "LDL_example.ctwas_sumstats_res.RDS", package = "ctwas"))
   z_gene <- ctwas_res$z_gene
-  boundary_genes <- ctwas_res$boundary_genes
   region_data <- ctwas_res$region_data
   group_prior <- ctwas_res$param$group_prior
   group_prior_var <- ctwas_res$param$group_prior_var
   finemap_res <- ctwas_res$finemap_res
   susie_alpha_res <- ctwas_res$susie_alpha_res
+
   combined_pip_res <- readRDS("LDL_example.combined_pip_res.RDS")
   combined_pip_res <- combined_pip_res$by_context
   mapping_table <- readRDS(system.file("extdata/sample_data", "mapping_table.RDS", package = "ctwas"))
