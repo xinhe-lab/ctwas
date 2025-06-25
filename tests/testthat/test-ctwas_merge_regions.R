@@ -209,6 +209,7 @@ test_that("postprocess_merge_regions works", {
                                                               group_prior_var = group_prior_var,
                                                               combined_pip_res = combined_pip_res,
                                                               mapping_table = mapping_table,
+                                                              show_mapping = TRUE,
                                                               min_PIP = 0.5,
                                                               filter_cs = TRUE,
                                                               maxSNP = 20000,
