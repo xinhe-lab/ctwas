@@ -13,12 +13,10 @@ postprocess_merge_regions_noLD(
   snp_map,
   finemap_res,
   susie_alpha_res,
+  mapping_table = NULL,
   group_prior = NULL,
   group_prior_var = NULL,
-  combined_pip_res = NULL,
-  mapping_table = NULL,
-  show_mapping = TRUE,
-  min_PIP = 0.5,
+  pip_thresh = 0.5,
   filter_cs = FALSE,
   maxSNP = Inf,
   ncore = 1,
@@ -44,21 +42,16 @@ postprocess_merge_regions_noLD(
 
 \item{susie_alpha_res}{a data frame of original susie alpha result.}
 
+\item{mapping_table}{a data frame of mapping between molecular traits and genes,
+with required columns: "molecular_id", "gene_name".}
+
 \item{group_prior}{a vector of prior inclusion probabilities for different groups.
 If NULL, it will use uniform prior inclusion probabilities.}
 
 \item{group_prior_var}{a vector of prior variances for different groups.
 If NULL, it will set prior variance = 50 as the default in \code{susie_rss}.}
 
-\item{combined_pip_res}{a data frame of combined gene PIP result from \code{combine_gene_pips()}.}
-
-\item{mapping_table}{a data frame of mapping between molecular traits and genes,
-with required columns: "molecular_id", "gene_name".}
-
-\item{show_mapping}{If TRUE, include the mapping between molecular traits and genes
-in the result.}
-
-\item{min_PIP}{PIP cutoff for selecting boundary genes to merge regions.}
+\item{pip_thresh}{PIP cutoff for selecting boundary genes to merge regions.}
 
 \item{filter_cs}{If TRUE, only select boundary genes in credible sets for region merge.}
 

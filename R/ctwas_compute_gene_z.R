@@ -179,6 +179,8 @@ get_boundary_genes <- function(region_info,
                                show_mapping = TRUE,
                                ncore = 1){
 
+  loginfo("Get boundary genes...")
+
   # limit to the selected genes
   if (!is.null(gene_ids)) {
     weights <- weights[gene_ids]
@@ -192,7 +194,7 @@ get_boundary_genes <- function(region_info,
     # get combined gene_info
     # map molecular traits to genes, allow for many-to-many matching, return all matches
     # a gene could have molecular traits, and a molecular trait could be linked to multiple genes
-    loginfo("Map molecular traits to genes...")
+    loginfo("Map molecular traits to genes.")
 
     mapped_gene_info <- gene_info %>%
       left_join(mapping_table[,c("molecular_id", "gene_name")],
@@ -243,7 +245,6 @@ get_boundary_genes <- function(region_info,
                                        ncore = ncore)
 
   # get boundary genes (n_regions > 1)
-  loginfo("Get boundary genes...")
   boundary_genes <- gene_region_info[gene_region_info$n_regions > 1, ]
   boundary_genes <- boundary_genes[with(boundary_genes, order(chrom, p0, p1)), ]
   rownames(boundary_genes) <- NULL
