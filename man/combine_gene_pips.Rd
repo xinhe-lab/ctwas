@@ -6,6 +6,9 @@
 \usage{
 combine_gene_pips(
   susie_alpha_res,
+  mapping_table = NULL,
+  map_by = "molecular_id",
+  drop_unmapped = TRUE,
   group_by = "molecular_id",
   by = c("context", "type", "group"),
   method = c("combine_cs", "sum"),
@@ -18,6 +21,13 @@ combine_gene_pips(
 }
 \arguments{
 \item{susie_alpha_res}{a data frame of annotated susie alpha result.}
+
+\item{mapping_table}{a data frame of mapping between molecular traits and genes,
+with required columns: "molecular_id", "gene_name".}
+
+\item{map_by}{column name to be mapped by (default: "molecular_id").}
+
+\item{drop_unmapped}{If TRUE, remove unmapped genes.}
 
 \item{group_by}{column name to group genes by.}
 

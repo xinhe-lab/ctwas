@@ -195,7 +195,7 @@ anno_susie_alpha_res <- function(susie_alpha_res,
 
     # Map molecular traits to genes, allow for many-to-many matching, return all matches
     # a gene could have molecular traits, and a molecular trait could be linked to multiple genes
-    loginfo("Map molecular traits to genes")
+    loginfo("Map molecular traits to genes.")
     susie_alpha_res <- susie_alpha_res %>%
       left_join(mapping_table, by = map_by, multiple = "all", relationship = "many-to-many")
 
@@ -203,7 +203,7 @@ anno_susie_alpha_res <- function(susie_alpha_res,
       unmapped_idx <- which(is.na(susie_alpha_res$gene_name))
       if ( length(unmapped_idx) > 0){
         unmapped_molecular_ids <- unique(susie_alpha_res$molecular_id[unmapped_idx])
-        loginfo("Drop %d unmapped molecular traits", length(unmapped_molecular_ids))
+        loginfo("Drop %d unmapped molecular traits.", length(unmapped_molecular_ids))
         susie_alpha_res <- susie_alpha_res[-unmapped_idx, , drop=FALSE]
       }
     }

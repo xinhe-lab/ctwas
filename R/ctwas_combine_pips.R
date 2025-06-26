@@ -3,6 +3,13 @@
 #'
 #' @param susie_alpha_res a data frame of annotated susie alpha result.
 #'
+#' @param mapping_table a data frame of mapping between molecular traits and genes,
+#' with required columns: "molecular_id", "gene_name".
+#'
+#' @param map_by column name to be mapped by (default: "molecular_id").
+#'
+#' @param drop_unmapped If TRUE, remove unmapped genes.
+#'
 #' @param group_by column name to group genes by.
 #'
 #' @param by option to combine PIPs by: "context" (default), "type", or "group".
@@ -38,6 +45,9 @@
 #'
 #' @export
 combine_gene_pips <- function(susie_alpha_res,
+                              mapping_table = NULL,
+                              map_by = "molecular_id",
+                              drop_unmapped = TRUE,
                               group_by = "molecular_id",
                               by = c("context", "type", "group"),
                               method = c("combine_cs", "sum"),
@@ -50,9 +60,19 @@ combine_gene_pips <- function(susie_alpha_res,
   by <- match.arg(by)
   method <- match.arg(method)
 
-  # Check to see if gene_name and gene_type are already in susie_alpha_res
+  loginfo("Compute combined PIPs...")
+
+  if (!is.null(mapping_table)) {
+    # map molecular traits to genes
+    susie_alpha_res <- anno_susie_alpha_res(susie_alpha_res,
+                                            mapping_table,
+                                            map_by = map_by,
+                                            drop_unmapped = drop_unmapped)
+  }
+
+  # Check to see if the group_by column is in susie_alpha_res
   if (!(group_by %in% colnames(susie_alpha_res))){
-    stop(paste("Cannot find the column", group_by, "in susie_alpha_res!"))
+    stop(paste0("Cannot find the column '", group_by, "' in susie_alpha_res!"))
   }
 
   # use sum option if there is no CS information
@@ -177,9 +197,6 @@ combine_gene_pips <- function(susie_alpha_res,
   # order by combined PIP
   combined_gene_pips <- combined_gene_pips[order(-combined_gene_pips$combined_pip),]
   rownames(combined_gene_pips) <- NULL
-
-  # new_colnames <- c(setdiff(colnames(combined_gene_pips), "combined_pip"), "combined_pip")
-  # combined_gene_pips <- combined_gene_pips[, new_colnames]
 
   return(combined_gene_pips)
 }
