@@ -18,6 +18,8 @@
 #'
 #' @param susie_alpha_res a data frame of original susie alpha result.
 #'
+#' @param combine_PIPs if TRUE, select boundary genes after combining gene PIPs.
+#'
 #' @param mapping_table a data frame of mapping between molecular traits and genes,
 #' with required columns: "molecular_id", "gene_name".
 #'
@@ -64,6 +66,7 @@ postprocess_merge_regions <- function(region_info,
                                       snp_map,
                                       finemap_res,
                                       susie_alpha_res,
+                                      combine_PIPs = TRUE,
                                       mapping_table = NULL,
                                       L = 5,
                                       group_prior = NULL,
@@ -84,53 +87,19 @@ postprocess_merge_regions <- function(region_info,
 
   loginfo("Run post-processing procedure for merging regions...")
 
-  if (!is.null(mapping_table)) {
-    # combine gene-level PIPs
-    combined_pip_res <- combine_gene_pips(susie_alpha_res,
-                                          mapping_table = mapping_table,
-                                          group_by = "gene_name",
-                                          filter_cs = filter_cs)
-  } else {
-    # combine molecular trait-level PIPs
-    combined_pip_res <- combine_gene_pips(susie_alpha_res,
-                                          group_by = "molecular_id",
-                                          filter_cs = filter_cs)
-  }
-
-  # get boundary genes (combining both molecular traits and genes)
-  boundary_genes <- get_boundary_genes(region_info,
-                                       weights,
-                                       gene_ids = z_gene$id,
-                                       mapping_table = mapping_table,
-                                       ncore = ncore)
-
-  loginfo("%d boundary genes.", nrow(boundary_genes))
-
-  # select boundary genes with PIP > 0.5 and in CS
-  finemap_gene_res <- finemap_res[finemap_res$group != "SNP",,drop=FALSE]
-  high_PIP_finemap_gene_res <- finemap_gene_res[finemap_gene_res$susie_pip > pip_thresh,,drop=FALSE]
-
-  if (filter_cs) {
-    # limit to genes in credible sets
-    high_PIP_finemap_gene_res <- high_PIP_finemap_gene_res[!is.na(high_PIP_finemap_gene_res$cs),,drop=FALSE]
-  }
-
-  high_PIP_ids <- unique(high_PIP_finemap_gene_res$id)
-  selected_boundary_genes <- boundary_genes[which(boundary_genes$id %in% high_PIP_ids), , drop=FALSE]
-  loginfo("Selected %d boundary genes with PIP > %s.", nrow(selected_boundary_genes), pip_thresh)
-
-  if (!is.null(mapping_table)) {
-    high_PIP_combined_pip_res <- combined_pip_res[combined_pip_res$combined_pip > pip_thresh,,drop=FALSE]
-    high_PIP_gene_names <- unique(high_PIP_combined_pip_res$gene_name)
-    selected_boundary_genes2 <- boundary_genes[which(boundary_genes$gene_name %in% high_PIP_gene_names), , drop=FALSE]
-  } else {
-    high_PIP_combined_pip_res <- combined_pip_res[combined_pip_res$combined_pip > pip_thresh,,drop=FALSE]
-    high_PIP_molecular_ids <- unique(high_PIP_combined_pip_res$molecular_id)
-    selected_boundary_genes2 <- boundary_genes[which(boundary_genes$molecular_id %in% high_PIP_molecular_ids), , drop=FALSE]
-  }
-  loginfo("Selected %d boundary genes with combined PIP > %s.", nrow(selected_boundary_genes2), pip_thresh)
-  selected_boundary_genes <- unique(rbind(selected_boundary_genes, selected_boundary_genes2))
-  loginfo("Selected %d boundary genes in total.", nrow(selected_boundary_genes))
+  # select boundary genes with high PIP and in CS
+  res <- select_boundary_genes(region_info,
+                               weights,
+                               gene_ids = z_gene$id,
+                               finemap_res = finemap_res,
+                               susie_alpha_res = susie_alpha_res,
+                               combine_PIPs = combine_PIPs,
+                               mapping_table = mapping_table,
+                               pip_thresh = pip_thresh,
+                               filter_cs = filter_cs,
+                               ncore = ncore)
+  boundary_genes <- res$boundary_genes
+  selected_boundary_genes <- res$selected_boundary_genes
 
   if (nrow(selected_boundary_genes) > 0) {
     # merge region data for selected boundary genes
@@ -245,6 +214,8 @@ postprocess_merge_regions <- function(region_info,
 #'
 #' @param susie_alpha_res a data frame of original susie alpha result.
 #'
+#' @param combine_PIPs if TRUE, select boundary genes after combining gene PIPs.
+#'
 #' @param mapping_table a data frame of mapping between molecular traits and genes,
 #' with required columns: "molecular_id", "gene_name".
 #'
@@ -284,6 +255,7 @@ postprocess_merge_regions_noLD <- function(region_info,
                                            snp_map,
                                            finemap_res,
                                            susie_alpha_res,
+                                           combine_PIPs = TRUE,
                                            mapping_table = NULL,
                                            group_prior = NULL,
                                            group_prior_var = NULL,
@@ -301,53 +273,19 @@ postprocess_merge_regions_noLD <- function(region_info,
 
   loginfo("Run post-processing procedure for merging regions without LD...")
 
-  if (!is.null(mapping_table)) {
-    # combine gene-level PIPs
-    combined_pip_res <- combine_gene_pips(susie_alpha_res,
-                                          mapping_table = mapping_table,
-                                          group_by = "gene_name",
-                                          filter_cs = filter_cs)
-  } else {
-    # combine molecular trait-level PIPs
-    combined_pip_res <- combine_gene_pips(susie_alpha_res,
-                                          group_by = "molecular_id",
-                                          filter_cs = filter_cs)
-  }
-
-  # get boundary genes (combining both molecular traits and genes)
-  boundary_genes <- get_boundary_genes(region_info,
-                                       weights,
-                                       gene_ids = z_gene$id,
-                                       mapping_table = mapping_table,
-                                       ncore = ncore)
-
-  loginfo("%d boundary genes.", nrow(boundary_genes))
-
-  # select boundary genes with PIP > 0.5 and in CS
-  finemap_gene_res <- finemap_res[finemap_res$group != "SNP",,drop=FALSE]
-  high_PIP_finemap_gene_res <- finemap_gene_res[finemap_gene_res$susie_pip > pip_thresh,,drop=FALSE]
-
-  if (filter_cs) {
-    # limit to genes in credible sets
-    high_PIP_finemap_gene_res <- high_PIP_finemap_gene_res[!is.na(high_PIP_finemap_gene_res$cs),,drop=FALSE]
-  }
-
-  high_PIP_ids <- unique(high_PIP_finemap_gene_res$id)
-  selected_boundary_genes <- boundary_genes[which(boundary_genes$id %in% high_PIP_ids), , drop=FALSE]
-  loginfo("Selected %d boundary genes with PIP > %s.", nrow(selected_boundary_genes), pip_thresh)
-
-  if (!is.null(mapping_table)) {
-    high_PIP_combined_pip_res <- combined_pip_res[combined_pip_res$combined_pip > pip_thresh,,drop=FALSE]
-    high_PIP_gene_names <- unique(high_PIP_combined_pip_res$gene_name)
-    selected_boundary_genes2 <- boundary_genes[which(boundary_genes$gene_name %in% high_PIP_gene_names), , drop=FALSE]
-  } else {
-    high_PIP_combined_pip_res <- combined_pip_res[combined_pip_res$combined_pip > pip_thresh,,drop=FALSE]
-    high_PIP_molecular_ids <- unique(high_PIP_combined_pip_res$molecular_id)
-    selected_boundary_genes2 <- boundary_genes[which(boundary_genes$molecular_id %in% high_PIP_molecular_ids), , drop=FALSE]
-  }
-  loginfo("Selected %d boundary genes with combined PIP > %s.", nrow(selected_boundary_genes2), pip_thresh)
-  selected_boundary_genes <- unique(rbind(selected_boundary_genes, selected_boundary_genes2))
-  loginfo("Selected %d boundary genes in total.", nrow(selected_boundary_genes))
+  # select boundary genes with high PIP and in CS
+  res <- select_boundary_genes(region_info,
+                               weights,
+                               gene_ids = z_gene$id,
+                               finemap_res = finemap_res,
+                               susie_alpha_res = susie_alpha_res,
+                               combine_PIPs = combine_PIPs,
+                               mapping_table = mapping_table,
+                               pip_thresh = pip_thresh,
+                               filter_cs = filter_cs,
+                               ncore = ncore)
+  boundary_genes <- res$boundary_genes
+  selected_boundary_genes <- res$selected_boundary_genes
 
   if (nrow(selected_boundary_genes) > 0) {
     # merge region data for selected boundary genes
@@ -430,3 +368,4 @@ postprocess_merge_regions_noLD <- function(region_info,
   }
 
 }
+

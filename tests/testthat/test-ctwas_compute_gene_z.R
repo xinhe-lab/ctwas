@@ -70,3 +70,38 @@ test_that("get_boundary_genes with mapping_table works", {
 
 })
 
+
+test_that("select_boundary_genes works", {
+
+  region_info <- readRDS(system.file("extdata/sample_data", "LDL_example.region_info.RDS", package = "ctwas"))
+  weights <- readRDS(system.file("extdata/sample_data", "LDL_example.preprocessed.weights.RDS", package = "ctwas"))
+  ctwas_res <- readRDS(system.file("extdata/sample_data", "LDL_example.ctwas_sumstats_res.RDS", package = "ctwas"))
+  z_gene <- ctwas_res$z_gene
+  finemap_res <- ctwas_res$finemap_res
+  susie_alpha_res <- ctwas_res$susie_alpha_res
+
+  combined_pip_res <- readRDS("LDL_example.combined_pip_res.RDS")
+  combined_pip_res <- combined_pip_res$by_context
+  mapping_table <- readRDS(system.file("extdata/sample_data", "mapping_table.RDS", package = "ctwas"))
+
+  expected_postprocess_merge_region_res <- readRDS("LDL_example.postprocess_merge_region_res.RDS")
+
+  capture.output({
+    res <- select_boundary_genes(region_info,
+                                 weights,
+                                 gene_ids = z_gene$id,
+                                 finemap_res = finemap_res,
+                                 susie_alpha_res = susie_alpha_res,
+                                 combine_PIPs = TRUE,
+                                 mapping_table = mapping_table,
+                                 pip_thresh = 0.5,
+                                 filter_cs = TRUE,
+                                 ncore = 1)
+    boundary_genes <- res$boundary_genes
+    selected_boundary_genes <- res$selected_boundary_genes
+  })
+
+  expect_equal(boundary_genes, expected_postprocess_merge_region_res$boundary_genes)
+  expect_equal(selected_boundary_genes, expected_postprocess_merge_region_res$selected_boundary_genes)
+
+})

@@ -13,6 +13,7 @@ postprocess_merge_regions_noLD(
   snp_map,
   finemap_res,
   susie_alpha_res,
+  combine_PIPs = TRUE,
   mapping_table = NULL,
   group_prior = NULL,
   group_prior_var = NULL,
@@ -41,6 +42,8 @@ postprocess_merge_regions_noLD(
 \item{finemap_res}{a data frame of original finemapping result.}
 
 \item{susie_alpha_res}{a data frame of original susie alpha result.}
+
+\item{combine_PIPs}{if TRUE, select boundary genes after combining gene PIPs.}
 
 \item{mapping_table}{a data frame of mapping between molecular traits and genes,
 with required columns: "molecular_id", "gene_name".}
