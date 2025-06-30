@@ -147,6 +147,66 @@ map_gene_regions <- function(gene_info,
   return(gene_region_info)
 }
 
+# Combines SNP and gene z-scores
+#
+# @param z_snp a data frame of SNP z-scores, with columns: "id", "A1", "A2", "z".
+# ("A1" and "A2" are optional)
+#
+# @param z_gene a data frame of gene z-scores, with columns: "id", "z", "type",
+# "context", "group".
+#
+combine_z <- function(z_snp, z_gene){
+
+  if (is.null(z_gene$type)){
+    z_gene$type <- "gene"
+  }
+  if (is.null(z_gene$context)){
+    z_gene$context <- "gene"
+  }
+  if (is.null(z_gene$group)){
+    z_gene$group <- "gene"
+  }
+
+  z_snp$type <- "SNP"
+  z_snp$context <- "SNP"
+  z_snp$group <- "SNP"
+
+  z_df <- rbind(z_gene[, c("id", "z", "type", "context", "group")],
+                z_snp[, c("id", "z", "type", "context", "group")])
+  rownames(z_df) <- NULL
+  return(z_df)
+}
+
+
+#' @title Filter z_gene by group size
+#'
+#' @param z_gene a data frame of gene z-scores, with columns: "id", "z", "type",
+#' "context", "group".
+#'
+#' @param min_group_size Minimum number of variables in a group.
+#'
+#' @return a data frame of gene z-scores.
+#'
+#' @export
+filter_z_gene_by_group_size <- function(z_gene, min_group_size){
+  gene_group_size <- table(z_gene$group)
+  if (any(gene_group_size < min_group_size)){
+    loginfo("Group sizes before filtering \n {%s}: {%s}",
+            names(gene_group_size), gene_group_size)
+    groups_dropped <- names(gene_group_size)[gene_group_size < min_group_size]
+    loginfo("Drop groups with group size < %d: %s", min_group_size, groups_dropped)
+    z_gene <- z_gene[!z_gene$group %in% groups_dropped, , drop=FALSE]
+    if (nrow(z_gene) == 0){
+      stop("No genes left after group size filtering!")
+    }
+    gene_group_size <- table(z_gene$group)
+    loginfo("Group sizes after filtering \n {%s}: {%s}",
+            names(gene_group_size), gene_group_size)
+  }
+  return(z_gene)
+}
+
+
 #' @title Get cross-boundary genes.
 #'
 #' @param region_info a data frame of region definitions.
@@ -252,61 +312,97 @@ get_boundary_genes <- function(region_info,
   return(boundary_genes)
 }
 
-# Combines SNP and gene z-scores
-#
-# @param z_snp a data frame of SNP z-scores, with columns: "id", "A1", "A2", "z".
-# ("A1" and "A2" are optional)
-#
-# @param z_gene a data frame of gene z-scores, with columns: "id", "z", "type",
-# "context", "group".
-#
-combine_z <- function(z_snp, z_gene){
-
-  if (is.null(z_gene$type)){
-    z_gene$type <- "gene"
-  }
-  if (is.null(z_gene$context)){
-    z_gene$context <- "gene"
-  }
-  if (is.null(z_gene$group)){
-    z_gene$group <- "gene"
-  }
-
-  z_snp$type <- "SNP"
-  z_snp$context <- "SNP"
-  z_snp$group <- "SNP"
-
-  z_df <- rbind(z_gene[, c("id", "z", "type", "context", "group")],
-                z_snp[, c("id", "z", "type", "context", "group")])
-  rownames(z_df) <- NULL
-  return(z_df)
-}
-
-
-#' @title Filter z_gene by group size
+#' @title Gets boundary genes and selects high PIP boundary genes
 #'
-#' @param z_gene a data frame of gene z-scores, with columns: "id", "z", "type",
-#' "context", "group".
+#' @param region_info a data frame of region definitions.
 #'
-#' @param min_group_size Minimum number of variables in a group.
+#' @param weights a list of preprocessed weights.
 #'
-#' @return a data frame of gene z-scores.
+#' @param gene_ids a vector of selected gene IDs (z_gene$id).
+#' If specified, limits to these genes. Default: use all genes in weights.
+#'
+#' @param finemap_res a data frame of original finemapping result.
+#'
+#' @param susie_alpha_res a data frame of original susie alpha result.
+#'
+#' @param combine_PIPs if TRUE, select boundary genes after combining gene PIPs.
+#'
+#' @param mapping_table a data frame of mapping between molecular traits and genes,
+#' with required columns: "molecular_id", "gene_name".
+#'
+#' @param pip_thresh PIP cutoff for selecting boundary genes to merge regions.
+#'
+#' @param filter_cs If TRUE, only select boundary genes in credible sets for region merge.
+#'
+#' @param ncore The number of cores used to parallelize computation over regions
+#'
+#' @return a list with boundary genes and selected boundary genes
+#'
+#' @importFrom logging loginfo
 #'
 #' @export
-filter_z_gene_by_group_size <- function(z_gene, min_group_size){
-  gene_group_size <- table(z_gene$group)
-  if (any(gene_group_size < min_group_size)){
-    loginfo("Group sizes before filtering \n {%s}: {%s}",
-            names(gene_group_size), gene_group_size)
-    groups_dropped <- names(gene_group_size)[gene_group_size < min_group_size]
-    loginfo("Drop groups with group size < %d: %s", min_group_size, groups_dropped)
-    z_gene <- z_gene[!z_gene$group %in% groups_dropped, , drop=FALSE]
-    if (nrow(z_gene) == 0){
-      stop("No genes left after group size filtering!")
-    }
-    gene_group_size <- table(z_gene$group)
-    loginfo("Group sizes after filtering \n {%s}: {%s}",
-            names(gene_group_size), gene_group_size)
+#'
+select_boundary_genes <- function(region_info,
+                                  weights,
+                                  gene_ids,
+                                  finemap_res,
+                                  susie_alpha_res,
+                                  combine_PIPs = TRUE,
+                                  mapping_table = NULL,
+                                  pip_thresh = 0.5,
+                                  filter_cs = FALSE,
+                                  ncore = 1) {
+
+  # get boundary genes
+  # get both molecular trait level and gene level positions when mapping_table is not NULL
+  boundary_genes <- get_boundary_genes(region_info,
+                                       weights,
+                                       gene_ids = gene_ids,
+                                       mapping_table = mapping_table,
+                                       ncore = ncore)
+  loginfo("%d boundary genes.", nrow(boundary_genes))
+
+  # select boundary genes with high PIP and in CS
+  finemap_gene_res <- finemap_res[finemap_res$group != "SNP",,drop=FALSE]
+  high_PIP_finemap_gene_res <- finemap_gene_res[finemap_gene_res$susie_pip > pip_thresh,,drop=FALSE]
+
+  if (filter_cs) {
+    # limit to genes in credible sets
+    high_PIP_finemap_gene_res <- high_PIP_finemap_gene_res[!is.na(high_PIP_finemap_gene_res$cs),,drop=FALSE]
   }
-  return(z_gene)
+
+  high_PIP_ids <- unique(high_PIP_finemap_gene_res$id)
+  selected_boundary_genes <- boundary_genes[which(boundary_genes$id %in% high_PIP_ids), , drop=FALSE]
+  loginfo("Selected %d boundary genes with PIP > %s.", nrow(selected_boundary_genes), pip_thresh)
+
+  # select boundary genes with high PIP after combining gene PIPs
+  if (combine_PIPs) {
+    if (!is.null(mapping_table)) {
+      # combine gene-level PIPs
+      combined_pip_res <- combine_gene_pips(susie_alpha_res,
+                                            mapping_table = mapping_table,
+                                            group_by = "gene_name",
+                                            filter_cs = filter_cs)
+      # select boundary genes with high combined PIP
+      high_PIP_combined_pip_res <- combined_pip_res[combined_pip_res$combined_pip > pip_thresh,,drop=FALSE]
+      high_PIP_gene_names <- unique(high_PIP_combined_pip_res$gene_name)
+      selected_boundary_genes2 <- boundary_genes[which(boundary_genes$gene_name %in% high_PIP_gene_names), , drop=FALSE]
+    } else {
+      # combine molecular trait-level PIPs
+      combined_pip_res <- combine_gene_pips(susie_alpha_res,
+                                            group_by = "molecular_id",
+                                            filter_cs = filter_cs)
+      # select boundary genes with high combined PIP
+      high_PIP_combined_pip_res <- combined_pip_res[combined_pip_res$combined_pip > pip_thresh,,drop=FALSE]
+      high_PIP_molecular_ids <- unique(high_PIP_combined_pip_res$molecular_id)
+      selected_boundary_genes2 <- boundary_genes[which(boundary_genes$molecular_id %in% high_PIP_molecular_ids), , drop=FALSE]
+    }
+
+    loginfo("Selected %d boundary genes with combined PIP > %s.", nrow(selected_boundary_genes2), pip_thresh)
+    selected_boundary_genes <- unique(rbind(selected_boundary_genes, selected_boundary_genes2))
+    loginfo("Selected %d boundary genes in total.", nrow(selected_boundary_genes))
+  }
+
+  return(list("boundary_genes" = boundary_genes,
+              "selected_boundary_genes" = selected_boundary_genes))
 }
