@@ -84,7 +84,7 @@ test_that("select_boundary_genes works", {
   combined_pip_res <- combined_pip_res$by_context
   mapping_table <- readRDS(system.file("extdata/sample_data", "mapping_table.RDS", package = "ctwas"))
 
-  expected_postprocess_merge_region_res <- readRDS("LDL_example.postprocess_merge_region_res.RDS")
+  expected_postprocess_region_merging_res <- readRDS("LDL_example.postprocess_region_merging_res.RDS")
 
   capture.output({
     res <- select_boundary_genes(region_info,
@@ -101,7 +101,7 @@ test_that("select_boundary_genes works", {
     selected_boundary_genes <- res$selected_boundary_genes
   })
 
-  expect_equal(boundary_genes, expected_postprocess_merge_region_res$boundary_genes)
-  expect_equal(selected_boundary_genes, expected_postprocess_merge_region_res$selected_boundary_genes)
+  expect_equal(boundary_genes, expected_postprocess_region_merging_res$boundary_genes)
+  expect_equal(selected_boundary_genes, expected_postprocess_region_merging_res$selected_boundary_genes)
 
 })

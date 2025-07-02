@@ -1,4 +1,4 @@
-#' @title Runs cTWAS post-processing procedure for merging regions
+#' @title Runs cTWAS post-processing procedure for region merging
 #'
 #' @param region_info a data frame of region definitions.
 #'
@@ -57,7 +57,7 @@
 #'
 #' @export
 #'
-postprocess_merge_regions <- function(region_info,
+postprocess_region_merging <- function(region_info,
                                       region_data,
                                       z_snp,
                                       z_gene,
@@ -85,7 +85,7 @@ postprocess_merge_regions <- function(region_info,
     addHandler(writeToFile, file=logfile, level='DEBUG')
   }
 
-  loginfo("Run post-processing procedure for merging regions...")
+  loginfo("Run post-processing procedure for region merging...")
 
   # select boundary genes with high PIP and in CS
   res <- select_boundary_genes(region_info,
@@ -196,7 +196,7 @@ postprocess_merge_regions <- function(region_info,
 
 }
 
-#' @title Runs cTWAS post-processing procedure for merging regions without LD
+#' @title Runs cTWAS post-processing procedure for region merging without LD
 #'
 #' @param region_info a data frame of region definitions.
 #'
@@ -247,7 +247,7 @@ postprocess_merge_regions <- function(region_info,
 #'
 #' @export
 #'
-postprocess_merge_regions_noLD <- function(region_info,
+postprocess_region_merging_noLD <- function(region_info,
                                            region_data,
                                            z_snp,
                                            z_gene,
@@ -271,7 +271,7 @@ postprocess_merge_regions_noLD <- function(region_info,
     addHandler(writeToFile, file=logfile, level='DEBUG')
   }
 
-  loginfo("Run post-processing procedure for merging regions without LD...")
+  loginfo("Run post-processing procedure for region merging without LD...")
 
   # select boundary genes with high PIP and in CS
   res <- select_boundary_genes(region_info,
