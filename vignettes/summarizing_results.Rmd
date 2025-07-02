@@ -211,7 +211,7 @@ We provide a  `mapping_table`  to map introns to genes for PredictDB expression 
 For example: 
 
 ```{r example_mapping_table}
-# mapping_table <- readRDS("/project2/xinhe/shared_data/multigroup_ctwas/weights/mapping_files/PredictDB_mapping.RDS")
+mapping_table <- readRDS("/project2/xinhe/shared_data/multigroup_ctwas/weights/mapping_files/PredictDB_mapping.RDS")
 
 head(mapping_table[mapping_table$gene_name == "UBR1",])
 ```
@@ -232,17 +232,7 @@ finemap_res <- anno_finemap_res(finemap_res,
 ```
 
 
-Similarly, we use the function `anno_susie_alpha_res()` to add additional columns to `susie_alpha_res`.  
-
-```{r map_gene_anno_2}
-susie_alpha_res <- anno_susie_alpha_res(susie_alpha_res,
-                                        mapping_table = mapping_table,
-                                        map_by = "molecular_id",
-                                        drop_unmapped = TRUE)
-```
-
-
-We could use the `combine_gene_pips()` function to compute gene PIPs across different types of molecular traits. Here we use `group_by = "gene_name"`, because molecular traits are mapped to their corresponding genes by the "gene_name" column in `mapping_table`.  
+We use the `combine_gene_pips()` function to compute gene PIPs across different types of molecular traits. Here we use `group_by = "gene_name"`, because molecular traits are mapped to their corresponding genes by the "gene_name" column in `mapping_table`.  
 
 ```{r combined_pip_by_type}
 combined_pip_by_type <- combine_gene_pips(susie_alpha_res,
