@@ -27,8 +27,8 @@
 #' @param thin_by options for thinning SNPs,
 #' "reference": thin reference SNPs, "gwas": thin GWAS SNPs.
 #'
-#' @param adjust_boundary_genes If TRUE, identify cross-boundary genes, and
-#' adjust region_data.
+#' @param adjust_boundary_genes If TRUE, identify boundary genes, and
+#' adjust region_data for boundary genes.
 #'
 #' @param ncore The number of cores used to parallelize susie over regions
 #'
@@ -36,7 +36,7 @@
 #'
 #' @param logfile path to the log file, if NULL will print log info on screen.
 #'
-#' @return a list with region_data and cross-boundary genes
+#' @return a list of region_data
 #'
 #' @importFrom logging addHandler loginfo logwarn writeToFile
 #' @importFrom data.table rbindlist
@@ -147,13 +147,15 @@ assemble_region_data <- function(region_info,
 
   # adjust region_data for boundary genes
   if (adjust_boundary_genes && nrow(region_info) > 1){
-    gene_info <- get_gene_regions(gene_info, region_info)
-    boundary_genes <- gene_info[gene_info$n_regions > 1, ]
-    boundary_genes <- boundary_genes[with(boundary_genes, order(chrom, p0)), ]
+    # map regions for each molecular trait or gene
+    gene_region_info <- map_gene_regions(gene_info, region_info, ncore = ncore)
+    # get boundary genes (n_regions > 1)
+    boundary_genes <- gene_region_info[gene_region_info$n_regions > 1, ]
+    boundary_genes <- boundary_genes[with(boundary_genes, order(chrom, p0, p1)), ]
     rownames(boundary_genes) <- NULL
     loginfo("Number of boundary genes: %d", nrow(boundary_genes))
     if (nrow(boundary_genes) > 0) {
-      region_data <- adjust_boundary_genes(boundary_genes, weights, region_data, snp_map)
+      region_data <- adjust_boundary_gene_region_assignment(boundary_genes, weights, region_data, snp_map)
     }
   } else {
     boundary_genes <- NULL
@@ -167,8 +169,7 @@ assemble_region_data <- function(region_info,
   loginfo("Updating region z-scores...")
   region_data <- update_region_z(region_data, z_snp, z_gene, ncore = ncore)
 
-  return(list("region_data" = region_data,
-              "boundary_genes" = boundary_genes))
+  return(region_data)
 }
 
 # Assign genes and SNPs in regions
@@ -363,13 +364,13 @@ update_region_z <- function(region_data,
   return(region_data2)
 }
 
-# Adjust region_data for boundary genes
+# Adjust gene assignment in region_data,
+# assign boundary genes to the regions with the largest abs(weights).
 #' @importFrom logging loginfo
-#' @importFrom data.table rbindlist
-adjust_boundary_genes <- function(boundary_genes,
-                                  weights,
-                                  region_data,
-                                  snp_map){
+adjust_boundary_gene_region_assignment <- function(boundary_genes,
+                                                   weights,
+                                                   region_data,
+                                                   snp_map){
   loginfo("Adjust region assignment for boundary genes")
 
   if (!inherits(weights,"list")){
@@ -384,10 +385,10 @@ adjust_boundary_genes <- function(boundary_genes,
     stop("'snp_map' should be a list.")
   }
 
-  # assign boundary gene to the region with max weights
+  # assign boundary gene to the region with the largest abs(weights)
   for (i in 1:nrow(boundary_genes)){
-    gname <- boundary_genes[i, "id"]
-    region_ids <- unlist(strsplit(boundary_genes[i, "region_id"], split = ","))
+    gname <- boundary_genes$id[i]
+    region_ids <- unlist(strsplit(boundary_genes$region_id[i], split = ","))
     wgt <- weights[[gname]][["wgt"]]
 
     region_sum_wgt <- sapply(region_ids, function(region_id){

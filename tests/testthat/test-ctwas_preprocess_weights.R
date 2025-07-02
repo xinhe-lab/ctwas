@@ -20,7 +20,8 @@ test_that("preprocess_weights with PredictDB weights works", {
                                     scale_predictdb_weights = TRUE,
                                     load_predictdb_LD = TRUE,
                                     filter_protein_coding_genes = TRUE,
-                                    varID_converter_fun = convert_to_ukb_varIDs)
+                                    varID_converter_fun = convert_to_ukb_varIDs,
+                                    ncore = 2)
   })
 
   expect_equal(weights, expected_weights)
@@ -44,7 +45,8 @@ test_that("preprocess_weights with multiple PredictDB weights works", {
                                         type = "expression",
                                         context = "liver",
                                         weight_name = "liver_expression",
-                                        varID_converter_fun = convert_to_ukb_varIDs)
+                                        varID_converter_fun = convert_to_ukb_varIDs,
+                                        ncore = 2)
 
     weight_adipose_file <- system.file("extdata/sample_data", "expression_Adipose_Subcutaneous.db", package = "ctwas")
     weights_adipose <- preprocess_weights(weight_adipose_file,
@@ -54,7 +56,8 @@ test_that("preprocess_weights with multiple PredictDB weights works", {
                                           type = "expression",
                                           context = "adipose",
                                           weight_name = "adipose_expression",
-                                          varID_converter_fun = convert_to_ukb_varIDs)
+                                          varID_converter_fun = convert_to_ukb_varIDs,
+                                          ncore = 2)
     weights <- c(weights_liver, weights_adipose)
   })
 

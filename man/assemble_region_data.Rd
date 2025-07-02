@@ -49,8 +49,8 @@ options: "z" (trim SNPs with lower |z|), "random".}
 \item{thin_by}{options for thinning SNPs,
 "reference": thin reference SNPs, "gwas": thin GWAS SNPs.}
 
-\item{adjust_boundary_genes}{If TRUE, identify cross-boundary genes, and
-adjust region_data.}
+\item{adjust_boundary_genes}{If TRUE, identify boundary genes, and
+adjust region_data for boundary genes.}
 
 \item{ncore}{The number of cores used to parallelize susie over regions}
 
@@ -59,7 +59,7 @@ adjust region_data.}
 \item{logfile}{path to the log file, if NULL will print log info on screen.}
 }
 \value{
-a list with region_data and cross-boundary genes
+a list of region_data
 }
 \description{
 Assembles data for all the regions

@@ -138,25 +138,21 @@ z_gene <- filter_z_gene_by_group_size(z_gene, min_group_size = 100)
 Because cTWAS runs region-by-region, we will first need to prepare the data for each region, combining information of all variants and molecular traits in that region. After data preprocessing and computation of Z-scores of molecular traits, we assemble the input data for all the regions using the function `assemble_region_data()`.  It assigns molecular traits, variants and their Z-scores to each region. The assignment of a molecular trait to regions is based on the weights, i.e. variants in the prediction model, of the molecular trait. 
 
 ```{r assemble_region_data, eval=FALSE}
-res <- assemble_region_data(region_info, 
-                            z_snp, 
-                            z_gene, 
-                            weights, 
-                            snp_map,
-                            thin = 1, 
-                            maxSNP = 20000,
-                            min_group_size = 100, 
-                            ncore = 6)
-region_data <- res$region_data
-boundary_genes <- res$boundary_genes
+region_data <- assemble_region_data(region_info, 
+                                    z_snp, 
+                                    z_gene, 
+                                    weights, 
+                                    snp_map,
+                                    thin = 1, 
+                                    maxSNP = 20000,
+                                    min_group_size = 100, 
+                                    ncore = 6)
 ```
 
 
 The function has a few arguments to control its behavior. The `thin` argument randomly selects a subset of variants (10% when thin = 0.1) to use during parameter estimation for candidate regions. This helps reduce computation. When `thin = 1` (default option), it will use all the SNPs. `maxSNP` sets a maximum on the number of variants that can be in a single region to prevent memory issues during fine-mapping. If the number of SNPs in a region is more than `maxSNP`, it will, by default, choose the top `maxSNP` SNPs with the highest Z-scores. `min_group_size` sets the minimum number of variables in a group. Groups with fewer variables will be removed from the analysis, because cTWAS cannot reliably estimate parameters for groups with too few variables.  `ncore` specifies the number of cores to use when parallelizing over regions.
 
-This function returns `region_data`, a list object containing input data (IDs of molecular traits and variants, their Z-scores, genomic boundaries, etc.) for each of the regions. It also returns 
-a data frame `boundary_genes`, containing the information of molecular traits whose weights cross region boundaries. The information would be used in later analysis and post-processing. 
-
+This function returns `region_data`, a list object containing input data (IDs of molecular traits and variants, their Z-scores, genomic boundaries, etc.) for each of the regions.
 
 ### Estimating parameters
 

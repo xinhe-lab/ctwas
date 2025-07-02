@@ -17,7 +17,7 @@
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">ctwas</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">0.5.25</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">0.5.34</span>
       </span>
     </div>
 
@@ -90,6 +90,9 @@
     <div id="ref-usage">
     <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="fu">combine_gene_pips</span><span class="op">(</span></span>
 <span>  <span class="va">susie_alpha_res</span>,</span>
+<span>  mapping_table <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  map_by <span class="op">=</span> <span class="st">"molecular_id"</span>,</span>
+<span>  drop_unmapped <span class="op">=</span> <span class="cn">TRUE</span>,</span>
 <span>  group_by <span class="op">=</span> <span class="st">"molecular_id"</span>,</span>
 <span>  by <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"context"</span>, <span class="st">"type"</span>, <span class="st">"group"</span><span class="op">)</span>,</span>
 <span>  method <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"combine_cs"</span>, <span class="st">"sum"</span><span class="op">)</span>,</span>
@@ -105,6 +108,19 @@
     <h2>Arguments</h2>
     <dl><dt>susie_alpha_res</dt>
 <dd><p>a data frame of annotated susie alpha result.</p></dd>
+
+
+<dt>mapping_table</dt>
+<dd><p>a data frame of mapping between molecular traits and genes,
+with required columns: "molecular_id", "gene_name".</p></dd>
+
+
+<dt>map_by</dt>
+<dd><p>column name to be mapped by (default: "molecular_id").</p></dd>
+
+
+<dt>drop_unmapped</dt>
+<dd><p>If TRUE, remove unmapped genes.</p></dd>
 
 
 <dt>group_by</dt>

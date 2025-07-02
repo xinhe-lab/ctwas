@@ -17,7 +17,7 @@
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">ctwas</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">0.5.25</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">0.5.34</span>
       </span>
     </div>
 
@@ -88,7 +88,7 @@
     </div>
 
     <div id="ref-usage">
-    <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="fu">convert_to_ukb_varIDs</span><span class="op">(</span><span class="va">varIDs</span><span class="op">)</span></span></code></pre></div>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="fu">convert_to_ukb_varIDs</span><span class="op">(</span><span class="va">varIDs</span>, ref_format <span class="op">=</span> <span class="st">"%s:%s_%s_%s"</span><span class="op">)</span></span></code></pre></div>
     </div>
 
     <div id="arguments">
@@ -98,12 +98,16 @@
 ("chr_pos_ref_alt") or PredictDB weight format
 (“chr_pos_ref_alt_build” or “chr:pos_ref_alt_build”)</p></dd>
 
+
+<dt>ref_format</dt>
+<dd><p>variant ID format in the LD reference.</p></dd>
+
 </dl></div>
     <div id="value">
     <h2>Value</h2>
     
 
-<p>a vector of variant IDs in the format of "chr:pos_ref_alt"</p>
+<p>a vector of variant IDs in the format of the LD reference.</p>
     </div>
 
   </div>

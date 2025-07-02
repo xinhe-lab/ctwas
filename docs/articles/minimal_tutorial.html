@@ -33,7 +33,7 @@
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">ctwas</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">0.5.25</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">0.5.34</span>
       </span>
     </div>
 
@@ -108,7 +108,7 @@
       <h1 data-toc-skip>A minimal tutorial of running cTWAS without LD</h1>
                         <h4 data-toc-skip class="author">Kaixuan Luo, Sheng Qian</h4>
             
-            <h4 data-toc-skip class="date">2025-06-06</h4>
+            <h4 data-toc-skip class="date">2025-07-02</h4>
       
       <small class="dont-index">Source: <a href="https://github.com/xinhe-lab/ctwas/blob/multigroup/vignettes/minimal_tutorial.Rmd" class="external-link"><code>vignettes/minimal_tutorial.Rmd</code></a></small>
       <div class="hidden name"><code>minimal_tutorial.Rmd</code></div>
@@ -246,7 +246,7 @@
 <div class="section level2">
 <h2 id="running-the-ctwas-analysis">Running the cTWAS analysis<a class="anchor" aria-label="anchor" href="#running-the-ctwas-analysis"></a>
 </h2>
-<p>We use the function <code><a href="../reference/ctwas_sumstats_noLD.html">ctwas_sumstats_noLD()</a></code> to run cTWAS analysis without LD. It takes as input preprocessed GWAS z-scores (<code>z_snp</code>), <code>weights</code>, <code>region_info</code>, <code>snp_map</code>, and will perform the main steps: (i) computing Z-scores of molecular traits - effectively performing TWAS; (i) estimating model parameters; (iii) screening regions potentially containing causal molecular traits, and (iv) fine-mapping those regions. Note that cTWAS uses a strategy to speed up computation. It initially estimates parameters in step (ii), and then in step (iii) select regions likely containing signals. After that, it includes all SNPs in the selected regions to do full fine-mapping analysis in step (iv).</p>
+<p>We use the function <code><a href="../reference/ctwas_sumstats_noLD.html">ctwas_sumstats_noLD()</a></code> to run cTWAS analysis without LD. It takes as input preprocessed GWAS z-scores (<code>z_snp</code>), <code>weights</code>, <code>region_info</code>, <code>snp_map</code>, and will perform the main steps: (i) computing Z-scores of molecular traits - effectively performing TWAS; (ii) estimating model parameters; (iii) screening regions potentially containing causal molecular traits, and (iv) fine-mapping those regions. Note that cTWAS uses a strategy to speed up computation. It initially estimates parameters in step (ii), and then in step (iii) select regions likely containing signals. After that, it includes all SNPs in the selected regions to do full fine-mapping analysis in step (iv).</p>
 <div class="sourceCode" id="cb13"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">ctwas_res</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/ctwas_sumstats_noLD.html">ctwas_sumstats_noLD</a></span><span class="op">(</span><span class="va">z_snp</span>,</span>
 <span>                                 <span class="va">weights</span>,</span>
@@ -258,7 +258,6 @@
 <span><span class="va">param</span> <span class="op">&lt;-</span> <span class="va">ctwas_res</span><span class="op">$</span><span class="va">param</span></span>
 <span><span class="va">finemap_res</span> <span class="op">&lt;-</span> <span class="va">ctwas_res</span><span class="op">$</span><span class="va">finemap_res</span></span>
 <span><span class="va">susie_alpha_res</span> <span class="op">&lt;-</span> <span class="va">ctwas_res</span><span class="op">$</span><span class="va">susie_alpha_res</span></span>
-<span><span class="va">boundary_genes</span> <span class="op">&lt;-</span> <span class="va">ctwas_res</span><span class="op">$</span><span class="va">boundary_genes</span></span>
 <span><span class="va">region_data</span> <span class="op">&lt;-</span> <span class="va">ctwas_res</span><span class="op">$</span><span class="va">region_data</span></span>
 <span><span class="va">screen_res</span> <span class="op">&lt;-</span> <span class="va">ctwas_res</span><span class="op">$</span><span class="va">screen_res</span></span></code></pre></div>
 <p><code><a href="../reference/ctwas_sumstats_noLD.html">ctwas_sumstats_noLD()</a></code> returns several main output:</p>
@@ -270,7 +269,6 @@
 <p>It also produces other output:</p>
 <ul>
 <li><p><code>susie_alpha_res</code>: a data frame with finemapping results of molecular traits and the single effect probabilities (alpha) in all credible sets. This will be used later when summarizing the cTWAS result.</p></li>
-<li><p><code>boundary_genes</code>: the genes/molecular traits whose weights cross region boundaries (we will need these in the post-processing step).</p></li>
 <li><p><code>region_data</code>: assembled region data, including Z scores of SNPs and molecular traits, for all the regions,. Note that only data of the subset of SNPs used in screening regions are included.</p></li>
 <li><p><code>screen_res</code>: screening regions results, including the data of all SNPs and molecular traits of the selected regions, and a data frame with non-SNP PIPs (total PIPs of all molecular traits) for all regions.</p></li>
 </ul>

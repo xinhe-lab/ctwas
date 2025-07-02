@@ -12,7 +12,6 @@
 #'
 #' @param p_diff_thresh numeric, p-value cutoff for identifying problematic SNPs
 #' with significant difference between observed z-scores and estimated values.
-#' Default is 5e-6.
 #'
 #' @param plot If TRUE, plot observed z score vs the expected value.
 #'
@@ -53,7 +52,7 @@ diagnose_LD_mismatch_susie <- function(region_ids,
     addHandler(writeToFile, file= logfile, level='DEBUG')
   }
 
-  loginfo("Performing LD mismatch diagnosis for %d regions", length(region_ids))
+  loginfo("Performing LD mismatch diagnosis for %d regions...", length(region_ids))
 
   if (!all(region_ids %in% LD_map$region_id)){
      stop("region_ids do not match with LD_map$region_id!")
@@ -175,7 +174,7 @@ get_problematic_genes <- function(problematic_snps,
                                   z_thresh = NULL){
 
   if (length(problematic_snps) == 0) {
-    loginfo('No problematic SNPs')
+    loginfo('No problematic SNPs.')
     problematic_genes <- NULL
   }else{
     loginfo('Number of problematic SNPs: %d', length(problematic_snps))
@@ -229,6 +228,8 @@ get_problematic_genes <- function(problematic_snps,
 #'
 #' @return a list with updated cTWAS finemapping result.
 #'
+#' @importFrom logging loginfo logwarn
+#'
 #' @export
 update_finemap_res <- function(finemap_res,
                                susie_alpha_res,
@@ -236,23 +237,32 @@ update_finemap_res <- function(finemap_res,
                                new_susie_alpha_res,
                                updated_region_ids){
 
-  if (!all(colnames(finemap_res) == colnames(new_finemap_res)))
-    stop("columns of finemap_res and new_finemap_res do not match!")
-
-  if (!all(colnames(susie_alpha_res) == colnames(new_susie_alpha_res)))
-    stop("columns of susie_alpha_res and new_susie_alpha_res do not match!")
+  # if (!setequal(colnames(finemap_res), colnames(new_finemap_res)))
+  #   logwarn("columns of finemap_res and new_finemap_res do not match!")
+  #
+  # if (!setequal(colnames(susie_alpha_res), colnames(new_susie_alpha_res)))
+  #   logwarn("columns of susie_alpha_res and new_susie_alpha_res do not match!")
 
   if (missing(updated_region_ids)){
     updated_region_ids <- unique(new_finemap_res$region_id)
   }
 
-  kept_finemap_res <- finemap_res[!finemap_res$region_id %in% updated_region_ids, ]
-  new_finemap_res <- new_finemap_res[new_finemap_res$region_id %in% updated_region_ids, ]
+  finemap_res_colnames <- intersect(colnames(finemap_res), colnames(new_finemap_res))
+  kept_finemap_res <- finemap_res[!finemap_res$region_id %in% updated_region_ids, finemap_res_colnames]
+  new_finemap_res <- new_finemap_res[new_finemap_res$region_id %in% updated_region_ids, finemap_res_colnames]
   finemap_res <- rbind(kept_finemap_res, new_finemap_res)
+  finemap_res <- unique(finemap_res)
+  rownames(finemap_res) <- NULL
 
-  kept_susie_alpha_res <- susie_alpha_res[!susie_alpha_res$region_id %in% updated_region_ids, ]
-  new_susie_alpha_res <- new_susie_alpha_res[new_susie_alpha_res$region_id %in% updated_region_ids, ]
+  susie_alpha_res_colnames <- intersect(colnames(susie_alpha_res), colnames(new_susie_alpha_res))
+  kept_susie_alpha_res <- susie_alpha_res[!susie_alpha_res$region_id %in% updated_region_ids, susie_alpha_res_colnames]
+  new_susie_alpha_res <- new_susie_alpha_res[new_susie_alpha_res$region_id %in% updated_region_ids, susie_alpha_res_colnames]
   susie_alpha_res <- rbind(kept_susie_alpha_res, new_susie_alpha_res)
+  susie_alpha_res <- unique(susie_alpha_res)
+  rownames(susie_alpha_res) <- NULL
+
+  if (!setequal(finemap_res$id[finemap_res$group != "SNP"], susie_alpha_res$id))
+    stop("finemap_res$id do not match with susie_alpha_res$id!")
 
   return(list("finemap_res" = finemap_res,
               "susie_alpha_res" = susie_alpha_res))

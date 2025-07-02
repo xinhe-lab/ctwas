@@ -15,8 +15,7 @@ merge_region_data_noLD(
   maxSNP = Inf,
   ncore = 1,
   verbose = FALSE,
-  logfile = NULL,
-  ...
+  logfile = NULL
 )
 }
 \arguments{
@@ -43,8 +42,6 @@ have enough memory to run the program.}
 \item{verbose}{If TRUE, print detail messages}
 
 \item{logfile}{The log filename. If NULL, will print log info on screen.}
-
-\item{...}{Additional arguments of \code{susie_rss}.}
 }
 \value{
 a list of merged region data, merged region info, snp_map,

@@ -10,15 +10,13 @@ merge_region_data(
   region_info,
   LD_map,
   snp_map,
-  weights,
   z_snp,
   z_gene,
   expand = TRUE,
   maxSNP = Inf,
   ncore = 1,
   verbose = FALSE,
-  logfile = NULL,
-  ...
+  logfile = NULL
 )
 }
 \arguments{
@@ -31,8 +29,6 @@ merge_region_data(
 \item{LD_map}{a data frame with filenames of LD matrices and SNP information for the regions.}
 
 \item{snp_map}{a list of data frames with SNP-to-region map for the reference.}
-
-\item{weights}{a list of preprocessed weights.}
 
 \item{z_snp}{A data frame with columns: "id", "z", giving the z-scores for SNPs.}
 
@@ -49,8 +45,6 @@ have enough memory to run the program.}
 \item{verbose}{If TRUE, print detail messages}
 
 \item{logfile}{The log filename. If NULL, will print log info on screen.}
-
-\item{...}{Additional arguments of \code{susie_rss}.}
 }
 \value{
 a list of merged region data, merged region info, LD_map, snp_map,

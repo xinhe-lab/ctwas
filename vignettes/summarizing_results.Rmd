@@ -56,7 +56,6 @@ z_gene <- ctwas_res$z_gene
 param <- ctwas_res$param
 finemap_res <- ctwas_res$finemap_res
 susie_alpha_res <- ctwas_res$susie_alpha_res
-boundary_genes <- ctwas_res$boundary_genes
 region_data <- ctwas_res$region_data
 screen_res <- ctwas_res$screen_res
 ```
@@ -77,8 +76,6 @@ It also produces other output:
 
 + `susie_alpha_res`: a data frame with finemapping results of molecular traits and the single effect probabilities (alpha) in all credible sets. This will be used when computing combined gene PIPs below. 
 
-+ `boundary_genes`: the genes/molecular traits that cross region boundaries (we will need these in the post-processing step). 
-
 + `region_data`: assembled region data, including Z scores of SNPs and molecular traits, for all the regions. Note that only data of the subset of SNPs used in screening regions are included. 
 
 + `screen_res`: screening regions results, including the data of all SNPs and molecular traits of the selected regions, estimated numbers of causal signals (`L`) for selected regions, and a data frame with estimated `L` and non-SNP PIPs for all regions.
@@ -90,11 +87,11 @@ We focus on examples from running cTWAS with LD here, but the steps below also m
 First, we make plots using the function `make_convergence_plots()` to see how estimated parameters converge during the execution of the program:
 
 ```{r convergence_plot, fig.width = 10, fig.height=5}
-make_convergence_plots(param, gwas_n, log_enrichment = FALSE)
+make_convergence_plots(param, gwas_n)
 ```
 
 
-These plots show the estimated prior inclusion probability, prior effect size variance, enrichment and proportion of variance explained (PVE) over the iterations of parameter estimation. The enrichment is defined as the ratio of the prior inclusion probability of molecular traits over the prior inclusion probability of variants. We generally expect molecular traits to have higher prior inclusion probability than variants. Enrichment values typically range from 20 - 100 for expression traits. We could also plot enrichment at the log scale by setting `log_enrichment = TRUE`.
+These plots show the estimated prior inclusion probability, prior effect size variance, enrichment and proportion of variance explained (PVE) over the iterations of parameter estimation. The enrichment is defined as the ratio of the prior inclusion probability of molecular traits over the prior inclusion probability of variants. We generally expect molecular traits to have higher prior inclusion probability than variants. Enrichment values typically range from 20 - 200 for expression traits. We could also plot enrichment at the log scale by setting `log_enrichment = TRUE`.
 
 Then, we use `summarize_param()` to obtain estimated parameters, test enrichment, and to compute the PVE by variants and molecular traits. 
 
@@ -209,23 +206,24 @@ subset(finemap_res, group != "SNP" & gene_type == "protein_coding" & susie_pip >
 For more complex settings that involve different types of molecular traits, we will need to map molecular traits to their corresponding genes in order to compute gene PIPs. 
 
 To map molecular traits to their corresponding genes, we need a data frame `mapping_table`, with IDs of molecular traits ("molecular_id"), and the corresponding gene names ("gene_name"). It is helpful to include additional gene information, such as gene types and gene positions. 
-We provide a  `mapping_table`  to map introns to genes for PredictDB expression and slicing data [here](https://uchicago.box.com/s/gx7raqf5c9jp6tgvm5tpc2ej7zr6bnxz). The mapping file is also available on UChicago RCC server: `/project2/xinhe/shared_data/multigroup_ctwas/weights/mapping_files/PredictDB_mapping.RDS` .
+We provide a  `mapping_table`  to map introns to genes for PredictDB expression and slicing data [here](https://uchicago.box.com/s/gx7raqf5c9jp6tgvm5tpc2ej7zr6bnxz). The mapping file is also available on UChicago RCC server: `/project2/xinhe/shared_data/multigroup_ctwas/weights/mapping_files/PredictDB_mapping.RDS`.
 
 For example: 
 
-```{r mapping_table_splicing}
+```{r example_mapping_table}
 mapping_table <- readRDS("/project2/xinhe/shared_data/multigroup_ctwas/weights/mapping_files/PredictDB_mapping.RDS")
 
 head(mapping_table[mapping_table$gene_name == "UBR1",])
 ```
 
 
-Using this mapping table, we can use the `anno_finemap_res()` function to add additional columns to the fine-mapping results.  If a molecular trait is mapped to multiple genes, it splits the PIP of that molecular trait to its target genes. We use `gene_annot` below as the mapping table between expression traits and the corresponding gene names. 
+Using this mapping table, we can use the `anno_finemap_res()` function to add additional columns to the fine-mapping results.  If a molecular trait is mapped to multiple genes, it splits the PIP of that molecular trait to its target genes. In this example, we use `gene_annot` as the mapping table between expression traits and the corresponding gene names. 
 
 ```{r map_gene_anno, eval=FALSE}
+mapping_table <- gene_annot
 finemap_res <- anno_finemap_res(finemap_res,
                                 snp_map = snp_map,
-                                mapping_table = gene_annot,
+                                mapping_table = mapping_table,
                                 add_gene_annot = TRUE,
                                 map_by = "molecular_id",
                                 drop_unmapped = TRUE,
@@ -234,20 +232,11 @@ finemap_res <- anno_finemap_res(finemap_res,
 ```
 
 
-Similarly, we use the function `anno_susie_alpha_res()` to add additional columns to `susie_alpha_res`.  
-
-```{r map_gene_anno_2}
-susie_alpha_res <- anno_susie_alpha_res(susie_alpha_res,
-                                        mapping_table = gene_annot,
-                                        map_by = "molecular_id",
-                                        drop_unmapped = TRUE)
-```
-
-
-We could use the `combine_gene_pips()` function to compute gene PIPs across different types of molecular traits. Here we use `group_by = "gene_name"`, because molecular traits are mapped to their corresponding genes by the "gene_name" column.  
+We use the `combine_gene_pips()` function to compute gene PIPs across different types of molecular traits. Here we use `group_by = "gene_name"`, because molecular traits are mapped to their corresponding genes by the "gene_name" column in `mapping_table`.  
 
 ```{r combined_pip_by_type}
 combined_pip_by_type <- combine_gene_pips(susie_alpha_res,
+                                          mapping_table = mapping_table,
                                           group_by = "gene_name",
                                           by = "type",
                                           method = "combine_cs",

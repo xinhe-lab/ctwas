@@ -11,8 +11,6 @@
 #'
 #' @param snp_map a list of data frames with SNP-to-region map for the reference.
 #'
-#' @param weights a list of preprocessed weights.
-#'
 #' @param z_snp A data frame with columns: "id", "z", giving the z-scores for SNPs.
 #'
 #' @param z_gene A data frame with columns: "id", "z", giving the z-scores for genes.
@@ -29,8 +27,6 @@
 #'
 #' @param logfile The log filename. If NULL, will print log info on screen.
 #'
-#' @param ... Additional arguments of \code{susie_rss}.
-#'
 #' @return a list of merged region data, merged region info, LD_map, snp_map,
 #' and merged region IDs.
 #'
@@ -43,15 +39,13 @@ merge_region_data <- function(boundary_genes,
                               region_info,
                               LD_map,
                               snp_map,
-                              weights,
                               z_snp,
                               z_gene,
                               expand = TRUE,
                               maxSNP = Inf,
                               ncore = 1,
                               verbose = FALSE,
-                              logfile = NULL,
-                              ...) {
+                              logfile = NULL) {
 
   if (!is.null(logfile)){
     addHandler(writeToFile, file= logfile, level='DEBUG')
@@ -146,8 +140,6 @@ merge_region_data <- function(boundary_genes,
 #'
 #' @param logfile The log filename. If NULL, will print log info on screen.
 #'
-#' @param ... Additional arguments of \code{susie_rss}.
-#'
 #' @return a list of merged region data, merged region info, snp_map,
 #' and merged region IDs.
 #'
@@ -165,8 +157,7 @@ merge_region_data_noLD <- function(boundary_genes,
                                    maxSNP = Inf,
                                    ncore = 1,
                                    verbose = FALSE,
-                                   logfile = NULL,
-                                   ...) {
+                                   logfile = NULL) {
 
   if (!is.null(logfile)){
     addHandler(writeToFile, file= logfile, level='DEBUG')
@@ -233,7 +224,6 @@ merge_region_data_noLD <- function(boundary_genes,
 # Identify overlapping regions
 label_overlapping_regions <- function(boundary_genes) {
 
-  boundary_genes <- boundary_genes[,c("id", "chrom", "region_start", "region_stop", "region_id", "n_regions")]
   boundary_genes <- boundary_genes[boundary_genes$n_regions > 1, ]
 
   boundary_genes_list <- list()
@@ -251,7 +241,7 @@ label_overlapping_regions <- function(boundary_genes) {
       # Loop through the rows starting from the second row
       for (i in 2:nrow(df)) {
         # Check if the current row overlaps with the previous row
-        if (df$region_start[i] <= df$region_stop[i-1]) {
+        if (df$region_start[i] < df$region_stop[i-1]) {
           # merge with previous region
           df$merge_label[i] <- paste0(b, ":", merge_idx)
         } else {
@@ -289,13 +279,13 @@ create_merged_snp_LD_map <- function(boundary_genes,
   merged_region_id_map <- data.frame()
 
   for(merge_label in merge_labels){
-    df <- boundary_genes[boundary_genes$merge_label == merge_label,,drop=F]
+    df <- boundary_genes[boundary_genes$merge_label == merge_label,,drop=FALSE]
     new_region_chrom <- df$chrom[1]
     new_region_start <- min(df$region_start)
     new_region_stop <- max(df$region_stop)
     new_region_id <- paste0(new_region_chrom, "_", new_region_start, "_", new_region_stop)
 
-    old_region_ids <- unique(unlist(strsplit(df[df$merge_label == merge_label, "region_id"], split = ",")))
+    old_region_ids <- unique(unlist(strsplit(df$region_id, split = ",")))
 
     merged_region_info <- rbind(merged_region_info,
                                 data.frame(chrom = new_region_chrom,
@@ -318,7 +308,7 @@ create_merged_snp_LD_map <- function(boundary_genes,
 
   }
 
-  loginfo("Merge %d boundary genes into %d regions", nrow(boundary_genes), nrow(merged_region_info))
+  loginfo("Merge boundary genes into %d regions", nrow(merged_region_info))
 
   return(list("merged_region_info" = merged_region_info,
               "merged_LD_map" = merged_LD_map,
@@ -341,13 +331,15 @@ create_merged_snp_map <- function(boundary_genes,
   merged_snp_map <- list()
   merged_region_id_map <- data.frame()
   for(merge_label in merge_labels){
-    df <- boundary_genes[boundary_genes$merge_label == merge_label,,drop=F]
+    # pool together all the regions for each merge_label,
+    # and get the new region start and stop positions
+    df <- boundary_genes[boundary_genes$merge_label == merge_label,,drop=FALSE]
     new_region_chrom <- df$chrom[1]
     new_region_start <- min(df$region_start)
     new_region_stop <- max(df$region_stop)
     new_region_id <- paste0(new_region_chrom, "_", new_region_start, "_", new_region_stop)
 
-    old_region_ids <- unique(unlist(strsplit(df[df$merge_label == merge_label, "region_id"], split = ",")))
+    old_region_ids <- unique(unlist(strsplit(df$region_id, split = ",")))
 
     merged_region_info <- rbind(merged_region_info,
                                 data.frame(chrom = new_region_chrom,
@@ -360,10 +352,9 @@ create_merged_snp_map <- function(boundary_genes,
     merged_region_id_map <- rbind(merged_region_id_map,
                                   data.frame(region_id = new_region_id,
                                              old_region_ids = paste(old_region_ids, collapse = ",")))
-
   }
 
-  loginfo("Merge %d boundary genes into %d regions", nrow(boundary_genes), nrow(merged_region_info))
+  loginfo("Merge boundary genes into %d regions", nrow(merged_region_info))
 
   return(list("merged_region_info" = merged_region_info,
               "merged_snp_map" = merged_snp_map,
@@ -382,6 +373,8 @@ create_merged_snp_map <- function(boundary_genes,
 #'
 #' @return a list with updated cTWAS finemapping result.
 #'
+#' @importFrom logging loginfo logwarn
+#'
 #' @export
 #'
 update_merged_region_finemap_res <- function(finemap_res,
@@ -390,20 +383,26 @@ update_merged_region_finemap_res <- function(finemap_res,
                                              merged_region_susie_alpha_res,
                                              merged_region_id_map){
 
+  # if (!setequal(colnames(finemap_res), colnames(merged_region_finemap_res)))
+  #   logwarn("columns of finemap_res and merged_region_finemap_res do not match!")
+  #
+  # if (!setequal(colnames(susie_alpha_res), colnames(merged_region_susie_alpha_res)))
+  #   logwarn("columns of susie_alpha_res and merged_region_susie_alpha_res do not match!")
+
   new_region_ids <- merged_region_id_map$region_id
   old_region_ids <- unlist(strsplit(merged_region_id_map$old_region_ids, ","))
 
-  kept_finemap_res <- finemap_res[!finemap_res$region_id %in% old_region_ids, ]
-  new_finemap_res <- merged_region_finemap_res[merged_region_finemap_res$region_id %in% new_region_ids, ]
+  finemap_res_colnames <- intersect(colnames(finemap_res), colnames(merged_region_finemap_res))
+  kept_finemap_res <- finemap_res[!finemap_res$region_id %in% old_region_ids, finemap_res_colnames]
+  new_finemap_res <- merged_region_finemap_res[merged_region_finemap_res$region_id %in% new_region_ids, finemap_res_colnames]
   finemap_res <- rbind(kept_finemap_res, new_finemap_res)
-
-  kept_susie_alpha_res <- susie_alpha_res[!susie_alpha_res$region_id %in% old_region_ids, ]
-  new_susie_alpha_res <- merged_region_susie_alpha_res[merged_region_susie_alpha_res$region_id %in% new_region_ids, ]
-  susie_alpha_res <- rbind(kept_susie_alpha_res, new_susie_alpha_res)
-
   finemap_res <- unique(finemap_res)
   rownames(finemap_res) <- NULL
 
+  susie_alpha_res_colnames <- intersect(colnames(susie_alpha_res), colnames(merged_region_susie_alpha_res))
+  kept_susie_alpha_res <- susie_alpha_res[!susie_alpha_res$region_id %in% old_region_ids, susie_alpha_res_colnames]
+  new_susie_alpha_res <- merged_region_susie_alpha_res[merged_region_susie_alpha_res$region_id %in% new_region_ids, susie_alpha_res_colnames]
+  susie_alpha_res <- rbind(kept_susie_alpha_res, new_susie_alpha_res)
   susie_alpha_res <- unique(susie_alpha_res)
   rownames(susie_alpha_res) <- NULL
 
@@ -445,8 +444,7 @@ update_merged_region_data <- function(region_data, merged_region_data,
   region_info <- rbind(kept_region_info, new_region_info)
 
   LD_map <- rbind(LD_map, merged_LD_map)
-  idx <- match(region_info$region_id, LD_map$region_id)
-  LD_map <- LD_map[idx, ]
+  LD_map <- LD_map[match(region_info$region_id, LD_map$region_id), ]
 
   snp_map <- c(snp_map, merged_snp_map)
   snp_map <- snp_map[region_info$region_id]
