@@ -300,12 +300,13 @@ Next, we compute gene PIPs across different types of molecular traits:
 
 susie_alpha_res <- ctwas_res$susie_alpha_res
 
-susie_alpha_res <- anno_susie_alpha_res(susie_alpha_res,
-                                        mapping_table = mapping_table,
-                                        map_by = "molecular_id",
-                                        drop_unmapped = TRUE)
+# susie_alpha_res <- anno_susie_alpha_res(susie_alpha_res,
+#                                         mapping_table = mapping_table,
+#                                         map_by = "molecular_id",
+#                                         drop_unmapped = TRUE)
 
 combined_pip_by_type <- combine_gene_pips(susie_alpha_res, 
+                                          mapping_table = mapping_table,
                                           group_by = "gene_name",
                                           by = "type",
                                           method = "combine_cs",

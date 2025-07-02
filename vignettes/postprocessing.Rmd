@@ -52,7 +52,6 @@ ctwas_res <- readRDS(system.file("extdata/sample_data", "LDL_example.ctwas_sumst
 z_gene <- ctwas_res$z_gene
 param <- ctwas_res$param
 finemap_res <- ctwas_res$finemap_res
-boundary_genes <- ctwas_res$boundary_genes
 region_data <- ctwas_res$region_data
 screen_res <- ctwas_res$screen_res
 
@@ -69,7 +68,6 @@ ctwas_res <- readRDS(system.file("extdata/sample_data", "LDL_example.ctwas_sumst
 z_gene <- ctwas_res$z_gene
 param <- ctwas_res$param
 finemap_res <- ctwas_res$finemap_res
-boundary_genes <- ctwas_res$boundary_genes
 region_data <- ctwas_res$region_data
 screen_res <- ctwas_res$screen_res
 ```
@@ -79,25 +77,83 @@ screen_res <- ctwas_res$screen_res
 
 If the variants in a prediction model of a gene (or molecular trait) span two (or more) regions, it would be unclear to cTWAS what region the gene should be assigned to. If this happens, cTWAS will attempt to assign the gene to one of the two regions that contain most of the weights. Nevertheless, there will be a risk of cross-region LD, where the genetic component of this gene may correlate with variants or genes of both regions. This violates the assumption of cTWAS and can lead to false positive findings. 
 
-We address this “cross-region” problem by performing “region merging” as a post-processing step. If any gene has variants in the weights that span two or more regions ("cross-boundary"), those regions will be merged, and cTWAS will rerun the fine-mapping step on the merged regions. 
+We address this “cross-region” problem by performing “region merging” as a post-processing procedure. If any gene has variants in the weights that span two or more regions ("cross-boundary"), those regions will be merged, and cTWAS will rerun the fine-mapping step on the merged regions. 
 
-We first select the genes to merge. This could be all genes whose weights span two or more regions. In practice, the genes that are unlikely to be causal for the phenotype generally wouldn’t cause problems. So we can limit to the cross-boundary genes that are plausible risk genes. The results of cTWAS contain the list of genes with cross-boundary weights, `boundary_genes`. We can then select among these genes, the ones above a PIP cutoff and in credible sets. 
+This post-processing procedure contains multiple steps, as described in details below. To automate these steps, we made functions `postprocess_region_merging()` and `postprocess_region_merging_noLD()`, which automatically perform these region merging steps with or without LD.
 
-```{r selected_boundary_genes, eval=FALSE}
-high_PIP_finemap_gene_res <- subset(finemap_res, group != "SNP" & susie_pip > 0.5 & !is.na(cs))
-
-high_PIP_genes <- unique(high_PIP_finemap_gene_res$id)
-
-selected_boundary_genes <- boundary_genes[boundary_genes$id %in% high_PIP_genes, , drop=FALSE]
+```{r postprocess_region_merging, eval=FALSE}
+postprocess_region_merging_res <- postprocess_region_merging(
+                                    region_info,
+                                    region_data,
+                                    z_snp,
+                                    z_gene,
+                                    weights,
+                                    LD_map,
+                                    snp_map,
+                                    finemap_res = finemap_res, 
+                                    susie_alpha_res = susie_alpha_res,
+                                    mapping_table = mapping_table,
+                                    L = 5,
+                                    group_prior = group_prior,
+                                    group_prior_var = group_prior_var,
+                                    pip_thresh = 0.5,
+                                    filter_cs = FALSE,
+                                    maxSNP = 20000,
+                                    save_cor = TRUE,
+                                    cor_dir = "./cor_matrix"
+                                    ncore = 6)
 ```
 
+
+
+```{r postprocess_region_merging_noLD, eval=FALSE}
+postprocess_region_merging_noLD_res <- postprocess_region_merging_noLD(
+                                        region_info,
+                                        region_data,
+                                        z_snp,
+                                        z_gene,
+                                        weights,
+                                        snp_map,
+                                        finemap_res = finemap_res, 
+                                        susie_alpha_res = susie_alpha_res,
+                                        mapping_table = mapping_table,
+                                        group_prior = group_prior,
+                                        group_prior_var = group_prior_var,
+                                        pip_thresh = 0.5,
+                                        filter_cs = FALSE,
+                                        maxSNP = 20000,
+                                        ncore = 6)
+```
+
+
+If you would like to run each step separately, please see the sections below.
+
+### Select boundary genes
+
+We first select the boundary genes to merge. This could be all genes whose weights span two or more regions. In practice, the genes that are unlikely to be causal for the phenotype generally wouldn’t cause problems. So we can limit to the cross-boundary genes that are plausible risk genes. We can use the following function to get boundary genes and select those above a PIP cutoff (default = 0.5). 
+
+```{r select_boundary_genes, eval=FALSE}
+res <- select_boundary_genes(region_info, 
+                             weights, 
+                             gene_ids = z_gene$id, 
+                             finemap_res = finemap_res, 
+                             susie_alpha_res = susie_alpha_res,
+                             mapping_table = mapping_table,
+                             pip_thresh = 0.5,
+                             filter_cs = FALSE)
+boundary_genes <- res$boundary_genes
+selected_boundary_genes <- res$selected_boundary_genes
+```
+
+
+We can also limit to those in credible sets by setting `filter_cs = TRUE`. 
 
 ###  Merge regions
 
 Next, we use the function `merge_region_data()` to perform region merging.  It first identifies overlapping regions from the selected genes, then creates the data about the merged region(s) needed for fine-mapping. The data includes:  `merged_region_data`,  `merged_region_info`, and the variant and LD information of the merged region(s), `merged_snp_map` and `merged_LD_map`. The function expands the merged regions with all SNPs if the `region_data` contains thinned SNPs. It also creates `merged_region_id_map`, a data frame containing region IDs for merged regions and the original region IDs, so that one could keep track of the regions that were merged.  
 
 ```{r merge_region_data, eval=FALSE}
- merge_region_res <- merge_region_data(selected_boundary_genes,
+merge_region_res <- merge_region_data(selected_boundary_genes,
                                        region_data,
                                        region_info = region_info,
                                        LD_map = LD_map,
@@ -114,19 +170,21 @@ merged_region_id_map <- merge_region_res$merged_region_id_map
 ```
 
 
-We could set `maxSNP` to limit the number of SNPs in the region, if merged regions contain too many SNPs,  
+We could set `maxSNP` to limit the number of SNPs in the region, if merged regions contain too many SNPs. 
 
 Next, we run fine-mapping again for these merged regions, similar to the section "Fine-mapping screened regions" in the tutorial ["Running cTWAS analysis"][running_ctwas_analysis_tutorial].
 
 ```{r finemap_merged_regions, eval=FALSE}
-finemap_merged_regions_res <- finemap_regions(merged_region_data,
-                                              LD_map = merged_LD_map,
-                                              weights = weights,
-                                              group_prior = group_prior,
-                                              group_prior_var = group_prior_var,
-                                              L = 5,
-                                              save_cor = TRUE,
-                                              cor_dir = "./cor_matrix")
+res <- finemap_regions(merged_region_data,
+                       LD_map = merged_LD_map,
+                       weights = weights,
+                       group_prior = group_prior,
+                       group_prior_var = group_prior_var,
+                       L = 5,
+                       save_cor = TRUE,
+                       cor_dir = "./cor_matrix")
+merged_region_finemap_res <- res$finemap_res
+merged_region_susie_alpha_res <- res$susie_alpha_res
 ```
 
 
@@ -154,9 +212,11 @@ merged_region_id_map <- merge_region_res$merged_region_id_map
 We can then run fine-mapping (without LD) on the merged region data:
 
 ```{r screen_merged_regions_noLD, eval=FALSE}
-finemap_merged_regions_res <- finemap_regions_noLD(merged_region_data,                                                     
-                                                   group_prior = group_prior,
-                                                   group_prior_var = group_prior_var)
+res <- finemap_regions_noLD(merged_region_data,                                                     
+                            group_prior = group_prior,
+                            group_prior_var = group_prior_var)
+merged_region_finemap_res <- res$finemap_res
+merged_region_susie_alpha_res <- res$susie_alpha_res
 ```
 
 
@@ -169,8 +229,8 @@ res <- update_merged_region_finemap_res(finemap_res,
                                         merged_region_finemap_res, 
                                         merged_region_susie_alpha_res,
                                         merged_region_id_map)
-updated_merged_finemap_res <- res$finemap_res
-updated_merged_susie_alpha_res <- res$susie_alpha_res
+updated_finemap_res <- res$finemap_res
+updated_susie_alpha_res <- res$susie_alpha_res
 ```
 
 
@@ -190,6 +250,7 @@ updated_snp_map <- updated_data_res$updated_snp_map
 
 
 Similarly, we could update region data when running without LD:
+
 ```{r update_merged_region_data_noLD, eval=FALSE}
 updated_data_res <- update_merged_region_data_noLD(region_data, merged_region_data,
                                                    region_info, merged_region_info,
@@ -201,20 +262,49 @@ updated_snp_map <- updated_data_res$updated_snp_map
 ```
 
 
-
-## Dealing with LD mismatch
+## LD mismatch analysis
 
 LD mismatch between GWAS data (in-sample LD) and the reference LD could lead to false positives in fine-mapping. Diagnostic tools including [SuSiE-RSS][susierss_diagnostic], and [DENTIST][DENTIST], have been developed to check possible LD mismatch. Because it is very time consuming to run the LD mismatch diagnosis for all the regions across the genome, we will perform LD mismatch diagnosis and adjustment only for selected regions with high PIP signals in the post-processing. 
 
-Here, we perform the LD mismatch diagnosis using [SuSiE-RSS][susierss_diagnostic] for selected regions. It is an optional step that users could run after finishing the main cTWAS analysis. Users could choose regions of interest.
+Here, we perform the LD mismatch diagnosis using [SuSiE-RSS][susierss_diagnostic] for selected regions. It is an optional step that users could run after finishing the main cTWAS analysis. 
 
-For example, we could use the function `compute_region_nonSNP_PIPs()` to compute total non-SNP PIPs for the regions. The non-SNP PIP of a region is the sum of PIPs of all molecular traits in that region. We also limit to credible sets by setting  `filter_cs = TRUE`. We can then select regions with total non-SNP PIPs > 0.8 to run LD mismatch diagnosis:
+Similar to region merging, the post-processing procedure for LD-mismatch analysis also involves several steps. We provided a function `postprocess_LD_mismatch()`, which automatically performs the post-processing steps for LD-mismatch analysis.
+
+```{r postprocess_LD_mismatch, eval=FALSE}
+postprocess_LD_mismatch_res <- postprocess_LD_mismatch(
+                                   region_data,
+                                   z_snp,
+                                   weights,
+                                   LD_map,
+                                   snp_map,
+                                   gwas_n,
+                                   finemap_res,
+                                   susie_alpha_res,
+                                   group_prior = group_prior,
+                                   group_prior_var = group_prior_var,
+                                   min_nonSNP_PIP = 0.8,
+                                   filter_cs = FALSE,
+                                   p_diff_thresh = 5e-6,
+                                   pip_thresh = 0.5,
+                                   plot = TRUE,
+                                   maxSNP = 20000,
+                                   ncore = 6)
+```
+
+
+Please see the details of LD-mismatch analysis below if you would like to perform each step separately.
+
+### Select regions
+
+Users first need to choose regions of interest to run LD-mismatch analysis. For example, we could use the function `compute_region_nonSNP_PIPs()` to compute total non-SNP PIPs for the regions. The non-SNP PIP of a region is the sum of PIPs of all molecular traits in that region. We can then select regions with total non-SNP PIPs > 0.8 to run LD mismatch diagnosis:
 
 ```{r select_regions_to_rerun, eval=FALSE}
-nonSNP_PIPs <- compute_region_nonSNP_PIPs(finemap_res, filter_cs = TRUE)
+nonSNP_PIPs <- compute_region_nonSNP_PIPs(finemap_res, filter_cs = FALSE)
 selected_region_ids <- names(nonSNP_PIPs)[nonSNP_PIPs > 0.8]
 ```
 
+
+We could also limit to credible sets by setting  `filter_cs = TRUE`. 
 
 We use the function `diagnose_LD_mismatch_susie()` to perform LD mismatch diagnosis for these regions.  This function uses [SuSiE-RSS][susierss_diagnostic] to detect problematic SNPs among all variants in a region. Basically, it infers the expected statistic of a variant, based on the statistics of nearby variants and their LD from the reference, and compares this with the observed statistic. Inconsistency between the two would suggest potential LD mismatch.  
 
@@ -282,7 +372,9 @@ updated_susie_alpha_res <- res$susie_alpha_res
 ```
 
 
-In practice, it could be helpful to first run region merging, and then perform the LD-mismatch analysis. We could first update the region data after region merging, and then run LD-mismatch analysis using the updated region data. 
+
+In practice, it could be helpful to first run region merging procedure (with `postprocess_region_merging()`), and then perform the LD-mismatch analysis (with `postprocess_LD_mismatch()`) using the outputs from region merging. 
+
 
 [reference]: https://xinhe-lab.github.io/ctwas/reference/index.html
 [UKBB_LD_ref]: https://uchicago.box.com/s/jqocacd2fulskmhoqnasrknbt59x3xkn

@@ -72,7 +72,8 @@ combine_gene_pips <- function(susie_alpha_res,
 
   # Check to see if the group_by column is in susie_alpha_res
   if (!(group_by %in% colnames(susie_alpha_res))){
-    stop(paste0("Cannot find the column '", group_by, "' in susie_alpha_res!"))
+    stop(paste0("Cannot find the column '", group_by, "' in susie_alpha_res! ",
+                "Please check mapping_table."))
   }
 
   # use sum option if there is no CS information
