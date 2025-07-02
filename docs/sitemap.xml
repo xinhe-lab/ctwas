@@ -55,6 +55,9 @@
     <loc>/reference/assemble_region_data.html</loc>
   </url>
   <url>
+    <loc>/reference/check_n_snps.html</loc>
+  </url>
+  <url>
     <loc>/reference/combine_gene_pips.html</loc>
   </url>
   <url>
@@ -77,6 +80,9 @@
   </url>
   <url>
     <loc>/reference/convert_geno_to_LD_matrix.html</loc>
+  </url>
+  <url>
+    <loc>/reference/convert_predictdb_weights_varIDs.html</loc>
   </url>
   <url>
     <loc>/reference/convert_to_ukb_varIDs.html</loc>
@@ -142,6 +148,9 @@
     <loc>/reference/fit_EM.html</loc>
   </url>
   <url>
+    <loc>/reference/get_boundary_genes.html</loc>
+  </url>
+  <url>
     <loc>/reference/get_cs_correlation.html</loc>
   </url>
   <url>
@@ -199,10 +208,22 @@
     <loc>/reference/make_locusplot.html</loc>
   </url>
   <url>
+    <loc>/reference/map_gene_regions.html</loc>
+  </url>
+  <url>
     <loc>/reference/merge_region_data.html</loc>
   </url>
   <url>
     <loc>/reference/merge_region_data_noLD.html</loc>
+  </url>
+  <url>
+    <loc>/reference/postprocess_LD_mismatch.html</loc>
+  </url>
+  <url>
+    <loc>/reference/postprocess_region_merging.html</loc>
+  </url>
+  <url>
+    <loc>/reference/postprocess_region_merging_noLD.html</loc>
   </url>
   <url>
     <loc>/reference/preprocess_weights.html</loc>
@@ -229,7 +250,13 @@
     <loc>/reference/screen_regions_noLD.html</loc>
   </url>
   <url>
+    <loc>/reference/select_boundary_genes.html</loc>
+  </url>
+  <url>
     <loc>/reference/single_effect_regression.html</loc>
+  </url>
+  <url>
+    <loc>/reference/subset_weights.html</loc>
   </url>
   <url>
     <loc>/reference/summarize_param.html</loc>

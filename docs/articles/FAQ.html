@@ -33,7 +33,7 @@
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">ctwas</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">0.5.25</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">0.5.34</span>
       </span>
     </div>
 
@@ -108,7 +108,7 @@
       <h1 data-toc-skip>FAQ</h1>
                         <h4 data-toc-skip class="author">Kaixuan Luo</h4>
             
-            <h4 data-toc-skip class="date">2025-06-06</h4>
+            <h4 data-toc-skip class="date">2025-07-02</h4>
       
       <small class="dont-index">Source: <a href="https://github.com/xinhe-lab/ctwas/blob/multigroup/vignettes/FAQ.Rmd" class="external-link"><code>vignettes/FAQ.Rmd</code></a></small>
       <div class="hidden name"><code>FAQ.Rmd</code></div>
@@ -129,7 +129,7 @@
 <div class="section level3">
 <h3 id="how-to-run-ctwas-with-multiple-datasets-with-the-same-type-and-context">How to run cTWAS with multiple datasets with the same type and context?<a class="anchor" aria-label="anchor" href="#how-to-run-ctwas-with-multiple-datasets-with-the-same-type-and-context"></a>
 </h3>
-<p>You may have multiple datasets with the same type and context, e.g. GTEx brain and CMC brain eQTLs. In this case, if we set <code>context = "brain"</code> and <code>type = "expression"</code> for both datasets, the molecular traits would be merged into a single group. If you prefer to treat them as separate groups, you can give them different context names, e.g. <code>context = “GTEx_brain”</code> and <code>“CMC_brain”</code>.</p>
+<p>You may have multiple datasets with the same type and context, e.g. GTEx brain and CMC brain eQTLs. In this case, if you set <code>context = "brain"</code> and <code>type = "expression"</code> for both datasets, the two brain expression datasets would be merged into a single group. If you prefer to treat them as separate groups, you can give them different context names, e.g. <code>context = “GTEx_brain”</code> and <code>“CMC_brain”</code>.</p>
 </div>
 <div class="section level3">
 <h3 id="can-i-use-my-own-ld-matrices-as-reference">Can I use my own LD matrices as reference?<a class="anchor" aria-label="anchor" href="#can-i-use-my-own-ld-matrices-as-reference"></a>

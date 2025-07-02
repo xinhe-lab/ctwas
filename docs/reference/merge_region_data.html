@@ -17,7 +17,7 @@
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">ctwas</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">0.5.25</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">0.5.34</span>
       </span>
     </div>
 
@@ -94,15 +94,13 @@
 <span>  <span class="va">region_info</span>,</span>
 <span>  <span class="va">LD_map</span>,</span>
 <span>  <span class="va">snp_map</span>,</span>
-<span>  <span class="va">weights</span>,</span>
 <span>  <span class="va">z_snp</span>,</span>
 <span>  <span class="va">z_gene</span>,</span>
 <span>  expand <span class="op">=</span> <span class="cn">TRUE</span>,</span>
 <span>  maxSNP <span class="op">=</span> <span class="cn">Inf</span>,</span>
 <span>  ncore <span class="op">=</span> <span class="fl">1</span>,</span>
 <span>  verbose <span class="op">=</span> <span class="cn">FALSE</span>,</span>
-<span>  logfile <span class="op">=</span> <span class="cn">NULL</span>,</span>
-<span>  <span class="va">...</span></span>
+<span>  logfile <span class="op">=</span> <span class="cn">NULL</span></span>
 <span><span class="op">)</span></span></code></pre></div>
     </div>
 
@@ -126,10 +124,6 @@
 
 <dt>snp_map</dt>
 <dd><p>a list of data frames with SNP-to-region map for the reference.</p></dd>
-
-
-<dt>weights</dt>
-<dd><p>a list of preprocessed weights.</p></dd>
 
 
 <dt>z_snp</dt>
@@ -160,10 +154,6 @@ have enough memory to run the program.</p></dd>
 
 <dt>logfile</dt>
 <dd><p>The log filename. If NULL, will print log info on screen.</p></dd>
-
-
-<dt>...</dt>
-<dd><p>Additional arguments of <code>susie_rss</code>.</p></dd>
 
 </dl></div>
     <div id="value">

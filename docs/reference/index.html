@@ -17,7 +17,7 @@
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">ctwas</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">0.5.25</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">0.5.34</span>
       </span>
     </div>
 
@@ -102,6 +102,10 @@
         </td>
         <td><p>Assembles data for all the regions</p></td>
       </tr><tr><td>
+          <p><code><a href="check_n_snps.html">check_n_snps()</a></code> </p>
+        </td>
+        <td><p>Check the numbers of SNPs in snp_map, z_snp and weights</p></td>
+      </tr><tr><td>
           <p><code><a href="combine_gene_pips.html">combine_gene_pips()</a></code> </p>
         </td>
         <td><p>Combines gene PIPs by context, type or group.</p></td>
@@ -135,13 +139,13 @@
         <td><p>Converts PLINK genotype data to LD matrices and SNP info files,
 saves LD matrices as .RDS files and SNP info as .Rvar files</p></td>
       </tr><tr><td>
+          <p><code><a href="convert_predictdb_weights_varIDs.html">convert_predictdb_weights_varIDs()</a></code> </p>
+        </td>
+        <td><p>Convert rsIDs and varIDs in predictDB weights to the reference variant format.</p></td>
+      </tr><tr><td>
           <p><code><a href="convert_to_ukb_varIDs.html">convert_to_ukb_varIDs()</a></code> </p>
         </td>
         <td><p>Convert variant IDs from Open GWAS format or PredictDB weight format</p></td>
-      </tr><tr><td>
-          <p><code><a href="count_n_snps.html">count_n_snps()</a></code> </p>
-        </td>
-        <td><p>Count the numbers of SNPs in snp_map, z_snp and weights</p></td>
       </tr><tr><td>
           <p><code><a href="create_predictdb_from_QTLs.html">create_predictdb_from_QTLs()</a></code> </p>
         </td>
@@ -191,17 +195,17 @@ saves LD matrices as .RDS files and SNP info as .Rvar files</p></td>
         </td>
         <td><p>Runs cTWAS fine-mapping for regions without LD (L = 1)</p></td>
       </tr><tr><td>
+          <p><code><a href="get_boundary_genes.html">get_boundary_genes()</a></code> </p>
+        </td>
+        <td><p>Get cross-boundary genes.</p></td>
+      </tr><tr><td>
           <p><code><a href="get_gene_annot_from_ens_db.html">get_gene_annot_from_ens_db()</a></code> </p>
         </td>
         <td><p>Get gene annotation table from Ensembl database</p></td>
       </tr><tr><td>
           <p><code><a href="get_gene_info.html">get_gene_info()</a></code> </p>
         </td>
-        <td><p>Get gene info from weights</p></td>
-      </tr><tr><td>
-          <p><code><a href="get_gene_regions.html">get_gene_regions()</a></code> </p>
-        </td>
-        <td><p>Get regions for each gene</p></td>
+        <td><p>Get gene info from weights.</p></td>
       </tr><tr><td>
           <p><code><a href="get_molecular_ids.html">get_molecular_ids()</a></code> </p>
         </td>
@@ -247,6 +251,10 @@ saves LD matrices as .RDS files and SNP info as .Rvar files</p></td>
         </td>
         <td><p>Plots the cTWAS result for a single locus</p></td>
       </tr><tr><td>
+          <p><code><a href="map_gene_regions.html">map_gene_regions()</a></code> </p>
+        </td>
+        <td><p>Map regions for each gene.</p></td>
+      </tr><tr><td>
           <p><code><a href="merge_region_data.html">merge_region_data()</a></code> </p>
         </td>
         <td><p>Merges region data for cross-boundary genes</p></td>
@@ -254,6 +262,18 @@ saves LD matrices as .RDS files and SNP info as .Rvar files</p></td>
           <p><code><a href="merge_region_data_noLD.html">merge_region_data_noLD()</a></code> </p>
         </td>
         <td><p>Merges region data for cross-boundary genes without using LD</p></td>
+      </tr><tr><td>
+          <p><code><a href="postprocess_LD_mismatch.html">postprocess_LD_mismatch()</a></code> </p>
+        </td>
+        <td><p>Runs cTWAS post-processing procedure for merging regions</p></td>
+      </tr><tr><td>
+          <p><code><a href="postprocess_region_merging.html">postprocess_region_merging()</a></code> </p>
+        </td>
+        <td><p>Runs cTWAS post-processing procedure for region merging</p></td>
+      </tr><tr><td>
+          <p><code><a href="postprocess_region_merging_noLD.html">postprocess_region_merging_noLD()</a></code> </p>
+        </td>
+        <td><p>Runs cTWAS post-processing procedure for region merging without LD</p></td>
       </tr><tr><td>
           <p><code><a href="preprocess_weights.html">preprocess_weights()</a></code> </p>
         </td>
@@ -283,6 +303,14 @@ saves LD matrices as .RDS files and SNP info as .Rvar files</p></td>
         </td>
         <td><p>Screens regions with strong signals</p></td>
       </tr><tr><td>
+          <p><code><a href="select_boundary_genes.html">select_boundary_genes()</a></code> </p>
+        </td>
+        <td><p>Gets boundary genes and selects high PIP boundary genes</p></td>
+      </tr><tr><td>
+          <p><code><a href="subset_weights.html">subset_weights()</a></code> </p>
+        </td>
+        <td><p>Get a subset of weights, by group, context or type.</p></td>
+      </tr><tr><td>
           <p><code><a href="summarize_param.html">summarize_param()</a></code> </p>
         </td>
         <td><p>Summarizes estimated parameters</p></td>
@@ -293,7 +321,7 @@ saves LD matrices as .RDS files and SNP info as .Rvar files</p></td>
       </tr><tr><td>
           <p><code><a href="trim_weights.html">trim_weights()</a></code> </p>
         </td>
-        <td><p>Trim weights by keeping top number of SNPs and/or filtering by minimum absolute weights.</p></td>
+        <td><p>Trim weights and filter SNPs by LD reference and GWAS SNPs.</p></td>
       </tr><tr><td>
           <p><code><a href="update_finemap_res.html">update_finemap_res()</a></code> </p>
         </td>

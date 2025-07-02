@@ -33,7 +33,7 @@
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">ctwas</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">0.5.25</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">0.5.34</span>
       </span>
     </div>
 
@@ -108,7 +108,7 @@
       <h1 data-toc-skip>Post-processing cTWAS results</h1>
                         <h4 data-toc-skip class="author">Kaixuan Luo, Sheng Qian</h4>
             
-            <h4 data-toc-skip class="date">2025-06-06</h4>
+            <h4 data-toc-skip class="date">2025-07-02</h4>
       
       <small class="dont-index">Source: <a href="https://github.com/xinhe-lab/ctwas/blob/multigroup/vignettes/postprocessing.Rmd" class="external-link"><code>vignettes/postprocessing.Rmd</code></a></small>
       <div class="hidden name"><code>postprocessing.Rmd</code></div>
@@ -138,7 +138,6 @@
 <span><span class="va">z_gene</span> <span class="op">&lt;-</span> <span class="va">ctwas_res</span><span class="op">$</span><span class="va">z_gene</span></span>
 <span><span class="va">param</span> <span class="op">&lt;-</span> <span class="va">ctwas_res</span><span class="op">$</span><span class="va">param</span></span>
 <span><span class="va">finemap_res</span> <span class="op">&lt;-</span> <span class="va">ctwas_res</span><span class="op">$</span><span class="va">finemap_res</span></span>
-<span><span class="va">boundary_genes</span> <span class="op">&lt;-</span> <span class="va">ctwas_res</span><span class="op">$</span><span class="va">boundary_genes</span></span>
 <span><span class="va">region_data</span> <span class="op">&lt;-</span> <span class="va">ctwas_res</span><span class="op">$</span><span class="va">region_data</span></span>
 <span><span class="va">screen_res</span> <span class="op">&lt;-</span> <span class="va">ctwas_res</span><span class="op">$</span><span class="va">screen_res</span></span>
 <span></span>
@@ -151,27 +150,75 @@
 <span><span class="va">z_gene</span> <span class="op">&lt;-</span> <span class="va">ctwas_res</span><span class="op">$</span><span class="va">z_gene</span></span>
 <span><span class="va">param</span> <span class="op">&lt;-</span> <span class="va">ctwas_res</span><span class="op">$</span><span class="va">param</span></span>
 <span><span class="va">finemap_res</span> <span class="op">&lt;-</span> <span class="va">ctwas_res</span><span class="op">$</span><span class="va">finemap_res</span></span>
-<span><span class="va">boundary_genes</span> <span class="op">&lt;-</span> <span class="va">ctwas_res</span><span class="op">$</span><span class="va">boundary_genes</span></span>
 <span><span class="va">region_data</span> <span class="op">&lt;-</span> <span class="va">ctwas_res</span><span class="op">$</span><span class="va">region_data</span></span>
 <span><span class="va">screen_res</span> <span class="op">&lt;-</span> <span class="va">ctwas_res</span><span class="op">$</span><span class="va">screen_res</span></span></code></pre></div>
 <div class="section level2">
 <h2 id="cross-region-ld">Cross-region LD<a class="anchor" aria-label="anchor" href="#cross-region-ld"></a>
 </h2>
 <p>If the variants in a prediction model of a gene (or molecular trait) span two (or more) regions, it would be unclear to cTWAS what region the gene should be assigned to. If this happens, cTWAS will attempt to assign the gene to one of the two regions that contain most of the weights. Nevertheless, there will be a risk of cross-region LD, where the genetic component of this gene may correlate with variants or genes of both regions. This violates the assumption of cTWAS and can lead to false positive findings.</p>
-<p>We address this “cross-region” problem by performing “region merging” as a post-processing step. If any gene has variants in the weights that span two or more regions (“cross-boundary”), those regions will be merged, and cTWAS will rerun the fine-mapping step on the merged regions.</p>
-<p>We first select the genes to merge. This could be all genes whose weights span two or more regions. In practice, the genes that are unlikely to be causal for the phenotype generally wouldn’t cause problems. So we can limit to the cross-boundary genes that are plausible risk genes. The results of cTWAS contain the list of genes with cross-boundary weights, <code>boundary_genes</code>. We can then select among these genes, the ones above a PIP cutoff and in credible sets.</p>
-<div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">high_PIP_finemap_gene_res</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/subset.html" class="external-link">subset</a></span><span class="op">(</span><span class="va">finemap_res</span>, <span class="va">group</span> <span class="op">!=</span> <span class="st">"SNP"</span> <span class="op">&amp;</span> <span class="va">susie_pip</span> <span class="op">&gt;</span> <span class="fl">0.5</span> <span class="op">&amp;</span> <span class="op">!</span><span class="fu"><a href="https://rdrr.io/r/base/NA.html" class="external-link">is.na</a></span><span class="op">(</span><span class="va">cs</span><span class="op">)</span><span class="op">)</span></span>
-<span></span>
-<span><span class="va">high_PIP_genes</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/unique.html" class="external-link">unique</a></span><span class="op">(</span><span class="va">high_PIP_finemap_gene_res</span><span class="op">$</span><span class="va">id</span><span class="op">)</span></span>
-<span></span>
-<span><span class="va">selected_boundary_genes</span> <span class="op">&lt;-</span> <span class="va">boundary_genes</span><span class="op">[</span><span class="va">boundary_genes</span><span class="op">$</span><span class="va">id</span> <span class="op"><a href="https://rdrr.io/r/base/match.html" class="external-link">%in%</a></span> <span class="va">high_PIP_genes</span>, , drop<span class="op">=</span><span class="cn">FALSE</span><span class="op">]</span></span></code></pre></div>
-<div class="section level3">
-<h3 id="merge-regions">Merge regions<a class="anchor" aria-label="anchor" href="#merge-regions"></a>
-</h3>
-<p>Next, we use the function <code><a href="../reference/merge_region_data.html">merge_region_data()</a></code> to perform region merging. It first identifies overlapping regions from the selected genes, then creates the data about the merged region(s) needed for fine-mapping. The data includes: <code>merged_region_data</code>, <code>merged_region_info</code>, and the variant and LD information of the merged region(s), <code>merged_snp_map</code> and <code>merged_LD_map</code>. The function expands the merged regions with all SNPs if the <code>region_data</code> contains thinned SNPs. It also creates <code>merged_region_id_map</code>, a data frame containing region IDs for merged regions and the original region IDs, so that one could keep track of the regions that were merged.</p>
+<p>We address this “cross-region” problem by performing “region merging” as a post-processing procedure. If any gene has variants in the weights that span two or more regions (“cross-boundary”), those regions will be merged, and cTWAS will rerun the fine-mapping step on the merged regions.</p>
+<p>This post-processing procedure contains multiple steps, as described in the section “Post-processing steps for region merging” below. To simplify these steps, we have the functions <code><a href="../reference/postprocess_region_merging.html">postprocess_region_merging()</a></code> and <code><a href="../reference/postprocess_region_merging_noLD.html">postprocess_region_merging_noLD()</a></code>, which automate the region merging steps with or without LD.</p>
+<p>Region merging with LD:</p>
+<div class="sourceCode" id="cb5"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb5-1"><a href="#cb5-1"></a>postprocess_region_merging_res &lt;-<span class="st"> </span><span class="kw">postprocess_region_merging</span>(</span>
+<span id="cb5-2"><a href="#cb5-2"></a>                                      region_info,</span>
+<span id="cb5-3"><a href="#cb5-3"></a>                                      region_data,</span>
+<span id="cb5-4"><a href="#cb5-4"></a>                                      z_snp,</span>
+<span id="cb5-5"><a href="#cb5-5"></a>                                      z_gene,</span>
+<span id="cb5-6"><a href="#cb5-6"></a>                                      weights,</span>
+<span id="cb5-7"><a href="#cb5-7"></a>                                      LD_map,</span>
+<span id="cb5-8"><a href="#cb5-8"></a>                                      snp_map,</span>
+<span id="cb5-9"><a href="#cb5-9"></a>                                      <span class="dt">finemap_res =</span> finemap_res, </span>
+<span id="cb5-10"><a href="#cb5-10"></a>                                      <span class="dt">susie_alpha_res =</span> susie_alpha_res,</span>
+<span id="cb5-11"><a href="#cb5-11"></a>                                      <span class="dt">mapping_table =</span> mapping_table,</span>
+<span id="cb5-12"><a href="#cb5-12"></a>                                      <span class="dt">L =</span> <span class="dv">5</span>,</span>
+<span id="cb5-13"><a href="#cb5-13"></a>                                      <span class="dt">group_prior =</span> group_prior,</span>
+<span id="cb5-14"><a href="#cb5-14"></a>                                      <span class="dt">group_prior_var =</span> group_prior_var,</span>
+<span id="cb5-15"><a href="#cb5-15"></a>                                      <span class="dt">pip_thresh =</span> <span class="fl">0.5</span>,</span>
+<span id="cb5-16"><a href="#cb5-16"></a>                                      <span class="dt">filter_cs =</span> <span class="ot">FALSE</span>,</span>
+<span id="cb5-17"><a href="#cb5-17"></a>                                      <span class="dt">maxSNP =</span> <span class="dv">20000</span>,</span>
+<span id="cb5-18"><a href="#cb5-18"></a>                                      <span class="dt">save_cor =</span> <span class="ot">TRUE</span>,</span>
+<span id="cb5-19"><a href="#cb5-19"></a>                                      <span class="dt">cor_dir =</span> <span class="st">"./cor_matrix"</span></span>
+<span id="cb5-20"><a href="#cb5-20"></a>                                      <span class="dt">ncore =</span> <span class="dv">6</span>)</span></code></pre></div>
+<p>Region merging without LD:</p>
 <div class="sourceCode" id="cb6"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span> <span class="va">merge_region_res</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/merge_region_data.html">merge_region_data</a></span><span class="op">(</span><span class="va">selected_boundary_genes</span>,</span>
+<code class="sourceCode R"><span><span class="va">postprocess_region_merging_noLD_res</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/postprocess_region_merging_noLD.html">postprocess_region_merging_noLD</a></span><span class="op">(</span></span>
+<span>                                           <span class="va">region_info</span>,</span>
+<span>                                           <span class="va">region_data</span>,</span>
+<span>                                           <span class="va">z_snp</span>,</span>
+<span>                                           <span class="va">z_gene</span>,</span>
+<span>                                           <span class="va">weights</span>,</span>
+<span>                                           <span class="va">snp_map</span>,</span>
+<span>                                           finemap_res <span class="op">=</span> <span class="va">finemap_res</span>, </span>
+<span>                                           susie_alpha_res <span class="op">=</span> <span class="va">susie_alpha_res</span>,</span>
+<span>                                           mapping_table <span class="op">=</span> <span class="va">mapping_table</span>,</span>
+<span>                                           group_prior <span class="op">=</span> <span class="va">group_prior</span>,</span>
+<span>                                           group_prior_var <span class="op">=</span> <span class="va">group_prior_var</span>,</span>
+<span>                                           pip_thresh <span class="op">=</span> <span class="fl">0.5</span>,</span>
+<span>                                           filter_cs <span class="op">=</span> <span class="cn">FALSE</span>,</span>
+<span>                                           maxSNP <span class="op">=</span> <span class="fl">20000</span>,</span>
+<span>                                           ncore <span class="op">=</span> <span class="fl">6</span><span class="op">)</span></span></code></pre></div>
+<p>If you would like to run each of the region merging steps separately, please see the section below.</p>
+<div class="section level3">
+<h3 id="post-processing-steps-for-region-merging">Post-processing steps for region merging<a class="anchor" aria-label="anchor" href="#post-processing-steps-for-region-merging"></a>
+</h3>
+<p><strong>Step 1. Select boundary genes</strong></p>
+<p>We first select the boundary genes to merge. This could be all genes whose weights span two or more regions. In practice, the genes that are unlikely to be causal for the phenotype generally wouldn’t cause problems. So we can limit to the cross-boundary genes that are plausible risk genes. We can use the following function to get boundary genes and select those above a PIP cutoff (default = 0.5).</p>
+<div class="sourceCode" id="cb7"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">res</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/select_boundary_genes.html">select_boundary_genes</a></span><span class="op">(</span><span class="va">region_info</span>, </span>
+<span>                             <span class="va">weights</span>, </span>
+<span>                             gene_ids <span class="op">=</span> <span class="va">z_gene</span><span class="op">$</span><span class="va">id</span>, </span>
+<span>                             finemap_res <span class="op">=</span> <span class="va">finemap_res</span>, </span>
+<span>                             susie_alpha_res <span class="op">=</span> <span class="va">susie_alpha_res</span>,</span>
+<span>                             mapping_table <span class="op">=</span> <span class="va">mapping_table</span>,</span>
+<span>                             pip_thresh <span class="op">=</span> <span class="fl">0.5</span>,</span>
+<span>                             filter_cs <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span></span>
+<span><span class="va">boundary_genes</span> <span class="op">&lt;-</span> <span class="va">res</span><span class="op">$</span><span class="va">boundary_genes</span></span>
+<span><span class="va">selected_boundary_genes</span> <span class="op">&lt;-</span> <span class="va">res</span><span class="op">$</span><span class="va">selected_boundary_genes</span></span></code></pre></div>
+<p>We can also limit to those in credible sets by setting <code>filter_cs = TRUE</code>.</p>
+<p><strong>Step 2. Merge regions</strong></p>
+<p>Next, we use the function <code><a href="../reference/merge_region_data.html">merge_region_data()</a></code> to perform region merging. It first identifies overlapping regions from the selected genes, then creates the data about the merged region(s) needed for fine-mapping. The data includes: <code>merged_region_data</code>, <code>merged_region_info</code>, and the variant and LD information of the merged region(s), <code>merged_snp_map</code> and <code>merged_LD_map</code>. The function expands the merged regions with all SNPs if the <code>region_data</code> contains thinned SNPs. It also creates <code>merged_region_id_map</code>, a data frame containing region IDs for merged regions and the original region IDs, so that one could keep track of the regions that were merged.</p>
+<div class="sourceCode" id="cb8"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">merge_region_res</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/merge_region_data.html">merge_region_data</a></span><span class="op">(</span><span class="va">selected_boundary_genes</span>,</span>
 <span>                                       <span class="va">region_data</span>,</span>
 <span>                                       region_info <span class="op">=</span> <span class="va">region_info</span>,</span>
 <span>                                       LD_map <span class="op">=</span> <span class="va">LD_map</span>,</span>
@@ -185,24 +232,9 @@
 <span><span class="va">merged_LD_map</span> <span class="op">&lt;-</span> <span class="va">merge_region_res</span><span class="op">$</span><span class="va">merged_LD_map</span></span>
 <span><span class="va">merged_snp_map</span> <span class="op">&lt;-</span> <span class="va">merge_region_res</span><span class="op">$</span><span class="va">merged_snp_map</span></span>
 <span><span class="va">merged_region_id_map</span> <span class="op">&lt;-</span> <span class="va">merge_region_res</span><span class="op">$</span><span class="va">merged_region_id_map</span></span></code></pre></div>
-<p>We could set <code>maxSNP</code> to limit the number of SNPs in the region, if merged regions contain too many SNPs,</p>
-<p>Next, we run fine-mapping again for these merged regions, similar to the section “Fine-mapping screened regions” in the tutorial <a href="https://xinhe-lab.github.io/multigroup_ctwas/articles/running_ctwas_analysis.html" class="external-link">“Running cTWAS analysis”</a>.</p>
-<div class="sourceCode" id="cb7"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">finemap_merged_regions_res</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/finemap_regions.html">finemap_regions</a></span><span class="op">(</span><span class="va">merged_region_data</span>,</span>
-<span>                                              LD_map <span class="op">=</span> <span class="va">merged_LD_map</span>,</span>
-<span>                                              weights <span class="op">=</span> <span class="va">weights</span>,</span>
-<span>                                              group_prior <span class="op">=</span> <span class="va">group_prior</span>,</span>
-<span>                                              group_prior_var <span class="op">=</span> <span class="va">group_prior_var</span>,</span>
-<span>                                              L <span class="op">=</span> <span class="fl">5</span>,</span>
-<span>                                              save_cor <span class="op">=</span> <span class="cn">TRUE</span>,</span>
-<span>                                              cor_dir <span class="op">=</span> <span class="st">"./cor_matrix"</span><span class="op">)</span></span></code></pre></div>
-<p>The output of this function has the same format as those from regular cTWAS analysis. It returns fine-mapping results for merged regions.</p>
-</div>
-<div class="section level3">
-<h3 id="merge-regions-without-ld">Merge regions without LD<a class="anchor" aria-label="anchor" href="#merge-regions-without-ld"></a>
-</h3>
-<p>When running cTWAS without LD, we can do region merging using the function <code><a href="../reference/merge_region_data_noLD.html">merge_region_data_noLD()</a></code>.</p>
-<div class="sourceCode" id="cb8"><pre class="downlit sourceCode r">
+<p>We could set <code>maxSNP</code> to limit the number of SNPs in the region, if merged regions contain too many SNPs.</p>
+<p>When running without LD, we could merge regions using the function <code><a href="../reference/merge_region_data_noLD.html">merge_region_data_noLD()</a></code>.</p>
+<div class="sourceCode" id="cb9"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">merge_region_res</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/merge_region_data_noLD.html">merge_region_data_noLD</a></span><span class="op">(</span><span class="va">selected_boundary_genes</span>,</span>
 <span>                                           <span class="va">region_data</span>,</span>
 <span>                                           region_info <span class="op">=</span> <span class="va">region_info</span>,</span>
@@ -214,26 +246,39 @@
 <span><span class="va">merged_region_info</span> <span class="op">&lt;-</span> <span class="va">merge_region_res</span><span class="op">$</span><span class="va">merged_region_info</span></span>
 <span><span class="va">merged_snp_map</span> <span class="op">&lt;-</span> <span class="va">merge_region_res</span><span class="op">$</span><span class="va">merged_snp_map</span></span>
 <span><span class="va">merged_region_id_map</span> <span class="op">&lt;-</span> <span class="va">merge_region_res</span><span class="op">$</span><span class="va">merged_region_id_map</span></span></code></pre></div>
-<p>We can then run fine-mapping (without LD) on the merged region data:</p>
-<div class="sourceCode" id="cb9"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">finemap_merged_regions_res</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/finemap_regions_noLD.html">finemap_regions_noLD</a></span><span class="op">(</span><span class="va">merged_region_data</span>,                                                     </span>
-<span>                                                   group_prior <span class="op">=</span> <span class="va">group_prior</span>,</span>
-<span>                                                   group_prior_var <span class="op">=</span> <span class="va">group_prior_var</span><span class="op">)</span></span></code></pre></div>
-</div>
-<div class="section level3">
-<h3 id="update-fine-mapping-results-after-region-merging">Update fine-mapping results after region merging<a class="anchor" aria-label="anchor" href="#update-fine-mapping-results-after-region-merging"></a>
-</h3>
-<p>We can update the fine-mapping results after region merging:</p>
+<p><strong>Step 3. Fine-map merged regions</strong></p>
+<p>Next, we run fine-mapping again for these merged regions, similar to the section “Fine-mapping screened regions” in the tutorial <a href="https://xinhe-lab.github.io/multigroup_ctwas/articles/running_ctwas_analysis.html" class="external-link">“Running cTWAS analysis”</a>.</p>
 <div class="sourceCode" id="cb10"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">res</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/finemap_regions.html">finemap_regions</a></span><span class="op">(</span><span class="va">merged_region_data</span>,</span>
+<span>                       LD_map <span class="op">=</span> <span class="va">merged_LD_map</span>,</span>
+<span>                       weights <span class="op">=</span> <span class="va">weights</span>,</span>
+<span>                       group_prior <span class="op">=</span> <span class="va">group_prior</span>,</span>
+<span>                       group_prior_var <span class="op">=</span> <span class="va">group_prior_var</span>,</span>
+<span>                       L <span class="op">=</span> <span class="fl">5</span>,</span>
+<span>                       save_cor <span class="op">=</span> <span class="cn">TRUE</span>,</span>
+<span>                       cor_dir <span class="op">=</span> <span class="st">"./cor_matrix"</span><span class="op">)</span></span>
+<span><span class="va">merged_region_finemap_res</span> <span class="op">&lt;-</span> <span class="va">res</span><span class="op">$</span><span class="va">finemap_res</span></span>
+<span><span class="va">merged_region_susie_alpha_res</span> <span class="op">&lt;-</span> <span class="va">res</span><span class="op">$</span><span class="va">susie_alpha_res</span></span></code></pre></div>
+<p>The output of this function has the same format as those from regular cTWAS analysis. It returns fine-mapping results for merged regions.</p>
+<p>We could also run fine-mapping without LD on the merged region data:</p>
+<div class="sourceCode" id="cb11"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">res</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/finemap_regions_noLD.html">finemap_regions_noLD</a></span><span class="op">(</span><span class="va">merged_region_data</span>,                                                     </span>
+<span>                            group_prior <span class="op">=</span> <span class="va">group_prior</span>,</span>
+<span>                            group_prior_var <span class="op">=</span> <span class="va">group_prior_var</span><span class="op">)</span></span>
+<span><span class="va">merged_region_finemap_res</span> <span class="op">&lt;-</span> <span class="va">res</span><span class="op">$</span><span class="va">finemap_res</span></span>
+<span><span class="va">merged_region_susie_alpha_res</span> <span class="op">&lt;-</span> <span class="va">res</span><span class="op">$</span><span class="va">susie_alpha_res</span></span></code></pre></div>
+<p><strong>Step 4. Update fine-mapping results after region merging</strong></p>
+<p>We can update the fine-mapping results after region merging:</p>
+<div class="sourceCode" id="cb12"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">res</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/update_merged_region_finemap_res.html">update_merged_region_finemap_res</a></span><span class="op">(</span><span class="va">finemap_res</span>, </span>
 <span>                                        <span class="va">susie_alpha_res</span>, </span>
 <span>                                        <span class="va">merged_region_finemap_res</span>, </span>
 <span>                                        <span class="va">merged_region_susie_alpha_res</span>,</span>
 <span>                                        <span class="va">merged_region_id_map</span><span class="op">)</span></span>
-<span><span class="va">updated_merged_finemap_res</span> <span class="op">&lt;-</span> <span class="va">res</span><span class="op">$</span><span class="va">finemap_res</span></span>
-<span><span class="va">updated_merged_susie_alpha_res</span> <span class="op">&lt;-</span> <span class="va">res</span><span class="op">$</span><span class="va">susie_alpha_res</span></span></code></pre></div>
+<span><span class="va">updated_finemap_res</span> <span class="op">&lt;-</span> <span class="va">res</span><span class="op">$</span><span class="va">finemap_res</span></span>
+<span><span class="va">updated_susie_alpha_res</span> <span class="op">&lt;-</span> <span class="va">res</span><span class="op">$</span><span class="va">susie_alpha_res</span></span></code></pre></div>
 <p>After region merging, we can also update the region data (and other input data), which could be used in later, e.g. LD mismatch analysis:</p>
-<div class="sourceCode" id="cb11"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb13"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">updated_data_res</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/update_merged_region_data.html">update_merged_region_data</a></span><span class="op">(</span><span class="va">region_data</span>, <span class="va">merged_region_data</span>,</span>
 <span>                                              <span class="va">region_info</span>, <span class="va">merged_region_info</span>,</span>
 <span>                                              <span class="va">LD_map</span>, <span class="va">merged_LD_map</span>,</span>
@@ -244,7 +289,7 @@
 <span><span class="va">updated_LD_map</span> <span class="op">&lt;-</span> <span class="va">updated_data_res</span><span class="op">$</span><span class="va">updated_LD_map</span></span>
 <span><span class="va">updated_snp_map</span> <span class="op">&lt;-</span> <span class="va">updated_data_res</span><span class="op">$</span><span class="va">updated_snp_map</span></span></code></pre></div>
 <p>Similarly, we could update region data when running without LD:</p>
-<div class="sourceCode" id="cb12"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb14"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">updated_data_res</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/update_merged_region_data_noLD.html">update_merged_region_data_noLD</a></span><span class="op">(</span><span class="va">region_data</span>, <span class="va">merged_region_data</span>,</span>
 <span>                                                   <span class="va">region_info</span>, <span class="va">merged_region_info</span>,</span>
 <span>                                                   <span class="va">snp_map</span>, <span class="va">merged_snp_map</span>,</span>
@@ -255,16 +300,44 @@
 </div>
 </div>
 <div class="section level2">
-<h2 id="dealing-with-ld-mismatch">Dealing with LD mismatch<a class="anchor" aria-label="anchor" href="#dealing-with-ld-mismatch"></a>
+<h2 id="ld-mismatch-analysis">LD mismatch analysis<a class="anchor" aria-label="anchor" href="#ld-mismatch-analysis"></a>
 </h2>
 <p>LD mismatch between GWAS data (in-sample LD) and the reference LD could lead to false positives in fine-mapping. Diagnostic tools including <a href="https://stephenslab.github.io/susieR/articles/susierss_diagnostic.html" class="external-link">SuSiE-RSS</a>, and <a href="https://github.com/Yves-CHEN/DENTIST/" class="external-link">DENTIST</a>, have been developed to check possible LD mismatch. Because it is very time consuming to run the LD mismatch diagnosis for all the regions across the genome, we will perform LD mismatch diagnosis and adjustment only for selected regions with high PIP signals in the post-processing.</p>
-<p>Here, we perform the LD mismatch diagnosis using <a href="https://stephenslab.github.io/susieR/articles/susierss_diagnostic.html" class="external-link">SuSiE-RSS</a> for selected regions. It is an optional step that users could run after finishing the main cTWAS analysis. Users could choose regions of interest.</p>
-<p>For example, we could use the function <code><a href="../reference/compute_region_nonSNP_PIPs.html">compute_region_nonSNP_PIPs()</a></code> to compute total non-SNP PIPs for the regions. The non-SNP PIP of a region is the sum of PIPs of all molecular traits in that region. We also limit to credible sets by setting <code>filter_cs = TRUE</code>. We can then select regions with total non-SNP PIPs &gt; 0.8 to run LD mismatch diagnosis:</p>
-<div class="sourceCode" id="cb13"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">nonSNP_PIPs</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/compute_region_nonSNP_PIPs.html">compute_region_nonSNP_PIPs</a></span><span class="op">(</span><span class="va">finemap_res</span>, filter_cs <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span>
+<p>Here, we perform the LD mismatch diagnosis using <a href="https://stephenslab.github.io/susieR/articles/susierss_diagnostic.html" class="external-link">SuSiE-RSS</a> for selected regions. It is an optional step that users could run after finishing the main cTWAS analysis.</p>
+<p>Similar to region merging, the post-processing procedure for LD mismatch analysis also involves several steps. We have a function <code><a href="../reference/postprocess_LD_mismatch.html">postprocess_LD_mismatch()</a></code>, which automates the post-processing steps for LD mismatch analysis.</p>
+<div class="sourceCode" id="cb15"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">postprocess_LD_mismatch_res</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/postprocess_LD_mismatch.html">postprocess_LD_mismatch</a></span><span class="op">(</span></span>
+<span>                                   <span class="va">region_data</span>,</span>
+<span>                                   <span class="va">z_snp</span>,</span>
+<span>                                   <span class="va">weights</span>,</span>
+<span>                                   <span class="va">LD_map</span>,</span>
+<span>                                   <span class="va">snp_map</span>,</span>
+<span>                                   <span class="va">gwas_n</span>,</span>
+<span>                                   <span class="va">finemap_res</span>,</span>
+<span>                                   <span class="va">susie_alpha_res</span>,</span>
+<span>                                   group_prior <span class="op">=</span> <span class="va">group_prior</span>,</span>
+<span>                                   group_prior_var <span class="op">=</span> <span class="va">group_prior_var</span>,</span>
+<span>                                   min_nonSNP_PIP <span class="op">=</span> <span class="fl">0.8</span>,</span>
+<span>                                   filter_cs <span class="op">=</span> <span class="cn">FALSE</span>,</span>
+<span>                                   p_diff_thresh <span class="op">=</span> <span class="fl">5e-6</span>,</span>
+<span>                                   pip_thresh <span class="op">=</span> <span class="fl">0.5</span>,</span>
+<span>                                   plot <span class="op">=</span> <span class="cn">TRUE</span>,</span>
+<span>                                   maxSNP <span class="op">=</span> <span class="fl">20000</span>,</span>
+<span>                                   ncore <span class="op">=</span> <span class="fl">6</span><span class="op">)</span></span></code></pre></div>
+<p>Please see the details of LD mismatch analysis below if you would like to perform each step separately.</p>
+<p><em>Note</em>: In practice, it could be helpful to first run the region merging procedure (with <code><a href="../reference/postprocess_region_merging.html">postprocess_region_merging()</a></code>), and then perform the LD mismatch analysis (with <code><a href="../reference/postprocess_LD_mismatch.html">postprocess_LD_mismatch()</a></code>) using the outputs from region merging.</p>
+<div class="section level3">
+<h3 id="post-processing-steps-for-ld-mismatch-analysis">Post-processing steps for LD mismatch analysis<a class="anchor" aria-label="anchor" href="#post-processing-steps-for-ld-mismatch-analysis"></a>
+</h3>
+<p><strong>Step 1. Select regions of interest</strong></p>
+<p>Users first need to choose regions of interest to run LD-mismatch analysis. For example, we could use the function <code><a href="../reference/compute_region_nonSNP_PIPs.html">compute_region_nonSNP_PIPs()</a></code> to compute total non-SNP PIPs for the regions. The non-SNP PIP of a region is the sum of PIPs of all molecular traits in that region. We can then select regions with total non-SNP PIPs &gt; 0.8 to run LD mismatch diagnosis:</p>
+<div class="sourceCode" id="cb16"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">nonSNP_PIPs</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/compute_region_nonSNP_PIPs.html">compute_region_nonSNP_PIPs</a></span><span class="op">(</span><span class="va">finemap_res</span>, filter_cs <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span></span>
 <span><span class="va">selected_region_ids</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/names.html" class="external-link">names</a></span><span class="op">(</span><span class="va">nonSNP_PIPs</span><span class="op">)</span><span class="op">[</span><span class="va">nonSNP_PIPs</span> <span class="op">&gt;</span> <span class="fl">0.8</span><span class="op">]</span></span></code></pre></div>
+<p>We could also limit to credible sets by setting <code>filter_cs = TRUE</code>.</p>
+<p><strong>Step 2. Diagnose LD mismatch</strong></p>
 <p>We use the function <code><a href="../reference/diagnose_LD_mismatch_susie.html">diagnose_LD_mismatch_susie()</a></code> to perform LD mismatch diagnosis for these regions. This function uses <a href="https://stephenslab.github.io/susieR/articles/susierss_diagnostic.html" class="external-link">SuSiE-RSS</a> to detect problematic SNPs among all variants in a region. Basically, it infers the expected statistic of a variant, based on the statistics of nearby variants and their LD from the reference, and compares this with the observed statistic. Inconsistency between the two would suggest potential LD mismatch.</p>
-<div class="sourceCode" id="cb14"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb17"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">res</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/diagnose_LD_mismatch_susie.html">diagnose_LD_mismatch_susie</a></span><span class="op">(</span>region_ids <span class="op">=</span> <span class="va">selected_region_ids</span>, </span>
 <span>                                  z_snp <span class="op">=</span> <span class="va">z_snp</span>, </span>
 <span>                                  LD_map <span class="op">=</span> <span class="va">LD_map</span>, </span>
@@ -277,20 +350,18 @@
 <span><span class="va">condz_stats</span> <span class="op">&lt;-</span> <span class="va">res</span><span class="op">$</span><span class="va">condz_stats</span></span>
 <span><span class="va">plots</span> <span class="op">&lt;-</span> <span class="va">res</span><span class="op">$</span><span class="va">plots</span></span></code></pre></div>
 <p>This returns a list of problematic SNPs (diagnostic test <code>p-value &lt; 5e-6</code>, by default), flipped SNPs, and the test statistics of <code>kriging_rss</code> function from <a href="https://stephenslab.github.io/susieR/articles/susierss_diagnostic.html" class="external-link">SuSiE-RSS</a>. When <code>plot = TRUE</code>, it returns the plots with expected vs. observed z-scores for diagnosis.</p>
+<p><strong>Step 3. Fine-map without LD for regions with problematic genes</strong></p>
 <p>Our basic strategy of dealing with LD mismatch is: we use the list of problematic SNPs to identify the molecular traits whose results may be affected by LD-mismatch. We would then run fine-mapping without LD (L = 1) in the regions containing these molecular traits, assuming a single causal signal in such a region. The fine-mapping results in this setting would be independent of LD.</p>
 <p>We choose the genes with some plausibility of being risk genes (gene PIP &gt; 0.5 by default) and problematic SNPs in their weights. We would then select regions containing these problematic genes.</p>
-<div class="sourceCode" id="cb15"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb18"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">problematic_genes</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/get_problematic_genes.html">get_problematic_genes</a></span><span class="op">(</span><span class="va">problematic_snps</span>, </span>
 <span>                                           <span class="va">weights</span>, </span>
 <span>                                           <span class="va">finemap_res</span>, </span>
-<span>                                           pip_thresh <span class="op">=</span> <span class="fl">0.5</span><span class="op">)</span></span>
-<span></span>
-<span><span class="va">problematic_region_ids</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/unique.html" class="external-link">unique</a></span><span class="op">(</span><span class="va">finemap_res</span><span class="op">[</span><span class="va">finemap_res</span><span class="op">$</span><span class="va">id</span> <span class="op"><a href="https://rdrr.io/r/base/match.html" class="external-link">%in%</a></span> <span class="va">problematic_genes</span>, <span class="st">"region_id"</span><span class="op">]</span><span class="op">)</span></span>
-<span></span>
-<span><span class="va">finemap_res</span><span class="op">[</span><span class="va">finemap_res</span><span class="op">$</span><span class="va">id</span> <span class="op"><a href="https://rdrr.io/r/base/match.html" class="external-link">%in%</a></span> <span class="va">problematic_genes</span>,<span class="op">]</span></span></code></pre></div>
+<span>                                           pip_thresh <span class="op">=</span> <span class="fl">0.5</span><span class="op">)</span></span></code></pre></div>
 <p>We then rerun the fine-mapping without LD information for the problematic regions, using the <code><a href="../reference/finemap_regions_noLD.html">finemap_regions_noLD()</a></code> function:</p>
-<div class="sourceCode" id="cb16"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="kw">if</span> <span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/length.html" class="external-link">length</a></span><span class="op">(</span><span class="va">problematic_region_ids</span><span class="op">)</span> <span class="op">&gt;</span> <span class="fl">0</span><span class="op">)</span> <span class="op">{</span></span>
+<div class="sourceCode" id="cb19"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="kw">if</span> <span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/length.html" class="external-link">length</a></span><span class="op">(</span><span class="va">problematic_genes</span><span class="op">)</span> <span class="op">&gt;</span> <span class="fl">0</span><span class="op">)</span> <span class="op">{</span></span>
+<span>  <span class="va">problematic_region_ids</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/unique.html" class="external-link">unique</a></span><span class="op">(</span><span class="va">finemap_res</span><span class="op">$</span><span class="va">region_id</span><span class="op">[</span><span class="va">finemap_res</span><span class="op">$</span><span class="va">id</span> <span class="op"><a href="https://rdrr.io/r/base/match.html" class="external-link">%in%</a></span> <span class="va">problematic_genes</span><span class="op">]</span><span class="op">)</span></span>
 <span>  <span class="va">rerun_region_data</span> <span class="op">&lt;-</span> <span class="va">screen_res</span><span class="op">$</span><span class="va">screened_region_data</span><span class="op">[</span><span class="va">problematic_region_ids</span><span class="op">]</span></span>
 <span>  <span class="va">res</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/finemap_regions_noLD.html">finemap_regions_noLD</a></span><span class="op">(</span><span class="va">rerun_region_data</span>, </span>
 <span>                              group_prior <span class="op">=</span> <span class="va">group_prior</span>,</span>
@@ -299,10 +370,10 @@
 <span>  <span class="va">rerun_susie_alpha_res</span> <span class="op">&lt;-</span> <span class="va">res</span><span class="op">$</span><span class="va">susie_alpha_res</span></span>
 <span><span class="op">}</span></span></code></pre></div>
 <p>We can check the fine-mapping results (without LD) for the problematic genes:</p>
-<div class="sourceCode" id="cb17"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb20"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">rerun_finemap_res</span><span class="op">[</span><span class="va">rerun_finemap_res</span><span class="op">$</span><span class="va">id</span> <span class="op"><a href="https://rdrr.io/r/base/match.html" class="external-link">%in%</a></span> <span class="va">problematic_genes</span>,<span class="op">]</span></span></code></pre></div>
 <p>We can update the fine-mapping results for the problematic regions:</p>
-<div class="sourceCode" id="cb18"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb21"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">res</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/update_finemap_res.html">update_finemap_res</a></span><span class="op">(</span><span class="va">finemap_res</span>, </span>
 <span>                          <span class="va">susie_alpha_res</span>, </span>
 <span>                          <span class="va">rerun_finemap_res</span>, </span>
@@ -310,7 +381,7 @@
 <span>                          updated_region_ids <span class="op">=</span> <span class="va">problematic_region_ids</span><span class="op">)</span></span>
 <span><span class="va">updated_finemap_res</span> <span class="op">&lt;-</span> <span class="va">res</span><span class="op">$</span><span class="va">finemap_res</span></span>
 <span><span class="va">updated_susie_alpha_res</span> <span class="op">&lt;-</span> <span class="va">res</span><span class="op">$</span><span class="va">susie_alpha_res</span></span></code></pre></div>
-<p>In practice, it could be helpful to first run region merging, and then perform the LD-mismatch analysis. We could first update the region data after region merging, and then run LD-mismatch analysis using the updated region data.</p>
+</div>
 </div>
   </div>
 
