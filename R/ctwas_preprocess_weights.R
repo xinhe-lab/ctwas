@@ -287,10 +287,16 @@ process_weights <- function(molecular_id,
   chrom <- sapply(strsplit(g.weight_table$varID, "_"), "[[", 1)
   chrom <- unique(parse_number(chrom))
   if (length(chrom) > 1) {
-    stop("More than one chrom in weight for %s!", molecular_id)
+    stop(sprintf("More than one 'chrom' in weight of %s!", molecular_id))
   }
 
-  snp_pos <- as.integer(snp_info$pos[match(g.weight_table$rsid, snp_info$id)])
+  snp_idx <- match(g.weight_table$rsid, snp_info$id)
+  snp_pos <- as.integer(snp_info$pos[snp_idx])
+  snp_chrom <- snp_info$chrom[snp_idx]
+  if (any(unique(snp_chrom) != chrom)) {
+    stop(sprintf("'chrom' in weight of %s does not match with the LD reference!", molecular_id))
+  }
+
   wgt.snpinfo <- data.frame(chrom = chrom,
                             id = g.weight_table$rsid,
                             cm = 0,
