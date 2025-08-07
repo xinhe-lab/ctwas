@@ -17,7 +17,7 @@
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">ctwas</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">0.5.34</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">0.5.35</span>
       </span>
     </div>
 
@@ -105,7 +105,6 @@
 <span>    <span class="st">"shared_nonSNP"</span>, <span class="st">"independent"</span><span class="op">)</span>,</span>
 <span>  min_nonSNP_PIP <span class="op">=</span> <span class="fl">0.5</span>,</span>
 <span>  min_snp_pval <span class="op">=</span> <span class="fl">5e-08</span>,</span>
-<span>  min_gene_pval <span class="op">=</span> <span class="va">min_snp_pval</span>,</span>
 <span>  min_p_single_effect <span class="op">=</span> <span class="fl">0.8</span>,</span>
 <span>  maxSNP <span class="op">=</span> <span class="cn">Inf</span>,</span>
 <span>  min_var <span class="op">=</span> <span class="fl">2</span>,</span>
@@ -201,12 +200,7 @@ will be selected to run finemapping using all SNPs.</p></dd>
 
 
 <dt>min_snp_pval</dt>
-<dd><p>Select regions with minimum SNP p-values &lt; <code>min_snp_pval</code>.</p></dd>
-
-
-<dt>min_gene_pval</dt>
-<dd><p>Select regions with minimum gene p-values &lt; <code>min_gene_pval</code>.
-By default, it is set to the same value as <code>min_snp_pval</code>.</p></dd>
+<dd><p>Select regions with minimum GWAS SNP p-values &lt; <code>min_snp_pval</code>.</p></dd>
 
 
 <dt>min_p_single_effect</dt>
