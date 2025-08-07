@@ -17,9 +17,6 @@
 #'
 #' @param min_snp_pval Select regions with minimum SNP p-values < \code{min_snp_pval}.
 #'
-#' @param min_gene_pval Select regions with minimum gene p-values < \code{min_gene_pval}.
-#' By default, it is set to the same value as \code{min_snp_pval}.
-#'
 #' @param null_method Method to compute null model, options: "ctwas", "susie" or "none".
 #'
 #' @param ncore The number of cores used to parallelize susie over regions.
@@ -42,8 +39,6 @@ screen_regions <- function(region_data,
                            min_gene = 1,
                            min_nonSNP_PIP = 0.5,
                            min_snp_pval = 5e-8,
-                           min_gene_pval = min_snp_pval,
-                           use_twas_min_pval = FALSE,
                            null_method = c("ctwas", "susie", "none"),
                            ncore = 1,
                            logfile = NULL,
@@ -98,11 +93,9 @@ screen_regions <- function(region_data,
     }
   }
 
-  loginfo("min_snp_pval = %s.", min_snp_pval)
-  loginfo("min_gene_pval = %s.", min_gene_pval)
-  sigP_region_ids <- screen_summary$region_id[which(screen_summary$min_snp_p < min_snp_pval | screen_summary$min_gene_p < min_gene_pval)]
+  sigP_region_ids <- screen_summary$region_id[which(screen_summary$min_snp_p < min_snp_pval)]
   sigP_region_ids <- setdiff(sigP_region_ids, skipped_region_ids)
-  loginfo("Selected %d regions with significant GWAS or TWAS signals.", length(sigP_region_ids))
+  loginfo("Selected %d regions with GWAS min. pval < %s.", length(sigP_region_ids), min_snp_pval)
 
   # run finemapping for all regions without LD (L=1) using the SER model
   # select regions with total non-SNP PIPs > 0.5

@@ -45,10 +45,7 @@
 #' @param min_nonSNP_PIP Regions with non-SNP PIP >= \code{min_nonSNP_PIP}
 #' will be selected to run finemapping using full SNPs.
 #'
-#' @param min_snp_pval Select regions with minimum SNP p-values < \code{min_snp_pval}.
-#'
-#' @param min_gene_pval Select regions with minimum gene p-values < \code{min_gene_pval}.
-#' By default, it is set to the same value as \code{min_snp_pval}.
+#' @param min_snp_pval Select regions with minimum GWAS SNP p-values < \code{min_snp_pval}.
 #'
 #' @param min_p_single_effect Regions with probability greater than \code{min_p_single_effect} of
 #' having 1 or fewer effects will be used for parameter estimation.
@@ -105,7 +102,6 @@ ctwas_sumstats_noLD <- function(
     min_group_size = 100,
     min_nonSNP_PIP = 0.5,
     min_snp_pval = 5e-8,
-    min_gene_pval = min_snp_pval,
     min_p_single_effect = 0.8,
     null_method = c("ctwas", "susie", "none"),
     EM_tol = 1e-4,
@@ -230,7 +226,6 @@ ctwas_sumstats_noLD <- function(
                                min_gene = min_gene,
                                min_nonSNP_PIP = min_nonSNP_PIP,
                                min_snp_pval = min_snp_pval,
-                               min_gene_pval = min_gene_pval,
                                null_method = null_method,
                                ncore = ncore,
                                verbose = verbose)
