@@ -333,6 +333,9 @@ create_predictdb_from_QTLs <- function(weight_table,
   loginfo("Makes PredictDB weights from QTL data")
 
   # check and clean the QTL data
+  if (!inherits(weight_table,"data.frame"))
+    stop("'weight_table' should be a data.frame object.")
+
   weight_table <- as.data.frame(weight_table)
 
   required_cols <- unique(c("gene", "rsid", "varID", "ref_allele", "eff_allele", "weight", select_by))
@@ -362,7 +365,8 @@ create_predictdb_from_QTLs <- function(weight_table,
     gene_table <- weight_table %>%
       group_by(.data$gene) %>%
       summarise(n.snps.in.model = n()) %>%
-      ungroup() %>% as.data.frame()
+      ungroup() %>%
+      as.data.frame()
     gene_table$genename <- NA
     gene_table$gene_type <- NA
     gene_table$pred.perf.R2 <- NA
@@ -371,6 +375,9 @@ create_predictdb_from_QTLs <- function(weight_table,
     gene_table <- gene_table[, c("gene", "genename", "gene_type", "n.snps.in.model",
                                  "pred.perf.R2", "pred.perf.pval", "pred.perf.qval")]
   }
+
+  if (!inherits(gene_table,"data.frame"))
+    stop("'gene_table' should be a data.frame object.")
 
   if (use_top_QTL) {
     if (any(gene_table$n.snps.in.model > 1)){
@@ -381,6 +388,9 @@ create_predictdb_from_QTLs <- function(weight_table,
     colnames(cov_table) <- c("GENE","RSID1","RSID2")
     cov_table$VALUE <- 1
   }
+
+  if (!inherits(cov_table,"data.frame"))
+    stop("'cov_table' should be a data.frame object.")
 
   # write PredictDB '.db' file
   if (!dir.exists(outputdir))

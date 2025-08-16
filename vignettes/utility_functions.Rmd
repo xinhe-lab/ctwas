@@ -120,8 +120,8 @@ create_predictdb_from_QTLs(weight_table,
                            gene_table, 
                            use_top_QTL = TRUE,
                            select_by = "weight",
-                           outputdir, 
-                           outname)
+                           outputdir = outputdir, 
+                           outname = outname)
 ```
 
 
