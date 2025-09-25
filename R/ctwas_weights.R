@@ -330,13 +330,21 @@ create_predictdb_from_QTLs <- function(weight_table,
 
   select_by <- match.arg(select_by)
 
-  loginfo("Makes PredictDB weights from QTL data")
+  loginfo("Creating PredictDB weights from QTL data...\n")
 
-  # check and clean the QTL data
+  # check inputs
   if (!inherits(weight_table,"data.frame"))
     stop("'weight_table' should be a data.frame object.")
 
-  weight_table <- as.data.frame(weight_table)
+  if (!is.null(gene_table)) {
+    if (!inherits(gene_table,"data.frame"))
+      stop("'gene_table' should be a data.frame object.")
+  }
+
+  if (!is.null(cov_table)) {
+    if (!inherits(cov_table,"data.frame"))
+      stop("'cov_table' should be a data.frame object.")
+  }
 
   required_cols <- unique(c("gene", "rsid", "varID", "ref_allele", "eff_allele", "weight", select_by))
   if (!all(required_cols %in% colnames(weight_table))){
@@ -357,16 +365,15 @@ create_predictdb_from_QTLs <- function(weight_table,
     weight_table <- weight_table[!duplicated(weight_table$gene), ]
   }
 
-  weight_table <- weight_table[weight_table$weight != 0, ,drop = FALSE]
-  weight_table <- weight_table[complete.cases(weight_table), ,drop = FALSE]
+  weight_table <- weight_table[weight_table$weight != 0, , drop = FALSE]
+  weight_table <- weight_table[complete.cases(weight_table), , drop = FALSE]
 
-  # if NULL, create a simply extra_table based on weight_table
+  # if NULL, create a simple gene_table based on weight_table
   if (is.null(gene_table)) {
     gene_table <- weight_table %>%
       group_by(.data$gene) %>%
       summarise(n.snps.in.model = n()) %>%
-      ungroup() %>%
-      as.data.frame()
+      ungroup() %>% as.data.frame()
     gene_table$genename <- NA
     gene_table$gene_type <- NA
     gene_table$pred.perf.R2 <- NA
@@ -376,9 +383,7 @@ create_predictdb_from_QTLs <- function(weight_table,
                                  "pred.perf.R2", "pred.perf.pval", "pred.perf.qval")]
   }
 
-  if (!inherits(gene_table,"data.frame"))
-    stop("'gene_table' should be a data.frame object.")
-
+  # creates cov_table and set covariance to 1 if use_top_QTL, as each gene only has one top QTL
   if (use_top_QTL) {
     if (any(gene_table$n.snps.in.model > 1)){
       stop("each gene should have only one SNP when using top QTL only")
@@ -388,9 +393,6 @@ create_predictdb_from_QTLs <- function(weight_table,
     colnames(cov_table) <- c("GENE","RSID1","RSID2")
     cov_table$VALUE <- 1
   }
-
-  if (!inherits(cov_table,"data.frame"))
-    stop("'cov_table' should be a data.frame object.")
 
   # write PredictDB '.db' file
   if (!dir.exists(outputdir))
@@ -474,23 +476,27 @@ write_predictdb <- function(weight_table,
   # create weights table
   dbWriteTable(db, 'weights', weight_table, overwrite = TRUE)
 
-  # create an empty extra table if NULL
-  if (is.null(extra_table)) {
+  if (!is.null(extra_table)) {
+    if (!inherits(extra_table,"data.frame"))
+      stop("'extra_table' should be a data.frame object.")
+    required_cols <- c("gene", "genename", "gene_type")
+    if (!all(required_cols %in% colnames(extra_table))) {
+      stop("extra_table needs to contain the following columns: ",
+           paste(required_cols, collapse = " "))
+    }
+  } else {
+    # create an empty extra table if NULL
     extra_table <- data.frame(matrix(ncol = 7, nrow = 0))
     colnames(extra_table) <- c("gene", "genename", "gene_type", "n.snps.in.model",
                                "pred.perf.R2", "pred.perf.pval", "pred.perf.qval")
   }
-  # check required columns
-  required_cols <- c("gene", "genename", "gene_type")
-  if (!all(required_cols %in% colnames(extra_table))) {
-    stop("extra_table needs to contain the following columns: ",
-         paste(required_cols, collapse = " "))
-  }
+
   dbWriteTable(db, 'extra', extra_table, overwrite = TRUE)
   dbDisconnect(db)
 
   if (!is.null(cov_table)) {
-    # check required columns
+    if (!inherits(cov_table,"data.frame"))
+      stop("'cov_table' should be a data.frame object.")
     required_cols <- c("GENE", "RSID1", "RSID2", "VALUE")
     if (!all(required_cols %in% colnames(cov_table))) {
       stop("cov_table needs to contain the following columns: ",
