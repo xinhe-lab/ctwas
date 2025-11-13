@@ -126,7 +126,7 @@ make_locusplot <- function(finemap_res,
                            color_pval_by = c("cs", "LD", "none"),
                            color_pip_by = c("cs", "LD", "none"),
                            LD.colors = c("grey", "blue", "purple", "salmon"),
-                           cs.colors = c("firebrick", "dodgerblue", "forestgreen", "darkmagenta", "darkorange"),
+                           cs.colors = c("grey", "firebrick", "dodgerblue", "forestgreen", "darkmagenta", "darkorange"),
                            focal.colors = c("grey", "salmon"),
                            label_QTLs = TRUE,
                            highlight_pval = NULL,
@@ -268,11 +268,12 @@ make_locusplot <- function(finemap_res,
   # set colors for credible sets
   if (color_pval_by == "cs" || color_pip_by == "cs") {
     if (is.null(finemap_region_res$cs)){
-      logwarn("'cs' not available. Cannot coloring by cs!")
+      logwarn("'cs' not available. Cannot color by credible sets!")
       color_pval_by[color_pval_by == "cs"] <- "none"
       color_pip_by[color_pip_by == "cs"] <- "none"
     } else {
-      cs_colors <- c("L1" = cs.colors[1], "L2" = cs.colors[2], "L3" = cs.colors[3], "L4" = cs.colors[4], "L5" = cs.colors[5])
+      finemap_region_res$cs[is.na(finemap_region_res$cs)] <- "non-CS"
+      cs_colors <- c("L1" = cs.colors[2], "L2" = cs.colors[3], "L3" = cs.colors[4], "L4" = cs.colors[5], "L5" = cs.colors[6], "non-CS" = cs.colors[1])
       # if there are multiple CSs, use the first one
       if (any(grepl(",", finemap_region_res$cs))){
         finemap_region_res$cs <- sapply(strsplit(finemap_region_res$cs, ","), "[[", 1)
@@ -394,7 +395,7 @@ make_locusplot <- function(finemap_res,
   # limit to credible sets (if cs is available)
   if (filter_cs && !is.null(pip_plot_data$cs)) {
     loginfo("Limit PIPs to credible sets")
-    pip_plot_data <- pip_plot_data[!is.na(pip_plot_data$cs),]
+    pip_plot_data <- pip_plot_data[grep("^L[1-9]+", pip_plot_data$cs),]
   }
 
   p_pip <- ggplot(pip_plot_data, aes(x=.data$pos/1e6, y=.data$susie_pip, shape=.data$type,
@@ -405,7 +406,7 @@ make_locusplot <- function(finemap_res,
     scale_size_manual(values = point.sizes, guide="none") +
     xlim(loc$xrange/1e6) +
     ylim(0,1) +
-    labs(x = "", y = "cTWAS PIP", shape = "") +
+    labs(x = "", y = "PIP", shape = "") +
     theme_bw() +
     theme(legend.position = legend.position,
           legend.spacing.x = unit(1.0, 'cm'),
