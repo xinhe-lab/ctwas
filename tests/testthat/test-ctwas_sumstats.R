@@ -21,8 +21,8 @@ test_that("ctwas_sumstats works", {
                                 maxSNP = 20000,
                                 min_nonSNP_PIP = 0.5,
                                 null_method = "ctwas",
-                                ncore = 2,
-                                ncore_LD = 2)
+                                ncore = 1,
+                                ncore_LD = 1)
   })
 
   # saveRDS(ctwas_res, "inst/extdata/sample_data/LDL_example.ctwas_sumstats_res.RDS")

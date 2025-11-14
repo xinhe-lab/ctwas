@@ -19,7 +19,7 @@ test_that("merge_region_data_noLD works", {
                                                z_snp = z_snp,
                                                z_gene = z_gene,
                                                maxSNP = 20000,
-                                               ncore = 2)
+                                               ncore = 1)
   })
 
   # saveRDS(merge_region_res, "LDL_example.merge_region_noLD_res.RDS")
@@ -54,7 +54,7 @@ test_that("merge_region_data works", {
                                           z_snp = z_snp,
                                           z_gene = z_gene,
                                           maxSNP = 20000,
-                                          ncore = 2)
+                                          ncore = 1)
   })
 
   # saveRDS(merge_region_res, "LDL_example.merge_region_res.RDS")
@@ -124,7 +124,7 @@ test_that("create_merged_snp_map with combined boundary genes works", {
                                           gene_ids = z_gene$id,
                                           mapping_table = mapping_table,
                                           show_mapping = TRUE,
-                                          ncore = 2)
+                                          ncore = 1)
 
     res1 <- create_merged_snp_map(boundary_genes1, region_info, snp_map)
 
@@ -133,7 +133,7 @@ test_that("create_merged_snp_map with combined boundary genes works", {
                                           gene_ids = z_gene$id,
                                           mapping_table = mapping_table,
                                           show_mapping = FALSE,
-                                          ncore = 2)
+                                          ncore = 1)
 
     res2 <- create_merged_snp_map(boundary_genes2, region_info, snp_map)
 
@@ -157,7 +157,7 @@ test_that("label_overlapping_regions works", {
     boundary_genes <- get_boundary_genes(region_info,
                                          weights,
                                          gene_ids = z_gene$id,
-                                         ncore = 2)
+                                         ncore = 1)
     labeled_boundary_genes <- label_overlapping_regions(boundary_genes)
   })
   # saveRDS(labeled_boundary_genes, "LDL_example.labeled_boundary_genes.RDS")

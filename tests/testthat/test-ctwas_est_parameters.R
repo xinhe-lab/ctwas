@@ -11,7 +11,7 @@ test_that("est_param works", {
                        niter = 50,
                        group_prior_var_structure = "shared_all",
                        null_method = "ctwas",
-                       ncore = 2)
+                       ncore = 1)
   })
 
   expect_equal(param$group_prior, expected_param$group_prior)
