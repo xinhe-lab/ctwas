@@ -18,7 +18,7 @@ make_locusplot(
   filter_cs = TRUE,
   color_pval_by = c("cs", "LD", "none"),
   color_pip_by = c("cs", "LD", "none"),
-  LD.colors = c("grey", "blue", "purple", "salmon"),
+  LD.colors = c("grey", "cyan", "green", "orange", "red", "salmon"),
   cs.colors = c("grey", "firebrick", "dodgerblue", "forestgreen", "darkmagenta",
     "darkorange"),
   focal.colors = c("grey", "salmon"),
@@ -27,7 +27,7 @@ make_locusplot(
   highlight_pip = 0.8,
   highlight_pos = NULL,
   highlight.color = "red",
-  highlight.pos.color = "cyan2",
+  highlight.pos.color = "magenta",
   point.sizes = c(1, 3),
   point.alpha = c(0.4, 0.6),
   point.shapes = c(16, 15, 18, 17, 10, 12, 14, 11),
@@ -37,6 +37,8 @@ make_locusplot(
   axis.title.size = 10,
   legend.text.size = 9,
   legend.position = "top",
+  legend.nrow = c(1, 1),
+  legend.pip.nrow = 1,
   genelabel.cex.text = 0.7,
   panel.heights = c(4, 4, 1, 4),
   verbose = FALSE
@@ -116,11 +118,13 @@ Exclude text labels when they overlap too many other things.}
 
 \item{legend.position}{position to put legends. If "none", no legends will be shown.}
 
-\item{genelabel.cex.text}{Size for gene label text.}
+\item{legend.nrow}{Number of rows for legend text in the panels.}
 
 \item{panel.heights}{Relative heights of the panels.}
 
 \item{verbose}{If TRUE, print detail messages.}
+
+\item{legend.nrow.pval}{Number of rows for legend text in the p-value panel.}
 }
 \description{
 Plots the cTWAS result for a single locus

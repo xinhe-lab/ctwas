@@ -74,7 +74,9 @@
 #'
 #' @param legend.position position to put legends. If "none", no legends will be shown.
 #'
-#' @param genelabel.cex.text Size for gene label text.
+#' @param legend.nrow.pval Number of rows for legend text in the p-value panel.
+#'
+#' @param legend.nrow Number of rows for legend text in the panels.
 #'
 #' @param panel.heights Relative heights of the panels.
 #'
@@ -125,7 +127,7 @@ make_locusplot <- function(finemap_res,
                            filter_cs = TRUE,
                            color_pval_by = c("cs", "LD", "none"),
                            color_pip_by = c("cs", "LD", "none"),
-                           LD.colors = c("grey", "blue", "purple", "salmon"),
+                           LD.colors = c("grey", "cyan", "green", "orange", "red", "salmon"),
                            cs.colors = c("grey", "firebrick", "dodgerblue", "forestgreen", "darkmagenta", "darkorange"),
                            focal.colors = c("grey", "salmon"),
                            label_QTLs = TRUE,
@@ -133,7 +135,7 @@ make_locusplot <- function(finemap_res,
                            highlight_pip = 0.8,
                            highlight_pos = NULL,
                            highlight.color = "red",
-                           highlight.pos.color = "cyan2",
+                           highlight.pos.color = "magenta",
                            point.sizes = c(1, 3),
                            point.alpha = c(0.4, 0.6),
                            point.shapes = c(16, 15, 18, 17, 10, 12, 14, 11),
@@ -143,6 +145,8 @@ make_locusplot <- function(finemap_res,
                            axis.title.size = 10,
                            legend.text.size = 9,
                            legend.position = "top",
+                           legend.nrow = c(1, 1),
+                           legend.pip.nrow = 1,
                            genelabel.cex.text = 0.7,
                            panel.heights = c(4, 4, 1, 4),
                            verbose = FALSE) {
@@ -158,6 +162,10 @@ make_locusplot <- function(finemap_res,
 
   if (anyNA(finemap_res$pos))
     stop("Missing values found in the 'pos' column of finemapping result!")
+
+  if (length(LD.colors) != 6) {
+    stop("Six colors are needed for LD.colors.")
+  }
 
   # input data should be a data frame
   finemap_res <- as.data.frame(finemap_res)
@@ -257,9 +265,10 @@ make_locusplot <- function(finemap_res,
       finemap_region_res$r2[finemap_region_res$type=="SNP"] <- R_snp_gene[finemap_region_res$id[finemap_region_res$type=="SNP"], focal_id]^2
       finemap_region_res$r2[finemap_region_res$id == focal_id] <- 100
       LD_colors <- c("0-0.2" = LD.colors[1], "0.2-0.4" = LD.colors[2],
-                     "0.4-1" = LD.colors[3], "1" = LD.colors[4])
+                     "0.4-0.6" = LD.colors[3], "0.6-0.8" = LD.colors[4],
+                     "0.8-0.1" = LD.colors[5], "1" = LD.colors[6])
       finemap_region_res$r2_levels <- cut(finemap_region_res$r2,
-                                          breaks = c(0, 0.2, 0.4, 1, Inf),
+                                          breaks = c(0, 0.2, 0.4, 0.6, 0.8, 1, Inf),
                                           labels = names(LD_colors))
       finemap_region_res$r2_levels <- factor(finemap_region_res$r2_levels, levels = rev(names(LD_colors)))
     }
@@ -366,20 +375,20 @@ make_locusplot <- function(finemap_res,
       geom_point(aes(color=.data$cs)) +
       scale_color_manual(values = cs_colors) +
       labs(color = "CS") +
-      guides(shape = guide_legend(order = 1, override.aes = list(size = legend.sizes)),
-             color = guide_legend(order = 2, override.aes = list(size = 1.5)))
+      guides(shape = guide_legend(order = 1, override.aes = list(size = legend.sizes), nrow = legend.nrow[1]),
+             color = guide_legend(order = 2, override.aes = list(size = 1.5), nrow = legend.nrow[1]))
   } else if (color_pval_by == "LD") {
     p_pval <- p_pval +
       geom_point(aes(color=.data$r2_levels)) +
       scale_color_manual(values = LD_colors) +
       labs(color = expression(R^2)) +
-      guides(shape = guide_legend(order = 1, override.aes = list(size = legend.sizes)),
-             color = guide_legend(order = 2, override.aes = list(size = 1.5)))
+      guides(shape = guide_legend(order = 1, override.aes = list(size = legend.sizes), nrow = legend.nrow[1]),
+             color = guide_legend(order = 2, override.aes = list(size = 1.5), nrow = legend.nrow[1]))
   } else {
     p_pval <- p_pval +
       geom_point(aes(color=.data$focal_levels)) +
       scale_color_manual(values = focal_colors, guide="none") +
-      guides(shape = guide_legend(override.aes = list(size = legend.sizes)))
+      guides(shape = guide_legend(override.aes = list(size = legend.sizes), nrow = legend.nrow[1]))
   }
 
   if (!is.null(highlight_pval)) {
@@ -425,13 +434,13 @@ make_locusplot <- function(finemap_res,
       geom_point(aes(color=.data$cs)) +
       scale_color_manual(values = cs_colors) +
       labs(color = "CS") +
-      guides(color = guide_legend(override.aes = list(size = 1.5)))
+      guides(color = guide_legend(override.aes = list(size = 1.5), nrow = legend.nrow[2]))
   } else if (color_pip_by == "LD") {
     p_pip <- p_pip +
       geom_point(aes(color=.data$r2_levels)) +
       scale_color_manual(values = LD_colors) +
       labs(color = expression(R^2)) +
-      guides(color = guide_legend(override.aes = list(size = 1.5)))
+      guides(color = guide_legend(override.aes = list(size = 1.5), nrow = legend.nrow[2]))
   } else {
     p_pip <- p_pip +
       geom_point(aes(color=.data$focal_levels)) +
