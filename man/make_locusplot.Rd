@@ -18,9 +18,11 @@ make_locusplot(
   filter_cs = TRUE,
   color_pval_by = c("cs", "LD", "none"),
   color_pip_by = c("cs", "LD", "none"),
+  LD.breaks = c(0, 0.2, 0.4, 0.6, 0.8, 1),
   LD.colors = c("grey", "cyan", "green", "orange", "red", "salmon"),
-  cs.colors = c("grey", "firebrick", "dodgerblue", "forestgreen", "darkmagenta",
-    "darkorange"),
+  L = 5,
+  cs.colors = c("firebrick", "dodgerblue", "forestgreen", "darkmagenta", "darkorange",
+    "grey"),
   focal.colors = c("grey", "salmon"),
   label_QTLs = TRUE,
   highlight_pval = NULL,
@@ -81,7 +83,11 @@ If NULL, the entire region will be plotted (with 100 bp flanks on both sides).}
 "cs": colors the PIP track by the credible sets.
 "none": uses the same color for non-focal genes.}
 
+\item{LD.breaks}{Breaks of LD intervals.}
+
 \item{LD.colors}{Colors for correlation levels.}
+
+\item{L}{Number of effects in finemapping.}
 
 \item{cs.colors}{Colors for credible sets.}
 

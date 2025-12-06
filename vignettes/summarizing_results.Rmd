@@ -66,7 +66,7 @@ screen_res <- ctwas_res$screen_res
 + `z_gene`: the Z-scores of molecular traits, 
 
 + `param`: the estimated parameters,
- 
+
 + `finemap_res`: fine-mapping results, a data frame of molecular traits and variants, including their cTWAS IDs ("id"), molecular ID ("molecular_ id"), the regions they belong to ("region_id"), Z-scores ("z"), PIPs ("susie_pip"), posterior effect size ("mu"), credible set indices ("cs_index"). 
 
 The IDs of molecular traits ("id") used in cTWAS is in the format of 
@@ -312,8 +312,26 @@ make_locusplot(finemap_res,
                color_pip_by = "cs")
 ```
 
-
 In this plot, one can see that there are several genes with good associations with the phenotype (top panel), but only HPR in liver is prioritized by cTWAS (second panel).  This suggests that other associations are likely due to their correlations with the prioritized genes rather than representing independent signals.
+
+We can also color by LD in both p-val and PIP panels, and customize the LD intervals (`LD.breaks`) and colors (`LD.colors`) if needed. For example:
+```{r locus_plot_3, fig.width=10, fig.height=8}
+make_locusplot(finemap_res,
+               region_id = "16_71020125_72901251",
+               ens_db = ens_db, 
+               weights = weights,
+               locus_range = c(71.6e6,72.4e6),
+               LD.breaks = c(0, 0.4, 0.8, 1),
+               LD.colors = c("#08519c", "#7fc97f", "#fdb462", "#e41a1c"),
+               highlight_pip = 0.8,
+               highlight_pos = 72070235,
+               R_snp_gene = cor_res$R_snp_gene,
+               R_gene = cor_res$R_gene,
+               filter_protein_coding_genes = TRUE,
+               filter_cs = TRUE,
+               color_pval_by = "LD",
+               color_pip_by = "LD")
+```
 
 For the "no-LD" version, we could still make the locus plot. The difference is that it could not color the data points by correlations with the focal gene.
 

@@ -37,7 +37,11 @@
 #' "cs": colors the PIP track by the credible sets.
 #' "none": uses the same color for non-focal genes.
 #'
+#' @param LD.breaks Breaks of LD intervals.
+#'
 #' @param LD.colors Colors for correlation levels.
+#'
+#' @param L Number of effects in finemapping.
 #'
 #' @param cs.colors Colors for credible sets.
 #'
@@ -127,8 +131,10 @@ make_locusplot <- function(finemap_res,
                            filter_cs = TRUE,
                            color_pval_by = c("cs", "LD", "none"),
                            color_pip_by = c("cs", "LD", "none"),
+                           LD.breaks = c(0, 0.2, 0.4, 0.6, 0.8, 1),
                            LD.colors = c("grey", "cyan", "green", "orange", "red", "salmon"),
-                           cs.colors = c("grey", "firebrick", "dodgerblue", "forestgreen", "darkmagenta", "darkorange"),
+                           L = 5,
+                           cs.colors = c("firebrick", "dodgerblue", "forestgreen", "darkmagenta", "darkorange", "grey"),
                            focal.colors = c("grey", "salmon"),
                            label_QTLs = TRUE,
                            highlight_pval = NULL,
@@ -163,8 +169,12 @@ make_locusplot <- function(finemap_res,
   if (anyNA(finemap_res$pos))
     stop("Missing values found in the 'pos' column of finemapping result!")
 
-  if (length(LD.colors) != 6) {
-    stop("Six colors are needed for LD.colors.")
+  if (length(LD.colors) != length(LD.breaks)) {
+    stop("Number of LD.colors should be the same as LD.breaks.")
+  }
+
+  if (length(cs.colors)-1 < L ) {
+    stop("Not enough cs.colors.")
   }
 
   # input data should be a data frame
@@ -264,11 +274,11 @@ make_locusplot <- function(finemap_res,
       finemap_region_res$r2[finemap_region_res$type!="SNP"] <- R_gene[finemap_region_res$id[finemap_region_res$type!="SNP"], focal_id]^2
       finemap_region_res$r2[finemap_region_res$type=="SNP"] <- R_snp_gene[finemap_region_res$id[finemap_region_res$type=="SNP"], focal_id]^2
       finemap_region_res$r2[finemap_region_res$id == focal_id] <- 100
-      LD_colors <- c("0-0.2" = LD.colors[1], "0.2-0.4" = LD.colors[2],
-                     "0.4-0.6" = LD.colors[3], "0.6-0.8" = LD.colors[4],
-                     "0.8-0.1" = LD.colors[5], "1" = LD.colors[6])
+      # set LD color legends
+      LD_colors <- LD.colors
+      names(LD_colors) <- c(paste(LD.breaks[-length(LD.breaks)], LD.breaks[-1], sep = "-"), "1")
       finemap_region_res$r2_levels <- cut(finemap_region_res$r2,
-                                          breaks = c(0, 0.2, 0.4, 0.6, 0.8, 1, Inf),
+                                          breaks = c(LD.breaks, Inf),
                                           labels = names(LD_colors))
       finemap_region_res$r2_levels <- factor(finemap_region_res$r2_levels, levels = rev(names(LD_colors)))
     }
@@ -282,7 +292,9 @@ make_locusplot <- function(finemap_res,
       color_pip_by[color_pip_by == "cs"] <- "none"
     } else {
       finemap_region_res$cs[is.na(finemap_region_res$cs)] <- "non-CS"
-      cs_colors <- c("L1" = cs.colors[2], "L2" = cs.colors[3], "L3" = cs.colors[4], "L4" = cs.colors[5], "L5" = cs.colors[6], "non-CS" = cs.colors[1])
+      # set colors for credible sets and non-CS
+      cs_colors <- c(cs.colors[1:L], cs.colors[length(cs.colors)])
+      names(cs_colors) <- c(paste0("L", 1:L), "non-CS")
       # if there are multiple CSs, use the first one
       if (any(grepl(",", finemap_region_res$cs))){
         finemap_region_res$cs <- sapply(strsplit(finemap_region_res$cs, ","), "[[", 1)
