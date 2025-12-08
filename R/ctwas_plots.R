@@ -273,13 +273,14 @@ make_locusplot <- function(finemap_res,
       finemap_region_res$r2 <- NA
       finemap_region_res$r2[finemap_region_res$type!="SNP"] <- R_gene[finemap_region_res$id[finemap_region_res$type!="SNP"], focal_id]^2
       finemap_region_res$r2[finemap_region_res$type=="SNP"] <- R_snp_gene[finemap_region_res$id[finemap_region_res$type=="SNP"], focal_id]^2
-      finemap_region_res$r2[finemap_region_res$id == focal_id] <- 100
+      finemap_region_res$r2[finemap_region_res$id == focal_id] <- 100 # to include r2 of the focal one in the colors
       # set LD color legends
       LD_colors <- LD.colors
       names(LD_colors) <- c(paste(LD.breaks[-length(LD.breaks)], LD.breaks[-1], sep = "-"), "1")
       finemap_region_res$r2_levels <- cut(finemap_region_res$r2,
                                           breaks = c(LD.breaks, Inf),
-                                          labels = names(LD_colors))
+                                          labels = names(LD_colors),
+                                          include.lowest = TRUE)
       finemap_region_res$r2_levels <- factor(finemap_region_res$r2_levels, levels = rev(names(LD_colors)))
     }
   }
