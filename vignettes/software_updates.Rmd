@@ -1,51 +1,28 @@
----
-title: "Software updates in multi-group cTWAS"
-author: "Kaixuan Luo"
-date: "`r Sys.Date()`"
-output: rmarkdown::html_vignette
-vignette: >
-  %\VignetteIndexEntry{Software updates}
-  %\VignetteEngine{knitr::rmarkdown}
-  %\VignetteEncoding{UTF-8}
----
 
+## Major updates in M-cTWAS software
 
-While the [published paper](https://doi.org/10.1038/s41588-023-01648-9) analyzes a single eQTL dataset, the latest version of cTWAS extends the method to integrate multiple groups of prediction models, allowing for joint analysis of multiple types of molecular traits, across potentially different tissues, cell types or conditions.
+We made several major improvements in M-cTWAS software. First, we extended the cTWAS framework to incorporate prediction models from multiple molecular trait types across diverse biological contexts. Second, we redesigned the software interface to improve modularity, implementing key M-cTWAS tasks as standalone components. Users may run the full M-cTWAS analysis via the main function or execute individual steps independently. In addition, we implemented a "no-LD" mode that enables M-cTWAS analyses without requiring an LD reference panel. Other important updates include:
 
-Below are major updates in the multi-group cTWAS:
+### Input processing
 
-- Extended cTWAS method to multiple types of molecular traits, across different contexts. 
+  - Supports multiple prediction model formats, including PredictDB, FUSION, and top-QTL.
+  - Provides streamlined preprocessing tools to harmonize GWAS summary statistics, prediction models, and LD reference.
+  - Offers utility functions for constructing LD matrices from individual-level genotype data and for loading LD matrices of various formats, with flexible support for user-defined custom formats.
 
-- Redesigned the software interface to be more modular. We now have separate modular functions for several key tasks of cTWAS. A user now has the option of running cTWAS either in a single step (main function) or in several steps.  
+### Computation
 
-- Implemented "no-LD" version, which allows running cTWAS analysis without LD reference.
+  -  Introduces new parameter estimation procedures that enable sharing of prior effect variance parameters across multiple groups of molecular traits. Several schemes of parameter sharing are supported, including: shared variance for all groups of variables (including SNPs); shared variance for all molecular traits; shared variance for all molecular traits of the same type/modality. 
+  - Compute standard errors and p-values of enrichment parameters.
+  - Implements new methods to screen genomic regions with likely causal molecular trait signals. This speeds up the computation, as only such regions will be subject to full fine-mapping (allowing more than one causal signal). 
+  - Supports fine-mapping of single or multiple regions, with or without LD information.
+  - Re-implements a simplified single effect regression (SER) model from SuSiE, incorporating the new implementation of null configuration. It is used in EM to speed up computation.
+  - Improves computational efficiency by more than ten-fold, enabling large-scale analyses across many molecular traits. A typical M-cTWAS analysis using molQTLs from multiple groups could be completed within 1--3 hours.
 
-- Improved the computational efficiency of the software by more than 10-fold, allowing it to handle large numbers of molecular traits. 
+### Creating the output
 
-- Provide support to several formats of prediction models: including PredictDB, FUSION and top-QTL.  
-
-- Created new methods for estimating parameters, which allows sharing of the prior effect variance parameters among groups.
-
-- Updated functions for interpreting cTWAS results, including methods for combining evidence of all the molecular traits affecting a target gene across all types and contexts. 
-
-Other changes include: 
-
-- Created new functions to perform LD-mismatch diagnosis using SuSiE-RSS in the post-processing step. 
-
-- Created utility functions for creating LD matrices from individual level genotype data, and loading LD matrices of different formats, including custom formats. 
-
-- Created new functions for preprocessing and harmonizing input data (GWAS Z-scores, prediction models, reference data, etc.)
-
-- Created new functions to compute standard errors and p-values for the enrichment parameters.
-
-- Created new ways for screening regions with likely causal signals in molecular traits. 
-
-- Updated functions for running cTWAS version of fine-mapping using estimated parameters. It also allows fine-mapping a single region or multiple regions, with or without LD. 
-
-- Updated functions for visualizing cTWAS results, allowing gene tracks to be plotted together with cTWAS result panels.
-
-- Addressed the “cross-region” problem by performing “region merging” as a post-processing step.
-
-*Note*: this updated cTWAS version currently only works for GWAS summary statistics. To use individual level data, please refer to the old cTWAS version for now. We will release a new version that will work with individual level data later. 
+  - Introduces new methods to combine evidence from all molecular traits targeting the same genes.
+  - Enhances visualization of M-cTWAS results, including updated locus plots with integrated gene tracks and fine-mapping result panels.
+  - Incorporates LD-mismatch diagnosis from SuSiE-RSS in post-processing.
+  - Introduce a region-merging step to resolve the "cross-region" challenge, where the genetic variants contributing to a molecular trait spans two regions.
 
 
