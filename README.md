@@ -74,20 +74,12 @@ If you find the `ctwas` package or any of the source code in this
 repository useful for your work, please cite:
 
 cTWAS paper:
-> Zhao S, Crouse W, Qian S, Luo K, Stephens M, He X. 
-> Adjusting for genetic confounders in transcriptome-wide association 
-> studies improves discovery of risk genes of complex traits. 
-> Nature Genetics 56, 336–347 (2024). 
-> https://doi.org/10.1038/s41588-023-01648-9
 
+> Zhao S, Crouse W, Qian S, Luo K, Stephens M, He X. Adjusting for genetic confounders in transcriptome-wide association studies improves discovery of risk genes of complex traits. Nature Genetics 56, 336–347 (2024). https://doi.org/10.1038/s41588-023-01648-9
 
 M-cTWAS paper:
-> Qian S, Luo K, Sun X, Crouse W, Liang L, Gu J, Stephens M, Zhao S,  He X.
-> Integrating multi-omics and multi-context QTL data with GWAS reveals 
-> the genetic architecture of complex traits and 
-> improves the discovery of risk genes.
-> medRxiv 2025.12.19.25342620; 
-> doi:https://doi.org/10.64898/2025.12.19.25342620
+
+> Qian S, Luo K, Sun X, Crouse W, Liang L, Gu J, Stephens M, Zhao S,  He X. Integrating multi-omics and multi-context QTL data with GWAS reveals the genetic architecture of complex traits and improves the discovery of risk genes. medRxiv 2025.12.19.25342620; https://doi.org/10.64898/2025.12.19.25342620
 
 
 ## Useful resources
