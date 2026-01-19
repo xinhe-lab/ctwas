@@ -6,9 +6,9 @@ Expression quantitative trait loci (eQTLs) have often been used to nominate cand
 
 Our method, "causal-TWAS" (cTWAS), addresses this challenge by borrowing ideas from statistical fine-mapping. It is a generalization of methods for transcriptome-wide association studies (TWAS), but when analyzing any gene, it adjusts for other nearby genes *and all nearby genetic variants.*
 
-While the [published paper](https://doi.org/10.1038/s41588-023-01648-9) analyzes a single eQTL dataset, the latest version of cTWAS extends the method to integrate multiple groups of prediction models, allowing for joint analysis of multiple types of molecular traits, across potentially different tissues, cell types or conditions.
+While the [published cTWAS paper](https://doi.org/10.1038/s41588-023-01648-9) analyzes a single eQTL dataset, [multigroup causal TWAS (M-cTWAS)](https://www.medrxiv.org/content/10.64898/2025.12.19.25342620v1) extends the cTWAS method to integrate multiple groups of prediction models, allowing for joint analysis of multiple types of molecular traits, across potentially different tissues, cell types or conditions.
 
-If you have already run cTWAS before, see [this page](https://xinhe-lab.github.io/multigroup_ctwas/articles/software_updates.html) for the software updates.
+Note, this is the software behind the M-cTWAS method. If you have already run cTWAS before, see [this page](https://xinhe-lab.github.io/multigroup_ctwas/articles/software_updates.html) for the software updates in M-cTWAS software.
 
 You can [browse source code](https://github.com/xinhe-lab/ctwas/tree/multigroup) and [report a bug](https://github.com/xinhe-lab/ctwas/issues) here. 
 
@@ -26,9 +26,9 @@ remotes::install_github("xinhe-lab/ctwas",ref = "multigroup")
 
 Currently, ctwas has only been tested on Linux systems.
  
-We recommend installing and running ctwas on a high-performance computing system.
+We recommend installing and running `ctwas` on a high-performance computing system.
 
-## Running ctwas
+## Running `ctwas`
 
 Running a cTWAS analysis involves four main steps: 
 
@@ -42,7 +42,7 @@ Running a cTWAS analysis involves four main steps:
 
 The outputs of cTWAS are posterior inclusion probabilities (PIPs) for all variants and genes.
 
-To learn more about the ctwas R package, we recommend starting with this introductory tutorial: 
+To learn more about the ctwas R package, we recommend starting with this introductory tutorial. 
 
 [A minimal tutorial of how to run cTWAS without LD](https://xinhe-lab.github.io/multigroup_ctwas/articles/minimal_tutorial.html) 
 
@@ -66,13 +66,14 @@ We also have a FAQ page for some common questions:
 
 - [FAQ](https://xinhe-lab.github.io/multigroup_ctwas/articles/FAQ.html)
 
-<img style="display:block;margin:auto" width="700" height="300" src="man/figures/multi_cTWAS_workflow.png">
+<img style="display:block;margin:auto" width="700" height="300" src="man/figures/workflow.png">
 
-## Reference
+## Citing this work
 
 If you find the `ctwas` package or any of the source code in this
 repository useful for your work, please cite:
 
+cTWAS paper:
 > Zhao S, Crouse W, Qian S, Luo K, Stephens M, He X. 
 > Adjusting for genetic confounders in transcriptome-wide association 
 > studies improves discovery of risk genes of complex traits. 
@@ -80,24 +81,33 @@ repository useful for your work, please cite:
 > https://doi.org/10.1038/s41588-023-01648-9
 
 
+M-cTWAS paper:
+> Qian S, Luo K, Sun X, Crouse W, Liang L, Gu J, Stephens M, Zhao S,  He X.
+> Integrating multi-omics and multi-context QTL data with GWAS reveals 
+> the genetic architecture of complex traits and 
+> improves the discovery of risk genes.
+> medRxiv 2025.12.19.25342620; 
+> doi:https://doi.org/10.64898/2025.12.19.25342620
+
+
 ## Useful resources
 
 We have pre-computed reference LD matrices and variant information of European samples from UK Biobank. They can be downloaded [here](https://uchicago.box.com/s/jqocacd2fulskmhoqnasrknbt59x3xkn).  
 
-cTWAS requires the prediction models, or weights, of molecular traits. 
+cTWAS requires the expression prediction models, or weights, of genes. 
 The pre-computed weights of GTEx expression and splicing traits can be downloaded from [PredictDB](https://predictdb.org/post/2021/07/21/gtex-v8-models-on-eqtl-and-sqtl/). 
 
 ## Acknowledgments
 
-We thank the authors of `susieR` package for borrowing their code.
+We thank the authors of `susieR` package for using their codes.
 
-The `susieR` code used in `ctwas` package was based on the commit `c7934c0`:
-
+Original `susieR` code obtained by:
 ```
 git clone git@github.com:stephenslab/susieR.git
 git checkout c7934c0
 ```
 
-Minor edits were made to allow for different prior variances.
+
+Minor edits to make it accept different prior variances for each variable.
 
 
