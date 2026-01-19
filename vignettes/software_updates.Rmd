@@ -9,7 +9,7 @@ vignette: >
   %\VignetteEncoding{UTF-8}
 ---
 
-Major updates in M-cTWAS software
+## Major updates in M-cTWAS software
 
 We made several major improvements in M-cTWAS software. First, we extended the cTWAS framework to incorporate prediction models from multiple molecular trait types across diverse biological contexts. Second, we redesigned the software interface to improve modularity, implementing key M-cTWAS tasks as standalone components. Users may run the full M-cTWAS analysis via the main function or execute individual steps independently. In addition, we implemented a "no-LD" mode that enables M-cTWAS analyses without requiring an LD reference panel. Other important updates include:
 
