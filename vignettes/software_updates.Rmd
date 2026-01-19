@@ -11,7 +11,11 @@ vignette: >
 
 ## Major updates in M-cTWAS software
 
-We made several major improvements in M-cTWAS software. First, we extended the cTWAS framework to incorporate prediction models from multiple molecular trait types across diverse biological contexts. Second, we redesigned the software interface to improve modularity, implementing key M-cTWAS tasks as standalone components. Users may run the full M-cTWAS analysis via the main function or execute individual steps independently. In addition, we implemented a "no-LD" mode that enables M-cTWAS analyses without requiring an LD reference panel. Other important updates include:
+  - Extended the cTWAS framework to incorporate prediction models from multiple molecular trait types across diverse biological contexts. 
+  - Redesigned the software interface to improve modularity, implementing key M-cTWAS tasks as standalone components. Users may run the full M-cTWAS analysis via the main function or execute individual steps independently. 
+  - Implemented a "no-LD" mode that enables M-cTWAS analyses without requiring an LD reference panel. 
+
+## Other important updates
 
 ### Input processing
 
@@ -33,6 +37,6 @@ We made several major improvements in M-cTWAS software. First, we extended the c
   - Introduces new methods to combine evidence from all molecular traits targeting the same genes.
   - Enhances visualization of M-cTWAS results, including updated locus plots with integrated gene tracks and fine-mapping result panels.
   - Incorporates LD-mismatch diagnosis from SuSiE-RSS in post-processing.
-  - Introduce a region-merging step to resolve the "cross-region" challenge, where the genetic variants contributing to a molecular trait spans two regions.
+  - Introduces a region-merging step to resolve the "cross-region" challenge, where the genetic variants contributing to a molecular trait spans two regions.
 
 *Note*: this updated cTWAS version currently only works for GWAS summary statistics. To use individual level data, please refer to the old cTWAS version for now. We will release a new version that will work with individual level data later. 
