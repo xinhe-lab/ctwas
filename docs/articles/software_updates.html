@@ -5,13 +5,13 @@
 <meta charset="utf-8">
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Software updates in multi-group cTWAS • ctwas</title>
+<title>Software updates • ctwas</title>
 <!-- jquery --><script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.4.1/jquery.min.js" integrity="sha256-CSXorXvZcTkaix6Yvo6HppcZGetbYMGWSFlBw8HfCJo=" crossorigin="anonymous"></script><!-- Bootstrap --><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/3.4.1/css/bootstrap.min.css" integrity="sha256-bZLfwXAP04zRMK2BjiO8iu9pf4FbLqX6zitd+tIvLhE=" crossorigin="anonymous">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/3.4.1/js/bootstrap.min.js" integrity="sha256-nuL8/2cJ5NDSSwnKD8VqreErSWHtnEP9E7AySL+1ev4=" crossorigin="anonymous"></script><!-- bootstrap-toc --><link rel="stylesheet" href="../bootstrap-toc.css">
 <script src="../bootstrap-toc.js"></script><!-- Font Awesome icons --><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.12.1/css/all.min.css" integrity="sha256-mmgLkCYLUQbXn0B1SRqzHar6dCnv9oZFPEC1g1cwlkk=" crossorigin="anonymous">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.12.1/css/v4-shims.min.css" integrity="sha256-wZjR52fzng1pJHwx4aV2AO3yyTOXrcDW7jBpJtTwVxw=" crossorigin="anonymous">
 <!-- clipboard.js --><script src="https://cdnjs.cloudflare.com/ajax/libs/clipboard.js/2.0.6/clipboard.min.js" integrity="sha256-inc5kl9MA1hkeYUt+EC3BhlIgyp/2jDIyBLS6k3UxPI=" crossorigin="anonymous"></script><!-- headroom.js --><script src="https://cdnjs.cloudflare.com/ajax/libs/headroom/0.11.0/headroom.min.js" integrity="sha256-AsUX4SJE1+yuDu5+mAVzJbuYNPHj/WroHuZ8Ir/CkE0=" crossorigin="anonymous"></script><script src="https://cdnjs.cloudflare.com/ajax/libs/headroom/0.11.0/jQuery.headroom.min.js" integrity="sha256-ZX/yNShbjqsohH1k95liqY9Gd8uOiE1S4vZc+9KQ1K4=" crossorigin="anonymous"></script><!-- pkgdown --><link href="../pkgdown.css" rel="stylesheet">
-<script src="../pkgdown.js"></script><meta property="og:title" content="Software updates in multi-group cTWAS">
+<script src="../pkgdown.js"></script><meta property="og:title" content="Software updates">
 <meta property="og:description" content="ctwas">
 <!-- mathjax --><script src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/MathJax.js" integrity="sha256-nvJJv9wWKEm88qvoQl9ekL2J+k/RWIsaSScxxlsrv8k=" crossorigin="anonymous"></script><script src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/config/TeX-AMS-MML_HTMLorMML.js" integrity="sha256-84DKXVJXs0/F8OTMzX4UR909+jtl4G7SPypPavF+GfA=" crossorigin="anonymous"></script><!--[if lt IE 9]>
 <script src="https://oss.maxcdn.com/html5shiv/3.7.3/html5shiv.min.js"></script>
@@ -33,7 +33,7 @@
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">ctwas</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">0.5.37</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">0.6.0</span>
       </span>
     </div>
 
@@ -105,10 +105,10 @@
       </header><script src="software_updates_files/accessible-code-block-0.0.1/empty-anchor.js"></script><div class="row">
   <div class="col-md-9 contents">
     <div class="page-header toc-ignore">
-      <h1 data-toc-skip>Software updates in multi-group cTWAS</h1>
+      <h1 data-toc-skip>Software updates</h1>
                         <h4 data-toc-skip class="author">Kaixuan Luo</h4>
             
-            <h4 data-toc-skip class="date">2025-11-13</h4>
+            <h4 data-toc-skip class="date">2026-01-19</h4>
       
       <small class="dont-index">Source: <a href="https://github.com/xinhe-lab/ctwas/blob/multigroup/vignettes/software_updates.Rmd" class="external-link"><code>vignettes/software_updates.Rmd</code></a></small>
       <div class="hidden name"><code>software_updates.Rmd</code></div>
@@ -117,29 +117,40 @@
 
     
     
-<p>While the <a href="https://doi.org/10.1038/s41588-023-01648-9" class="external-link">published paper</a> analyzes a single eQTL dataset, the latest version of cTWAS extends the method to integrate multiple groups of prediction models, allowing for joint analysis of multiple types of molecular traits, across potentially different tissues, cell types or conditions.</p>
-<p>Below are major updates in the multi-group cTWAS:</p>
+<p>Major updates in M-cTWAS software</p>
+<p>We made several major improvements in M-cTWAS software. First, we extended the cTWAS framework to incorporate prediction models from multiple molecular trait types across diverse biological contexts. Second, we redesigned the software interface to improve modularity, implementing key M-cTWAS tasks as standalone components. Users may run the full M-cTWAS analysis via the main function or execute individual steps independently. In addition, we implemented a “no-LD” mode that enables M-cTWAS analyses without requiring an LD reference panel. Other important updates include:</p>
+<div class="section level3">
+<h3 id="input-processing">Input processing<a class="anchor" aria-label="anchor" href="#input-processing"></a>
+</h3>
 <ul>
-<li><p>Extended cTWAS method to multiple types of molecular traits, across different contexts.</p></li>
-<li><p>Redesigned the software interface to be more modular. We now have separate modular functions for several key tasks of cTWAS. A user now has the option of running cTWAS either in a single step (main function) or in several steps.</p></li>
-<li><p>Implemented “no-LD” version, which allows running cTWAS analysis without LD reference.</p></li>
-<li><p>Improved the computational efficiency of the software by more than 10-fold, allowing it to handle large numbers of molecular traits.</p></li>
-<li><p>Provide support to several formats of prediction models: including PredictDB, FUSION and top-QTL.</p></li>
-<li><p>Created new methods for estimating parameters, which allows sharing of the prior effect variance parameters among groups.</p></li>
-<li><p>Updated functions for interpreting cTWAS results, including methods for combining evidence of all the molecular traits affecting a target gene across all types and contexts.</p></li>
+<li>Supports multiple prediction model formats, including PredictDB, FUSION, and top-QTL.</li>
+<li>Provides streamlined preprocessing tools to harmonize GWAS summary statistics, prediction models, and LD reference.</li>
+<li>Offers utility functions for constructing LD matrices from individual-level genotype data and for loading LD matrices of various formats, with flexible support for user-defined custom formats.</li>
 </ul>
-<p>Other changes include:</p>
+</div>
+<div class="section level3">
+<h3 id="computation">Computation<a class="anchor" aria-label="anchor" href="#computation"></a>
+</h3>
 <ul>
-<li><p>Created new functions to perform LD-mismatch diagnosis using SuSiE-RSS in the post-processing step.</p></li>
-<li><p>Created utility functions for creating LD matrices from individual level genotype data, and loading LD matrices of different formats, including custom formats.</p></li>
-<li><p>Created new functions for preprocessing and harmonizing input data (GWAS Z-scores, prediction models, reference data, etc.)</p></li>
-<li><p>Created new functions to compute standard errors and p-values for the enrichment parameters.</p></li>
-<li><p>Created new ways for screening regions with likely causal signals in molecular traits.</p></li>
-<li><p>Updated functions for running cTWAS version of fine-mapping using estimated parameters. It also allows fine-mapping a single region or multiple regions, with or without LD.</p></li>
-<li><p>Updated functions for visualizing cTWAS results, allowing gene tracks to be plotted together with cTWAS result panels.</p></li>
-<li><p>Addressed the “cross-region” problem by performing “region merging” as a post-processing step.</p></li>
+<li>Introduces new parameter estimation procedures that enable sharing of prior effect variance parameters across multiple groups of molecular traits. Several schemes of parameter sharing are supported, including: shared variance for all groups of variables (including SNPs); shared variance for all molecular traits; shared variance for all molecular traits of the same type/modality.</li>
+<li>Compute standard errors and p-values of enrichment parameters.</li>
+<li>Implements new methods to screen genomic regions with likely causal molecular trait signals. This speeds up the computation, as only such regions will be subject to full fine-mapping (allowing more than one causal signal).</li>
+<li>Supports fine-mapping of single or multiple regions, with or without LD information.</li>
+<li>Re-implements a simplified single effect regression (SER) model from SuSiE, incorporating the new implementation of null configuration. It is used in EM to speed up computation.</li>
+<li>Improves computational efficiency by more than ten-fold, enabling large-scale analyses across many molecular traits. A typical M-cTWAS analysis using molQTLs from multiple groups could be completed within 1–3 hours.</li>
+</ul>
+</div>
+<div class="section level3">
+<h3 id="creating-the-output">Creating the output<a class="anchor" aria-label="anchor" href="#creating-the-output"></a>
+</h3>
+<ul>
+<li>Introduces new methods to combine evidence from all molecular traits targeting the same genes.</li>
+<li>Enhances visualization of M-cTWAS results, including updated locus plots with integrated gene tracks and fine-mapping result panels.</li>
+<li>Incorporates LD-mismatch diagnosis from SuSiE-RSS in post-processing.</li>
+<li>Introduce a region-merging step to resolve the “cross-region” challenge, where the genetic variants contributing to a molecular trait spans two regions.</li>
 </ul>
 <p><em>Note</em>: this updated cTWAS version currently only works for GWAS summary statistics. To use individual level data, please refer to the old cTWAS version for now. We will release a new version that will work with individual level data later.</p>
+</div>
   </div>
 
   <div class="col-md-3 hidden-xs hidden-sm" id="pkgdown-sidebar">

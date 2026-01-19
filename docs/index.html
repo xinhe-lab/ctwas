@@ -41,7 +41,7 @@
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="index.html">ctwas</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">0.5.37</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">0.6.0</span>
       </span>
     </div>
 
@@ -118,8 +118,8 @@
 <p><a href="https://github.com/xinhe-lab/ctwas/actions/workflows/R-CMD-check.yaml" class="external-link"><img src="https://github.com/xinhe-lab/ctwas/actions/workflows/R-CMD-check.yaml/badge.svg" alt="R-CMD-check"></a></p>
 <p>Expression quantitative trait loci (eQTLs) have often been used to nominate candidate genes from genome-wide association studies (GWAS). However, commonly used methods are susceptible to false positives largely due to linkage disequilibrium (LD) of eQTLs with causal variants acting on the phenotype directly.</p>
 <p>Our method, “causal-TWAS” (cTWAS), addresses this challenge by borrowing ideas from statistical fine-mapping. It is a generalization of methods for transcriptome-wide association studies (TWAS), but when analyzing any gene, it adjusts for other nearby genes <em>and all nearby genetic variants.</em></p>
-<p>While the <a href="https://doi.org/10.1038/s41588-023-01648-9" class="external-link">published paper</a> analyzes a single eQTL dataset, the latest version of cTWAS extends the method to integrate multiple groups of prediction models, allowing for joint analysis of multiple types of molecular traits, across potentially different tissues, cell types or conditions.</p>
-<p>If you have already run cTWAS before, see <a href="https://xinhe-lab.github.io/multigroup_ctwas/articles/software_updates.html" class="external-link">this page</a> for the software updates.</p>
+<p>While the <a href="https://doi.org/10.1038/s41588-023-01648-9" class="external-link">published cTWAS paper</a> analyzes a single eQTL dataset, <a href="https://www.medrxiv.org/content/10.64898/2025.12.19.25342620v1" class="external-link">multigroup causal TWAS (M-cTWAS)</a> extends the cTWAS method to integrate multiple groups of prediction models, allowing for joint analysis of multiple types of molecular traits, across potentially different tissues, cell types or conditions.</p>
+<p><em>Note</em>: this is the software behind the M-cTWAS method. If you have already run cTWAS before, see <a href="https://xinhe-lab.github.io/multigroup_ctwas/articles/software_updates.html" class="external-link">this page</a> for the software updates in M-cTWAS software.</p>
 <p>You can <a href="https://github.com/xinhe-lab/ctwas/tree/multigroup" class="external-link">browse source code</a> and <a href="https://github.com/xinhe-lab/ctwas/issues" class="external-link">report a bug</a> here.</p>
 <p>You can also join our <a href="https://groups.google.com/g/ctwas_users" class="external-link">Google Group</a> to ask questions, report issues, or receive notifications of software updates.</p>
 <div class="section level2">
@@ -130,10 +130,11 @@
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/utils/install.packages.html" class="external-link">install.packages</a></span><span class="op">(</span><span class="st">"remotes"</span><span class="op">)</span></span>
 <span><span class="fu">remotes</span><span class="fu">::</span><span class="fu"><a href="https://remotes.r-lib.org/reference/install_github.html" class="external-link">install_github</a></span><span class="op">(</span><span class="st">"xinhe-lab/ctwas"</span>,ref <span class="op">=</span> <span class="st">"multigroup"</span><span class="op">)</span></span></code></pre></div>
 <p>Currently, ctwas has only been tested on Linux systems.</p>
-<p>We recommend installing and running ctwas on a high-performance computing system.</p>
+<p>We recommend installing and running <code>ctwas</code> on a high-performance computing system.</p>
 </div>
 <div class="section level2">
-<h2 id="running-ctwas">Running ctwas<a class="anchor" aria-label="anchor" href="#running-ctwas"></a>
+<h2 id="running-ctwas">Running <code>ctwas</code>
+<a class="anchor" aria-label="anchor" href="#running-ctwas"></a>
 </h2>
 <p>Running a cTWAS analysis involves four main steps:</p>
 <ol style="list-style-type: decimal">
@@ -143,7 +144,7 @@
 <li><p>Fine-mapping causal genes</p></li>
 </ol>
 <p>The outputs of cTWAS are posterior inclusion probabilities (PIPs) for all variants and genes.</p>
-<p>To learn more about the ctwas R package, we recommend starting with this introductory tutorial:</p>
+<p>To learn more about the ctwas R package, we recommend starting with this introductory tutorial.</p>
 <p><a href="https://xinhe-lab.github.io/multigroup_ctwas/articles/minimal_tutorial.html" class="external-link">A minimal tutorial of how to run cTWAS without LD</a></p>
 <p>To run the full cTWAS, follow these tutorials:</p>
 <ul>
@@ -157,28 +158,29 @@
 <ul><li><a href="https://xinhe-lab.github.io/multigroup_ctwas/articles/utility_functions.html" class="external-link">cTWAS utility functions</a></li></ul>
 <p>We also have a FAQ page for some common questions:</p>
 <ul><li><a href="https://xinhe-lab.github.io/multigroup_ctwas/articles/FAQ.html" class="external-link">FAQ</a></li></ul>
-<p><img style="display:block;margin:auto" width="700" height="300" src="reference/figures/multi_cTWAS_workflow.png"></p>
+<p><img style="display:block;margin:auto" width="700" height="380" src="reference/figures/m_ctwas_workflow.png"></p>
 </div>
 <div class="section level2">
-<h2 id="reference">Reference<a class="anchor" aria-label="anchor" href="#reference"></a>
+<h2 id="citing-this-work">Citing this work<a class="anchor" aria-label="anchor" href="#citing-this-work"></a>
 </h2>
 <p>If you find the <code>ctwas</code> package or any of the source code in this repository useful for your work, please cite:</p>
-<blockquote><p>Zhao S, Crouse W, Qian S, Luo K, Stephens M, He X. Adjusting for genetic confounders in transcriptome-wide association studies improves discovery of risk genes of complex traits. Nature Genetics 56, 336–347 (2024). <a href="https://doi.org/10.1038/s41588-023-01648-9" class="external-link uri">https://doi.org/10.1038/s41588-023-01648-9</a></p></blockquote>
+<p>cTWAS paper: &gt; Zhao S, Crouse W, Qian S, Luo K, Stephens M, He X. &gt; Adjusting for genetic confounders in transcriptome-wide association &gt; studies improves discovery of risk genes of complex traits. &gt; Nature Genetics 56, 336–347 (2024). &gt; <a href="https://doi.org/10.1038/s41588-023-01648-9" class="external-link uri">https://doi.org/10.1038/s41588-023-01648-9</a></p>
+<p>M-cTWAS paper: &gt; Qian S, Luo K, Sun X, Crouse W, Liang L, Gu J, Stephens M, Zhao S, He X. &gt; Integrating multi-omics and multi-context QTL data with GWAS reveals &gt; the genetic architecture of complex traits and &gt; improves the discovery of risk genes. &gt; medRxiv 2025.12.19.25342620; &gt; <a href="doi:https://doi.org/10.64898/2025.12.19.25342620" class="external-link uri">doi:https://doi.org/10.64898/2025.12.19.25342620</a></p>
 </div>
 <div class="section level2">
 <h2 id="useful-resources">Useful resources<a class="anchor" aria-label="anchor" href="#useful-resources"></a>
 </h2>
 <p>We have pre-computed reference LD matrices and variant information of European samples from UK Biobank. They can be downloaded <a href="https://uchicago.box.com/s/jqocacd2fulskmhoqnasrknbt59x3xkn" class="external-link">here</a>.</p>
-<p>cTWAS requires the prediction models, or weights, of molecular traits. The pre-computed weights of GTEx expression and splicing traits can be downloaded from <a href="https://predictdb.org/post/2021/07/21/gtex-v8-models-on-eqtl-and-sqtl/" class="external-link">PredictDB</a>.</p>
+<p>cTWAS requires the expression prediction models, or weights, of genes. The pre-computed weights of GTEx expression and splicing traits can be downloaded from <a href="https://predictdb.org/post/2021/07/21/gtex-v8-models-on-eqtl-and-sqtl/" class="external-link">PredictDB</a>.</p>
 </div>
 <div class="section level2">
 <h2 id="acknowledgments">Acknowledgments<a class="anchor" aria-label="anchor" href="#acknowledgments"></a>
 </h2>
-<p>We thank the authors of <code>susieR</code> package for borrowing their code.</p>
-<p>The <code>susieR</code> code used in <code>ctwas</code> package was based on the commit <code>c7934c0</code>:</p>
+<p>We thank the authors of <code>susieR</code> package for using their codes.</p>
+<p>Original <code>susieR</code> code obtained by:</p>
 <pre><code>git clone git@github.com:stephenslab/susieR.git
 git checkout c7934c0</code></pre>
-<p>Minor edits were made to allow for different prior variances.</p>
+<p>Minor edits to make it accept different prior variances for each variable.</p>
 </div>
 </div>
   </div>

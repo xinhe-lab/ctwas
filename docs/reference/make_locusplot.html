@@ -17,7 +17,7 @@
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">ctwas</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">0.5.37</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">0.6.0</span>
       </span>
     </div>
 
@@ -102,16 +102,18 @@
 <span>  filter_cs <span class="op">=</span> <span class="cn">TRUE</span>,</span>
 <span>  color_pval_by <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"cs"</span>, <span class="st">"LD"</span>, <span class="st">"none"</span><span class="op">)</span>,</span>
 <span>  color_pip_by <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"cs"</span>, <span class="st">"LD"</span>, <span class="st">"none"</span><span class="op">)</span>,</span>
-<span>  LD.colors <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"grey"</span>, <span class="st">"blue"</span>, <span class="st">"purple"</span>, <span class="st">"salmon"</span><span class="op">)</span>,</span>
-<span>  cs.colors <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"grey"</span>, <span class="st">"firebrick"</span>, <span class="st">"dodgerblue"</span>, <span class="st">"forestgreen"</span>, <span class="st">"darkmagenta"</span>,</span>
-<span>    <span class="st">"darkorange"</span><span class="op">)</span>,</span>
+<span>  LD.breaks <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">0</span>, <span class="fl">0.2</span>, <span class="fl">0.4</span>, <span class="fl">0.6</span>, <span class="fl">0.8</span>, <span class="fl">1</span><span class="op">)</span>,</span>
+<span>  LD.colors <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"grey"</span>, <span class="st">"cyan"</span>, <span class="st">"green"</span>, <span class="st">"orange"</span>, <span class="st">"red"</span>, <span class="st">"salmon"</span><span class="op">)</span>,</span>
+<span>  L <span class="op">=</span> <span class="fl">5</span>,</span>
+<span>  cs.colors <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"firebrick"</span>, <span class="st">"dodgerblue"</span>, <span class="st">"forestgreen"</span>, <span class="st">"darkmagenta"</span>, <span class="st">"darkorange"</span>,</span>
+<span>    <span class="st">"grey"</span><span class="op">)</span>,</span>
 <span>  focal.colors <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"grey"</span>, <span class="st">"salmon"</span><span class="op">)</span>,</span>
 <span>  label_QTLs <span class="op">=</span> <span class="cn">TRUE</span>,</span>
 <span>  highlight_pval <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  highlight_pip <span class="op">=</span> <span class="fl">0.8</span>,</span>
 <span>  highlight_pos <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  highlight.color <span class="op">=</span> <span class="st">"red"</span>,</span>
-<span>  highlight.pos.color <span class="op">=</span> <span class="st">"cyan2"</span>,</span>
+<span>  highlight.pos.color <span class="op">=</span> <span class="st">"magenta"</span>,</span>
 <span>  point.sizes <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">1</span>, <span class="fl">3</span><span class="op">)</span>,</span>
 <span>  point.alpha <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">0.4</span>, <span class="fl">0.6</span><span class="op">)</span>,</span>
 <span>  point.shapes <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">16</span>, <span class="fl">15</span>, <span class="fl">18</span>, <span class="fl">17</span>, <span class="fl">10</span>, <span class="fl">12</span>, <span class="fl">14</span>, <span class="fl">11</span><span class="op">)</span>,</span>
@@ -121,6 +123,8 @@
 <span>  axis.title.size <span class="op">=</span> <span class="fl">10</span>,</span>
 <span>  legend.text.size <span class="op">=</span> <span class="fl">9</span>,</span>
 <span>  legend.position <span class="op">=</span> <span class="st">"top"</span>,</span>
+<span>  legend.nrow <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">1</span>, <span class="fl">1</span><span class="op">)</span>,</span>
+<span>  legend.pip.nrow <span class="op">=</span> <span class="fl">1</span>,</span>
 <span>  genelabel.cex.text <span class="op">=</span> <span class="fl">0.7</span>,</span>
 <span>  panel.heights <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">4</span>, <span class="fl">4</span>, <span class="fl">1</span>, <span class="fl">4</span><span class="op">)</span>,</span>
 <span>  verbose <span class="op">=</span> <span class="cn">FALSE</span></span>
@@ -191,8 +195,16 @@ If NULL, the entire region will be plotted (with 100 bp flanks on both sides).</
 "none": uses the same color for non-focal genes.</p></dd>
 
 
+<dt>LD.breaks</dt>
+<dd><p>Breaks of LD intervals.</p></dd>
+
+
 <dt>LD.colors</dt>
 <dd><p>Colors for correlation levels.</p></dd>
+
+
+<dt>L</dt>
+<dd><p>Number of effects in finemapping.</p></dd>
 
 
 <dt>cs.colors</dt>
@@ -264,8 +276,8 @@ Exclude text labels when they overlap too many other things.</p></dd>
 <dd><p>position to put legends. If "none", no legends will be shown.</p></dd>
 
 
-<dt>genelabel.cex.text</dt>
-<dd><p>Size for gene label text.</p></dd>
+<dt>legend.nrow</dt>
+<dd><p>Number of rows for legend text in the panels.</p></dd>
 
 
 <dt>panel.heights</dt>
@@ -274,6 +286,10 @@ Exclude text labels when they overlap too many other things.</p></dd>
 
 <dt>verbose</dt>
 <dd><p>If TRUE, print detail messages.</p></dd>
+
+
+<dt>legend.nrow.pval</dt>
+<dd><p>Number of rows for legend text in the p-value panel.</p></dd>
 
 </dl></div>
 

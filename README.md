@@ -8,7 +8,7 @@ Our method, "causal-TWAS" (cTWAS), addresses this challenge by borrowing ideas f
 
 While the [published cTWAS paper](https://doi.org/10.1038/s41588-023-01648-9) analyzes a single eQTL dataset, [multigroup causal TWAS (M-cTWAS)](https://www.medrxiv.org/content/10.64898/2025.12.19.25342620v1) extends the cTWAS method to integrate multiple groups of prediction models, allowing for joint analysis of multiple types of molecular traits, across potentially different tissues, cell types or conditions.
 
-Note, this is the software behind the M-cTWAS method. If you have already run cTWAS before, see [this page](https://xinhe-lab.github.io/multigroup_ctwas/articles/software_updates.html) for the software updates in M-cTWAS software.
+*Note*: this is the software behind the M-cTWAS method. If you have already run cTWAS before, see [this page](https://xinhe-lab.github.io/multigroup_ctwas/articles/software_updates.html) for the software updates in M-cTWAS software.
 
 You can [browse source code](https://github.com/xinhe-lab/ctwas/tree/multigroup) and [report a bug](https://github.com/xinhe-lab/ctwas/issues) here. 
 

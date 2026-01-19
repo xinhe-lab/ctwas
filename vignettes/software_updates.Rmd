@@ -1,5 +1,15 @@
+---
+title: "Software updates"
+author: "Kaixuan Luo"
+date: "`r Sys.Date()`"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{Software updates}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
 
-## Major updates in M-cTWAS software
+Major updates in M-cTWAS software
 
 We made several major improvements in M-cTWAS software. First, we extended the cTWAS framework to incorporate prediction models from multiple molecular trait types across diverse biological contexts. Second, we redesigned the software interface to improve modularity, implementing key M-cTWAS tasks as standalone components. Users may run the full M-cTWAS analysis via the main function or execute individual steps independently. In addition, we implemented a "no-LD" mode that enables M-cTWAS analyses without requiring an LD reference panel. Other important updates include:
 
@@ -25,4 +35,4 @@ We made several major improvements in M-cTWAS software. First, we extended the c
   - Incorporates LD-mismatch diagnosis from SuSiE-RSS in post-processing.
   - Introduce a region-merging step to resolve the "cross-region" challenge, where the genetic variants contributing to a molecular trait spans two regions.
 
-
+*Note*: this updated cTWAS version currently only works for GWAS summary statistics. To use individual level data, please refer to the old cTWAS version for now. We will release a new version that will work with individual level data later. 
