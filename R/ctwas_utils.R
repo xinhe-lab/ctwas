@@ -207,29 +207,26 @@ prep_pvar <- function(pgenf, outputdir = getwd()){
 # Read .pgen file into R
 #
 # @param pgenf .pgen file or .bed file
-#
 # @param pvarf .pvar file or .bim file with have proper
 #  header.  Matching `pgenf`.
-#
 # @return  A matrix of allele count for each variant (columns) in each sample
 #  (rows). ALT allele in pvar file is counted (A1 allele in .bim file is the ALT
 #   allele).
 #
 #' @importFrom data.table fread
-#' @importFrom pgenlibr NewPgen NewPvar
 #' @importFrom tools file_ext file_path_sans_ext
 prep_pgen <- function(pgenf, pvarf){
 
-  pvar <- NewPvar(pvarf)
+  pvar <- pgenlibr::NewPvar(pvarf)
 
   if (file_ext(pgenf) == "pgen"){
-    pgen <- NewPgen(pgenf, pvar = pvar)
+    pgen <- pgenlibr::NewPgen(pgenf, pvar = pvar)
 
   } else if (file_ext(pgenf) == "bed"){
     famf <- paste0(file_path_sans_ext(pgenf), ".fam")
     fam <- fread(famf, header = F)
     raw_s_ct <- nrow(fam)
-    pgen <- NewPgen(pgenf, pvar = pvar, raw_sample_ct = raw_s_ct)
+    pgen <- pgenlibr::NewPgen(pgenf, pvar = pvar, raw_sample_ct = raw_s_ct)
 
   } else{
     stop("unrecognized input")
@@ -239,23 +236,17 @@ prep_pgen <- function(pgenf, pvarf){
 }
 
 # Read pgen file into R
-#
 # @param pgen .pgen file or .bed file
-#
 # @param variantidx variant index. If NULL, all variants will be extracted.
-#
 # @return A matrix, columns are allele count for each SNP, rows are
 #  for each sample.
-#
-#' @importFrom pgenlibr GetVariantCt
-#' @importFrom pgenlibr ReadList
 read_pgen <- function(pgen, variantidx = NULL, meanimpute = F ){
   if (is.null(variantidx)){
-    variantidx <- 1: GetVariantCt(pgen)}
+    variantidx <- 1: pgenlibr::GetVariantCt(pgen)}
 
-  ReadList(pgen,
-           variant_subset = variantidx,
-           meanimpute = meanimpute)
+  pgenlibr::ReadList(pgen,
+                     variant_subset = variantidx,
+                     meanimpute = meanimpute)
 }
 
 

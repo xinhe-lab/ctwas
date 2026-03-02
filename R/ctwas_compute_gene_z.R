@@ -228,7 +228,7 @@ filter_z_gene_by_group_size <- function(z_gene, min_group_size){
 #'
 #' @importFrom logging loginfo
 #' @importFrom magrittr %>%
-#' @importFrom dplyr left_join select summarise group_by ungroup
+#' @importFrom dplyr left_join select all_of summarise group_by ungroup
 #' @importFrom rlang .data
 #'
 #' @export
