@@ -44,12 +44,12 @@ Imports:
     R.utils,
     RSQLite,
     locuszoomr,
-    pgenlibr,
     ensembldb,
     AnnotationFilter,
     AMR
 Suggests: 
     Rfast,
+    pgenlibr,
     enrichR,
     DT,
     htmltools,
