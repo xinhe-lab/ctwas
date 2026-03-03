@@ -78,9 +78,9 @@
 #'
 #' @param legend.position position to put legends. If "none", no legends will be shown.
 #'
-#' @param legend.nrow.pval Number of rows for legend text in the p-value panel.
-#'
 #' @param legend.nrow Number of rows for legend text in the panels.
+#'
+#' @param genelabel.cex.text Controls the size of the gene labels.
 #'
 #' @param panel.heights Relative heights of the panels.
 #'
@@ -152,7 +152,6 @@ make_locusplot <- function(finemap_res,
                            legend.text.size = 9,
                            legend.position = "top",
                            legend.nrow = c(1, 1),
-                           legend.pip.nrow = 1,
                            genelabel.cex.text = 0.7,
                            panel.heights = c(4, 4, 1, 4),
                            verbose = FALSE) {

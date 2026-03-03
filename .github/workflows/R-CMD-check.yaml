@@ -1,9 +1,9 @@
 # Workflow derived from https://github.com/r-lib/actions/tree/v2/examples
 on:
   push:
-    branches: [main, master, multigroup, multigroup_test, multigroup_ser]
+    branches: [main, master, multigroup, multigroup_test]
   pull_request:
-    branches: [main, master, multigroup, multigroup_test, multigroup_ser]
+    branches: [main, master, multigroup, multigroup_test]
 
 name: R-CMD-check
 
@@ -24,11 +24,12 @@ jobs:
         run: |
           install.packages(c("logging","mixsqp","rlang"))
           install.packages(c("magrittr","dplyr","ggplot2","cowplot"))
-          install.packages(c("ggrepel","readr","data.table","R.utils"))
-          install.packages(c("RSQLite","locuszoomr","pgenlibr","Rfast"))
-          install.packages(c("knitr","rmarkdown","testthat","BiocManager"))
-          install.packages(c("crayon","rcmdcheck","tidyr","enrichR"))
-          install.packages(c("AMR","DT","htmltools"))
+          install.packages(c("ggrepel","readr","data.table","Matrix"))
+          install.packages(c("RSQLite","locuszoomr","AMR", "R.utils"))
+          install.packages(c("crayon","rcmdcheck","tidyr","BiocManager"))
+          install.packages(c("Rfast","pgenlibr","enrichR", "DT","htmltools"))
+          install.packages(c("knitr","rmarkdown","testthat"))
+          install.packages(c("parallel","foreach","doParallel"))
           BiocManager::install("GenomeInfoDb",ask = FALSE)
           BiocManager::install("ensembldb",ask = FALSE)
           BiocManager::install("AnnotationFilter",ask = FALSE)
