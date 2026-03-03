@@ -25,7 +25,7 @@ jobs:
           install.packages(c("logging","mixsqp","rlang"))
           install.packages(c("magrittr","dplyr","ggplot2","cowplot"))
           install.packages(c("ggrepel","readr","data.table","Matrix"))
-          install.packages(c("RSQLite","locuszoomr","AMR"))
+          install.packages(c("RSQLite","locuszoomr","AMR", "R.utils"))
           install.packages(c("crayon","rcmdcheck","tidyr","BiocManager"))
           install.packages(c("Rfast","pgenlibr","enrichR", "DT","htmltools"))
           install.packages(c("knitr","rmarkdown","testthat"))
