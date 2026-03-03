@@ -41,7 +41,6 @@ Imports:
     crayon,
     readr,
     data.table,
-    R.utils,
     RSQLite,
     locuszoomr,
     ensembldb,
@@ -50,6 +49,8 @@ Imports:
 Suggests: 
     Rfast,
     pgenlibr,
+    foreach,
+    doParallel,
     enrichR,
     DT,
     htmltools,
