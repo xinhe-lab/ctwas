@@ -48,6 +48,9 @@ library(data.table)
 ```
 
 
+Installation of `ctwas` takes 1-2 minutes if the dependent packages have already been installed. 
+Running this tutorial with the included sample data takes 2-3 minutes. 
+
 ## Preparing the input data
 
 The "no-LD" version of cTWAS requires several input datasets: (i) GWAS summary statistics; (ii) prediction models (called "weights" in our documentation) and (iii) the reference data, including information about all the variants; and the definition of the genomic regions. We describe below the steps for data preparation and preprocessing before running cTWAS. More details about data preparation, including preparing the LD data, which is required for full cTWAS, are given in the tutorial, ["Preparing cTWAS input data"][preparing_input_data_tutorial].
@@ -102,7 +105,7 @@ ref_snp_info <- fread(ref_snp_info_file, sep = "\t")
 class(ref_snp_info) <- "data.frame"
 region_info <- subset(region_info, chrom == example_chrom)
 
-res <- create_snp_map(region_info, ref_snp_info, ncore = 6)
+res <- create_snp_map(region_info, ref_snp_info, ncore = 4)
 region_info <- res$region_info
 snp_map <- res$snp_map
 ```
@@ -142,7 +145,7 @@ weights_liver <- preprocess_weights(weight_liver_file,
                                     type = "expression",
                                     context = "liver",
                                     varID_converter_fun = convert_to_ukb_varIDs,
-                                    ncore = 6)
+                                    ncore = 4)
 
 weight_adipose_file <- system.file("extdata/sample_data", "expression_Adipose_Subcutaneous.db", package = "ctwas")
 weights_adipose <- preprocess_weights(weight_adipose_file,
@@ -152,7 +155,7 @@ weights_adipose <- preprocess_weights(weight_adipose_file,
                                       type = "expression",
                                       context = "adipose", 
                                       varID_converter_fun = convert_to_ukb_varIDs,
-                                      ncore = 6)
+                                      ncore = 4)
 
 weights <- c(weights_liver, weights_adipose)
 ```
@@ -169,7 +172,7 @@ ctwas_res <- ctwas_sumstats_noLD(z_snp,
                                  weights,
                                  region_info,
                                  snp_map,
-                                 ncore = 6)
+                                 ncore = 4)
 ```
 
 
