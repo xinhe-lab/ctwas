@@ -108,7 +108,7 @@
       <h1 data-toc-skip>A minimal tutorial of running cTWAS without LD</h1>
                         <h4 data-toc-skip class="author">Kaixuan Luo, Sheng Qian</h4>
             
-            <h4 data-toc-skip class="date">2026-03-02</h4>
+            <h4 data-toc-skip class="date">2026-03-18</h4>
       
       <small class="dont-index">Source: <a href="https://github.com/xinhe-lab/ctwas/blob/multigroup/vignettes/minimal_tutorial.Rmd" class="external-link"><code>vignettes/minimal_tutorial.Rmd</code></a></small>
       <div class="hidden name"><code>minimal_tutorial.Rmd</code></div>
@@ -130,6 +130,7 @@
 <div class="sourceCode" id="cb2"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://github.com/xinhe-lab/ctwas/" class="external-link">ctwas</a></span><span class="op">)</span></span>
 <span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://r-datatable.com" class="external-link">data.table</a></span><span class="op">)</span></span></code></pre></div>
+<p>Installation of <code>ctwas</code> takes 1-2 minutes if the dependent packages have already been installed. Running this tutorial with the included sample data takes 2-3 minutes.</p>
 <div class="section level2">
 <h2 id="preparing-the-input-data">Preparing the input data<a class="anchor" aria-label="anchor" href="#preparing-the-input-data"></a>
 </h2>
@@ -197,7 +198,7 @@
 <span><span class="fu"><a href="https://rdrr.io/r/base/class.html" class="external-link">class</a></span><span class="op">(</span><span class="va">ref_snp_info</span><span class="op">)</span> <span class="op">&lt;-</span> <span class="st">"data.frame"</span></span>
 <span><span class="va">region_info</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/subset.html" class="external-link">subset</a></span><span class="op">(</span><span class="va">region_info</span>, <span class="va">chrom</span> <span class="op">==</span> <span class="va">example_chrom</span><span class="op">)</span></span>
 <span></span>
-<span><span class="va">res</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/create_snp_map.html">create_snp_map</a></span><span class="op">(</span><span class="va">region_info</span>, <span class="va">ref_snp_info</span>, ncore <span class="op">=</span> <span class="fl">6</span><span class="op">)</span></span>
+<span><span class="va">res</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/create_snp_map.html">create_snp_map</a></span><span class="op">(</span><span class="va">region_info</span>, <span class="va">ref_snp_info</span>, ncore <span class="op">=</span> <span class="fl">4</span><span class="op">)</span></span>
 <span><span class="va">region_info</span> <span class="op">&lt;-</span> <span class="va">res</span><span class="op">$</span><span class="va">region_info</span></span>
 <span><span class="va">snp_map</span> <span class="op">&lt;-</span> <span class="va">res</span><span class="op">$</span><span class="va">snp_map</span></span></code></pre></div>
 <p>We set <code>ncore</code> to parallelize the computation.</p>
@@ -227,7 +228,7 @@
 <span>                                    type <span class="op">=</span> <span class="st">"expression"</span>,</span>
 <span>                                    context <span class="op">=</span> <span class="st">"liver"</span>,</span>
 <span>                                    varID_converter_fun <span class="op">=</span> <span class="va">convert_to_ukb_varIDs</span>,</span>
-<span>                                    ncore <span class="op">=</span> <span class="fl">6</span><span class="op">)</span></span>
+<span>                                    ncore <span class="op">=</span> <span class="fl">4</span><span class="op">)</span></span>
 <span></span>
 <span><span class="va">weight_adipose_file</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/system.file.html" class="external-link">system.file</a></span><span class="op">(</span><span class="st">"extdata/sample_data"</span>, <span class="st">"expression_Adipose_Subcutaneous.db"</span>, package <span class="op">=</span> <span class="st">"ctwas"</span><span class="op">)</span></span>
 <span><span class="va">weights_adipose</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/preprocess_weights.html">preprocess_weights</a></span><span class="op">(</span><span class="va">weight_adipose_file</span>,</span>
@@ -237,7 +238,7 @@
 <span>                                      type <span class="op">=</span> <span class="st">"expression"</span>,</span>
 <span>                                      context <span class="op">=</span> <span class="st">"adipose"</span>, </span>
 <span>                                      varID_converter_fun <span class="op">=</span> <span class="va">convert_to_ukb_varIDs</span>,</span>
-<span>                                      ncore <span class="op">=</span> <span class="fl">6</span><span class="op">)</span></span>
+<span>                                      ncore <span class="op">=</span> <span class="fl">4</span><span class="op">)</span></span>
 <span></span>
 <span><span class="va">weights</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="va">weights_liver</span>, <span class="va">weights_adipose</span><span class="op">)</span></span></code></pre></div>
 <p>Note, FUSION weights do not contain LD information, so LD is required when using FUSION weights.</p>
@@ -252,7 +253,7 @@
 <span>                                 <span class="va">weights</span>,</span>
 <span>                                 <span class="va">region_info</span>,</span>
 <span>                                 <span class="va">snp_map</span>,</span>
-<span>                                 ncore <span class="op">=</span> <span class="fl">6</span><span class="op">)</span></span></code></pre></div>
+<span>                                 ncore <span class="op">=</span> <span class="fl">4</span><span class="op">)</span></span></code></pre></div>
 <div class="sourceCode" id="cb14"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">z_gene</span> <span class="op">&lt;-</span> <span class="va">ctwas_res</span><span class="op">$</span><span class="va">z_gene</span></span>
 <span><span class="va">param</span> <span class="op">&lt;-</span> <span class="va">ctwas_res</span><span class="op">$</span><span class="va">param</span></span>
