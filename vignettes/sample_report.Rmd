@@ -77,7 +77,7 @@ sprintf("Total number of introns = %s",weights_splicing$gene_count)
 
 The reference data include genomic region definitions and LD reference. 
 We use the genomic regions provided by the package and LD reference in b38, 
-located in the RCC cluster of UChicago:  `/project2/mstephens/wcrouse/UKB_LDR_0.1/`. 
+located in the RCC cluster of UChicago:  `/project2/compbio/UKB_LD_REF/UKB_LDR_0.1_b38/`. 
 Alternatively, the LD reference can be downloaded from this [link](https://uchicago.app.box.com/s/jqocacd2fulskmhoqnasrknbt59x3xkn). 
 
 ## Data processing and harmonization
@@ -95,7 +95,7 @@ users can expand the code snippets below to view the exact code used.
 weight_files <- c("/project2/xinhe/shared_data/multigroup_ctwas/weights/expression_models/expression_Liver.db","/project2/xinhe/shared_data/multigroup_ctwas/weights/splicing_models/splicing_Liver.db")
 z_snp_file <- "/project2/xinhe/shared_data/multigroup_ctwas/gwas/ctwas_inputs_zsnp/LDL-ukb-d-30780_irnt.z_snp.RDS"
 genome_version <- "b38"
-LD_dir <- "/project2/mstephens/wcrouse/UKB_LDR_0.1/"
+LD_dir <- "/project2/compbio/UKB_LD_REF/UKB_LDR_0.1_b38/"
 region_file <- system.file("extdata/ldetect", paste0("EUR.", genome_version, ".ldetect.regions.RDS"), package = "ctwas")
 region_info <- readRDS(region_file)
 
@@ -206,7 +206,7 @@ ctwas_res <- readRDS(file.path(results_dir, paste0(trait,".ctwas.res.RDS")))
 
 We make plots using the function `make_convergence_plots(param, gwas_n)` to 
 see how estimated parameters converge during the execution of the program:
-```{r echo=TRUE, eval=TRUE}
+```{r echo=TRUE, eval=TRUE, message=FALSE, warning=FALSE}
 param <- ctwas_res$param
 make_convergence_plots(param, gwas_n)
 ```
@@ -228,7 +228,7 @@ ctwas_parameters$group_size
 
 
 `ctwas_parameters$prop_heritability` contains the proportion of heritability 
-mediated by molecular traits and variants, we visualize it using the pie chart.
+mediated by molecular traits and variants, which can be visualized using a pie chart.
 ```{r percent_heritability, echo=TRUE, eval=TRUE}
 data <- data.frame(
   category = names(ctwas_parameters$prop_heritability),
@@ -243,7 +243,7 @@ ggplot(data, aes(x = "", y = percentage, fill = category)) +
   theme_void() +
   geom_text(aes(label = percentage_label), 
             position = position_stack(vjust = 0.5), size = 5) +
-  scale_fill_manual(values = c("#FF9999", "#66B2FF", "#99FF99")) +  # Custom colors
+  scale_fill_manual(values = c("#FF9999", "#66B2FF", "#99FF99")) +
   labs(fill = "Category") +
   ggtitle("Percent of heritability")
 ```
@@ -266,7 +266,8 @@ ggplot(data = finemap_res[finemap_res$type!="SNP",], aes(x = abs(z), y = susie_p
 
 ## Fine-mapping results
 
-To process the fine-mapping results, we first map introns to genes and add gene annotations to cTWAS results. We provide a  `mapping_table`  for PredictDB expression and slicing data [here](https://uchicago.box.com/s/gx7raqf5c9jp6tgvm5tpc2ej7zr6bnxz). 
+To process the fine-mapping results, we first map introns to genes and add gene annotations to cTWAS results. 
+We provide a  `mapping_table`  for PredictDB expression and slicing data [here](https://uchicago.box.com/s/gx7raqf5c9jp6tgvm5tpc2ej7zr6bnxz). 
 
 ```{r anno_finemap_res, echo=TRUE, eval=TRUE}
 mapping_table <- readRDS("/project2/xinhe/shared_data/multigroup_ctwas/weights/mapping_files/PredictDB_mapping.RDS")
@@ -352,7 +353,7 @@ make_locusplot(finemap_res = finemap_res,
 
 ## Gene set enrichment analysis
 
-We do GO enrichment analysis using the genes with PIP > 0.8:
+We perform GO enrichment analysis using the genes with PIP > 0.8:
 
 ```{r GO_enrichment, echo=TRUE, eval=TRUE, message=FALSE, warning=FALSE, fig.width=8, fig.height=4}
 

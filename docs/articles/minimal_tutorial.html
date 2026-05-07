@@ -108,7 +108,7 @@
       <h1 data-toc-skip>A minimal tutorial of running cTWAS without LD</h1>
                         <h4 data-toc-skip class="author">Kaixuan Luo, Sheng Qian</h4>
             
-            <h4 data-toc-skip class="date">2026-03-18</h4>
+            <h4 data-toc-skip class="date">2026-05-06</h4>
       
       <small class="dont-index">Source: <a href="https://github.com/xinhe-lab/ctwas/blob/multigroup/vignettes/minimal_tutorial.Rmd" class="external-link"><code>vignettes/minimal_tutorial.Rmd</code></a></small>
       <div class="hidden name"><code>minimal_tutorial.Rmd</code></div>
@@ -187,7 +187,7 @@
 <code class="sourceCode R"><span><span class="va">region_file</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/system.file.html" class="external-link">system.file</a></span><span class="op">(</span><span class="st">"extdata/ldetect"</span>, <span class="st">"EUR.b38.ldetect.regions.RDS"</span>, package <span class="op">=</span> <span class="st">"ctwas"</span><span class="op">)</span></span>
 <span><span class="va">region_info</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/readRDS.html" class="external-link">readRDS</a></span><span class="op">(</span><span class="va">region_file</span><span class="op">)</span></span></code></pre></div>
 <p>Additionally, we require <code>ref_snp_info</code> as a “reference” of the variants. <code>ref_snp_info</code> is a data frame, containing the positions and allele information of all the variants from the entire genome. This reference data needs to be mapped to the regions, i.e. we will need a structure to store the information of which variants are located in which regions. To do this, we provide a function, <code><a href="../reference/create_snp_map.html">create_snp_map()</a></code>. It takes input of <code>region_info</code> and <code>ref_snp_info</code>. It maps variants to regions based on the variant locations, and returns the result as <code>snp_map</code>, a list object containing variant information in each of the regions. In addition, the function checks the format of <code>region_info</code> to ensure that it matches the format required by cTWAS (e.g. adding “region_id” column if not available), and returns the output as updated <code>region_info</code>.</p>
-<p>We have the reference variant information from UK Biobank European population available <a href="https://uchicago.box.com/s/w3j3w49a5y5p1rhlti95u324g8ro6kkn" class="external-link">here</a>. They are also available on the University of Chicago RCC cluster at <code>/project2/xinhe/shared_data/cTWAS/ref_snp_info/</code>.</p>
+<p>We have the reference variant information from UK Biobank European population available <a href="https://uchicago.box.com/s/w3j3w49a5y5p1rhlti95u324g8ro6kkn" class="external-link">here</a>. They are also available on the University of Chicago RCC cluster at <code>/project2/compbio/UKB_LD_REF/ref_snp_info/</code>.</p>
 <p>In this tutorial, we use chr16 as an example, so we specify <code>chrom = 16</code>. In real cTWAS analysis, you should run the entire genome.</p>
 <div class="sourceCode" id="cb10"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">example_chrom</span> <span class="op">&lt;-</span> <span class="fl">16</span></span>

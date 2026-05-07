@@ -139,7 +139,7 @@ By default, we need a LD matrix file for each region (preferably in `.RDS` forma
 We have precomputed reference LD matrices (`.RDS` files) and the variant information tables (`.Rvar` files) accompanying the LD matrices for UK Biobank. LD matrices were computed on 10% of the UK Biobank independent, White British samples for variants with MAF > 1%. 
 
 The complete LD matrices of European individuals from UK Biobank can be downloaded [here][UKBB_LD_ref]. 
-On the University of Chicago RCC cluster, the b38 reference is available at `/project2/mstephens/wcrouse/UKB_LDR_0.1/` and the b37 reference is available at `/project2/mstephens/wcrouse/UKB_LDR_0.1_b37/`.
+On the University of Chicago RCC cluster, the b38 LD reference is available at `/project2/compbio/UKB_LD_REF/UKB_LDR_0.1_b38/` and the b37 LD reference is available at `/project2/compbio/UKB_LD_REF/UKB_LDR_0.1_b37/`.
 
 The columns of the `.Rvar` file include information on chromosome, variant name, position in base pairs, and the alternative and reference alleles. The "variance" column is the variance of each variant prior to standardization; this is required for PredictDB weights but not FUSION weights. We've also included information on allele frequency (for the alternative alleles) in the variant info, but this is optional and not used in the program.
 
@@ -151,7 +151,7 @@ We will need to link the reference SNP and LD files to the regions. To do this, 
 
 The following paths and filenames were from the University of Chicago RCC cluster, please replace them with your own paths. 
 ```{r add_LD_paths, eval=FALSE}
-LD_dir <- "/project2/mstephens/wcrouse/UKB_LDR_0.1"
+LD_dir <- "/project2/compbio/UKB_LD_REF/UKB_LDR_0.1_b38/"
 genome_version <- "b38"
 
 LD_filestem <- sprintf("ukb_%s_0.1_chr%s.R_snp.%s_%s", genome_version, region_info$chrom, region_info$start, region_info$stop)
@@ -181,7 +181,7 @@ When preparing data without LD, we need `region_info` (region definitions, no ne
 
 We have the reference variant information from UK Biobank European population available [here](https://uchicago.box.com/s/w3j3w49a5y5p1rhlti95u324g8ro6kkn).
 
-On the University of Chicago RCC cluster, the reference variant information is available at `/project2/xinhe/shared_data/cTWAS/ref_snp_info/`.
+On the University of Chicago RCC cluster, the reference variant information is available at `/project2/compbio/UKB_LD_REF/ref_snp_info/`.
 
 We then use the `create_snp_map()` function to preprocess region definitions, and map variants from the LD reference to regions, which returns processed `region_info` and `snp_map`.
 
