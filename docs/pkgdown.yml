@@ -1,5 +1,5 @@
 pandoc: 2.7.3
-pkgdown: 2.0.7
+pkgdown: 2.2.0
 pkgdown_sha: ~
 articles:
   FAQ: FAQ.html
@@ -11,5 +11,7 @@ articles:
   software_updates: software_updates.html
   summarizing_results: summarizing_results.html
   utility_functions: utility_functions.html
-last_built: 2026-05-07T02:08Z
-
+last_built: 2026-09-02T15:58Z
+urls:
+  reference: https://xinhe-lab.github.io/ctwas/reference
+  article: https://xinhe-lab.github.io/ctwas/articles

@@ -1,0 +1,65 @@
+# Software updates
+
+## Major updates in M-cTWAS software
+
+  - Extended the cTWAS framework to incorporate prediction models from
+    multiple molecular trait types across diverse biological contexts.
+  - Redesigned the software interface to improve modularity,
+    implementing key M-cTWAS tasks as standalone components. Users may
+    run the full M-cTWAS analysis via the main function or execute
+    individual steps independently.
+  - Implemented a “no-LD” mode that enables M-cTWAS analyses without
+    requiring an LD reference panel.
+
+## Other important updates
+
+### Input processing
+
+  - Supports multiple prediction model formats, including PredictDB,
+    FUSION, and top-QTL.
+  - Provides streamlined preprocessing tools to harmonize GWAS summary
+    statistics, prediction models, and LD reference.
+  - Offers utility functions for constructing LD matrices from
+    individual-level genotype data and for loading LD matrices of
+    various formats, with flexible support for user-defined custom
+    formats.
+
+### Computation
+
+  - Introduces new parameter estimation procedures that enable sharing
+    of prior effect variance parameters across multiple groups of
+    molecular traits. Several schemes of parameter sharing are
+    supported, including: shared variance for all groups of variables
+    (including SNPs); shared variance for all molecular traits; shared
+    variance for all molecular traits of the same type/modality.
+  - Compute standard errors and p-values of enrichment parameters.
+  - Implements new methods to screen genomic regions with likely causal
+    molecular trait signals. This speeds up the computation, as only
+    such regions will be subject to full fine-mapping (allowing more
+    than one causal signal).
+  - Supports fine-mapping of single or multiple regions, with or without
+    LD information.
+  - Re-implements a simplified single effect regression (SER) model from
+    SuSiE, incorporating the new implementation of null configuration.
+    It is used in EM to speed up computation.
+  - Improves computational efficiency by more than ten-fold, enabling
+    large-scale analyses across many molecular traits. A typical M-cTWAS
+    analysis using molQTLs from multiple groups could be completed
+    within 1–3 hours.
+
+### Creating the output
+
+  - Introduces new methods to combine evidence from all molecular traits
+    targeting the same genes.
+  - Enhances visualization of M-cTWAS results, including updated locus
+    plots with integrated gene tracks and fine-mapping result panels.
+  - Incorporates LD-mismatch diagnosis from SuSiE-RSS in
+    post-processing.
+  - Introduces a region-merging step to resolve the “cross-region”
+    challenge, where the genetic variants contributing to a molecular
+    trait spans two regions.
+
+*Note*: this updated cTWAS version currently only works for GWAS summary
+statistics. To use individual level data, please refer to the old cTWAS
+version for now. We will release a new version that will work with
+individual level data later.

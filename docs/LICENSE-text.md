@@ -1,0 +1,4 @@
+# License
+
+    YEAR: 2020
+    COPYRIGHT HOLDER: Siming Zhao, Wesley Crouse, Sheng Qian, Kaixuan Luo, Matthew Stephens, Xin He

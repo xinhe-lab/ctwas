@@ -1,0 +1,215 @@
+# cTWAS utility functions
+
+In this tutorial, we will introduce a few cTWAS utility functions for
+preparing and processing input data.
+
+Load the packages.
+
+``` r
+library(ctwas)
+```
+
+#### Creating LD matrices from individual level genotype data
+
+cTWAS provides a function `convert_geno_to_LD_matrix()` to create LD
+matrices from individual level genotype data.
+
+This function needs genotype files (`genotype_files`) and variant
+information files (`varinfo_files`) in PLINK format, and region
+definitions (`region_info`) as input. It converts genotype data to LD
+matrices region-by-region, and save the LD correlation matrices (`.RDS`
+files) and corresponding variant information (`.Rvar` files) to the
+directory `outputdir`. It returns a data frame `region_metatable`, which
+contains region definitions from `region_info` and two additional
+columns “LD\_file” and “SNP\_file”. “LD\_file” stores the filenames to
+the LD matrices (`.RDS` files), “SNP\_file” stores the filenames of
+corresponding variant information (`.Rvar` files).
+
+Below is an example for creating LD matrices in b37 using 1000 Genomes
+European data.
+
+`genotype_files` need to have genotype files for all chromosomes (one
+file per chromosome). `varinfo_files` could have one variant information
+file for each chromosome or have one big file with variant information
+from all chromosomes. By default, it will process all chromosomes from 1
+to 22. You could process only one chromosome or several chromosomes by
+specifying `chrom`.
+
+``` r
+ldref_dir <- "./1000G_EUR_Phase3_plink"
+genotype_files <- paste0("1000G.EUR.QC.", 1:22, ".bed")
+varinfo_files <- paste0("1000G.EUR.QC.", 1:22, ".bim")
+
+region_file <- system.file("extdata/ldetect", "EUR.b37.ldetect.regions.RDS", package = "ctwas")
+region_info <- readRDS(region_file)
+
+outputdir <- "./cTWAS_LD"
+outname <- "1000G_EUR_Phase3_b37"
+
+region_metatable <- convert_geno_to_LD_matrix(region_info,
+                                              genotype_files,
+                                              varinfo_files,
+                                              chrom = 1:22,
+                                              outputdir = outputdir,
+                                              outname = outname)
+```
+
+We provided precomputed LD matrices in b37 for 1000 Genomes European
+genotype data
+[here](https://uchicago.box.com/s/bi7yy7461hdd07xafyk0qlji1kwmleu7). The
+genotype data were downloaded from the reference files of LDSC
+[here](https://zenodo.org/records/7768714).
+
+We provide example R scripts to create LD matrices for UK biobank or
+1000 genomes genotype data
+[here](https://github.com/xinhe-lab/ctwas/tree/multigroup/inst/extdata/scripts).
+
+### Using FUSION weights
+
+PredictDB is the recommended format for cTWAS, and we introduced how to
+use PredictDB weights in the tutorial [“Preparing cTWAS input
+data”](https://xinhe-lab.github.io/multigroup_ctwas/articles/preparing_input_data.html).
+Here, we will discuss how to use FUSION weights.
+
+Please check
+[FUSION/TWAS](http://gusevlab.org/projects/fusion/#compute-your-own-predictive-models)
+for the format of FUSION weights. You can download [precomputed FUSION
+models](http://gusevlab.org/projects/fusion/#download-pre-computed-predictive-models).
+
+For example, we download an example GTEx whole blood data:
+
+``` bash
+wget https://data.broadinstitute.org/alkesgroup/FUSION/WGT/GTEx.Whole_Blood.tar.bz2
+
+tar xjf GTEx.Whole_Blood.tar.bz2
+```
+
+After unpacking the package, we will see a folder named
+`GTEx.Whole_Blood`, which contains the `.wgt.RDat` files of the
+precomputed weights. We will also see a file `GTEx.Whole_Blood.pos`
+(outside the weight folder), which points to the individual `.wgt.RDat`
+weight files, their gene IDs, and genomic positions.
+
+We use the `preprocess_weight()` function to harmonize the prediction
+models and LD reference. To use the FUSION format, we need to specify
+the weight directory that contains the `.wgt.RDat` files. We specify
+`weight_format = 'FUSION'` and specify the prediction models in FUSION
+by `fusion_method`. It supports the following models: “lasso” (default),
+“enet”, “top1”, “blup”, “bslmm”, and also “best.cv”, which will choose
+the best model for each gene based on the cross-validation performance.
+
+This function also takes a few other inputs, including the definition of
+regions (`region_info`), the list of variants from GWAS (`z_snp$id`),
+the list of SNPs and information of LD matrix of each region (`snp_map`
+and `LD_map`), type (`type`) and context (`context`) of the weights.
+Please refer to the tutorial [\`Preparing input
+data”](https://xinhe-lab.github.io/multigroup_ctwas/articles/preparing_input_data.html)
+about these data structures.
+
+``` r
+weights <- preprocess_weights("./GTEx.Whole_Blood",
+                              region_info,
+                              gwas_snp_ids = z_snp$id,
+                              snp_map = snp_map,
+                              LD_map = LD_map,
+                              type = "expression",
+                              context = "whole_blood",                         
+                              weight_format = "FUSION",
+                              fusion_method = "lasso",
+                              fusion_genome_version = "b37",
+                              top_n_snps = NULL,
+                              drop_strand_ambig = TRUE,
+                              filter_protein_coding_genes = FALSE,
+                              scale_predictdb_weights = FALSE,
+                              load_predictdb_LD = FALSE,
+                              ncore = 4)
+```
+
+We drop strand ambiguous variants (`drop_strand_ambig = TRUE`) by
+default. FUSION weights are already on the standardized scale, so we
+don’t scale weights by the variance. For FUSION models, we don’t have
+precomputed covariances between variants. So we calculate correlations
+between weight variants using the LD reference. This usually takes a
+while, so it is helpful to set `ncore` to parallelize the computation.
+FUSION weights do not contain gene type information, so we don’t limit
+to protein coding genes. By default, we use all variants in the
+prediction models. If you have dense prediction models and want to use
+only the top variants for each gene in the weights, you could set the
+number in `top_n_snps` (`top_n_snps = 5` will use the top five variants
+for each gene). We could set the genome build of the FUSION models in
+`fusion_genome_version`. This is only used when creating the “varID” of
+the variants to be consistent with PredictDB format, but does not affect
+the preprocessed weights.
+
+### Creating prediction models from QTL lists
+
+Often a researcher may have a list of significant QTLs, but have not
+explicitly built prediction models. In such cases, it is possible to run
+cTWAS. One just needs to use the top QTL per molecular trait as the
+prediction models. Running cTWAS in this way would be similar to
+colocalization analysis with coloc. Nevertheless, it still has some
+advantages over coloc: it estimates the important parameters from data,
+and it analyzes multiple molecular traits in a region simultaneously.
+See the Supplementary Note of the cTWAS paper for details.
+
+We could convert top QTLs into PredictDB format weights using the
+function `create_predictdb_from_QTLs()`. It will create PredictDB format
+weights, and save to the `outputdir` directory.
+
+``` r
+create_predictdb_from_QTLs(weight_table, 
+                           gene_table, 
+                           use_top_QTL = TRUE,
+                           select_by = "weight",
+                           outputdir = outputdir, 
+                           outname = outname)
+```
+
+`weight_table` is a data frame of the QTLs in the following format and
+with the required columns (“gene”, “rsid”, “varID”, “ref\_allele”,
+“eff\_allele”, “weight”):
+
+    "
+          gene        rsid                    varID   ref_allele eff_allele weight
+    cg07570687  rs11190571  chr10_100472320_G_A_b38          G          A      1
+    cg16342193   rs7070776  chr10_100504915_A_G_b38          A          G      1
+    cg21542427   rs2495721  chr10_100614350_G_A_b38          G          A      1
+    cg26540559   rs4917904  chr10_100687535_G_A_b38          G          A      1
+    cg23069052 rs147983854 chr10_100717502_GC_G_b38         GC          G      1
+    cg24179445  rs12268880  chr10_100735528_G_C_b38          G          C      1
+    "
+
+`gene_table` is an optional data frame in the following format with
+information of the genes/molecular traits (“gene”, “genename”,
+“gene\_type”, etc.):
+
+    "
+          gene genename      gene_type
+    cg19220149      A2M protein_coding
+    cg06705064   A4GALT protein_coding
+    cg25015779   A4GALT protein_coding
+    cg08572757     AACS protein_coding
+    cg06287003     AACS protein_coding
+    cg26295774  AADACL2 protein_coding
+    "
+
+When `use_top_QTL=TRUE`, it is limited to only one top QTL per molecular
+trait. If `weight_table` has more than one SNP per molecular trait, it
+has two options to select the top SNP. If `select_by = "weight"`, it
+will select the top SNP with the largest `abs(weight)`. If `select_by =
+"pval"`, it will select the top SNP with the smallest QTL p-value (in
+this case, the `weight_table` needs to contain an additional column
+named “pval”). It will also create a simple covariance table with
+covariance set to 1, as each molecular trait only has one top QTL.
+
+If you want to use multiple QTLs per molecular trait, you can set
+`use_top_QTL=FALSE`. In that case, we assume the weights of the QTLs are
+learned from multiple regression (instead of marginal effect sizes).
+
+If you use weights converted from *top* QTLs, we set `load_predictdb_LD
+= TRUE` in the `preprocess_weights()` function to load pre-computed
+correlations between variants. But for weights converted from multiple
+QTLs per molecular trait, you would still need to compute correlations
+between variants from the LD reference by setting `load_predictdb_LD =
+FALSE`. Also, we do not need to scale the weights, so we set
+`scale_predictdb_weights = FALSE`.

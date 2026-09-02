@@ -1,0 +1,280 @@
+# ctwas: an R package for integrating molecular QTLs and GWAS for gene discovery
+
+[![R-CMD-check](https://github.com/xinhe-lab/ctwas/actions/workflows/R-CMD-check.yaml/badge.svg)](https://github.com/xinhe-lab/ctwas/actions/workflows/R-CMD-check.yaml)
+
+Expression quantitative trait loci (eQTLs) have often been used to
+nominate candidate genes from genome-wide association studies (GWAS).
+However, commonly used methods are susceptible to false positives
+largely due to linkage disequilibrium (LD) of eQTLs with causal variants
+acting on the phenotype directly.
+
+Our method, “causal-TWAS” (cTWAS), addresses this challenge by borrowing
+ideas from statistical fine-mapping. It is a generalization of methods
+for transcriptome-wide association studies (TWAS), but when analyzing
+any gene, it adjusts for other nearby genes *and all nearby genetic
+variants.*
+
+While the [published cTWAS
+paper](https://doi.org/10.1038/s41588-023-01648-9) analyzes a single
+eQTL dataset, [multigroup causal TWAS
+(M-cTWAS)](https://www.medrxiv.org/content/10.64898/2025.12.19.25342620v1)
+extends the cTWAS method to integrate multiple groups of prediction
+models, allowing for joint analysis of multiple types of molecular
+traits, across potentially different tissues, cell types or conditions.
+
+*Note*: this is the software behind the M-cTWAS method. If you have
+already run cTWAS before, see [this
+page](https://xinhe-lab.github.io/multigroup_ctwas/articles/software_updates.html)
+for the software updates in M-cTWAS software.
+
+You can [browse source
+code](https://github.com/xinhe-lab/ctwas/tree/multigroup) and [report a
+bug](https://github.com/xinhe-lab/ctwas/issues) here.
+
+You can also join our [Google
+Group](https://groups.google.com/g/ctwas_users) to ask questions, report
+issues, or receive notifications of software updates.
+
+## Install ctwas
+
+Use “remotes” to install the latest version of ctwas from GitHub:
+
+``` r
+install.packages("remotes")
+remotes::install_github("xinhe-lab/ctwas",ref = "multigroup")
+```
+
+Currently, ctwas has only been tested on Linux systems.
+
+We recommend installing and running `ctwas` on a high-performance
+computing system.
+
+## Running `ctwas`
+
+Running a cTWAS analysis involves four main steps:
+
+1.  Preparing the input data.
+
+2.  Computing associations of genes with the phenotype (Z-scores).
+
+3.  Estimating the model parameters.
+
+4.  Fine-mapping causal genes
+
+The outputs of cTWAS are posterior inclusion probabilities (PIPs) for
+all variants and genes.
+
+To learn more about the ctwas R package, we recommend starting with this
+introductory tutorial.
+
+[A minimal tutorial of how to run cTWAS without
+LD](https://xinhe-lab.github.io/multigroup_ctwas/articles/minimal_tutorial.html)
+
+To run the full cTWAS, follow these tutorials:
+
+  - [Preparing input
+    data](https://xinhe-lab.github.io/multigroup_ctwas/articles/preparing_input_data.html)
+
+  - [Running cTWAS
+    analysis](https://xinhe-lab.github.io/multigroup_ctwas/articles/running_ctwas_analysis.html)
+
+  - [Summarizing and visualizing cTWAS
+    results](https://xinhe-lab.github.io/multigroup_ctwas/articles/summarizing_results.html)
+
+  - [Sample report of cTWAS
+    results](https://xinhe-lab.github.io/multigroup_ctwas/articles/sample_report.html)
+
+  - [Post-processing cTWAS
+    results](https://xinhe-lab.github.io/multigroup_ctwas/articles/postprocessing.html)
+
+In addition, we have some useful functions to help run cTWAS, e.g. for
+creating your own reference LD data:
+
+  - [cTWAS utility
+    functions](https://xinhe-lab.github.io/multigroup_ctwas/articles/utility_functions.html)
+
+We also have a FAQ page for some common questions:
+
+  - [FAQ](https://xinhe-lab.github.io/multigroup_ctwas/articles/FAQ.html)
+
+![Overview of the M-cTWAS
+workflow](reference/figures/m_ctwas_workflow.png)
+
+## Citing this work
+
+If you find the `ctwas` package or any of the source code in this
+repository useful for your work, please cite:
+
+cTWAS paper:
+
+> Zhao S, Crouse W, Qian S, Luo K, Stephens M, He X. Adjusting for
+> genetic confounders in transcriptome-wide association studies improves
+> discovery of risk genes of complex traits. Nature Genetics 56, 336–347
+> (2024). <https://doi.org/10.1038/s41588-023-01648-9>
+
+M-cTWAS paper:
+
+> Qian S, Luo K, Sun X, Crouse W, Liang L, Gu J, Stephens M, Zhao S, He
+> X. Integrating multi-omics and multi-context QTL data with GWAS
+> reveals the genetic architecture of complex traits and improves the
+> discovery of risk genes. medRxiv 2025.12.19.25342620;
+> <https://doi.org/10.64898/2025.12.19.25342620>
+
+## Useful resources
+
+We have pre-computed reference LD matrices and variant information of
+European samples from UK Biobank. They can be downloaded
+[here](https://uchicago.box.com/s/jqocacd2fulskmhoqnasrknbt59x3xkn).
+
+cTWAS requires the expression prediction models, or weights, of genes.
+The pre-computed weights of GTEx expression and splicing traits can be
+downloaded from
+[PredictDB](https://predictdb.org/post/2021/07/21/gtex-v8-models-on-eqtl-and-sqtl/).
+
+## Acknowledgments
+
+We thank the authors of `susieR` package for using their codes.
+
+Original `susieR` code obtained by:
+
+    git clone git@github.com:stephenslab/susieR.git
+    git checkout c7934c0
+
+Minor edits to make it accept different prior variances for each
+variable.
+
+# Package index
+
+## All functions
+
+<!-- end list -->
+
+  - `add_pos()` : Add SNP and gene positions to cTWAS finemapping
+    result.
+  - `anno_finemap_res()` : Map finemapping result of molecular traits to
+    genes.
+  - `anno_susie_alpha_res()` : Map molecular traits to genes in susie
+    alpha result.
+  - `assemble_region_data()` : Assembles data for all the regions
+  - `check_n_snps()` : Check the numbers of SNPs in snp\_map, z\_snp and
+    weights
+  - `combine_gene_pips()` : Combines gene PIPs by context, type or
+    group.
+  - `compute_enrichment_test()` : Computes enrichment (log-scale),
+    standard error and p-value
+  - `compute_gene_z()` : Computes z-scores of molecular traits
+  - `compute_region_cor()` : Computes correlation matrices for a single
+    region
+  - `compute_region_nonSNP_PIPs()` : Computes non-SNP PIPs for all
+    regions from finemapping result
+  - `compute_weight_LD_from_ref()` : Computes LD for weight variants
+    using reference LD
+  - `convert_fusion_to_predictdb()` : Converts fusion weights to
+    predictDB format
+  - `convert_geno_to_LD_matrix()` : Converts PLINK genotype data to LD
+    matrices and SNP info files, saves LD matrices as .RDS files and SNP
+    info as .Rvar files
+  - `convert_predictdb_weights_varIDs()` : Convert rsIDs and varIDs in
+    predictDB weights to the reference variant format.
+  - `convert_to_ukb_varIDs()` : Convert variant IDs from Open GWAS
+    format or PredictDB weight format
+  - `create_predictdb_from_QTLs()` : Creates weight files in PredictDB
+    format from QTL data
+  - `create_snp_LD_map()` : Map SNPs to regions using region meta table.
+  - `create_snp_map()` : Map SNPs to regions using all the variants in
+    the LD reference.
+  - `ctwas_sumstats()` : cTWAS analysis using summary statistics
+  - `ctwas_sumstats_noLD()` : cTWAS analysis using summary statistics
+    with "no LD" version
+  - `diagnose_LD_mismatch_susie()` : Diagnose LD mismatch using SuSiE
+    RSS
+  - `est_param()` : Estimates cTWAS parameters using EM with cTWAS SER
+    model
+  - `estimate_region_L()` : Estimate L for all regions by running
+    finemapping with uniform prior
+  - `expand_region_data()` : Expands region\_data with all SNPs
+  - `filter_z_gene_by_group_size()` : Filter z\_gene by group size
+  - `finemap_regions()` : Runs cTWAS fine-mapping for regions
+  - `finemap_regions_noLD()` : Runs cTWAS fine-mapping for regions
+    without LD (L = 1)
+  - `get_boundary_genes()` : Get cross-boundary genes.
+  - `get_gene_annot_from_ens_db()` : Get gene annotation table from
+    Ensembl database
+  - `get_gene_info()` : Get gene info from weights.
+  - `get_molecular_ids()` : Get original molecular IDs
+  - `get_predictdb_genome_build()` : Get genome build of PredictDB
+    weight
+  - `get_problematic_genes()` : Gets problematic genes from problematic
+    SNPs
+  - `get_region_cor()` : Gets correlation matrices for a single region.
+  - `load_LD()` : Load LD matrix
+  - `load_fusion_weights()` : Loads weights in FUSION format
+  - `load_predictdb_weights()` : Loads weights in PredictDB format
+  - `load_region_cor()` : Loads precomputed correlation matrices for a
+    single region.
+  - `load_weights()` : Loads weights in PredictDB or FUSION format
+  - `make_convergence_plots()` : Make convergence plots for the
+    estimated parameters
+  - `make_locusplot()` : Plots the cTWAS result for a single locus
+  - `map_gene_regions()` : Map regions for each gene.
+  - `merge_region_data()` : Merges region data for cross-boundary genes
+  - `merge_region_data_noLD()` : Merges region data for cross-boundary
+    genes without using LD
+  - `postprocess_LD_mismatch()` : Runs cTWAS post-processing procedure
+    for merging regions
+  - `postprocess_region_merging()` : Runs cTWAS post-processing
+    procedure for region merging
+  - `postprocess_region_merging_noLD()` : Runs cTWAS post-processing
+    procedure for region merging without LD
+  - `preprocess_weights()` : Preprocess PredictDB/FUSION weights and
+    harmonize with LD reference
+  - `preprocess_z_snp()` : Preprocess GWAS z-scores, harmonize GWAS
+    z-scores with LD reference
+  - `read_gwas()` : Read GWAS summary statistics
+  - `read_snp_info_file()` : Read a single SNP info file as a data frame
+  - `read_snp_info_files()` : Read multiple single SNP info files as a
+    data frame
+  - `screen_regions()` : Screens regions with strong signals
+  - `select_boundary_genes()` : Gets boundary genes and selects high PIP
+    boundary genes
+  - `subset_weights()` : Get a subset of weights, by group, context or
+    type.
+  - `summarize_param()` : Summarizes estimated parameters
+  - `summarize_region_signals()` : Gets a basic summary of region
+    signals
+  - `trim_weights()` : Trim weights and filter SNPs by LD reference and
+    GWAS SNPs.
+  - `update_finemap_res()` : Updates cTWAS finemapping result for
+    selected regions
+  - `update_merged_region_data()` : Updates cTWAS input data with merged
+    region data
+  - `update_merged_region_data_noLD()` : Updates cTWAS input data
+    without LD with merged region data
+  - `update_merged_region_finemap_res()` : Updates cTWAS finemapping
+    result for merged regions
+  - `update_region_z()` : Adds or updates z-scores in region\_data based
+    on z\_snp and z\_gene. this will also update sid and gid based on
+    z\_snp and z\_gene.
+  - `z2p()` : convert z-scores to p-values (two-sided test)
+
+# Articles
+
+### All vignettes
+
+  - [FAQ](https://xinhe-lab.github.io/ctwas/articles/FAQ.md):
+  - [A minimal tutorial of running cTWAS without
+    LD](https://xinhe-lab.github.io/ctwas/articles/minimal_tutorial.md):
+  - [Post-processing cTWAS
+    results](https://xinhe-lab.github.io/ctwas/articles/postprocessing.md):
+  - [Preparing cTWAS input
+    data](https://xinhe-lab.github.io/ctwas/articles/preparing_input_data.md):
+  - [Running cTWAS
+    analysis](https://xinhe-lab.github.io/ctwas/articles/running_ctwas_analysis.md):
+  - [Sample report of cTWAS
+    results](https://xinhe-lab.github.io/ctwas/articles/sample_report.md):
+  - [Software
+    updates](https://xinhe-lab.github.io/ctwas/articles/software_updates.md):
+  - [Summarizing and visualizing cTWAS
+    results](https://xinhe-lab.github.io/ctwas/articles/summarizing_results.md):
+  - [cTWAS utility
+    functions](https://xinhe-lab.github.io/ctwas/articles/utility_functions.md):

@@ -1,0 +1,144 @@
+# FAQ
+
+## Common questions
+
+### Can I run cTWAS if my GWAS data and prediction models have different genome builds?
+
+It is critical that the genome build (e.g. hg38) of the LD reference
+matches the genome build used to train the prediction models. You can
+use the function `get_predictdb_genome_build()` to check the genome
+build of PredictDB weight file.
+
+The genome build of the GWAS summary statistics does not matter because
+variant positions are determined by the LD reference.
+
+### How to run cTWAS with multiple datasets of the same modality and tissue/cell context?
+
+You may have multiple datasets with the same modality and context,
+e.g. eQTLs in the brain, from two sources, GTEx and CommonMinds
+Consortium (CMC). In this case, if you set `context = "brain"` and `type
+= "expression"` for both datasets, the two brain expression datasets
+would be merged into a single group. If you prefer to treat them as
+separate groups, you can give them different context names,
+e.g. `context = “GTEx_brain”` and `“CMC_brain”`.
+
+### Can I use my own LD matrices as reference?
+
+By default, we use our own LD matrices in “.RDS” format. We also support
+other common formats, such as “.Rdata”, “.mtx”, “.csv”, “.txt”. If you
+already have LD matrices in custom format, you could directly load your
+own LD matrices, and don’t need to save those in our LD matrix format.
+To do this, you could write a loader function that loads your LD
+matrices into our LD matrix format. Then set `LD_format = "custom"` and
+pass your loader function to the argument `LD_loader_fun`.
+
+If your variant information files are custom format, you can also write
+a loader function to read your own variant information files, and then
+pass your loader function to the argument `snpinfo_loader_fun`.
+
+### How can I create my own LD matrices as references from genotype data?
+
+cTWAS provides a function `convert_geno_to_LD_matrix()` to create LD
+matrices from individual level genotype data. See the tutorial [“cTWAS
+utility
+functions”](https://xinhe-lab.github.io/multigroup_ctwas/articles/utility_functions.html)
+for details.
+
+### Can I use cTWAS to analyze GWAS from non-European ancestry?
+
+Running cTWAS with a different ancestry is under development. For now,
+we recommend using LD reference matching the GWAS samples (not the
+weights).
+
+### Is there any way to speed up the computation?
+
+To save running time, we parallelized computations when running cTWAS
+main function and several other modular functions. We currently use the
+forking approach for parallelization, so it does not work on Windows.
+
+You could set `ncore` to control how many cores are used in the
+parallelization. When processing LD matrices, especially during
+screening regions and fine-mapping, we recommend using larger memory. If
+you use the cTWAS main function, we have an argument `ncore_LD`, which
+allows using a lower number of cores during screening regions and
+fine-mapping steps, so more memory will be allocated for those steps.
+
+### My parameters look strange. What should I do?
+
+The most important parameters of cTWAS are the “enrichment” parameters,
+the ratio of prior inclusion probabilities of molecular traits
+vs. variants. In our experience, these numbers usually range from 20 -
+200. If the numbers are outside this range, check the prior variance
+parameters. When the variance parameters are very different between
+molecular traits and variants, you can get exceedingly large enrichment.
+In that case, you can specify the same prior variance parameters for
+molecular traits and genes, by setting `group_prior_var_structure =
+"shared_all"`.
+
+### Can I filter regions before estimating parameters in cTWAS?
+
+In general, all LD windows should be included in the parameter
+estimation step, as long as they contain genetically predictable
+features. We do not recommend selecting LD windows based on significant
+associations before parameter estimation, because doing so can lead to
+inflated parameter estimates. This procedure effectively uses the same
+data twice: first to select regions showing strong associations, and
+then to estimate the model parameters. Including all eligible LD windows
+avoids this selection bias and provides better parameter estimates.
+
+### My molQTL features, e.g. CpG sites, are highly correlated. As a result, the PIPs of individual features are often small. What should I do?
+
+When applying cTWAS to certain types of molQTLs, especially epigenetic
+QTLs (CpG sites or ATAC peaks), the genetic prediction models of these
+features may be highly correlated, making it difficult to distinguish
+them during fine-mapping. In such cases, M-cTWAS will not be able to
+resolve the causal one, and the evidence is in fact split among these
+sites/peaks. This would reduce the number of high PIP findings.
+
+To address this issue, we recommend merging CpG sites or ATAC peaks that
+fall within the same credible set and treating them as a single
+cis-regulatory element (CRE). The PIP of the CRE is then calculated as
+the sum of the PIPs of all constituent sites or peaks.
+
+## Potential error messages when running cTWAS
+
+### Error message: “Some SNPs in weights not found in z\_snp\!” when running compute\_gene\_z() function
+
+We limit variants in the processed weights to the processed variants in
+`z_snp` (by setting `gwas_snp_ids = z_snp$id`), so you should first run
+`preprocess_z_snp()`, and then run `preprocess_weights()` after getting
+processed variants. If you later changed the SNPs included in `z_snp`,
+you would need to rerun preprocess\_weights() with `gwas_snp_ids` set to
+the updated `z_snp$id`.
+
+### Error message: “R matrix dimension does not match with z\!”
+
+This message suggests conflicts between the correlation matrices and the
+Z-scores when running fine-mapping. This often happens when you run
+cTWAS main function or fine-mapping using new data but load correlation
+matrices saved from an earlier analysis. By default, cTWAS will
+automatically load correlation matrices saved in `cor_dir`, so it will
+cause conflicts when you run different cTWAS analyses with the same
+`cor_dir`. So please make sure to save correlation matrices to a new
+directory when running new cTWAS analyses. Each cTWAS analysis should
+use a separate `cor_dir` to store the correlation matrices.
+
+### Error message: “Viewport has zero dimension(s)” when making the locus plots.
+
+If you get an error message “Viewport has zero dimension(s)” when making
+locus plots, it usually suggests the R viewer window is too small. You
+can try increasing the size of the viewer window size and try again.
+
+### Missing shapes in the legend of locus plots when including many types of molecular traits
+
+We included several default shapes to represent different types of
+molecular traits. If you have more types of molecular traits or if you
+want to change the shapes, you can set the `point.shapes`argument in the
+function `make_locusplot()`.
+
+### Error message: " ‘NULL’ found in mclapply output. Results may be incomplete\!"
+
+This message is often caused by insufficient memory when running cTWAS
+with multiple cores in parallel. You could use a larger memory, or set a
+lower `ncore`. If you still get this error message, try `ncore=1` to run
+without parallelization.
