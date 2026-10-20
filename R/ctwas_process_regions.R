@@ -202,8 +202,8 @@ index_regions <- function(regionfile,
     for (b in 1: length(regionlist)){
       for (rn in names(regionlist[[b]])) {
         if (length(regionlist[[b]][[rn]][["sid"]]) > maxSNP){
-          idx <- match(regionlist[[b]][[rn]][["sid"]], select[, "id"])
-          z.abs <- abs(select[idx, "z"])
+          idx <- match(regionlist[[b]][[rn]][["sid"]], select[["id"]])
+          z.abs <- abs(select[["z"]][idx])
           ifkeep <- rank(-z.abs) <= maxSNP
           regionlist[[b]][[rn]][["sidx"]] <-  regionlist[[b]][[rn]][["sidx"]][ifkeep]
           regionlist[[b]][[rn]][["sid"]] <-  regionlist[[b]][[rn]][["sid"]][ifkeep]
