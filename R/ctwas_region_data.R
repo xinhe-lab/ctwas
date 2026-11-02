@@ -263,7 +263,7 @@ trim_region_data <- function(region_data,
         if (length(region_data[[region_id]][["sid"]]) > maxSNP){
           loginfo("Trim region %s with SNPs more than %s", region_id, maxSNP)
           idx <- match(region_data[[region_id]][["sid"]], z_snp$id)
-          z.abs <- abs(z_snp[idx, "z"])
+          z.abs <- abs(z_snp$z[idx])
           keep_idx <- which(rank(-z.abs) <= maxSNP)
           region_data[[region_id]][["sid"]] <- region_data[[region_id]][["sid"]][keep_idx]
         }
