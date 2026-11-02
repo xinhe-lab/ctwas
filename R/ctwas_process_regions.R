@@ -11,10 +11,10 @@
 #' or a data frame with columns id and z (id is for gene or SNP id, z is for z scores).
 #' z will be used for remove SNPs if the total number of SNPs exceeds limit. See
 #' parameter `maxSNP` for more information.
-#' 
+#'
 #' @param thin  A scalar in (0,1]. The proportion of SNPs
 #' left after down sampling. Only applied on SNPs after selecting variants.
-#'  
+#'
 #' @param maxSNP Default is Inf, no limit for the maximum number of SNPs in a region. Or an
 #' integer indicating the maximum number of SNPs allowed in a region. This
 #' parameter is useful when a region contains many SNPs and you don't have enough memory to
@@ -23,13 +23,13 @@
 #' provided, SNPs are ranked based on |z| from high to low and only the top `maxSNP` SNPs
 #' are kept. If only variant ids are provided, then `maxSNP` number of SNPs will be chosen
 #' randomly.
-#'  
+#'
 #' @param minvar minimum number of variatns in a region
 #'
 #' @param merge TRUE/FALSE. If TRUE, merge regions when a gene spans a region boundary (i.e. belongs to multiple regions.)
-#' 
+#'
 #' @param outputdir a string, the directory to store output
-#' 
+#'
 #' @param outname a string, the output name
 #'
 #' @return A list. Items correspond to each pvarf/exprvarf. Each Item is
@@ -70,8 +70,9 @@ index_regions <- function(regionfile,
   }
 
   if (is.null(dim(select))) {
-    selectid <- select
+    selectid <- select # a vector of variant IDs
   } else {
+    select <- as.data.frame(select) # a data frame with id and z columns
     selectid <- select$id
   }
 
@@ -103,7 +104,7 @@ index_regions <- function(regionfile,
     nkept <- round(nrow(snpinfo) * thin)
     set.seed(99)
     snpinfo$thin_tag[sample(1:nrow(snpinfo), nkept)] <- 1
-    
+
     # get gene info (from exprf file)
     exprvarf <- exprvarfs[b]
     geneinfo <- read_exprvar(exprvarf)
@@ -125,9 +126,9 @@ index_regions <- function(regionfile,
     regionlist[[b]] <- list()
 
     for (rn in 1:nrow(regions)){
-      
+
       #loginfo(rn)
-      
+
       rn.start <- regions$start[rn]
       rn.stop <- regions$stop[rn]
 
@@ -202,8 +203,8 @@ index_regions <- function(regionfile,
     for (b in 1: length(regionlist)){
       for (rn in names(regionlist[[b]])) {
         if (length(regionlist[[b]][[rn]][["sid"]]) > maxSNP){
-          idx <- match(regionlist[[b]][[rn]][["sid"]], select[, "id"])
-          z.abs <- abs(select[idx, "z"])
+          idx <- match(regionlist[[b]][[rn]][["sid"]], select$id)
+          z.abs <- abs(select$z[idx])
           ifkeep <- rank(-z.abs) <= maxSNP
           regionlist[[b]][[rn]][["sidx"]] <-  regionlist[[b]][[rn]][["sidx"]][ifkeep]
           regionlist[[b]][[rn]][["sid"]] <-  regionlist[[b]][[rn]][["sid"]][ifkeep]
